@@ -1,2 +1,6 @@
 - hiding output of tuned-adm (restarting services, etc..)
 
+Permanent:
+
+- if you add some new plugin, please add it into fake-profiles/disabled-config/tuned.conf
+

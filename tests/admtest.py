@@ -44,7 +44,8 @@ class AdmTester:
 			[ None, False, False ], # off mode
 			[ "enabled-tuned", True, False ],
 			[ "enabled-ktune", False, True ],
-			[ "disabled-all", False, False ]
+			[ "disabled-all", False, False ],
+			[ "disabled-config", True, False ]
 		]
 
 		for ts in testing_states:

@@ -6,6 +6,11 @@ tuned and tuned-utils packages installed and you have to run the test
 as superuser (needed for tuned-adm tests). Please note that your
 settings of tuned can be changed.
 
+Tests for tuned-adm control tuned currently installed on your system.
+If you made some changes in the tuned code and are going to verify
+it using this test, please, build the tuned RPM package from your
+sources, install it and then run this test.
+
 What is tested
 
  * monitor-plugins have to implement: init(), getLoad(), cleanup()
@@ -24,6 +29,7 @@ What is tested
     - enabled-all
     - enabled-ktune
     - enabled-tuned
+    - disabled-config (tuned enabled, but all plugins disabled in tuned.conf)
    tuned-adm has to:
     - stop/start service(s)
     - add/remove/disable service(s)
