@@ -17,6 +17,7 @@
 #
 
 import os
+from tuned_nettool import ethcard
 
 class NetMonitor:
 	def __init__(self):
@@ -32,10 +33,17 @@ class NetMonitor:
 				continue
 			self.devices[d] = {}
 			self.devices[d]["new"] = ['0', '0', '0', '0']
-			# Assume 1gbit interfaces for now. FIXME: Need clean way to figure out max interface speed
-			self.devices[d]["max"] = [70*1024*1024, 1, 70*1024*1024, 1]
+			max_speed = self.__calcspeed__( ethcard(d).get_max_speed() );
+			self.devices[d]["max"] = [max_speed, 1, max_speed, 1]
 			self.__updateStat__(d)
-			self.devices[d]["max"] = [70*1024*1024, 1, 70*1024*1024, 1]
+			self.devices[d]["max"] = [max_speed, 1, max_speed, 1]
+
+	def __calcspeed__(self, speed):
+		# 0.6 is just a magical constant (empirical value): Typical workload on netcard won't exceed
+		# that and if it does, then the code is smart enough to adapt it.
+		# 1024 * 1024 as for MB -> B
+		# speed / 8  Mb -> MB
+		return (int) (0.6 * 1024 * 1024 * speed / 8)
 
 	def __calcdiff__(self, dev):
 		l = []
@@ -73,9 +81,9 @@ class NetMonitor:
 			self.verbose = (self.config.get("NetMonitor", "verbose") == "True")
 		except:
 			pass
-		# Assume 1gbit interfaces for now. FIXME: Need clean way to figure out max interface speed
 		for d in self.devices.keys():
-			self.devices[d]["max"] = [70*1024*1024*interval, 1, 70*1024*1024*interval, 1]
+			max_data = self.__calcspeed__(ethcard(d).get_max_speed()) * interval;
+			self.devices[d]["max"] = [max_data, 1, max_data, 1]
 
 		if self.verbose:
 			print self.devices

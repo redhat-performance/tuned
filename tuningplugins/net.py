@@ -17,6 +17,7 @@
 #
 
 import os, copy
+from tuned_nettool import ethcard
 
 class NetTuning:
 	def __init__(self):
@@ -48,7 +49,7 @@ class NetTuning:
 	def cleanup(self):
 		for dev in self.devidle.keys():
 			if self.enabled and self.devidle[dev]["LEVEL"] > 0:
-				os.system("ethtool -s "+dev+" advertise 0x03F")
+				ethcard(dev).set_max_speed()
 
 	def setTuning(self, load):
 		if not self.enabled:
@@ -59,10 +60,10 @@ class NetTuning:
 			self.__updateIdle__(dev, devload)
 			if self.devidle[dev]["LEVEL"] == 0 and self.devidle[dev]["READ"] >= 6 and self.devidle[dev]["WRITE"] >= 6:
 				self.devidle[dev]["LEVEL"] = 1
-				os.system("ethtool -s "+dev+" advertise 0x00F")
+				ethcard(dev).set_speed(100) # FIXME: what about making this more dynamic?
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
 				self.devidle[dev]["LEVEL"] = 0
-				os.system("ethtool -s "+dev+" advertise 0x03F")
+				ethcard(dev).set_max_speed()
 		if self.verbose:
 			print(load, self.devidle)
 _plugin = NetTuning()
