@@ -75,7 +75,9 @@ class Tuned:
 		while True:
 			lh = {}
 			for p in self.mp:
-				lh.update(p.getLoad())
+				load = p.getLoad()
+				if load != None:
+					lh.update(load)
 			for p in self.tp:
 				p.setTuning(lh)
 			time.sleep(self.interval)
