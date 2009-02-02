@@ -1,0 +1,141 @@
+Automatic system tuning daemon: tuned
+=====================================
+
+Concept:
+--------
+
+- Monitoring plugins for different sources (cpu, disk, network, sound, memory)
+- Each monitoring plugin has a getLoad() method that returns a value between 0 - 100
+- Tuning plugins for different targets (cpu, disk, network, sound,
+  memory etc) and modes (power or performance)
+- Each plugin can set various weights for any monitoring source (0 - 100)
+- Each tuning plugin has a setTuning(load) method
+- Tuning will be based on accumulated load*weight for each target
+
+
+
+Diagram:
+--------
+
+ [Mon-P]   [Mon-P]    [Mon-P]
+    \         |         /
+      \       |       /
+        \     |     /
+          \   |   /
+            \ | /
+           [tuned]
+            / | \
+          /   |   \
+        /     |     \
+      /       |       \
+    /         |         \
+ [Tune-P]   [Tune-P]  [Tune-P]
+
+
+
+tuned:
+-------
+
+- Is the main interface and aggregator
+- Acts as a "middleware"
+- Only general functionality. Specific hw/mon functionality only in plugins
+- Has a list of all mon and pm plugins
+- Monitoring interval is configurable (1 wakeup per interval to reduce # of
+  wakeups)
+- Weights for each Mon can be set for each Tune plugin
+- Default weight is 0
+- Aggreated load: mon-p.getLoad() * tune-p.weights[mon-p] / 100. If all weights
+  together are 100 then this will be a balanced and normalized load
+- Accumulated weights per tune plugin can be > 100 or < 100. Need to decide
+  whether to automatically normalize it or not
+- Tuning aggressivness can be specified from 0 to 100. 0 == no PM, 100 means
+  always fully tune even under full load. Configurable globally for all tuning
+  plugins and/or individually
+- all fooLoad() methods always return a hash like this: {cat -> {devname -> {subcat = load}}}
+  to support multiple devices per monitor (e.g. disks, network cards)
+- Optional parameters for fooLoad() calls: category, subcategory and devname
+- Each plugin can be completely disabled.
+- External interfaces to allow requests for monitoring applications
+
+
+Monitor plugins:
+----------------
+
+- Monitor plugins can be based on any source. E.g. collectd or stap scripts
+- Each plugins needs to register to tuned via registerMonitorPlugin()
+- Each plugins has it's own configuration. Only external interface to tuned
+  is getLoad() (which returns a list of tuples, see tuned)
+- Each plugin needs to be in a specific category
+- Examples of categories that can be monitored:
+  o CPU
+  o Disk IO
+  o Network IO
+  o Memory IO
+  o USB
+  o Graphics
+  o External input (keyboard/mouse)
+- Subcategories possible:
+  o Input
+  o Output 
+  o Blocksize
+- Should avoid disk/network io to prevent unecessary wakeups
+
+
+Tuning plugins:
+---------------
+
+- Tuning plugins will be HW specific
+- Each plugins needs to register to tuned via registerTuningPlugin()
+- Blacklists for know problems with HW
+- There are 2 types of tuning plugins:
+  o Power
+  o Performance
+- Each plugin has to define it's own policy for handling the different
+  levels of aggregated load
+- Each plugin has an interface called setTuning(load) where load is the aggreated
+  load for that tuning plugin modified by the specific or overall level of
+  tuning aggressiveness
+- Several levels of aggressiveness: none, low, medium, high, max
+- Parts that can be tuned:
+  o CPU
+  o Disk IO
+  o Network IO
+  o Memory IO
+  o USB
+  o Graphics
+  o External input (keyboard/mouse)
+
+
+Example:
+--------
+
+monitoring plugin for disk io: Montiors either via /proc or other means the IO
+for all disks in the system.
+
+getLoad() returns something like: {"DISK" : {"sda" : {"READ" : 0.24, "WRITE" :
+0.01, "SIZE" : 0.31}}}
+
+This means that sda would be at 24% of it's known peak load in regard to
+reads, at 1% in regard to writes and at 31% in regard to blocksizes.
+
+Based on that information a tuning plugin for disk io could now decide to do
+the following:
+
+load = tuned.getLoad("DISK")
+for devnames in load["DISK"].keys():
+  devnode = load["DISK"][devname]
+  # Spin down after 30s and max powersave if device isn't in use
+  if (devnode["WRITE"] == 0.0 and devnode["READ"] == 0.0) {
+    hdparm -S5 /dev/devname 
+    hdparm -B1 /dev/devname
+  # If no write and little reads: Allow drive to spin down after 5m
+  # and max powersave.
+  } elseif (devnode["WRITE"] == 0.0 and devnode["READ"] <= 0.05) {
+    hdparm -S60 /dev/devname
+    hdparm -B1 /dev/devname
+  # If write are done or more reads don't allow disk to spindown
+  # and raise powersave mode to medium range
+  } else { 
+    hdparm -S0 /dev/devname
+    hdparm -B128 /dev/devname
+  }
