@@ -48,9 +48,11 @@ tuned:
   together are 100 then this will be a balanced and normalized load
 - Accumulated weights per tune plugin can be > 100 or < 100. Need to decide
   whether to automatically normalize it or not
-- Tuning aggressivness can be specified from 0 to 100. 0 == no PM, 100 means
+/* - Tuning aggressivness can be specified from 0 to 100. 0 == no PM, 100 means
   always fully tune even under full load. Configurable globally for all tuning
-  plugins and/or individually
+  plugins and/or individually */
+- Tuning modes should follow the system/user settings for power management of
+  the currently running GUI (e.g. presentation mode etc)
 - all fooLoad() methods always return a hash like this: {cat -> {devname -> {subcat = load}}}
   to support multiple devices per monitor (e.g. disks, network cards)
 - Optional parameters for fooLoad() calls: category, subcategory and devname
