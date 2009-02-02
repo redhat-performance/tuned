@@ -1,0 +1,7 @@
+#!/usr/bin/python
+
+from tuned import tuned
+
+tuned.init(".")
+tuned.run()
+tuned.cleanup()
