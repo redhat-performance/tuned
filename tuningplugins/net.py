@@ -18,13 +18,13 @@
 
 import os, copy
 
-class DiskTuning:
+class NetTuning:
 	def __init__(self):
 		self.devidle = {}
 
 	def __updateIdle__(self, dev, devload):
 		for type in ("READ", "WRITE"):
-			if devload[type] == 0.0:
+			if devload[type] <= 0.005:
 				idle = self.devidle.setdefault(dev, {})
 				idle.setdefault(type, 0)
 				idle[type] += 1
@@ -34,15 +34,15 @@ class DiskTuning:
 				idle[type] = 0
 
 	def setTuning(self, load):
-		disks = load.setdefault("DISK", {})
+		disks = load.setdefault("NET", {})
 		oldidle = copy.deepcopy(self.devidle)
 		for dev in disks.keys():
 			devload = disks[dev]
 			self.__updateIdle__(dev, devload)
-			if self.devidle[dev]["READ"] == 30 or self.devidle[dev]["WRITE"] == 30:
-				os.system("hdparm -Y -S60 -B1 /dev/"+dev)
-			if oldidle.has_key(dev) and oldidle[dev]["READ"] > 30 and oldidle[dev]["WRITE"] > 30 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
-				os.system("hdparm -S255 -B127 /dev/"+dev)
+			if self.devidle[dev]["READ"] == 6 or self.devidle[dev]["WRITE"] == 6:
+				os.system("ethtool -s "+dev+" advertise 0x003")
+			if oldidle.has_key(dev) and oldidle[dev]["READ"] > 6 and oldidle[dev]["WRITE"] > 6 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
+				os.system("ethtool -s "+dev+" advertise 0x03F")
 		print(load, self.devidle)
 
-_plugin = DiskTuning()
+_plugin = NetTuning()
