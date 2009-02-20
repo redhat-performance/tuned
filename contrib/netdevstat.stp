@@ -63,6 +63,7 @@ probe netdev.receive
 
 function print_activity()
 {
+	printf("\033[2J\033[1;1H")
         printf("%5s %5s %-7s %9s %9s %9s %9s   %9s %9s %9s %9s %-15s\n",
                 "PID", "UID", "DEV", "XMIT_CNT", "XMIT_MIN", "XMIT_MAX", "XMIT_AVG", "RECV_CNT", "RECV_MIN", "RECV_MAX", "RECV_AVG", "COMMAND")
 

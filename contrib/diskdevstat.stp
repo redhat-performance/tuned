@@ -63,6 +63,7 @@ probe vfs.read
 
 function print_activity()
 {
+	printf("\033[2J\033[1;1H")
         printf("%5s %5s %-7s %9s %9s %9s %9s   %9s %9s %9s %9s %-15s\n",
                 "PID", "UID", "DEV", "WRITE_CNT", "WRITE_MIN", "WRITE_MAX", "WRITE_AVG", "READ_CNT", "READ_MIN", "READ_MAX", "READ_AVG", "COMMAND")
 

@@ -23,25 +23,26 @@ class NetTuning:
 		self.devidle = {}
 
 	def __updateIdle__(self, dev, devload):
+		idle = self.devidle.setdefault(dev, {})
+		idle.setdefault("LEVEL", 0)
 		for type in ("READ", "WRITE"):
-			if devload[type] <= 0.005:
-				idle = self.devidle.setdefault(dev, {})
+			if devload[type] <= 0.05:
 				idle.setdefault(type, 0)
 				idle[type] += 1
 			else:
-				idle = self.devidle.setdefault(dev, {})
 				idle.setdefault(type, 0)
 				idle[type] = 0
 
 	def setTuning(self, load):
 		disks = load.setdefault("NET", {})
-		oldidle = copy.deepcopy(self.devidle)
 		for dev in disks.keys():
 			devload = disks[dev]
 			self.__updateIdle__(dev, devload)
-			if self.devidle[dev]["READ"] == 6 or self.devidle[dev]["WRITE"] == 6:
-				os.system("ethtool -s "+dev+" advertise 0x003")
-			if oldidle.has_key(dev) and oldidle[dev]["READ"] > 6 and oldidle[dev]["WRITE"] > 6 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
+			if self.devidle[dev]["LEVEL"] == 0 and self.devidle[dev]["READ"] >= 6 and self.devidle[dev]["WRITE"] >= 6:
+				self.devidle[dev]["LEVEL"] = 1
+				os.system("ethtool -s "+dev+" advertise 0x00F")
+			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
+				self.devidle[dev]["LEVEL"] = 0
 				os.system("ethtool -s "+dev+" advertise 0x03F")
 		print(load, self.devidle)
 
