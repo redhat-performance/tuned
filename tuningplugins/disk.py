@@ -44,6 +44,6 @@ class DiskTuning:
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
 				self.devidle[dev]["LEVEL"] = 0
 				os.system("hdparm -S255 -B127 /dev/"+dev)
-		print(load, self.devidle)
+		#print(load, self.devidle)
 
 _plugin = DiskTuning()

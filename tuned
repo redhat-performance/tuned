@@ -20,9 +20,34 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.    
 #                                                                                    
 
+import sys, os.path
 
-from tuned import tuned
+if __name__ == "__main__":
+	try:
+		pid = os.fork()
+		if pid > 0:
+			sys.exit(0)
+	except OSError, e:
+		sys.exit(1)
 
-tuned.init(".")
-tuned.run()
-tuned.cleanup()
+	os.chdir("/")
+	os.setsid()
+	os.umask(0)
+
+	try:
+		pid = os.fork()
+		if pid > 0:
+			sys.exit(0)
+	except OSError, e:
+		sys.exit(1)
+
+	sys.stdout = sys.stderr = open("/dev/null", 'a+')
+	TUNEDDIR="/usr/share/tuned"
+	if not TUNEDDIR in sys.path:
+		sys.path.append(TUNEDDIR)
+
+	from tuned import tuned
+
+	tuned.init(TUNEDDIR)
+	tuned.run()
+	tuned.cleanup()

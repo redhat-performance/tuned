@@ -1,0 +1,102 @@
+#!/bin/sh
+#
+# tuned  Startup script for the tuned dynamic system tuning daemon
+# chkconfig: - 86 15
+# description: tuned is a dynamic system tuning daemon that uses various
+#   monitoring resources to adapt system settings adaptively.
+
+### BEGIN INIT INFO
+# Provides: 
+# Required-Start: 
+# Required-Stop: 
+# Should-Start: 
+# Should-Stop: 
+# Default-Start: 
+# Default-Stop: 
+# Short-Description: This service is a dynamic system tuning daemon
+# Description: 
+### END INIT INFO
+
+# Source function library.
+. /etc/init.d/functions
+
+exec="/usr/sbin/tuned"
+prog="tuned"
+config="/etc/tuned.conf"
+
+[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+
+lockfile=/var/lock/subsys/$prog
+
+start () {
+	[ -x $exec ] || exit 5
+	[ -f $config ] || exit 6
+	echo -n $"Starting $prog: "
+	daemon $exec
+	retval=$?
+	echo
+	[ $retval -eq 0 ] && touch $lockfile
+}
+
+stop () {
+	echo -n $"Stopping $prog: "
+	killproc $prog
+	retval=$?
+	echo
+	[ $retval -eq 0 ] && rm -f $lockfile
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    # run checks to determine if the service is running or use generic status
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+esac
+exit $?
+# vim:syntax=sh

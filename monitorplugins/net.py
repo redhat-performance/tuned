@@ -33,7 +33,7 @@ class NetMonitor:
 			self.devices[d]["max"] = [70*1024*1024, 1, 70*1024*1024, 1]
 			self.__updateStat__(d)
 			self.devices[d]["max"] = [70*1024*1024, 1, 70*1024*1024, 1]
-		print self.devices
+		#print self.devices
 
 	def __calcdiff__(self, dev):
 		l = []

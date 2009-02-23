@@ -44,6 +44,6 @@ class NetTuning:
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
 				self.devidle[dev]["LEVEL"] = 0
 				os.system("ethtool -s "+dev+" advertise 0x03F")
-		print(load, self.devidle)
+		#print(load, self.devidle)
 
 _plugin = NetTuning()

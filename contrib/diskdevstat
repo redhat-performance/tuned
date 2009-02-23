@@ -1,0 +1,98 @@
+#!/usr/bin/stap
+#
+# diskdevstat: A simple systemtap script to record harddisk activity
+# 	       of processes and display statistics for read/write operations
+# Copyright (C) 2008, 2009 Red Hat, Inc.
+# Authors: Phil Knirsch
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the
+#
+# Free Software Foundation, Inc.
+# 51 Franklin Street, Fifth Floor
+# Boston, MA  02110-1301, USA.
+#
+
+global ifavg, iflast
+
+probe vfs.write
+{
+	if(pid() == 0 || devname == "N/A") {
+		next;
+	}
+	ms = gettimeofday_ms();
+	if(iflast[0, pid(), devname, execname(), uid()] == 0) {
+		iflast[0, pid(), devname, execname(), uid()] = ms;
+	} else {
+		diff = ms - iflast[0, pid(), devname, execname(), uid()];
+		iflast[0, pid(), devname, execname(), uid()] = ms;
+		ifavg[0, pid(), devname, execname(), uid()] <<< diff;
+	}
+}
+
+probe vfs.read
+{
+	if(pid() == 0 || devname == "N/A") {
+		next;
+	}
+	ms = gettimeofday_ms();
+	if(iflast[1, pid(), devname, execname(), uid()] == 0) {
+		iflast[1, pid(), devname, execname(), uid()] = ms;
+	} else {
+		diff = ms - iflast[1, pid(), devname, execname(), uid()];
+		iflast[1, pid(), devname, execname(), uid()] = ms;
+		ifavg[1, pid(), devname, execname(), uid()] <<< diff;
+	}
+}
+
+
+function print_activity()
+{
+	printf("\033[2J\033[1;1H")
+	printf("%5s %5s %-7s %9s %9s %9s %9s   %9s %9s %9s %9s %-15s\n",
+		"PID", "UID", "DEV", "WRITE_CNT", "WRITE_MIN", "WRITE_MAX",
+		"WRITE_AVG", "READ_CNT", "READ_MIN", "READ_MAX", "READ_AVG",
+		"COMMAND")
+
+	foreach ([type, pid, dev, exec, uid] in ifavg-) {
+		nxmit = @count(ifavg[0, pid, dev, exec, uid])
+		nrecv = @count(ifavg[1, pid, dev, exec, uid])
+		write_min = nxmit ? @min(ifavg[0, pid, dev, exec, uid]) : 0
+		write_max = nxmit ? @max(ifavg[0, pid, dev, exec, uid]) : 0
+		write_avg = nxmit ? @avg(ifavg[0, pid, dev, exec, uid]) : 0
+		read_min = nrecv ? @min(ifavg[1, pid, dev, exec, uid]) : 0
+		read_max = nrecv ? @max(ifavg[1, pid, dev, exec, uid]) : 0
+		read_avg = nrecv ? @avg(ifavg[1, pid, dev, exec, uid]) : 0
+		if(type == 0 || nxmit == 0) {
+			printf("%5d %5d %-7s %9d %5d.%03d %5d.%03d %5d.%03d",
+				pid, uid, dev, nxmit,
+				write_min/1000,	write_min%1000,
+				write_max/1000, write_max%1000,
+				write_avg/1000, write_avg%1000)
+			printf("   %9d %5d.%03d %5d.%03d %5d.%03d %-15s\n",
+				nrecv,
+				read_min/1000, read_min%1000,
+				read_max/1000, read_max%1000,
+				read_avg/1000, read_avg%1000,
+				exec)
+		}
+	}
+
+	print("\n")
+}
+
+probe timer.s(5), end, error
+{
+	print_activity()
+}
+
