@@ -75,6 +75,8 @@ install:
 	mkdir -p $(DESTDIR)/etc/rc.d/init.d
 	install -m 0755 tuned.initscript $(DESTDIR)/etc/rc.d/init.d/tuned
 
+changelog:
+	git-log > ChangeLog
 
 clean:
 	rm -rf *.pyc monitorplugins/*.pyc tuningplugins/*.pyc $(VERSIONED_NAME) rpm-build-dir

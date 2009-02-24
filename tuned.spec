@@ -5,6 +5,7 @@ Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
 Source: tuned-%{version}.tar.bz2
+URL: http://fedorapeople.org/gitweb?p=pknirsch/public_git/tuned.git;a=summary
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
 Requires(preun): chkconfig
@@ -53,11 +54,12 @@ fi
 %defattr(-,root,root)
 %doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/*
 %{_initddir}/tuned
-%{_sysconfdir}/tuned.conf
+%config(noreplace) %{_sysconfdir}/tuned.conf
 %{_sbindir}/tuned
 %{_datadir}/tuned
 
 %files utils
+%defattr(-,root,root)
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 

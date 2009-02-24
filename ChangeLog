@@ -1,0 +1,56 @@
+commit 80093be74fbed8d4459938e19ff00920a41a9712
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Mon Feb 23 18:03:35 2009 +0100
+
+    - Real first complete version with initscript, config file and
+      proper Makefile and packaging.
+
+commit c02f25afb09ff1f38484a8b69c4dcc85ed2378c7
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Fri Feb 20 18:29:35 2009 +0100
+
+    - Lots of updates to packaging and installation (specfile, makefile)
+
+commit 5818e327421ff22f41618c7b9fa74be8d23d4fd5
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Tue Feb 10 18:45:38 2009 +0100
+
+    - Added full network support
+    - Moved docs around a bit
+
+commit 28bd83e0d262ba1164d52fa1d9a551caab2e31e6
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Mon Feb 2 14:55:24 2009 +0100
+
+    - Added copyright notices to files
+    - Added GPL COPYING license file
+
+commit dad7d76884d3558f14e4f61334b08cf0d1d7c81a
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Mon Feb 2 14:31:26 2009 +0100
+
+    - Added a howto docu with some tips and tricks
+
+commit dcb6c2b4e8f85d87b2fdfd3aa2bb53d560ce9a1c
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Mon Feb 2 13:01:22 2009 +0100
+
+    - Fixed the aggressinvess idea. Rather use system/user settings than have yet another separate configurtion
+
+commit 5f27cb0c4fdb3442f5dc5e95dd6a1996df1da3de
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Mon Feb 2 12:59:41 2009 +0100
+
+    - Added disk and net monitoring systemtap scripts
+
+commit 208a596438910fac0bd9064c80eef5a6b8329347
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Mon Feb 2 12:34:27 2009 +0100
+
+    - Draft spec added
+
+commit 796739577264cd143b50dc7cd5302cd8ab49ca08
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Mon Feb 2 12:33:41 2009 +0100
+
+    - Initial stuff
