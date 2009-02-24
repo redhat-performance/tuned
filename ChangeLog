@@ -1,3 +1,11 @@
+commit b47b4e70891d4283111f2fd03a739bd100d0c8b6
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Tue Feb 24 12:14:04 2009 +0100
+
+    - Added a changelog rule in Makefile
+    - Started overall README
+    - Fixed a few rpmlint error messages
+
 commit 80093be74fbed8d4459938e19ff00920a41a9712
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Mon Feb 23 18:03:35 2009 +0100

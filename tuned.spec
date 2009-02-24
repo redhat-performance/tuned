@@ -22,7 +22,8 @@ Requires: systemtap kernel-debuginfo
 Group: Applications/System
 
 %description utils
-The tuned-utils package contains several systemtap scripts to allow detailed manual monitoring of the system.
+The tuned-utils package contains several systemtap scripts to allow detailed
+manual monitoring of the system.
 
 %prep
 %setup -q
