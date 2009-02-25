@@ -12,7 +12,7 @@ Group: System Environment/Daemons
 #  make archive
 Source: tuned-%{version}.tar.bz2
 URL: http://fedorapeople.org/~pknirsch/git/tuned.git/
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Buildroot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Requires(post): chkconfig
 Requires(preun): chkconfig
 Requires(preun): initscripts
@@ -75,6 +75,7 @@ fi
 %changelog
 * Wed Feb 25 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.1-1
 - Bump release
+- Fixed BuildRoot tag to use latest recommendation of FPG
 - Lots of whitespace changes
 - Some minor README changes
 - Added a changelog rule in Makefile
