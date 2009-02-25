@@ -1,3 +1,15 @@
+commit c6e97c54cf38923f8c5cd515d53dc92af3c310b4
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Feb 25 12:30:07 2009 +0100
+
+    - Added a manpage and updated the readme with it (as a start).
+
+commit 60663d4e347ca6a114294b3dfd60d5f8539db1f6
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Feb 25 11:47:42 2009 +0100
+
+    - Updated changelog
+
 commit ca552606191920c1f6d02c28b80273d2e9d4349a
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 11:45:48 2009 +0100

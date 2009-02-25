@@ -1,4 +1,4 @@
-Summary: A adaptive dynamic system tuning daemon
+Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 0.1.0
 Release: 1%{?dist}
