@@ -1,3 +1,11 @@
+commit 62debaff1a107a2a8229f4a8a804762cec142071
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Feb 25 19:22:54 2009 +0100
+
+    - Lots of whitespace changes
+    - Bump release
+    - Some minor README changes
+
 commit 2f9173b101917db44503436f213988248447409e
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 18:23:15 2009 +0100

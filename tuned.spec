@@ -74,6 +74,9 @@ fi
 
 %changelog
 * Wed Feb 25 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.1-1
+- Bump release
+- Lots of whitespace changes
+- Some minor README changes
 - Added a changelog rule in Makefile
 - Fixed rpmlint error messages
 - Add init() methods to each plugin
@@ -87,7 +90,7 @@ fi
   getting a SIGTERM to restore default values
 - Made the disk tuning pluging less nosy if started as non-daemon
 - Fixed missing self. in the tuned.py config handling
-- Added a manpage and updated the readme with it (as a start)
+- Added a manpage
 - Fixed summary
 - Added missing GPL notic to tuned.py
 - Added explanation for Source entry in specfile
