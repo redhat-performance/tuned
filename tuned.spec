@@ -4,8 +4,12 @@ Version: 0.1.0
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
+# The source for this package was pulled from upstream's vcs.  Use the
+# following commands to generate the tarball:
+#  git clone http://fedorapeople.org/~pknirsch/git/tuned.git/
+#  make archive
 Source: tuned-%{version}.tar.bz2
-URL: http://fedorapeople.org/gitweb?p=pknirsch/public_git/tuned.git;a=summary
+URL: http://fedorapeople.org/~pknirsch/git/tuned.git/
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires(post): chkconfig
 Requires(preun): chkconfig
