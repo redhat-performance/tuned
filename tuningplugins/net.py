@@ -36,6 +36,10 @@ class NetTuning:
 	def init(self, config):
 		self.config = config
 
+	def cleanup(self):
+		for dev in self.devidle.keys():
+			os.system("ethtool -s "+dev+" advertise 0x03F")
+
 	def setTuning(self, load):
 		disks = load.setdefault("NET", {})
 		for dev in disks.keys():

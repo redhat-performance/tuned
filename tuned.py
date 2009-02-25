@@ -22,10 +22,10 @@ class Tuned:
 	def init(self, path, cfgfile):
 		self.config = ConfigParser.ConfigParser()
 		self.config.read(cfgfile)
-		if config.has_option("main", "interval"):
-			self.interval = config.getint("main", "interval")
+		if self.config.has_option("main", "interval"):
+			self.interval = self.config.getint("main", "interval")
 		else:
-			config.set("main", "interval", self.interval)
+			self.config.set("main", "interval", self.interval)
 		self.__initplugins__(path, "monitorplugins", self.mp)
 		self.__initplugins__(path, "tuningplugins", self.tp)
 		for p in self.mp:
@@ -43,7 +43,11 @@ class Tuned:
 				p.setTuning(lh)
 			time.sleep(self.interval)
 
-	def cleanup(self):
+	def cleanup(self, signum=0, frame=None):
 		print("Cleanup...")
+		for p in self.mp:
+			p.cleanup()
+		for p in self.tp:
+			p.cleanup()
 
 tuned = Tuned()

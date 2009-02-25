@@ -69,6 +69,9 @@ class NetMonitor:
 		for d in self.devices.keys():
 			self.devices[d]["max"] = [70*1024*1024*interval, 1, 70*1024*1024*interval, 1]
 
+	def cleanup(self):
+		pass
+
 	def getLoad(self):
 		self.__update__()
 		ret = {}

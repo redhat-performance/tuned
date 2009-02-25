@@ -20,10 +20,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.    
 #                                                                                    
 
-import sys, os.path, getopt
+import sys, os.path, getopt, atexit, signal
 
 def usage():
 	print "Usage: tuned [-d|--daemon] [-c conffile|--config=conffile]"
+
+def handler(signum, frame):
+	sys.exit()
 
 def daemonize():
 	try:
@@ -75,6 +78,9 @@ if __name__ == "__main__":
 		sys.path.append(TUNEDDIR)
 
 	from tuned import tuned
+
+	atexit.register(tuned.cleanup)
+	signal.signal(signal.SIGTERM, handler)
 
 	tuned.init(TUNEDDIR, cfgfile)
 	tuned.run()

@@ -60,6 +60,9 @@ class DiskMonitor:
 	def init(self, config):
 		self.config = config
 
+	def cleanup(self):
+		pass
+
 	def getLoad(self):
 		self.__update__()
 		ret = {}
