@@ -1,3 +1,30 @@
+commit ca552606191920c1f6d02c28b80273d2e9d4349a
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Feb 25 11:45:48 2009 +0100
+
+    - Added complete cleanup code in case of tuned exiting and/or
+      getting a SIGTERM to restore default values
+    - Made the disk tuning pluging less nosy if started as non-daemon
+    - Fixed missing self. in the tuned.py config handling
+
+commit 1fa57228447abc46d58bcc377ab373c026ccd008
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Feb 25 11:28:06 2009 +0100
+
+    - Add init() methods to each plugin
+    - Call plugin init() methods during tuned's init()
+    - Add support for command line parameters
+      o -c conffile|--config==conffile to specify the location of the config file
+      o -d to start tuned as a daemon (instead of as normal app)
+    - Readded the debug output in case tuned isn't started as as daemon
+    - Fixed initialization of max transfer values for net tuning plugin
+
+commit e393e728bcffd730401780a8fb3d077d952fed78
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Tue Feb 24 13:19:07 2009 +0100
+
+    - Last few rpmlint fixes to specfile
+
 commit b47b4e70891d4283111f2fd03a739bd100d0c8b6
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Tue Feb 24 12:14:04 2009 +0100
