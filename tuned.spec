@@ -4,9 +4,11 @@ Version: 0.1.0
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
-# The source for this package was pulled from upstream's vcs.  Use the
-# following commands to generate the tarball:
-#  git clone http://fedorapeople.org/~pknirsch/git/tuned.git/
+# The source for this package was pulled from upstream git.  Use the
+# following commands to get the corresponding tarball:
+#  git clone git://fedorapeople.org/~pknirsch/tuned.git/
+#  cd tuned
+#  git checkout v%{version}
 #  make archive
 Source: tuned-%{version}.tar.bz2
 URL: http://fedorapeople.org/~pknirsch/git/tuned.git/
@@ -56,7 +58,7 @@ if [ "$1" -ge "1" ] ; then
 fi
 
 %files
-%defattr(-,root,root)
+%defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/README.txt doc/TIPS.txt
 %{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
@@ -65,7 +67,7 @@ fi
 %{_mandir}/man8/*
 
 %files utils
-%defattr(-,root,root)
+%defattr(-,root,root,-)
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 

@@ -5,7 +5,7 @@ VERSIONED_NAME = $(NAME)-$(VERSION)
 
 DESTDIR = /
 MANDIR = /usr/share/man/
-GITTAG = r$(subst .,-,$(VERSION))
+GITTAG = v$(VERSION)
 
 DIRS = doc contrib tuningplugins monitorplugins
 FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf
@@ -14,6 +14,8 @@ FILES_contrib = contrib/diskdevstat contrib/netdevstat
 FILES_tuningplugins = tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
 FILES_monitorplugins = monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
+
+distarchive: tag archive
 
 archive:
 	rm -rf $(VERSIONED_NAME)
@@ -32,7 +34,8 @@ archive:
 	ln -fs $(VERSIONED_NAME).tar.bz2 latest-archive
 
 tag:
-	git tag $(GITTAG)
+	git tag -f $(GITTAG)
+	git push --tags
 
 srpm: archive
 	rm -rf rpm-build-dir
