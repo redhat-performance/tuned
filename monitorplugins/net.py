@@ -30,10 +30,11 @@ class NetMonitor:
 				continue
 			self.devices[d] = {}
 			self.devices[d]["new"] = ['0', '0', '0', '0']
+			# Assume 1gbit interfaces for now. FIXME: Need clean way to figure out max interface speed
 			self.devices[d]["max"] = [70*1024*1024, 1, 70*1024*1024, 1]
 			self.__updateStat__(d)
 			self.devices[d]["max"] = [70*1024*1024, 1, 70*1024*1024, 1]
-		#print self.devices
+		print self.devices
 
 	def __calcdiff__(self, dev):
 		l = []
@@ -60,7 +61,14 @@ class NetMonitor:
 		for dev in self.devices.keys():
 			self.__updateStat__(dev)
 			self.devices[dev]["diff"] = self.__calcdiff__(dev)
-		
+
+	def init(self, config):
+		self.config = config
+		interval = self.config.getint("main", "interval")
+		# Assume 1gbit interfaces for now. FIXME: Need clean way to figure out max interface speed
+		for d in self.devices.keys():
+			self.devices[d]["max"] = [70*1024*1024*interval, 1, 70*1024*1024*interval, 1]
+
 	def getLoad(self):
 		self.__update__()
 		ret = {}

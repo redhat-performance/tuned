@@ -33,6 +33,9 @@ class DiskTuning:
 				idle.setdefault(type, 0)
 				idle[type] = 0
 
+	def init(self, config):
+		self.config = config
+
 	def setTuning(self, load):
 		disks = load.setdefault("DISK", {})
 		for dev in disks.keys():
@@ -44,6 +47,6 @@ class DiskTuning:
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
 				self.devidle[dev]["LEVEL"] = 0
 				os.system("hdparm -S255 -B127 /dev/"+dev)
-		#print(load, self.devidle)
+		print(load, self.devidle)
 
 _plugin = DiskTuning()

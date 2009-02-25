@@ -34,7 +34,7 @@ class DiskMonitor:
 			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 			self.__updateStat__(d)
 			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-		#print self.devices
+		print self.devices
 
 
 	def __calcdiff__(self, dev):
@@ -56,7 +56,10 @@ class DiskMonitor:
 		for dev in self.devices.keys():
 			self.__updateStat__(dev)
 			self.devices[dev]["diff"] = self.__calcdiff__(dev)
-		
+
+	def init(self, config):
+		self.config = config
+
 	def getLoad(self):
 		self.__update__()
 		ret = {}

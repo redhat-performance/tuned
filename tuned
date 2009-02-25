@@ -20,9 +20,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.    
 #                                                                                    
 
-import sys, os.path
+import sys, os.path, getopt
 
-if __name__ == "__main__":
+def usage():
+	print "Usage: tuned [-d|--daemon] [-c conffile|--config=conffile]"
+
+def daemonize():
 	try:
 		pid = os.fork()
 		if pid > 0:
@@ -42,12 +45,37 @@ if __name__ == "__main__":
 		sys.exit(1)
 
 	sys.stdout = sys.stderr = open("/dev/null", 'a+')
+
+if __name__ == "__main__":
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "dc:", ["daemon", "config="])
+	except getopt.error, e:
+		print >>sys.stderr, ("Error parsing command-line arguments: %s", e)
+		usage()
+	        sys.exit(1)
+
+	if len(args) > 0:
+		print >>sys.stderr, ("Too many arguments.")
+		usage()
+		sys.exit(1)
+
+	daemon = False
+	cfgfile = "/etc/tuned.conf"
+	for (opt, val) in opts:
+		if   opt in ['-d', "--daemon"]:
+			daemon = True
+		elif opt in ['-c', "--config"]:
+			cfgfile = val
+		
+	if daemon:
+		daemonize()
+
 	TUNEDDIR="/usr/share/tuned"
 	if not TUNEDDIR in sys.path:
 		sys.path.append(TUNEDDIR)
 
 	from tuned import tuned
 
-	tuned.init(TUNEDDIR)
+	tuned.init(TUNEDDIR, cfgfile)
 	tuned.run()
 	tuned.cleanup()
