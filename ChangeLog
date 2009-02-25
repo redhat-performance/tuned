@@ -1,3 +1,17 @@
+commit 2f9173b101917db44503436f213988248447409e
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Feb 25 18:23:15 2009 +0100
+
+    - Added a distarchive target for the Makefile for proper tagging in git
+    - Added a explanation how to create the tarball via git in the specfile
+    - Fixed the defattr() lines in the specfile to conform FRG
+
+commit fd0d01812c480c1a439041ba68265d04ec866bef
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Feb 25 17:10:11 2009 +0100
+
+    - Added explanation for Source entry in specfile
+
 commit efd15b9e707dc988265aa11ed14a82708cda71fa
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 15:08:41 2009 +0100

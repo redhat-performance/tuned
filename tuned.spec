@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.1.0
+Version: 0.1.1
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -73,5 +73,27 @@ fi
 
 
 %changelog
+* Wed Feb 25 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.1-1
+- Added a changelog rule in Makefile
+- Fixed rpmlint error messages
+- Add init() methods to each plugin
+- Call plugin init() methods during tuned's init()
+- Add support for command line parameters
+      o -c conffile|--config==conffile to specify the location of the config file
+      o -d to start tuned as a daemon (instead of as normal app)
+- Readded the debug output in case tuned isn't started as as daemon
+- Fixed initialization of max transfer values for net tuning plugin
+- Added complete cleanup code in case of tuned exiting and/or
+  getting a SIGTERM to restore default values
+- Made the disk tuning pluging less nosy if started as non-daemon
+- Fixed missing self. in the tuned.py config handling
+- Added a manpage and updated the readme with it (as a start)
+- Fixed summary
+- Added missing GPL notic to tuned.py
+- Added explanation for Source entry in specfile
+- Added a distarchive target for the Makefile for proper tagging in git
+- Added a explanation how to create the tarball via git in the specfile
+- Fixed the defattr() lines in the specfile to conform FRG
+
 * Mon Feb 23 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.0-1
 - Initial version
