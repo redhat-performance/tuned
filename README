@@ -1,4 +1,24 @@
-Tuned, a dynamic adaptive system tuning daemon
-==============================================
+NAME
+       tuned - dynamic adaptive system tuning daemon
 
+SYNOPSIS
+       tuned [options]
 
+DESCRIPTION
+       tuned is a dynamic adaptive system tuning daemon that tunes system settings dynamically depending on usage.
+
+OPTIONS
+       -d, --daemon
+                   This options starts tuned as a daemon as opposed to in the foreground without forking at startup.
+
+       -c, --conffile="conffile"
+                   Specify the name and path of the configuration file, default is /etc/tuned.conf.
+
+BUGS
+       There are no known bugs.  To file bug reports, see AUTHORS below.
+
+AUTHOR
+       Written by Phil Knirsch <pknirsch@redhat.com>.
+
+REPORTING BUGS
+       Report bugs to <pknirsch@redhat.com>.

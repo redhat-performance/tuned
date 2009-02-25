@@ -53,11 +53,12 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/*
+%doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/README.txt doc/TIPS.txt
 %{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
 %{_sbindir}/tuned
 %{_datadir}/tuned
+%{_mandir}/man8/*
 
 %files utils
 %defattr(-,root,root)
