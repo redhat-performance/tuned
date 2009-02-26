@@ -15,4 +15,5 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
-# This file intentionally left blank and needed because of python module magic.$
+# This file intentionally left blank and needed because of Python Packages
+# magic.$

@@ -74,7 +74,8 @@ fi
 
 %changelog
 * Wed Feb 25 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.1-1
-- Bump release
+- Bump version
+- Added comment in empty __init__.py files
 - Fixed BuildRoot tag to use latest recommendation of FPG
 - Lots of whitespace changes
 - Some minor README changes
