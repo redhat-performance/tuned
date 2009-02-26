@@ -21,6 +21,7 @@ import os
 class DiskMonitor:
 	def __init__(self):
 		self.devices = {}
+		self.enabled = True
 		dnames = os.listdir("/sys/block/")
 		for d in dnames:
 			try:
@@ -58,11 +59,15 @@ class DiskMonitor:
 
 	def init(self, config):
 		self.config = config
+		if self.config.has_option("DiskMonitor", "enabled"):
+			self.enabled = (self.config.get("DiskMonitor", "enabled") == "True")
 
 	def cleanup(self):
 		pass
 
 	def getLoad(self):
+		if not self.enabled:
+			return
 		self.__update__()
 		ret = {}
 		ret["DISK"] = {}

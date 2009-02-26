@@ -9,7 +9,7 @@ GITTAG = v$(VERSION)
 
 DIRS = doc contrib tuningplugins monitorplugins
 FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf
-FILES_doc = doc/README.txt doc/TIPS.txt doc/tuned.8
+FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5
 FILES_contrib = contrib/diskdevstat contrib/netdevstat
 FILES_tuningplugins = tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
 FILES_monitorplugins = monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
@@ -78,9 +78,11 @@ install:
 	mkdir -p $(DESTDIR)/etc/rc.d/init.d
 	install -m 0755 tuned.initscript $(DESTDIR)/etc/rc.d/init.d/tuned
 
-	# Install manpage
+	# Install manpages
 	mkdir -p $(DESTDIR)/usr/share/man/man8
 	install -m 0644 doc/tuned.8 $(DESTDIR)/usr/share/man/man8
+	mkdir -p $(DESTDIR)/usr/share/man/man5
+	install -m 0644 doc/tuned.conf.5 $(DESTDIR)/usr/share/man/man5
 
 changelog:
 	git-log > ChangeLog

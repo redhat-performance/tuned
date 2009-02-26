@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.1.1
+Version: 0.1.2
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -21,15 +21,22 @@ BuildArch: noarch
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
+It does so by monitoring the usage of several system components periodically.
+Based on that information components will then be put into lower or higher
+power saving modes to adapt to the current usage. Currently only ethernet
+network and ATA harddisk devices are implemented.
 
 %package utils
-Summary: Disk and net monitoring systemtap scripts
+Summary: Disk and net statistic monitoring systemtap scripts
 Requires: systemtap kernel-debuginfo
 Group: Applications/System
 
 %description utils
 The tuned-utils package contains several systemtap scripts to allow detailed
-manual monitoring of the system.
+manual monitoring of the system. Instead of the typical IO/sec it collects
+minimal, maximal and average time between operations to be able to
+identify applications that behave power inefficient (many small operations
+instead of fewer large ones).
 
 %prep
 %setup -q
@@ -59,20 +66,31 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/README.txt doc/TIPS.txt
+%doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt
 %{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
 %{_sbindir}/tuned
 %{_datadir}/tuned
+%{_mandir}/man5/*
 %{_mandir}/man8/*
 
 %files utils
+%doc doc/README.utils
 %defattr(-,root,root,-)
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 
 
 %changelog
+* Thu Feb 26 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.2-1
+- Added config file option to enable/disable plugins
+- Switched from ConfigParser to RawConfigParser
+- Renamed doc/README.txt to doc/DESIGN.txt
+- Added tuned.conf man page
+- Updated tuned man page
+- Updated package descriptions (#487312)
+- Added documentation for utils scripts (#487312)
+
 * Wed Feb 25 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.1-1
 - Bump version
 - Added comment in empty __init__.py files

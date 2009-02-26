@@ -21,6 +21,7 @@ import os
 class NetMonitor:
 	def __init__(self):
 		self.devices = {}
+		self.enabled = True
 		devs = open("/proc/net/dev").readlines()
 		for l in devs:
 			l = l.replace(":", " ")
@@ -64,6 +65,8 @@ class NetMonitor:
 
 	def init(self, config):
 		self.config = config
+		if self.config.has_option("NetMonitor", "enabled"):
+                        self.enabled = (self.config.get("NetMonitor", "enabled") == "True")
 		interval = self.config.getint("main", "interval")
 		# Assume 1gbit interfaces for now. FIXME: Need clean way to figure out max interface speed
 		for d in self.devices.keys():
@@ -73,6 +76,8 @@ class NetMonitor:
 		pass
 
 	def getLoad(self):
+		if not self.enabled:
+			return
 		self.__update__()
 		ret = {}
 		ret["NET"] = {}

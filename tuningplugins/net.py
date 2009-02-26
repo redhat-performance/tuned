@@ -21,6 +21,7 @@ import os, copy
 class NetTuning:
 	def __init__(self):
 		self.devidle = {}
+		self.enabled = True
 
 	def __updateIdle__(self, dev, devload):
 		idle = self.devidle.setdefault(dev, {})
@@ -35,12 +36,18 @@ class NetTuning:
 
 	def init(self, config):
 		self.config = config
+		if self.config.has_option("NetTuning", "enabled"):
+                        self.enabled = (self.config.get("NetTuning", "enabled") == "True")
+
 
 	def cleanup(self):
 		for dev in self.devidle.keys():
-			os.system("ethtool -s "+dev+" advertise 0x03F")
+			if self.enabled and self.devidle[dev]["LEVEL"] > 0:
+				os.system("ethtool -s "+dev+" advertise 0x03F")
 
 	def setTuning(self, load):
+		if not self.enabled:
+			return
 		disks = load.setdefault("NET", {})
 		for dev in disks.keys():
 			devload = disks[dev]

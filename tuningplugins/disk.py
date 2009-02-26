@@ -21,6 +21,7 @@ import os, copy
 class DiskTuning:
 	def __init__(self):
 		self.devidle = {}
+		self.enabled = True
 
 	def __updateIdle__(self, dev, devload):
 		idle = self.devidle.setdefault(dev, {})
@@ -35,12 +36,17 @@ class DiskTuning:
 
 	def init(self, config):
 		self.config = config
+		if self.config.has_option("DiskTuning", "enabled"):
+                        self.enabled = (self.config.get("DiskTuning", "enabled") == "True")
 
 	def cleanup(self):
 		for dev in self.devidle.keys():
-			os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
+			if self.enabled and self.devidle[dev]["LEVEL"] > 0:
+				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
 
 	def setTuning(self, load):
+		if not self.enabled:
+			return
 		disks = load.setdefault("DISK", {})
 		for dev in disks.keys():
 			devload = disks[dev]

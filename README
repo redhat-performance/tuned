@@ -19,21 +19,51 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
-SYNOPSIS
-       tuned [options]
+How to use
+----------
 
-DESCRIPTION
-       tuned is a dynamic adaptive system tuning daemon that tunes system settings dynamically depending on usage.
+After installing the package you simply need to start the tuned
+service either with system-config-services or from the
+commandline in a rootshell via:
 
-OPTIONS
-       -d, --daemon
-                   This options starts tuned as a daemon as opposed to in the foreground without forking at startup.
+  service tuned start
 
-       -c, --conffile="conffile"
-                   Specify the name and path of the configuration file, default is /etc/tuned.conf.
+You can also automatically start it during system startup by
+switching it on via chkconfig:
 
-BUGS
-       There are no known bugs.  To file bug reports, see AUTHORS below.
+  chkconfig tuned on
 
-AUTHOR
-       Written by Phil Knirsch <pknirsch@redhat.com>.
+After that the daemon will run automatically and monitor the
+usage of various system components. Based on that information
+components will then be put into lower or higher power saving
+modes to adapt to the current usage. Currently only ethernet
+network and and ATA harddisk devices are implemented.
+
+The config file /etc/tuned.conf contains several sections in
+INI style. There is always a "main" section which controls
+overall options of the daemon. Currently only 1 option
+is available:
+
+interval:  Interval for monitoring and tuning in seconds.
+           Default is 10.
+
+Each monitoring and tuning plugin has an own section then.
+Currently only 1 option for plugins is available:
+
+enabled: Enabled or disable the plugin. Default is True.
+         Any other value disables it.
+
+WARNING: At the moment there is a small incompatibility with
+tuned and NetworkManager which will results in connectivity
+loss if you are using tuned and your network devices are
+controlled by NetworkManager. This will be fixed in a future
+version of tuned and NetworkManager. At the moment there
+are two workarounds:
+
+1) Don't use NetworkManager for your Ethernet devices but
+configure them with system-config-network and enable the
+network service.
+2) Disabled the network tuning in tuned by editing
+/etc/tuned.conf and uncomment the
+# enabled=False
+line in the NetTuning section.

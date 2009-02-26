@@ -38,7 +38,7 @@ class Tuned:
 			store.append(_plugin)
 
 	def init(self, path, cfgfile):
-		self.config = ConfigParser.ConfigParser()
+		self.config = ConfigParser.RawConfigParser()
 		self.config.read(cfgfile)
 		if self.config.has_option("main", "interval"):
 			self.interval = self.config.getint("main", "interval")
