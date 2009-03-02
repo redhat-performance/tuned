@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.1.2
+Version: 0.1.3
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -75,13 +75,16 @@ fi
 %{_mandir}/man8/*
 
 %files utils
-%doc doc/README.utils
 %defattr(-,root,root,-)
+%doc doc/README.utils
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 
 
 %changelog
+* Mon Mar 02 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.3-1
+- Fixed placement of doc entry at tuned-utils package
+
 * Thu Feb 26 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.2-1
 - Added config file option to enable/disable plugins
 - Switched from ConfigParser to RawConfigParser
