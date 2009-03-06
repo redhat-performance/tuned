@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.1.3
+Version: 0.1.4
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -28,7 +28,7 @@ network and ATA harddisk devices are implemented.
 
 %package utils
 Summary: Disk and net statistic monitoring systemtap scripts
-Requires: systemtap kernel-debuginfo
+Requires: systemtap
 Group: Applications/System
 
 %description utils
@@ -82,6 +82,9 @@ fi
 
 
 %changelog
+* Fri Mar 06 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.4-1
+- Dropped unecessary kernel-debuginfo requires from tuned-utils
+
 * Mon Mar 02 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.3-1
 - Fixed placement of doc entry at tuned-utils package
 
