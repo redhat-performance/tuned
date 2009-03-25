@@ -2,18 +2,18 @@ Systemtap disk and network statistic monitoring tools
 =====================================================
 
 The netdevstat and diskdevstat are 2 systemtap tools that allow the user to
-collect detailed information about network and disk aktivity of all
-applications running on a system. These 2 tools were insipred by powertop,
-which shows the wakeups of applications per second.
+collect detailed information about network and disk activity of all
+applications running on a system. These 2 tools were inspired by powertop,
+which shows number of wakeups for every application per second.
 
-The basic idea is to collect statistic about the running applications in a
-form that allows a user to identify applications that behave power
-inefficient, meaning instead of doing fewer and bigger IO operations they
-do more and smaller ones. Current monitoring tools typically only show
-the transfer speeds which isn't very meaningful in that context.
+The basic idea is to collect statistic about the running applications in
+a form that allows a user to identify power greedy applications.
+That means f.e. instead of doing fewer and bigger IO operations they
+do more and smaller ones. Current monitoring tools show typically only
+the transfer speeds, which isn't very meaningful in that context.
 
-To run them you need to have systemtap and kernel-debuginfo installed.
-If both are installed a simple
+To run those tools, you need to have systemtap installed.
+Then you can simply type
 
  netdevstat
 
@@ -21,7 +21,7 @@ or
 
  diskdevstat
 
-will start the scripts. Both can take up to 3 parameters:
+and the scripts will start. Both can take up to 3 parameters:
 
 diskdevstat [Update interval] [Total duration] [Display histogram at the end]
 netdevstat [Update interval] [Total duration] [Display histogram at the end]

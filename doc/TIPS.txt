@@ -1,8 +1,8 @@
 === Simple user tips for improving power usage ===
-* Use a properly dimensioned system for the job (no need for overpowered systems for simple Desktop use e.g.) 
-* For servers consolidate services on fewer systems to maximize efficiency of each system
-* Enforce turning of machines that are not used (e.g. company policy)
-* Unplug and/or turn of peripherals that aren't used (e.g. external USB devices, monitors, printers, scanners)
+* Use a properly dimensioned system for the job (no need for overpowered systems for simple Desktop use e.g.).
+* For servers consolidate services on fewer systems to maximize efficiency of each system.
+* Enforce turning of machines that are not used (e.g. company policy).
+* Unplug and/or turn of peripherals that aren't used (e.g. external USB devices, monitors, printers, scanners).
 * Turn of unused hardware already in BIOS.
 * Disable power hungry features.
 * Enable CPU scaling if supported for ondemand CPU governor. DONT use powersave governor, typically uses more power than ondemand
@@ -15,7 +15,7 @@
 ** hdparm -S240 /dev/sda (20m idle to spindown)
 ** hdparm -B1 /dev/sda (Max powersave mode)
 * Make sure writes to hd don't wake it up too quickly:
-** Set flusing to once 5 minutes
+** Set flushing to once per 5 minutes
 ** echo "3000" > /proc/sys/vm/dirty_writeback_centisecs
 ** Enable laptop mode
 ** echo "5" > /proc/sys/vm/laptop_mode
@@ -29,10 +29,10 @@
 ** xset dpms 0 0 120
 
 === Simple programmer tips for improving power usage ===
-* Avoid unecessary work/computation
+* Avoid unnecessary work/computation
 * Wake up only when necessary
 * Do not actively poll in programs or use short regular timeouts, rather react to events 
 * If you wake up, do everything at once (race to idle) and as fast as possible
 * Use large buffers to avoid frequent disk access. Write one large block at a time
 * Don't use [f]sync() if not necessary
-* Group timers accross applications if possible (even systems)
+* Group timers across applications if possible (even systems)

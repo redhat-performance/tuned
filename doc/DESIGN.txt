@@ -48,7 +48,7 @@ tuned:
   together are 100 then this will be a balanced and normalized load
 - Accumulated weights per tune plugin can be > 100 or < 100. Need to decide
   whether to automatically normalize it or not
-/* - Tuning aggressivness can be specified from 0 to 100. 0 == no PM, 100 means
+/* - Tuning aggressiveness can be specified from 0 to 100. 0 == no PM, 100 means
   always fully tune even under full load. Configurable globally for all tuning
   plugins and/or individually */
 - Tuning modes should follow the system/user settings for power management of
@@ -80,7 +80,7 @@ Monitor plugins:
   o Input
   o Output 
   o Blocksize
-- Should avoid disk/network io to prevent unecessary wakeups
+- Should avoid disk/network io to prevent unnecessary wakeups
 
 
 Tuning plugins:
@@ -94,7 +94,7 @@ Tuning plugins:
   o Performance
 - Each plugin has to define it's own policy for handling the different
   levels of aggregated load
-- Each plugin has an interface called setTuning(load) where load is the aggreated
+- Each plugin has an interface called setTuning(load) where load is the aggregated
   load for that tuning plugin modified by the specific or overall level of
   tuning aggressiveness
 - Several levels of aggressiveness: none, low, medium, high, max
@@ -111,7 +111,7 @@ Tuning plugins:
 Example:
 --------
 
-monitoring plugin for disk io: Montiors either via /proc or other means the IO
+monitoring plugin for disk io: Monitors either via /proc or other means the IO
 for all disks in the system.
 
 getLoad() returns something like: {"DISK" : {"sda" : {"READ" : 0.24, "WRITE" :
