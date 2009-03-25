@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.1.4
+Version: 0.1.5
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -82,6 +82,12 @@ fi
 
 
 %changelog
+* Wed Mar 25 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.5-1
+- Updated documentation, thanks to Marcela Maslanova!
+- Updated diskdevstat and netdevstat to have command line arguments
+- Added the possibility to output a histogram at the end of the
+  run for detailed information about the collected data
+
 * Fri Mar 06 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.4-1
 - Dropped unecessary kernel-debuginfo requires from tuned-utils
 

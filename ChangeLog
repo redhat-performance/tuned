@@ -1,3 +1,53 @@
+commit fde8c26f215ea7a20a3da88a7f91d2156288dd3d
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Mar 25 17:49:48 2009 +0100
+
+    - Updated documentation, thanks to Marcela Maslanova!
+
+commit 019e5d08cc04c5bbe5a16edb2fe8d2b3023a00a1
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Mar 25 17:42:43 2009 +0100
+
+    - Updated diskdevstat and netdevstat to have command line arguments
+    - Added the possibility to output a histogram at the end of the
+      run for detailed information about the collected data
+
+commit ccd7b1e2608520610e34feed95931f41c233f459
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Fri Mar 6 10:42:52 2009 +0100
+
+    - Dropped unecessary kernel-debuginfo requires from tuned-utils
+
+commit 6aa10a2b46d6d1f292fa8e55978dac352fd4a284
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Mon Mar 2 12:33:09 2009 +0100
+
+    - Fixed placement of doc entry at tuned-utils package
+
+commit 82e5d550f1f1da442f4844986477c4a7c0bafa55
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Thu Feb 26 18:38:39 2009 +0100
+
+    - Added config file option to enable/disable plugins
+    - Switched from ConfigParser to RawConfigParser
+    - Renamed doc/README.txt to doc/DESIGN.txt
+    - Added tuned.conf man page
+    - Updated tuned man page
+    - Updated package descriptions (#487312)
+    - Added documentation for utils scripts (#487312)
+
+commit 6b79fa915df800feeadbeab68e6a36a1a958bc2e
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Thu Feb 26 13:47:01 2009 +0100
+
+    - Added comment in empty __init__.py files
+
+commit c52014cb40c78ddef6660b84551803cef8004256
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Feb 25 19:32:31 2009 +0100
+
+    - Fixed BuildRoot tag to use latest recommendation of FPG
+
 commit 85afc406d455c1dce5452519ee0d3795c62b8698
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 19:25:10 2009 +0100
