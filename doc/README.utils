@@ -21,8 +21,22 @@ or
 
  diskdevstat
 
-will start the scripts. There are no parameters or options for them. The
-output will look similar to top and/or powertop. Here a sample output of
+will start the scripts. Both can take up to 3 parameters:
+
+diskdevstat [Update interval] [Total duration] [Display histogram at the end]
+netdevstat [Update interval] [Total duration] [Display histogram at the end]
+
+Update interval:
+    Time in seconds between updates for the display. Default: 5
+
+Total duration:
+    Time in seconds for the whole run. Default: 86400 (1 day)
+
+Display histogram at the end:
+    Flag if at the end of the execution a histogram for the whole collected
+    data.
+
+The output will look similar to top and/or powertop. Here a sample output of
 a longer diskdevstat run on a Fedora 10 system running KDE 4.2:
 
 

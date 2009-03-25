@@ -2,6 +2,12 @@
 #
 # diskdevstat: A simple systemtap script to record harddisk activity
 # 	       of processes and display statistics for read/write operations
+#
+# Usage: diskdevstat [Update interval] [Total duration] [Display histogram at the end]
+#
+# Update interval and total duration are in seconds. Display histogram only requires a
+# 3rd option to exist to be enabled.
+#
 # Copyright (C) 2008, 2009 Red Hat, Inc.
 # Authors: Phil Knirsch
 #
@@ -9,12 +15,12 @@
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-#
+# 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#
+# 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the
 #
@@ -23,7 +29,19 @@
 # Boston, MA  02110-1301, USA.
 #
 
-global ifavg, iflast
+global ifavg, iflast, rtime, interval, duration, histogram
+
+probe begin
+{
+	rtime = 0;
+	interval = 5;
+	duration = 86400;
+	histogram = 0;
+
+%( $# > 0 %? interval = $1; %)
+%( $# > 1 %? duration = $2; %)
+%( $# > 2 %? histogram = 1; %)
+}
 
 probe vfs.write
 {
@@ -91,8 +109,40 @@ function print_activity()
 	print("\n")
 }
 
-probe timer.s(5), end, error
+function print_histogram()
 {
-	print_activity()
+	foreach ([type, pid, dev, exec, uid] in ifavg-) {
+		nxmit = @count(ifavg[0, pid, dev, exec, uid])
+		nrecv = @count(ifavg[1, pid, dev, exec, uid])
+		if (type == 0 || nxmit == 0) {
+			printf("%5d %5d %-7s %-15s\n", pid, uid, dev, exec)
+			if (nxmit > 0) {
+				printf("  WRITE histogram\n")
+				print(@hist_log(ifavg[0, pid, dev, exec, uid]))
+			}
+			if (nrecv > 0) {
+				printf("  READ histogram\n")
+				print(@hist_log(ifavg[1, pid, dev, exec, uid]))
+			}
+		}
+	}
 }
 
+probe timer.s(1)
+{
+	rtime = rtime + 1;
+	if (rtime % interval == 0) {
+		print_activity()
+	}
+	if (rtime >= duration) {
+		exit();
+	}
+}
+
+probe end, error
+{
+	if (histogram == 1) {
+		print_histogram();
+	}
+	exit();
+}
