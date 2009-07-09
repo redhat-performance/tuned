@@ -1,0 +1,94 @@
+#!/usr/bin/python
+#
+# varnetload: A python script to create reproducable sustained network traffic
+#
+# Usage: varnetload [-d delay in milliseconds] [-t runtime in seconds] [-u URL]
+#
+# Howto use it:
+#  - In order to effectively use it you need to have a http server in your local
+#  LAN where you can put files.
+#  - Upload a large HTML (or any other kind of file) to the http server.
+#  - Use the -u option of the script to point to that URL
+#  - Play with the delay option to vary the load put on your network. Typical
+#    useful values range from 0 to 500.
+#
+# Copyright (C) 2009 Red Hat, Inc.
+# Authors: Phil Knirsch
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to:
+#
+# Free Software Foundation, Inc.
+# 51 Franklin Street, Fifth Floor
+# Boston, MA  02110-1301, USA.
+#
+
+import time, getopt, sys
+from urllib2 import *
+
+def usage():
+	print("Usage: varnetload [-d delay in milliseconds] [-t runtime in seconds] [-u URL]")
+
+delay = 1000.0
+rtime = 60.0
+url = "http://myhost.mydomain/index.html"
+
+try:
+	opts, args = getopt.getopt(sys.argv[1:], "d:t:u:")
+except getopt.error, e:
+        print("Error parsing command-line arguments: %s" % e)
+	usage()
+	sys.exit(1)
+
+for (opt, val) in opts:
+	if   opt == '-d':
+		delay = float(val)
+	elif opt == '-t':
+		rtime = float(val)
+	elif opt == '-u':
+		url = val
+	else:
+		print("Unknown option: %s" % opt)
+		usage()
+		sys.exit(1)
+
+endtime = time.time() + rtime
+delay = float(delay)/1000.0
+
+count = 0
+while(time.time() < endtime):
+	if (delay < 0.01):
+		urlopen(url).read(409600)
+		time.sleep(delay)
+		urlopen(url).read(409600)
+		time.sleep(delay)
+		urlopen(url).read(409600)
+		time.sleep(delay)
+		urlopen(url).read(409600)
+		time.sleep(delay)
+		urlopen(url).read(409600)
+		time.sleep(delay)
+		urlopen(url).read(409600)
+		time.sleep(delay)
+		urlopen(url).read(409600)
+		time.sleep(delay)
+		urlopen(url).read(409600)
+		time.sleep(delay)
+		urlopen(url).read(409600)
+		time.sleep(delay)
+		count += 9
+	urlopen(url).read(409600)
+	time.sleep(delay)
+	count += 1
+
+print("Finished varnetload. Received %d pages in %d seconds" % (count, rtime))
