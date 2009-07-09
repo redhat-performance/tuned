@@ -1,0 +1,45 @@
+.\"/* 
+.\" * All rights reserved
+.\" * Copyright (C) 2009 Red Hat, Inc.
+.\" * Authors: Marcela Mašláňová
+.\" *
+.\" * This program is free software; you can redistribute it and/or
+.\" * modify it under the terms of the GNU General Public License
+.\" * as published by the Free Software Foundation; either version 2
+.\" * of the License, or (at your option) any later version.
+.\" *
+.\" * This program is distributed in the hope that it will be useful,
+.\" * but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" * GNU General Public License for more details.
+.\" *
+.\" * You should have received a copy of the GNU General Public License
+.\" * along with this program; if not, write to the Free Software
+.\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+.\" */
+.\" 
+.TH TUNED_ADM "1" "9 Jul 2009" "Linux Programmer's Manual"
+.SH NAME
+tuned_adm \- commandline tool for setting the power-save options
+.SH SYNOPSIS
+.B tuned_adm 
+.B 
+.BR help ", " laptop ", " server
+.br
+.SH DESCRIPTION
+This command line utility allows user to set profile for server or laptop.
+.SH "OPTIONS"
+.TP
+.B help
+Print out the list of commands.
+.TP
+.B laptop
+.TP
+.B server
+.TP
+These settings are calling ktune which set up different values for better resource consumption.
+
+.SH "SEE ALSO"
+.SH AUTHOR
+.nf
+Marcela Mašláňová <mmaslano@redhat.com>
