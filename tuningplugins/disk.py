@@ -22,6 +22,8 @@ class DiskTuning:
 	def __init__(self):
 		self.devidle = {}
 		self.enabled = True
+		self.spins = ["0", "250", "240", "230", "220", "210", "200", "190", "180", "170", "160", "150", "140", "130", "120", "110", "100", "90", "80", "70", "60"]
+		self.power = ["255", "225", "195", "165", "155", "145", "135", "125", "115", "100", "90", "80", "70", "60"]
 
 	def __updateIdle__(self, dev, devload):
 		idle = self.devidle.setdefault(dev, {})

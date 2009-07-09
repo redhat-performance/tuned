@@ -9,8 +9,8 @@ GITTAG = v$(VERSION)
 
 DIRS = doc contrib tuningplugins monitorplugins
 FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf
-FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5
-FILES_contrib = contrib/diskdevstat contrib/netdevstat
+FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/README.scomes
+FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes
 FILES_tuningplugins = tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
 FILES_monitorplugins = monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README

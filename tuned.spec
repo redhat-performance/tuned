@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.1.5
+Version: 0.1.6
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -77,11 +77,16 @@ fi
 %files utils
 %defattr(-,root,root,-)
 %doc doc/README.utils
+%doc doc/README.scomes
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
+%{_sbindir}/scomes
 
 
 %changelog
+* Thu Jun 25 2009 Petr Lautrbach <plautrba@redhat.com> - 0.1.6-1
+- added scomes
+
 * Wed Mar 25 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.5-1
 - Updated documentation, thanks to Marcela Maslanova!
 - Updated diskdevstat and netdevstat to have command line arguments
