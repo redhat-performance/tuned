@@ -1,3 +1,22 @@
+commit b0faedccaa8c6ed144ec5ece82b672ca8bed9642
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Thu Jul 9 12:23:37 2009 +0200
+
+    - Added some more utilities
+    - Fixed typo in README.scomes
+
+commit 73a0ac72279c220582ceb51be087c29a2631c9a9
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Thu Jul 9 12:20:45 2009 +0200
+
+    - Added scomes from Petr Lauterbach
+
+commit 903eed6759fd680e481f5f5a4735e8d601d13d71
+Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
+Date:   Wed Mar 25 17:52:00 2009 +0100
+
+    - Updated specfile and ChangeLog, release 0.1.5
+
 commit fde8c26f215ea7a20a3da88a7f91d2156288dd3d
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Mar 25 17:49:48 2009 +0100
