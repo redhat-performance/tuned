@@ -1,3 +1,10 @@
+commit 03276ef8f409ac67124252ca199aed608ea7c332
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Mon Jul 13 17:00:01 2009 +0200
+
+    New release 0.1.6.
+    Update ChangeLog.
+
 commit b0faedccaa8c6ed144ec5ece82b672ca8bed9642
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Thu Jul 9 12:23:37 2009 +0200
