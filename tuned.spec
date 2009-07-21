@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.1.6
+Version: 0.1.7
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -78,12 +78,16 @@ fi
 %defattr(-,root,root,-)
 %doc doc/README.utils
 %doc doc/README.scomes
+%{_sbindir}/varnetload
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 %{_sbindir}/scomes
 
 
 %changelog
+* Thu Jul 16 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.7-1
+- Added first version CPU tuning and monitoring plugins
+
 * Thu Jun 25 2009 Petr Lautrbach <plautrba@redhat.com> - 0.1.6-1
 - added scomes
 
