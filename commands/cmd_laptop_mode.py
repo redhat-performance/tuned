@@ -5,7 +5,7 @@ from kobo.cli import Command
 import os
 
 class Laptop(Command):
-    """set laptop mode"""
+    """laptop mode not implemented yet"""
     enabled = True
 
 
@@ -23,4 +23,5 @@ class Laptop(Command):
     def run(self, *args, **kwargs):
         # this should be part of ktune
         # if on wifi then switch off network card?
+        # usb suspend set to auto
         pass

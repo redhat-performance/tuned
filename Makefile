@@ -7,12 +7,13 @@ DESTDIR = /
 MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
-DIRS = doc contrib tuningplugins monitorplugins
-FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf
+DIRS = doc contrib tuningplugins monitorplugins commands
+FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/README.scomes
-FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes
-FILES_tuningplugins = tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
-FILES_monitorplugins = monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
+FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
+FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
+FILES_monitorplugins = monitorplugins/cpu.py monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
+FILES_commands = commands/cmd_default_mode.py commands/cmd_server_mode.py commands/cmd_off_mode.py commands/__init__.py
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 
 distarchive: tag archive
@@ -29,6 +30,7 @@ archive:
 	cp $(FILES_contrib) $(VERSIONED_NAME)/contrib
 	cp $(FILES_tuningplugins) $(VERSIONED_NAME)/tuningplugins
 	cp $(FILES_monitorplugins) $(VERSIONED_NAME)/monitorplugins
+	cp $(FILES_commands) $(VERSIONED_NAME)/commands
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
 	ln -fs $(VERSIONED_NAME).tar.bz2 latest-archive
@@ -52,17 +54,22 @@ install:
 	# Install the binaries
 	mkdir -p $(DESTDIR)/usr/sbin/
 	install -m 0755 tuned $(DESTDIR)/usr/sbin/
+	install -m 0755 tuned-adm $(DESTDIR)/usr/sbin/
 
 	# Install the plugins and classes
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/tuningplugins
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/monitorplugins
+	mkdir -p $(DESTDIR)/usr/share/$(NAME)/commands
 	install -m 0644 tuned.py $(DESTDIR)/usr/share/$(NAME)/
 	for file in $(FILES_tuningplugins); do \
 		install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/tuningplugins; \
 	done
 	for file in $(FILES_monitorplugins); do \
 		install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/monitorplugins; \
+	done
+	for file in $(FILES_commands); do \
+	    install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/commands; \
 	done
 
 	# Install contrib systemtap scripts
@@ -73,6 +80,8 @@ install:
 	# Install config file
 	mkdir -p $(DESTDIR)/etc
 	install -m 0644 tuned.conf $(DESTDIR)/etc
+
+	mkdir -p $(DESTDIR)/etc/tune-profiles/{desktop,laptop,personal,server}
 
 	# Install initscript
 	mkdir -p $(DESTDIR)/etc/rc.d/init.d

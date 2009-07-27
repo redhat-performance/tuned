@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.1.6
-Release: 1%{?dist}
+Version: 0.1.7
+Release: 2%{?dist}test
 License: GPLv2+
 Group: System Environment/Daemons
 # The source for this package was pulled from upstream git.  Use the
@@ -18,6 +18,7 @@ Requires(preun): chkconfig
 Requires(preun): initscripts
 Requires(postun): initscripts
 BuildArch: noarch
+Requires: kobo
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
@@ -70,6 +71,8 @@ fi
 %{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
 %{_sbindir}/tuned
+%{_sbindir}/tuned-adm
+%{_sysconfdir}/tune-profiles
 %{_datadir}/tuned
 %{_mandir}/man5/*
 %{_mandir}/man8/*
@@ -78,12 +81,19 @@ fi
 %defattr(-,root,root,-)
 %doc doc/README.utils
 %doc doc/README.scomes
+%{_sbindir}/varnetload
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 %{_sbindir}/scomes
 
 
 %changelog
+* Mon Jul 27 2009 Marcela Mašláňová <mmaslano@redhat.com> - 0.1.7-2
+- tuned-adm - CLI for setting profiles
+
+* Thu Jul 16 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.7-1
+- Added first version CPU tuning and monitoring plugins
+
 * Thu Jun 25 2009 Petr Lautrbach <plautrba@redhat.com> - 0.1.6-1
 - added scomes
 
