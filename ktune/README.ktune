@@ -1,0 +1,28 @@
+Overview
+--------
+
+ktune provides the ktune service, which sets several kernel tuning parameters 
+to values suitable for certain system profiles.  Currently, the only profile
+provided is for large-memory systems running disk and network-intensive
+applications.  These settings do not override settings in /etc/sysctl.conf or
+on the kernel command line.  ktune may harm performance on some systems and
+workloads, so it should be tested under production-like conditions prior to
+production use.  If ktune is found to harm performance, the settings may be
+reverted without rebooting by stopping the ktune service.
+
+Using ktune
+-----------
+
+To start ktune you can start the service with the service command:
+
+   service ktune start
+
+If you want to enable the service in the system, use the chkconfig command:
+
+   chkconfig ktune on
+
+More Information
+----------------
+
+Please have a look at /etc/sysconfig/ktune and /etc/sysctl.ktune for tuning 
+parameters.

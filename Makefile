@@ -7,12 +7,13 @@ DESTDIR = /
 MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
-DIRS = doc contrib tuningplugins monitorplugins
+DIRS = doc contrib tuningplugins monitorplugins ktune
 FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/README.scomes
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
 FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
 FILES_monitorplugins = monitorplugins/cpu.py monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
+FILES_ktune = ktune/ktune.init ktune/ktune.sysconfig ktune/sysctl.ktune ktune/README.ktune
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 
 distarchive: tag archive
@@ -29,6 +30,7 @@ archive:
 	cp $(FILES_contrib) $(VERSIONED_NAME)/contrib
 	cp $(FILES_tuningplugins) $(VERSIONED_NAME)/tuningplugins
 	cp $(FILES_monitorplugins) $(VERSIONED_NAME)/monitorplugins
+	cp $(FILES_ktune) $(VERSIONED_NAME)/ktune
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
 	ln -fs $(VERSIONED_NAME).tar.bz2 latest-archive
@@ -83,6 +85,15 @@ install:
 	install -m 0644 doc/tuned.8 $(DESTDIR)/usr/share/man/man8
 	mkdir -p $(DESTDIR)/usr/share/man/man5
 	install -m 0644 doc/tuned.conf.5 $(DESTDIR)/usr/share/man/man5
+
+	# INstall ktune
+	install -m 755 -d $(DESTDIR)/etc
+	install -m 644 ktune/sysctl.ktune $(DESTDIR)/etc/
+	install -m 755 -d $(DESTDIR)/etc/ktune.d
+	install -m 755 -d $(DESTDIR)/etc/sysconfig
+	install -m 644 ktune/ktune.sysconfig $(DESTDIR)/etc/sysconfig/ktune
+	install -m 755 -d $(DESTDIR)/etc/rc.d/init.d
+	install -m 755 ktune/ktune.init $(DESTDIR)/etc/rc.d/init.d/ktune
 
 changelog:
 	git-log > ChangeLog

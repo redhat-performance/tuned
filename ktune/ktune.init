@@ -1,0 +1,243 @@
+#!/bin/sh
+#
+# ktune		ktune sysctls
+#
+# chkconfig: - 05 99
+# description:	Applies and reverts ktune sysctl settings
+#
+# config: /etc/sysctl.ktune
+# config: /etc/sysconfig/ktune
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# Source ktune configureation.
+if [ -f /etc/sysconfig/ktune ] ; then
+    . /etc/sysconfig/ktune
+else
+    echo -n $"$0: /etc/sysconfig/ktune does not exist."; warning; echo
+    exit 5
+fi
+
+VAR_SUBSYS_KTUNE=/var/lock/subsys/ktune
+SAVE_FILE="/var/run/ktune.save"
+SYSCTL_SET="/sbin/sysctl -q -w "
+SYSCTL_GET="/sbin/sysctl -e"
+
+KERNEL_ELEVATOR="cfq"
+/bin/fgrep -q 'elevator=' /proc/cmdline
+CMDLINE_ELEVATOR=$?
+SYS_BLOCK_SDX=$(eval LANG=C /bin/ls -1 ${ELEVATOR_TUNE_DEVS} 2>/dev/null)
+
+declare -a KTUNE_FILES
+if [ -r "$SYSCTL" ]; then
+    KTUNE_FILES[0]="$SYSCTL"
+fi
+if [ "x$USE_KTUNE_D" = "xyes" ]; then
+    while read file; do
+	[ -r "$file" ] || continue
+	KTUNE_FILES[${#KTUNE_FILES[*]}]="${file}"
+    done <<EOF 
+$(LANG=C /bin/ls -1 /etc/ktune.d/*.conf 2>/dev/null)
+EOF
+fi
+
+load_file() {
+    local file=$1
+    local save=$2
+
+    ret_s=0
+    errors=
+    # apply ktune settings
+    while read line; do
+	[ "${line:0:1}" == "#" -o "${line:0:1}" == ";" ] && continue
+	[ -z "$line" ] && continue
+
+	key=$(echo $line | awk '{ match($0,"[ \t]*=[ \t]*") && $0=substr($0,1,RSTART-1); print $0}')
+	value=$(echo $line | awk '/=/ { match($0,"[ \t]*=[ \t]*"); $0=substr($0,RSTART+RLENGTH); print $0}')
+
+	[ $save -ne 0 ] && save_value=$($SYSCTL_GET "$key")
+
+	setting=$key
+	[ -n "$value" ] && setting+="=${value}"
+
+	error="$($SYSCTL_SET "${setting}" 2>&1)"
+	ret=$?
+	if [ $save -ne 0 -a $ret -eq 0 ] && ! grep -q "^${key} =" $SAVE_FILE 2>/dev/null; then
+	    echo "$save_value" >> "$SAVE_FILE"
+	fi
+	[ -n "$error" ] && errors+="${error}\n"
+
+	let ret_s+=$ret
+    done < "$file"
+
+    if [ $ret_s -eq 0 ]; then
+	success; echo
+    else
+	failure; echo; ret=1
+	echo -e "$errors" | while read line; do echo -e "  ${line}"; done
+    fi
+}
+
+call_script() {
+    local script=$1
+
+    if [ -x "$script" ]; then
+	echo -n "Calling "$script": "
+	("$script")
+	ret=$?
+
+	if [ $ret -eq 0 ]; then
+	    success; echo
+	else
+	    failure; echo; ret=1
+	fi
+    fi
+}
+
+load_sysctl() {
+    # Remove save file
+    /bin/rm -f "$SAVE_FILE"
+
+    if [ ${#KTUNE_FILES[@]} -gt 0 ]; then
+	echo $"Applying ktune sysctl settings:"
+
+	# Apply ktune files.
+	for file in "${KTUNE_FILES[@]}"; do
+	    echo -n $"$file: "
+	    load_file "$file" 1
+	    call_script "${file%.conf}.sh"
+	done
+
+        # Apply general sysctl settings afterwards
+	if [ -r "$SYSCTL_POST" ]; then
+	    echo -n $"Applying sysctl settings from $SYSCTL_POST: "
+	    load_file "$SYSCTL_POST" 1
+	fi
+    fi
+}
+
+revert_sysctl() {
+    if [ -r "$SAVE_FILE" ]; then
+	echo -n $"Reverting to saved sysctl settings: "
+	load_file "$SAVE_FILE" 0
+	/bin/rm -f "$SAVE_FILE"
+    fi
+}
+
+start() {
+    ret=0
+
+    load_sysctl
+
+    # if no elevator on command line, apply the ktune elevator
+    if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a !$CMDLINE_ELEVATOR ]; then
+	ret_e=0
+	echo -n $"Applying ${ELEVATOR} elevator: "
+	for i in $SYS_BLOCK_SDX; do
+	    dev="${i%%/queue*}"; echo -n "${dev##*/} "
+	    echo "$ELEVATOR" > "$i" 2>/dev/null;
+	    let ret_e+=$?
+	done
+	if [ $ret_e -eq 0 ]; then
+	    success; echo
+	else
+	    failure; echo; ret=1
+	fi
+    fi
+    
+    /bin/touch $VAR_SUBSYS_KTUNE
+    return $ret
+}
+
+reload() {
+    revert_sysctl
+    load_sysctl
+}
+
+stop() {
+    ret=0
+
+    revert_sysctl
+
+    # if no elevator on command line, apply the default elevator
+    if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a !$CMDLINE_ELEVATOR ]; then
+	ret_e=0
+	echo -n $"Reverting to ${KERNEL_ELEVATOR} elevator: "
+	for i in $SYS_BLOCK_SDX; do
+	    dev="${i%%/queue*}"; echo -n "${dev##*/} "
+	    echo "$KERNEL_ELEVATOR" > "$i" 2>/dev/null;
+	    let ret_e+=$?
+	done
+	if [ $ret_e -eq 0 ]; then
+	    success; echo
+	else
+	    failure; echo; ret=1
+	fi
+    fi
+
+    /bin/rm -f $VAR_SUBSYS_KTUNE
+    return $ret
+}
+
+status() {
+    if [ ! -f "$VAR_SUBSYS_KTUNE" ]; then
+	echo $"ktune stettings are not applied."
+	return 3
+    fi
+
+    echo $"Current ktune sysctl stettings:"
+    keys=$(awk '/^[#;]/ { next } /=/ { match($1,"=") && $1=substr($1,1,RSTART-1); print $1 }' "$SAVE_FILE")
+    for key in $keys; do
+	$SYSCTL_GET $key
+    done
+
+    if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a $CMDLINE_ELEVATOR -ne 0 ]; then
+	echo
+	echo $"Current elevator stettings:"
+	for i in $SYS_BLOCK_SDX; do
+	    echo -n "${i}: "; cat "$i"
+	done
+    fi
+
+    return 0
+}
+
+case "$1" in
+    start)
+	[ -f "$VAR_SUBSYS_KTUNE" ] && exit 0
+	start
+	RETVAL=$?
+	;;
+    stop)
+	[ -f "$VAR_SUBSYS_KTUNE" ] || exit 0
+	stop
+	RETVAL=$?
+	;;
+    reload)
+	[ -f "$VAR_SUBSYS_KTUNE" ] && reload
+	RETVAL=$?
+	;;
+    restart|force-reload)
+	[ -f "$VAR_SUBSYS_KTUNE" ] && stop
+	start
+	RETVAL=$?
+	;;
+    condrestart|try-restart)
+	[ -f "$VAR_SUBSYS_KTUNE" ] || exit 0
+	stop
+	start
+	RETVAL=$?
+	;;
+    status)
+	status
+	RETVAL=$?
+	;;
+    *)
+	echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	RETVAL=2
+	;;
+esac
+
+exit $RETVAL

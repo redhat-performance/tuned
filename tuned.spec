@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.1.7
+Version: 0.2.0
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -52,27 +52,35 @@ rm -rf %{buildroot}
 
 %post
 /sbin/chkconfig --add tuned
+/sbin/chkconfig --add ktune
 
 %preun
 if [ $1 = 0 ] ; then
     /sbin/service tuned stop >/dev/null 2>&1
     /sbin/chkconfig --del tuned
+    /sbin/service ktune stop >/dev/null 2>&1
+    /sbin/chkconfig --del ktune
 fi
 
 %postun
 if [ "$1" -ge "1" ] ; then
     /sbin/service tuned condrestart >/dev/null 2>&1 || :
+    /sbin/service ktune condrestart >/dev/null 2>&1 || :
 fi
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt
+%doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt ktune/README.ktune
 %{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
 %{_sbindir}/tuned
 %{_datadir}/tuned
 %{_mandir}/man5/*
 %{_mandir}/man8/*
+%attr(0755,root,root) %{_initddir}/ktune
+%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/sysconfig/ktune
+%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/sysctl.ktune
+%dir %attr(0755,root,root) %{_sysconfdir}/ktune.d
 
 %files utils
 %defattr(-,root,root,-)
@@ -85,6 +93,9 @@ fi
 
 
 %changelog
+* Mon Jul 27 2009 Thomas Woerner <twoerner@redhat.com> - 0.2.0-1
+- Integrated ktune-0.4
+
 * Thu Jul 16 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.7-1
 - Added first version CPU tuning and monitoring plugins
 
