@@ -22,8 +22,9 @@ class DiskTuning:
 	def __init__(self):
 		self.devidle = {}
 		self.enabled = True
-		self.spins = ["0", "250", "240", "230", "220", "210", "200", "190", "180", "170", "160", "150", "140", "130", "120", "110", "100", "90", "80", "70", "60"]
-		self.power = ["255", "225", "195", "165", "155", "145", "135", "125", "115", "100", "90", "80", "70", "60"]
+		self.power = ["255", "225", "195", "165", "145", "125", "105", "85", "70", "55", "30", "20"]
+		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
+		self.levels = len(self.power)
 
 	def __updateIdle__(self, dev, devload):
 		idle = self.devidle.setdefault(dev, {})
@@ -53,12 +54,17 @@ class DiskTuning:
 		for dev in disks.keys():
 			devload = disks[dev]
 			self.__updateIdle__(dev, devload)
-			if self.devidle[dev]["LEVEL"] == 0 and self.devidle[dev]["READ"] >= 30 and self.devidle[dev]["WRITE"] >= 30:
-				self.devidle[dev]["LEVEL"] = 1
-				os.system("hdparm -Y -S60 -B1 /dev/"+dev+" > /dev/null 2>&1")
+			if self.devidle[dev]["LEVEL"] < self.levels-1 and self.devidle[dev]["READ"] >= 6 and self.devidle[dev]["WRITE"] >= 6:
+				self.devidle[dev].setdefault("LEVEL", 0)
+				self.devidle[dev]["LEVEL"] += 1
+				level = self.devidle[dev]["LEVEL"]
+				os.system("hdparm -S"+self.power[level]+" -B"+self.spindown[level]+" /dev/"+dev+" > /dev/null 2>&1")
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
-				self.devidle[dev]["LEVEL"] = 0
-				os.system("hdparm -S255 -B127 /dev/"+dev+" > /dev/null 2>&1")
-		print(load, self.devidle)
+				self.devidle[dev].setdefault("LEVEL", 0)
+				self.devidle[dev]["LEVEL"] -= 2
+				if self.devidle[dev]["LEVEL"] < 0:
+					self.devidle[dev]["LEVEL"] = 0
+				level = self.devidle[dev]["LEVEL"]
+				os.system("hdparm -S"+self.power[level]+" -B"+self.spindown[level]+" /dev/"+dev+" > /dev/null 2>&1")
 
 _plugin = DiskTuning()
