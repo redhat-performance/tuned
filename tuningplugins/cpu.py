@@ -27,9 +27,8 @@ class CPUTuning:
 		self.config = config
 		if self.config.has_option("CPUTuning", "enabled"):
                         self.enabled = (self.config.get("CPUTuning", "enabled") == "True")
-		print "FOOO"
 		try:
-			open("/dev/FOO_dma_latency", "w")
+			open("/dev/cpu_dma_latency", "w")
 		except:
 			self.enabled = False
 

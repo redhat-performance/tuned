@@ -86,7 +86,7 @@ install:
 	mkdir -p $(DESTDIR)/usr/share/man/man5
 	install -m 0644 doc/tuned.conf.5 $(DESTDIR)/usr/share/man/man5
 
-	# INstall ktune
+	# Install ktune
 	install -m 755 -d $(DESTDIR)/etc
 	install -m 644 ktune/sysctl.ktune $(DESTDIR)/etc/
 	install -m 755 -d $(DESTDIR)/etc/ktune.d
