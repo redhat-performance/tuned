@@ -24,12 +24,15 @@ class Server(Command):
     def run(self, *args, **kwargs):
 	# link config files into directory which is exectued by ktune
 	if os.path.exists("/etc/tune-profiles/server/server.conf"):
-		os.symlink("/etc/tune-profiles/server/server.conf", "/etc/tune.d/server.conf")
+		os.symlink("/etc/tune-profiles/server/server.conf", "/etc/ktune.d/server.conf")
 	if os.path.exists("/etc/tune-profiles/server/server.sh"):
-		os.symlink("/etc/tune-profiles/server/server.sh", "/etc/tune.d/server.sh")
-		os.system('mv /etc/sysconfig/ktune /etc/sysconfig/ktune.bckp')
+		os.symlink("/etc/tune-profiles/server/server.sh", "/etc/ktune.d/server.sh")
 	if os.path.exists("/etc/tune-profiles/server/ktune"):
+	        os.system('mv /etc/sysconfig/ktune /etc/sysconfig/ktune.bckp')
 		os.symlink("/etc/tune-profiles/server/ktune", "/etc/sysconfig/ktune")
+	if os.path.exists("/etc/tune-profiles/server/tuned.conf"):
+	        os.system("mv /etc/tuned.conf /etc/tuned.conf.bckp")
+	        os.symlink("/etc/tune-profiles/server/tuned.conf", "/etc/tuned.conf")
         os.system('service ktune start')
         os.system('chkconfig --add ktune && chkconfig --level 345 ktune on')
 

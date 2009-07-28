@@ -11,8 +11,8 @@ DIRS = doc contrib tuningplugins monitorplugins commands
 FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/README.scomes
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
-FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
-FILES_monitorplugins = monitorplugins/cpu.py monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
+FILES_tuningplugins = tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
+FILES_monitorplugins = monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
 FILES_commands = commands/cmd_default_mode.py commands/cmd_server_mode.py commands/cmd_off_mode.py commands/__init__.py
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 

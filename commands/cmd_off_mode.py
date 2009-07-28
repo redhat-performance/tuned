@@ -21,13 +21,12 @@ class Off(Command):
 
 
     def run(self, *args, **kwargs):
-	if os.path.exists("/etc/tune.d/*.conf"):
-		os.remove("/etc/tune.d/*.conf")
-	if os.path.exists("/etc/tune.d/*.sh"):
-		os.remove("/etc/tune.d/*.sh")
+	os.system("rm -rf /etc/ktune.d/{server,laptop}.conf")
+	os.system("rm -rf /etc/ktune.d/{server,laptop}.sh")
 	if os.path.exists("/etc/sysconfig/ktune.bckp"):
-		os.system('mv /etc/sysconfig/ktune.bckp /etc/sysconfig/ktune')
-		os.remove("/etc/sysconfig/ktune")
+		os.rename("/etc/sysconfig/ktune.bckp", "/etc/sysconfig/ktune")
+	if os.path.exists("/etc/tuned.conf.bckp") and os.path.exists("/etc/tuned.conf"):
+	        os.rename("/etc/tuned.conf.bckp", "/etc/tuned.conf")
         os.system('service ktune stop')
         os.system('service tuned stop')
         os.system('chkconfig --del ktune')
