@@ -21,16 +21,17 @@ class Off(Command):
 
 
     def run(self, *args, **kwargs):
-	os.system("rm -rf /etc/ktune.d/{server,laptop}.conf")
-	os.system("rm -rf /etc/ktune.d/{server,laptop}.sh")
-	if os.path.exists("/etc/sysconfig/ktune.bckp"):
-		os.rename("/etc/sysconfig/ktune.bckp", "/etc/sysconfig/ktune")
-	if os.path.exists("/etc/tuned.conf.bckp") and os.path.exists("/etc/tuned.conf"):
-	        os.rename("/etc/tuned.conf.bckp", "/etc/tuned.conf")
+        os.system("rm -rf /etc/ktune.d/*.conf")
+        os.system("rm -rf /etc/ktune.d/*.sh")
+        if os.path.exists("/etc/sysconfig/ktune.bckp"):
+                os.rename("/etc/sysconfig/ktune.bckp", "/etc/sysconfig/ktune")
+        if os.path.exists("/etc/tuned.conf.bckp") and os.path.exists("/etc/tuned.conf"):
+                os.rename("/etc/tuned.conf.bckp", "/etc/tuned.conf")
         os.system('service ktune stop')
         os.system('service tuned stop')
         os.system('chkconfig --del ktune')
         os.system('chkconfig --del tuned')
         usb_devices = glob.glob('/sys/bus/usb/devices/?-?/')
+        # test whether usb suspend is on
         for i in usb_devices:
-		retcode, output = kobo.shortcuts.run('echo on > %spower/level' % i)
+                retcode, output = kobo.shortcuts.run('echo on > %spower/level' % i)

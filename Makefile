@@ -13,7 +13,8 @@ FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.c
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
 FILES_tuningplugins = tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
 FILES_monitorplugins = monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
-FILES_commands = commands/cmd_default_mode.py commands/cmd_server_mode.py commands/cmd_off_mode.py commands/__init__.py
+FILES_commands = commands/cmd_default_mode.py commands/cmd_off_mode.py commands/cmd_list.py \
+                commands/cmd_modes.py commands/__init__.py
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 
 distarchive: tag archive
@@ -81,7 +82,7 @@ install:
 	mkdir -p $(DESTDIR)/etc
 	install -m 0644 tuned.conf $(DESTDIR)/etc
 
-	mkdir -p $(DESTDIR)/etc/tune-profiles/{desktop,laptop,personal,server}
+	mkdir -p $(DESTDIR)/etc/tune-profiles/
 
 	# Install initscript
 	mkdir -p $(DESTDIR)/etc/rc.d/init.d
