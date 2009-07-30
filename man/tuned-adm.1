@@ -1,0 +1,55 @@
+.\"/* 
+.\" * All rights reserved
+.\" * Copyright (C) 2009 Red Hat, Inc.
+.\" * Authors: Marcela Mašláňová
+.\" *
+.\" * This program is free software; you can redistribute it and/or
+.\" * modify it under the terms of the GNU General Public License
+.\" * as published by the Free Software Foundation; either version 2
+.\" * of the License, or (at your option) any later version.
+.\" *
+.\" * This program is distributed in the hope that it will be useful,
+.\" * but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" * GNU General Public License for more details.
+.\" *
+.\" * You should have received a copy of the GNU General Public License
+.\" * along with this program; if not, write to the Free Software
+.\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+.\" */
+.\" 
+.TH TUNED_ADM "1" "9 Jul 2009" "Linux Programmer's Manual"
+.SH NAME
+tuned-adm \- commandline tool for setting the power-save options
+.SH SYNOPSIS
+.B tuned-adm 
+.B 
+.BR help ", " laptop ", " server ", " default ", " off "
+.br
+.SH DESCRIPTION
+This command line utility allows user to set profile for server or laptop.
+.SH "OPTIONS"
+
+.SS
+.TP
+.B help
+Print out the list of commands.
+
+.TP
+.B laptop
+
+.TP
+.B server
+These settings are calling ktune which set up different values for better resource consumption.
+It also switch on tuned daemon and add ktune and tuned into chkconfig. Usbsuspend is set.
+
+.TP
+.B off
+Switch off all ktune and tuned settings and remove them from services. The configuration file are 
+set to previous settings.
+
+.SH "SEE ALSO"
+.BR tuned (8)
+.SH AUTHOR
+.nf
+Marcela Mašláňová <mmaslano@redhat.com>

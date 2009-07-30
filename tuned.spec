@@ -18,6 +18,7 @@ Requires(preun): chkconfig
 Requires(preun): initscripts
 Requires(postun): initscripts
 BuildArch: noarch
+Requires: kobo
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
@@ -74,6 +75,8 @@ fi
 %{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
 %{_sbindir}/tuned
+%{_sbindir}/tuned-adm
+%{_sysconfdir}/tune-profiles
 %{_datadir}/tuned
 %{_mandir}/man5/*
 %{_mandir}/man8/*

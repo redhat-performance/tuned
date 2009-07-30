@@ -14,6 +14,8 @@ FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/va
 FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
 FILES_monitorplugins = monitorplugins/cpu.py monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
 FILES_ktune = ktune/ktune.init ktune/ktune.sysconfig ktune/sysctl.ktune ktune/README.ktune
+FILES_commands = commands/cmd_default_mode.py commands/cmd_off_mode.py commands/cmd_list.py \
+                commands/cmd_modes.py commands/__init__.py
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 
 distarchive: tag archive
@@ -31,6 +33,7 @@ archive:
 	cp $(FILES_tuningplugins) $(VERSIONED_NAME)/tuningplugins
 	cp $(FILES_monitorplugins) $(VERSIONED_NAME)/monitorplugins
 	cp $(FILES_ktune) $(VERSIONED_NAME)/ktune
+	cp $(FILES_commands) $(VERSIONED_NAME)/commands
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
 	ln -fs $(VERSIONED_NAME).tar.bz2 latest-archive
@@ -54,17 +57,22 @@ install:
 	# Install the binaries
 	mkdir -p $(DESTDIR)/usr/sbin/
 	install -m 0755 tuned $(DESTDIR)/usr/sbin/
+	install -m 0755 tuned-adm $(DESTDIR)/usr/sbin/
 
 	# Install the plugins and classes
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/tuningplugins
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/monitorplugins
+	mkdir -p $(DESTDIR)/usr/share/$(NAME)/commands
 	install -m 0644 tuned.py $(DESTDIR)/usr/share/$(NAME)/
 	for file in $(FILES_tuningplugins); do \
 		install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/tuningplugins; \
 	done
 	for file in $(FILES_monitorplugins); do \
 		install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/monitorplugins; \
+	done
+	for file in $(FILES_commands); do \
+	    install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/commands; \
 	done
 
 	# Install contrib systemtap scripts
@@ -75,6 +83,8 @@ install:
 	# Install config file
 	mkdir -p $(DESTDIR)/etc
 	install -m 0644 tuned.conf $(DESTDIR)/etc
+
+	mkdir -p $(DESTDIR)/etc/tune-profiles/
 
 	# Install initscript
 	mkdir -p $(DESTDIR)/etc/rc.d/init.d
