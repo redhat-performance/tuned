@@ -1,0 +1,27 @@
+# ktune service configuration
+
+# This is the ktune sysctl file.  You can comment this out to prevent ktune
+# from applying its sysctl settings.
+SYSCTL="/etc/sysctl.ktune"
+
+# Use *.conf files in the ktune configuration directory /etc/ktune.d.
+#   Value: yes|no,  default: yes
+# It is useful if you want to load settings from additional files. Set this to
+# no if you to prevent ktune from using these additional files.
+USE_KTUNE_D="yes"
+
+# This is the custom sysctl configuration file.  Any settings in this file will
+# be applied after the ktune settings, overriding them.  Comment this out to
+# use only the ktune settings.
+SYSCTL_POST="/etc/sysctl.conf"
+
+# This is the I/O scheduler ktune will use.  This will *not* override anything
+# explicitly set on the kernel command line, nor will it change the scheduler
+# for any block device that is using a non-default scheduler when ktune starts.
+# You should probably leave this on "deadline", but "as", "cfq", and "noop" are
+# also legal values.  Comment this out to prevent ktune from changing I/O
+# scheduler settings.
+ELEVATOR="deadline"
+
+# These are the devices, that should be tuned with the ELEVATOR
+ELEVATOR_TUNE_DEVS="/sys/block/{sd,cciss}*/queue/scheduler"
