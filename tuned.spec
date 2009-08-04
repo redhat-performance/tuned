@@ -104,6 +104,9 @@ fi
 * Mon Jul 27 2009 Thomas Woerner <twoerner@redhat.com> - 0.2.0-1
 - Integrated ktune-0.4
 
+* Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.1.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
 * Thu Jul 16 2009 Phil Knirsch <pknirsch@redhat.com> - 0.1.7-1
 - Added first version CPU tuning and monitoring plugins
 
