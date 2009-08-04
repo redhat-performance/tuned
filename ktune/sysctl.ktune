@@ -47,4 +47,5 @@ vm.dirty_ratio = 50
 # Ensure there's always some easily-dropped pagecache if the system is under
 # memory pressure from cached files, since it's much faster to page back in than
 # swap.
-vm.pagecache = 90
+# Doesn't exist for 2.6.30++ anymore
+# vm.pagecache = 90

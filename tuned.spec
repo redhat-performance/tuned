@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.0
+Version: 0.2.1
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -96,6 +96,11 @@ fi
 
 
 %changelog
+* Tue Aug 04 2009 Phil Knirsch <pknirsch@redhat.com> - 0.2.1-1
+- Added first set of profiles
+- Added tuned-adm tool for profile switching
+- Fixed several issues with the tuned-adm tool
+
 * Mon Jul 27 2009 Thomas Woerner <twoerner@redhat.com> - 0.2.0-1
 - Integrated ktune-0.4
 

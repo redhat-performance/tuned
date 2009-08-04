@@ -7,8 +7,8 @@ DESTDIR = /
 MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
-DIRS = doc contrib tuningplugins monitorplugins ktune
-FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf
+DIRS = doc contrib tuningplugins monitorplugins ktune commands
+FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/README.scomes
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
 FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
@@ -34,6 +34,7 @@ archive:
 	cp $(FILES_monitorplugins) $(VERSIONED_NAME)/monitorplugins
 	cp $(FILES_ktune) $(VERSIONED_NAME)/ktune
 	cp $(FILES_commands) $(VERSIONED_NAME)/commands
+	cp -a tune-profiles $(VERSIONED_NAME)/tune-profiles
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
 	ln -fs $(VERSIONED_NAME).tar.bz2 latest-archive
@@ -104,6 +105,10 @@ install:
 	install -m 644 ktune/ktune.sysconfig $(DESTDIR)/etc/sysconfig/ktune
 	install -m 755 -d $(DESTDIR)/etc/rc.d/init.d
 	install -m 755 ktune/ktune.init $(DESTDIR)/etc/rc.d/init.d/ktune
+
+	# Install tune-profiles
+	install -m 755 -d $(DESTDIR)/etc/tune-profiles
+	cp -a tune-profiles/* $(DESTDIR)/etc/tune-profiles
 
 changelog:
 	git-log > ChangeLog
