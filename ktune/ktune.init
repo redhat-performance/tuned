@@ -30,6 +30,8 @@ KERNEL_ELEVATOR="cfq"
 CMDLINE_ELEVATOR=$?
 SYS_BLOCK_SDX=$(eval LANG=C /bin/ls -1 ${ELEVATOR_TUNE_DEVS} 2>/dev/null)
 
+CMDLINE_ARG1=$1
+
 declare -a KTUNE_FILES
 if [ -r "$SYSCTL" ]; then
     KTUNE_FILES[0]="$SYSCTL"
@@ -85,7 +87,7 @@ call_script() {
 
     if [ -x "$script" ]; then
 	echo -n "Calling "$script": "
-	("$script")
+	("$script ${CMDLINE_ARG1}")
 	ret=$?
 
 	if [ $ret -eq 0 ]; then
