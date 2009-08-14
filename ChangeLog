@@ -1,9 +1,108 @@
+commit ed3e6634f292110c0e79aa9e6441a56da91ab45a
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Fri Aug 14 17:05:44 2009 +0200
+
+    - Updates to the ktune scripts
+    - Added support for start/stop of the ktune scripts and ktune initscript
+
+commit d4938a7800bfb589a2da0ed4195dadbed6cbfacb
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Aug 4 17:41:20 2009 +0200
+
+    - Added fedora rel-eng changelog entry
+
+commit 05ee10191bc6ac46e763d9817033c73736834333
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Aug 4 17:39:15 2009 +0200
+
+    - Small update to specfile
+
+commit 37bb0358b7d884762103fd878b2f1bd26869120f
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Aug 4 17:33:20 2009 +0200
+
+    - Added a first set of profiles. Still need more work
+    - Fixed several issues with the tuned-adm tool, should work now
+
+commit 733402af8bc6f751037273b1da00254b864d7f32
+Merge: 87606bc 9d168d8
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Thu Jul 30 18:01:53 2009 +0200
+
+    Merge branch 'command'
+    
+    Conflicts:
+    	Makefile
+    	tuned.spec
+
+commit 9d168d837db6d165730f72e6b29f0d2e610a8983
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Thu Jul 30 16:30:52 2009 +0200
+
+    Rewrite commands only to: default, help, list, modes, off.
+    The different modes could be specified in /etc/tune-profiles
+    and then can be listed by list:
+    tuned-adm list
+    and set by:
+    tuned-adm modes YourFavourite
+
+commit 87606bc49f9543751f57529ee6306796ac325a1a
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Jul 28 16:22:37 2009 +0200
+
+    - Fixed typo in Makefile
+    - Fixed debug code still left in new cpu tuning plugin
+
+commit 27a8af70efd6f78838ec2f9ded11062fe6d287d4
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Tue Jul 28 13:10:55 2009 +0200
+
+    Fix commands server and off.
+
+commit ab29d0e07a9c9049ee1c80583c86e1a0955890d4
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Mon Jul 27 18:16:23 2009 +0200
+
+    - Improve disk tuning algorithm
+
+commit 2835008734f2ed5f4bacc9c0d6ad93826d151f41
+Author: Thomas Woerner <twoerner@redhat.com>
+Date:   Mon Jul 27 17:24:58 2009 +0200
+
+    Integrated ktune-0.4
+
+commit 9490bc08b339e4b07601f60d10ce8e3c79d18a5c
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Mon Jul 27 16:36:24 2009 +0200
+
+    Specified commands for tuned-adm (default, server, off).
+    Start to use gitignore.
+
+commit 4d051a3c6f848bf11e7bf037ba1ad277aac2c18d
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Jul 21 15:01:21 2009 +0200
+
+    - Added CPU monitoring and tuning plugins
+    - Small fixes to tuned specfile, add varnetload properly
+
+commit 77d5ee012944785a929d53a5c4bd17c8268279d1
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Mon Jul 13 17:23:02 2009 +0200
+
+    Makefile was missing varnetload file.
+
 commit 03276ef8f409ac67124252ca199aed608ea7c332
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Mon Jul 13 17:00:01 2009 +0200
 
     New release 0.1.6.
     Update ChangeLog.
+
+commit b7a092f3e7b598ee771ecbe881fe0c9db9e350a5
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Thu Jul 9 13:23:10 2009 +0200
+
+    Initial commit of commandline tool.
 
 commit b0faedccaa8c6ed144ec5ece82b672ca8bed9642
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>

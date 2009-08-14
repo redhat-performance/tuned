@@ -111,7 +111,7 @@ install:
 	cp -a tune-profiles/* $(DESTDIR)/etc/tune-profiles
 
 changelog:
-	git-log > ChangeLog
+	git log > ChangeLog
 
 clean:
 	rm -rf *.pyc monitorplugins/*.pyc tuningplugins/*.pyc $(VERSIONED_NAME) rpm-build-dir
