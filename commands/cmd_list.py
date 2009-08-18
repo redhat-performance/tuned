@@ -7,7 +7,7 @@ import kobo.shortcuts
 from kobo.cli import Command
 
 class List(Command):
-    """list of modes"""
+    """list all available profiles"""
     enabled = True
 
     def options(self):

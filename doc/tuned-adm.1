@@ -1,0 +1,83 @@
+.\"/* 
+.\" * All rights reserved
+.\" * Copyright (C) 2009 Red Hat, Inc.
+.\" * Authors: Marcela Mašláňová, Phil Knirsch
+.\" *
+.\" * This program is free software; you can redistribute it and/or
+.\" * modify it under the terms of the GNU General Public License
+.\" * as published by the Free Software Foundation; either version 2
+.\" * of the License, or (at your option) any later version.
+.\" *
+.\" * This program is distributed in the hope that it will be useful,
+.\" * but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" * GNU General Public License for more details.
+.\" *
+.\" * You should have received a copy of the GNU General Public License
+.\" * along with this program; if not, write to the Free Software
+.\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+.\" */
+.\" 
+.TH TUNED_ADM "1" "9 Jul 2009" "Linux Programmer's Manual"
+.SH NAME
+tuned-adm \- commandline tool for switching between different tuning profiles
+.SH SYNOPSIS
+.B tuned-adm 
+.B 
+.BR [ " help ", " list ", " profile <profile> ", " off " ]
+.br
+.SH DESCRIPTION
+This command line utility allows user to switch between user definable tuning profiles. Several predefined profiles are already included for some of the more common cases.
+.SH "OPTIONS"
+
+.SS
+.TP
+.B help
+Print out the list of commands. It's also the default if you start tuned-adm without any commands.
+
+.TP
+.B list
+List all available profiles.
+
+.TP
+.B profile <profile>
+Switches to the given profilename. If none is given or no valid one is given the command gracefully exits without performing any operation.
+
+.TP
+.B off
+Switch off all ktune and tuned settings and remove them from services. The configuration file are 
+set to previous settings.
+
+.SH PREDEFINED PROFILES
+At the moment we're providing the following pre defined profiles:
+
+.TP
+.BI "desktop-powersave"
+Very light powersaving profile directed at desktop systems.
+
+.TP
+.BI server-powersave
+Very light powersaving profile directed at server systems.
+
+.TP
+.BI laptop-ac-powersave
+Medium powersaving profile directed at laptops running on AC.
+
+.TP
+.BI laptop-battery-powersave
+Strong powersaving profile directed at laptops running on battery. This profile will affect the overall performance of the system as a tradeoff for typically longer running time on battery power.
+
+.TP
+.BI throughput-performance
+Sever profile for typical througput performance tuning.
+
+.TP
+.BI latency-performance
+Sever profile for typical latency performance tuning.
+
+.SH "SEE ALSO"
+.BR tuned (8)
+.SH AUTHOR
+.nf
+Marcela Mašláňová <mmaslano@redhat.com>
+Phil Knirsch <pknirsch@redhat.com>

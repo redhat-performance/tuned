@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.2
+Version: 0.2.3
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -78,6 +78,7 @@ fi
 %{_sbindir}/tuned-adm
 %{_sysconfdir}/tune-profiles
 %{_datadir}/tuned
+%{_mandir}/man1/*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
 %attr(0755,root,root) %{_initddir}/ktune
@@ -96,6 +97,10 @@ fi
 
 
 %changelog
+* Tue Aug 18 2009 Phil Knirsch <pknirsch@redhat.com> 0.2.3-1
+- Updated documentation
+- Few more fixes for tuned-adm
+
 * Fri Aug 14 2009 Phil Knirsch <pknirsch@redhat.com>  0.2.2-1
 - Updates to the ktune scripts
 - Added support for start/stop of the ktune scripts and ktune initscript

@@ -31,7 +31,3 @@ class Off(Command):
         os.system('service tuned stop')
         os.system('chkconfig --del ktune')
         os.system('chkconfig --del tuned')
-        usb_devices = glob.glob('/sys/bus/usb/devices/?-?/')
-        # test whether usb suspend is on
-        for i in usb_devices:
-                retcode, output = kobo.shortcuts.run('echo on > %spower/level' % i)

@@ -6,8 +6,8 @@ import glob
 import kobo.shortcuts
 from kobo.cli import Command
 
-class Modes(Command):
-    """set mode"""
+class Profile(Command):
+    """<profile>    switch to given profile"""
     enabled = True
 
     def options(self):
@@ -26,6 +26,11 @@ class Modes(Command):
 	enablektune = False
 	enabletuned = False
 	if len(args) == 0:
+		print "No profile given. To list all available profiles please run:"
+		print "tuned-adm list"
+		return
+	if not os.path.exists("/etc/tune-profiles/"+args[0]):
+		print "No profile with name %s found." % args[0]
 		return
         if os.path.exists("/etc/tune-profiles/"):
 		os.system('service ktune stop')
@@ -34,7 +39,7 @@ class Modes(Command):
         	os.system('chkconfig --add tuned && chkconfig --level 345 tuned off')
                 modes = os.listdir("/etc/tune-profiles")
                 if modes > 0:
-                        print 'Mode %s' % args[0]
+                        print 'Switching to profile %s' % args[0]
 			if os.path.exists('/etc/ktune.d/tunedadm.sh'):
 				os.remove('/etc/ktune.d/tunedadm.sh')
 			if os.path.exists('/etc/ktune.d/tunedadm.conf'):
