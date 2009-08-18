@@ -1,3 +1,17 @@
+commit b596ac9f1f30fd81d687ba97b52cff3c21344cf0
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Aug 18 18:00:39 2009 +0200
+
+    - Updated documentation
+    - Few more fixes for tuned-adm
+
+commit d4e52c51ddcfaa9b1370b879a28f1354736d12b1
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Fri Aug 14 17:19:21 2009 +0200
+
+    - Updated changelog
+    - Fixed makefile to use git log instead of git-log
+
 commit ed3e6634f292110c0e79aa9e6441a56da91ab45a
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Fri Aug 14 17:05:44 2009 +0200
