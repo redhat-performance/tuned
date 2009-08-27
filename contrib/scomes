@@ -3,12 +3,17 @@
 # ===================================================================
 # Do this when we have started
 global report_period = 0
+# For watch_forked variable:
+#    0 = watch only main thread
+#    1 = watch forked with same execname as well
+#    2 = watch all forked processes
+global watch_forked = 2
 probe begin {
   if ($# == 1) {
     report_period = $1
   }
-  PIDS[target()] = 1   # initialise list of watched pids
   print("Collecting data...\n")
+  printf("... for pid %d - %s\n", target(), pid2execname(target()))
 }
 
 # ===================================================================
@@ -19,7 +24,8 @@ function compute_score() {
 }
 function print_status() {
   printf("-----------------------------------\n")
-  printf("Monitored execname: %s\n", pid2execname(target()))
+  ###target_set_report()
+  printf("Monitored process: %d (%s)\n", target(), pid2execname(target()))
   printf("Number of syscalls: %d\n", syscalls)
   printf("Kernel/Userspace ticks: %d/%d (%d)\n", kticks, uticks, kticks+uticks)
   printf("Read/Written bytes: %d/%d (%d)\n", reads, writes, reads+writes)
@@ -32,9 +38,9 @@ function print_status() {
 # Define helper function for comparing if this is relevant pid
 # and for watching if our watched pid forked
 # ... from http://sourceware.org/systemtap/wiki/systemtapstarters
-global PIDS
+global PIDS = 1   # as target() is already running
 function is_watched(p) {
-  if (p == target() || p in PIDS) {
+  if ( (watch_forked == 0 && p == target()) || (watch_forked == 1 && target_set_pid(p) && pid2execname(target()) == pid2execname(p)) || (watch_forked == 2 && target_set_pid(p)) ) {
     #printf("Process %d is relevant to process %d\n", p, target())
     return 1   # yes, we are watching this pid
   } else {
@@ -43,26 +49,22 @@ function is_watched(p) {
 }
 # Add a relevant forked process to the list of watched processes
 probe kernel.function("do_fork") {
-  if (is_watched(ppid()) && pexecname() == execname()) {   # we do not care about forked processes with different name (e.g. when cron lunches something)
-    #printf("Proces forked with %d(%d)->%d as %s->%s - adding\n", ppid(), target(), pid(), pexecname(), execname())
-    PIDS[pid()] = 1
-    #foreach (p in PIDS) {
-    #  println(p, PIDS[p])
-    #}
+  #printf("Fork of %d (%s) detected\n", pid(), execname())
+  if (is_watched(pid())) {
+    #printf("Proces %d forked\n", pid())
+    PIDS = PIDS + 1
+    #printf("Currently watching %d pids (1 just added)\n", PIDS)
   }
 }
 # Remove pid from the list of watched pids and print report when
 # all relevant processes ends
 probe syscall.exit {
-  if (pid() in PIDS) {
+  if (is_watched(pid())) {
     #printf("Removing process %d\n", pid())
-    delete PIDS[pid()]
+    PIDS = PIDS - 1
   }
-  count = 0
-  foreach (p in PIDS) {
-    count++
-  }
-  if (count == 0) {
+  #printf("Currently watching %d pids (1 just removed)\n", PIDS)
+  if (PIDS == 0) {
     printf("-----------------------------------\n")
     printf("LAST RESULTS:\n")
     print_status()
@@ -187,6 +189,9 @@ probe timer.s(1) {
 # ===================================================================
 # Print quit message
 probe end {
+  printf("-----------------------------------\n")
+  printf("LAST RESULTS:\n")
+  print_status()
   printf("-----------------------------------\n")
   printf("QUITTING\n")
   printf("-----------------------------------\n")
