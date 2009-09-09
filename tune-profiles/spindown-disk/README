@@ -1,0 +1,14 @@
+Possible problems:
+The script is remounting your ext3 fs if you have
+it as noatime. Also configuration of rsyslog is
+changed to not sync. hdparm is setting disc to
+minimal spins but without use of tuned daemon.
+Bluetooth will be switch off.
+Wifi will be switch into power safe mode.
+Usecase:
+Safe extra energy on your laptop or home server
+which wake-up only when you ssh to it. On server
+could be hdparm and sysctl values problematic for 
+some type of discs. Laptops should be probably ok
+with these numbers.
+

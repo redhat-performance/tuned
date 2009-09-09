@@ -1,0 +1,7 @@
+# ktune sysctl settings
+
+vm.dirty_writeback_centisecs=6000
+vm.dirty_expire_centisecs=9000
+vm.dirty_ratio=60
+vm.laptop_mode=5
+vm.swappiness=30
