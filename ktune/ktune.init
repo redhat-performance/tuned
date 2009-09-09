@@ -87,7 +87,7 @@ call_script() {
 
     if [ -x "$script" ]; then
 	echo -n "Calling "$script": "
-	("$script ${CMDLINE_ARG1}")
+	($script ${CMDLINE_ARG1})
 	ret=$?
 
 	if [ $ret -eq 0 ]; then
