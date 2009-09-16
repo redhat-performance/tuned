@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import time,os,locale,ConfigParser
+import time,os,sys,locale,ConfigParser
 
 class Tuned:
 	def __init__(self):
@@ -44,6 +44,10 @@ class Tuned:
 			self.interval = self.config.getint("main", "interval")
 		else:
 			self.config.set("main", "interval", self.interval)
+		if self.config.has_option("main", "pidfile"):
+			self.pidfile = self.config.get("main", "pidfile")
+		else:
+			self.pidfile = "/var/run/tuned.pid"
 		self.__initplugins__(path, "monitorplugins", self.mp)
 		self.__initplugins__(path, "tuningplugins", self.tp)
 		for p in self.mp:
@@ -52,6 +56,12 @@ class Tuned:
 			p.init(self.config)
 
 	def run(self):
+		try:
+			f = open(self.pidfile, "w")
+			f.write("%d" % os.getpid())
+			f.close()
+		except:
+			print >>sys.stderr, "Can't write to pidfile", self.pidfile;
 		print("Running...")
 		while True:
 			lh = {}
@@ -67,5 +77,9 @@ class Tuned:
 			p.cleanup()
 		for p in self.tp:
 			p.cleanup()
+		try:
+			os.unlink(self.pidfile)
+		except:
+			print >>sys.stderr, "can't remove pidfile", self.pidfile;
 
 tuned = Tuned()
