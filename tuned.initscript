@@ -29,6 +29,10 @@ config="/etc/tuned.conf"
 lockfile=/var/lock/subsys/$prog
 
 start () {
+	if [ $UID -ne 0 ] ; then
+		echo "User had insufficient privilege."
+		exit 4
+	fi
 	[ -x $exec ] || exit 5
 	[ -f $config ] || exit 6
 	echo -n $"Starting $prog: "
@@ -39,6 +43,10 @@ start () {
 }
 
 stop () {
+	if [ $UID -ne 0 ] ; then
+		echo "User had insufficient privilege."
+		exit 4
+	fi
 	echo -n $"Stopping $prog: "
 	killproc $prog
 	retval=$?
@@ -68,6 +76,15 @@ rh_status_q() {
     rh_status >/dev/null 2>&1
 }
 
+usage() {
+    echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+}
+
+if [ $# -eq 0 ]; then
+    usage
+    exit 0
+fi
+
 case "$1" in
     start)
         rh_status_q && exit 0
@@ -95,7 +112,7 @@ case "$1" in
         restart
         ;;
     *)
-        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        usage
         exit 2
 esac
 exit $?
