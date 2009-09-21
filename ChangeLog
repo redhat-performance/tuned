@@ -1,3 +1,78 @@
+commit a5150eddfbbc57b2826cb0b4ceb8d69e0fc7c05f
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Mon Sep 21 15:24:35 2009 +0200
+
+    bumb version to 0.2.4
+
+commit 32d00cb4be45df1899f1744ea915916ca740ca33
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Mon Sep 21 14:37:47 2009 +0200
+
+    tuned: move daemonize after init() before run()
+
+commit 47829cd5922c61f5add6895e85fd87b16f2017ad
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Mon Sep 21 14:23:45 2009 +0200
+
+    tuned.initscript: "usage" follows common usage policy, fixed indentation
+
+commit b1f1e60c4db7b4287edc18370c043cff019ea018
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Wed Sep 16 21:55:04 2009 +0200
+
+    tuned.initscript: fixed usage and insuficient rights (#523385)
+
+commit 9490320b36d448f42a2ddde31281396853a53a87
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Wed Sep 16 21:54:51 2009 +0200
+
+    tuned creates and cleans pidfile from config file
+
+commit c2486397a9cbee7ff2bdffeadacd7cd13a78299a
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Wed Sep 9 13:20:26 2009 +0200
+
+    Spindown disc profile - set disc to minimum spins.
+    Writen-by: Daniel Mach
+    Rewrite-into-profile: Marcela Mašláňová
+
+commit 1b04250db925efa575235af75cbc6a43a314f577
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Wed Sep 9 10:34:52 2009 +0200
+
+    Apostrophes broke execution of *.sh scripts in profiles.
+    
+    Reported-by: Marcela Mašláňová
+    Fixed-by: Petr Lautrbach
+
+commit da4c316c8dc2fdc33327de4f579fd059ea16f382
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Tue Sep 8 16:59:29 2009 +0200
+
+    Scripts in profiles didn't run because ktune runs
+    only executable scripts.
+
+commit e5c73033aeb67ad9848721301e02628dea25c808
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Thu Aug 27 13:19:40 2009 +0200
+
+    jhutar@redhat.com: scomes now watches also forked sub-processes
+    KNOWN BUG: Scomes ends when main process ends. So if there is some forked process in the background which lasts longer, some part of it will be missed.
+
+commit b596ac9f1f30fd81d687ba97b52cff3c21344cf0
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Aug 18 18:00:39 2009 +0200
+
+    - Updated documentation
+    - Few more fixes for tuned-adm
+
+commit d4e52c51ddcfaa9b1370b879a28f1354736d12b1
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Fri Aug 14 17:19:21 2009 +0200
+
+    - Updated changelog
+    - Fixed makefile to use git log instead of git-log
+
 commit ed3e6634f292110c0e79aa9e6441a56da91ab45a
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Fri Aug 14 17:05:44 2009 +0200
