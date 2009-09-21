@@ -71,18 +71,19 @@ if __name__ == "__main__":
 		elif opt in ['-c', "--config"]:
 			cfgfile = val
 		
-	if daemon:
-		daemonize()
-
 	TUNEDDIR="/usr/share/tuned"
 	if not TUNEDDIR in sys.path:
 		sys.path.append(TUNEDDIR)
 
 	from tuned import tuned
 
+	tuned.init(TUNEDDIR, cfgfile)
+
+	if daemon:
+		daemonize()
+
 	atexit.register(tuned.cleanup)
 	signal.signal(signal.SIGTERM, handler)
 
-	tuned.init(TUNEDDIR, cfgfile)
 	tuned.run()
 	tuned.cleanup()
