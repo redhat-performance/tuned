@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.3
+Version: 0.2.4
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -97,6 +97,10 @@ fi
 
 
 %changelog
+* Mon Sep 21 2009 Petr Lautrbach <plautrba@redhat.com> 0.2.4-1
+- Update release to tuned-0.2.4
+- Resolves: #523385
+
 * Tue Aug 18 2009 Phil Knirsch <pknirsch@redhat.com> 0.2.3-1
 - Updated documentation
 - Few more fixes for tuned-adm
