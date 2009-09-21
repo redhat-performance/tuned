@@ -29,29 +29,29 @@ config="/etc/tuned.conf"
 lockfile=/var/lock/subsys/$prog
 
 start () {
-	if [ $UID -ne 0 ] ; then
-		echo "User had insufficient privilege."
-		exit 4
-	fi
-	[ -x $exec ] || exit 5
-	[ -f $config ] || exit 6
-	echo -n $"Starting $prog: "
-	daemon $exec -d -c $config
-	retval=$?
-	echo
-	[ $retval -eq 0 ] && touch $lockfile
+    if [ $UID -ne 0 ] ; then
+        echo "User had insufficient privilege."
+        exit 4
+    fi
+    [ -x $exec ] || exit 5
+    [ -f $config ] || exit 6
+    echo -n $"Starting $prog: "
+    daemon $exec -d -c $config
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
 }
 
 stop () {
-	if [ $UID -ne 0 ] ; then
-		echo "User had insufficient privilege."
-		exit 4
-	fi
-	echo -n $"Stopping $prog: "
-	killproc $prog
-	retval=$?
-	echo
-	[ $retval -eq 0 ] && rm -f $lockfile
+    if [ $UID -ne 0 ] ; then
+        echo "User had insufficient privilege."
+        exit 4
+    fi
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
 }
 
 restart() {
@@ -80,11 +80,6 @@ usage() {
     echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
 }
 
-if [ $# -eq 0 ]; then
-    usage
-    exit 0
-fi
-
 case "$1" in
     start)
         rh_status_q && exit 0
@@ -110,6 +105,10 @@ case "$1" in
     condrestart|try-restart)
         rh_status_q || exit 0
         restart
+        ;;
+    usage)
+        usage
+        exit 0
         ;;
     *)
         usage
