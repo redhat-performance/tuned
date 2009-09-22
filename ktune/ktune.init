@@ -185,11 +185,11 @@ stop() {
 
 status() {
     if [ ! -f "$VAR_SUBSYS_KTUNE" ]; then
-	echo $"ktune stettings are not applied."
+	echo $"ktune settings are not applied."
 	return 3
     fi
 
-    echo $"Current ktune sysctl stettings:"
+    echo $"Current ktune sysctl settings:"
     keys=$(awk '/^[#;]/ { next } /=/ { match($1,"=") && $1=substr($1,1,RSTART-1); print $1 }' "$SAVE_FILE")
     for key in $keys; do
 	$SYSCTL_GET $key
@@ -197,7 +197,7 @@ status() {
 
     if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a $CMDLINE_ELEVATOR -ne 0 ]; then
 	echo
-	echo $"Current elevator stettings:"
+	echo $"Current elevator settings:"
 	for i in $SYS_BLOCK_SDX; do
 	    echo -n "${i}: "; cat "$i"
 	done
