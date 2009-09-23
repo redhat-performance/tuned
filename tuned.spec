@@ -1,17 +1,17 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 0.2.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
 # The source for this package was pulled from upstream git.  Use the
 # following commands to get the corresponding tarball:
-#  git clone git://fedorapeople.org/~pknirsch/tuned.git/
+#  git clone git://git.fedorahosted.org/git/tuned.git
 #  cd tuned
 #  git checkout v%{version}
 #  make archive
 Source: tuned-%{version}.tar.bz2
-URL: http://fedorapeople.org/~pknirsch/git/tuned.git/
+URL: https://fedorahosted.org/tuned/
 Buildroot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Requires(post): chkconfig
 Requires(preun): chkconfig
