@@ -97,6 +97,10 @@ fi
 
 
 %changelog
+* Wed Sep 23 2009 Petr Lautrbach <plautrba@redhat.com> 0.2.4-2
+- fixed url to fedorahosted project page
+- Resolves: #519019
+
 * Mon Sep 21 2009 Petr Lautrbach <plautrba@redhat.com> 0.2.4-1
 - Update release to tuned-0.2.4
 - Resolves: #523385
