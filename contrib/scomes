@@ -28,7 +28,8 @@ function print_status() {
   printf("Monitored process: %d (%s)\n", target(), pid2execname(target()))
   printf("Number of syscalls: %d\n", syscalls)
   printf("Kernel/Userspace ticks: %d/%d (%d)\n", kticks, uticks, kticks+uticks)
-  printf("Read/Written bytes: %d/%d (%d)\n", reads, writes, reads+writes)
+  printf("Read/Written bytes (from/to devices): %d/%d (%d)\n", reads, writes, reads+writes)
+  printf("Read/Written bytes (from/to N/A device): %d/%d (%d)\n", reads_c, writes_c, reads_c+writes_c)
   printf("Transmitted/Recived bytes: %d/%d (%d)\n", ifxmit, ifrecv, ifxmit+ifrecv)
   printf("Pooling syscalls: %d\n", poll_timeout+epoll_timeout+select_timeout+itimer_timeout+nanosleep_timeout+futex_timeout+signal_timeout)
   printf("SCORE: %d\n", compute_score())
@@ -86,15 +87,23 @@ probe syscall.* {
 # ===================================================================
 # Check read/written bytes
 # ... from disktop.stp
-global reads, writes
+global reads, writes, reads_c, writes_c
 probe vfs.read.return {
-  if (is_watched(pid()) && $return>0 && devname!="N/A") {   # skip read from cache
-    reads += $return
+  if (is_watched(pid()) && $return>0) {
+    if (devname!="N/A") {
+      reads += $return
+    } else {
+      reads_c += $return
+    }
   }
 }
 probe vfs.write.return {
-  if (is_watched(pid()) && $return>0 && devname!="N/A") {   # skip write to N/A device
-    writes += $return
+  if (is_watched(pid()) && $return>0) {
+    if (devname!="N/A") {
+      writes += $return
+    } else {
+      writes_c += $return
+    }
   }
 }
 
