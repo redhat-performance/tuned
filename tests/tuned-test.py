@@ -18,11 +18,11 @@
 #
 
 import sys
-import monitorpluginstest
+import pluginstest
 
 # importing modules - parent directory
 tunedir = sys.path[0] + "/.."
 sys.path.insert(1, tunedir);
 
-mpt = monitorpluginstest.MonitorPluginsTest(tunedir)
-mpt.run()
+pt = pluginstest.PluginsTester(tunedir)
+pt.run()
