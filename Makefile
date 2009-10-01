@@ -117,6 +117,9 @@ install:
 changelog:
 	git log > ChangeLog
 
+test:
+	./tests/tuned-test.py
+
 clean:
 	rm -rf *.pyc monitorplugins/*.pyc tuningplugins/*.pyc $(VERSIONED_NAME) rpm-build-dir
 
