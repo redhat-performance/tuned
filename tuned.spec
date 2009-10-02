@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.4
-Release: 2%{?dist}
+Version: 0.2.5
+Release: 0.1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
 # The source for this package was pulled from upstream git.  Use the
@@ -18,7 +18,6 @@ Requires(preun): chkconfig
 Requires(preun): initscripts
 Requires(postun): initscripts
 BuildArch: noarch
-Requires: kobo
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
@@ -97,6 +96,9 @@ fi
 
 
 %changelog
+* Fri Oct  2 2009 Petr Lautrbach <plautrba@redhat.com> 0.2.5-0.1
+- tuned-adm without kobo dependence
+
 * Wed Sep 23 2009 Petr Lautrbach <plautrba@redhat.com> 0.2.4-2
 - fixed url to fedorahosted project page
 - Resolves: #519019
