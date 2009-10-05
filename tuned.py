@@ -40,6 +40,10 @@ class Tuned:
 	def init(self, path, cfgfile):
 		self.config = ConfigParser.RawConfigParser()
 		self.config.read(cfgfile)
+
+		if not self.config.has_section("main"):
+			self.config.add_section("main")
+
 		if self.config.has_option("main", "interval"):
 			self.interval = self.config.getint("main", "interval")
 		else:
