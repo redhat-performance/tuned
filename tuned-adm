@@ -1,76 +1,26 @@
 #!/usr/bin/python
-#
-# tuned-adm: A command line utility for switching between user 
-#            definable tuning profiles.
-#
-# Copyright (C) 2008, 2009 Red Hat, Inc.
-# Authors: Marcela Maslanova
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-#
 
 import os
 import sys
 import locale
-import getopt
+from kobo.cli import *
 
-def usage():
-	print """
-Usage: tuned-adm [-p <profile_dir>] [-h] <command> [args] 
-Options:
-  -p <profile_dir>  directory with profiles
-  -h, --help  show this help message and exit
 
-commands:
-  list                           list all available profiles
-  off                            switch off all tunning
-  profile                        <profile>    switch to given profile
-"""
+from kobo.tback import *
+set_except_hook()
+
+
+TUNEDDIR="/usr/share/tuned"
+if TUNEDDIR not in sys.path:
+    sys.path.insert(0, TUNEDDIR)
+
+import commands
+CommandContainer.register_module(commands)
+
+
+def main(argv):
+    parser = CommandOptionParser(command_container=CommandContainer(), default_command="help")
+    parser.run()
 
 if __name__ == "__main__":
-
-	profile_dir = "/etc/tune-profiles/"
-
-	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hp:", ["help"])
-	except getopt.error, e:
-		print >>sys.stderr, "Error parsing command-line arguments: %s" % e
-		usage()
-	        sys.exit(1)
-
-	for (opt, val) in opts:
-		if opt in ['-h', "--help"]:
-			usage()
-			sys.exit(0)
-		if opt in ['-p']:
-			profile_dir = val
-
-	if len(args) < 1:
-		print >>sys.stderr, ("Missing arguments.")
-		usage()
-		sys.exit(1)
-
-	TUNEDDIR="/usr/share/tuned"
-	if TUNEDDIR not in sys.path:
-		sys.path.insert(0, TUNEDDIR)
-
-	from tuned_adm import tuned_adm
-
-	tuned_adm.init(profile_dir)
-	if (tuned_adm.run(args)):
-		usage()
-		sys.exit(1)
-
-
+    main(sys.argv[1:])
