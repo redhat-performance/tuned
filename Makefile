@@ -7,14 +7,13 @@ DESTDIR = /
 MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
-DIRS = doc contrib tuningplugins monitorplugins ktune commands
+DIRS = doc contrib tuningplugins monitorplugins ktune
 FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
 FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
 FILES_monitorplugins = monitorplugins/cpu.py monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
 FILES_ktune = ktune/ktune.init ktune/ktune.sysconfig ktune/sysctl.ktune ktune/README.ktune
-FILES_commands = commands/cmd_off_mode.py commands/cmd_list.py commands/cmd_profile.py commands/__init__.py
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 
 distarchive: tag archive
@@ -32,7 +31,6 @@ archive:
 	cp $(FILES_tuningplugins) $(VERSIONED_NAME)/tuningplugins
 	cp $(FILES_monitorplugins) $(VERSIONED_NAME)/monitorplugins
 	cp $(FILES_ktune) $(VERSIONED_NAME)/ktune
-	cp $(FILES_commands) $(VERSIONED_NAME)/commands
 	cp -a tune-profiles $(VERSIONED_NAME)/tune-profiles
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
@@ -63,16 +61,12 @@ install:
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/tuningplugins
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/monitorplugins
-	mkdir -p $(DESTDIR)/usr/share/$(NAME)/commands
 	install -m 0644 tuned.py $(DESTDIR)/usr/share/$(NAME)/
 	for file in $(FILES_tuningplugins); do \
 		install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/tuningplugins; \
 	done
 	for file in $(FILES_monitorplugins); do \
 		install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/monitorplugins; \
-	done
-	for file in $(FILES_commands); do \
-	    install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/commands; \
 	done
 
 	# Install contrib systemtap scripts
