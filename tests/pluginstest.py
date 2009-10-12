@@ -17,6 +17,7 @@
 #
 
 import os, ConfigParser
+from logging import log
 
 class PluginsTester:
 
@@ -27,12 +28,14 @@ class PluginsTester:
 		self.tp_dir = "tuningplugins"
 
 		self.config = ConfigParser.RawConfigParser()
+		self.config.add_section("main")
+		self.config.set("main", "interval", 10)
 
 	def run(self):
 
-		self.__checkPlugins()
+		self.__check_plugins()
 
-	def __getPluginsFromDir(self, dir):
+	def __get_plugins_from_dir(self, dir):
 
 		files = os.listdir(self.tunedir + "/" + dir);
 		plugins = filter(lambda f: f[0] != "." and f[-3:] == ".py" and f != "__init__.py", files) 
@@ -41,176 +44,178 @@ class PluginsTester:
 
 		return plugins
 
-	### reporting tests progress
+	def __check_plugins(self):
 
-	def __reportTestBegin(self, info):
-		print " * %s" % (info)
-
-	def __reportTestStep(self, info):
-		self.__testStep = info
-
-	def __reportTestResult(self, exception = None):
-		if exception == None:
-			print "    - %s: success" % (self.__testStep)
-		else:
-			print "    - %s: failed (%s, %s)" % (self.__testStep, exception, type (exception))
-	def __reportTestSkip(self, info):
-		print "    - %s: skipped, %s" % (self.__testStep, info)
-
-	### testing
-
-	def __checkPlugins(self):
-
-		monitorplugins = self.__getPluginsFromDir(self.mp_dir)
-		tuningplugins = self.__getPluginsFromDir(self.tp_dir)
+		monitorplugins = self.__get_plugins_from_dir(self.mp_dir)
+		tuningplugins = self.__get_plugins_from_dir(self.tp_dir)
 
 		# check plugins availability
 
-		print "checking plugins availablity"
-
-		self.__checkSiblingPlugins(monitorplugins, tuningplugins)
-
-		print
+		self.__check_sibling_plugins(monitorplugins, tuningplugins)
 
 		# monitor plugins test
 
-		print "monitor plugins test"
+		log.test("monitor plugins test")
 		if len(monitorplugins) == 0:
-			print " - no plugins found"
+			log.result("no plugins found")
+
+		log.indent()
 
 		monitor_results = {}
-
 		for mp in monitorplugins:
-			load = self.__testMonitorPlugin(mp)
+			load = self.__test_monitor_plugin(mp)
 			monitor_results[mp] = load
 
-		print
+		log.unindent()
 
 		# tuning plugins test
 
-		print "tunning plugins test"
+		log.test("tunning plugins test")
+
 		if len(tuningplugins) == 0:
-			print " - no plugins found"
+			log.result("no plugins found")
+
+		log.indent()
 
 		for tp in tuningplugins:
 			try:
 				load = monitor_results[tp]
 			except:
 				load = None
-			self.__testTuningPlugin(tp, load)
+			self.__test_tuning_plugin(tp, load)
 
-	def __checkSiblingPlugins(self, monitorplugins, tuningplugins):
+		log.unindent()
+
+	def __check_sibling_plugins(self, monitorplugins, tuningplugins):
 
 		ok = True
+
+		log.test("monitor and tuning plugins availability")
 
 		for mp in monitorplugins:
 			if tuningplugins.count(mp) != 1:
 				ok = False
-				print " - monitor plugin '%s' misses tuning plugin" % mp
+				log.info("monitor plugin '%s' misses tuning plugin" % mp)
 
 		for tp in tuningplugins:
 			if monitorplugins.count(tp) != 1:
 				ok = False
-				print " - tuning plugin '%s' misses monitor plugin" % tp
+				log.info("tuning plugin '%s' misses monitor plugin" % tp)
 
 		if ok:
-			print " - monitor and tuning plugins match"
+			log.result()
+		else:
+			log.result("monitor and tunning plugins do not match")
 
-	def __testMonitorPlugin(self, name):
+	def __test_monitor_plugin(self, name):
 
-		self.__reportTestBegin("monitor plugin: %s" % (name))
+		log.test("monitor plugin: %s" % name)
+		log.indent()
 
 		# initialization
 
-		self.__reportTestStep("initialization")
+		log.test("initialization")
 		try:
 			exec "from %s.%s import _plugin" % (self.mp_dir, name)
 		except Exception as e:
-			self.__reportTestResult(e)
+			log.result_e(e)
+			log.unindent()
 			return None
-		self.__reportTestResult()
+
+		log.result()
 
 		# init()
 
-		self.__reportTestStep("call init()")
+		log.test("call init()")
 		try:
 			_plugin.init(self.config)
 		except Exception as e:
-			self.__reportTestResult(e)
+			log.result_e(e)
+			log.unindent()
 			return None
-		self.__reportTestResult()
+		log.result()
 
 		# getLoad()
 
-		self.__reportTestStep("call getLoad()")
+		log.test("call getLoad()")
 		try:
 			load = _plugin.getLoad()
 			if load == None:
 				raise Exception("Plugin returned None as a result.")
 		except Exception as e:
-			self.__reportTestResult(e)
+			log.result_e(e)
+			log.unindent()
 			return None
-		self.__reportTestResult()
+		log.result()
 
 		# cleanup()
 
-		self.__reportTestStep("call cleanup()")
+		log.test("call cleanup()")
 		try:
 			_plugin.cleanup()
 		except Exception as e:
-			self.__reportTestResult(e)
-			return None
-		self.__reportTestResult()
+			log.result_e(e)
+			log.unindent()
+			return load
 
+		log.result()
+
+		log.unindent()
 		return load
 
-	def __testTuningPlugin(self, name, load):
+	def __test_tuning_plugin(self, name, load):
 
-		self.__reportTestBegin("tuning plugin: %s" % (name))
+		log.test("tuning plugin: %s" % name)
+		log.indent()
 
 		# initialization
 
-		self.__reportTestStep("initialization")
+		log.test("initialization")
 		try:
 			exec "from %s.%s import _plugin" % (self.tp_dir, name)
 		except Exception as e:
-			self.__reportTestResult(e)
+			log.result_e()
+			log.unindent()
 			return False
-		self.__reportTestResult()
+		log.result()
 
 		# init()
 
-		self.__reportTestStep("call init()")
+		log.test("call init()")
 		try:
 			_plugin.init(self.config)
 		except Exception as e:
-			self.__reportTestResult(e)
+			log.result_e(e)
+			log.unindent()
 			return False
-		self.__reportTestResult()
+		log.result()
 
 		# setTuning()
 
-		self.__reportTestStep("call setTuning()")
+		log.test("call setTuning()")
 
 		if load == None:
-			self.__reportTestSkip("no data from monitor plugin available")
+			log.info("no data from monitor plugin available")
 		else:
-				try:
-					_plugin.setTuning(load)
-				except Exception as e:
-					self.__reportTestResult(e)
-					return False
-				self.__reportTestResult()
+			try:
+				_plugin.setTuning(load)
+			except Exception as e:
+				log.result_e(e)
+				log.unindent()
+				return False
+			log.result()
 
 		# cleanup()
 
-		self.__reportTestStep("call cleanup()")
+		log.test("call cleanup()")
 		try:
 			_plugin.cleanup()
 		except Exception as e:
-			self.__reportTestResult(e)
+			log.result_e(e)
+			log.unindent()
 			return False
-		self.__reportTestResult()
+		log.result()
 
+		log.unindent()
 		return True
 

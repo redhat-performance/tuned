@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright (C) 2008, 2009 Red Hat, Inc.
 #
@@ -17,19 +16,37 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import sys, os
-import pluginstest, admtest
-from logging import log
+import sys, StringIO
 
-# importing modules from parent directory
-tunedir = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + "/..")
-sys.path.insert(1, tunedir);
+class StreamCapture:
 
-log.section("monitoring and tuning plugins")
-pt = pluginstest.PluginsTester(tunedir)
-pt.run()
+	__capture = None
+	__stdout = None
 
-log.section("tuned-adm tests")
-at = admtest.AdmTester()
-at.run()
+	def __init__(self):
+		self.__stdout = sys.stdout
+		self.__capture = StringIO.StringIO()
 
+	def capture(self):
+		sys.stdout = self.__capture
+
+	def stdout(self):
+		sys.stdout = self.__stdout
+
+	def getcaptured(self):
+		return self.__capture.getvalue()
+
+	def clean(self):
+		self.__capture.close()
+		self.__capture = StringIO.StringIO()
+
+	def close(self):
+		self.__capture.close()		
+
+	def __del__(self):
+		try: sys.stdout = self.__stdout
+		except: pass
+		try: self.__capture.close()
+		except: pass
+
+capture = StreamCapture()

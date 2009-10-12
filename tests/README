@@ -1,0 +1,36 @@
+Tests can be started with "make test" command from parent directory
+or by executing "tuned-test.py" script.
+
+The tests can not be run in completely isolated environment. You need
+tuned and tuned-utils packages installed and you have to run the test
+as superuser (needed for tuned-adm tests). Please note that your
+settings of tuned can be changed.
+
+What is tested
+
+ * monitor-plugins have to implement: init(), getLoad(), cleanup()
+ * tuning-plugins have to implement: init(), setTuning(), cleanup()
+ * each monitor-plugin has to have it's tuning-plugin with the same
+   name
+ * the result of monitor's getLoad() function is passed to setTuning(),
+   therefore tuning's getLoad() must not return Null
+ * "tuned-adm list" correctness
+ * "tuned-adm off" has to:
+    - stop tuned a ktune services
+    - remove (disable) tuned a ktune services
+    - remove "/etc/ktune.d/tunedadm.{sh,conf}"
+ * there are fake-profiles available for "tuned-adm profile <name>":
+    - disabled-all
+    - enabled-all
+    - enabled-ktune
+    - enabled-tuned
+   tuned-adm has to:
+    - stop/start service(s)
+    - add/remove/disable service(s)
+    - set up "/etc/ktune.d/tunedadm.{sh,conf}"
+
+What is NOT tested
+
+ * monitor-plugins getLoad() data validity
+ * tuning-plugins setTuning() system setting changes
+
