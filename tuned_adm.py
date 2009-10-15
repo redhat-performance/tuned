@@ -31,8 +31,14 @@ class Tuned_adm:
 		if   args[0] == "list":
 			self.list()
 		elif args[0] == "off":
+			if not os.getuid()==0:
+				print >>sys.stderr, "Only root can run this script";
+				sys.exit(2)
 			self.off()
 		elif args[0] == "profile":
+			if not os.getuid()==0:
+				print >>sys.stderr, "Only root can run this script";
+				sys.exit(2)
 			self.profile(args[1:])
 		else:
 			print >>sys.stderr, "Nonexistent argument %s" % args[0]

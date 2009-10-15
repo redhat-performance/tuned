@@ -8,7 +8,7 @@ MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
 DIRS = doc contrib tuningplugins monitorplugins ktune
-FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm
+FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
 FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
@@ -57,11 +57,20 @@ install:
 	install -m 0755 tuned $(DESTDIR)/usr/sbin/
 	install -m 0755 tuned-adm $(DESTDIR)/usr/sbin/
 
+	# Install the consolehelper files
+	mkdir -p $(DESTDIR)/etc/pam.d/
+	install -m 0644 tuned-adm.pam $(DESTDIR)/etc/pam.d/tuned-adm
+	mkdir -p $(DESTDIR)/etc/security/console.apps/
+	install -m 0644 tuned-adm.consolehelper $(DESTDIR)/etc/security/console.apps/tuned-adm
+	mkdir -p $(DESTDIR)/usr/bin/
+	ln -s consolehelper $(DESTDIR)/usr/bin/tuned-adm
+
 	# Install the plugins and classes
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/tuningplugins
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)/monitorplugins
 	install -m 0644 tuned.py $(DESTDIR)/usr/share/$(NAME)/
+	install -m 0644 tuned_adm.py $(DESTDIR)/usr/share/$(NAME)/
 	for file in $(FILES_tuningplugins); do \
 		install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/tuningplugins; \
 	done

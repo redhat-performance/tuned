@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 0.2.5
-Release: 0.1%{?dist}
+Release: 0.2%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
 # The source for this package was pulled from upstream git.  Use the
@@ -13,6 +13,7 @@ Group: System Environment/Daemons
 Source: tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
 Buildroot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+Requires: usermode
 Requires(post): chkconfig
 Requires(preun): chkconfig
 Requires(preun): initscripts
@@ -73,8 +74,11 @@ fi
 %doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt ktune/README.ktune
 %{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
+%config(noreplace) /etc/pam.d/tuned-adm
+%config(noreplace) /etc/security/console.apps/tuned-adm
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
+%{_bindir}/tuned-adm
 %{_sysconfdir}/tune-profiles
 %{_datadir}/tuned
 %{_mandir}/man1/*
@@ -96,6 +100,9 @@ fi
 
 
 %changelog
+* Thu Oct 15 2009 Petr Lautrbach <plautrba@redhat.com> 0.2.5-0.2
+- Allow run tuned-adm as root for users at the physical console
+
 * Mon Oct 12 2009 Petr Lautrbach <plautrba@redhat.com> 0.2.5-0.1
 - Removed dependence on kobo
 - Bumped to 0.2.5 pre release version
