@@ -22,6 +22,7 @@ class NetMonitor:
 	def __init__(self):
 		self.devices = {}
 		self.enabled = True
+		self.verbose = False
 		devs = open("/proc/net/dev").readlines()
 		for l in devs:
 			l = l.replace(":", " ")
@@ -35,7 +36,6 @@ class NetMonitor:
 			self.devices[d]["max"] = [70*1024*1024, 1, 70*1024*1024, 1]
 			self.__updateStat__(d)
 			self.devices[d]["max"] = [70*1024*1024, 1, 70*1024*1024, 1]
-		print self.devices
 
 	def __calcdiff__(self, dev):
 		l = []
@@ -68,9 +68,17 @@ class NetMonitor:
 		if self.config.has_option("NetMonitor", "enabled"):
                         self.enabled = (self.config.get("NetMonitor", "enabled") == "True")
 		interval = self.config.getint("main", "interval")
+		try:
+			self.verbose = (self.config.get("main", "verbose") == "True")
+			self.verbose = (self.config.get("NetMonitor", "verbose") == "True")
+		except:
+			pass
 		# Assume 1gbit interfaces for now. FIXME: Need clean way to figure out max interface speed
 		for d in self.devices.keys():
 			self.devices[d]["max"] = [70*1024*1024*interval, 1, 70*1024*1024*interval, 1]
+
+		if self.verbose:
+			print self.devices
 
 	def cleanup(self):
 		pass
@@ -85,6 +93,8 @@ class NetMonitor:
 			ret["NET"][dev] = {}
 			ret["NET"][dev]["READ"] = float(self.devices[dev]["diff"][0]) / float(self.devices[dev]["max"][0])
 			ret["NET"][dev]["WRITE"] = float(self.devices[dev]["diff"][2]) / float(self.devices[dev]["max"][2])
+		if self.verbose:
+			print self.devices
 		return ret
 
 _plugin = NetMonitor()

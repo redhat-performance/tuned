@@ -22,6 +22,7 @@ class NetTuning:
 	def __init__(self):
 		self.devidle = {}
 		self.enabled = True
+		self.verbose = False
 
 	def __updateIdle__(self, dev, devload):
 		idle = self.devidle.setdefault(dev, {})
@@ -38,7 +39,11 @@ class NetTuning:
 		self.config = config
 		if self.config.has_option("NetTuning", "enabled"):
                         self.enabled = (self.config.get("NetTuning", "enabled") == "True")
-
+		try:
+			self.verbose = (self.config.get("main", "verbose") == "True")
+			self.verbose = (self.config.get("NetTuning", "verbose") == "True")
+		except:
+			pass
 
 	def cleanup(self):
 		for dev in self.devidle.keys():
@@ -58,6 +63,6 @@ class NetTuning:
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
 				self.devidle[dev]["LEVEL"] = 0
 				os.system("ethtool -s "+dev+" advertise 0x03F")
-		print(load, self.devidle)
-
+		if self.verbose:
+			print(load, self.devidle)
 _plugin = NetTuning()

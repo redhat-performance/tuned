@@ -23,6 +23,7 @@ class Tuned:
 		self.interval = 10
 		self.mp = []
 		self.tp = []
+		self.verbose = False
 
 	def __initplugins__(self, path, module, store):
 		_files = map(lambda v: v[:-3], filter(lambda v: v[-3:] == ".py" and \
@@ -48,6 +49,10 @@ class Tuned:
 			self.interval = self.config.getint("main", "interval")
 		else:
 			self.config.set("main", "interval", self.interval)
+		if self.config.has_option("main", "verbose"):
+			self.verbose = (self.config.get("main", "verbose") == "True")
+		else:
+			self.config.set("main", "verbose", self.verbose)
 		if self.config.has_option("main", "pidfile"):
 			self.pidfile = self.config.get("main", "pidfile")
 		else:

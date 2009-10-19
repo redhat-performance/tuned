@@ -22,20 +22,7 @@ class DiskMonitor:
 	def __init__(self):
 		self.devices = {}
 		self.enabled = True
-		dnames = os.listdir("/sys/block/")
-		for d in dnames:
-			try:
-				v = open("/sys/block/"+d+"/device/vendor").read().strip()
-			except:
-				v = None
-			if v != "ATA" and v != "SCSI":
-				continue
-			self.devices[d] = {}
-			self.devices[d]["new"] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
-			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-			self.__updateStat__(d)
-			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-		print self.devices
+		self.verbose = False
 
 	def __calcdiff__(self, dev):
 		l = []
@@ -61,6 +48,28 @@ class DiskMonitor:
 		self.config = config
 		if self.config.has_option("DiskMonitor", "enabled"):
 			self.enabled = (self.config.get("DiskMonitor", "enabled") == "True")
+		try:
+			self.verbose = (self.config.get("main","verbose") == "True")
+			self.verbose = (self.config.get("DiskMonitor", "verbose") == "True")
+			print self.verbose
+		except:
+			pass
+
+		dnames = os.listdir("/sys/block/")
+		for d in dnames:
+			try:
+				v = open("/sys/block/"+d+"/device/vendor").read().strip()
+			except:
+				v = None
+			if v != "ATA" and v != "SCSI":
+				continue
+			self.devices[d] = {}
+			self.devices[d]["new"] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+			self.__updateStat__(d)
+			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+		if self.verbose:
+			print self.devices
 
 	def cleanup(self):
 		pass

@@ -25,6 +25,7 @@ class DiskTuning:
 		self.power = ["255", "225", "195", "165", "145", "125", "105", "85", "70", "55", "30", "20"]
 		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
 		self.levels = len(self.power)
+		self.verbose = False
 
 	def __updateIdle__(self, dev, devload):
 		idle = self.devidle.setdefault(dev, {})
@@ -41,6 +42,12 @@ class DiskTuning:
 		self.config = config
 		if self.config.has_option("DiskTuning", "enabled"):
                         self.enabled = (self.config.get("DiskTuning", "enabled") == "True")
+		try:
+			self.verbose = (self.config.get("main", "verbose") == "True")
+			self.verbose = (self.config.get("DiskTuning","verbose") == "True")
+			print self.verbose
+		except:
+			pass
 
 	def cleanup(self):
 		for dev in self.devidle.keys():
@@ -66,5 +73,6 @@ class DiskTuning:
 					self.devidle[dev]["LEVEL"] = 0
 				level = self.devidle[dev]["LEVEL"]
 				os.system("hdparm -S"+self.power[level]+" -B"+self.spindown[level]+" /dev/"+dev+" > /dev/null 2>&1")
-
+			if self.verbose:
+				print (load,self.devidle)
 _plugin = DiskTuning()
