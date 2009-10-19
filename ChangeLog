@@ -1,3 +1,114 @@
+commit d838f1a15147cd70f22bba04bd4a33bb31cfd97d
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Mon Oct 19 17:01:25 2009 +0200
+
+    Verbose mode for main part of for separate plugins.
+
+commit f87c1ede50c0808d7c99ed40f716ed160c3cebf5
+Author: Jan Hutar <jhutar@redhat.com>
+Date:   Fri Sep 25 15:00:00 2009 +0200
+
+    Add statistic for cached reads/writes
+
+commit 19fd3596225d7ca15b88f53451b94f9ffafd5a73
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Oct 5 18:11:12 2009 +0200
+
+    tuned.py: automatically add section "main" into configuration when it is missing in config-file
+
+commit 1afcd62f784c4b8eddbbc6bd5425f94fb243dce8
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Oct 12 15:33:09 2009 +0200
+
+    All changes are related to tests:
+    
+    - New tests for "tuned-adm" with fake-profiles.
+    - Common results logging for pluginstest.py and admtest.py.
+    - Fixed issue with relative paths when started using "make test" or "tests/tuned-test.py".
+    - A bit code polishing.
+    - Added README.
+    - Added TODO.
+
+commit 07fef467c0114f332692cde36a4d5497ee5620f8
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Oct 1 16:54:41 2009 +0200
+
+    'make tests' now run tests/tuned-test.py
+
+commit 3e4988faef136607bf8b2ab5b267b6e15652ebc2
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Oct 1 16:52:44 2009 +0200
+
+    monitor plugins test rewritten and widen to support tuning plugins as well
+
+commit a276cd5a1521884bb7e02cddeb0c662d32b927d9
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Sep 30 14:52:29 2009 +0200
+
+    added first unit tests
+
+commit c336e5ec7804dbc224c290d1e5b529695753f6ff
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Thu Oct 15 15:51:50 2009 +0200
+
+    allow run tuned-adm as root for users at the physical console
+
+commit 2115f45002a21ef0e5aa8f1b55479e4dc1bd45c2
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Mon Oct 12 09:01:46 2009 +0200
+
+    Makefile: removed commands dir
+
+commit 6295acc0df7a7ed2281a08f7cd6dec62bdc719c8
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Mon Oct 12 08:55:58 2009 +0200
+
+    tuned-0.2.5-0.1, removed kobo dependece
+
+commit 62077bc935cc2accd68c337f0f54b28396199fae
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Fri Oct 2 17:27:10 2009 +0200
+
+    tuned-adm: remove dependence on kobo, arguments parsed with getopt, Tuned_adm class
+
+commit 689d3b705dcafa8dd04ee547eed513c86aa0cefa
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Thu Oct 8 16:45:50 2009 +0200
+
+    Revert "tuned-adm: remove dependence on kobo, arguments parsed with getopt, Tuned_adm class"
+    
+    This reverts commit aec313a8228048ed254bfc35e44e9bc91573b11a.
+
+commit aec313a8228048ed254bfc35e44e9bc91573b11a
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Fri Oct 2 17:27:10 2009 +0200
+
+    tuned-adm: remove dependence on kobo, arguments parsed with getopt, Tuned_adm class
+
+commit 393e7134ef07d689a72fc7865aa40ddc85726f69
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Wed Sep 23 12:50:23 2009 +0200
+
+    tuned.spec: updated changelog
+
+commit 99625dd427161acbaee24b4848a965faa6ebe597
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Wed Sep 23 12:43:15 2009 +0200
+
+    tuned.spec: fixed url to fedorahosted project page
+
+commit 1abd2f44ba360f397e2feb670dd76c0422108954
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Tue Sep 22 14:56:02 2009 +0200
+
+    ktune/ktune.init: bz519019 -  typos in init script
+
+commit 87d78ca1714bdd743efd20fc2ee473cef6ad5d26
+Author: Petr Lautrbach <plautrba@redhat.com>
+Date:   Mon Sep 21 15:31:32 2009 +0200
+
+    Updated changelog
+
 commit a5150eddfbbc57b2826cb0b4ceb8d69e0fc7c05f
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Mon Sep 21 15:24:35 2009 +0200

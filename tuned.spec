@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 0.2.5
-Release: 0.2%{?dist}
+Release: 0.3%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
 # The source for this package was pulled from upstream git.  Use the
@@ -74,10 +74,11 @@ fi
 %doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt ktune/README.ktune
 %{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
-%config(noreplace) /etc/pam.d/tuned-adm
-%config(noreplace) /etc/security/console.apps/tuned-adm
+%config(noreplace) %{_sysconfdir}/pam.d/tuned-adm
+%config(noreplace) %{_sysconfdir}/security/console.apps/tuned-adm
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
+# consolehelper hard link
 %{_bindir}/tuned-adm
 %{_sysconfdir}/tune-profiles
 %{_datadir}/tuned
@@ -100,6 +101,9 @@ fi
 
 
 %changelog
+* Mon Oct 19 2009 Marcela Mašláňová <mmaslano@redhat.com> 0.2.5-0.3
+- new release
+
 * Thu Oct 15 2009 Petr Lautrbach <plautrba@redhat.com> 0.2.5-0.2
 - Allow run tuned-adm as root for users at the physical console
 
