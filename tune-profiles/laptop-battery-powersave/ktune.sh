@@ -40,7 +40,7 @@ start() {
 }
 
 stop() {
-	set_alpm "max_power"
+	set_alpm "max_performance"
 
 	# Disables USB autosuspend for all devices
 	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 0 > $i; done
@@ -53,6 +53,9 @@ stop() {
 
 	# Enable AC97 audio power saving
 	[ -e /sys/module/snd_ac97_codec/parameters/power_save ] && echo Y > /sys/module/snd_ac97_codec/parameters/power_save
+
+	# Enable HAL polling of CDROMS
+	for i in /dev/scd*; do hal-disable-polling --enable-polling --device $i; done
 
 	# Reset power saving mode for Wi-Fi cards
 	for i in /sys/bus/pci/devices/*/power_level ; do echo 0 > $i ; done
