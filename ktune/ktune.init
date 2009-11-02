@@ -2,7 +2,7 @@
 #
 # ktune		ktune sysctls
 #
-# chkconfig: - 05 99
+# chkconfig: - 27 99
 # description:	Applies and reverts ktune sysctl settings
 #
 # config: /etc/sysctl.ktune
