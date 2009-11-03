@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 0.2.5
-Release: 0.4%{?dist}
+Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
 # The source for this package was pulled from upstream git.  Use the
@@ -13,7 +13,7 @@ Group: System Environment/Daemons
 Source: tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
 Buildroot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-Requires: usermode
+Requires: usermode ethtool
 Requires(post): chkconfig
 Requires(preun): chkconfig
 Requires(preun): initscripts
@@ -101,8 +101,9 @@ fi
 
 
 %changelog
-* Tue Nov 03 2009 Phil Knirsch <pknirsch@redhat.com> 0.2.5-0.4
-- New release
+* Tue Nov 03 2009 Phil Knirsch <pknirsch@redhat.com> 0.2.5-1
+- Moved from prerelease to normal
+- Added missing ethtool requires
 - Fixed 532209 - init priority wrong for ktune (Jan Vcelak)
 - Fixed 530457 - [abrt] crash detected in tuned-0.2.5-0.1.fc12 (Jan Vcelak)
 - Added detection of netcard supported speeds (Jan Vcelak)
