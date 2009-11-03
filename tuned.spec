@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 0.2.5
-Release: 0.3%{?dist}
+Release: 0.4%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
 # The source for this package was pulled from upstream git.  Use the
@@ -101,6 +101,13 @@ fi
 
 
 %changelog
+* Tue Nov 03 2009 Phil Knirsch <pknirsch@redhat.com> 0.2.5-0.4
+- New release
+- Fixed 532209 - init priority wrong for ktune (Jan Vcelak)
+- Fixed 530457 - [abrt] crash detected in tuned-0.2.5-0.1.fc12 (Jan Vcelak)
+- Added detection of netcard supported speeds (Jan Vcelak)
+- Fix ktune.sh script for stopping in regard to ALPM and CDROM polling (Phil Knirsch)
+
 * Mon Oct 19 2009 Marcela Mašláňová <mmaslano@redhat.com> 0.2.5-0.3
 - new release
 

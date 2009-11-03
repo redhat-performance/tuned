@@ -1,3 +1,46 @@
+commit 51c51d366f63ec5b4b4d509a2f23ec844646debf
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Nov 2 18:58:00 2009 +0100
+
+    ktune/ktune.init: bz 532209 - init priority wrong for ktune
+    
+    Some tuned profiles require "messagebus" and "haldaemon" running.
+    Changed startup priority from 5 to 27.
+
+commit fc39e3ff2bc0c84ececd8740f7f2be1e23b702e8
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Sun Oct 29 16:17:54 2045 +0100
+
+    Extends unit tests to detect this problem (bug 530457) next time.
+    
+    Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+commit 62dcc5c12720622b2344bcfdd7be5d0cfff975c5
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Sun Oct 29 16:17:06 2045 +0100
+
+    530457 -  [abrt] crash detected in tuned-0.2.5-0.1.fc12
+    
+    Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
+
+commit 56ba289b23d8759c7bde4e1d451ae3451388ef3d
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Sun Oct 29 16:15:54 2045 +0100
+
+    This patch adds detection of netcard supported speeds.
+
+commit 784d0b3598c4ef4e06388c3f0e54aa715c4822b6
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Oct 20 14:23:42 2009 +0200
+
+    - Fix ktune.sh script for stopping in regard to ALPM and CDROM polling
+
+commit 4c01b1244d6bd9b106ccdc5d9c040485812716de
+Author: Marcela Mašláňová <mmaslano@redhat.com>
+Date:   Mon Oct 19 17:06:21 2009 +0200
+
+    New release.
+
 commit d838f1a15147cd70f22bba04bd4a33bb31cfd97d
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Mon Oct 19 17:01:25 2009 +0200
