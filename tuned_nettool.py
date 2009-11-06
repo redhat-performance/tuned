@@ -159,7 +159,11 @@ class Tuned_nettool:
 				del section
 
 			elif state == "speed":
-				self.speed = re_speed.match(line).group(1)
+				# Try to determine speed. If it fails, assume 1gbit ethernet
+				try:
+					self.speed = re_speed.match(line).group(1)
+				except:
+					self.speed = 1000
 				state = "wait"
 
 			elif state == "duplex":
@@ -175,21 +179,30 @@ class Tuned_nettool:
 				state = "wait"
 
 			elif state == "supported_modes":
-				for m in line.split():
-					(s, d) = re_mode.match(m).group(1,2)
-					self.supported_modes.append( (int(s), d == "Full") )
-				del m,s,d
+				# Try to determine supported modes. If it fails, assume 1gibt ethernet fullduplex works
+				try:
+					for m in line.split():
+						(s, d) = re_mode.match(m).group(1,2)
+						self.supported_modes.append( (int(s), d == "Full") )
+					del m,s,d
+				except:
+					self.supported_modes.append(1000, True)
+	
 
 			elif state == "supported_autoneg":
 				self.supported_autoneg = line == "Yes"
 				state = "wait"
 
 			elif state == "advertised_modes":
-				if line != "Not reported":
-					for m in line.split():
-						(s, d) = re_mode.match(m).group(1,2)
-						self.advertised_modes.append( (int(s), d == "Full") )
-					del m,s,d
+				# Try to determine advertised modes. If it fails, assume 1gibt ethernet fullduplex works
+				try:
+					if line != "Not reported":
+						for m in line.split():
+							(s, d) = re_mode.match(m).group(1,2)
+							self.advertised_modes.append( (int(s), d == "Full") )
+						del m,s,d
+				except:
+					self.advertised_modes.append(1000, True)
 
 			elif state == "advertised_autoneg":
 				self.advertised_autoneg = line == "Yes"
