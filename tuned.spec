@@ -13,6 +13,7 @@ Group: System Environment/Daemons
 Source: tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
 Buildroot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+BuildRequires: python-devel
 Requires: usermode ethtool
 Requires(post): chkconfig
 Requires(preun): chkconfig
