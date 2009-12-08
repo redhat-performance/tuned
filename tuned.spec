@@ -102,12 +102,16 @@ fi
 
 
 %changelog
-* Tue Dec 08 2009 Phil Knirsch <pknirsch@redhat.com>
+* Tue Dec 08 2009 Phil Knirsch <pknirsch@redhat.com> 0.2.6-1
 - Included Jan Vcelak's patch for pyo and pyc files
 - Updated ktune.sh script for laptop-battery-powersave profile with latest
   ALPM mechanism
 - Fixed ktune.sh script for laptop-battery-powersave profile to stop printing
   errors when files in /sys are missing
+
+* Thu Nov 26 2009 Petr Lautrbach <plautrba@redhat.com> 0.2.5-2
+- Added python into build requires
+- Resolves: #539949
 
 * Tue Nov 03 2009 Phil Knirsch <pknirsch@redhat.com> 0.2.5-1
 - Moved from prerelease to normal
