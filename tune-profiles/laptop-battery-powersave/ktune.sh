@@ -3,13 +3,14 @@
 ALPM="min_power"
 
 set_alpm() {
-	for x in /sys/bus/scsi/devices/host*/scsi_host/host*/; do
-		hotplug="0"
-		if [ -e $x/sata_hotplug ]; then
-			hotplug="$(cat $x/sata_hotplug)"
-		fi
-		if [ "$hotplug" == "0" -a -e $x/link_power_management_policy ]; then
-			echo $1 > $x/link_power_management_policy
+	for x in /sys/class/scsi_host/*; do
+		if [ -f $x/ahci_port_cmd ]; then
+			port_cmd=`cat $x/ahci_port_cmd`;
+			if [ $((0x$port_cmd & 0x240000)) = 0 -a -f $x/link_power_management_policy ]; then
+				echo $1 >$x/link_power_management_policy;
+			else
+				echo "max_performance" >$x/link_power_management_policy;
+			fi
 		fi
 	done
 }
@@ -19,7 +20,7 @@ start() {
 	set_alpm ${ALPM}
 
 	# Enables USB autosuspend for all devices
-	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 1 > $i; done
+	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 1 > $i; done > /dev/null 2>&1
 
 	# Enables multi core power savings for low wakeup systems
 	[ -e /sys/devices/system/cpu/sched_mc_power_savings ] && echo 1 > /sys/devices/system/cpu/sched_mc_power_savings
@@ -31,10 +32,10 @@ start() {
 	[ -e /sys/module/snd_ac97_codec/parameters/power_save ] && echo Y > /sys/module/snd_ac97_codec/parameters/power_save
 
 	# Disable HAL polling of CDROMS
-	for i in /dev/scd*; do hal-disable-polling --device $i; done
+	for i in /dev/scd*; do hal-disable-polling --device $i; done > /dev/null 2>&1
 
 	# Enable power saving mode for Wi-Fi cards
-	for i in /sys/bus/pci/devices/*/power_level ; do echo 5 > $i ; done
+	for i in /sys/bus/pci/devices/*/power_level ; do echo 5 > $i ; done > /dev/null 2>&1
 
 	return 0
 }
@@ -43,7 +44,7 @@ stop() {
 	set_alpm "max_performance"
 
 	# Disables USB autosuspend for all devices
-	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 0 > $i; done
+	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 0 > $i; done > /dev/null 2>&1
 
 	# Disables multi core power savings for low wakeup systems
 	[ -e /sys/devices/system/cpu/sched_mc_power_savings ] && echo 0 > /sys/devices/system/cpu/sched_mc_power_savings
@@ -55,10 +56,10 @@ stop() {
 	[ -e /sys/module/snd_ac97_codec/parameters/power_save ] && echo Y > /sys/module/snd_ac97_codec/parameters/power_save
 
 	# Enable HAL polling of CDROMS
-	for i in /dev/scd*; do hal-disable-polling --enable-polling --device $i; done
+	for i in /dev/scd*; do hal-disable-polling --enable-polling --device $i; done > /dev/null 2>&1
 
 	# Reset power saving mode for Wi-Fi cards
-	for i in /sys/bus/pci/devices/*/power_level ; do echo 0 > $i ; done
+	for i in /sys/bus/pci/devices/*/power_level ; do echo 0 > $i ; done > /dev/null 2>&1
 
 	return 0
 }

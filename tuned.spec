@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.5
+Version: 0.2.6
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -102,6 +102,13 @@ fi
 
 
 %changelog
+* Tue Dec 08 2009 Phil Knirsch <pknirsch@redhat.com>
+- Included Jan Vcelak's patch for pyo and pyc files
+- Updated ktune.sh script for laptop-battery-powersave profile with latest
+  ALPM mechanism
+- Fixed ktune.sh script for laptop-battery-powersave profile to stop printing
+  errors when files in /sys are missing
+
 * Tue Nov 03 2009 Phil Knirsch <pknirsch@redhat.com> 0.2.5-1
 - Moved from prerelease to normal
 - Added missing ethtool requires
