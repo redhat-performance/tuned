@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.6
+Version: 0.2.7
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -102,6 +102,11 @@ fi
 
 
 %changelog
+* Fri Dec 11 2009 Thomas Woerner <twoerner@redhat.com> 0.2.7-1
+- Updated ktune to version 0.4-1
+  - Supports start and stop options in profile scripts calls
+  - Fixed CMDLINE_ELEVATOR test (rhbz#496940#c9)
+
 * Tue Dec 08 2009 Phil Knirsch <pknirsch@redhat.com> 0.2.6-1
 - Included Jan Vcelak's patch for pyo and pyc files
 - Updated ktune.sh script for laptop-battery-powersave profile with latest
