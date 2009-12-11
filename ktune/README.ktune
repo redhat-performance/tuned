@@ -1,28 +1,141 @@
-Overview
---------
+ktune
+===============================================================================
 
-ktune provides the ktune service, which sets several kernel tuning parameters 
-to values suitable for certain system profiles.  Currently, the only profile
-provided is for large-memory systems running disk and network-intensive
-applications.  These settings do not override settings in /etc/sysctl.conf or
-on the kernel command line.  ktune may harm performance on some systems and
-workloads, so it should be tested under production-like conditions prior to
-production use.  If ktune is found to harm performance, the settings may be
-reverted without rebooting by stopping the ktune service.
+This description will give you a quick overview of ktune and what it can do for
+you.
 
-Using ktune
------------
+1) What is ktune?
+2) What it does
+2.1) ktune start
+2.2) ktune stop
+3) How you can use it
+4) How you can extend it
+5) Planned features
 
-To start ktune you can start the service with the service command:
 
-   service ktune start
+1) What is ktune?
+-------------------------------------------------------------------------------
+The kernel in a Linux system is configured to fit the needs of a lot of
+customers and use cases. But for certain use cases these defaults might not be
+appropriate. For example there are use cases where much more shared memory
+segments are needed as with others. Also the size of network buffers might be
+important and also the elevator used for block devices to get maximum
+performance.
 
-If you want to enable the service in the system, use the chkconfig command:
+Initially the service ktune was created to have a simple way to tune kernel
+parameters according to a usage profile. Over time this service has been
+expanded to support multiple profiles and provide more than kernel parameter
+tuning as well as adding a way for customers to use their own tuning settings.
 
-   chkconfig ktune on
+The package ktune provides a service init script together with a global config
+file and a sysctl throughput settings file, a directory to store additional
+profiles and some documentation.
 
-More Information
-----------------
+    /etc/rc.d/init.d/ktune
+    /etc/sysconfig/ktune
+    /etc/sysctl.ktune
+    /etc/ktune.d/
+    /usr/share/doc/ktune-0.4
+    /usr/share/doc/ktune-0.4/COPYING
+    /usr/share/doc/ktune-0.4/README
 
-Please have a look at /etc/sysconfig/ktune and /etc/sysctl.ktune for tuning 
-parameters.
+
+2) What it does
+-------------------------------------------------------------------------------
+ktune is a system service that is primarily managed by chkconfig. If the
+service is enabled and started, it will use the configuration options from
+/etc/sysconfig/ktune:
+
+    SYSCTL="/etc/sysctl.ktune"
+    USE_KTUNE_D="yes"
+    SYSCTL_POST="/etc/sysctl.conf"
+    ELEVATOR="deadline"
+    ELEVATOR_TUNE_DEVS="/sys/block/{sd,cciss}*/queue/scheduler"
+
+SYSCTL is the primary ktune sysctl profile. If you comment it out, it will not
+get applied.
+
+USE_KTUNE_D is a switch, that enables or disabled the use of additional
+profiles from the /etc/ktune.d directory. A profile has to have the extension
+.conf to be used. If there is an additional file with the same name, but the
+extension .sh it will be used as a profile script.
+
+SYSCTL_POST references the system wide sysctl file for customer settings.
+
+ELEVATOR is the I/O scheduler, ktune will set for ELEVATOR_TUNE_DEVS. If you
+want to disable the setting of the I/O scheduler, just comment out the ELEVATOR
+line. ktune will not apply any scheduler if a scheduler is set on the kernel
+command line. It is safe to leave this on "deadline", but "as", "cfq", and
+"noop" are also legal values. ELEVATOR_TUNE_DEVS references the devices which
+should be tuned with the ELEVATOR.
+
+2.1) ktune start
+
+When the service starts, it is applying the sysctl settings from the SYSCTL
+file and afterwards the sysctl settings from the conf files in the /etc/ktune.d
+directory. For each sysctl settings, that will be modified, it will store the
+original value in a save file to be able to restore the initial settings if the
+service is stopped. This way it can easily be evaluated if settings are good or
+bad for a specific environment. After a profile from the ktune.d directory has
+been applied, the profile script will be called if available. The script will
+get the service parameter, the service has been started with: If "service ktune
+start" has been used, profile scripts will be called with the parameter
+"start". This way custom settings, for which the sysctl settings file can not
+be used, can be made.
+
+After applying the sysctl settings, the elevators will be set.
+
+2.2) ktune stop
+
+When the service stopps, it applies the settings saved while starting.
+
+
+3) How you can use it
+-------------------------------------------------------------------------------
+The service is managed by chkconfig and can be enabled or disabled for
+automatic system start and stop. If you want to evaluate settings or want to
+find te best settings for your system it is save to leave the service disabled
+and to start or stop it manually with the service command.
+
+To start or stop ktune you can use the service command:
+
+    service ktune <start|stop>
+
+To enable or disable ktune for automatic system start, use the chkconfig
+command:
+
+    chkconfig ktune <on|off>
+
+
+4) How you can extend it
+-------------------------------------------------------------------------------
+To change the primary profile, use the SYSCTL variable in the ktune sysconfig
+file. If you want to add additional profiles, put them into the /etc/ktune.d
+directory altogether with a profile scrip if needed.
+
+Skeleton of a profile scipt:
+
+    #!/bin/sh
+
+    case "$1" in
+        start)
+            # do something
+            RETVAL=$?
+            ;;
+        stop)
+            # do something
+            RETVAL=$?
+            ;;
+        *)
+            echo $"Usage: $0 {start|stop}"
+            RETVAL=2
+            ;;
+    esac
+
+    exit $RETVAL
+
+
+5) Planned features
+-------------------------------------------------------------------------------
+* Readahead tuning for block devices
+

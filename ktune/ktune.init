@@ -30,8 +30,6 @@ KERNEL_ELEVATOR="cfq"
 CMDLINE_ELEVATOR=$?
 SYS_BLOCK_SDX=$(eval LANG=C /bin/ls -1 ${ELEVATOR_TUNE_DEVS} 2>/dev/null)
 
-CMDLINE_ARG1=$1
-
 declare -a KTUNE_FILES
 if [ -r "$SYSCTL" ]; then
     KTUNE_FILES[0]="$SYSCTL"
@@ -84,10 +82,11 @@ load_file() {
 
 call_script() {
     local script=$1
+    local option=$2
 
     if [ -x "$script" ]; then
-	echo -n "Calling "$script": "
-	($script ${CMDLINE_ARG1})
+	echo -n "Calling '$script $option': "
+	("$script" "$option")
 	ret=$?
 
 	if [ $ret -eq 0 ]; then
@@ -109,7 +108,7 @@ load_sysctl() {
 	for file in "${KTUNE_FILES[@]}"; do
 	    echo -n $"$file: "
 	    load_file "$file" 1
-	    call_script "${file%.conf}.sh"
+	    call_script "${file%.conf}.sh" start
 	done
 
         # Apply general sysctl settings afterwards
@@ -126,6 +125,12 @@ revert_sysctl() {
 	load_file "$SAVE_FILE" 0
 	/bin/rm -f "$SAVE_FILE"
     fi
+
+    if [ ${#KTUNE_FILES[@]} -gt 0 ]; then
+	for file in "${KTUNE_FILES[@]}"; do
+	    call_script "${file%.conf}.sh" stop
+	done
+    fi
 }
 
 start() {
@@ -134,7 +139,7 @@ start() {
     load_sysctl
 
     # if no elevator on command line, apply the ktune elevator
-    if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a !$CMDLINE_ELEVATOR ]; then
+    if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a $CMDLINE_ELEVATOR -ne 0 ]; then
 	ret_e=0
 	echo -n $"Applying ${ELEVATOR} elevator: "
 	for i in $SYS_BLOCK_SDX; do
@@ -164,7 +169,7 @@ stop() {
     revert_sysctl
 
     # if no elevator on command line, apply the default elevator
-    if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a !$CMDLINE_ELEVATOR ]; then
+    if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a $CMDLINE_ELEVATOR -ne 0 ]; then
 	ret_e=0
 	echo -n $"Reverting to ${KERNEL_ELEVATOR} elevator: "
 	for i in $SYS_BLOCK_SDX; do

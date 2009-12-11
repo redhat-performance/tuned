@@ -14,7 +14,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 Requires(post): chkconfig
 Requires(preun): chkconfig
-Requires: gawk
+Requires: grep gawk
 
 %description
 ktune provides settings for server performance tuning. Please have a look at 
@@ -67,13 +67,18 @@ fi
 %dir %attr(0755,root,root) %{_sysconfdir}/ktune.d
 
 %changelog
+* Fri Dec 11 2009 Thomas Woerner <twoerner@redhat.com> 0.4-1
+- added support for start and stop options to profile scripts calls
+- fixed CMDLINE_ELEVATOR test (rhbz#496940#c9)
+- added requirement for grep again
+
 * Fri Jul 24 2009 Thomas Woerner <twoerner@redhat.com> 0.3-2
 - use /bin/ls with LANG=C
 
 * Tue Jul 21 2009 Thomas Woerner <twoerner@redhat.com> 0.3-2
 - added support for profile scripts
 
-* Tue May  5 2008 Thomas Woerner <twoerner@redhat.com> 0.3-1
+* Tue May  5 2009 Thomas Woerner <twoerner@redhat.com> 0.3-1
 - added support for loading additional files: /etc/ktune.d/*.conf
   Resolves: rhbz#496940
 
