@@ -132,7 +132,11 @@ class Tuned_nettool:
 		errors = p_ethtool.communicate()[1]
 
 		if errors != "":
-			raise Exception("Some errors were reported by 'ethtool'.", errors)
+			# it is possible that the network card is not supported
+			self.__clean_status()
+			return
+			# TODO: subject of logging
+			#raise Exception("Some errors were reported by 'ethtool'.", errors)
 
 		# parses output - kind of FSM
 
