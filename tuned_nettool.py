@@ -18,8 +18,11 @@
 
 from subprocess import *
 import re
+import logging, tuned_logging
 
-class Tuned_nettool:
+log = logging.getLogger("tuned")
+
+class Nettool:
 
 	__advertise_values = { # [ half, full ]
 		10 : [ 0x001, 0x002 ],
@@ -30,18 +33,15 @@ class Tuned_nettool:
 		"auto" : 0x03F
 	}
 
+	__disabled = False
+
 	def __init__(self, interface):
 		self.__interface = interface;
 		self.update()
 
-#		print "speed:", self.speed
-#		print "full dupl:", self.full_duplex
-#		print "autoneg:", self.autoneg
-#		print "link:", self.link
-#		print "sup modes:", self.supported_modes
-#		print "sup autoneg:", self.supported_autoneg
-#		print "adv modes:", self.advertised_modes
-#		print "adv autoneg:", self.advertised_autoneg
+		log.debug("%s: speed %s, full duplex %s, autoneg %s, link %s" % (interface, self.speed, self.full_duplex, self.autoneg, self.link)) 
+		log.debug("%s: supports: autoneg %s, modes %s" % (interface, self.supported_autoneg, self.supported_modes))
+		log.debug("%s: advertises: autoneg %s, modes %s" % (interface, self.advertised_autoneg, self.advertised_modes))
 
 #	def __del__(self):
 #		if self.supported_autoneg:
@@ -92,7 +92,7 @@ class Tuned_nettool:
 			return 1000
 
 	def set_max_speed(self):
-		if not self.supported_autoneg:
+		if self.__disabled or not self.supported_autoneg:
 			return False
 
 		#if self.__set_advertise(self.__calculateMode(self.supported_modes)):
@@ -103,7 +103,7 @@ class Tuned_nettool:
 			return False
 
 	def set_speed(self, speed):
-		if not self.supported_autoneg:
+		if self.__disabled or not self.supported_autoneg:
 			return False
 
 		mode = 0
@@ -115,6 +115,8 @@ class Tuned_nettool:
 
 		effective_mode = mode & self.__calculate_mode(self.supported_modes)
 
+		log.debug("%s: set_speed(%d) - effective_mode 0x%03x" % (self.interface, speed, effective_mode))
+
 		if self.__set_advertise(effective_mode):
 			self.update()
 			return True
@@ -122,6 +124,8 @@ class Tuned_nettool:
 			return False
 
 	def update(self):
+		if self.__disabled:
+			return
 
 		# run ethtool and preprocess output
 
@@ -132,11 +136,11 @@ class Tuned_nettool:
 		errors = p_ethtool.communicate()[1]
 
 		if errors != "":
-			# it is possible that the network card is not supported
+			log.warning("%s: some errors were reported by 'ethtool'" % self.__interface)
+			log.debug("%s: %s" % (self.__interface, errors.replace("\n", r"\n")))
 			self.__clean_status()
+			self.__disabled = True
 			return
-			# TODO: subject of logging
-			#raise Exception("Some errors were reported by 'ethtool'.", errors)
 
 		# parses output - kind of FSM
 
@@ -175,7 +179,7 @@ class Tuned_nettool:
 				state = "wait"
 
 			elif state == "autoneg":
-				self.autoneg = line == "yes"
+				self.autoneg = (line == "yes" or line == "on")
 				state = "wait"
 
 			elif state == "link":
@@ -214,8 +218,7 @@ class Tuned_nettool:
 
 def ethcard(interface):
 	if not interface in ethcard.list:
-		#print "ethcard -> Tuned_nettool(%s)" % interface
-		ethcard.list[interface] = Tuned_nettool(interface)
+		ethcard.list[interface] = Nettool(interface)
 
 	return ethcard.list[interface]
 
