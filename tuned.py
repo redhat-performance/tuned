@@ -81,9 +81,11 @@ class Tuned:
 
 		self.__initplugins__(path, "monitorplugins", self.mp)
 		self.__initplugins__(path, "tuningplugins", self.tp)
-		for p in self.mp:
-			p.init(self.config)
-		for p in self.tp:
+
+		for p in self.mp + self.tp:
+			if not debug and self.config.has_option(p.config_section, "logging"):
+				logging.getLogger("tuned.%s" % p.config_section.lower()).setLevelString(self.config.get(p.config_section, "logging"))
+
 			p.init(self.config)
 
 	def run(self):
