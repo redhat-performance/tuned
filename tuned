@@ -27,7 +27,7 @@ import logging, tuned_logging
 log = logging.getLogger("tuned")
 
 def usage():
-	print "Usage: tuned [-d|--daemon] [-c conffile|--config=conffile]"
+	print "Usage: tuned [-d|--daemon] [-c conffile|--config=conffile] [-D|--debug]"
 
 def handler(signum, frame):
 	log.debug("Received signal number %d." % signum)
@@ -60,7 +60,7 @@ def daemonize():
 
 if __name__ == "__main__":
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "dc:", ["daemon", "config="])
+		opts, args = getopt.getopt(sys.argv[1:], "dc:D", ["daemon", "config=", "debug"])
 	except getopt.error, e:
 		print >>sys.stderr, ("Error parsing command-line arguments: %s", e)
 		usage()
@@ -73,18 +73,22 @@ if __name__ == "__main__":
 
 	daemon = False
 	cfgfile = "/etc/tuned.conf"
+	debug = False
 	for (opt, val) in opts:
 		if   opt in ['-d', "--daemon"]:
 			daemon = True
 		elif opt in ['-c', "--config"]:
 			cfgfile = val
+		elif opt in ['-D', "--debug"]:
+			debug = True
+
 	TUNEDDIR = "/usr/share/tuned"
 	if not TUNEDDIR in sys.path:
 		sys.path.append(TUNEDDIR)
 
 	from tuned import tuned
 
-	tuned.init(TUNEDDIR, cfgfile)
+	tuned.init(TUNEDDIR, cfgfile, debug = debug)
 
 	if daemon:
 		daemonize()
