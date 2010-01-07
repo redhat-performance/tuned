@@ -17,6 +17,9 @@
 #
 
 import time,os,sys,locale,ConfigParser
+import logging, tuned_logging
+
+log = logging.getLogger("tuned")
 
 class Tuned:
 	def __init__(self):
@@ -26,6 +29,8 @@ class Tuned:
 		self.verbose = False
 
 	def __initplugins__(self, path, module, store):
+		log.debug("Initializing plugins (%s)" % module)
+
 		_files = map(lambda v: v[:-3], filter(lambda v: v[-3:] == ".py" and \
                              v != "__init__.py" and \
                              v[0] != '.', \
@@ -38,9 +43,26 @@ class Tuned:
     			exec _cmd
 			store.append(_plugin)
 
-	def init(self, path, cfgfile):
+	def init(self, path, cfgfile, debug = False):
 		self.config = ConfigParser.RawConfigParser()
 		self.config.read(cfgfile)
+
+		# logging
+
+		if debug:
+			log.setLevel(logging.DEBUG)
+		else:
+			if self.config.has_option("main", "logging"):
+				log.setLevelString(self.config.get("main", "logging"))
+			else:
+				log.setLevel(logging.INFO)
+
+			if self.config.has_option("main", "logging_disable"):
+				tuned_logging.disableString(self.config.get("main", "logging_disable"))
+
+		# main settings
+
+		log.debug("Parsing config file")
 
 		if not self.config.has_section("main"):
 			self.config.add_section("main")
@@ -49,14 +71,14 @@ class Tuned:
 			self.interval = self.config.getint("main", "interval")
 		else:
 			self.config.set("main", "interval", self.interval)
-		if self.config.has_option("main", "verbose"):
-			self.verbose = (self.config.get("main", "verbose") == "True")
-		else:
-			self.config.set("main", "verbose", self.verbose)
+
 		if self.config.has_option("main", "pidfile"):
 			self.pidfile = self.config.get("main", "pidfile")
 		else:
 			self.pidfile = "/var/run/tuned.pid"
+
+		# loading, setting logging level and initializing plugins
+
 		self.__initplugins__(path, "monitorplugins", self.mp)
 		self.__initplugins__(path, "tuningplugins", self.tp)
 		for p in self.mp:
@@ -70,8 +92,10 @@ class Tuned:
 			f.write("%d" % os.getpid())
 			f.close()
 		except:
-			print >>sys.stderr, "Can't write to pidfile", self.pidfile;
-		print("Running...")
+			log.warning("Cannot write to pidfile (%s)" % self.pidfile)
+
+		log.info("Running...")
+
 		while True:
 			lh = {}
 			for p in self.mp:
@@ -83,7 +107,9 @@ class Tuned:
 			time.sleep(self.interval)
 
 	def cleanup(self, signum=0, frame=None):
-		print("Cleanup...")
+
+		log.info("Cleaning up...")
+
 		for p in self.mp:
 			p.cleanup()
 		for p in self.tp:
@@ -91,6 +117,6 @@ class Tuned:
 		try:
 			os.unlink(self.pidfile)
 		except:
-			print >>sys.stderr, "can't remove pidfile", self.pidfile;
+			log.warning("Cannot remove pidfile (%s)" % self.pidfile)
 
 tuned = Tuned()
