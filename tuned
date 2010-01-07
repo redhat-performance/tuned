@@ -22,19 +22,26 @@
 #
 
 import sys, os.path, getopt, atexit, signal
+import logging, tuned_logging
+
+log = logging.getLogger("tuned")
 
 def usage():
 	print "Usage: tuned [-d|--daemon] [-c conffile|--config=conffile]"
 
 def handler(signum, frame):
+	log.debug("Received signal number %d." % signum)
 	sys.exit()
 
 def daemonize():
+	log.debug("Daemonizing")
+
 	try:
 		pid = os.fork()
 		if pid > 0:
 			sys.exit(0)
 	except OSError, e:
+		log.critical("Cannot fork: %s", str(e))
 		sys.exit(1)
 
 	os.chdir("/")
@@ -46,6 +53,7 @@ def daemonize():
 		if pid > 0:
 			sys.exit(0)
 	except OSError, e:
+		log.cricital("Cannot fork: %s", str(e))
 		sys.exit(1)
 
 	sys.stdout = sys.stderr = open("/dev/null", 'a+')
@@ -70,8 +78,7 @@ if __name__ == "__main__":
 			daemon = True
 		elif opt in ['-c', "--config"]:
 			cfgfile = val
-		
-	TUNEDDIR="/usr/share/tuned"
+	TUNEDDIR = "/usr/share/tuned"
 	if not TUNEDDIR in sys.path:
 		sys.path.append(TUNEDDIR)
 
@@ -82,6 +89,7 @@ if __name__ == "__main__":
 	if daemon:
 		daemonize()
 
+	atexit.register(logging.shutdown)
 	atexit.register(tuned.cleanup)
 	signal.signal(signal.SIGTERM, handler)
 
