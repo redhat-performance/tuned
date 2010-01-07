@@ -17,13 +17,15 @@
 #
 
 import os, copy
+import logging, tuned_logging
 from tuned_nettool import ethcard
+
+log = logging.getLogger("tuned.nettuning")
 
 class NetTuning:
 	def __init__(self):
 		self.devidle = {}
 		self.enabled = True
-		self.verbose = False
 
 	def __updateIdle__(self, dev, devload):
 		idle = self.devidle.setdefault(dev, {})
@@ -37,16 +39,17 @@ class NetTuning:
 				idle[type] = 0
 
 	def init(self, config):
+		log.debug("Init")
+
 		self.config = config
 		if self.config.has_option("NetTuning", "enabled"):
                         self.enabled = (self.config.get("NetTuning", "enabled") == "True")
-		try:
-			self.verbose = (self.config.get("main", "verbose") == "True")
-			self.verbose = (self.config.get("NetTuning", "verbose") == "True")
-		except:
-			pass
+
+		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
 
 	def cleanup(self):
+		log.debug("Cleanup")
+
 		for dev in self.devidle.keys():
 			if self.enabled and self.devidle[dev]["LEVEL"] > 0:
 				ethcard(dev).set_max_speed()
@@ -60,10 +63,13 @@ class NetTuning:
 			self.__updateIdle__(dev, devload)
 			if self.devidle[dev]["LEVEL"] == 0 and self.devidle[dev]["READ"] >= 6 and self.devidle[dev]["WRITE"] >= 6:
 				self.devidle[dev]["LEVEL"] = 1
+
+				log.debug("%s: setting 100Mbps" % dev)
 				ethcard(dev).set_speed(100) # FIXME: what about making this more dynamic?
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
 				self.devidle[dev]["LEVEL"] = 0
+
+				log.debug("%s: setting maximal speed" % dev)
 				ethcard(dev).set_max_speed()
-		if self.verbose:
-			print(load, self.devidle)
+
 _plugin = NetTuning()

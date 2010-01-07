@@ -17,12 +17,14 @@
 #
 
 import os
+import logging, tuned_logging
+
+log = logging.getLogger("tuned.diskmonitor")
 
 class DiskMonitor:
 	def __init__(self):
 		self.devices = {}
 		self.enabled = True
-		self.verbose = False
 
 	def __calcdiff__(self, dev):
 		l = []
@@ -44,16 +46,16 @@ class DiskMonitor:
 			self.__updateStat__(dev)
 			self.devices[dev]["diff"] = self.__calcdiff__(dev)
 
+			log.debug("%s diff: %s" % (dev, self.devices[dev]["diff"]))
+
 	def init(self, config):
+		log.debug("Init")
+
 		self.config = config
 		if self.config.has_option("DiskMonitor", "enabled"):
 			self.enabled = (self.config.get("DiskMonitor", "enabled") == "True")
-		try:
-			self.verbose = (self.config.get("main","verbose") == "True")
-			self.verbose = (self.config.get("DiskMonitor", "verbose") == "True")
-			print self.verbose
-		except:
-			pass
+
+		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
 
 		dnames = os.listdir("/sys/block/")
 		for d in dnames:
@@ -68,11 +70,11 @@ class DiskMonitor:
 			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 			self.__updateStat__(d)
 			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-		if self.verbose:
-			print self.devices
+
+		log.info("Available hard drives: %s" % ", ".join(self.devices.keys()))
 
 	def cleanup(self):
-		pass
+		log.debug("Cleanup")
 
 	def getLoad(self):
 		if not self.enabled:

@@ -17,6 +17,9 @@
 #
 
 import os, copy
+import logging, tuned_logging
+
+log = logging.getLogger("tuned.disktuning")
 
 class DiskTuning:
 	def __init__(self):
@@ -25,7 +28,6 @@ class DiskTuning:
 		self.power = ["255", "225", "195", "165", "145", "125", "105", "85", "70", "55", "30", "20"]
 		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
 		self.levels = len(self.power)
-		self.verbose = False
 
 	def __updateIdle__(self, dev, devload):
 		idle = self.devidle.setdefault(dev, {})
@@ -39,17 +41,16 @@ class DiskTuning:
 				idle[type] = 0
 
 	def init(self, config):
+		log.debug("Init")
+
 		self.config = config
+		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
 		if self.config.has_option("DiskTuning", "enabled"):
                         self.enabled = (self.config.get("DiskTuning", "enabled") == "True")
-		try:
-			self.verbose = (self.config.get("main", "verbose") == "True")
-			self.verbose = (self.config.get("DiskTuning","verbose") == "True")
-			print self.verbose
-		except:
-			pass
 
 	def cleanup(self):
+		log.debug("Cleanup")
+
 		for dev in self.devidle.keys():
 			if self.enabled and self.devidle[dev]["LEVEL"] > 0:
 				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
@@ -65,6 +66,8 @@ class DiskTuning:
 				self.devidle[dev].setdefault("LEVEL", 0)
 				self.devidle[dev]["LEVEL"] += 1
 				level = self.devidle[dev]["LEVEL"]
+
+				log.debug("Level changed to %d (power %s, spindown %s)" % (level, self.power[level], self.spindown[level]))
 				os.system("hdparm -S"+self.power[level]+" -B"+self.spindown[level]+" /dev/"+dev+" > /dev/null 2>&1")
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
 				self.devidle[dev].setdefault("LEVEL", 0)
@@ -72,7 +75,11 @@ class DiskTuning:
 				if self.devidle[dev]["LEVEL"] < 0:
 					self.devidle[dev]["LEVEL"] = 0
 				level = self.devidle[dev]["LEVEL"]
+
+				log.debug("Level changed to %d (power %s, spindown %s)" % (level, self.power[level], self.spindown[level]))
 				os.system("hdparm -S"+self.power[level]+" -B"+self.spindown[level]+" /dev/"+dev+" > /dev/null 2>&1")
-			if self.verbose:
-				print (load,self.devidle)
+
+			log.debug("%s load: read %f, write %f" % (dev, load["DISK"][dev]["READ"], load["DISK"][dev]["WRITE"]))
+			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["READ"], self.devidle[dev]["WRITE"], self.devidle[dev]["LEVEL"]))
+
 _plugin = DiskTuning()

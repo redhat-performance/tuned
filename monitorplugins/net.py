@@ -17,13 +17,15 @@
 #
 
 import os
+import logging, tuned_logging
 from tuned_nettool import ethcard
+
+log = logging.getLogger("tuned.netmonitor")
 
 class NetMonitor:
 	def __init__(self):
 		self.devices = {}
 		self.enabled = True
-		self.verbose = False
 		devs = open("/proc/net/dev").readlines()
 		for l in devs:
 			l = l.replace(":", " ")
@@ -71,25 +73,26 @@ class NetMonitor:
 			self.__updateStat__(dev)
 			self.devices[dev]["diff"] = self.__calcdiff__(dev)
 
+			log.debug("%s diff: %s" % (dev, self.devices[dev]["diff"]))
+
 	def init(self, config):
+		log.debug("Init")
+
 		self.config = config
 		if self.config.has_option("NetMonitor", "enabled"):
                         self.enabled = (self.config.get("NetMonitor", "enabled") == "True")
 		interval = self.config.getint("main", "interval")
-		try:
-			self.verbose = (self.config.get("main", "verbose") == "True")
-			self.verbose = (self.config.get("NetMonitor", "verbose") == "True")
-		except:
-			pass
+
+		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
+
 		for d in self.devices.keys():
 			max_data = self.__calcspeed__(ethcard(d).get_max_speed()) * interval;
 			self.devices[d]["max"] = [max_data, 1, max_data, 1]
 
-		if self.verbose:
-			print self.devices
+		log.info("Available ethernet cards: %s" % ", ".join(self.devices.keys()))
 
 	def cleanup(self):
-		pass
+		log.debug("Cleanup")
 
 	def getLoad(self):
 		if not self.enabled:
@@ -101,8 +104,7 @@ class NetMonitor:
 			ret["NET"][dev] = {}
 			ret["NET"][dev]["READ"] = float(self.devices[dev]["diff"][0]) / float(self.devices[dev]["max"][0])
 			ret["NET"][dev]["WRITE"] = float(self.devices[dev]["diff"][2]) / float(self.devices[dev]["max"][2])
-		if self.verbose:
-			print self.devices
+
 		return ret
 
 _plugin = NetMonitor()

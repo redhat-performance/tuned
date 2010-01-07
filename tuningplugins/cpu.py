@@ -17,6 +17,9 @@
 #
 
 import os
+import logging, tuned_logging
+
+log = logging.getLogger("tuned.cputuning")
 
 class CPUTuning:
 	def __init__(self):
@@ -24,6 +27,8 @@ class CPUTuning:
 		self.enabled = True
 
 	def init(self, config):
+		log.debug("Init")
+
 		self.config = config
 		if self.config.has_option("CPUTuning", "enabled"):
                         self.enabled = (self.config.get("CPUTuning", "enabled") == "True")
@@ -32,7 +37,10 @@ class CPUTuning:
 		except:
 			self.enabled = False
 
+		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
+
 	def cleanup(self):
+		log.debug("Cleanup")
 		if not self.enabled:
 			return
 		open("/dev/cpu_dma_latency", "w").write("100\n")
@@ -42,9 +50,11 @@ class CPUTuning:
 			return
 		loadavg = load.setdefault("CPU", 0.0)
 		if self.latency == 100 and loadavg < 0.2:
+			log.debug("Setting latency to 999")
 			self.latency = 999
 			open("/dev/cpu_dma_latency", "w").write("999\n")
 		if self.latency == 999 and loadavg > 0.2:
+			log.debug("Setting latency to 100")
 			self.latency = 100
 			open("/dev/cpu_dma_latency", "w").write("100\n")
 

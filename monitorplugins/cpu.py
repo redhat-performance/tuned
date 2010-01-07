@@ -17,6 +17,9 @@
 #
 
 import os
+import logging, tuned_logging
+
+log = logging.getLogger("tuned.cpumonitor")
 
 class CPUMonitor:
 	def __init__(self):
@@ -25,15 +28,17 @@ class CPUMonitor:
 
 	def __update__(self):
 		self.loadavg = float(open("/proc/loadavg").read().split()[0])
+		log.debug("Load is %s" % self.loadavg)
 
 	def init(self, config):
+		log.debug("Init")
 		self.config = config
+		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
 		if self.config.has_option("CPUMonitor", "enabled"):
                         self.enabled = (self.config.get("CPUMonitor", "enabled") == "True")
-		interval = self.config.getint("main", "interval")
 
 	def cleanup(self):
-		pass
+		log.debug("Cleanup")
 
 	def getLoad(self):
 		if not self.enabled:
