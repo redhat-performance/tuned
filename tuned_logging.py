@@ -36,17 +36,18 @@ def disableString(name):
 	level = logging._levelNames.get(str(name).upper(), logging.CRITICAL)
 	logging.disable(level)
 
-######
-
 logging.setLoggerClass(TunedLogger)
 
-console_handler = logging.StreamHandler()
-file_handler = logging.handlers.RotatingFileHandler("/tmp/tuned.log", maxBytes=200*1000, backupCount=2)
+# intialization
 
 tuned_logger = logging.getLogger("tuned")
 tuned_logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(name)s: %(message)s")
+
+console_handler = logging.StreamHandler()
+file_handler = logging.handlers.RotatingFileHandler("/var/log/tuned.log", maxBytes=200*1000, backupCount=2)
+
 console_handler.setFormatter(formatter)
 file_handler.setFormatter(formatter)
 

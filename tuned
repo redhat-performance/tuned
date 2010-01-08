@@ -77,6 +77,7 @@ if __name__ == "__main__":
 	for (opt, val) in opts:
 		if   opt in ['-d', "--daemon"]:
 			daemon = True
+			log.switchToFile()
 		elif opt in ['-c', "--config"]:
 			cfgfile = val
 		elif opt in ['-D', "--debug"]:
