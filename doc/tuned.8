@@ -18,6 +18,9 @@ in the foreground without forking at startup.
 .TP 12
 .BI \-c "\fR, \fP" \--conffile=" conffile"
 Specify the name and path of the configuration file, default is \fB/etc/tuned.conf\fR.
+.TP 12
+.BI \-D "\fR, \fP" \--debug
+Sets the highest logging level. This could be very useful when having trouble with tuned.
 .SH BUGS
 Using NetworkManager and tuned in the same time will completely stop and start NetworkManager.
 The inconvenience is done by tuned, which is setting the power saving levels.
