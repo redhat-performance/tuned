@@ -23,6 +23,9 @@ from tuned_nettool import ethcard
 log = logging.getLogger("tuned.netmonitor")
 
 class NetMonitor:
+
+	config_section = "NetMonitor"
+
 	def __init__(self):
 		self.devices = {}
 		self.enabled = True
@@ -79,8 +82,8 @@ class NetMonitor:
 		log.debug("Init")
 
 		self.config = config
-		if self.config.has_option("NetMonitor", "enabled"):
-                        self.enabled = (self.config.get("NetMonitor", "enabled") == "True")
+		if self.config.has_option(self.config_section, "enabled"):
+                        self.enabled = (self.config.get(self.config_section, "enabled") == "True")
 		interval = self.config.getint("main", "interval")
 
 		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))

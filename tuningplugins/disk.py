@@ -22,6 +22,9 @@ import logging, tuned_logging
 log = logging.getLogger("tuned.disktuning")
 
 class DiskTuning:
+
+	config_section = "DiskTuning"
+
 	def __init__(self):
 		self.devidle = {}
 		self.enabled = True
@@ -44,9 +47,10 @@ class DiskTuning:
 		log.debug("Init")
 
 		self.config = config
+		if self.config.has_option(self.config_section, "enabled"):
+                        self.enabled = (self.config.get(self.config_section, "enabled") == "True")
+
 		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
-		if self.config.has_option("DiskTuning", "enabled"):
-                        self.enabled = (self.config.get("DiskTuning", "enabled") == "True")
 
 	def cleanup(self):
 		log.debug("Cleanup")

@@ -22,6 +22,9 @@ import logging, tuned_logging
 log = logging.getLogger("tuned.cputuning")
 
 class CPUTuning:
+
+	config_section = "CPUTuning"
+
 	def __init__(self):
 		self.latency = 100
 		self.enabled = True
@@ -30,8 +33,8 @@ class CPUTuning:
 		log.debug("Init")
 
 		self.config = config
-		if self.config.has_option("CPUTuning", "enabled"):
-                        self.enabled = (self.config.get("CPUTuning", "enabled") == "True")
+		if self.config.has_option(self.config_section, "enabled"):
+                        self.enabled = (self.config.get(self.config_section, "enabled") == "True")
 		try:
 			open("/dev/cpu_dma_latency", "w")
 		except:

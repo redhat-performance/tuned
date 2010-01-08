@@ -22,6 +22,9 @@ import logging, tuned_logging
 log = logging.getLogger("tuned.diskmonitor")
 
 class DiskMonitor:
+
+	config_section = "DiskMonitor"
+
 	def __init__(self):
 		self.devices = {}
 		self.enabled = True
@@ -52,8 +55,8 @@ class DiskMonitor:
 		log.debug("Init")
 
 		self.config = config
-		if self.config.has_option("DiskMonitor", "enabled"):
-			self.enabled = (self.config.get("DiskMonitor", "enabled") == "True")
+		if self.config.has_option(self.config_section, "enabled"):
+			self.enabled = (self.config.get(self.config_section, "enabled") == "True")
 
 		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
 

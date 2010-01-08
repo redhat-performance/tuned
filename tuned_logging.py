@@ -22,13 +22,7 @@ import logging.handlers
 class TunedLogger (logging.getLoggerClass()):
 
 	def setLevelString(self, name):
-		name = str(name)
-		if name.isdigit():
-			level = int(name)
-		else:
-			level = logging._levelNames.get(name.upper(), logging.NOTSET)
-
-		self.level = level
+		self.level = logging._levelNames.get(str(name).upper(), logging.NOTSET)
 
 	def switchToConsole(self):
 		self.addHandler(console_handler)
@@ -38,9 +32,13 @@ class TunedLogger (logging.getLoggerClass()):
 		self.addHandler(file_handler)
 		self.removeHandler(console_handler)
 
-logging.setLoggerClass(TunedLogger)
+def disableString(name):
+	level = logging._levelNames.get(str(name).upper(), logging.CRITICAL)
+	logging.disable(level)
 
 ######
+
+logging.setLoggerClass(TunedLogger)
 
 console_handler = logging.StreamHandler()
 file_handler = logging.handlers.RotatingFileHandler("/tmp/tuned.log", maxBytes=200*1000, backupCount=2)

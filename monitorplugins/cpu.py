@@ -22,6 +22,9 @@ import logging, tuned_logging
 log = logging.getLogger("tuned.cpumonitor")
 
 class CPUMonitor:
+
+	config_section = "CPUMonitor"
+
 	def __init__(self):
 		self.__update__()
 		self.enabled = True
@@ -33,9 +36,10 @@ class CPUMonitor:
 	def init(self, config):
 		log.debug("Init")
 		self.config = config
+		if self.config.has_option(self.config_section, "enabled"):
+			self.enabled = (self.config.get(self.config_section, "enabled") == "True")
+
 		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
-		if self.config.has_option("CPUMonitor", "enabled"):
-                        self.enabled = (self.config.get("CPUMonitor", "enabled") == "True")
 
 	def cleanup(self):
 		log.debug("Cleanup")

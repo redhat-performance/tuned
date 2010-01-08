@@ -23,6 +23,9 @@ from tuned_nettool import ethcard
 log = logging.getLogger("tuned.nettuning")
 
 class NetTuning:
+
+	config_section = "NetTuning"
+
 	def __init__(self):
 		self.devidle = {}
 		self.enabled = True
@@ -42,8 +45,8 @@ class NetTuning:
 		log.debug("Init")
 
 		self.config = config
-		if self.config.has_option("NetTuning", "enabled"):
-                        self.enabled = (self.config.get("NetTuning", "enabled") == "True")
+		if self.config.has_option(self.config_section, "enabled"):
+			self.enabled = (self.config.get(self.config_section, "enabled") == "True")
 
 		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
 
