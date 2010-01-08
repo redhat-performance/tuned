@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.7
+Version: 0.2.8
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -102,6 +102,9 @@ fi
 
 
 %changelog
+* Fri Jan 08 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.8-1
+- Adds logging support.
+
 * Fri Dec 11 2009 Thomas Woerner <twoerner@redhat.com> 0.2.7-1
 - Updated ktune to version 0.4-1
   - Supports start and stop options in profile scripts calls
