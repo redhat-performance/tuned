@@ -134,6 +134,7 @@ revert_sysctl() {
 }
 
 start() {
+    [ "$EUID" != "0" ] && exit 4
     ret=0
 
     load_sysctl
@@ -159,11 +160,13 @@ start() {
 }
 
 reload() {
+    [ "$EUID" != "0" ] && exit 4
     revert_sysctl
     load_sysctl
 }
 
 stop() {
+    [ "$EUID" != "0" ] && exit 4
     ret=0
 
     revert_sysctl
@@ -189,6 +192,8 @@ stop() {
 }
 
 status() {
+    [ "$EUID" != "0" ] && exit 4
+
     if [ ! -f "$VAR_SUBSYS_KTUNE" ]; then
 	echo $"ktune settings are not applied."
 	return 3
