@@ -22,8 +22,12 @@
 #
 
 import sys, os.path, getopt, atexit, signal
-import logging, tuned_logging
 
+TUNEDDIR = "/usr/share/tuned"
+if not TUNEDDIR in sys.path:
+	sys.path.append(TUNEDDIR)
+
+import logging, tuned_logging
 log = logging.getLogger("tuned")
 
 def usage():
@@ -82,10 +86,6 @@ if __name__ == "__main__":
 			cfgfile = val
 		elif opt in ['-D', "--debug"]:
 			debug = True
-
-	TUNEDDIR = "/usr/share/tuned"
-	if not TUNEDDIR in sys.path:
-		sys.path.append(TUNEDDIR)
 
 	from tuned import tuned
 

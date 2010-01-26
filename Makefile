@@ -72,6 +72,7 @@ install:
 	install -m 0644 tuned.py $(DESTDIR)/usr/share/$(NAME)/
 	install -m 0644 tuned_adm.py $(DESTDIR)/usr/share/$(NAME)/
 	install -m 0644 tuned_nettool.py $(DESTDIR)/usr/share/$(NAME)/
+	install -m 0644 tuned_logging.py $(DESTDIR)/usr/share/$(NAME)/
 	for file in $(FILES_tuningplugins); do \
 		install -m 0644 $$file $(DESTDIR)/usr/share/$(NAME)/tuningplugins; \
 	done
