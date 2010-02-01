@@ -1,3 +1,181 @@
+commit f5af4406ffeed8dc9b0d065e36aaec6ed231f6dd
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Feb 1 13:50:14 2010 +0100
+
+    tuned.spec: synchronized with Fedora changelog
+
+commit 7dbf7151f37588f61f2c57fe4f374e3bd8c7d145
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 26 16:19:51 2010 +0100
+
+    logging: initialization fix, module inclusion into result rpm package
+
+commit 98063947dd683e89e15aebca05fc464605fe479c
+Author: Thomas Woerner <twoerner@redhat.com>
+Date:   Fri Jan 22 19:00:41 2010 +0100
+
+    - ktune: added insufficient user rights test to start, reload, stop and status
+      service commands
+
+commit 53dc5e9d9f5bf563d8e42ed28909c5a9a91bcf5f
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jan 8 17:27:02 2010 +0100
+
+    Makefile: added missing filename with logging code
+
+commit a65d361b40fa2668902ad22443f098afa43924bb
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jan 8 17:13:25 2010 +0100
+
+    Changelog update
+
+commit 583be1877dcca96cca3833b4aa46e3b052c78d07
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jan 8 15:36:56 2010 +0100
+
+    tuned: fixed logging output in deamon mode, log filename change
+
+commit e57b96ddc3fd8093cde7c11238db3bbeefe35a87
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jan 8 14:54:31 2010 +0100
+
+    manpage update: added --debug option description
+
+commit d949fa39a113754c0d82978790c3f2ebf63d1dc9
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jan 8 14:04:13 2010 +0100
+
+    plugins: fixed logging level setting for plugins
+
+commit 0d94ee8f174867181777c9f1497ea86713714945
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 7 15:17:56 2010 +0100
+
+    tuned.conf: added new logging directives and description
+
+commit d0b5d0cc65c693ab21fff85d2cc2854c3fc08d6d
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 7 15:17:18 2010 +0100
+
+    tuned.py: logging level can be set separately for each module
+
+commit e0b52c07e55a3f2db4a9c021282bc2d0dcf1bf83
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 7 15:16:55 2010 +0100
+
+    tuned: added support for --debug option
+
+commit c39e1c389842f4ff5029576700923a156aeb5995
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 7 15:07:17 2010 +0100
+
+    tuned.py: logging support
+
+commit e45ed546240e33c563e39258cd8218d52959a8dd
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 7 15:05:29 2010 +0100
+
+    nettool: logging support
+
+commit 4f1d0f8d45acfe98243c77de309ee6edf5f08d7b
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 7 14:34:35 2010 +0100
+
+    plugins: basic logging support
+
+commit 52399d8451a7002cb3fd9a78cd64c6259beeff65
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 7 14:24:48 2010 +0100
+
+    tuned: basic logging
+
+commit 41570a1b26e586dae3ab691603b2bde32bfd9f13
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 7 13:58:09 2010 +0100
+
+    logging: adds logger class with few modifications
+
+commit 94b46b4e38fa056e21e35087681c06a00ad9d0ff
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Dec 21 13:14:45 2009 +0100
+
+    tuned_nettool.py: bz 542305 - [abrt] crash detected in tuned-0.2.5-2.fc12
+    
+    Some strange network cards (e.g. Unknown (0x1062)) are not supported
+    by 'ethtool'. The tool reports not very obviously:
+    
+    Cannot get device settings: Operation not permitted
+    Cannot get wake-on-lan settings: Operation not permitted
+    Cannot get link status: Operation not permitted
+
+commit da353c39e15022eb745adcd39d83e9d88da13ac2
+Author: Thomas Woerner <twoerner@redhat.com>
+Date:   Fri Dec 11 13:19:05 2009 +0100
+
+    - Updated ktune to version 0.4-1
+      - Supports start and stop options in profile scripts calls
+      - Fixed CMDLINE_ELEVATOR test (rhbz#496940#c9)
+
+commit 20ece57af84f5cacbd8e1378da16a2f1d60b1d0d
+Author: Thomas Woerner <twoerner@redhat.com>
+Date:   Fri Dec 11 13:01:44 2009 +0100
+
+    - new ktune version 0.4-1
+      - added support for start and stop options to profile scripts calls
+      - fixed CMDLINE_ELEVATOR test (rhbz#496940#c9)
+    - new README.ktune
+
+commit 9d9984b1808a100f4fc5a00c42082b85208a340d
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Dec 8 15:01:49 2009 +0100
+
+    - Fixed changelog
+
+commit 8d7ab53cbf88cfb889ea21e7f8169a5b692b4f77
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Dec 8 14:59:19 2009 +0100
+
+    - Updated ktune.sh script for laptop-battery-powersave profile with latest
+      ALPM mechanism
+    - Fixed ktune.sh script for laptop-battery-powersave profile to stop printing
+      errors when files in /sys are missing
+
+commit c3707d179d0b898df40fc501ff4af09ba1f315d4
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Dec 1 12:22:23 2009 +0100
+
+    tuned-spec: python in BuildRequires is sufficient (instead of pyhon-devel)
+
+commit 461ae6d2466cb47736ccbdf964e96c5c4b01d9bd
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Nov 26 11:33:11 2009 +0100
+
+    tuned.spec: bz 539949 - SELinux is preventing /usr/bin/python "write" access on tuned
+    
+    Added python-devel into BuildRequires. Compiled files (.pyc and .pyo) are now created automatically during package build.
+
+commit 70e3767f73be346060ef5d5e3e16763725a54707
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Fri Nov 6 17:15:08 2009 +0100
+
+    - Fix traceback when tuned was started with non-connected ethernet
+
+commit e4aad64bc7eb9947a19d8a3321ff82025517057c
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Nov 3 14:23:41 2009 +0100
+
+    - Moved from prerelease to normal
+    - Added missing ethtool requires
+
+commit 0603af7d5c251e11b13182aa78d4ebdfd33eedef
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Nov 3 14:03:00 2009 +0100
+
+    - Fixed 532209 - init priority wrong for ktune (Jan Vcelak)
+    - Fixed 530457 - [abrt] crash detected in tuned-0.2.5-0.1.fc12 (Jan Vcelak)
+    - Added detection of netcard supported speeds (Jan Vcelak)
+    - Fix ktune.sh script for stopping in regard to ALPM and CDROM polling (Phil Knirsch)
+
 commit 51c51d366f63ec5b4b4d509a2f23ec844646debf
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Nov 2 18:58:00 2009 +0100
