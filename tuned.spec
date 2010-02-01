@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.8
+Version: 0.2.9
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -102,8 +102,20 @@ fi
 
 
 %changelog
+* Mon Feb 01 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.9
+- New release.
+
+* Tue Jan 26 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.8-2
+- Included Thomas Woerner's patch checking user rights when executing
+  ktune service commands.
+- Included Jan Vcelak's patch fixing logging module initialization.
+
 * Fri Jan 08 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.8-1
-- Adds logging support.
+- New release. Adds logging support.
+
+* Mon Dec 21 2009 Jan Vcelak <jvcelak@redhat.com> 0.2.7-2
+- Fixed 542305 - [abrt] crash detected in tuned-0.2.5-2.fc12
+  Some ethernet cards are not supported by 'ethtool'.
 
 * Fri Dec 11 2009 Thomas Woerner <twoerner@redhat.com> 0.2.7-1
 - Updated ktune to version 0.4-1
