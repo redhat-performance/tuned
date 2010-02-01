@@ -102,7 +102,7 @@ fi
 
 
 %changelog
-* Mon Feb 01 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.9
+* Mon Feb 01 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.9-1
 - New release.
 
 * Tue Jan 26 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.8-2
