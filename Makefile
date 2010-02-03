@@ -116,6 +116,9 @@ install:
 	install -m 755 -d $(DESTDIR)/etc/tune-profiles
 	cp -a tune-profiles/* $(DESTDIR)/etc/tune-profiles
 
+	# Create log directory
+	mkdir -p $(DESTDIR)/var/log/tuned
+
 changelog:
 	git log > ChangeLog
 

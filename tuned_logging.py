@@ -16,8 +16,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+import os, os.path
 import logging
 import logging.handlers
+
+LOG_FILENAME="/var/log/tuned/tuned.log"
 
 class TunedLogger (logging.getLoggerClass()):
 
@@ -46,7 +49,12 @@ tuned_logger.setLevel(logging.INFO)
 formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(name)s: %(message)s")
 
 console_handler = logging.StreamHandler()
-file_handler = logging.handlers.RotatingFileHandler("/var/log/tuned.log", maxBytes=200*1000, backupCount=2)
+
+log_directory = os.path.dirname(LOG_FILENAME)
+if not os.path.exists(log_directory):
+	os.makedirs(log_directory)
+
+file_handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=200*1000, backupCount=2)
 
 console_handler.setFormatter(formatter)
 file_handler.setFormatter(formatter)

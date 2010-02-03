@@ -90,6 +90,7 @@ fi
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/sysconfig/ktune
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/sysctl.ktune
 %dir %attr(0755,root,root) %{_sysconfdir}/ktune.d
+%dir /var/log/tuned
 
 %files utils
 %defattr(-,root,root,-)
