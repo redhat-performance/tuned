@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.9
+Version: 0.2.10
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -103,6 +103,9 @@ fi
 
 
 %changelog
+* Wed Feb 03 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.10-1
+- Log file moved to separate directory.
+
 * Mon Feb 01 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.9-1
 - New release.
 

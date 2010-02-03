@@ -1,4 +1,22 @@
-commit f5af4406ffeed8dc9b0d065e36aaec6ed231f6dd
+commit 951aaba78d27f0e6a15b66b4f0387f943fcf7b30
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Feb 3 18:15:33 2010 +0100
+
+    logging: log file moved into separate directory
+
+commit ed3e42d48f82aed34c138236149ead50edc0b30a
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Feb 1 15:00:02 2010 +0100
+
+    tuned.spec: version typo in changelog
+
+commit 3be18f6c63db619a1c9ab102abe19d0197571fb5
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Feb 1 14:11:31 2010 +0100
+
+    ChangeLog update
+
+commit eb7f90f7e37ef6842262d9fafe9d537978623ba1
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Feb 1 13:50:14 2010 +0100
 
