@@ -1,18 +1,18 @@
 #!/bin/sh
 
-ALPM="medium_power"
+ALPM="min_power"
 
-# Set ALPM for all host adapters that support it
 set_alpm() {
-	for x in /sys/bus/scsi/devices/host*/scsi_host/host*/; do
-		hotplug="0"
-		if [ -e $x/sata_hotplug ]; then
-			hotplug="$(cat $x/sata_hotplug)"
-		fi
-		if [ "$hotplug" == "0" -a -e $x/link_power_management_policy ]; then
-			echo $1 > $x/link_power_management_policy
-		fi
-	done
+        for x in /sys/class/scsi_host/*; do
+                if [ -f $x/ahci_port_cmd ]; then
+                        port_cmd=`cat $x/ahci_port_cmd`;
+                        if [ $((0x$port_cmd & 0x240000)) = 0 -a -f $x/link_power_management_policy ]; then
+                                echo $1 >$x/link_power_management_policy;
+                        else
+                                echo "max_performance" >$x/link_power_management_policy;
+                        fi
+                fi
+        done
 }
 
 start() {
@@ -22,7 +22,7 @@ start() {
 
 # Disable ALPM for all host adapters that support it
 stop() {
-	set_alpm "max_power"
+	set_alpm "max_performance"
 	return 0
 }
 

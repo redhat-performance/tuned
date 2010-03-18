@@ -20,7 +20,7 @@ start() {
 	set_alpm ${ALPM}
 
 	# Enables USB autosuspend for all devices
-	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 1 > $i; done > /dev/null 2>&1
+	#for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 1 > $i; done > /dev/null 2>&1
 
 	# Enables multi core power savings for low wakeup systems
 	[ -e /sys/devices/system/cpu/sched_mc_power_savings ] && echo 1 > /sys/devices/system/cpu/sched_mc_power_savings
@@ -44,7 +44,7 @@ stop() {
 	set_alpm "max_performance"
 
 	# Disables USB autosuspend for all devices
-	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 0 > $i; done > /dev/null 2>&1
+	#for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 0 > $i; done > /dev/null 2>&1
 
 	# Disables multi core power savings for low wakeup systems
 	[ -e /sys/devices/system/cpu/sched_mc_power_savings ] && echo 0 > /sys/devices/system/cpu/sched_mc_power_savings
