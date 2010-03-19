@@ -17,12 +17,19 @@ set_alpm() {
 
 start() {
 	set_alpm ${ALPM}
+
+	# Disable HAL polling of CDROMS
+        for i in /dev/scd*; do hal-disable-polling --device $i; done > /dev/null 2>&1
+
 	return 0
 }
 
-# Disable ALPM for all host adapters that support it
 stop() {
 	set_alpm "max_performance"
+
+        # Enable HAL polling of CDROMS
+        for i in /dev/scd*; do hal-disable-polling --enable-polling --device $i; done > /dev/null 2>&1
+
 	return 0
 }
 

@@ -6,10 +6,11 @@ tuned \- dynamic adaptive system tuning daemon
 .SH DESCRIPTION
 \fBtuned\fR is a dynamic adaptive system tuning daemon
 that tunes system settings dynamically depending on
-usage. It does so by monitoring the usage of several system components
-periodically. Based on that information components will be put into
-lower or higher power saving modes to adapt to the current usage. Currently
-only ethernet network and ATA harddisk devices are implemented.
+usage. For each hardware subsystem a specific monitoring plugin collects data
+periodically. This information is then used by tuning plugins to change system
+settings to lower or higher power saving modes in order to adapt to the current
+usage. Currently monitoring and tuning plugins for CPU, ethernet network and ATA
+harddisk devices are implemented.
 .SH OPTIONS
 .TP 12
 .BI \-d "\fR, \fP" \--daemon
@@ -21,20 +22,14 @@ Specify the name and path of the configuration file, default is \fB/etc/tuned.co
 .TP 12
 .BI \-D "\fR, \fP" \--debug
 Sets the highest logging level. This could be very useful when having trouble with tuned.
-.SH BUGS
-Using NetworkManager and tuned in the same time will completely stop and start NetworkManager.
-The inconvenience is done by tuned, which is setting the power saving levels.
-This happens because the network device will loose it's physical
-link for a very short time when it performs a power saving switch and
-NetworkManager can not distinguish this from a connectivity loss. This will be
-resolved in future versions of tuned and NM where NM will gain the mechanism to
-switch speeds for network devices.
 .SH "FILES"
 .nf
 /etc/tuned.conf
+/usr/share/doc/tuned-*/README
 .SH "SEE ALSO"
 .LP
 tuned.conf(5)
+tuned-adm(1)
 .SH AUTHOR
 Written by Phil Knirsch <pknirsch@redhat.com>.
 .SH REPORTING BUGS

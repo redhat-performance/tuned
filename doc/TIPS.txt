@@ -1,7 +1,9 @@
 === Simple user tips for improving power usage ===
 * Use a properly dimensioned system for the job (no need for overpowered systems for simple Desktop use e.g.).
 * For servers consolidate services on fewer systems to maximize efficiency of each system.
+* For a server farm consolidating all physical machines on one bigger server and then using Virtualization.
 * Enforce turning of machines that are not used (e.g. company policy).
+* Try to establish a company culture that is Green "aware", including but not limited to the above point.
 * Unplug and/or turn of peripherals that aren't used (e.g. external USB devices, monitors, printers, scanners).
 * Turn of unused hardware already in BIOS.
 * Disable power hungry features.
@@ -30,7 +32,8 @@
 
 === Simple programmer tips for improving power usage ===
 * Avoid unnecessary work/computation
-* Wake up only when necessary
+* Use efficient algorithms 
+* Wake up only when necessary/real work is pending
 * Do not actively poll in programs or use short regular timeouts, rather react to events 
 * If you wake up, do everything at once (race to idle) and as fast as possible
 * Use large buffers to avoid frequent disk access. Write one large block at a time

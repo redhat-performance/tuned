@@ -27,7 +27,10 @@ tuned-adm \- commandline tool for switching between different tuning profiles
 .BR [ " help ", " list ", " profile <profile> ", " off " ]
 .br
 .SH DESCRIPTION
-This command line utility allows user to switch between user definable tuning profiles. Several predefined profiles are already included for some of the more common cases.
+This command line utility allows user to switch between user definable tuning profiles. Several predefined profiles are already included for some of the more common cases. Although the profiles typically refer to a common use case you can of course switch to any profile on any system. So switching to the laptop-battery-powersave profile on a server will activate this profile on it. This way, depending on your requirements you can select any of the profiles that fits your needs. You can even create your own profile, either based on one of the existing ones by copying it or make a completely new one. The profiles are stored in subdirectories below /etc/tune-profiles.
+
+The power saving profiles contain settings that are typically not enabled by default as they will noticeably impact the latency/performance of your system as opposed to the power saving mechanisms we have enabled by default. On the other hand the performance profiles disable the additional power saving mechanisms of tuned and ktune as they would negatively impact the performance tuning, be it throughput or latency.
+
 .SH "OPTIONS"
 
 .SS
@@ -53,27 +56,31 @@ At the moment we're providing the following pre defined profiles:
 
 .TP
 .BI "desktop-powersave"
-Very light powersaving profile directed at desktop systems.
+A powersaving profile directed at desktop systems. Enables ALPM powersaving for SATA host adapters as well as the CPU, ethernet and disk plugins of tuned.
 
 .TP
 .BI server-powersave
-Very light powersaving profile directed at server systems.
+A powersaving profile directed at server systems. Enables ALPM powersaving for SATA host adapters, disables CD-ROM polling via hal and activates the CPU and disk plugins of tuned.
 
 .TP
 .BI laptop-ac-powersave
-Medium powersaving profile directed at laptops running on AC.
+Medium powersaving profile directed at laptops running on AC. Enables ALPM powersaving for SATA host adapters,  WiFi power saving as well as CPU, ethernet and disk plugins of tuned.
 
 .TP
 .BI laptop-battery-powersave
-Strong powersaving profile directed at laptops running on battery. This profile will affect the overall performance of the system as a tradeoff for typically longer running time on battery power.
+Strong powersaving profile directed at laptops running on battery. It activates all power saving mechanisms from the previous profiles plus it enables multi core power savings scheduler for low wakeup systems and makes sure the ondemand governor is active and the AC97 audio power saving is enabled. This profile can be used for any kind of system, not only laptops on battery power in order to save the maximum amount of power. The tradeoff for this profile is a noticeable impact on performance, specifically latency of disk and network IO. 
 
 .TP
 .BI throughput-performance
-Sever profile for typical througput performance tuning.
+Sever profile for typical throughput performance tuning. Disables tuned and ktune power saving mechanisms and enables sysctl settings that improve the throughput performance of your disk and network IO and switches to the deadline scheduler.
 
 .TP
 .BI latency-performance
-Sever profile for typical latency performance tuning.
+Sever profile for typical latency performance tuning. Disables tuned and ktune power saving mechanisms and enables sysctl settings that improve the latency performance of your network IO.
+
+.SH "FILES"
+.nf
+/etc/tune-profiles/*
 
 .SH "SEE ALSO"
 .BR tuned (8)

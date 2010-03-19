@@ -17,12 +17,20 @@ set_alpm() {
 
 start() {
 	set_alpm ${ALPM}
+
+        # Enable power saving mode for Wi-Fi cards
+        for i in /sys/bus/pci/devices/*/power_level ; do echo 5 > $i ; done > /dev/null 2>&1
+
 	return 0
 }
 
 # Disable ALPM for all host adapters that support it
 stop() {
 	set_alpm "max_performance"
+
+        # Reset power saving mode for Wi-Fi cards
+        for i in /sys/bus/pci/devices/*/power_level ; do echo 0 > $i ; done > /dev/null 2>&1
+
 	return 0
 }
 

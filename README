@@ -36,8 +36,8 @@ switching it on via chkconfig:
 After that the daemon will run automatically and monitor the
 usage of various system components. Based on that information
 components will then be put into lower or higher power saving
-modes to adapt to the current usage. Currently only ethernet
-network and and ATA harddisk devices are implemented.
+modes to adapt to the current usage. Currently plugins for CPU,
+ethernet network and and ATA harddisk devices are implemented.
 
 The config file /etc/tuned.conf contains several sections in
 INI style. There is always a "main" section which controls
@@ -53,17 +53,28 @@ Currently only 1 option for plugins is available:
 enabled: Enabled or disable the plugin. Default is True.
          Any other value disables it.
 
-WARNING: At the moment there is a small incompatibility with
-tuned and NetworkManager which will results in connectivity
-loss if you are using tuned and your network devices are
-controlled by NetworkManager. This will be fixed in a future
-version of tuned and NetworkManager. At the moment there
-are two workarounds:
 
-1) Don't use NetworkManager for your Ethernet devices but
-configure them with system-config-network and enable the
-network service.
-2) Disabled the network tuning in tuned by editing
-/etc/tuned.conf and uncomment the
-# enabled=False
-line in the NetTuning section.
+Monitoring/tuning plugins in detail
+-----------------------------------
+
+ - CPU
+   This plugin pair monitors the CPU usage of the system. If the current
+   workload of it is very low (uptime smaller than 0.2) it will switch
+   the system wide PM-QOS setting to 999 usec. If the load should get
+   higher again the PM-QOS latency will be lowered to 100 again. More details
+   about PM-QOS can be found here http://www.lesswatts.org/projects/power-qos/
+
+ - Disk
+   This plugin pair monitors usage of every disk in the system. For each
+   harddisk we check how long they have been in idle mode. The longer they are
+   the more we raise the power saving features for that drive and allow it to
+   actually spin down. As soon as it is being used we then reduce the power
+   savings for it and deactivate the automatic spin down again at higher
+   performance levels again.
+
+ - Net
+   This plugin pair monitors usage of network devices. At startup it checks
+   what speed the interfaces have. If at any time the utilization of any
+   interface falls below 5% of the possible maximum speed we then renegotiate
+   the speed of the interface at 100mbit. In case utilization goes up again
+   we renegotiate to the full speed once more.
