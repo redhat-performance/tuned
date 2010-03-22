@@ -34,7 +34,9 @@ Options:
   -h, --help  show this help message and exit
 
 commands:
-  list                           list all available profiles
+  help                           show this help message and exit
+  list                           list all available and active profiles
+  active                         show current active profile
   off                            switch off all tunning
   profile                        <profile>    switch to given profile
 """
@@ -61,6 +63,10 @@ if __name__ == "__main__":
 		print >>sys.stderr, ("Missing arguments.")
 		usage()
 		sys.exit(1)
+
+	if args[0] == "help":
+		usage()
+		sys.exit(0)
 
 	TUNEDDIR="/usr/share/tuned"
 	if TUNEDDIR not in sys.path:

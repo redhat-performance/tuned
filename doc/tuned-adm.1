@@ -24,7 +24,7 @@ tuned-adm \- commandline tool for switching between different tuning profiles
 .SH SYNOPSIS
 .B tuned-adm 
 .B 
-.BR [ " help ", " list ", " profile <profile> ", " off " ]
+.BR [ " help ", " list ", " active ", " profile <profile> ", " off " ]
 .br
 .SH DESCRIPTION
 This command line utility allows user to switch between user definable tuning profiles. Several predefined profiles are already included for some of the more common cases. Although the profiles typically refer to a common use case you can of course switch to any profile on any system. So switching to the laptop-battery-powersave profile on a server will activate this profile on it. This way, depending on your requirements you can select any of the profiles that fits your needs. You can even create your own profile, either based on one of the existing ones by copying it or make a completely new one. The profiles are stored in subdirectories below /etc/tune-profiles.
@@ -43,6 +43,10 @@ Print out the list of commands. It's also the default if you start tuned-adm wit
 List all available profiles.
 
 .TP
+.B active
+Show current active profile.
+
+.TP
 .B profile <profile>
 Switches to the given profilename. If none is given or no valid one is given the command gracefully exits without performing any operation.
 
@@ -53,6 +57,10 @@ set to previous settings.
 
 .SH PREDEFINED PROFILES
 At the moment we're providing the following pre defined profiles:
+
+.TP
+.BI "default"
+This is the default powersaving profile. It is the lowest of the available profiles in regard to powersaving and only enables CPU and disk plugins of tuned.
 
 .TP
 .BI "desktop-powersave"

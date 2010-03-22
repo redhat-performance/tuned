@@ -8,7 +8,7 @@ MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
 DIRS = doc contrib tuningplugins monitorplugins ktune
-FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned_nettool.py tuned_logging.py
+FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned-adm.conf tuned_nettool.py tuned_logging.py
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
 FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
@@ -115,6 +115,7 @@ install:
 	# Install tune-profiles
 	install -m 755 -d $(DESTDIR)/etc/tune-profiles
 	cp -a tune-profiles/* $(DESTDIR)/etc/tune-profiles
+	install -m 0644 tuned-adm.conf $(DESTDIR)//etc/tune-profiles/active-profile
 
 	# Create log directory
 	mkdir -p $(DESTDIR)/var/log/tuned

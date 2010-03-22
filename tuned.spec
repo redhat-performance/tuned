@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.10
+Version: 0.2.11
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -81,6 +81,7 @@ fi
 %{_sbindir}/tuned-adm
 # consolehelper hard link
 %{_bindir}/tuned-adm
+%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/tune-profiles/active-profile
 %{_sysconfdir}/tune-profiles
 %{_datadir}/tuned
 %{_mandir}/man1/*
@@ -103,6 +104,18 @@ fi
 
 
 %changelog
+* Mon Mar 22 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.11-1
+- Added support for display of currently active profile
+- Fix missing help command
+
+* Fri Mar 19 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.11-1
+- Large update to documentation and manpages
+- Updated several of the profiles
+
+* Thu Mar 18 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.11-1
+- Updated ALPM powersave code in the various powersave profiles
+- Disabled USB autosuspend in laptop-battery-powersave for now
+
 * Wed Feb 03 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.10-1
 - Log file moved to separate directory.
 

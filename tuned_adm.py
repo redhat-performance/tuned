@@ -30,6 +30,8 @@ class Tuned_adm:
 	def run(self, args):
 		if   args[0] == "list":
 			self.list()
+		elif args[0] == "active":
+			self.active()
 		elif args[0] == "off":
 			if not os.getuid()==0:
 				print >>sys.stderr, "Only root can run this script";
@@ -51,11 +53,18 @@ class Tuned_adm:
 			if len(modes) > 0:
 				print "Modes: "
 				for i in range(len(modes)):
-					print modes[i]
+					if modes[i] != "active-profile":
+						print modes[i]
 			else:
 				print "No profiles defined."
+			self.active()
+
+	def active(self):
+		profile = open(self.profile_dir+"/active-profile", "r").read()
+		print "Current active profile: %s" % profile
 
 	def off(self):
+		open(self.profile_dir+"/active-profile", "w").write("off")
 		os.system("rm -rf /etc/ktune.d/*.conf")
 		os.system("rm -rf /etc/ktune.d/*.sh")
 		if os.path.exists("/etc/sysconfig/ktune.bckp"):
@@ -86,6 +95,7 @@ class Tuned_adm:
 			modes = os.listdir(self.profile_dir)
 			if modes > 0:
 				print 'Switching to profile %s' % args[0]
+				open(self.profile_dir+"/active-profile", "w").write(args[0])
 				if os.path.exists('/etc/ktune.d/tunedadm.sh'):
 					os.remove('/etc/ktune.d/tunedadm.sh')
 				if os.path.exists('/etc/ktune.d/tunedadm.conf'):
