@@ -1,3 +1,22 @@
+commit 89da4e25e135b35d5deff6f69965062fd0350cce
+Merge: 62cd551 4c89a38
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Mar 23 12:43:01 2010 +0100
+
+    Merge branch 'master' of ssh://git.fedorahosted.org/git/tuned
+
+commit 62cd55141dbc0e29f369ec227a779626e3aa275e
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Tue Mar 23 12:42:27 2010 +0100
+
+    - Added missing tuned-adm.conf file
+
+commit 4c89a3865ef24c592005c165b202f31a0fd525d0
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 23 11:59:21 2010 +0100
+
+    minor changes, changelog update
+
 commit cad3726c321885a6e5db2dbb15c77de3a866f662
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Mon Mar 22 19:14:34 2010 +0100
