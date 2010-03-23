@@ -1,3 +1,30 @@
+commit cad3726c321885a6e5db2dbb15c77de3a866f662
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Mon Mar 22 19:14:34 2010 +0100
+
+    - Added support for display of currently active profile
+    - Fix missing help command
+
+commit 16cad923e0fcfe0b8b119917ae4d8ed5f8968734
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Fri Mar 19 17:38:41 2010 +0100
+
+    - Large update to documentation and manpages
+    - Updated several of the profiles
+
+commit db9c8a82031fa583dc50c18084fe3ca7b47cef4f
+Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
+Date:   Thu Mar 18 14:28:48 2010 +0100
+
+    - Updated ALPM powersave code in the various powersave profiles
+    - Disabled USB autosuspend in laptop-battery-powersave for now
+
+commit 4bfefca84ea64b98b6ce07759477b95afd202094
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Feb 3 18:17:31 2010 +0100
+
+    changelog update
+
 commit 951aaba78d27f0e6a15b66b4f0387f943fcf7b30
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Feb 3 18:15:33 2010 +0100

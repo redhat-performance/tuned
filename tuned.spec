@@ -107,12 +107,8 @@ fi
 * Mon Mar 22 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.11-1
 - Added support for display of currently active profile
 - Fix missing help command
-
-* Fri Mar 19 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.11-1
 - Large update to documentation and manpages
 - Updated several of the profiles
-
-* Thu Mar 18 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.11-1
 - Updated ALPM powersave code in the various powersave profiles
 - Disabled USB autosuspend in laptop-battery-powersave for now
 
