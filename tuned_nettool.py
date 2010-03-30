@@ -115,7 +115,7 @@ class Nettool:
 
 		effective_mode = mode & self.__calculate_mode(self.supported_modes)
 
-		log.debug("%s: set_speed(%d) - effective_mode 0x%03x" % (self.interface, speed, effective_mode))
+		log.debug("%s: set_speed(%d) - effective_mode 0x%03x" % (self.__interface, speed, effective_mode))
 
 		if self.__set_advertise(effective_mode):
 			self.update()
