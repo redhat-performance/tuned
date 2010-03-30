@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.11
+Version: 0.2.12
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -104,6 +104,9 @@ fi
 
 
 %changelog
+* Tue Mar 30 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.12-1
+- Fixed 577983 - AttributeError: Nettool instance has no attribute 'interface'
+
 * Mon Mar 22 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.11-1
 - Added support for display of currently active profile
 - Fix missing help command

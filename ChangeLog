@@ -1,3 +1,17 @@
+commit ce20fa296e35bc43f69107daa581c03fe2950759
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 30 10:22:21 2010 +0200
+
+    bug fix - rhbz #577983
+    
+    tuned: AttributeError: Nettool instance has no attribute 'interface'
+
+commit e2736a96f2963ff60b03e7db3900942072024c61
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 23 13:49:38 2010 +0100
+
+    changelog update
+
 commit 89da4e25e135b35d5deff6f69965062fd0350cce
 Merge: 62cd551 4c89a38
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
