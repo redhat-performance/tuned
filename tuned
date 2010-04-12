@@ -78,21 +78,29 @@ if __name__ == "__main__":
 	daemon = False
 	cfgfile = "/etc/tuned.conf"
 	debug = False
+	is_superuser = os.getuid() == 0
+
 	for (opt, val) in opts:
 		if   opt in ['-d', "--daemon"]:
 			daemon = True
-			log.switchToFile()
 		elif opt in ['-c', "--config"]:
 			cfgfile = val
 		elif opt in ['-D', "--debug"]:
 			debug = True
 
-	from tuned import tuned
-
-	tuned.init(TUNEDDIR, cfgfile, debug = debug)
+	if not is_superuser:
+		if daemon:
+			log.critical("Superuser permissions are needed.")
+			sys.exit(1)
+		else:
+			log.warn("Superuser permissions are needed. Most tunings will not work!")
 
 	if daemon:
+		log.switchToFile()
 		daemonize()
+
+	from tuned import tuned
+	tuned.init(TUNEDDIR, cfgfile, debug = debug)
 
 	atexit.register(logging.shutdown)
 	atexit.register(tuned.cleanup)
