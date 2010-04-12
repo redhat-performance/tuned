@@ -20,7 +20,19 @@ import os, os.path
 import logging
 import logging.handlers
 
+# configuration
+
 LOG_FILENAME="/var/log/tuned/tuned.log"
+LOG_FILE_MAXBYTES=100*1000
+LOG_FILE_COUNT=2
+
+# supportive functions
+
+def disableString(name):
+	level = logging._levelNames.get(str(name).upper(), logging.CRITICAL)
+	logging.disable(level)
+
+# customized logger
 
 class TunedLogger (logging.getLoggerClass()):
 
@@ -28,36 +40,43 @@ class TunedLogger (logging.getLoggerClass()):
 		self.level = logging._levelNames.get(str(name).upper(), logging.NOTSET)
 
 	def switchToConsole(self):
-		self.addHandler(console_handler)
-		self.removeHandler(file_handler)
+		self._setupConsole()
+
+		self.addHandler(self._console_handler)
+		self.removeHandler(self._file_handler)
 
 	def switchToFile(self):
-		self.addHandler(file_handler)
-		self.removeHandler(console_handler)
+		self._setupFile()
 
-def disableString(name):
-	level = logging._levelNames.get(str(name).upper(), logging.CRITICAL)
-	logging.disable(level)
+		self.addHandler(self._file_handler)
+		self.removeHandler(self._console_handler)
+
+	@classmethod
+	def _setupConsole(cls):
+		if cls._console_handler == None:
+			cls._console_handler = logging.StreamHandler()
+			cls._console_handler.setFormatter(cls._formatter)
+
+	@classmethod
+	def _setupFile(cls):
+		if cls._file_handler == None:
+			log_directory = os.path.dirname(LOG_FILENAME)
+			if not os.path.exists(log_directory):
+				os.makedirs(log_directory)
+
+			cls._file_handler = logging.handlers.RotatingFileHandler(LOG_FILENAME,
+					maxBytes=LOG_FILE_MAXBYTES, backupCount=LOG_FILE_COUNT)
+			cls._file_handler.setFormatter(cls._formatter)
+
+TunedLogger._formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(name)s: %(message)s")
+TunedLogger._console_handler = None;
+TunedLogger._file_handler = None;
+
+# initialization
 
 logging.setLoggerClass(TunedLogger)
-
-# intialization
-
 tuned_logger = logging.getLogger("tuned")
 tuned_logger.setLevel(logging.INFO)
-
-formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(name)s: %(message)s")
-
-console_handler = logging.StreamHandler()
-
-log_directory = os.path.dirname(LOG_FILENAME)
-if not os.path.exists(log_directory):
-	os.makedirs(log_directory)
-
-file_handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=200*1000, backupCount=2)
-
-console_handler.setFormatter(formatter)
-file_handler.setFormatter(formatter)
 
 tuned_logger.switchToConsole()
 
