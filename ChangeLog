@@ -1,3 +1,37 @@
+commit eb141446432d96f84e223b8e752965bbb36fb44b
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue May 4 14:15:29 2010 +0200
+
+    removing global /etc/sysctl.ktune
+
+commit 9e5a9880a0c00fd88fbea6caf443b4c809c7b994
+Author: Thomas Woerner <twoerner@redhat.com>
+Date:   Tue May 4 11:46:06 2010 +0200
+
+    - use "sysctl -e -p" to apply settings from SYSCTL_POST (/etc/sysctl.conf) to
+      be consistent with /etc/rc.sysinit (rhbz#577971)
+
+commit 6e17f8c329240aaf3cd4bf54d0857bd4ac1986bb
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Apr 12 14:32:51 2010 +0200
+
+    tuned: added superuser permissions check
+    
+    Running on foreground without superuser permissions emits warning.
+    Running as daemon without superuser permissions causes graceful crash.
+
+commit 9e1c4960b8b763ae07d79eb8ed1f6e4a2580c62d
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Apr 12 13:59:09 2010 +0200
+
+    logging: handlers initialization by need
+
+commit 7e8fc881d077a6fb53d559a2d034d6beb0bb58ee
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 30 14:28:43 2010 +0200
+
+    changelog, new version
+
 commit ce20fa296e35bc43f69107daa581c03fe2950759
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Mar 30 10:22:21 2010 +0200

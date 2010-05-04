@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.12
+Version: 0.2.13
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -103,6 +103,10 @@ fi
 
 
 %changelog
+* Tue May 04 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.13-1
+- Fixed 588736 - tuned should not apply /etc/sysctl.ktune settings (Jan Vcelak)
+- Fixed 577971 - error: "net.bridge.bridge-nf-call-ip6tables" is an unknown key (Thomas Woerner)
+
 * Tue Mar 30 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.12-1
 - Fixed 577983 - AttributeError: Nettool instance has no attribute 'interface'
 
