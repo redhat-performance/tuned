@@ -72,7 +72,7 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt ktune/README.ktune
+%doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt ktune/README.ktune doc/examples
 %{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
 %config(noreplace) %{_sysconfdir}/pam.d/tuned-adm
@@ -89,7 +89,6 @@ fi
 %{_mandir}/man8/*
 %attr(0755,root,root) %{_initddir}/ktune
 %config(noreplace) %attr(0644,root,root) %{_sysconfdir}/sysconfig/ktune
-%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/sysctl.ktune
 %dir %attr(0755,root,root) %{_sysconfdir}/ktune.d
 %dir /var/log/tuned
 

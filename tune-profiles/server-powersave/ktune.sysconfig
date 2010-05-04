@@ -2,7 +2,7 @@
 
 # This is the ktune sysctl file.  You can comment this out to prevent ktune
 # from applying its sysctl settings.
-SYSCTL="/etc/sysctl.ktune"
+#SYSCTL="/etc/sysctl.ktune"
 
 # Use *.conf files in the ktune configuration directory /etc/ktune.d.
 #   Value: yes|no,  default: yes
