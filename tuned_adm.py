@@ -16,106 +16,161 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import sys,os,glob
+import sys
+import os
+import os.path
+import glob
 
 class Tuned_adm:
-	def __init__(self):
-		self.profile_dir = "/etc/tune-profiles/"
 
+	def __init__(self):
+		self.profile_dir = None
+		self.active_file = None
 
 	def init(self, profile_dir):
-		self.profile_dir = profile_dir
+		self.profile_dir = os.path.normpath(profile_dir)
+		self.active_file = os.path.join(profile_dir, "active-profile")
 
+	def error(self, msg, exit_code = 1):
+		print >>sys.stderr, msg
+		sys.exit(exit_code)
+
+	def check_permissions(self):
+		if not os.getuid() == 0:
+			self.error("Only root can run this script.", 2)
 
 	def run(self, args):
-		if   args[0] == "list":
+		if args[0] == "list":
 			self.list()
 		elif args[0] == "active":
 			self.active()
 		elif args[0] == "off":
-			if not os.getuid()==0:
-				print >>sys.stderr, "Only root can run this script";
-				sys.exit(2)
+			self.check_permissions()
 			self.off()
 		elif args[0] == "profile":
-			if not os.getuid()==0:
-				print >>sys.stderr, "Only root can run this script";
-				sys.exit(2)
-			self.profile(args[1:])
+			if len(args) == 2:
+				self.check_permissions()
+				self.profile(args[1])
+			else:
+				self.error("Invalid profile specification. Use 'tuned-adm list' to get all available profiles.")
 		else:
-			print >>sys.stderr, "Nonexistent argument %s" % args[0]
-			return 1
-
+			self.error("Nonexistent argument '%s'." % args[0])
 
 	def list(self):
-		if os.path.exists(self.profile_dir):
-			modes = os.listdir(self.profile_dir)
-			if len(modes) > 0:
-				print "Modes: "
-				for i in range(len(modes)):
-					if modes[i] != "active-profile":
-						print modes[i]
-			else:
-				print "No profiles defined."
-			self.active()
+		active = self.get_active()
+		modes = os.listdir(self.profile_dir)
+		if len(modes) > 0:
+			print "Available profiles: "
+			for mode in modes:
+				dir = os.path.join(self.profile_dir, mode)
+				if not os.path.isdir(dir):
+					continue
 
-	def active(self):
-		profile = open(self.profile_dir+"/active-profile", "r").read()
-		print "Current active profile: %s" % profile
+				if mode == active:
+					print "- %s (active)" % mode
+				else:
+					print "- %s" % mode
+		else:
+			print "No profiles defined."
+
+	def get_active(self):
+		print self.active_file
+		file = open(self.active_file, "r")
+		profile = file.read()
+		file.close()
+		return profile
+
+	def set_active(self, profile):
+		file = open(self.active_file, "w")
+		file.write(profile)
+		file.close()
+
+	def verify_profile(self, profile):
+		path = os.path.abspath(os.path.join(self.profile_dir, profile))
+
+		if not path.startswith("%s/" % self.profile_dir):
+			return False
+
+		if not os.path.isdir(path):
+			return False
+
+		return True
+
+	def remove(self, wildcard, filter = None):
+		if filter == None:
+			filter = lambda file: True
+
+		files = glob.glob(wildcard)
+		for f in files:
+			if filter(f):
+				os.unlink(f)
 
 	def off(self):
-		open(self.profile_dir+"/active-profile", "w").write("off")
-		os.system("rm -rf /etc/ktune.d/*.conf")
-		os.system("rm -rf /etc/ktune.d/*.sh")
+		self.set_active("off")
+
+		# remove profile settings
+		self.remove("/etc/ktune.d/*.conf", os.path.islink)
+		self.remove("/etc/ktune.d/*.sh", os.path.islink)
+
+		# restore previous ktune settings (if present)
 		if os.path.exists("/etc/sysconfig/ktune.bckp"):
 			os.rename("/etc/sysconfig/ktune.bckp", "/etc/sysconfig/ktune")
 		if os.path.exists("/etc/tuned.conf.bckp") and os.path.exists("/etc/tuned.conf"):
 			os.rename("/etc/tuned.conf.bckp", "/etc/tuned.conf")
+
+		# disable services
 		os.system('service ktune stop')
 		os.system('service tuned stop')
 		os.system('chkconfig --del ktune')
 		os.system('chkconfig --del tuned')
 
-
-	def profile(self, args):
+	def profile(self, profile):
 		enablektune = False
 		enabletuned = False
-		if len(args) == 0:
-			print "No profile given. To list all available profiles please run:"
-			print "tuned-adm list"
-			return
-		if not os.path.exists(self.profile_dir+"/"+args[0]):
-			print "No profile with name %s found." % args[0]
-			return
-		if os.path.exists(self.profile_dir):
-			os.system('service ktune stop')
-			os.system('chkconfig --add ktune && chkconfig --level 345 ktune off')
-			os.system('service tuned stop')
-			os.system('chkconfig --add tuned && chkconfig --level 345 tuned off')
-			modes = os.listdir(self.profile_dir)
-			if modes > 0:
-				print 'Switching to profile %s' % args[0]
-				open(self.profile_dir+"/active-profile", "w").write(args[0])
-				if os.path.exists('/etc/ktune.d/tunedadm.sh'):
-					os.remove('/etc/ktune.d/tunedadm.sh')
-				if os.path.exists('/etc/ktune.d/tunedadm.conf'):
-					os.remove('/etc/ktune.d/tunedadm.conf')
-				file = ('%s/%s/ktune.sysconfig' % (self.profile_dir, args[0]))
-				if os.path.exists(file):
-					enablektune = True
-					os.rename('/etc/sysconfig/ktune', '/etc/sysconfig/ktune.bckp')
-					os.symlink(file, '/etc/sysconfig/ktune')
-				file = ('%s/%s/ktune.sh' % (self.profile_dir, args[0]))
-				if os.path.exists(file):
-					os.symlink(file, '/etc/ktune.d/tunedadm.sh')
-				file = ('%s/%s/sysctl.ktune' % (self.profile_dir, args[0]))
-				if os.path.exists(file):
-					os.symlink(file, '/etc/ktune.d/tunedadm.conf')
-				file = ('%s/%s/tuned.conf' % (self.profile_dir, args[0]))
-				if os.path.exists(file):
-					enabletuned = True
-					os.rename('/etc/tuned.conf', '/etc/tuned.conf.bckp')
-					os.symlink(file, '/etc/tuned.conf')
+
+		if not self.verify_profile(profile):
+			self.error("Invalid profile. Use 'tuned-adm list' to get all available profiles.")
+
+		profile_root = os.path.join(self.profile_dir, profile)
+
+		# disabling services
+
+		os.system('service ktune stop')
+		os.system('service tuned stop')
+		os.system('chkconfig --add ktune && chkconfig --level 345 ktune off')
+		os.system('chkconfig --add tuned && chkconfig --level 345 tuned off')
+
+		print >>sys.stderr, "Switching to profile '%s'" % profile
+		self.set_active(profile)
+
+		# ktune settings
+
+		self.remove('/etc/ktune.d/tunedadm.sh')
+		self.remove('/etc/ktune.d/tunedadm.conf')
+
+		file = os.path.join(profile_root, "ktune.sysconfig")
+		if os.path.isfile(file):
+			enablektune = True
+			os.rename('/etc/sysconfig/ktune', '/etc/sysconfig/ktune.bckp')
+			os.symlink(file, '/etc/sysconfig/ktune')
+
+		file = os.path.join(profile_root, 'ktune.sh')
+		if os.path.isfile(file):
+			os.symlink(file, '/etc/ktune.d/tunedadm.sh')
+
+		file = os.path.join(profile_root, 'sysctl.ktune')
+		if os.path.isfile(file):
+			os.symlink(file, '/etc/ktune.d/tunedadm.conf')
+
+		# tuned settings
+
+		file = os.path.join(profile_root, 'tuned.conf')
+		if os.path.isfile(file):
+			enabletuned = True
+			os.rename('/etc/tuned.conf', '/etc/tuned.conf.bckp')
+			os.symlink(file, '/etc/tuned.conf')
+
+		# enabling services
 
 		if enablektune:
 			os.system('service ktune start')
@@ -124,6 +179,5 @@ class Tuned_adm:
 		if enabletuned:
 			os.system('service tuned start')
 			os.system('chkconfig --add tuned && chkconfig --level 345 tuned on')
-
 
 tuned_adm = Tuned_adm()
