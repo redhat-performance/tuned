@@ -43,7 +43,7 @@ class Tuned_adm:
 		if args[0] == "list":
 			self.list()
 		elif args[0] == "active":
-			self.active()
+			print self.get_active()
 		elif args[0] == "off":
 			self.check_permissions()
 			self.off()
@@ -74,7 +74,6 @@ class Tuned_adm:
 			print "No profiles defined."
 
 	def get_active(self):
-		print self.active_file
 		file = open(self.active_file, "r")
 		profile = file.read()
 		file.close()
