@@ -23,11 +23,7 @@ import glob
 
 class Tuned_adm:
 
-	def __init__(self):
-		self.profile_dir = None
-		self.active_file = None
-
-	def init(self, profile_dir):
+	def __init__(self, profile_dir = "/etc/tune-profiles"):
 		self.profile_dir = os.path.normpath(profile_dir)
 		self.active_file = os.path.join(profile_dir, "active-profile")
 

@@ -24,47 +24,28 @@
 import os
 import sys
 import locale
-import getopt
 
 def usage():
 	print """
-Usage: tuned-adm [-p <profile_dir>] [-h] <command> [args] 
-Options:
-  -p <profile_dir>  directory with profiles
-  -h, --help  show this help message and exit
+Usage: tuned-adm <command>
 
 commands:
   help                           show this help message and exit
   list                           list all available and active profiles
   active                         show current active profile
   off                            switch off all tunning
-  profile                        <profile>    switch to given profile
+  profile <profile-name>         switch to given profile
 """
 
 if __name__ == "__main__":
-
-	profile_dir = "/etc/tune-profiles/"
-
-	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hp:", ["help"])
-	except getopt.error, e:
-		print >>sys.stderr, "Error parsing command-line arguments: %s" % e
-		usage()
-	        sys.exit(1)
-
-	for (opt, val) in opts:
-		if opt in ['-h', "--help"]:
-			usage()
-			sys.exit(0)
-		if opt in ['-p']:
-			profile_dir = val
+	args = sys.argv[1:]
 
 	if len(args) < 1:
-		print >>sys.stderr, ("Missing arguments.")
+		print >>sys.stderr, "Missing arguments."
 		usage()
 		sys.exit(1)
 
-	if args[0] == "help":
+	if args[0] in [ "help", "--help", "-h" ]:
 		usage()
 		sys.exit(0)
 
@@ -73,10 +54,5 @@ if __name__ == "__main__":
 		sys.path.insert(0, TUNEDDIR)
 
 	from tuned_adm import tuned_adm
-
-	tuned_adm.init(profile_dir)
-	if (tuned_adm.run(args)):
-		usage()
-		sys.exit(1)
-
+	tuned_adm.run(args)
 
