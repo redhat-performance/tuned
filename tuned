@@ -66,7 +66,7 @@ if __name__ == "__main__":
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "dc:D", ["daemon", "config=", "debug"])
 	except getopt.error, e:
-		print >>sys.stderr, ("Error parsing command-line arguments: %s", e)
+		print >>sys.stderr, ("Error parsing command-line arguments: %s" % e)
 		usage()
 	        sys.exit(1)
 
