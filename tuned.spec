@@ -77,6 +77,7 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned.conf
 %config(noreplace) %{_sysconfdir}/pam.d/tuned-adm
 %config(noreplace) %{_sysconfdir}/security/console.apps/tuned-adm
+%{_sysconfdir}/bash_completion.d/tuned.bash
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
 # consolehelper hard link

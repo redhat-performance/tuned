@@ -8,7 +8,7 @@ MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
 DIRS = doc doc/examples contrib tuningplugins monitorplugins ktune
-FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned-adm.conf tuned_nettool.py tuned_logging.py
+FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned-adm.conf tuned_nettool.py tuned_logging.py tuned.bash
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes
 FILES_examples = ktune/sysctl.ktune
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
@@ -117,6 +117,10 @@ install:
 	install -m 755 -d $(DESTDIR)/etc/tune-profiles
 	cp -a tune-profiles/* $(DESTDIR)/etc/tune-profiles
 	install -m 0644 tuned-adm.conf $(DESTDIR)//etc/tune-profiles/active-profile
+
+	# Install bash completion
+	mkdir -p $(DESTDIR)/etc/bash_completion.d
+	install -m 0644 tuned.bash $(DESTDIR)/etc/bash_completion.d/tuned.bash
 
 	# Create log directory
 	mkdir -p $(DESTDIR)/var/log/tuned
