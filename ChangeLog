@@ -1,3 +1,39 @@
+commit 00e2281db3a47ce158cefa44cbccb73e910135db
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jun 1 19:03:04 2010 +0200
+
+    bash completion for tuned and tuned-adm
+
+commit 0483497c7f832e304e606f2c87afafd4c282f9f7
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jun 1 17:58:19 2010 +0200
+
+    tuned-adm: removed '-p' option
+
+commit 3b370c5c2e169a14f2189c9a0a42653285cf945e
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jun 1 10:18:47 2010 +0200
+
+    tuned_adm: fixed active profile displaying
+
+commit 7e9001fdb2720e02494656518e5481fe966ceba4
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jun 1 10:12:15 2010 +0200
+
+    tuned: fixed error message when invalid arguments
+
+commit 4a4023fc19a1becc69fc62bc742cc47c18beb7c2
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon May 31 14:15:14 2010 +0200
+
+    tuned_adm: profile validity check and code cleanup
+
+commit 0a746648dfabdef61ce94d571ca429fdcfd9d3a8
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue May 4 15:30:27 2010 +0200
+
+    changelog, new version
+
 commit eb141446432d96f84e223b8e752965bbb36fb44b
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue May 4 14:15:29 2010 +0200

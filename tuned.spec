@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.13
+Version: 0.2.14
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -104,6 +104,10 @@ fi
 
 
 %changelog
+* Fri Jun 04 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.14-1
+- bash completion support
+- tuned-adm: profile validity check
+
 * Tue May 04 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.13-1
 - Fixed 588736 - tuned should not apply /etc/sysctl.ktune settings (Jan Vcelak)
 - Fixed 577971 - error: "net.bridge.bridge-nf-call-ip6tables" is an unknown key (Thomas Woerner)
