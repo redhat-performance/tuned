@@ -200,10 +200,14 @@ status() {
     fi
 
     echo $"Current ktune sysctl settings:"
-    keys=$(awk '/^[#;]/ { next } /=/ { match($1,"=") && $1=substr($1,1,RSTART-1); print $1 }' "$SAVE_FILE")
-    for key in $keys; do
-	$SYSCTL_GET $key
-    done
+    if [ -e $SAVE_FILE ]; then
+        keys=$(awk '/^[#;]/ { next } /=/ { match($1,"=") && $1=substr($1,1,RSTART-1); print $1 }' "$SAVE_FILE")
+        for key in $keys; do
+	    $SYSCTL_GET $key
+        done
+    else
+        echo $"None"
+    fi
 
     if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a $CMDLINE_ELEVATOR -ne 0 ]; then
 	echo
