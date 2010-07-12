@@ -40,6 +40,8 @@ class Tuned_adm:
 			self.list()
 		elif args[0] == "active":
 			self.active()
+			self.service_status("tuned")
+			self.service_status("ktune")
 		elif args[0] == "off":
 			self.check_permissions()
 			self.off()
@@ -69,6 +71,13 @@ class Tuned_adm:
 	def active(self):
 		print "Current active profile: %s" % self.get_active()
 
+	def service_status(self, service):
+		(enabled, running) = self.get_service_status(service)
+
+		print "Service %s: %s, %s" % (service,
+				"enabled" if enabled else "disabled",
+				"running" if running else "stopped")
+
 	def get_active(self):
 		file = open(self.active_file, "r")
 		profile = file.read()
@@ -79,6 +88,11 @@ class Tuned_adm:
 		file = open(self.active_file, "w")
 		file.write(profile)
 		file.close()
+
+	def get_service_status(self, service):
+		enabled = os.system("chkconfig %s" % service) == 0
+		running = os.system("service %s status >/dev/null 2>&1" % service) == 0
+		return (enabled, running)
 
 	def verify_profile(self, profile):
 		path = os.path.abspath(os.path.join(self.profile_dir, profile))
