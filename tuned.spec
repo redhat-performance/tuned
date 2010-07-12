@@ -82,15 +82,16 @@ fi
 %{_sbindir}/tuned-adm
 # consolehelper hard link
 %{_bindir}/tuned-adm
-%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/tune-profiles/active-profile
+%config(noreplace) %{_sysconfdir}/tune-profiles/active-profile
 %{_sysconfdir}/tune-profiles
 %{_datadir}/tuned
 %{_mandir}/man1/*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
 %attr(0755,root,root) %{_initddir}/ktune
-%config(noreplace) %attr(0644,root,root) %{_sysconfdir}/sysconfig/ktune
-%dir %attr(0755,root,root) %{_sysconfdir}/ktune.d
+%config(noreplace) %{_sysconfdir}/sysconfig/ktune
+%config(noreplace) %{_sysconfdir}/ktune.d/tunedadm.conf
+%dir %{_sysconfdir}/ktune.d
 %dir /var/log/tuned
 
 %files utils

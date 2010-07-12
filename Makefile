@@ -89,7 +89,7 @@ install:
 
 	# Install config file
 	mkdir -p $(DESTDIR)/etc
-	install -m 0644 tuned.conf $(DESTDIR)/etc
+	ln -s /etc/tune-profiles/default/tuned.conf $(DESTDIR)/etc/tuned.conf
 
 	mkdir -p $(DESTDIR)/etc/tune-profiles/
 
@@ -109,14 +109,15 @@ install:
 	install -m 755 -d $(DESTDIR)/etc
 	install -m 755 -d $(DESTDIR)/etc/ktune.d
 	install -m 755 -d $(DESTDIR)/etc/sysconfig
-	install -m 644 ktune/ktune.sysconfig $(DESTDIR)/etc/sysconfig/ktune
 	install -m 755 -d $(DESTDIR)/etc/rc.d/init.d
 	install -m 755 ktune/ktune.init $(DESTDIR)/etc/rc.d/init.d/ktune
+	ln -s /etc/tune-profiles/default/ktune.sysconfig $(DESTDIR)/etc/sysconfig/ktune
+	ln -s /etc/tune-profiles/default/sysctl.ktune $(DESTDIR)/etc/ktune.d/tunedadm.conf
 
 	# Install tune-profiles
 	install -m 755 -d $(DESTDIR)/etc/tune-profiles
 	cp -a tune-profiles/* $(DESTDIR)/etc/tune-profiles
-	install -m 0644 tuned-adm.conf $(DESTDIR)//etc/tune-profiles/active-profile
+	install -m 0644 tuned-adm.conf $(DESTDIR)/etc/tune-profiles/active-profile
 
 	# Install bash completion
 	mkdir -p $(DESTDIR)/etc/bash_completion.d
