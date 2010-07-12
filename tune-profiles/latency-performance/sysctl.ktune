@@ -1,7 +1,1 @@
-# ktune sysctl settings for latency tuning
-net.ipv4.conf.default.arp_filter=1
-net.ipv4.tcp_low_latency=1
-net.ipv4.tcp_window_scaling=0
-net.ipv4.tcp_rmem = 4096        87380   4194304
-net.ipv4.tcp_wmem = 4096        16384   4194304
-net.ipv4.tcp_mem = 196608       262144  393216
+# ktune sysctl
