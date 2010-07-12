@@ -98,6 +98,7 @@ fi
 %defattr(-,root,root,-)
 %doc doc/README.utils
 %doc doc/README.scomes
+%doc COPYING
 %{_sbindir}/varnetload
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
