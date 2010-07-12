@@ -39,7 +39,7 @@ class Tuned_adm:
 		if args[0] == "list":
 			self.list()
 		elif args[0] == "active":
-			print self.get_active()
+			self.active()
 		elif args[0] == "off":
 			self.check_permissions()
 			self.off()
@@ -53,21 +53,21 @@ class Tuned_adm:
 			self.error("Nonexistent argument '%s'." % args[0])
 
 	def list(self):
-		active = self.get_active()
 		modes = os.listdir(self.profile_dir)
 		if len(modes) > 0:
-			print "Available profiles: "
+			print "Available profiles:"
 			for mode in modes:
 				dir = os.path.join(self.profile_dir, mode)
 				if not os.path.isdir(dir):
 					continue
+				print "- %s" % mode
 
-				if mode == active:
-					print "- %s (active)" % mode
-				else:
-					print "- %s" % mode
+			self.active()
 		else:
 			print "No profiles defined."
+
+	def active(self):
+		print "Current active profile: %s" % self.get_active()
 
 	def get_active(self):
 		file = open(self.active_file, "r")
