@@ -2,14 +2,14 @@
 
 VAR_SUBSYS_KTUNE="/var/lock/subsys/ktune"
 
-CPUSPEED_SAVE_FILE="/var/run/ktune-cpuspeed.save"
-CPUSPEED_ORIG_GOV="var/run/ktune-cpuspeed-governor.save"
+CPUSPEED_SAVE_FILE="/var/run/tuned/ktune-cpuspeed.save"
+CPUSPEED_ORIG_GOV="/var/run/tuned/ktune-cpuspeed-governor.save"
 CPUSPEED_CFG="/etc/sysconfig/cpuspeed"
 CPUSPEED_INIT="/etc/init.d/cpuspeed"
 CPUS="/sys/devices/system/cpu*/cpufreq"
 
 THP_ENABLE="/sys/kernel/mm/redhat_transparent_hugepage/enabled"
-THP_SAVE="/var/run/ktune-thp.save"
+THP_SAVE="/var/run/tuned/ktune-thp.save"
 
 start() {
 	# Save currently enabled governor and/or cpuspeed config
