@@ -1,5 +1,7 @@
 #!/bin/sh
 
+VAR_SUBSYS_KTUNE="/var/lock/subsys/ktune"
+
 ALPM="min_power"
 
 set_alpm() {

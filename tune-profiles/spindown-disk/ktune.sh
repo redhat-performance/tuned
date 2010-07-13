@@ -2,6 +2,8 @@
 # Author of original script: Daniel Mach
 # Rewrite into profiles by: Marcela Mašláňová
 
+VAR_SUBSYS_KTUNE="/var/lock/subsys/ktune"
+
 ALPM="medium_power"
 
 # Set ALPM for all host adapters that support it
