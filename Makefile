@@ -8,7 +8,7 @@ MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
 DIRS = doc doc/examples contrib tuningplugins monitorplugins ktune
-FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned-adm.conf tuned_nettool.py tuned_logging.py tuned.bash
+FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned_nettool.py tuned_logging.py tuned.bash
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes
 FILES_examples = ktune/sysctl.ktune
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
@@ -16,6 +16,8 @@ FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/n
 FILES_monitorplugins = monitorplugins/cpu.py monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
 FILES_ktune = ktune/ktune.init ktune/ktune.sysconfig ktune/README.ktune
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
+
+DEFAULT_PROFILE = default
 
 distarchive: tag archive
 
@@ -89,7 +91,7 @@ install:
 
 	# Install config file
 	mkdir -p $(DESTDIR)/etc
-	ln -s /etc/tune-profiles/default/tuned.conf $(DESTDIR)/etc/tuned.conf
+	ln -s /etc/tune-profiles/$(DEFAULT_PROFILE)/tuned.conf $(DESTDIR)/etc/tuned.conf
 
 	mkdir -p $(DESTDIR)/etc/tune-profiles/
 
@@ -111,13 +113,13 @@ install:
 	install -m 755 -d $(DESTDIR)/etc/sysconfig
 	install -m 755 -d $(DESTDIR)/etc/rc.d/init.d
 	install -m 755 ktune/ktune.init $(DESTDIR)/etc/rc.d/init.d/ktune
-	ln -s /etc/tune-profiles/default/ktune.sysconfig $(DESTDIR)/etc/sysconfig/ktune
-	ln -s /etc/tune-profiles/default/sysctl.ktune $(DESTDIR)/etc/ktune.d/tunedadm.conf
+	ln -s /etc/tune-profiles/$(DEFAULT_PROFILE)/ktune.sysconfig $(DESTDIR)/etc/sysconfig/ktune
+	ln -s /etc/tune-profiles/$(DEFAULT_PROFILE)/sysctl.ktune $(DESTDIR)/etc/ktune.d/tunedadm.conf
 
 	# Install tune-profiles
 	install -m 755 -d $(DESTDIR)/etc/tune-profiles
 	cp -a tune-profiles/* $(DESTDIR)/etc/tune-profiles
-	install -m 0644 tuned-adm.conf $(DESTDIR)/etc/tune-profiles/active-profile
+	echo -n $(DEFAULT_PROFILE) >$(DESTDIR)/etc/tune-profiles/active-profile
 
 	# Install bash completion
 	mkdir -p $(DESTDIR)/etc/bash_completion.d
