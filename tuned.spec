@@ -93,6 +93,7 @@ fi
 %config(noreplace) %{_sysconfdir}/ktune.d/tunedadm.conf
 %dir %{_sysconfdir}/ktune.d
 %dir /var/log/tuned
+%dir /var/run/tuned
 
 %files utils
 %defattr(-,root,root,-)

@@ -128,6 +128,9 @@ install:
 	# Create log directory
 	mkdir -p $(DESTDIR)/var/log/tuned
 
+	# Create runtime directory
+	mkdir -p $(DESTDIR)/var/run/tuned
+
 changelog:
 	git log > ChangeLog
 
