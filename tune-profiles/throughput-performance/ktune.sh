@@ -3,28 +3,41 @@
 VAR_SUBSYS_KTUNE="/var/lock/subsys/ktune"
 
 CPUSPEED_SAVE_FILE="/var/run/tuned/ktune-cpuspeed.save"
-CPUSPEED_ORIG_GOV="/var/run/tuned/ktune-cpuspeed-governor.save"
+CPUSPEED_ORIG_GOV="/var/run/tuned/ktune-cpuspeed-governor-%s.save"
+CPUSPEED_STARTED="/var/run/tuned/ktune-cpuspeed-started"
 CPUSPEED_CFG="/etc/sysconfig/cpuspeed"
 CPUSPEED_INIT="/etc/init.d/cpuspeed"
-CPUS="/sys/devices/system/cpu*/cpufreq"
+CPUS="$(ls -d1 /sys/devices/system/cpu/cpu* | sed 's;^.*/;;' |  grep "cpu[0-9]\+")"
 
 THP_ENABLE="/sys/kernel/mm/redhat_transparent_hugepage/enabled"
 THP_SAVE="/var/run/tuned/ktune-thp.save"
 
 start() {
-	# Save currently enabled governor and/or cpuspeed config
-	cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor > $CPUSPEED_ORIG_GOV
-	if [ ! -e $CPUSPEED_SAVE_FILE -a -e $CPUSPEED_CFG ]; then
-		cp -p $CPUSPEED_CFG $CPUSPEED_SAVE_FILE
-		sed -e 's/^GOVERNOR=.*/GOVERNOR=performance/g' $CPUSPEED_SAVE_FILE > $CPUSPEED_CFG
-	fi
-
-	# Enable performance governor (best for maximum i/o throughput in most cases)
+	# Enable performance CPU governor (prefer cpuspeed)
 	if [ -e $CPUSPEED_INIT ]; then
-		/sbin/service cpuspeed restart > /dev/null 2>&1
+		if [ ! -e $CPUSPEED_SAVE_FILE -a -e $CPUSPEED_CFG ]; then
+			cp -p $CPUSPEED_CFG $CPUSPEED_SAVE_FILE
+			sed -e 's/^GOVERNOR=.*/GOVERNOR=performance/g' $CPUSPEED_SAVE_FILE > $CPUSPEED_CFG
+		fi
+
+		service cpuspeed status >/dev/null 2>&1
+		[ $? -eq 3 ] && touch $CPUSPEED_STARTED || rm -f $CPUSPEED_STARTED
+
+		service cpuspeed restart >/dev/null 2>&1
 	else
+		echo >/dev/stderr
+		echo "Suggestion: install 'cpuspeed' package to get best performance and latency." >/dev/stderr
+		echo "Falling back to 'performance' scaling governor for all CPUs." >/dev/stderr
+		echo >/dev/stderr
+
 		for cpu in $CPUS; do
-			echo performance > $cpu/scaling_governor
+			gov_file=/sys/devices/system/cpu/$cpu/cpufreq/scaling_governor
+			save_file=$(printf $CPUSPEED_ORIG_GOV $cpu)
+			rm -f $save_file
+			if [ -e $gov_file ]; then
+				cat $gov_file > $save_file
+				echo performance > $gov_file
+			fi
 		done
 	fi
 
@@ -36,27 +49,34 @@ start() {
 }
 
 stop() {
-	# Restore previous cpuspeed config
-	if [ -e $CPUSPEED_SAVE_FILE ]; then
-		cp -fp $CPUSPEED_SAVE_FILE $CPUSPEED_CFG
-		rm -f $CPUSPEED_SAVE_FILE
-	fi
-
-	# Re-enable previous governor
+	# Re-enable previous CPU governor
 	if [ -e $CPUSPEED_INIT ]; then
-		/sbin/service cpuspeed restart > /dev/null 2>&1
-	elif [ -e $CPUSPEED_ORIG_GOV ]; then
-		for cpu in $CPUS; do
-			echo $(cat $CPUSPEED_ORIG_GOV) > $cpu/scaling_governor
-		done
+		if [ -e $CPUSPEED_SAVE_FILE ]; then
+			cp -fp $CPUSPEED_SAVE_FILE $CPUSPEED_CFG
+			rm -f $CPUSPEED_SAVE_FILE
+		fi
+
+		if [ -e $CPUSPEED_STARTED ]; then
+			rm -f $CPUSPEED_STARTED
+			service cpuspeed stop >/dev/null 2>&1
+		else
+			service cpuspeed restart >/dev/null 2>&1
+		fi
 	else
 		for cpu in $CPUS; do
-			echo userspace > $cpu/scaling_governor
-			cat $cpu/cpuinfo_max_freq > $cpu/scaling_setspeed
+			cpufreq_dir=/sys/devices/system/cpu/$cpu/cpufreq
+			save_file=$(printf $CPUSPEED_ORIG_GOV $cpu)
+
+			if [ -e $cpufreq_dir/scaling_governor ]; then
+				if [ -e $save_file ]; then
+					cat $save_file > $cpufreq_dir/scaling_governor
+					rm -f $save_file
+				else
+					echo userspace > $cpufreq_dir/scaling_governor
+					cat $cpufreq_dir/cpuinfo_max_freq > $cpufreq_dir/scaling_setspeed
+				fi
+			fi
 		done
-	fi
-	if [ -e $CPUSPEED_ORIG_GOV ]; then
-		rm -f $CPUSPEED_ORIG_GOV
 	fi
 
 	# Restore transparent hugepages setting

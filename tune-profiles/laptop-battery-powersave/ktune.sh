@@ -3,11 +3,11 @@
 VAR_SUBSYS_KTUNE="/var/lock/subsys/ktune"
 
 CPUSPEED_SAVE_FILE="/var/run/tuned/ktune-cpuspeed.save"
-CPUSPEED_ORIG_GOV="/var/run/tuned/ktune-cpuspeed-governor.save"
+CPUSPEED_ORIG_GOV="/var/run/tuned/ktune-cpuspeed-governor-%s.save"
 CPUSPEED_STARTED="/var/run/tuned/ktune-cpuspeed-started"
 CPUSPEED_CFG="/etc/sysconfig/cpuspeed"
 CPUSPEED_INIT="/etc/init.d/cpuspeed"
-CPUS="/sys/devices/system/cpu*/cpufreq"
+CPUS="$(ls -d1 /sys/devices/system/cpu/cpu* | sed 's;^.*/;;' |  grep "cpu[0-9]\+")"
 
 ALPM="min_power"
 
@@ -35,7 +35,6 @@ start() {
 	[ -e /sys/devices/system/cpu/sched_mc_power_savings ] && echo 1 > /sys/devices/system/cpu/sched_mc_power_savings
 
 	# Enable ondemand CPU governor (prefer cpuspeed)
-	cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor > $CPUSPEED_ORIG_GOV
 	if [ -e $CPUSPEED_INIT ]; then
 		if [ ! -e $CPUSPEED_SAVE_FILE -a -e $CPUSPEED_CFG ]; then
 			cp -p $CPUSPEED_CFG $CPUSPEED_SAVE_FILE
@@ -53,7 +52,13 @@ start() {
 		echo >/dev/stderr
 
 		for cpu in $CPUS; do
-			echo ondemand > $cpu/scaling_governor
+			gov_file=/sys/devices/system/cpu/$cpu/cpufreq/scaling_governor
+			save_file=$(printf $CPUSPEED_ORIG_GOV $cpu)
+			rm -f $save_file
+			if [ -e $gov_file ]; then
+				cat $gov_file > $save_file
+				echo ondemand > $gov_file
+			fi
 		done
 	fi
 
@@ -93,18 +98,20 @@ stop() {
 			service cpuspeed restart >/dev/null 2>&1
 		fi
 	else
-		if [ -e $CPUSPEED_ORIG_GOV ]; then
-			OLD_GOVERNOR=$(cat $CPUSPEED_ORIG_GOV)
-			rm -f $CPUSPEED_ORIG_GOV
-			for cpu in $CPUS; do
-				echo $OLD_GOVERNOR > $cpu/scaling_governor
-			done
-		else
-			for cpu in $CPUS; do
-				echo userspace > $cpu/scaling_governor
-				cat $cpu/cpuinfo_max_freq > $cpu/scaling_setspeed
-			done
-		fi
+		for cpu in $CPUS; do
+			cpufreq_dir=/sys/devices/system/cpu/$cpu/cpufreq
+			save_file=$(printf $CPUSPEED_ORIG_GOV $cpu)
+
+			if [ -e $cpufreq_dir/scaling_governor ]; then
+				if [ -e $save_file ]; then
+					cat $save_file > $cpufreq_dir/scaling_governor
+					rm -f $save_file
+				else
+					echo userspace > $cpufreq_dir/scaling_governor
+					cat $cpufreq_dir/cpuinfo_max_freq > $cpufreq_dir/scaling_setspeed
+				fi
+			fi
+		done
 	fi
 
 	# Enable AC97 audio power saving
