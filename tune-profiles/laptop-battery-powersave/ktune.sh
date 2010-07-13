@@ -1,5 +1,14 @@
 #!/bin/sh
 
+VAR_SUBSYS_KTUNE="/var/lock/subsys/ktune"
+
+CPUSPEED_SAVE_FILE="/var/run/tuned/ktune-cpuspeed.save"
+CPUSPEED_ORIG_GOV="/var/run/tuned/ktune-cpuspeed-governor.save"
+CPUSPEED_STARTED="/var/run/tuned/ktune-cpuspeed-started"
+CPUSPEED_CFG="/etc/sysconfig/cpuspeed"
+CPUSPEED_INIT="/etc/init.d/cpuspeed"
+CPUS="/sys/devices/system/cpu*/cpufreq"
+
 ALPM="min_power"
 
 set_alpm() {
@@ -25,8 +34,28 @@ start() {
 	# Enables multi core power savings for low wakeup systems
 	[ -e /sys/devices/system/cpu/sched_mc_power_savings ] && echo 1 > /sys/devices/system/cpu/sched_mc_power_savings
 
-	# Enable ondemand governor (best for powersaving)
-	[ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ] && echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	# Enable ondemand CPU governor (prefer cpuspeed)
+	cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor > $CPUSPEED_ORIG_GOV
+	if [ -e $CPUSPEED_INIT ]; then
+		if [ ! -e $CPUSPEED_SAVE_FILE -a -e $CPUSPEED_CFG ]; then
+			cp -p $CPUSPEED_CFG $CPUSPEED_SAVE_FILE
+			sed -e 's/^GOVERNOR=.*/GOVERNOR=ondemand/g' $CPUSPEED_SAVE_FILE > $CPUSPEED_CFG
+		fi
+
+		service cpuspeed status >/dev/null 2>&1
+		[ $? -eq 3 ] && touch $CPUSPEED_STARTED || rm -f $CPUSPEED_STARTED
+
+		service cpuspeed restart >/dev/null 2>&1
+	else
+		echo >/dev/stderr
+		echo "Suggestion: install 'cpuspeed' package to get better powersaving results." >/dev/stderr
+		echo "Falling back to 'ondemand' scaling governor for all CPUs." >/dev/stderr
+		echo >/dev/stderr
+
+		for cpu in $CPUS; do
+			echo ondemand > $cpu/scaling_governor
+		done
+	fi
 
 	# Enable AC97 audio power saving
 	[ -e /sys/module/snd_ac97_codec/parameters/power_save ] && echo Y > /sys/module/snd_ac97_codec/parameters/power_save
@@ -36,6 +65,7 @@ start() {
 
 	# Enable power saving mode for Wi-Fi cards
 	for i in /sys/bus/pci/devices/*/power_level ; do echo 5 > $i ; done > /dev/null 2>&1
+
 
 	return 0
 }
@@ -49,8 +79,33 @@ stop() {
 	# Disables multi core power savings for low wakeup systems
 	[ -e /sys/devices/system/cpu/sched_mc_power_savings ] && echo 0 > /sys/devices/system/cpu/sched_mc_power_savings
 
-	# Enable ondemand governor (best for powersaving)
-	[ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ] && echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	# Revert previous CPU governor
+	if [ -e $CPUSPEED_INIT ]; then
+		if [ -e $CPUSPEED_SAVE_FILE ]; then
+			cp -fp $CPUSPEED_SAVE_FILE $CPUSPEED_CFG
+			rm -f $CPUSPEED_SAVE_FILE
+		fi
+
+		if [ -e $CPUSPEED_STARTED ]; then
+			rm -f $CPUSPEED_STARTED
+			service cpuspeed stop >/dev/null 2>&1
+		else
+			service cpuspeed restart >/dev/null 2>&1
+		fi
+	else
+		if [ -e $CPUSPEED_ORIG_GOV ]; then
+			OLD_GOVERNOR=$(cat $CPUSPEED_ORIG_GOV)
+			rm -f $CPUSPEED_ORIG_GOV
+			for cpu in $CPUS; do
+				echo $OLD_GOVERNOR > $cpu/scaling_governor
+			done
+		else
+			for cpu in $CPUS; do
+				echo userspace > $cpu/scaling_governor
+				cat $cpu/cpuinfo_max_freq > $cpu/scaling_setspeed
+			done
+		fi
+	fi
 
 	# Enable AC97 audio power saving
 	[ -e /sys/module/snd_ac97_codec/parameters/power_save ] && echo Y > /sys/module/snd_ac97_codec/parameters/power_save
