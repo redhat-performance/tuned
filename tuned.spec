@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.14
+Version: 0.2.15
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -107,6 +107,12 @@ fi
 
 
 %changelog
+* Tue Jul 13 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.15-1
+- overall profiles update
+- 'tuned-adm active' shows status of tuned and ktune services as well
+- proper configuration files setup after fresh instalation
+- tuned-utils: added license text
+
 * Fri Jun 04 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.14-1
 - bash completion support
 - tuned-adm: profile validity check

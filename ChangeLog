@@ -1,3 +1,196 @@
+commit 3be92554725f1471a52ab4b112433ebcd6ec70f5
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 19:55:29 2010 +0200
+
+    governors: prefer cpuspeed, restore for each CPU
+    
+    Added verifications, whether tuned cpu supports scaling.
+    
+    Previous governor settings are saved and reverted separately for each
+    CPU.
+    
+    If 'cpuspeed' is installed, CPU governor is set by changing it's
+    settings. If not, governor is set directly through sysfs and a message
+    suggesting installation of 'cpuspeed' is shown.
+    
+    Updated profiles:
+    - laptop-batery-powersave
+    - latency-performance
+    - throughput-performance
+
+commit 01230c06e22f42f748f1cc9d8448d04bc484cca7
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 15:34:24 2010 +0200
+
+    tuned: added /var/run/tuned into specfile
+
+commit 34cd670b21681ba2990205cbb75f98fd3170e041
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 15:06:05 2010 +0200
+
+    laptop-battery-powersave: enable ondemand governor
+
+commit 1d32fcb0e7a528a5597852697631f02a1a288b45
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 15:05:40 2010 +0200
+
+    latency-performance: enable performance governor
+
+commit 34a8129ea8c061dd208125e0999bb5526694eee3
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 14:33:36 2010 +0200
+
+    tune-profiles: added missing VAR_SUBSYS_KTUNE
+    
+    Missing VAR_SUBSYS_KTUNE variable in ktune.sh scripts prevented these
+    scripts to run stop() when disabling profile.
+    
+    Fixed in:
+     - desktop-powersave
+     - laptop-ac-powersave
+     - server-powersave
+     - spindown-disk
+
+commit 347a24aa21c44c2bdcdc1e4d43d0b1520d65278b
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 14:38:14 2010 +0200
+
+    throughput-performance: updated save paths
+    
+    All save files will be in /var/run/tuned directory.
+    This is being done to comply with SELinux policy.
+
+commit d8fa2ca16b690c6f68914fa3c6a0f010b7716b2f
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 14:22:04 2010 +0200
+
+    tuned: pid file moved to /var/run/tuned/tuned.pid
+    
+    This is being done to comply with SELinux policy.
+    /var/run/tuned/ is intended to be a new home of any runtime files
+    created by tuned itself or tuned plugins.
+
+commit e12dc4fb78aead57487d5d68c743c5aa960d1917
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 12:57:58 2010 +0200
+
+    tuned-adm: fixed disabling tuned
+    
+    Services tuned and ktune have to be stopped before removing configration
+    files. The ktune.sh script may need to do some stop operations.
+
+commit 02c585de00562310dbbff1f6b723621948307e44
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 15:47:43 2010 +0200
+
+    tuned-adm: replaced tuned-adm.conf
+    
+    /etc/tune-profiles/active-profile is generated from Makefile
+
+commit 5d9f0c6b0c757e97178d9b33a0d8dae2218cba87
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Jul 12 17:44:13 2010 +0200
+
+    tuned-adm: displaying services status
+    
+    'tuned-adm active' newly shows tuned and ktune services status as
+    enabled/disabled, running/stopped.
+
+commit 4fff6793229f752009d18aa366d6686d775900ac
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Jul 12 17:01:09 2010 +0200
+
+    latency-performance: removed sysctl 'net' bits
+
+commit 335edca35d653809a133c01c1a72efd464273126
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Jul 12 16:57:46 2010 +0200
+
+    added license text into tuned-utils subpackage
+    
+    File COPYING was added into tuned-utils subpackage to meet new Fedora
+    Licensing Guidelines.
+
+commit 12968c1f2634ff4b54f88125e6ca7d203caa1919
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Jul 12 16:18:29 2010 +0200
+
+    fixed symlinks to configuration files
+    
+    After fresh installation, configuration files will be symbolic links to
+    appropriate files in 'default' profile.
+
+commit acad0bbd7ac04d42ff145ba78f25df306185df3b
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Jul 12 15:21:36 2010 +0200
+
+    tuned-adm: better active profile displaying
+
+commit c62252bb0cccf87df271e7a8f65ee35fb94b8a4f
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Jul 12 15:08:11 2010 +0200
+
+    throughput-performance: removed SYSCTL option
+    
+    /etc/sysctl.ktune is no longer used, sysctl.ktune from profile
+    is loaded through /etc/ktune.d/tunedadm.conf
+
+commit 6982c57e8c4da71a5c9ba95e63471d919f74da68
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Fri Jul 9 17:06:09 2010 -0400
+
+    ktune: increase pid_max in throughtput-performance profile
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+commit d88e88579f10c8a53e68bad7daf06b2c537a9092
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Thu Jul 8 17:38:32 2010 -0400
+
+    ktune: update throughput-performance profile for rhel6
+    
+    Per discussion with the perf team:
+    
+    - Set performance cpuspeed governor
+    - Set deadline io scheduler
+    - Set kernel.sched_min_granularity_ns = 10000000
+    - Set kernel.sched_wakeup_granularity_ns = 15000000
+    - Set vm.dirty_ratio = 40
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+commit 88ed6a3138eca59e02634cf8233b6470e58a292f
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Thu Jul 8 17:20:49 2010 -0400
+
+    ktune: fix service ktune status w/no sysctl changes applied
+    
+    The default profile has no sysctl changes to it. If you try running
+    service ktune status after applying it, you get:
+    
+    Current ktune sysctl settings:
+    awk: cmd. line:1: fatal: cannot open file `/var/run/ktune.save' for reading (No such file or directory)
+    
+    After this patch:
+    Current ktune sysctl settings:
+    None
+    
+    (Simply adds a check for $SAVE_FILE, and if not found, prints out NONE).
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+commit 7a639e4c3fe9d61b35b768a1f33c3f2270a45efb
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jun 4 14:17:07 2010 +0200
+
+    tuned.spec: fixed unowned /etc/bash_completion.d
+
+commit ccabfd8cd61cfd8ce012fc62fa849dc21207464c
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jun 4 14:01:52 2010 +0200
+
+    changelog, new version
+
 commit 00e2281db3a47ce158cefa44cbccb73e910135db
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jun 1 19:03:04 2010 +0200
