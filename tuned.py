@@ -75,7 +75,7 @@ class Tuned:
 		if self.config.has_option("main", "pidfile"):
 			self.pidfile = self.config.get("main", "pidfile")
 		else:
-			self.pidfile = "/var/run/tuned.pid"
+			self.pidfile = "/var/run/tuned/tuned.pid"
 
 		# loading, setting logging level and initializing plugins
 
