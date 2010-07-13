@@ -117,6 +117,12 @@ class Tuned_adm:
 	def off(self):
 		self.set_active("off")
 
+		# disable services
+		os.system('service ktune stop')
+		os.system('service tuned stop')
+		os.system('chkconfig --del ktune')
+		os.system('chkconfig --del tuned')
+
 		# remove profile settings
 		self.remove("/etc/ktune.d/*.conf", os.path.islink)
 		self.remove("/etc/ktune.d/*.sh", os.path.islink)
@@ -126,12 +132,6 @@ class Tuned_adm:
 			os.rename("/etc/sysconfig/ktune.bckp", "/etc/sysconfig/ktune")
 		if os.path.exists("/etc/tuned.conf.bckp") and os.path.exists("/etc/tuned.conf"):
 			os.rename("/etc/tuned.conf.bckp", "/etc/tuned.conf")
-
-		# disable services
-		os.system('service ktune stop')
-		os.system('service tuned stop')
-		os.system('chkconfig --del ktune')
-		os.system('chkconfig --del tuned')
 
 	def profile(self, profile):
 		enablektune = False
