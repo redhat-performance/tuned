@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.15
+Version: 0.2.16
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -107,6 +107,10 @@ fi
 
 
 %changelog
+* Tue Aug 03 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.16-1
+- Fixed problem with network cards that provide unparsable supported network modes
+  Resolves: #620686
+
 * Tue Jul 13 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.15-1
 - overall profiles update
 - 'tuned-adm active' shows status of tuned and ktune services as well
