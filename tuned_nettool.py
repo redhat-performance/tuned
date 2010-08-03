@@ -194,7 +194,7 @@ class Nettool:
 						self.supported_modes.append( (int(s), d == "Full") )
 					del m,s,d
 				except:
-					self.supported_modes.append(1000, True)
+					self.supported_modes.append((1000, True))
 	
 
 			elif state == "supported_autoneg":
