@@ -59,9 +59,10 @@ start() {
 	done
 
 	# Increase the readahead value on all volumes
-	for d in /sys/block/{sd,cciss}*/queue/read_ahead_kb
+	readaheadvols=$(ls /sys/block/{sd,cciss}*/queue/read_ahead_kb 2>/dev/null)
+	for d in $readaheadvols
 	do
-		echo 512 > $d > /dev/null 2>&1
+		(echo 512 > $d) > /dev/null 2>&1
 	done
 
 	return 0
@@ -116,9 +117,10 @@ stop() {
 	done
 
 	# Reset default readahead value on all volumes
-	for d in /sys/block/{sd,cciss}*/queue/read_ahead_kb
+	readaheadvols=$(ls /sys/block/{sd,cciss}*/queue/read_ahead_kb 2>/dev/null)
+	for d in $readaheadvols
 	do
-		echo 128 > $d > /dev/null 2>&1
+		(echo 128 > $d) > /dev/null 2>&1
 	done
 
 	return 0
