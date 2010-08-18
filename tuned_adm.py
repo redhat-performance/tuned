@@ -20,12 +20,14 @@ import sys
 import os
 import os.path
 import glob
+import platform
 
 class Tuned_adm:
 
 	def __init__(self, profile_dir = "/etc/tune-profiles"):
 		self.profile_dir = os.path.normpath(profile_dir)
 		self.active_file = os.path.join(profile_dir, "active-profile")
+		self.arch = platform.machine()
 
 	def error(self, msg, exit_code = 1):
 		print >>sys.stderr, msg
@@ -114,6 +116,17 @@ class Tuned_adm:
 			if filter(f):
 				os.unlink(f)
 
+	def pick_config(self, name, profile_root):
+		file = os.path.join(profile_root, name)
+		(path, ext) = os.path.splitext(file)
+		arch_specific = "%s.%s%s" % (path, self.arch, ext)
+		if os.path.exists(arch_specific):
+			return arch_specific
+		elif os.path.exists(file):
+			return file
+		else:
+			return None
+
 	def off(self):
 		self.set_active("off")
 
@@ -157,24 +170,24 @@ class Tuned_adm:
 		self.remove('/etc/ktune.d/tunedadm.sh')
 		self.remove('/etc/ktune.d/tunedadm.conf')
 
-		file = os.path.join(profile_root, "ktune.sysconfig")
-		if os.path.isfile(file):
+		file = self.pick_config("ktune.sysconfig", profile_root)
+		if file:
 			enablektune = True
 			os.rename('/etc/sysconfig/ktune', '/etc/sysconfig/ktune.bckp')
 			os.symlink(file, '/etc/sysconfig/ktune')
 
-		file = os.path.join(profile_root, 'ktune.sh')
-		if os.path.isfile(file):
+		file = self.pick_config("ktune.sh", profile_root)
+		if file:
 			os.symlink(file, '/etc/ktune.d/tunedadm.sh')
 
-		file = os.path.join(profile_root, 'sysctl.ktune')
-		if os.path.isfile(file):
+		file = self.pick_config("sysctl.ktune", profile_root)
+		if file:
 			os.symlink(file, '/etc/ktune.d/tunedadm.conf')
 
 		# tuned settings
 
-		file = os.path.join(profile_root, 'tuned.conf')
-		if os.path.isfile(file):
+		file = self.pick_config("tuned.conf", profile_root)
+		if file:
 			enabletuned = True
 			os.rename('/etc/tuned.conf', '/etc/tuned.conf.bckp')
 			os.symlink(file, '/etc/tuned.conf')
