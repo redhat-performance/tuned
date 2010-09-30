@@ -73,7 +73,7 @@ start() {
 	# Enables USB autosuspend for all devices
 	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 1 > $i; done
 	# Disable HAL polling of CDROMS
-	for i in /dev/scd*; do hal-disable-polling --device $i; done
+	for i in /dev/scd*; do hal-disable-polling --device $(readlink -f $i); done
 	hciconfig hci0 down; modprobe -r hci_usb
 	dont_sync_logs
 	wireless_powersave 1

@@ -21,7 +21,7 @@ start() {
 	set_alpm ${ALPM}
 
 	# Disable HAL polling of CDROMS
-        for i in /dev/scd*; do hal-disable-polling --device $i; done > /dev/null 2>&1
+	for i in /dev/scd*; do hal-disable-polling --device $(readlink -f $i); done > /dev/null 2>&1
 
 	return 0
 }
@@ -30,7 +30,7 @@ stop() {
 	set_alpm "max_performance"
 
         # Enable HAL polling of CDROMS
-        for i in /dev/scd*; do hal-disable-polling --enable-polling --device $i; done > /dev/null 2>&1
+	for i in /dev/scd*; do hal-disable-polling --enable-polling --device $(readlink -f $i); done > /dev/null 2>&1
 
 	return 0
 }
