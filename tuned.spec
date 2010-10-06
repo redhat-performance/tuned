@@ -111,6 +111,9 @@ fi
 - Fixed problem with network cards that provide unparsable supported network modes
   Resolves: #620686
 
+* Wed Aug 11 2010 David Malcolm <dmalcolm@redhat.com> - 0.2.15-2
+- recompiling .py files against Python 2.7 (rhbz#623413)
+
 * Tue Jul 13 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.15-1
 - overall profiles update
 - 'tuned-adm active' shows status of tuned and ktune services as well
