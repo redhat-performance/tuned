@@ -113,10 +113,7 @@ fi
 - special sysctl setting for s390x arch in 'throughtput-performance' profile
 - apply I/O scheduler setting to device mapper devices
 - workaround for hal-disable-polling bug
-
-* Tue Aug 03 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.16-1
-- Fixed problem with network cards that provide unparsable supported network modes
-  Resolves: #620686
+- fixed problem with network cards that provide unparsable supported network modes (#620686)
 
 * Wed Aug 11 2010 David Malcolm <dmalcolm@redhat.com> - 0.2.15-2
 - recompiling .py files against Python 2.7 (rhbz#623413)
