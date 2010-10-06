@@ -1,3 +1,114 @@
+commit 6a64e3d0c6da871797882ec74f87356132c8b22b
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Oct 6 10:22:17 2010 +0200
+
+    sync specfile with Fedora
+
+commit cee19fbf001258020d42e5520c71dbf2bfa8a52d
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Sep 30 11:34:11 2010 +0200
+
+    profiles: workaround hal-disable-polling bug
+    
+    Workarounds: #554886
+
+commit e78494e1c5d3683df4dac8984f4845204f348a54
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Sep 29 09:12:05 2010 +0200
+
+    profiles: apply IO scheduler changes to dm devices
+    
+    Resolves: #636548
+
+commit d7bf3c1d1013df8ffe350f78ebff70a08ae772e4
+Merge: a0222d7 b90ba21
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Wed Aug 18 10:00:03 2010 -0400
+
+    Merge branch 'master' of ssh://git.fedorahosted.org/git/tuned
+
+commit a0222d7fcb7790cdd629c506bae9998f44aed8bc
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Wed Aug 18 09:59:54 2010 -0400
+
+    enterprise-storage: fix setting read_ahead_kb
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+commit b90ba21fd225fc61dd40dfb4aa80dc1d0174bd99
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Aug 18 12:37:25 2010 +0200
+
+    throughput-performance: s390x sysctl settings
+    
+    bz #619377 kernel: Process scheduler tuning recommendation for s390
+
+commit 3bcac3095cb7604cc29d18d7cf0b1c0650146b86
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Aug 18 12:35:04 2010 +0200
+
+    architecture specific configuration files support
+    
+    If arch specific configuration file is required, add .$arch before the
+    configuration file extension, e.g.:
+    
+    In profile 'latency-performance' on s390x machines, special sysctl
+    tunning is required. Adding 'sysctl.s390x.ktune' file into profile will
+    cause loading of this file instead of 'sysctl.ktune'.
+
+commit bdce7eb69d2f737aa277c152a64f4971a5a275b0
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Tue Aug 17 14:04:57 2010 -0400
+
+    add new enterprise-storage profile
+    
+    Starts out as a clone of throughput-performance profile, but takes the
+    additional steps to disable barriers on data volumes and increase
+    readahead values.
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+commit bdd933246b31ce7897b47985058c0987ea30f9c1
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Tue Aug 17 13:16:58 2010 -0400
+
+    throughput-performance: don't twiddle cpufreq or hugepages if not supported
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+commit 1f017e33b5f0ed484a17c8c86ae815d5306ae82d
+Author: Phil Knirsch <pknirsch@redhat.com>
+Date:   Tue Aug 3 12:09:37 2010 +0200
+
+    - Forgot to bump version and added a changelog.
+
+commit 64edcee9a765361b4fedf4d8f0c1e1c0e33e71eb
+Author: Phil Knirsch <pknirsch@redhat.com>
+Date:   Tue Aug 3 11:42:18 2010 +0200
+
+    - Fixed problem with network cards that provide unparsable supported network modes
+      Resolves: #620686
+
+commit 927529c1ccf0e917b9bd5a46adbdfb86145e3d2d
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Wed Jul 14 11:21:30 2010 -0400
+
+    further throughput-performance profile tweaks
+    
+    - don't set pid_max by default, as it can be highly dependent on cpu
+      count (and architecture, to some extent)
+    - add commented out vm.dirty_background_ratio param, which we may or may
+      not set sometime in the future, but its also there now for people to
+      enable w/relative ease.
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+commit 53442a48afe9c2451a376f67dcfd1b27b2b0bca3
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jul 13 20:15:26 2010 +0200
+
+    changelog, new version
+
 commit 3be92554725f1471a52ab4b112433ebcd6ec70f5
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 19:55:29 2010 +0200

@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.16
+Version: 0.2.17
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -107,6 +107,13 @@ fi
 
 
 %changelog
+* Wed Oct 06 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.17-1
+- added 'enterprise-storage' profile
+- added support for architecture-specific configuration files
+- special sysctl setting for s390x arch in 'throughtput-performance' profile
+- apply I/O scheduler setting to device mapper devices
+- workaround for hal-disable-polling bug
+
 * Tue Aug 03 2010 Phil Knirsch <pknirsch@redhat.com> 0.2.16-1
 - Fixed problem with network cards that provide unparsable supported network modes
   Resolves: #620686
