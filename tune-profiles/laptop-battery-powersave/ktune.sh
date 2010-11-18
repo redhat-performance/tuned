@@ -66,7 +66,8 @@ start() {
 	[ -e /sys/module/snd_ac97_codec/parameters/power_save ] && echo Y > /sys/module/snd_ac97_codec/parameters/power_save
 
 	# Disable HAL polling of CDROMS
-	for i in /dev/scd*; do hal-disable-polling --device $(readlink -f $i); done > /dev/null 2>&1
+	cddrives=$(command ls -1 /dev/scd* 2>/dev/null)
+	for i in $cddrives; do hal-disable-polling --device $(readlink -f $i); done &>/dev/null
 
 	# Enable power saving mode for Wi-Fi cards
 	for i in /sys/bus/pci/devices/*/power_level ; do echo 5 > $i ; done > /dev/null 2>&1
@@ -118,7 +119,8 @@ stop() {
 	[ -e /sys/module/snd_ac97_codec/parameters/power_save ] && echo Y > /sys/module/snd_ac97_codec/parameters/power_save
 
 	# Enable HAL polling of CDROMS
-	for i in /dev/scd*; do hal-disable-polling --enable-polling --device $(readlink -f $i); done > /dev/null 2>&1
+	cddrives=$(command ls -1 /dev/scd* 2>/dev/null)
+	for i in $cddrives; do hal-disable-polling --enable-polling --device $(readlink -f $i); done &>/dev/null
 
 	# Reset power saving mode for Wi-Fi cards
 	for i in /sys/bus/pci/devices/*/power_level ; do echo 0 > $i ; done > /dev/null 2>&1
