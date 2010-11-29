@@ -72,6 +72,12 @@ start() {
 	# Enable power saving mode for Wi-Fi cards
 	for i in /sys/bus/pci/devices/*/power_level ; do echo 5 > $i ; done > /dev/null 2>&1
 
+	# Set reduced FSB on EEE PCs with Inte Atom
+	if [ -e /sys/devices/platform/eeepc/she ]; then
+		echo 2 > /sys/devices/platform/eeepc/she
+	elif [ -e /sys/devices/platform/eeepc/cpufv ]; then
+		echo 2 > /sys/devices/platform/eeepc/cpufv
+	fi
 
 	return 0
 }
@@ -124,6 +130,13 @@ stop() {
 
 	# Reset power saving mode for Wi-Fi cards
 	for i in /sys/bus/pci/devices/*/power_level ; do echo 0 > $i ; done > /dev/null 2>&1
+
+	# Set normal FSB on EEE PCs with Inte Atom
+	if [ -e /sys/devices/platform/eeepc/she ]; then
+		echo 1 > /sys/devices/platform/eeepc/she
+	elif [ -e /sys/devices/platform/eeepc/cpufv ]; then
+		echo 1 > /sys/devices/platform/eeepc/cpufv
+	fi
 
 	return 0
 }
