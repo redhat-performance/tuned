@@ -1,0 +1,2 @@
+# tuned runtime directory
+d /var/run/tuned 0755 root root -

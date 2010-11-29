@@ -1,3 +1,5 @@
+%global uses_tmpfs (0%{?fedora} >= 15)
+
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 0.2.17
@@ -49,6 +51,10 @@ instead of fewer large ones).
 rm -rf %{buildroot}
 make install DESTDIR=%{buildroot}
 
+if !%uses_tmpfs
+    rm -rf %{buildroot}%{_sysconfdir}/tmpfiles.d
+%endif
+
 %clean
 rm -rf %{buildroot}
 
@@ -92,8 +98,11 @@ fi
 %config(noreplace) %{_sysconfdir}/sysconfig/ktune
 %config(noreplace) %{_sysconfdir}/ktune.d/tunedadm.conf
 %dir %{_sysconfdir}/ktune.d
-%dir /var/log/tuned
-%dir /var/run/tuned
+%dir %{_localstatedir}/log/tuned
+%dir %{_localstatedir}/run/tuned
+%if %uses_tmpfs
+%{_sysconfdir}/tmpfiles.d
+%endif
 
 %files utils
 %defattr(-,root,root,-)
