@@ -2,7 +2,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.17
+Version: 0.2.18
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -51,7 +51,7 @@ instead of fewer large ones).
 rm -rf %{buildroot}
 make install DESTDIR=%{buildroot}
 
-if !%uses_tmpfs
+%if !%uses_tmpfs
     rm -rf %{buildroot}%{_sysconfdir}/tmpfiles.d
 %endif
 
@@ -116,6 +116,10 @@ fi
 
 
 %changelog
+* Mon Nov 29 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.18-1
+- fix hal-disable-polling if no CD drives present
+- setup tmpfiles.d config to autocreate runtime directory on F15
+
 * Wed Oct 06 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.17-1
 - added 'enterprise-storage' profile
 - added support for architecture-specific configuration files

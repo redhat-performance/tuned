@@ -1,3 +1,32 @@
+commit ec9e9ae10fb34a661805ef2a20cde44f874dcb50
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Nov 29 11:37:21 2010 +0100
+
+    tmpfiles.d config to autocreate runtime directory on F15
+
+commit 594d652b4b293f7cda432c287e15c70f630ec799
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Nov 18 15:02:34 2010 +0100
+
+    fix hal-disable-polling if no CD drives present
+
+commit d7169cf0b221a5c67e28836d2b182a1c4020386e
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Oct 6 10:35:37 2010 +0200
+
+    another change of changelog
+    
+    Have to do this to have the same specfile in Fedora and here.
+    
+    0.2.16-1 merged with 0.2.17-1, as the dates in previsous entries were
+    crossed. Sorry for doing this.
+
+commit 6a24f54c24a5a24e0a58177762ae04935b3d6733
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Oct 6 10:29:01 2010 +0200
+
+    changelog, new version
+
 commit 6a64e3d0c6da871797882ec74f87356132c8b22b
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Oct 6 10:22:17 2010 +0200
