@@ -1,0 +1,398 @@
+# vim: set syn=sh :
+#
+# This script contains functions which can be useful in ktune profile scripts.
+#
+
+#
+# DISK tuning
+#
+
+set -x
+
+DISKS="$(command ls -d1 /dev/[sh]d*[a-z] 2>/dev/null)"
+
+# SATA Aggressive Link Power Management
+# usage: set_disk_alpm policy
+set_disk_alpm() {
+	policy=$1
+
+        for host in /sys/class/scsi_host/*; do
+                if [ -f $host/ahci_port_cmd ]; then
+                        port_cmd=`cat $host/ahci_port_cmd`;
+                        if [ $((0x$port_cmd & 0x240000)) = 0 -a -f $host/link_power_management_policy ]; then
+                                echo $policy >$host/link_power_management_policy;
+                        else
+                                echo "max_performance" >$host/link_power_management_policy;
+                        fi
+                fi
+        done
+}
+
+# usage: set_disk_apm level
+set_disk_apm() {
+	level=$1
+	for disk in $DISKS; do
+		hdparm -B $level $disk &>/dev/null
+	done
+}
+
+# usage: set_disk_spindown level
+set_disk_spindown() {
+	level=$1
+	for disk in $DISKS; do
+		hdparm -S $level $disk &>/dev/null
+	done
+}
+
+# usage: set_disk_readahead
+set_disk_readahead() {
+	value=$1
+
+	readaheadvols=$(ls /sys/block/{sd,cciss}*/queue/read_ahead_kb 2>/dev/null)
+	for d in $readaheadvols; do
+		(echo $value > $d) &>/dev/null
+	done
+}
+
+# usage: remount_disk options partition1 partition2 ...
+remount_partitions() {
+	options=$1
+	shift
+
+	for partition in $@; do
+		mount -o remount,$options $partition
+	done
+}
+
+#
+# CPU tuning
+#
+
+CPUSPEED_SAVE_FILE="/var/run/tuned/ktune-cpuspeed.save"
+CPUSPEED_ORIG_GOV="/var/run/tuned/ktune-cpuspeed-governor-%s.save"
+CPUSPEED_STARTED="/var/run/tuned/ktune-cpuspeed-started"
+CPUSPEED_CFG="/etc/sysconfig/cpuspeed"
+CPUSPEED_INIT="/etc/init.d/cpuspeed"
+CPUS="$(ls -d1 /sys/devices/system/cpu/cpu* | sed 's;^.*/;;' |  grep "cpu[0-9]\+")"
+
+# set CPU governor setting and store the old settings
+# usage: set_cpu_governor governor
+set_cpu_governor() {
+	governor=$1
+
+	# prefer governor setting using cpuspeed daemon
+	if [ -e $CPUSPEED_INIT ]; then
+		if [ ! -e $CPUSPEED_SAVE_FILE -a -e $CPUSPEED_CFG ]; then
+			cp -p $CPUSPEED_CFG $CPUSPEED_SAVE_FILE
+			sed -e 's/^GOVERNOR=.*/GOVERNOR='$governor'/g' $CPUSPEED_SAVE_FILE > $CPUSPEED_CFG
+		fi
+
+		service cpuspeed status &> /dev/null
+		[ $? -eq 3 ] && touch $CPUSPEED_STARTED || rm -f $CPUSPEED_STARTED
+
+		service cpuspeed restart &> /dev/null
+
+	# direct change using /sys fs
+	elif [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then
+		echo >&2
+		echo "Suggestion: install 'cpuspeed' package to get best tuning results." >&2
+		echo "Falling back to '$governor' scaling governor for all CPUs." >&2
+		echo >&2
+
+		for cpu in $CPUS; do
+			gov_file=/sys/devices/system/cpu/$cpu/cpufreq/scaling_governor
+			save_file=$(printf $CPUSPEED_ORIG_GOV $cpu)
+			rm -f $save_file
+			if [ -e $gov_file ]; then
+				cat $gov_file > $save_file
+				echo $governor > $gov_file
+			fi
+		done
+	fi
+}
+
+# re-enable previous CPU governor settings
+# usage: restore_cpu_governor
+restore_cpu_governor() {
+	if [ -e $CPUSPEED_INIT ]; then
+		if [ -e $CPUSPEED_SAVE_FILE ]; then
+			cp -fp $CPUSPEED_SAVE_FILE $CPUSPEED_CFG
+			rm -f $CPUSPEED_SAVE_FILE
+		fi
+
+		if [ -e $CPUSPEED_STARTED ]; then
+			rm -f $CPUSPEED_STARTED
+			service cpuspeed stop &> /dev/null
+		else
+			service cpuspeed restart &> /dev/null
+		fi
+	elif [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then
+		for cpu in $CPUS; do
+			cpufreq_dir=/sys/devices/system/cpu/$cpu/cpufreq
+			save_file=$(printf $CPUSPEED_ORIG_GOV $cpu)
+
+			if [ -e $cpufreq_dir/scaling_governor ]; then
+				if [ -e $save_file ]; then
+					cat $save_file > $cpufreq_dir/scaling_governor
+					rm -f $save_file
+				else
+					echo userspace > $cpufreq_dir/scaling_governor
+					cat $cpufreq_dir/cpuinfo_max_freq > $cpufreq_dir/scaling_setspeed
+				fi
+			fi
+		done
+	fi
+}
+
+_cpu_multicore_powersave() {
+	value=$1
+	[ -e /sys/devices/system/cpu/sched_mc_power_savings ] && echo $value > /sys/devices/system/cpu/sched_mc_power_savings
+}
+
+# enable multi core power savings for low wakeup systems
+enable_cpu_multicore_powersave() {
+	_cpu_multicore_powersave 1
+}
+
+disable_cpu_multicore_powersave() {
+	_cpu_multicore_powersave 0
+}
+
+#
+# MEMORY tuning
+#
+
+THP_ENABLE="/sys/kernel/mm/redhat_transparent_hugepage/enabled"
+THP_SAVE="/var/run/tuned/ktune-thp.save"
+
+enable_transparent_hugepages() {
+	if [ -e $THP_ENABLE ]; then
+		cut -f2 -d'[' $THP_ENABLE  | cut -f1 -d']' > $THP_SAVE
+		(echo always > $THP_ENABLE) &> /dev/null
+	fi
+}
+
+restore_transparent_hugepages() {
+	if [ -e $THP_SAVE ]; then
+		(echo $(cat $THP_SAVE) > $THP_ENABLE) &> /dev/null
+		rm -f $THP_SAVE
+	fi
+}
+
+#
+# WIFI tuning
+#
+
+# usage: _wifi_set_power_level level
+_wifi_set_power_level() {
+	# 0    auto, PM enabled
+	# 1-5  least savings and lowest latency - most savings and highest latency
+	# 6    disable power savings
+	level=$1
+
+	# apply the settings using iwpriv
+	ifaces=$(cat /proc/net/wireless | grep -v '|' | sed 's@^ *\([^:]*\):.*@\1@')
+	for iface in $ifaces; do
+		iwpriv $iface set_power $level
+	done
+
+	# some adapters may relay on sysfs
+	for i in /sys/bus/pci/devices/*/power_level; do
+		(echo $level > $i) &> /dev/null
+	done
+}
+
+enable_wifi_powersave() {
+	_wifi_set_power_level 5
+}
+
+disable_wifi_powersave() {
+	_wifi_set_power_level 0
+}
+
+#
+# BLUETOOTH tuning
+#
+
+disable_bluetooth() {
+	hciconfig hci0 down
+	rmmod hci_usb
+}
+
+enable_bluetooth() {
+	modprobe hci_usb
+	hciconfig hci0 up
+}
+
+#
+# USB tuning
+#
+
+_usb_autosuspend() {
+	value=$1
+	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo $value > $i; done &> /dev/null
+}
+
+enable_usb_autosupend() {
+	_usb_autosuspend 1
+}
+
+disable_usb_autosuspend() {
+	_usb_autosuspend 0
+}
+
+#
+# SOUND CARDS tuning
+#
+
+_snd_ac97_powersave() {
+	value=$1
+	[ -e /sys/module/snd_ac97_codec/parameters/power_save ] && echo $value > /sys/module/snd_ac97_codec/parameters/power_save
+}
+
+enable_snd_ac97_powersave() {
+	_snd_ac97_powersave Y
+}
+
+disable_snd_ac97_powersave() {
+	_snd_ac97_powersave N
+}
+
+#
+# CD DRIVES tuning
+#
+
+_cd_polling() {
+	[ "$1" == "1" ] && opts=--enable-polling || opts=
+
+	cddrives=$(command ls -1 /dev/scd* 2>/dev/null)
+	for i in $cddrives; do hal-disable-polling $opts --device $(readlink -f $i); done &>/dev/null
+}
+
+enable_cd_polling() {
+	_cd_polling 1
+}
+
+disable_cd_polling() {
+	_cd_polling 0
+}
+
+#
+# SOFTWARE tuning
+#
+
+RSYSLOG_CFG="/etc/rsyslog.conf"
+RSYSLOG_SAVE="/var/run/tuned/ktune-cpuspeed.save"
+
+disable_logs_syncing() {
+	cp -p $RSYSLOG_CFG $RSYSLOG_SAVE
+	sed -i 's/ \/var\/log/-\/var\/log/' $RSYSLOG_CFG
+}
+
+restore_logs_syncing() {
+	mv $RSYSLOG_SAVE $RSYSLOG_CFG
+}
+
+#
+# HARDWARE SPECIFIC tuning
+#
+
+# Asus EEE with Intel Atom
+_eee_fsb_control() {
+	value=$1
+	if [ -e /sys/devices/platform/eeepc/she ]; then
+		echo $value > /sys/devices/platform/eeepc/she
+	elif [ -e /sys/devices/platform/eeepc/cpufv ]; then
+		echo $value > /sys/devices/platform/eeepc/cpufv
+	fi
+}
+
+eee_set_reduced_fsb() {
+	_eee_fsb_control 2
+}
+
+eee_set_normal_fsb() {
+	_eee_fsb_control 1
+}
+
+#
+# KTUNE ACTION PROCESSING
+#
+
+error_not_implemented() {
+	echo "tuned: ktune script function '$1' is not implemented." >&2
+}
+
+# implicit actions, will be used if not provided by profile script:
+#
+# * start    must be implemented
+# * stop     must be implemented
+# * reload   runs start
+# * restart  runs stop + start
+# * status   returns 0
+
+start() {
+	error_not_implemented start
+	return 16
+}
+
+stop() {
+	error_not_implemented stop
+	return 16
+}
+
+reload() {
+	start
+	return $?
+}
+
+restart() {
+	stop && start
+	return $?
+}
+
+status() {
+	return 0
+}
+
+# main processing
+
+process() {
+	VAR_SUBSYS_KTUNE="/var/lock/subsys/ktune"
+
+	case "$1" in
+	start)
+		[ -f "$VAR_SUBSYS_KTUNE" ] && exit 0
+		start
+		RETVAL=$?
+		;;
+	stop)
+		[ -f "$VAR_SUBSYS_KTUNE" ] || exit 0
+		stop
+		RETVAL=$?
+		;;
+	reload)
+		[ -f "$VAR_SUBSYS_KTUNE" ] && reload
+		RETVAL=$?
+		;;
+	restart|force-reload)
+		[ -f "$VAR_SUBSYS_KTUNE" ] && restart
+		RETVAL=$?
+		;;
+	condrestart|try-restart)
+		[ -f "$VAR_SUBSYS_KTUNE" ] || exit 0
+		restart
+		RETVAL=$?
+		;;
+	status)
+		status
+		RETVAL=$?
+		;;
+		*)
+		echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+		RETVAL=2
+		;;
+	esac
+
+	exit $RETVAL
+}
