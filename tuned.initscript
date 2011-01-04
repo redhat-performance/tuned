@@ -26,6 +26,7 @@ config="/etc/tuned.conf"
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
+pidfile=/var/run/$prog/$prog.pid
 lockfile=/var/lock/subsys/$prog
 
 start () {
@@ -69,7 +70,7 @@ force_reload() {
 
 rh_status() {
     # run checks to determine if the service is running or use generic status
-    status $prog
+    status -p $pidfile $prog
 }
 
 rh_status_q() {
