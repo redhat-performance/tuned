@@ -31,7 +31,7 @@ lockfile=/var/lock/subsys/$prog
 
 start () {
     if [ $UID -ne 0 ] ; then
-        echo "User had insufficient privilege."
+        echo $"User has insufficient privilege."
         exit 4
     fi
     [ -x $exec ] || exit 5
@@ -45,7 +45,7 @@ start () {
 
 stop () {
     if [ $UID -ne 0 ] ; then
-        echo "User had insufficient privilege."
+        echo $"User has insufficient privilege."
         exit 4
     fi
     echo -n $"Stopping $prog: "
