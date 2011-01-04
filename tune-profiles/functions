@@ -7,8 +7,6 @@
 # DISK tuning
 #
 
-set -x
-
 DISKS="$(command ls -d1 /dev/[sh]d*[a-z] 2>/dev/null)"
 
 # SATA Aggressive Link Power Management
