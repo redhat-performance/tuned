@@ -34,6 +34,10 @@ start () {
         echo $"User has insufficient privilege."
         exit 4
     fi
+    if uname -p | grep -q '^s390x\?$'; then
+	echo $"Not starting tuned (no need on s390/s390x architecture)."
+	exit 0
+    fi
     [ -x $exec ] || exit 5
     [ -f $config ] || exit 6
     echo -n $"Starting $prog: "
