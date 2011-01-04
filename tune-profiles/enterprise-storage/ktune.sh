@@ -14,7 +14,7 @@ start() {
 	nobarriervols=$(echo "$volumes" | grep -v $rootvol | grep -v $bootvol)
 	remount_partitions nobarrier $nobarriervols
 
-	set_disk_readahead 512
+	multiply_disk_readahead 4
 
 	return 0
 }
@@ -31,7 +31,7 @@ stop() {
 	nobarriervols=$(echo "$volumes" | grep -v $rootvol | grep -v $bootvol)
 	remount_partitions barrier $nobarriervols
 
-	set_disk_readahead 128
+	multiply_disk_readahead 0.25
 
 	return 0
 }

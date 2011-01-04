@@ -42,13 +42,19 @@ set_disk_spindown() {
 	done
 }
 
-# usage: set_disk_readahead
-set_disk_readahead() {
-	value=$1
+# usage: multiply_disk_readahead by
+multiply_disk_readahead() {
+	by=$1
+
+	# float multiplication not supported in bash
+	# bc might not be installed, python is available for sure
 
 	readaheadvols=$(ls /sys/block/{sd,cciss}*/queue/read_ahead_kb 2>/dev/null)
 	for d in $readaheadvols; do
-		(echo $value > $d) &>/dev/null
+		old=$(cat $d)
+		new=$(echo "print int($old*$by)" | python)
+
+		(echo $new > $d) &>/dev/null
 	done
 }
 
