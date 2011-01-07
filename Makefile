@@ -7,7 +7,7 @@ DESTDIR = /
 MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
-DIRS = doc doc/examples contrib tuningplugins monitorplugins ktune
+DIRS = doc doc/examples contrib tuningplugins monitorplugins ktune udev
 FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned_nettool.py tuned_logging.py tuned.bash tuned.tmpfiles
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes
 FILES_examples = ktune/sysctl.ktune
@@ -15,6 +15,8 @@ FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/va
 FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
 FILES_monitorplugins = monitorplugins/cpu.py monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
 FILES_ktune = ktune/ktune.init ktune/ktune.sysconfig ktune/README.ktune
+FILES_udev_rules = udev/80-tuned-iosched.rules udev/80-tuned-mpath-iosched.rules
+FILES_udev_scripts = udev/tuned-mpath-iosched
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 
 DEFAULT_PROFILE = default
@@ -35,6 +37,7 @@ archive:
 	cp $(FILES_tuningplugins) $(VERSIONED_NAME)/tuningplugins
 	cp $(FILES_monitorplugins) $(VERSIONED_NAME)/monitorplugins
 	cp $(FILES_ktune) $(VERSIONED_NAME)/ktune
+	cp $(FILES_udev_rules) $(FILES_udev_scripts) $(VERSIONED_NAME)/udev
 	cp -a tune-profiles $(VERSIONED_NAME)/tune-profiles
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
@@ -134,6 +137,15 @@ install:
 	# Setup runtime directory autocreation for tmpfs
 	mkdir -p $(DESTDIR)/etc/tmpfiles.d
 	install -m 0644 tuned.tmpfiles $(DESTDIR)/etc/tmpfiles.d/tuned.conf
+
+	# Install udev rules and scripts
+	install -m 755 -d $(DESTDIR)/lib/udev/rules.d
+	for file in $(FILES_udev_rules); do \
+		install -m 0755 $$file $(DESTDIR)/lib/udev/rules.d/; \
+	done
+	for file in $(FILES_udev_scripts); do \
+		install -m 0755 $$file $(DESTDIR)/lib/udev/; \
+	done
 
 changelog:
 	git log > ChangeLog
