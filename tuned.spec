@@ -16,7 +16,7 @@ Source: tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
 Buildroot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires: python
-Requires: usermode ethtool
+Requires: usermode ethtool udev
 Requires(post): chkconfig
 Requires(preun): chkconfig
 Requires(preun): initscripts
@@ -100,6 +100,8 @@ fi
 %dir %{_sysconfdir}/ktune.d
 %dir %{_localstatedir}/log/tuned
 %dir %{_localstatedir}/run/tuned
+%attr(0755,root,root) /lib/udev/tuned-mpath-iosched
+/lib/udev/rules.d/*
 %if %uses_tmpfs
 %{_sysconfdir}/tmpfiles.d
 %endif
