@@ -1,0 +1,14 @@
+#
+# CFQ's default tunings are geared towards slow SATA disks.  If we detect
+# anything else, we change the tunings to drive deeper queue depths and
+# keep the device busy.
+#
+SUBSYSTEM!="block", GOTO="end_iosched"
+KERNEL=="dm-*", GOTO="end_iosched"
+ENV{DEVTYPE}=="partition", GOTO="end_iosched"
+ACTION!="add|change", GOTO="end_iosched"
+ENV{ID_BUS}=="ata", GOTO="end_iosched"
+ATTR{queue/scheduler}!="*\[cfq\]", GOTO="end_iosched"
+ATTR{queue/iosched/slice_idle}="0"
+ATTR{queue/iosched/quantum}="32"
+LABEL="end_iosched"
