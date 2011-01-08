@@ -141,7 +141,7 @@ install:
 	# Install udev rules and scripts
 	install -m 755 -d $(DESTDIR)/lib/udev/rules.d
 	for file in $(FILES_udev_rules); do \
-		install -m 0755 $$file $(DESTDIR)/lib/udev/rules.d/; \
+		install -m 0644 $$file $(DESTDIR)/lib/udev/rules.d/; \
 	done
 	for file in $(FILES_udev_scripts); do \
 		install -m 0755 $$file $(DESTDIR)/lib/udev/; \
