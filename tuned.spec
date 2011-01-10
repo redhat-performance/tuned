@@ -2,7 +2,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.18
+Version: 0.2.19
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -118,6 +118,13 @@ fi
 
 
 %changelog
+* Mon Jan 10 2011 Jan Vcelak <jvcelak@redhat.com> 0.2.19-1
+- reduced FSB support on Asus EEE netbooks with Intel Atom
+- consolidate ktune script functions in tuning profiles
+- disable tuned daemon on s390/s390x architectures
+- set readahead by multiplying previous setting
+- udev rules and script for CFQ and multipath scheduler tuning
+
 * Mon Nov 29 2010 Jan Vcelak <jvcelak@redhat.com> 0.2.18-1
 - fix hal-disable-polling if no CD drives present
 - setup tmpfiles.d config to autocreate runtime directory on F15

@@ -1,3 +1,99 @@
+commit d6377a8f8a52376b546601f4e6bd901e38abf79a
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Jan 10 18:48:19 2011 +0100
+
+    udev: fixed tuned-mpath-iosched script name typo
+
+commit 66fcc79706eb5fcdfc2ca8fc8d6ba596a570273e
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Sat Jan 8 18:51:57 2011 +0100
+
+    udev: fix rules permissions
+
+commit 9fae405df20a8b41adccdd1b3d0b960afb6c9566
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jan 7 17:07:17 2011 +0100
+
+    udev: specfile changes
+
+commit 12307a51327eeeac731264cfad04049bf9e554a7
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jan 7 17:00:53 2011 +0100
+
+    udev: add related files into Makefile
+
+commit 35b44f0b7fa7d6600c2e65bb4bdfaaa289154dea
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Jan 7 17:00:22 2011 +0100
+
+    udev: add rules for scheduler tuning
+
+commit 4e9b48112d7fc48ad19c4285b105f4e83ba3f644
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 4 18:13:45 2011 +0100
+
+    set_disk_readahead -> multiply_disk_readahead
+    
+    Resolves: #658843
+
+commit 54b1caece582b8c63d644d0dba1753bed3b006c0
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 4 18:00:58 2011 +0100
+
+    profiles: disable debugging in 'functions' script
+    
+    forgotten 'set -x' removed
+
+commit 339381786368baccf4d9983395a12ab5e76f83b8
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 4 17:41:20 2011 +0100
+
+    initiscript: don't start tuned daemon on s390/s390x
+    
+    cpu and disk tuning doesn't work, net tuning makes no sense
+    
+    Resolves: #624494
+
+commit 572c9d6d16af9f3e62f4ea44c2c099796d4b5fe4
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 4 17:39:10 2011 +0100
+
+    initiscript: localization of insufficient privilege error
+
+commit 1f60e8f952527667fc4fc884e6d62f2bf67f26d0
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 4 15:30:24 2011 +0100
+
+    fix: initscript - invalid pidfile check
+    
+    Resolves: #621122
+
+commit 93ad579f6953261ce7bc6c34f0ca4cb9d3c8b33d
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Dec 22 15:34:13 2010 +0100
+
+    all ktune.sh updated to use common functions file
+
+commit 436f4d234bceb797752c3cd16702db05cf9d44cc
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Dec 22 15:32:56 2010 +0100
+
+    consolidated ktune scripts functions
+
+commit 732e072dc06306ac1c02713ade78a34a73da98dd
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Nov 29 19:05:35 2010 +0100
+
+    reduced FSB support on EEE PCs with Intel Atom
+    
+    profile: laptop-battery-powersave
+
+commit 58a2c0093dd408948e701278621560961b38a2c0
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Nov 29 11:38:25 2010 +0100
+
+    version bump
+
 commit ec9e9ae10fb34a661805ef2a20cde44f874dcb50
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Nov 29 11:37:21 2010 +0100
