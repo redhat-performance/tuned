@@ -30,6 +30,20 @@ the section name. All plugins support at least the following options:
 
 .IP \fBenabled\fR
 Enabled or disable the plugin. Default is True. Any other value disables it.
+.SH "AVAILABLE PLUGINS"
+.IP \fBcpu\fR
+Plugin monitors CPU load and changes it's latency setting to increase power
+savings but without sacrificing the user's QoS expectations. It can basically
+improve CPU idle time. The setting is available only with ondemand CPU governor.
+
+.IP \fBdisk\fR
+Plugin monitors disk activity (read/write) and dynamically changes APM settings
+and disk spindown settings.
+
+.IP \fBnet\fR
+Plugin monitors network activity (receive/transmit) and can dynamically switch
+between 10Mbps mode (saves power) and maximal speed mode.
+
 .SH "FILES"
 .nf
 /etc/tuned.conf
