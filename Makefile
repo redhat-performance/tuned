@@ -9,7 +9,7 @@ GITTAG = v$(VERSION)
 
 DIRS = doc doc/examples contrib tuningplugins monitorplugins ktune udev
 FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned_nettool.py tuned_logging.py tuned.bash tuned.tmpfiles
-FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes
+FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes doc/diskdevstat.8 doc/netdevstat.8 doc/scomes.8 doc/varnetload.8
 FILES_examples = ktune/sysctl.ktune
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
 FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/net.py tuningplugins/__init__.py
@@ -105,6 +105,10 @@ install:
 	# Install manpages
 	mkdir -p $(DESTDIR)/usr/share/man/man8
 	install -m 0644 doc/tuned.8 $(DESTDIR)/usr/share/man/man8
+	install -m 0644 doc/diskdevstat.8 $(DESTDIR)/usr/share/man/man8
+	install -m 0644 doc/netdevstat.8 $(DESTDIR)/usr/share/man/man8
+	install -m 0644 doc/scomes.8 $(DESTDIR)/usr/share/man/man8
+	install -m 0644 doc/varnetload.8 $(DESTDIR)/usr/share/man/man8
 	mkdir -p $(DESTDIR)/usr/share/man/man5
 	install -m 0644 doc/tuned.conf.5 $(DESTDIR)/usr/share/man/man5
 	mkdir -p $(DESTDIR)/usr/share/man/man1
