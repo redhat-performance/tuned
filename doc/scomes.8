@@ -1,0 +1,29 @@
+.TH "scomes" "8" "13 Jan 2011" "Phil Knirsch" "Tool for watching system resources"
+.SH NAME
+scomes \- tool for watching system resources
+.SH SYNOPSIS
+\fBscomes\fP -c "binary [binary arguments ...]" [timer]
+.SH DESCRIPTION
+\fBscomes\fR is a simple systemtap script for watching activity of one process. Syscalls count,
+userspace and kernelspace ticks, read and written bytes, transitted and received bytes and polling
+syscalls are measured.
+
+.TP
+binary
+Binary file to be executed. This process will be watched.
+.TP
+timer
+Setting this option causes the script to print out statistic every N seconds. If not provided,
+the statistics are printed only when watched process terminates.
+
+.SH "SEE ALSO"
+.LP
+tuned(8)
+diskdevstat(8)
+netdevstat(8)
+varnetload(8)
+stap(1)
+.SH AUTHOR
+Written by Jan Hutar <jhutar@redhat.com>.
+.SH REPORTING BUGS
+Report bugs to <pknirsch@redhat.com>.

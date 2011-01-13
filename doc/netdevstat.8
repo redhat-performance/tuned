@@ -1,0 +1,30 @@
+.TH "netdevstat" "8" "13 Jan 2011" "Phil Knirsch" "Tool for recording network activity"
+.SH NAME
+netdevstat \- tool for recording network activity
+.SH SYNOPSIS
+\fBnetdevstat\fP [\fIupdate interval\fP] [\fItotal duration\fP] [\fIdisplay histogram\fP]
+.SH DESCRIPTION
+\fBnetdevstat\fR is a simple systemtap script to record network activity of processes
+and display statistics for transmit/receive operations.
+
+.TP
+update interval
+Sets sampling interval in seconds.
+.TP
+total duration
+Sets total measurement time in seconds.
+.TP
+display histogram
+If this parameter is present, the histogram will be shown at the end of the measurement.
+
+.SH "SEE ALSO"
+.LP
+tuned(8)
+diskdevstat(8)
+varnetload(8)
+scomes(8)
+stap(1)
+.SH AUTHOR
+Written by Phil Knirsch <pknirsch@redhat.com>.
+.SH REPORTING BUGS
+Report bugs to <pknirsch@redhat.com>.
