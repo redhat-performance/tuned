@@ -18,8 +18,8 @@ start() {
 stop() {
 	set_disk_alpm max_performance
 	#disable_usb_autosuspend
-	disable_cpu_multicore_power_savings
-	restore_cpu_scheduler
+	disable_cpu_multicore_powersave
+	restore_cpu_governor
 	enable_snd_ac97_powersave
 	enable_cd_polling
 	disable_wifi_powersave
