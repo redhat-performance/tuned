@@ -52,15 +52,14 @@ Switches to the given profilename. If none is given or no valid one is given the
 
 .TP
 .B off
-Switch off all ktune and tuned settings and remove them from services. The configuration file are 
-set to previous settings.
+Switch off all ktune and tuned settings and remove them from services. The configuration file are set to previous settings.
 
 .SH PREDEFINED PROFILES
 At the moment we're providing the following pre defined profiles:
 
 .TP
 .BI "default"
-This is the default powersaving profile. It is the lowest of the available profiles in regard to powersaving and only enables CPU and disk plugins of tuned.
+This is the default powersaving profile. It is the lowest of the available profiles in regard to powersaving and only enables CPU and disk plugins of tuned. This is not the same as 'tuned-adm off', where tuned and ktune services are disabled.
 
 .TP
 .BI "desktop-powersave"
@@ -76,15 +75,23 @@ Medium powersaving profile directed at laptops running on AC. Enables ALPM power
 
 .TP
 .BI laptop-battery-powersave
-Strong powersaving profile directed at laptops running on battery. It activates all power saving mechanisms from the previous profiles plus it enables multi core power savings scheduler for low wakeup systems and makes sure the ondemand governor is active and the AC97 audio power saving is enabled. This profile can be used for any kind of system, not only laptops on battery power in order to save the maximum amount of power. The tradeoff for this profile is a noticeable impact on performance, specifically latency of disk and network IO. 
+Strong powersaving profile directed at laptops running on battery. It activates all power saving mechanisms from the previous profiles plus it enables multi core power savings scheduler for low wakeup systems and makes sure the ondemand governor is active and the AC97 audio power saving is enabled.  This profile can be used for any kind of system, not only laptops on battery power in order to save the maximum amount of power. The tradeoff for this profile is a noticeable impact on performance, specifically latency of disk and network IO. 
+
+.TP
+.BI "spindown-disk"
+Strong powersaving profile enabling aggresive disk spin-down. Disk writeback values are increased and disk swappines is lowered. CD drives polling and log syncing is disabled. All partitions are remounted with 'noatime' option. All tuned plugins are disabled.
 
 .TP
 .BI throughput-performance
-Sever profile for typical throughput performance tuning. Disables tuned and ktune power saving mechanisms and enables sysctl settings that improve the throughput performance of your disk and network IO and switches to the deadline scheduler.
+Server profile for typical throughput performance tuning. Disables tuned and ktune power saving mechanisms and enables sysctl settings that improve the throughput performance of your disk and network IO and switches to the deadline scheduler. CPU governor is set to performance.
 
 .TP
 .BI latency-performance
-Sever profile for typical latency performance tuning. Disables tuned and ktune power saving mechanisms and enables sysctl settings that improve the latency performance of your network IO.
+Server profile for typical latency performance tuning. Disables tuned and ktune power saving mechanisms and enables deadline IO scheduler. CPU governor is set to performance.
+
+.TP
+.BI "enterprise-storage"
+Server profile for high disk throughput performace tuning. Disables tuned and ktune power saving mechanisms and enables deadline IO scheduler. Enables hugepages and disables disk barriers. Disk readahead values are increased. CPU governor is set to performance.
 
 .SH "FILES"
 .nf
