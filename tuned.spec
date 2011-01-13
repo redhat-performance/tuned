@@ -91,9 +91,9 @@ fi
 %config(noreplace) %{_sysconfdir}/tune-profiles/active-profile
 %{_sysconfdir}/tune-profiles
 %{_datadir}/tuned
-%{_mandir}/man1/*
-%{_mandir}/man5/*
-%{_mandir}/man8/*
+%{_mandir}/man1/tuned-adm.*
+%{_mandir}/man5/tuned.conf.*
+%{_mandir}/man8/tuned.*
 %attr(0755,root,root) %{_initddir}/ktune
 %config(noreplace) %{_sysconfdir}/sysconfig/ktune
 %config(noreplace) %{_sysconfdir}/ktune.d/tunedadm.conf
@@ -115,6 +115,10 @@ fi
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 %{_sbindir}/scomes
+%{_mandir}/man8/varnetload.*
+%{_mandir}/man8/netdevstat.*
+%{_mandir}/man8/diskdevstat.*
+%{_mandir}/man8/scomes.*
 
 
 %changelog
