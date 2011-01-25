@@ -65,30 +65,34 @@ for (opt, val) in opts:
 endtime = time.time() + rtime
 delay = float(delay)/1000.0
 
-count = 0
-while(time.time() < endtime):
-	if (delay < 0.01):
+try:
+	count = 0
+	while(time.time() < endtime):
+		if (delay < 0.01):
+			urlopen(url).read(409600)
+			time.sleep(delay)
+			urlopen(url).read(409600)
+			time.sleep(delay)
+			urlopen(url).read(409600)
+			time.sleep(delay)
+			urlopen(url).read(409600)
+			time.sleep(delay)
+			urlopen(url).read(409600)
+			time.sleep(delay)
+			urlopen(url).read(409600)
+			time.sleep(delay)
+			urlopen(url).read(409600)
+			time.sleep(delay)
+			urlopen(url).read(409600)
+			time.sleep(delay)
+			urlopen(url).read(409600)
+			time.sleep(delay)
+			count += 9
 		urlopen(url).read(409600)
 		time.sleep(delay)
-		urlopen(url).read(409600)
-		time.sleep(delay)
-		urlopen(url).read(409600)
-		time.sleep(delay)
-		urlopen(url).read(409600)
-		time.sleep(delay)
-		urlopen(url).read(409600)
-		time.sleep(delay)
-		urlopen(url).read(409600)
-		time.sleep(delay)
-		urlopen(url).read(409600)
-		time.sleep(delay)
-		urlopen(url).read(409600)
-		time.sleep(delay)
-		urlopen(url).read(409600)
-		time.sleep(delay)
-		count += 9
-	urlopen(url).read(409600)
-	time.sleep(delay)
-	count += 1
+		count += 1
+except URLError, e:
+	print("Downloading failed: %s" % e.reason)
+	sys.exit(2)
 
 print("Finished varnetload. Received %d pages in %d seconds" % (count, rtime))
