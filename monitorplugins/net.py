@@ -34,7 +34,7 @@ class NetMonitor:
 			l = l.replace(":", " ")
 			v = l.split()
 			d = v[0]
-			if not d.startswith("eth"):
+			if not self._device_is_tunable(d):
 				continue
 			self.devices[d] = {}
 			self.devices[d]["new"] = ['0', '0', '0', '0']
@@ -42,6 +42,16 @@ class NetMonitor:
 			self.devices[d]["max"] = [max_speed, 1, max_speed, 1]
 			self.__updateStat__(d)
 			self.devices[d]["max"] = [max_speed, 1, max_speed, 1]
+
+	def _device_is_tunable(self, name):
+		# just guess from device name
+		for prefix in ["eth", "em", "pci"]:
+			if name.startswith(prefix): break
+		else:
+			return False
+
+		card = ethcard(name)
+		return len(card.supported_modes) > 1 and card.get_max_speed() >= 1000
 
 	def __calcspeed__(self, speed):
 		# 0.6 is just a magical constant (empirical value): Typical workload on netcard won't exceed
@@ -92,7 +102,7 @@ class NetMonitor:
 			max_data = self.__calcspeed__(ethcard(d).get_max_speed()) * interval;
 			self.devices[d]["max"] = [max_data, 1, max_data, 1]
 
-		log.info("Available ethernet cards: %s" % ", ".join(self.devices.keys()))
+		log.info("Tunable ethernet cards: %s" % ", ".join(self.devices.keys()))
 
 	def cleanup(self):
 		log.debug("Cleanup")
