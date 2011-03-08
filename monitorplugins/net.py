@@ -17,6 +17,7 @@
 #
 
 import os
+import re
 import logging, tuned_logging
 from tuned_nettool import ethcard
 
@@ -29,29 +30,40 @@ class NetMonitor:
 	def __init__(self):
 		self.devices = {}
 		self.enabled = True
-		devs = open("/proc/net/dev").readlines()
-		for l in devs:
-			l = l.replace(":", " ")
-			v = l.split()
-			d = v[0]
-			if not self._device_is_tunable(d):
-				continue
-			self.devices[d] = {}
-			self.devices[d]["new"] = ['0', '0', '0', '0']
-			max_speed = self._calcspeed( ethcard(d).get_max_speed() );
-			self.devices[d]["max"] = [max_speed, 1, max_speed, 1]
-			self._updateStat(d)
-			self.devices[d]["max"] = [max_speed, 1, max_speed, 1]
+		tunable = self._tunable_devices()
+		for dev in tunable:
+			max_speed = self._calcspeed(ethcard(dev).get_max_speed())
+			self.devices[dev] = {}
+			self.devices[dev]["new"] = ['0', '0', '0', '0']
+			self.devices[dev]["max"] = [max_speed, 1, max_speed, 1]
+			self._updateStat(dev)
+			self.devices[dev]["max"] = [max_speed, 1, max_speed, 1]
+
+	def _tunable_devices(self):
+		devices = os.listdir("/sys/class/net")
+		tunable = filter(self._device_is_tunable, devices)
+		return tunable
 
 	def _device_is_tunable(self, name):
-		# just guess from device name
-		for prefix in ["eth", "em", "pci"]:
-			if name.startswith(prefix): break
-		else:
+		if self._device_type(name) in "virtual":
 			return False
 
 		card = ethcard(name)
 		return len(card.supported_modes) > 1 and card.get_max_speed() >= 1000
+
+	def _device_type(self, name):
+		path = os.path.join("/sys/class/net", name)
+		path = os.path.join(os.path.dirname(path), os.readlink(path))
+		path = os.path.normpath(path)
+
+		try:
+			devtype = re.match(r"/sys/devices/([^/]+)/", path).group(1)
+		except AttributeError:
+			devtype = "unknown"
+			log.warn("Cannot determine type of '%s' (%s)." % (name, path))
+
+		log.debug("Found network device: %s (%s)" % (name, devtype))
+		return devtype
 
 	def _calcspeed(self, speed):
 		# 0.6 is just a magical constant (empirical value): Typical workload on netcard won't exceed
