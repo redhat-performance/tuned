@@ -38,9 +38,9 @@ class NetMonitor:
 				continue
 			self.devices[d] = {}
 			self.devices[d]["new"] = ['0', '0', '0', '0']
-			max_speed = self.__calcspeed__( ethcard(d).get_max_speed() );
+			max_speed = self._calcspeed( ethcard(d).get_max_speed() );
 			self.devices[d]["max"] = [max_speed, 1, max_speed, 1]
-			self.__updateStat__(d)
+			self._updateStat(d)
 			self.devices[d]["max"] = [max_speed, 1, max_speed, 1]
 
 	def _device_is_tunable(self, name):
@@ -53,20 +53,20 @@ class NetMonitor:
 		card = ethcard(name)
 		return len(card.supported_modes) > 1 and card.get_max_speed() >= 1000
 
-	def __calcspeed__(self, speed):
+	def _calcspeed(self, speed):
 		# 0.6 is just a magical constant (empirical value): Typical workload on netcard won't exceed
 		# that and if it does, then the code is smart enough to adapt it.
 		# 1024 * 1024 as for MB -> B
 		# speed / 8  Mb -> MB
 		return (int) (0.6 * 1024 * 1024 * speed / 8)
 
-	def __calcdiff__(self, dev):
+	def _calcdiff(self, dev):
 		l = []
 		for i in xrange(len(self.devices[dev]["old"])):
 			l.append(int(self.devices[dev]["new"][i]) - int(self.devices[dev]["old"][i]))
 		return l
 
-	def __updateStat__(self, dev):
+	def _updateStat(self, dev):
 		self.devices[dev]["old"] = self.devices[dev]["new"][:]
 		l = open("/sys/class/net/"+dev+"/statistics/rx_bytes", "r").read().strip()
 		self.devices[dev]["new"][0] = l
@@ -76,15 +76,15 @@ class NetMonitor:
 		self.devices[dev]["new"][2] = l
 		l = open("/sys/class/net/"+dev+"/statistics/tx_packets", "r").read().strip()
 		self.devices[dev]["new"][3] = l
-		l = self.__calcdiff__(dev)
+		l = self._calcdiff(dev)
 		for i in xrange(len(l)):
 			if l[i] > self.devices[dev]["max"][i]:
 				self.devices[dev]["max"][i] = l[i]
 
-	def __update__(self):
+	def _update(self):
 		for dev in self.devices.keys():
-			self.__updateStat__(dev)
-			self.devices[dev]["diff"] = self.__calcdiff__(dev)
+			self._updateStat(dev)
+			self.devices[dev]["diff"] = self._calcdiff(dev)
 
 			log.debug("%s diff: %s" % (dev, self.devices[dev]["diff"]))
 
@@ -99,7 +99,7 @@ class NetMonitor:
 		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
 
 		for d in self.devices.keys():
-			max_data = self.__calcspeed__(ethcard(d).get_max_speed()) * interval;
+			max_data = self._calcspeed(ethcard(d).get_max_speed()) * interval;
 			self.devices[d]["max"] = [max_data, 1, max_data, 1]
 
 		log.info("Tunable ethernet cards: %s" % ", ".join(self.devices.keys()))
@@ -110,7 +110,7 @@ class NetMonitor:
 	def getLoad(self):
 		if not self.enabled:
 			return
-		self.__update__()
+		self._update()
 		ret = {}
 		ret["NET"] = {}
 		for dev in self.devices.keys():

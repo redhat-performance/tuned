@@ -28,7 +28,7 @@ class Tuned:
 		self.tp = []
 		self.verbose = False
 
-	def __initplugins__(self, path, module, store):
+	def _initplugins(self, path, module, store):
 		log.debug("Initializing plugins (%s)" % module)
 
 		_files = map(lambda v: v[:-3], filter(lambda v: v[-3:] == ".py" and \
@@ -79,8 +79,8 @@ class Tuned:
 
 		# loading, setting logging level and initializing plugins
 
-		self.__initplugins__(path, "monitorplugins", self.mp)
-		self.__initplugins__(path, "tuningplugins", self.tp)
+		self._initplugins(path, "monitorplugins", self.mp)
+		self._initplugins(path, "tuningplugins", self.tp)
 
 		for p in self.mp + self.tp:
 			if not debug and self.config.has_option(p.config_section, "logging"):

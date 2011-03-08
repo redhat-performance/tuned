@@ -29,25 +29,25 @@ class DiskMonitor:
 		self.devices = {}
 		self.enabled = True
 
-	def __calcdiff__(self, dev):
+	def _calcdiff(self, dev):
 		l = []
 		for i in xrange(len(self.devices[dev]["old"])):
 			l.append(int(self.devices[dev]["new"][i]) - int(self.devices[dev]["old"][i]))
 		return l
 
-	def __updateStat__(self, dev):
+	def _updateStat(self, dev):
 		l = open("/sys/block/"+dev+"/stat", "r").read()
 		self.devices[dev]["old"] = self.devices[dev]["new"]
 		self.devices[dev]["new"] = l.split()
-		l = self.__calcdiff__(dev)
+		l = self._calcdiff(dev)
 		for i in xrange(len(l)):
 			if l[i] > self.devices[dev]["max"][i]:
 				self.devices[dev]["max"][i] = l[i]
 
-	def __update__(self):
+	def _update(self):
 		for dev in self.devices.keys():
-			self.__updateStat__(dev)
-			self.devices[dev]["diff"] = self.__calcdiff__(dev)
+			self._updateStat(dev)
+			self.devices[dev]["diff"] = self._calcdiff(dev)
 
 			log.debug("%s diff: %s" % (dev, self.devices[dev]["diff"]))
 
@@ -71,7 +71,7 @@ class DiskMonitor:
 			self.devices[d] = {}
 			self.devices[d]["new"] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
 			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-			self.__updateStat__(d)
+			self._updateStat(d)
 			self.devices[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
 		log.info("Available hard drives: %s" % ", ".join(self.devices.keys()))
@@ -82,7 +82,7 @@ class DiskMonitor:
 	def getLoad(self):
 		if not self.enabled:
 			return
-		self.__update__()
+		self._update()
 		ret = {}
 		ret["DISK"] = {}
 		for dev in self.devices.keys():

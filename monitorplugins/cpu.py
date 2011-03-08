@@ -26,10 +26,10 @@ class CPUMonitor:
 	config_section = "CPUMonitor"
 
 	def __init__(self):
-		self.__update__()
+		self._update()
 		self.enabled = True
 
-	def __update__(self):
+	def _update(self):
 		self.loadavg = float(open("/proc/loadavg").read().split()[0])
 		log.debug("Load is %s" % self.loadavg)
 
@@ -47,7 +47,7 @@ class CPUMonitor:
 	def getLoad(self):
 		if not self.enabled:
 			return
-		self.__update__()
+		self._update()
 		ret = {}
 		ret["CPU"] = self.loadavg
 		return ret

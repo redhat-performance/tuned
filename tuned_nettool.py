@@ -24,7 +24,7 @@ log = logging.getLogger("tuned")
 
 class Nettool:
 
-	__advertise_values = { # [ half, full ]
+	_advertise_values = { # [ half, full ]
 		10 : [ 0x001, 0x002 ],
 		100 : [ 0x004, 0x008 ],
 		1000 : [ 0x010, 0x020 ],
@@ -33,10 +33,10 @@ class Nettool:
 		"auto" : 0x03F
 	}
 
-	__disabled = False
+	_disabled = False
 
 	def __init__(self, interface):
-		self.__interface = interface;
+		self._interface = interface;
 		self.update()
 
 		log.debug("%s: speed %s, full duplex %s, autoneg %s, link %s" % (interface, self.speed, self.full_duplex, self.autoneg, self.link)) 
@@ -45,9 +45,9 @@ class Nettool:
 
 #	def __del__(self):
 #		if self.supported_autoneg:
-#			self.__set_advertise(self.__advertise_values["auto"])
+#			self._set_advertise(self._advertise_values["auto"])
 
-	def __clean_status(self):
+	def _clean_status(self):
 		self.speed = 0
 		self.full_duplex = False
 		self.autoneg = False
@@ -59,27 +59,27 @@ class Nettool:
 		self.advertised_modes = []
 		self.advertised_autoneg = False
 
-	def __calculate_mode(self, modes):
+	def _calculate_mode(self, modes):
 		mode = 0;
 		for m in modes:
-			mode += self.__advertise_values[m[0]][ 1 if m[1] else 0 ]
+			mode += self._advertise_values[m[0]][ 1 if m[1] else 0 ]
 
 		return mode
 
-	def __set_autonegotiation(self, enable):
+	def _set_autonegotiation(self, enable):
 		if self.autoneg == enable:
 			return True
 
 		if not self.supported_autoneg:
 			return False
 
-		return 0 == call(["ethtool", "-s", self.__interface, "autoneg", "on" if enable else "off"])
+		return 0 == call(["ethtool", "-s", self._interface, "autoneg", "on" if enable else "off"])
 
-	def __set_advertise(self, value):
-		if not self.__set_autonegotiation(True):
+	def _set_advertise(self, value):
+		if not self._set_autonegotiation(True):
 			return False
 
-		return 0 == call(["ethtool", "-s", self.__interface, "advertise", "0x%03x" % value])
+		return 0 == call(["ethtool", "-s", self._interface, "advertise", "0x%03x" % value])
 
 	def get_max_speed(self):
 		max = 0
@@ -92,59 +92,59 @@ class Nettool:
 			return 1000
 
 	def set_max_speed(self):
-		if self.__disabled or not self.supported_autoneg:
+		if self._disabled or not self.supported_autoneg:
 			return False
 
-		#if self.__set_advertise(self.__calculateMode(self.supported_modes)):
-		if self.__set_advertise(self.__advertise_values["auto"]):
+		#if self._set_advertise(self._calculateMode(self.supported_modes)):
+		if self._set_advertise(self._advertise_values["auto"]):
 			self.update()
 			return True
 		else:
 			return False
 
 	def set_speed(self, speed):
-		if self.__disabled or not self.supported_autoneg:
+		if self._disabled or not self.supported_autoneg:
 			return False
 
 		mode = 0
-		for am in self.__advertise_values:
+		for am in self._advertise_values:
 			if am == "auto": continue
 			if am <= speed:
-				mode += self.__advertise_values[am][0];
-				mode += self.__advertise_values[am][1];
+				mode += self._advertise_values[am][0];
+				mode += self._advertise_values[am][1];
 
-		effective_mode = mode & self.__calculate_mode(self.supported_modes)
+		effective_mode = mode & self._calculate_mode(self.supported_modes)
 
-		log.debug("%s: set_speed(%d) - effective_mode 0x%03x" % (self.__interface, speed, effective_mode))
+		log.debug("%s: set_speed(%d) - effective_mode 0x%03x" % (self._interface, speed, effective_mode))
 
-		if self.__set_advertise(effective_mode):
+		if self._set_advertise(effective_mode):
 			self.update()
 			return True
 		else:
 			return False
 
 	def update(self):
-		if self.__disabled:
+		if self._disabled:
 			return
 
 		# run ethtool and preprocess output
 
-		p_ethtool = Popen(["ethtool", self.__interface], stdout=PIPE, stderr=PIPE)
+		p_ethtool = Popen(["ethtool", self._interface], stdout=PIPE, stderr=PIPE)
 		p_filter = Popen(["sed", "s/^\s*//;s/:\s*/:\\n/g"], stdin=p_ethtool.stdout, stdout=PIPE)
 
 		output = p_filter.communicate()[0]
 		errors = p_ethtool.communicate()[1]
 
 		if errors != "":
-			log.warning("%s: some errors were reported by 'ethtool'" % self.__interface)
-			log.debug("%s: %s" % (self.__interface, errors.replace("\n", r"\n")))
-			self.__clean_status()
-			self.__disabled = True
+			log.warning("%s: some errors were reported by 'ethtool'" % self._interface)
+			log.debug("%s: %s" % (self._interface, errors.replace("\n", r"\n")))
+			self._clean_status()
+			self._disabled = True
 			return
 
 		# parses output - kind of FSM
 
-		self.__clean_status()
+		self._clean_status()
 
 		re_speed = re.compile(r"(\d+)")
 		re_mode = re.compile(r"(\d+)baseT/(Half|Full)")

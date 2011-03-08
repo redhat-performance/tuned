@@ -32,7 +32,7 @@ class DiskTuning:
 		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
 		self.levels = len(self.power)
 
-	def __updateIdle__(self, dev, devload):
+	def _updateIdle(self, dev, devload):
 		idle = self.devidle.setdefault(dev, {})
 		idle.setdefault("LEVEL", 0)
 		for type in ("READ", "WRITE"):
@@ -65,7 +65,7 @@ class DiskTuning:
 		disks = load.setdefault("DISK", {})
 		for dev in disks.keys():
 			devload = disks[dev]
-			self.__updateIdle__(dev, devload)
+			self._updateIdle(dev, devload)
 			if self.devidle[dev]["LEVEL"] < self.levels-1 and self.devidle[dev]["READ"] >= 6 and self.devidle[dev]["WRITE"] >= 6:
 				self.devidle[dev].setdefault("LEVEL", 0)
 				self.devidle[dev]["LEVEL"] += 1
