@@ -60,15 +60,15 @@ class NetTuning:
 	def setTuning(self, load):
 		if not self.enabled:
 			return
-		disks = load.setdefault("NET", {})
-		for dev in disks.keys():
-			devload = disks[dev]
+		ethcards = load.setdefault("NET", {})
+		for dev in ethcards.keys():
+			devload = ethcards[dev]
 			self._updateIdle(dev, devload)
 			if self.devidle[dev]["LEVEL"] == 0 and self.devidle[dev]["READ"] >= 6 and self.devidle[dev]["WRITE"] >= 6:
 				self.devidle[dev]["LEVEL"] = 1
 
 				log.debug("%s: setting 100Mbps" % dev)
-				ethcard(dev).set_speed(100) # FIXME: what about making this more dynamic?
+				ethcard(dev).set_speed(100)
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
 				self.devidle[dev]["LEVEL"] = 0
 
