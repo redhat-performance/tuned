@@ -25,9 +25,14 @@ class CPUTuning:
 
 	config_section = "CPUTuning"
 
+	eeefsb_control = "/sys/devices/platform/eeepc/cpufv"
+
 	def __init__(self):
 		self.latency = 100
 		self.enabled = True
+
+		self.eeefsb = False
+		self.fsbreduced = False
 
 	def init(self, config):
 		log.debug("Init")
@@ -39,6 +44,13 @@ class CPUTuning:
 			open("/dev/cpu_dma_latency", "w")
 		except:
 			self.enabled = False
+
+		if self.config.has_option(self.config_section, "eeefsb"):
+                        self.eeefsb = (self.config.get(self.config_section, "eeefsb") == "True")
+		try:
+			open(self.eeefsb_control, "w")
+		except:
+			self.eeefsb = False
 
 		log.info("Module is %s" % ("enabled" if self.enabled else "disabled"))
 
@@ -60,5 +72,12 @@ class CPUTuning:
 			log.debug("Setting latency to 100")
 			self.latency = 100
 			open("/dev/cpu_dma_latency", "w").write("100\n")
+		if self.eeefsb:
+			if not self.fsbreduced and loadavg < 0.4:
+				open(self.eeefsb_control, "w").write("2\n")
+				self.fsbreduced = True
+			if self.fsbreduced and loadavg > 0.5:
+				open(self.eeefsb_control, "w").write("1\n")
+				self.fsbreduced = False
 
 _plugin = CPUTuning()

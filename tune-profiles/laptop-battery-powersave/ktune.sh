@@ -10,7 +10,6 @@ start() {
 	enable_snd_ac97_powersave
 	disable_cd_polling
 	enable_wifi_powersave
-	eee_set_reduced_fsb
 
 	return 0
 }
@@ -23,7 +22,6 @@ stop() {
 	enable_snd_ac97_powersave
 	enable_cd_polling
 	disable_wifi_powersave
-	eee_set_normal_fsb
 
 	return 0
 }
