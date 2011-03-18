@@ -1,3 +1,107 @@
+commit 9f490b6cb16b378c37c440dafb8d8ac32da2ec90
+Author: Jaroslav Škarvada <jskarvad@redhat.com>
+Date:   Mon Mar 14 09:49:26 2011 +0100
+
+    cpu plugin: add EEEPC dynamic FSB reclocking
+    
+    The Asus FSB reclocking feature is also known as Super Hybrid Engine (SHE).
+    The feature can be enabled in tuned.conf by setting the eeefsb to True.
+    It is enabled by default in the laptop-battery-powersave profile.
+    
+    Signed-off-by: Jan Vcelak <jvcelak@redhat.com>
+
+commit fd2656d591082539d00fd9d56441dc9d9adea531
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 8 19:02:36 2011 +0100
+
+    net: universal ethernet card identifier detection
+    
+    - get all network devices from /sys/class/net
+    - exclude all virtual devices
+      (symlinks point to /sys/devices/virtual/*)
+    - exclude all untunable devices
+      (ethtool reports no modes, maximal speed is lower than 1000Mbit)
+
+commit 31cd75fa772a93024b88acbb6606b0d2716ebe7e
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 8 17:42:37 2011 +0100
+
+    code cleanup: net plugin variable names
+
+commit c36714fd02e8dc995a13d666b4a0654456e981ef
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 8 17:41:57 2011 +0100
+
+    code cleanup: too much underscores
+
+commit ae41fe8929116bd8616c5b3d09d30cd8c8863cf8
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 8 17:27:35 2011 +0100
+
+    net: support new network device naming
+    
+    https://fedoraproject.org/wiki/Features/ConsistentNetworkDeviceNaming
+    Resolves: #682379
+
+commit a1d1df7bb1f6ccec698c7e5d661d5a0b8f6744c7
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 25 15:05:32 2011 +0100
+
+    varnetload: urlerror exception handling
+    
+    Resolves: #659968
+
+commit a251de81fee5ae1674ec261f9379510e5fdfffc9
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 13 18:11:04 2011 +0100
+
+    tuned.spec: move man pages for utils to subpackage
+
+commit 5299225ea95d7bfbd2b2c1084c3dd501c0e07e5a
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 13 15:35:53 2011 +0100
+
+    man: tuned-adm - update profiles description
+
+commit a351b52ff3ddb22f0ec23608ca5e81c333acf5e9
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 13 14:58:07 2011 +0100
+
+    man: tuned.conf - plugins description
+
+commit f6d80577d32690715878030c1d29985a913fc444
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 13 16:30:28 2011 +0100
+
+    disable tuned in performance and spindown profiles
+    
+    Not providing tuned.conf caused, that default or previous
+    tuned configuration was used instead of disabling tuned.
+
+commit c53cf2a2ee780a44b7bcf8d38abc9aaf00d43d48
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 13 14:24:21 2011 +0100
+
+    laptop-battery-powersave: ktune script typos
+
+commit 840c0e8232711d86a1fc466932cd88be910083dd
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 13 14:02:28 2011 +0100
+
+    Makefile: added new manpages
+
+commit 97306e2b55dc2acccceadda203857747fbcea6ab
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Jan 13 13:50:36 2011 +0100
+
+    new man pages: diskdevstat netdevstat scomes varnetload
+
+commit 0e7e22ef3120b2f2fa703a9330bc1174cadade7f
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Jan 10 20:20:09 2011 +0100
+
+    version bump
+
 commit d6377a8f8a52376b546601f4e6bd901e38abf79a
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Jan 10 18:48:19 2011 +0100

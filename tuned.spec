@@ -2,7 +2,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.19
+Version: 0.2.20
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -122,6 +122,13 @@ fi
 
 
 %changelog
+* Fri Mar 18 2011 Jan Vcelak <jvcelak@redhat.com> 0.2.20-1
+- new manual pages: diskdevstat, netdevstat, scomes, and varnetload
+- updated obsolete parts in the other manual pages
+- laptop-battery-powersave profile fixes
+- support for new network device naming
+- EEE PC dynamic FSB reclocking is done dynamicly in CPU plugin (Jaroslav Skarvada)
+
 * Mon Jan 10 2011 Jan Vcelak <jvcelak@redhat.com> 0.2.19-1
 - reduced FSB support on Asus EEE netbooks with Intel Atom
 - consolidate ktune script functions in tuning profiles
