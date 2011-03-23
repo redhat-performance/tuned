@@ -28,7 +28,11 @@ SYSCTL_GET="/sbin/sysctl -e"
 KERNEL_ELEVATOR="cfq"
 /bin/fgrep -q 'elevator=' /proc/cmdline
 CMDLINE_ELEVATOR=$?
-SYS_BLOCK_SDX=$(eval LANG=C /bin/ls -1 ${ELEVATOR_TUNE_DEVS} 2>/dev/null)
+if [ -n "$ELEVATOR_TUNE_DEVS" ]; then
+	SYS_BLOCK_SDX=$(eval LANG=C /bin/ls -1 "${ELEVATOR_TUNE_DEVS}" 2>/dev/null)
+else
+	SYS_BLOCK_SDX=
+fi
 
 declare -a KTUNE_FILES
 if [ -r "$SYSCTL" ]; then
