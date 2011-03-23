@@ -210,7 +210,7 @@ class Nettool:
 							self.advertised_modes.append( (int(s), d == "Full") )
 						del m,s,d
 				except:
-					self.advertised_modes.append(1000, True)
+					self.advertised_modes.append((1000, True))
 
 			elif state == "advertised_autoneg":
 				self.advertised_autoneg = line == "Yes"
