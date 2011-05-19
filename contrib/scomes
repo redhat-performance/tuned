@@ -31,7 +31,7 @@ function print_status() {
   printf("Read/Written bytes (from/to devices): %d/%d (%d)\n", reads, writes, reads+writes)
   printf("Read/Written bytes (from/to N/A device): %d/%d (%d)\n", reads_c, writes_c, reads_c+writes_c)
   printf("Transmitted/Recived bytes: %d/%d (%d)\n", ifxmit, ifrecv, ifxmit+ifrecv)
-  printf("Pooling syscalls: %d\n", poll_timeout+epoll_timeout+select_timeout+itimer_timeout+nanosleep_timeout+futex_timeout+signal_timeout)
+  printf("Polling syscalls: %d\n", poll_timeout+epoll_timeout+select_timeout+itimer_timeout+nanosleep_timeout+futex_timeout+signal_timeout)
   printf("SCORE: %d\n", compute_score())
 }
 
