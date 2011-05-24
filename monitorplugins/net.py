@@ -52,15 +52,14 @@ class NetMonitor:
 		return len(card.supported_modes) > 1 and card.get_max_speed() >= 1000
 
 	def _device_type(self, name):
-		path = os.path.join("/sys/class/net", name)
-		path = os.path.join(os.path.dirname(path), os.readlink(path))
-		path = os.path.normpath(path)
-
 		try:
+			path = os.path.join("/sys/class/net", name)
+			path = os.path.join(os.path.dirname(path), os.readlink(path))
+			path = os.path.normpath(path)
 			devtype = re.match(r"/sys/devices/([^/]+)/", path).group(1)
-		except AttributeError:
+		except (IOError, AttributeError):
 			devtype = "unknown"
-			log.warn("Cannot determine type of '%s' (%s)." % (name, path))
+			log.warn("Cannot determine type of '%s'." % name)
 
 		log.debug("Found network device: %s (%s)" % (name, devtype))
 		return devtype
