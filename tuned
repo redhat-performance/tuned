@@ -60,7 +60,12 @@ def daemonize():
 		log.cricital("Cannot fork: %s", str(e))
 		sys.exit(1)
 
-	sys.stdout = sys.stderr = open("/dev/null", 'a+')
+	si = file('/dev/null', 'r')
+	so = file('/dev/null', 'a+')
+	se = file('/dev/null', 'a+', 0)
+	os.dup2(si.fileno(), sys.stdin.fileno())
+	os.dup2(so.fileno(), sys.stdout.fileno())
+	os.dup2(se.fileno(), sys.stderr.fileno())
 
 if __name__ == "__main__":
 	try:
