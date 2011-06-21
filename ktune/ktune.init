@@ -9,6 +9,18 @@
 # config: /etc/sysconfig/ktune
 #
 
+### BEGIN INIT INFO
+# Provides: 
+# Required-Start: 
+# Required-Stop: 
+# Should-Start: 
+# Should-Stop: 
+# Default-Start: 
+# Default-Stop: 
+# Short-Description: This service applies and reverts ktune sysctl settings.
+# Description: 
+### END INIT INFO
+
 # Source function library.
 . /etc/init.d/functions
 
