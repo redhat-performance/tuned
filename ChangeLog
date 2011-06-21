@@ -1,3 +1,72 @@
+commit ccecd6fa7d4ed038ad72ac46eb76ef89aaefb3c8
+Author: Phil Knirsch <pknirsch@redhat.com>
+Date:   Tue Jun 21 13:46:01 2011 +0200
+
+    Incorrect handling of stdin/stdout/stderr during daemon creation
+    
+    Resolves: #695480
+    Signed-off-by: Jan Vcelak <jvcelak@redhat.com>
+
+commit 53ad121de8eb0ec9bcf2a2f73c6f5ad010006987
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jun 21 12:50:36 2011 +0200
+
+    ktune: add LSB headers to initscript
+    
+    Otherwise systemd deadlocks when restarting cpuspeed daemon
+    within ktune.
+    
+    Resolves: #690177
+
+commit 2884a1ac3627aa75ea6a2a7d35fc2e070b67be5b
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jun 21 12:36:33 2011 +0200
+
+    remove control of HAL CD polling
+    
+    HAL is being removed from all current distributions, including Fedora.
+    
+    Resolves: #710920
+
+commit ba38290e921b4727c00d6f40924b4c586655622a
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue May 24 10:24:04 2011 +0200
+
+    net: device type determination, handle IOError
+    
+    - handle the situation, when checked /path does not exist (bz #707079)
+
+commit d78b41e9ff7bf54666c23ae14390aaab591569fe
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu May 19 09:29:43 2011 +0200
+
+    scomes: typo pooling -> polling
+    
+    Thanks to Jaroslav Skarvada <jskarvad@redhat.com>
+
+commit c6875ac43df639b5079bd55318e301f2dabc214a
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Mar 23 16:02:36 2011 +0100
+
+    ktune: check if ELEVATOR_TUNE_DEVS is set
+    
+    When ELEVATOR_TUNE_DEVS variable is not set, all files from current
+    directory will propagate to SYS_BLOCK_SDX variable.
+
+commit ac079d8f40a53c5ca4efe1ff917a5337c8d9d508
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Mar 23 14:56:26 2011 +0100
+
+    fix: crash when ethtool advertised modes in unknown format
+    
+    Resolves: #689715 (RHEL)
+
+commit 08da2b82beaf2426cc30e0d6058c87859dc3017c
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Mar 18 11:23:25 2011 +0100
+
+    version bump
+
 commit 9f490b6cb16b378c37c440dafb8d8ac32da2ec90
 Author: Jaroslav Škarvada <jskarvad@redhat.com>
 Date:   Mon Mar 14 09:49:26 2011 +0100

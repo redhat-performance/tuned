@@ -2,7 +2,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.20
+Version: 0.2.21
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -122,6 +122,15 @@ fi
 
 
 %changelog
+* Tue Jun 21 2011 Jan Vcelak <jvcelak@redhat.com> 0.2.21-1
+- fix: crash when ethtool advertised modes in unknown format (#689715)
+- fix: check if ELEVATOR_KTUNE_DEVS is set
+- typo fix: scomes, pooling -> polling
+- fix: handle exceptions when determining type of network device (#707079)
+- remove hal-disable-polling as HAL is being removed from Fedora (#710920)
+- fix: add LSB headers to ktune initscript not to cause deadlock in systemd (#690177)
+- fix: incorrect handling of stdin/stdout/stderr during daemon creation (#695480)
+
 * Fri Mar 18 2011 Jan Vcelak <jvcelak@redhat.com> 0.2.20-1
 - new manual pages: diskdevstat, netdevstat, scomes, and varnetload
 - updated obsolete parts in the other manual pages
