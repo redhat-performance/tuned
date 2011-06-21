@@ -10,7 +10,6 @@ start() {
 	set_disk_spindown 6
 
 	enable_usb_autosuspend
-	disable_cd_polling
 	disable_bluetooth
 	enable_wifi_powersave
 	disable_logs_syncing

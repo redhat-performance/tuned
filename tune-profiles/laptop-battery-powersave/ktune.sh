@@ -8,7 +8,6 @@ start() {
 	enable_cpu_multicore_powersave
 	set_cpu_governor ondemand
 	enable_snd_ac97_powersave
-	disable_cd_polling
 	enable_wifi_powersave
 
 	return 0
@@ -20,7 +19,6 @@ stop() {
 	disable_cpu_multicore_powersave
 	restore_cpu_governor
 	enable_snd_ac97_powersave
-	enable_cd_polling
 	disable_wifi_powersave
 
 	return 0

@@ -263,25 +263,6 @@ disable_snd_ac97_powersave() {
 }
 
 #
-# CD DRIVES tuning
-#
-
-_cd_polling() {
-	[ "$1" == "1" ] && opts=--enable-polling || opts=
-
-	cddrives=$(command ls -1 /dev/scd* 2>/dev/null)
-	for i in $cddrives; do hal-disable-polling $opts --device $(readlink -f $i); done &>/dev/null
-}
-
-enable_cd_polling() {
-	_cd_polling 1
-}
-
-disable_cd_polling() {
-	_cd_polling 0
-}
-
-#
 # SOFTWARE tuning
 #
 
