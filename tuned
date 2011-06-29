@@ -23,6 +23,7 @@
 
 import sys, os.path, getopt, atexit, signal
 
+INIT_TIMEOUT = 3
 TUNEDDIR = "/usr/share/tuned"
 if not TUNEDDIR in sys.path:
 	sys.path.append(TUNEDDIR)
@@ -43,6 +44,7 @@ def daemonize():
 	try:
 		pid = os.fork()
 		if pid > 0:
+			daemonize_wait()
 			sys.exit(0)
 	except OSError, e:
 		log.critical("Cannot fork: %s", str(e))
@@ -66,6 +68,24 @@ def daemonize():
 	os.dup2(si.fileno(), sys.stdin.fileno())
 	os.dup2(so.fileno(), sys.stdout.fileno())
 	os.dup2(se.fileno(), sys.stderr.fileno())
+
+def daemonize_wait():
+	signal.signal(signal.SIGALRM, daemonize_handle_signal)
+	signal.signal(signal.SIGUSR1, daemonize_handle_signal)
+	signal.alarm(INIT_TIMEOUT)
+	while True:
+		signal.pause()
+
+def daemonize_done(ppid):
+	os.kill(ppid, signal.SIGUSR1)
+
+def daemonize_handle_signal(signum, frame):
+	if signum == signal.SIGALRM:
+		sys.exit(1)
+	elif signum == signal.SIGUSR1:
+		sys.exit(0)
+	else:
+		pass
 
 if __name__ == "__main__":
 	try:
@@ -101,11 +121,15 @@ if __name__ == "__main__":
 			log.warn("Superuser permissions are needed. Most tunings will not work!")
 
 	if daemon:
+		main_pid = os.getpid()
 		log.switchToFile()
 		daemonize()
 
 	from tuned import tuned
 	tuned.init(TUNEDDIR, cfgfile, debug = debug)
+
+	if daemon:
+		daemonize_done(main_pid)
 
 	atexit.register(logging.shutdown)
 	atexit.register(tuned.cleanup)
