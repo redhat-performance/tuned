@@ -67,7 +67,7 @@ A powersaving profile directed at desktop systems. Enables ALPM powersaving for 
 
 .TP
 .BI server-powersave
-A powersaving profile directed at server systems. Enables ALPM powersaving for SATA host adapters, disables CD-ROM polling via hal and activates the CPU and disk plugins of tuned.
+A powersaving profile directed at server systems. Enables ALPM powersaving for SATA host adapters, and activates the CPU and disk plugins of tuned.
 
 .TP
 .BI laptop-ac-powersave
@@ -79,7 +79,7 @@ Strong powersaving profile directed at laptops running on battery. It activates 
 
 .TP
 .BI "spindown-disk"
-Strong powersaving profile enabling aggresive disk spin-down. Disk writeback values are increased and disk swappines is lowered. CD drives polling and log syncing is disabled. All partitions are remounted with 'noatime' option. All tuned plugins are disabled.
+Strong powersaving profile directed at machines with classic HDDs. It enables aggressive disk spin-down. Disk writeback values are increased and disk swappiness is lowered. Log syncing is disabled. All partitions are remounted with 'noatime' option. All tuned plugins are disabled.
 
 .TP
 .BI throughput-performance

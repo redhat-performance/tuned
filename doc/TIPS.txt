@@ -23,8 +23,6 @@
 ** echo "5" > /proc/sys/vm/laptop_mode
 * Use relatime for your / partition
 ** mount -o remount,relatime / 
-* Disable CD-ROM polling from HAL (prevents popups when a CD is inserted):
-** hal-disable-polling --device /dev/scd0 
 * Enable USB autosuspend by adding the following to the kernel boot commandline:
 ** usbcore.autosuspend=5 
 * Screensaver needs to dpms off the screen, not just make colors black.  To turn of monitor after 120s when X is running:
