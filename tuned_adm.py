@@ -92,8 +92,8 @@ class Tuned_adm:
 		file.close()
 
 	def get_service_status(self, service):
-		enabled = os.system("chkconfig %s" % service) == 0
-		running = os.system("service %s status >/dev/null 2>&1" % service) == 0
+		enabled = os.system("chkconfig %s &>/dev/null" % service) == 0
+		running = os.system("service %s status &>/dev/null" % service) == 0
 		return (enabled, running)
 
 	def verify_profile(self, profile):
@@ -133,8 +133,8 @@ class Tuned_adm:
 		# disable services
 		os.system('service ktune stop')
 		os.system('service tuned stop')
-		os.system('chkconfig --del ktune')
-		os.system('chkconfig --del tuned')
+		os.system('chkconfig ktune off')
+		os.system('chkconfig tuned off')
 
 		# remove profile settings
 		self.remove("/etc/ktune.d/*.conf", os.path.islink)
@@ -159,8 +159,8 @@ class Tuned_adm:
 
 		os.system('service ktune stop')
 		os.system('service tuned stop')
-		os.system('chkconfig --add ktune && chkconfig --level 345 ktune off')
-		os.system('chkconfig --add tuned && chkconfig --level 345 tuned off')
+		os.system('chkconfig ktune on')
+		os.system('chkconfig tuned on')
 
 		print >>sys.stderr, "Switching to profile '%s'" % profile
 		self.set_active(profile)
@@ -196,10 +196,10 @@ class Tuned_adm:
 
 		if enablektune:
 			os.system('service ktune start')
-			os.system('chkconfig --add ktune && chkconfig --level 345 ktune on')
+			os.system('chkconfig ktune on')
 
 		if enabletuned:
 			os.system('service tuned start')
-			os.system('chkconfig --add tuned && chkconfig --level 345 tuned on')
+			os.system('chkconfig tuned on')
 
 tuned_adm = Tuned_adm()
