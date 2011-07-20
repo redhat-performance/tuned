@@ -8,7 +8,7 @@ MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
 DIRS = doc doc/examples contrib tuningplugins monitorplugins ktune udev
-FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned_nettool.py tuned_logging.py tuned.bash tuned.tmpfiles
+FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned_nettool.py tuned_logging.py tuned.bash tuned.tmpfiles tuned.service
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes doc/diskdevstat.8 doc/netdevstat.8 doc/scomes.8 doc/varnetload.8
 FILES_examples = ktune/sysctl.ktune
 FILES_contrib = contrib/diskdevstat contrib/netdevstat contrib/scomes contrib/varnetload
@@ -20,6 +20,8 @@ FILES_udev_scripts = udev/tuned-mpath-iosched
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 
 DEFAULT_PROFILE = default
+
+INITSYSTEM = sysvinit
 
 distarchive: tag archive
 
@@ -56,7 +58,9 @@ srpm: archive
 build: 
 	# Nothing to build
 
-install:
+install: install-base install-parts-$(INITSYSTEM)
+
+install-base:
 	mkdir -p $(DESTDIR)
 
 	# Install the binaries
@@ -98,10 +102,6 @@ install:
 
 	mkdir -p $(DESTDIR)/etc/tune-profiles/
 
-	# Install initscript
-	mkdir -p $(DESTDIR)/etc/rc.d/init.d
-	install -m 0755 tuned.initscript $(DESTDIR)/etc/rc.d/init.d/tuned
-
 	# Install manpages
 	mkdir -p $(DESTDIR)/usr/share/man/man8
 	install -m 0644 doc/tuned.8 $(DESTDIR)/usr/share/man/man8
@@ -114,12 +114,10 @@ install:
 	mkdir -p $(DESTDIR)/usr/share/man/man1
 	install -m 0644 doc/tuned-adm.1 $(DESTDIR)/usr/share/man/man1
 
-	# Install ktune
+	# Install ktune configuration
 	install -m 755 -d $(DESTDIR)/etc
 	install -m 755 -d $(DESTDIR)/etc/ktune.d
 	install -m 755 -d $(DESTDIR)/etc/sysconfig
-	install -m 755 -d $(DESTDIR)/etc/rc.d/init.d
-	install -m 755 ktune/ktune.init $(DESTDIR)/etc/rc.d/init.d/ktune
 	ln -s /etc/tune-profiles/$(DEFAULT_PROFILE)/ktune.sysconfig $(DESTDIR)/etc/sysconfig/ktune
 	ln -s /etc/tune-profiles/$(DEFAULT_PROFILE)/sysctl.ktune $(DESTDIR)/etc/ktune.d/tunedadm.conf
 
@@ -138,10 +136,6 @@ install:
 	# Create runtime directory
 	mkdir -p $(DESTDIR)/var/run/tuned
 
-	# Setup runtime directory autocreation for tmpfs
-	mkdir -p $(DESTDIR)/etc/tmpfiles.d
-	install -m 0644 tuned.tmpfiles $(DESTDIR)/etc/tmpfiles.d/tuned.conf
-
 	# Install udev rules and scripts
 	install -m 755 -d $(DESTDIR)/lib/udev/rules.d
 	for file in $(FILES_udev_rules); do \
@@ -150,6 +144,25 @@ install:
 	for file in $(FILES_udev_scripts); do \
 		install -m 0755 $$file $(DESTDIR)/lib/udev/; \
 	done
+
+install-parts-sysvinit:
+	# initscripts
+	mkdir -p $(DESTDIR)/etc/rc.d/init.d
+	install -m 0755 tuned.initscript $(DESTDIR)/etc/rc.d/init.d/tuned
+	install -m 0755 ktune/ktune.init $(DESTDIR)/etc/rc.d/init.d/ktune
+
+install-parts-systemd:
+	# Setup runtime directory autocreation for tmpfs
+	mkdir -p $(DESTDIR)/etc/tmpfiles.d
+	install -m 0644 tuned.tmpfiles $(DESTDIR)/etc/tmpfiles.d/tuned.conf
+
+	# systemd units
+	mkdir -p $(DESTDIR)/lib/systemd/system
+	install -m 0644 tuned.service $(DESTDIR)/lib/systemd/system
+
+	# ktune: sysvinit compatiblity
+	mkdir -p $(DESTDIR)/etc/rc.d/init.d
+	install -m 0755 ktune/ktune.init $(DESTDIR)/etc/rc.d/init.d/ktune
 
 changelog:
 	git log > ChangeLog

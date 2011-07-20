@@ -1,4 +1,4 @@
-%global uses_tmpfs (0%{?fedora} >= 15)
+%global uses_systemd (0%{?fedora} >= 15)
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
@@ -49,37 +49,41 @@ instead of fewer large ones).
 
 %install
 rm -rf %{buildroot}
-make install DESTDIR=%{buildroot}
-
-%if !%uses_tmpfs
-    rm -rf %{buildroot}%{_sysconfdir}/tmpfiles.d
+%if %uses_systemd
+    make install DESTDIR=%{buildroot} INITSYSTEM=systemd
+%else
+    make install DESTDIR=%{buildroot}
 %endif
 
 %clean
 rm -rf %{buildroot}
 
 %post
-/sbin/chkconfig --add tuned
+%if !%uses_systemd
+    /sbin/chkconfig --add tuned
+%endif
 /sbin/chkconfig --add ktune
 
 %preun
 if [ $1 = 0 ] ; then
-    /sbin/service tuned stop >/dev/null 2>&1
-    /sbin/chkconfig --del tuned
-    /sbin/service ktune stop >/dev/null 2>&1
+    /sbin/service tuned stop &>/dev/null
+    /sbin/service ktune stop &>/dev/null
+
+    %if !%uses_systemd
+        /sbin/chkconfig --del tuned
+    %endif
     /sbin/chkconfig --del ktune
 fi
 
 %postun
 if [ "$1" -ge "1" ] ; then
-    /sbin/service tuned condrestart >/dev/null 2>&1 || :
-    /sbin/service ktune condrestart >/dev/null 2>&1 || :
+    /sbin/service tuned condrestart &>/dev/null || :
+    /sbin/service ktune condrestart &>/dev/null || :
 fi
 
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt ktune/README.ktune doc/examples
-%{_initddir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned.conf
 %config(noreplace) %{_sysconfdir}/pam.d/tuned-adm
 %config(noreplace) %{_sysconfdir}/security/console.apps/tuned-adm
@@ -94,7 +98,6 @@ fi
 %{_mandir}/man1/tuned-adm.*
 %{_mandir}/man5/tuned.conf.*
 %{_mandir}/man8/tuned.*
-%attr(0755,root,root) %{_initddir}/ktune
 %config(noreplace) %{_sysconfdir}/sysconfig/ktune
 %config(noreplace) %{_sysconfdir}/ktune.d/tunedadm.conf
 %dir %{_sysconfdir}/ktune.d
@@ -102,8 +105,14 @@ fi
 %dir %{_localstatedir}/run/tuned
 %attr(0755,root,root) /lib/udev/tuned-mpath-iosched
 /lib/udev/rules.d/*
-%if %uses_tmpfs
+%if %uses_systemd
 %{_sysconfdir}/tmpfiles.d
+%{_unitdir}/tuned.service
+# compatibility
+%{_initddir}/ktune
+%else
+%{_initddir}/tuned
+%{_initddir}/ktune
 %endif
 
 %files utils
