@@ -7,7 +7,7 @@ DESTDIR = /
 MANDIR = /usr/share/man/
 GITTAG = v$(VERSION)
 
-DIRS = doc doc/examples contrib tuningplugins monitorplugins ktune udev
+DIRS = doc doc/examples contrib tuningplugins monitorplugins ktune udev libexec
 FILES = tuned tuned.spec Makefile tuned.py tuned.initscript tuned.conf tuned-adm tuned_adm.py tuned-adm.pam tuned-adm.consolehelper tuned_nettool.py tuned_logging.py tuned.bash tuned.tmpfiles tuned.service
 FILES_doc = doc/DESIGN.txt doc/README.utils doc/TIPS.txt doc/tuned.8 doc/tuned.conf.5 doc/tuned-adm.1 doc/README.scomes doc/diskdevstat.8 doc/netdevstat.8 doc/scomes.8 doc/varnetload.8
 FILES_examples = ktune/sysctl.ktune
@@ -17,6 +17,7 @@ FILES_monitorplugins = monitorplugins/cpu.py monitorplugins/disk.py monitorplugi
 FILES_ktune = ktune/ktune.init ktune/ktune.sysconfig ktune/README.ktune
 FILES_udev_rules = udev/80-tuned-iosched.rules udev/80-tuned-mpath-iosched.rules
 FILES_udev_scripts = udev/tuned-mpath-iosched
+FILES_libexec = libexec/pmqos-static.py
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 
 DEFAULT_PROFILE = default
@@ -40,6 +41,7 @@ archive:
 	cp $(FILES_monitorplugins) $(VERSIONED_NAME)/monitorplugins
 	cp $(FILES_ktune) $(VERSIONED_NAME)/ktune
 	cp $(FILES_udev_rules) $(FILES_udev_scripts) $(VERSIONED_NAME)/udev
+	cp $(FILES_libexec) $(VERSIONED_NAME)/libexec
 	cp -a tune-profiles $(VERSIONED_NAME)/tune-profiles
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
@@ -143,6 +145,12 @@ install-base:
 	done
 	for file in $(FILES_udev_scripts); do \
 		install -m 0755 $$file $(DESTDIR)/lib/udev/; \
+	done
+
+	# Install libexec scripts
+	install -m 0755 -d $(DESTDIR)/usr/libexec/tuned
+	for file in $(FILES_libexec); do \
+		install -m 0755 $$file $(DESTDIR)/usr/libexec/tuned; \
 	done
 
 install-parts-sysvinit:

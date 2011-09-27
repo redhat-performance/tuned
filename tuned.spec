@@ -105,6 +105,7 @@ fi
 %dir %{_localstatedir}/run/tuned
 %attr(0755,root,root) /lib/udev/tuned-mpath-iosched
 /lib/udev/rules.d/*
+%{_libexecdir}/tuned/
 %if %uses_systemd
 %{_sysconfdir}/tmpfiles.d
 %{_unitdir}/tuned.service
