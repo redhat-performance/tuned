@@ -152,5 +152,6 @@ if __name__ == "__main__":
 		print >>sys.stderr, "No options set. Not starting."
 		sys.exit(1)
 
+	kill_daemon()
 	run_daemon(options)
 	sys.exit(1)
