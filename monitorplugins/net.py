@@ -57,7 +57,7 @@ class NetMonitor:
 			path = os.path.join(os.path.dirname(path), os.readlink(path))
 			path = os.path.normpath(path)
 			devtype = re.match(r"/sys/devices/([^/]+)/", path).group(1)
-		except (IOError, AttributeError):
+		except (IOError, AttributeError, OSError):
 			devtype = "unknown"
 			log.warn("Cannot determine type of '%s'." % name)
 
