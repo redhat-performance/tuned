@@ -101,24 +101,24 @@ def run_daemon(options):
 	else:
 		return False
 
-def kill_daemon():
+def kill_daemon(force = False):
 	try:
 		with open(PIDFILE, "r") as pidfile:
 			daemon_pid = int(pidfile.read())
 	except IOError, e:
-		print >>sys.stderr, "Cannot open PID file (%s)." % e
+		if not force: print >>sys.stderr, "Cannot open PID file (%s)." % e
 		return False
 
 	try:
 		os.kill(daemon_pid, signal.SIGTERM)
 	except OSError, e:
-		print >>sys.stderr, "Cannot terminate the daemon (%s)." % e
+		if not force: print >>sys.stderr, "Cannot terminate the daemon (%s)." % e
 		return False
 
 	try:
 		os.unlink(PIDFILE)
 	except OSError, e:
-		print >>sys.stderr, "Cannot delete the PID file (%s)." % e
+		if not force: print >>sys.stderr, "Cannot delete the PID file (%s)." % e
 		return False
 
 	return True
@@ -152,6 +152,6 @@ if __name__ == "__main__":
 		print >>sys.stderr, "No options set. Not starting."
 		sys.exit(1)
 
-	kill_daemon()
+	kill_daemon(True)
 	run_daemon(options)
 	sys.exit(1)
