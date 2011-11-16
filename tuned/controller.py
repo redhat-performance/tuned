@@ -15,17 +15,40 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import os
+__all__ = ["Controller"]
+
 import exports
 import exports.dbus
+import logs
+
+log = logs.get("tuned")
 
 DBUS_BUS = "com.redhat.tuned"
 DBUS_INTERFACE = "com.redhat.tuned.control"
 DBUS_OBJECT = "/Tuned"
 
+dbus_exporter = exports.dbus.DBusExporter(DBUS_BUS, DBUS_INTERFACE, DBUS_OBJECT)
+exports.register_exporter(dbus_exporter)
+
 class Controller(exports.interfaces.IExportable):
-	def __init__(self):
+	def __init__(self, config_file, debug):
 		super(self.__class__, self).__init__()
+		exports.register_object(self)
+		self._daemon = None
+		self._terminating = False
+
+	def run(self):
+		exports.start()
+		i = 0
+		import time
+		while not self._terminating:
+			i += 1
+			log.critical("controller run loop %d" % i)
+			time.sleep(1)
+		exports.stop()
+
+	def terminate(self):
+		self._terminating = True
 
 	@exports.export("", "b")
 	def start(self):
@@ -50,11 +73,3 @@ class Controller(exports.interfaces.IExportable):
 	@exports.export("", "a{bb}")
 	def status(self):
 		return [ False, False ]
-
-controller = Controller()
-dbus_exporter = exports.dbus.DBusExporter(DBUS_BUS, DBUS_INTERFACE, DBUS_OBJECT)
-
-exports.register_exporter(dbus_exporter)
-exports.register_object(controller)
-
-exports.run()

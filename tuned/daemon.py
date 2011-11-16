@@ -24,27 +24,11 @@ CONFIG_FILE = "/etc/tuned/tuned.conf"
 INIT_TIMEOUT = 3
 
 class Daemon(object):
-	def __init__(self, config_file = None, debug = False):
+	def __init__(self, config_file = None):
 		log.info("initializing")
-
 		if config_file is None:
 			config_file = CONFIG_FILE
-
-
 		self._config_file = config_file
-		self._debug = debug
-
-	def daemonize(self):
-		log.debug("daemonizing")
-
-		if utils.daemonize(INIT_TIMEOUT):
-			log.debug("daemonizing done")
-		else:
-			log.critical("daemonizing failed")
-			sys.exit(1)
-
-	def run_controller(self):
-		pass
 
 	def run(self):
 		log.info("running")
@@ -65,4 +49,4 @@ class Daemon(object):
 
 	def cleanup(self):
 		# TODO: do we need it?
-		raise Exception()
+		pass

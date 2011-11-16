@@ -21,7 +21,6 @@
 #
 
 import tuned
-import atexit
 import getopt
 import os
 import signal
@@ -69,15 +68,17 @@ if __name__ == "__main__":
 		else:
 			log.warn("Superuser permissions are needed. Most tunings will not work!")
 
-	tuned_daemon = tuned.Daemon(config_file, debug)
+	controller = tuned.Controller(config_file, debug)
 
-	tuned.utils.handle_signal(signal.SIGHUP, tuned_daemon.reload)
-	tuned.utils.handle_signal([signal.SIGINT, signal.SIGTERM], tuned_daemon.terminate)
+	tuned.utils.handle_signal(signal.SIGHUP, controller.reload)
+	tuned.utils.handle_signal([signal.SIGINT, signal.SIGTERM], controller.terminate)
 
 	if daemon:
 		log.switch_to_file()
-		tuned_daemon.daemonize()
+		if tuned.utils.daemonize():
+			log.debug("successfully daemonized")
+		else:
+			log.critical("cannot daemonize")
+			sys.exit(1)
 
-	atexit.register(tuned_daemon.cleanup)
-
-	tuned_daemon.run()
+	controller.run()
