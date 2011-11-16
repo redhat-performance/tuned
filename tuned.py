@@ -33,12 +33,6 @@ def usage():
 def error(message):
 	print >>sys.stderr, message
 
-def handle_signal(signum, callback):
-	def wrapper(_signum, _frame):
-		if signum == _signum:
-			callback()
-	signal.signal(signum, wrapper)
-
 if __name__ == "__main__":
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "dc:D", ["daemon", "config=", "debug"])
@@ -77,9 +71,8 @@ if __name__ == "__main__":
 
 	tuned_daemon = tuned.Daemon(config_file, debug)
 
-	handle_signal(signal.SIGHUP, tuned_daemon.reload)
-	handle_signal(signal.SIGINT, tuned_daemon.terminate)
-	handle_signal(signal.SIGTERM, tuned_daemon.terminate)
+	tuned.utils.handle_signal(signal.SIGHUP, tuned_daemon.reload)
+	tuned.utils.handle_signal([signal.SIGINT, signal.SIGTERM], tuned_daemon.terminate)
 
 	if daemon:
 		log.switch_to_file()

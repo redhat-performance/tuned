@@ -15,6 +15,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+import utils
 import logs
 import atexit
 import os
@@ -42,9 +43,7 @@ class Daemon(object):
 
 		parent_pid = os.getpid()
 
-		signal.signal(signal.SIGALRM, self._daemonize_handle_signal)
-		signal.signal(signal.SIGUSR1, self._daemonize_handle_signal)
-		signal.signal(signal.SIGUSR2, self._daemonize_handle_signal)
+		utils.handle_signal([signal.SIGALRM, signal.SIGUSR1, signal.SIGUSR2], self._daemonize_handle_signal, pass_args=True)
 
 		if self._daemonize_fork():
 			os.kill(parent_pid, signal.SIGUSR1)
@@ -54,9 +53,7 @@ class Daemon(object):
 			log.critical("daemonizing failed")
 			sys.exit(1)
 
-		signal.signal(signal.SIGALRM, signal.SIG_DFL)
-		signal.signal(signal.SIGUSR1, signal.SIG_DFL)
-		signal.signal(signal.SIGUSR2, signal.SIG_DFL)
+		utils.handle_signal([signal.SIGALRM, signal.SIGUSR1, signal.SIGUSR2], signal.SIG_DFL)
 
 	def _daemonize_fork(self):
 		try:
