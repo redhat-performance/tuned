@@ -17,14 +17,17 @@
 
 from __future__ import absolute_import
 
-import exports.interfaces
+import tuned.exports.interfaces
 import decorator
 import dbus.service
 import dbus.mainloop.glib
 import gobject
 import inspect
+import threading
 
-class DBusExporter(exports.interfaces.IExporter):
+gobject.threads_init()
+
+class DBusExporter(tuned.exports.interfaces.IExporter):
 	"""
 	Export method calls through DBus Interface.
 
@@ -42,6 +45,9 @@ class DBusExporter(exports.interfaces.IExporter):
 		self._bus_name = bus_name
 		self._interface_name = interface_name
 		self._object_name = object_name
+
+		self._thread = None
+		self._main_loop = gobject.MainLoop()
 
 	@property
 	def bus_name(self):
@@ -80,14 +86,30 @@ class DBusExporter(exports.interfaces.IExporter):
 
 		self._dbus_object_cls = cls
 
-	def run(self):
+	def start(self):
+		if self._dbus_object_cls is None:
+			self._construct_dbus_object_class()
+
+		self.stop()
+		self._thread = threading.Thread(target=self._thread_code)
+		self._thread.start()
+
+	def stop(self):
+		if self._thread is not None and self._thread.is_alive():
+			self._main_loop.quit()
+			self._thread.join()
+			self._thread = None
+
+	def _thread_code(self):
+		import tuned.logs
+		log = tuned.logs.get("tuned")
+		log.critical("dbus thread")
+
 		dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 		bus = dbus.SessionBus()
 		bus_name = dbus.service.BusName(self._bus_name, bus)
+		bus_object = self._dbus_object_cls(bus, self._object_name, bus_name)
 
-		self._construct_dbus_object_class()
-		dbus_object = self._dbus_object_cls(bus, self._object_name, bus_name)
-
-		loop = gobject.MainLoop()
-		loop.run()
+		self._main_loop.run()
+		del bus_object
