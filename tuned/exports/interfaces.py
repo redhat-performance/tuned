@@ -23,5 +23,8 @@ class IExporter(object):
 		# to be overriden by concrete implementation
 		raise NotImplemented()
 
-	def serve(self):
+	def start(self):
+		raise NotImplemented()
+
+	def stop(self):
 		raise NotImplemented()
