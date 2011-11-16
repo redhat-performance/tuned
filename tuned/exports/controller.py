@@ -30,6 +30,7 @@ class ExportsController(object):
 	def __init__(self):
 		self._exporters = []
 		self._objects = []
+		self._exports_initialized = False
 
 	@classmethod
 	def get_instance(cls):
@@ -57,15 +58,24 @@ class ExportsController(object):
 			kwargs = method.export_params[1]
 			exporter.export(method, *args, **kwargs)
 
-	def run(self):
-		"""Start the exports. This call is blocking at the moment."""
-		# TODO: possibility to choose blocking/nonblocking
+	def _initialize_exports(self):
+		if self._exports_initialized:
+			return
 
 		for instance in self._objects:
 			exportable = inspect.getmembers(instance, self._is_exportable_method)
 			for name, method in exportable:
 				self._export_method(method)
 
-		# TODO: naive - handle concurrency between multiple exporters
+		self._exports_initialized = True
+
+	def start(self):
+		"""Start the exports."""
+		self._initialize_exports()
 		for exporter in self._exporters:
-			exporter.run()
+			exporter.start()
+
+	def stop(self):
+		"""Stop the exports."""
+		for exporter in self._exporters:
+			exporter.stop()

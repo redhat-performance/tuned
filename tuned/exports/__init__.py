@@ -37,6 +37,10 @@ def register_object(instance):
 	ctl = controller.ExportsController.get_instance()
 	return ctl.register_object(instance)
 
-def run():
+def start():
 	ctl = controller.ExportsController.get_instance()
-	return ctl.run()
+	return ctl.start()
+
+def stop():
+	ctl = controller.ExportsController.get_instance()
+	return ctl.stop()
