@@ -15,12 +15,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+__all__ = ["handle_signal", "daemonize"]
+
 import logs
 import os
 import signal
 import sys
-
-__all__ = ['handle_signal', 'daemonize']
 
 log = logs.get("tuned")
 
