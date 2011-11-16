@@ -15,11 +15,19 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+import logs
+import os
 import signal
+import sys
 
-__all__ = ['handle_signal']
+__all__ = ['handle_signal', 'daemonize']
+
+log = logs.get("tuned")
 
 def handle_signal(signals, callback, pass_args = False):
+	"""
+	Set up signal handler for a given signal or a list of signals.
+	"""
 	if type(signals) is not list:
 		signals = [signals]
 	for signum in signals:
@@ -33,3 +41,66 @@ def _handle_signal(signum, callback, pass_args):
 			if signum == _signum:
 				callback()
 		signal.signal(signum, handler_wrapper)
+
+def daemonize(timeout):
+	"""
+	Perform current process daemonization. Kills current SIGALRM, SIGUSR1, and SIGUSR2 signal handlers.
+	"""
+	parent_pid = os.getpid()
+	handle_signal([signal.SIGALRM, signal.SIGUSR1, signal.SIGUSR2], _daemonize_handle_signal, pass_args=True)
+
+	if _daemonize_fork(timeout):
+		os.kill(parent_pid, signal.SIGUSR1)
+		result = True
+	else:
+		os.kill(parent_pid, signal.SIGUSR2)
+		result = False
+
+	handle_signal([signal.SIGALRM, signal.SIGUSR1, signal.SIGUSR2], signal.SIG_DFL)
+	return result
+
+def _daemonize_fork(timeout):
+	try:
+		pid = os.fork()
+		if pid > 0:
+			_daemonize_wait(timeout)
+			assert False
+	except OSError as e:
+		log.critical("fork: %s", str(e))
+		return False
+
+	os.chdir("/")
+	os.setsid()
+	os.umask(0)
+
+	try:
+		pid = os.fork()
+		if pid > 0:
+			sys.exit(0)
+	except OSError as e:
+		log.cricital("fork: %s", str(e))
+		return False
+
+	si = file('/dev/null', 'r')
+	so = file('/dev/null', 'a+')
+	se = file('/dev/null', 'a+', 0)
+	os.dup2(si.fileno(), sys.stdin.fileno())
+	os.dup2(so.fileno(), sys.stdout.fileno())
+	os.dup2(se.fileno(), sys.stderr.fileno())
+
+	return True
+
+def _daemonize_wait(timeout):
+	signal.alarm(timeout)
+	while True:
+		signal.pause()
+
+def _daemonize_handle_signal(signum, frame):
+	if signum == signal.SIGUSR1:
+		log.debug("daemonizing, got signal (success), exit")
+		sys.exit(0)
+	if signum == signal.SIGUSR2 or signum == signal.SIGALRM:
+		log.critical("daemonizing, signal %d (failure), exit" % signum)
+		sys.exit(1)
+	else:
+		log.warn("daemonizing, unknown signal %s, ignoring" % signum)

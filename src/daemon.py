@@ -17,10 +17,6 @@
 
 import utils
 import logs
-import atexit
-import os
-import signal
-import sys
 
 log = logs.get("tuned")
 
@@ -41,65 +37,11 @@ class Daemon(object):
 	def daemonize(self):
 		log.debug("daemonizing")
 
-		parent_pid = os.getpid()
-
-		utils.handle_signal([signal.SIGALRM, signal.SIGUSR1, signal.SIGUSR2], self._daemonize_handle_signal, pass_args=True)
-
-		if self._daemonize_fork():
-			os.kill(parent_pid, signal.SIGUSR1)
+		if utils.daemonize(INIT_TIMEOUT):
 			log.debug("daemonizing done")
 		else:
-			os.kill(parent_pid, signal.SIGUSR2)
 			log.critical("daemonizing failed")
 			sys.exit(1)
-
-		utils.handle_signal([signal.SIGALRM, signal.SIGUSR1, signal.SIGUSR2], signal.SIG_DFL)
-
-	def _daemonize_fork(self):
-		try:
-			pid = os.fork()
-			if pid > 0:
-				self._daemonize_wait()
-				assert False # unreachable
-		except OSError as e:
-			log.critical("fork: %s", str(e))
-			return false
-
-		os.chdir("/")
-		os.setsid()
-		os.umask(0)
-
-		try:
-			pid = os.fork()
-			if pid > 0:
-				sys.exit(0)
-		except OSError as e:
-			log.cricital("fork: %s", str(e))
-			return false
-
-		si = file('/dev/null', 'r')
-		so = file('/dev/null', 'a+')
-		se = file('/dev/null', 'a+', 0)
-		os.dup2(si.fileno(), sys.stdin.fileno())
-		os.dup2(so.fileno(), sys.stdout.fileno())
-		os.dup2(se.fileno(), sys.stderr.fileno())
-
-		return True
-
-	def _daemonize_wait(self):
-		signal.alarm(INIT_TIMEOUT)
-		while True:
-			signal.pause()
-
-	def _daemonize_handle_signal(self, signum, frame):
-		if signum == signal.SIGUSR1:
-			log.debug("daemonizing, got signal (success), exit")
-			sys.exit(0)
-		if signum == signal.SIGUSR2 or signum == signal.SIGALRM:
-			log.critical("daemonizing, signal %d (failure), exit" % signum)
-			sys.exit(1)
-		else:
-			log.warn("daemonizing, unknown signal %s, ignoring" % signum)
 
 	def run_controller(self):
 		pass
