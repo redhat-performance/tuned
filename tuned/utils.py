@@ -34,7 +34,7 @@ def handle_signal(signals, callback, pass_args = False):
 		_handle_signal(signum, callback, pass_args)
 
 def _handle_signal(signum, callback, pass_args):
-	if pass_args or signum in [signal.SIG_DFL, signal.SIG_IGN]:
+	if pass_args or callback in [signal.SIG_DFL, signal.SIG_IGN]:
 		signal.signal(signum, callback)
 	else:
 		def handler_wrapper(_signum, _frame):
