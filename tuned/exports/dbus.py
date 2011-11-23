@@ -101,10 +101,6 @@ class DBusExporter(tuned.exports.interfaces.IExporter):
 			self._thread = None
 
 	def _thread_code(self):
-		import tuned.logs
-		log = tuned.logs.get("tuned")
-		log.critical("dbus thread")
-
 		dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 		bus = dbus.SessionBus()
