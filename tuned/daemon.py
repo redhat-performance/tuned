@@ -17,35 +17,51 @@
 
 import utils
 import logs
+import threading
 
 log = logs.get("tuned")
 
-CONFIG_FILE = "/etc/tuned/tuned.conf"
-INIT_TIMEOUT = 3
+DEFAULT_CONFIG_FILE = "/etc/tuned/tuned.conf"
 
 class Daemon(object):
 	def __init__(self, config_file = None):
-		log.info("initializing")
+		super(self.__class__, self).__init__()
+		log.info("initializing Daemon")
 		if config_file is None:
-			config_file = CONFIG_FILE
+			config_file = DEFAULT_CONFIG_FILE
 		self._config_file = config_file
 
-	def run(self):
-		log.info("running")
+		self._thread = None
+		self._terminate = threading.Event()
 
-		import time
+	def _thread_code(self):
+		self._terminate.clear()
+		while not self._terminate.wait(10):
+			log.debug("doing some stuff")
 
-		self._terminate = False
-		while not self._terminate:
-			time.sleep(1)
+	def is_running(self):
+		return self._thread is not None and self._thread.is_alive()
 
-	def terminate(self):
-		log.info("terminating")
-		self._terminate = True
+	def is_enabled(self):
+		# TODO
+		return True
 
-	def reload(self):
-		log.info("reloading")
-		pass
+	def start(self):
+		if self.is_running():
+			return False
+		log.info("starting tuning")
+		self._thread = threading.Thread(target=self._thread_code)
+		self._thread.start()
+		return True
+
+	def stop(self):
+		if not self.is_running():
+			return False
+		log.info("stopping tunning")
+		self._terminate.set()
+		self._thread.join()
+		self._thread = None
+		return True
 
 	def cleanup(self):
 		# TODO: do we need it?
