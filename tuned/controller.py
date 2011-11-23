@@ -17,9 +17,11 @@
 
 __all__ = ["Controller"]
 
+import daemon
 import exports
 import exports.dbus
 import logs
+import threading
 
 log = logs.get("tuned")
 
@@ -31,45 +33,71 @@ dbus_exporter = exports.dbus.DBusExporter(DBUS_BUS, DBUS_INTERFACE, DBUS_OBJECT)
 exports.register_exporter(dbus_exporter)
 
 class Controller(exports.interfaces.IExportable):
+	"""
+	Controller's purpose is to keep the program running, start/stop the tuning,
+	and export the controller interface (currently only over D-Bus).
+	"""
+
 	def __init__(self, config_file, debug):
 		super(self.__class__, self).__init__()
 		exports.register_object(self)
-		self._daemon = None
-		self._terminating = False
+		self._daemon = daemon.Daemon(config_file)
+		self._terminate = threading.Event()
 
 	def run(self):
+		"""
+		Controller main loop. The call is blocking.
+		"""
+		log.info("starting controller")
 		exports.start()
-		i = 0
-		import time
-		while not self._terminating:
-			i += 1
-			log.critical("controller run loop %d" % i)
-			time.sleep(1)
+		self.start()
+
+		self._terminate.clear()
+		# we have to pass some timeout, otherwise signals will not work
+		while not self._terminate.wait(3600):
+			pass
+
+		log.info("terminating controller")
 		exports.stop()
+		self.stop()
 
 	def terminate(self):
-		self._terminating = True
+		self._terminate.set()
 
 	@exports.export("", "b")
 	def start(self):
-		return False
+		if self._daemon.is_running():
+			return True
+		elif not self._daemon.is_enabled():
+			return False
+		else:
+			return self._daemon.start()
 
 	@exports.export("", "b")
 	def stop(self):
-		return False
+		if not self._daemon.is_running():
+			return True
+		else:
+			return self._daemon.stop()
 
 	@exports.export("", "b")
 	def reload(self):
-		return False
+		if not self._daemon.is_running():
+			return False
+		else:
+			return self.stop() and self.start()
 
 	@exports.export("s", "b")
 	def switch_profile(self, profile):
+		# TODO
 		return False
 
 	@exports.export("", "s")
 	def active_profile(self):
+		# TODO
 		return "default"
 
 	@exports.export("", "a{bb}")
 	def status(self):
-		return [ False, False ]
+		# TODO: add ktune status
+		return [ self._daemon.is_running(), False ]
