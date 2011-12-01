@@ -9,6 +9,7 @@ start() {
 	set_cpu_governor ondemand
 	enable_snd_ac97_powersave
 	enable_wifi_powersave
+	set_radeon_powersave dynpm
 
 	return 0
 }
@@ -20,6 +21,7 @@ stop() {
 	restore_cpu_governor
 	enable_snd_ac97_powersave
 	disable_wifi_powersave
+	set_radeon_powersave default
 
 	return 0
 }
