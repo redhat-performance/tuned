@@ -19,9 +19,10 @@ probe begin {
 # ===================================================================
 # Define helper function for printing results
 function compute_score() {
-  # FIXME: "bulharska konstanta"
-  return kticks + 2*uticks + 10*(reads+writes) + ifxmit + ifrecv
+  # new empirical formula that was proposed by Vratislav Podzimek <vpodzime@redhat.com> in his bachelor thesis
+  return syscalls + (poll_timeout + epoll_timeout + select_timeout + itimer_timeout + nanosleep_timeout + futex_timeout + signal_timeout) * 4 + (reads + writes) / 5000 + (ifxmit + ifrecv) * 25
 }
+
 function print_status() {
   printf("-----------------------------------\n")
   ###target_set_report()
