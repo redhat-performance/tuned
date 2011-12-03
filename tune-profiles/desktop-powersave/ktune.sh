@@ -4,7 +4,7 @@
 
 start() {
 	set_disk_alpm min_power
-	set_radeon_powersave dynpm
+	set_radeon_powersave auto
 	return 0
 }
 
