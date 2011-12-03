@@ -267,7 +267,7 @@ disable_snd_ac97_powersave() {
 #
 
 # Power savings settings for Radeon
-# usage: set_radeon_powersave dynpm | default | low | med | high
+# usage: set_radeon_powersave dynpm | default | low | mid | high
 set_radeon_powersave () {
 	[ -e /sys/class/drm/card0/device/power_method ] || return
 	if [ "$1" = default -o "$1" = auto -o "$1" = low -o "$1" = med -o "$1" = high ]; then
