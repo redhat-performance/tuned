@@ -9,7 +9,7 @@ start() {
 	set_cpu_governor ondemand
 	enable_snd_ac97_powersave
 	enable_wifi_powersave
-	set_radeon_powersave dynpm
+	set_radeon_powersave auto
 
 	return 0
 }
