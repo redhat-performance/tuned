@@ -15,10 +15,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-class IExportable(object):
+class ExportableInterface(object):
 	pass
 
-class IExporter(object):
+class ExporterInterface(object):
 	def export(self, method, in_signature, out_signature):
 		# to be overriden by concrete implementation
 		raise NotImplemented()

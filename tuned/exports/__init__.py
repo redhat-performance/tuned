@@ -26,13 +26,13 @@ def export(*args, **kwargs):
 	return wrapper
 
 def register_exporter(instance):
-	if not isinstance(instance, interfaces.IExporter):
+	if not isinstance(instance, interfaces.ExporterInterface):
 		raise Exception()
 	ctl = controller.ExportsController.get_instance()
 	return ctl.register_exporter(instance)
 
 def register_object(instance):
-	if not isinstance(instance, interfaces.IExportable):
+	if not isinstance(instance, interfaces.ExportableInterface):
 		raise Exception()
 	ctl = controller.ExportsController.get_instance()
 	return ctl.register_object(instance)

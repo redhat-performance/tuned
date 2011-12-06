@@ -27,7 +27,7 @@ import threading
 
 gobject.threads_init()
 
-class DBusExporter(tuned.exports.interfaces.IExporter):
+class DBusExporter(tuned.exports.interfaces.ExporterInterface):
 	"""
 	Export method calls through DBus Interface.
 

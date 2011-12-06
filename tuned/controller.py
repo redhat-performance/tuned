@@ -32,7 +32,7 @@ DBUS_OBJECT = "/Tuned"
 dbus_exporter = exports.dbus.DBusExporter(DBUS_BUS, DBUS_INTERFACE, DBUS_OBJECT)
 exports.register_exporter(dbus_exporter)
 
-class Controller(exports.interfaces.IExportable):
+class Controller(exports.interfaces.ExportableInterface):
 	"""
 	Controller's purpose is to keep the program running, start/stop the tuning,
 	and export the controller interface (currently only over D-Bus).
