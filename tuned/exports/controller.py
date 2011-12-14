@@ -17,27 +17,18 @@
 
 import interfaces
 import inspect
+import tuned.patterns
 
-class ExportsController(object):
+class ExportsController(tuned.patterns.Singleton):
 	"""
 	Controls and manages object interface exporting.
-
-	(Singleton class.)
 	"""
 
-	_instance = None
-
 	def __init__(self):
+		super(self.__class__, self).__init__()
 		self._exporters = []
 		self._objects = []
 		self._exports_initialized = False
-
-	@classmethod
-	def get_instance(cls):
-		"""Get class instance."""
-		if cls._instance is None:
-			cls._instance = cls()
-		return cls._instance
 
 	def register_exporter(self, instance):
 		"""Register objects exporter."""
