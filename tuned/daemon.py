@@ -15,8 +15,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+import units
 import utils
 import logs
+import monitors
+import plugins
 import threading
 
 log = logs.get("tuned")
@@ -25,7 +28,6 @@ DEFAULT_CONFIG_FILE = "/etc/tuned/tuned.conf"
 
 class Daemon(object):
 	def __init__(self, config_file = None):
-		super(self.__class__, self).__init__()
 		log.info("initializing Daemon")
 		if config_file is None:
 			config_file = DEFAULT_CONFIG_FILE
@@ -36,8 +38,21 @@ class Daemon(object):
 
 	def _thread_code(self):
 		self._terminate.clear()
+
+		# TODO: temporary code
+		manager = units.get_manager()
+		monitors_repo = monitors.get_repository()
+		plugins_repo = plugins.get_repository()
+
+		cpu = manager.create("test", "test", None)
+
 		while not self._terminate.wait(10):
-			log.debug("doing some stuff")
+			log.debug("updating monitors")
+			monitors_repo.update()
+			log.debug("performing tunings")
+			plugins_repo.update()
+
+		manager.delete_all()
 
 	def is_running(self):
 		return self._thread is not None and self._thread.is_alive()
