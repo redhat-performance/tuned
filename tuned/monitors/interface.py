@@ -1,3 +1,7 @@
+import tuned.logs
+
+log = tuned.logs.get()
+
 class MonitorInterface(object):
 	"""
 
@@ -20,6 +24,7 @@ class MonitorInterface(object):
 		cls._init_available_devices()
 		assert(type(cls._available_devices) is set)
 		cls._class_initialized = True
+		log.debug("available devices: %s" % ", ".join(cls._available_devices))
 
 	@classmethod
 	def _init_available_devices(cls):
@@ -78,11 +83,13 @@ class MonitorInterface(object):
 		self._updating_devices.update(new_updating)
 
 	def add_device(self, device):
+		assert type(device) is str
 		if device in self._available_devices:
 			self._devices.add(device)
 			self._updating_devices.add(device)
 
 	def remove_device(self, device):
+		assert type(device) is str
 		if device in self._devices:
 			self._devices.remove(device)
 			self._updating_devices.remove(device)
