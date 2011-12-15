@@ -4,11 +4,14 @@ log = tuned.logs.get()
 
 class Monitor(object):
 	"""
+	Base class for all monitors.
+
+	Monitors provide data about the running system to Plugin objects, which use the data
+	to tune system parameters.
 
 	Following methods require reimlementation:
 	  - _init_available_devices(cls)
 	  - update(cls)
-
 	"""
 
 	# class properties

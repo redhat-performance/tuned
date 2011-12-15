@@ -10,11 +10,11 @@ class MonitorRepository(tuned.patterns.Singleton):
 		self._loader = tuned.utils.PluginLoader("tuned.monitors", "monitor_", tuned.monitors.Monitor)
 		self._monitors = set()
 
-	def create(self, plugin_name):
+	def create(self, plugin_name, devices):
 		log.debug("creating monitor %s" % plugin_name)
 		# TODO: exception handling
 		monitor_cls = self._loader.load(plugin_name)
-		monitor_instance = monitor_cls()
+		monitor_instance = monitor_cls(devices)
 		self._monitors.add(monitor_instance)
 		return monitor_instance
 
