@@ -1,4 +1,4 @@
-class PluginInterface(object):
+class Plugin(object):
 	@classmethod
 	def _get_default_options(cls):
 		return {}

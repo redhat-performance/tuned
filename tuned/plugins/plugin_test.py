@@ -1,6 +1,6 @@
 import tuned.monitors
 
-class TestPlugin(tuned.plugins.interface.PluginInterface):
+class TestPlugin(tuned.plugins.Plugin):
 	def __init__(self, options = None):
 		"""
 		"""

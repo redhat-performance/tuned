@@ -1,6 +1,7 @@
 import tuned.patterns
 import tuned.logs
 import tuned.utils
+import tuned.plugins
 import tuned.plugins.exception
 
 log = tuned.logs.get()
@@ -8,7 +9,7 @@ log = tuned.logs.get()
 class PluginRepository(tuned.patterns.Singleton):
 	def __init__(self):
 		super(self.__class__, self).__init__()
-		self._loader = tuned.utils.PluginLoader("tuned.plugins", "plugin_", tuned.plugins.interface.PluginInterface)
+		self._loader = tuned.utils.PluginLoader("tuned.plugins", "plugin_", tuned.plugins.Plugin)
 		self._plugins = set()
 
 	def create(self, plugin_name):

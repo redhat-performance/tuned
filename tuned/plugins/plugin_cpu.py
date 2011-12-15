@@ -1,10 +1,10 @@
-import tuned.plugins.interface
+import tuned.plugins
 import tuned.monitors
 
 import os
 import struct
 
-class CPULatencyPlugin(tuned.plugins.interface.PluginInterface):
+class CPULatencyPlugin(tuned.plugins.Plugin):
 	def __init__(self, options = None):
 		"""
 		"""
