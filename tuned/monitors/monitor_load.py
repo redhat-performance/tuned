@@ -1,6 +1,6 @@
-import tuned.monitors.interface
+import tuned.monitors
 
-class LoadMonitor(tuned.monitors.interface.MonitorInterface):
+class LoadMonitor(tuned.monitors.Monitor):
 	@classmethod
 	def _init_available_devices(cls):
 		cls._available_devices = set(["system"])

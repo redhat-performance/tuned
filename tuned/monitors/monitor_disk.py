@@ -1,8 +1,7 @@
-import tuned.monitors.interface
-
+import tuned.monitors
 import os
 
-class DiskMonitor(tuned.monitors.interface.MonitorInterface):
+class DiskMonitor(tuned.monitors.Monitor):
 
 	_supported_vendors = ["ATA", "SCSI"]
 

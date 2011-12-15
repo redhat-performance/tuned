@@ -2,7 +2,7 @@ import tuned.logs
 
 log = tuned.logs.get()
 
-class MonitorInterface(object):
+class Monitor(object):
 	"""
 
 	Following methods require reimlementation:

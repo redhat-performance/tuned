@@ -1,4 +1,3 @@
-import tuned.plugins.interface
 import tuned.monitors
 
 class TestPlugin(tuned.plugins.interface.PluginInterface):

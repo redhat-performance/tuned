@@ -1,6 +1,5 @@
 import tuned.patterns
 import tuned.logs
-import tuned.monitors.interface
 import tuned.utils
 
 log = tuned.logs.get()
@@ -8,7 +7,7 @@ log = tuned.logs.get()
 class MonitorRepository(tuned.patterns.Singleton):
 	def __init__(self):
 		super(self.__class__, self).__init__()
-		self._loader = tuned.utils.PluginLoader("tuned.monitors", "monitor_", tuned.monitors.interface.MonitorInterface)
+		self._loader = tuned.utils.PluginLoader("tuned.monitors", "monitor_", tuned.monitors.Monitor)
 		self._monitors = set()
 
 	def create(self, plugin_name):
