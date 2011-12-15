@@ -20,15 +20,33 @@ import logging
 import logging.handlers
 import os
 import os.path
+import inspect
 
-__all__ = [ "get" ]
+__all__ = ["get"]
 
 LOG_FILENAME = "/var/log/tuned/tuned.log"
 LOG_FILE_MAXBYTES = 100*1000
 LOG_FILE_COUNT = 2
 
-def get(name = "tuned"):
-	return logging.getLogger(name)
+root_logger = None
+
+def get():
+	global root_logger
+	if root_logger is None:
+		root_logger = logging.getLogger("tuned")
+
+	calling_module = inspect.currentframe().f_back
+	name = calling_module.f_locals["__name__"]
+	if name == "__main__":
+		name = "tuned"
+		return root_logger
+	elif name.startswith("tuned."):
+		(root, child) = name.split(".", 1)
+		child_logger = root_logger.getChild(child)
+		child_logger.setLevel("NOTSET")
+		return child_logger
+	else:
+		assert False
 
 class TunedLogger(logging.getLoggerClass()):
 	"""Custom tuned daemon logger class."""

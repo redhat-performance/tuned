@@ -1,7 +1,10 @@
 import tuned.plugins
+import tuned.logs
 import tuned.monitors
 import os
 import struct
+
+log = tuned.logs.get()
 
 class CPULatencyPlugin(tuned.plugins.Plugin):
 	"""

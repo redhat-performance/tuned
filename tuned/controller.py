@@ -23,7 +23,7 @@ import exports.dbus
 import logs
 import threading
 
-log = logs.get("tuned")
+log = logs.get()
 
 DBUS_BUS = "com.redhat.tuned"
 DBUS_INTERFACE = "com.redhat.tuned.control"

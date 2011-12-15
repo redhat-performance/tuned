@@ -22,7 +22,7 @@ import monitors
 import plugins
 import threading
 
-log = logs.get("tuned")
+log = logs.get()
 
 DEFAULT_CONFIG_FILE = "/etc/tuned/tuned.conf"
 
