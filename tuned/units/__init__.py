@@ -1,7 +1,6 @@
-__all__ = ["manager", "unit"]
-
 import manager
-import unit
+
+__all__ = ["manager", "get_manager"]
 
 def get_manager():
 	return manager.UnitManager.get_instance()
