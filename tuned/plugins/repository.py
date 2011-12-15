@@ -12,11 +12,11 @@ class PluginRepository(tuned.patterns.Singleton):
 		self._loader = tuned.utils.PluginLoader("tuned.plugins", "plugin_", tuned.plugins.Plugin)
 		self._plugins = set()
 
-	def create(self, plugin_name):
+	def create(self, plugin_name, devices, options):
 		log.debug("creating plugin %s" % plugin_name)
 		try:
 			plugin_cls = self._loader.load(plugin_name)
-			plugin_instance = plugin_cls()
+			plugin_instance = plugin_cls(devices, options)
 			self._plugins.add(plugin_instance)
 			return plugin_instance
 		except Exception as exception:

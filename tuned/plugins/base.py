@@ -1,9 +1,24 @@
 class Plugin(object):
+	"""
+	Base class for all plugins.
+
+	Plugins change various system settings in order to get desired performance or power
+	saving. Plugins use Monitor objects to get information from the running system.
+
+	Methods requiring reimplementation:
+	 - update_tuning(self)
+	"""
+
+	# class methods
+
 	@classmethod
 	def _get_default_options(cls):
 		return {}
 
-	def __init__(self, options = None):
+	# instance methods
+
+	def __init__(self, devices = None, options = None):
+		self._devices = devices
 		self._options = self._get_default_options()
 		if options is not None:
 			self._merge_options(options)

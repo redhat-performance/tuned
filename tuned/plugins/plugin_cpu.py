@@ -1,18 +1,20 @@
 import tuned.plugins
 import tuned.monitors
-
 import os
 import struct
 
 class CPULatencyPlugin(tuned.plugins.Plugin):
-	def __init__(self, options = None):
+	"""
+	"""
+
+	def __init__(self, devices = None, options = None):
 		"""
 		"""
-		super(self.__class__, self).__init__(options)
+		super(self.__class__, self).__init__(options, None, options)
 
 		self._latency = None
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
-		self._load_monitor = tuned.monitors.get_repository().create("load")
+		self._load_monitor = tuned.monitors.get_repository().create("load", devices)
 
 	@classmethod
 	def _get_default_options(cls):
