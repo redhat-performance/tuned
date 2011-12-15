@@ -1,10 +1,10 @@
 import tuned.monitors
 
 class TestPlugin(tuned.plugins.Plugin):
-	def __init__(self, devices = None, options = None):
+	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(options)
+		super(self.__class__, self).__init__(devices, options)
 
 		self._monitors = [
 			tuned.monitors.get_repository().create("load", None),

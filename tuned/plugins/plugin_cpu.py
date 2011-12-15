@@ -10,10 +10,10 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 	"""
 	"""
 
-	def __init__(self, devices = None, options = None):
+	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(options, None, options)
+		super(self.__class__, self).__init__(None, options)
 
 		self._latency = None
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
