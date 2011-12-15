@@ -16,14 +16,14 @@ class Monitor(object):
 
 	# class properties
 
-	_class_initialized = False
-	_instances = set()
-	_available_devices = set()
-	_updating_devices = set()
-	_load = {}
-
 	@classmethod
 	def _init_class(cls):
+		cls._class_initialized = False
+		cls._instances = set()
+		cls._available_devices = set()
+		cls._updating_devices = set()
+		cls._load = {}
+
 		cls._init_available_devices()
 		assert(type(cls._available_devices) is set)
 		cls._class_initialized = True
@@ -52,9 +52,9 @@ class Monitor(object):
 	# instance properties
 
 	def __init__(self, devices = None):
-		if self._class_initialized is False:
+		if not hasattr(self, "_class_initialized"):
 			self._init_class()
-			assert(self._class_initialized)
+			assert hasattr(self, "_class_initialized")
 
 		if devices is not None:
 			self.devices = devices

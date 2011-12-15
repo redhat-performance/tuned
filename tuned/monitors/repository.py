@@ -25,5 +25,5 @@ class MonitorRepository(tuned.patterns.Singleton):
 
 	def update(self):
 		for monitor in self._monitors:
-			log.debug("updating %s")
+			log.debug("updating %s" % monitor)
 			monitor.update()
