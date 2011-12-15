@@ -38,6 +38,9 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 			self._set_latency(self._options["latency_low"])
 
 	def _set_latency(self, latency):
+		latency = int(latency)
 		if self._latency != latency:
-			latency_bin = struct.pack("i", int(latency))
+			log.info("new cpu latency %d" % latency)
+			latency_bin = struct.pack("i", latency)
 			os.write(self._cpu_latency_fd, latency_bin)
+			self._latency = latency
