@@ -57,7 +57,7 @@ class Tuned_adm:
 			self.error("Nonexistent argument '%s'." % args[0])
 
 	def list(self):
-		modes = os.listdir(self.profile_dir)
+		modes = sorted(os.listdir(self.profile_dir))
 		if len(modes) > 0:
 			print "Available profiles:"
 			for mode in modes:
