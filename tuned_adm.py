@@ -81,9 +81,13 @@ class Tuned_adm:
 				"running" if running else "stopped")
 
 	def get_active(self):
-		file = open(self.active_file, "r")
-		profile = file.read()
-		file.close()
+		try:
+			file = open(self.active_file, "r")
+			profile = file.read()
+			file.close()
+		except IOError:
+			profile = "off"
+
 		return profile
 
 	def set_active(self, profile):
