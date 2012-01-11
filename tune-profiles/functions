@@ -7,7 +7,8 @@
 # DISK tuning
 #
 
-DISKS="$(command ls -d1 /dev/[sh]d*[a-z] 2>/dev/null)"
+DISKS_DEV="$(command ls -d1 /dev/[shv]d*[a-z] 2>/dev/null)"
+DISKS_SYS="$(command ls -d1 /sys/block/{sd,cciss,dm-,vd}* 2>/dev/null)"
 
 # SATA Aggressive Link Power Management
 # usage: set_disk_alpm policy
@@ -29,7 +30,7 @@ set_disk_alpm() {
 # usage: set_disk_apm level
 set_disk_apm() {
 	level=$1
-	for disk in $DISKS; do
+	for disk in $DISKS_DEV; do
 		hdparm -B $level $disk &>/dev/null
 	done
 }
@@ -37,7 +38,7 @@ set_disk_apm() {
 # usage: set_disk_spindown level
 set_disk_spindown() {
 	level=$1
-	for disk in $DISKS; do
+	for disk in $DISKS_DEV; do
 		hdparm -S $level $disk &>/dev/null
 	done
 }
@@ -49,12 +50,12 @@ multiply_disk_readahead() {
 	# float multiplication not supported in bash
 	# bc might not be installed, python is available for sure
 
-	readaheadvols=$(ls /sys/block/{sd,cciss}*/queue/read_ahead_kb 2>/dev/null)
-	for d in $readaheadvols; do
-		old=$(cat $d)
+	for disk in $DISKS_SYS; do
+		control="${disk}/queue/read_ahead_kb"
+		old=$(cat $control)
 		new=$(echo "print int($old*$by)" | python)
 
-		(echo $new > $d) &>/dev/null
+		(echo $new > $control) &>/dev/null
 	done
 }
 
