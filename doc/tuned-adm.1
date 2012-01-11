@@ -97,6 +97,10 @@ Server profile for high disk throughput performace tuning. Disables tuned and kt
 .BI "virtual-guest"
 Profile optimized for virtual guests based on enterprise-storage profile. It additionally decreases virtual memory swapiness.
 
+.TP
+.BI "virtual-host"
+Profile optimized for virtual hosts based on enterprise-storage profile. It additionally decreases virtual memory swapiness and enables more aggresive writeback of dirty pages.
+
 .SH "FILES"
 .nf
 /etc/tune-profiles/*
