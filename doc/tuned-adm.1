@@ -93,6 +93,10 @@ Server profile for typical latency performance tuning. Disables tuned and ktune 
 .BI "enterprise-storage"
 Server profile for high disk throughput performace tuning. Disables tuned and ktune power saving mechanisms and enables deadline IO scheduler. Enables hugepages and disables disk barriers. Disk readahead values are increased. CPU governor is set to performance.
 
+.TP
+.BI "virtual-guest"
+Profile optimized for virtual guests based on enterprise-storage profile. It additionally decreases virtual memory swapiness.
+
 .SH "FILES"
 .nf
 /etc/tune-profiles/*
