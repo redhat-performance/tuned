@@ -69,6 +69,25 @@ remount_partitions() {
 	done
 }
 
+DISK_QUANTUM_SAVE="/var/run/tuned/disk_quantum.save"
+
+set_disk_scheduler_quantum() {
+	value=$1
+	rm -f "$DISK_QUANTUM_SAVE"
+	for disk in $DISKS_SYS; do
+		control="${disk}/queue/iosched/quantum"
+		echo "echo $(cat $control) > $control" >> "$DISK_QUANTUM_SAVE" 2>/dev/null
+		(echo $value > $control) &2>/dev/null
+	done
+}
+
+restore_disk_scheduler_quantum() {
+	if [ -r "$DISK_QUANTUM_SAVE" ]; then
+		/bin/sh "$DISK_QUANTUM_SAVE" &>/dev/null
+		rm -f "$DISK_QUANTUM_SAVE"
+	fi
+}
+
 #
 # CPU tuning
 #
