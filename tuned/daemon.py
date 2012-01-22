@@ -44,7 +44,8 @@ class Daemon(object):
 		monitors_repo = monitors.get_repository()
 		plugins_repo = plugins.get_repository()
 
-		cpu = manager.create("test", "test", None)
+		test_a = manager.create("test", "test", None)
+		test_b = manager.create("foo", "cpu", None)
 
 		while not self._terminate.wait(10):
 			log.debug("updating monitors")
