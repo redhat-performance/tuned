@@ -41,7 +41,8 @@ class Controller(exports.interfaces.ExportableInterface):
 	def __init__(self, config_file, debug):
 		super(self.__class__, self).__init__()
 		exports.register_object(self)
-		self._daemon = daemon.Daemon(config_file)
+		self._config_file = config_file
+		self._daemon = daemon.Daemon()
 		self._terminate = threading.Event()
 
 	def run(self):
@@ -89,8 +90,13 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("s", "b")
 	def switch_profile(self, profile):
-		# TODO
-		return False
+		config_file = "/etc/tune-profiles/%s/tuned.conf" % (profile)
+		try:
+			self._daemon.config_file = config_file
+		except ValueError as e:
+			log.error("Unable to open profile's config file %s" % (config_file) )
+			return False
+		return self.reload()
 
 	@exports.export("", "s")
 	def active_profile(self):

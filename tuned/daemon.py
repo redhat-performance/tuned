@@ -15,26 +15,33 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+import os
 import units
 import utils
 import logs
 import monitors
 import plugins
 import threading
+import ConfigParser
 
 log = logs.get()
 
 DEFAULT_CONFIG_FILE = "/etc/tuned/tuned.conf"
 
 class Daemon(object):
-	def __init__(self, config_file = None):
+	def __init__(self):
 		log.info("initializing Daemon")
-		if config_file is None:
-			config_file = DEFAULT_CONFIG_FILE
-		self._config_file = config_file
+		self._config_file = DEFAULT_CONFIG_FILE
 
 		self._thread = None
 		self._terminate = threading.Event()
+
+	def _load_plugins(self, manager):
+		cfg = ConfigParser.SafeConfigParser()
+		cfg.read(self._config_file)
+
+		test_a = manager.create("test", "test", None)
+		test_b = manager.create("foo", "cpu", None)
 
 	def _thread_code(self):
 		self._terminate.clear()
@@ -44,8 +51,7 @@ class Daemon(object):
 		monitors_repo = monitors.get_repository()
 		plugins_repo = plugins.get_repository()
 
-		test_a = manager.create("test", "test", None)
-		test_b = manager.create("foo", "cpu", None)
+		self._load_plugins(manager)
 
 		while not self._terminate.wait(10):
 			log.debug("updating monitors")
@@ -54,6 +60,18 @@ class Daemon(object):
 			plugins_repo.update()
 
 		manager.delete_all()
+
+	@property
+	def config_file(self):
+		return self._config_file
+
+	@config_file.setter
+	def config_file(self, value):
+		if not os.path.exists(value):
+			raise ValueError("Config file does not exist")
+
+		self._config_file = value
+		# TODO: Maybe restart the daemon here?
 
 	def is_running(self):
 		return self._thread is not None and self._thread.is_alive()
