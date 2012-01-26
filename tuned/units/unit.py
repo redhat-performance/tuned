@@ -2,7 +2,7 @@ import tuned.plugins
 
 class Unit(object):
 	"""
-	Unit is the smallest tuning component. Units have to be insantiated using UnitManager.
+	Unit is the smallest tuning component. Units have to be instantiated using UnitManager.
 
 	One unit utilizes one plugin. The tuning can be limited to certain devices with specific
 	options. Multiple units can utilize one plugin, but they should not control the same
