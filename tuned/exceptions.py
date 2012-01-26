@@ -2,13 +2,15 @@ import tuned.logs
 import sys
 import traceback
 
+exception_logger = tuned.logs.get()
+
 class TunedException(Exception):
 	"""
 	"""
 
 	def log(self, logger = None):
 		if logger is None:
-			logger = tuned.logs.get()
+			logger = exception_logger
 		logger.error(str(self))
 		self._log_trace(logger)
 
