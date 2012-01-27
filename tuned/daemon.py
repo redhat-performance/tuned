@@ -40,8 +40,21 @@ class Daemon(object):
 		cfg = ConfigParser.SafeConfigParser()
 		cfg.read(self._config_file)
 
-		test_a = manager.create("test", "test", None)
-		test_b = manager.create("foo", "cpu", None)
+		
+		for section in cfg.sections():
+			if section == "main":
+				continue
+
+			if not cfg.has_option(section, "type"):
+				log.error("No 'type' option for %s plugin" % (section))
+				continue
+
+			plugin = cfg.get(section, "type")
+			plugin_cfg = dict(cfg.items(section))
+			del plugin_cfg["type"]
+
+			p = manager.create(section, plugin, plugin_cfg)
+			
 
 	def _thread_code(self):
 		self._terminate.clear()

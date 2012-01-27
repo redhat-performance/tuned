@@ -24,7 +24,7 @@ class PluginRepository(tuned.patterns.Singleton):
 			raise plugin_exception
 
 	def delete(self, plugin):
-		assert type(plugin) is self._loader.interface
+		assert isinstance(plugin, self._loader.interface)
 		plugin.cleanup()
 		self._plugins.remove(plugin)
 

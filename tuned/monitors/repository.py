@@ -19,7 +19,7 @@ class MonitorRepository(tuned.patterns.Singleton):
 		return monitor_instance
 
 	def delete(self, monitor):
-		assert type(monitor) is self._loader.interface
+		assert isinstance(monitor, self._loader.interface)
 		monitor.cleanup()
 		self._monitors.remove(monitor)
 

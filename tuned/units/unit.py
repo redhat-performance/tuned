@@ -37,6 +37,7 @@ class Unit(object):
 		if config is None:
 			return (None, {})
 
+		devices = None
 		assert type(config) is dict
 		if "devices" in config:
 			devices = config[devices].strip().split()

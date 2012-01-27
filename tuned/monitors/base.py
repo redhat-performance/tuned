@@ -65,10 +65,13 @@ class Monitor(object):
 		self._register_instance(self)
 
 	def __del__(self):
-		self.cleanup()
+		try:
+			self.cleanup()
+		except:
+			pass
 
 	def cleanup(self):
-		self.deregister_instance(self)
+		self._deregister_instance(self)
 
 	@property
 	def devices(self):
