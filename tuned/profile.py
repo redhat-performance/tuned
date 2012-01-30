@@ -33,6 +33,7 @@ class Profile(object):
 		self._config_file = config_file
 		self._sysctl = {}
 		self._sysctl_original = {}
+		self._scripts = []
 
 	def _load_sysctl(self, cfg):
 		if cfg.has_section("sysctl"):
@@ -59,10 +60,23 @@ class Profile(object):
 				self._sysctl_original[k] = v
 
 			self._exec_sysctl(key + "=" + value, True)
+		return True
 
 	def _revert_sysctl(self):
 		for key, value in self._sysctl_original.iteritems():
 			self._exec_sysctl(key + "=" + value, True)
+
+	def _call_scripts(self, arg = "start"):
+		for script in self._scripts:
+			try: 
+				proc = Popen([script, arg], stdout=PIPE, stderr=PIPE)
+				out, err = proc.communicate()
+
+				if proc.returncode:
+					log.error("script %s error: %s" % (script, err[:-1]))
+			except OSError as e:
+				log.error("Script %s error: %s" % (script, e))
+		return True
 
 	def _load_config(self, manager, config):
 		if not os.path.exists(config):
@@ -74,6 +88,11 @@ class Profile(object):
 
 		if cfg.has_option("main", "include"):
 			self._load_config(manager, cfg.get("main", "include"))
+
+		if cfg.has_option("main", "script"):
+			script = os.path.abspath(cfg.get("main", "script"))
+			if not script in self._scripts:
+				self._scripts.append(script)
 
 		self._load_sysctl(cfg)
 
@@ -94,7 +113,8 @@ class Profile(object):
 		return True
 
 	def load(self):
-		return self._load_config(self._manager, self._config_file) and self._apply_sysctl()
+		return self._load_config(self._manager, self._config_file) and self._apply_sysctl() and self._call_scripts()
 
 	def cleanup(self):
 		self._revert_sysctl()
+		self._call_scripts("stop")
