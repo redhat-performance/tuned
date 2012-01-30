@@ -102,7 +102,7 @@ class Controller(exports.interfaces.ExportableInterface):
 	def switch_profile(self, profile):
 		cfg = "/etc/tune-profiles/%s/tuned.conf" % (profile)
 		try:
-			config_file = cfg
+			self.config_file = cfg
 		except ValueError as e:
 			log.error("Unable to open profile's config file %s" % (cfg) )
 			return False
@@ -111,8 +111,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("", "s")
 	def active_profile(self):
-		# TODO
-		return "default"
+		return self.config_file.split("/")[-2]
 
 	@exports.export("", "a{bb}")
 	def status(self):

@@ -36,11 +36,18 @@ class Daemon(object):
 		self._thread = None
 		self._terminate = threading.Event()
 
-	def _load_plugins(self, manager):
-		cfg = ConfigParser.SafeConfigParser()
-		cfg.read(self._config_file)
+	# TODO: Move me to different class probably?
+	def _load_config(self, manager, config):
+		if not os.path.exists(config):
+			log.error("Config file %s does not exist" % (config))
+			return
 
-		
+		cfg = ConfigParser.SafeConfigParser()
+		cfg.read(config)
+
+		if cfg.has_option("main", "include"):
+			self._load_config(manager, cfg.get("main", "include"))
+
 		for section in cfg.sections():
 			if section == "main":
 				continue
@@ -54,7 +61,9 @@ class Daemon(object):
 			del plugin_cfg["type"]
 
 			p = manager.create(section, plugin, plugin_cfg)
-			
+
+	def _load_plugins(self, manager):
+		self._load_config(manager, self._config_file)
 
 	def _thread_code(self):
 		self._terminate.clear()
