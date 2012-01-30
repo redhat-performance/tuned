@@ -23,6 +23,7 @@ import monitors
 import plugins
 import threading
 import ConfigParser
+import glob
 from subprocess import *
 
 log = logs.get()
@@ -34,6 +35,9 @@ class Profile(object):
 		self._sysctl = {}
 		self._sysctl_original = {}
 		self._scripts = []
+		self._elevator = ""
+		# TODO: match cciss* somehow
+		self._elevator_devs = "/sys/block/sd*/queue/scheduler"
 
 	def _load_sysctl(self, cfg):
 		if cfg.has_section("sysctl"):
@@ -52,6 +56,9 @@ class Profile(object):
 		return (proc.returncode, out, err)
 
 	def _apply_sysctl(self):
+		if len(self._elevator) == 0:
+			return
+
 		for key, value in self._sysctl.iteritems():
 			returncode, out, err = self._exec_sysctl(key)
 			if not returncode:
@@ -63,18 +70,42 @@ class Profile(object):
 		return True
 
 	def _revert_sysctl(self):
+		if len(self._elevator) == 0:
+			return
+
 		for key, value in self._sysctl_original.iteritems():
 			self._exec_sysctl(key + "=" + value, True)
 
+	def _apply_elevator(self):
+		print glob.glob(self._elevator_devs)
+		for dev in glob.glob(self._elevator_devs):
+			log.debug("Applying elevator: %s < %s" % (dev, self._elevator))
+			try:
+				f = open(dev, "w")
+				f.write(self._elevator)
+				f.close()
+			except (OSError,IOError) as e:
+				log.error("Setting elevator on %s error: %s" % (dev, e))
+
+	def _revert_elevator(self):
+		for dev in glob.glob(self._elevator_devs):
+			log.debug("Applying elevator: %s < cfs" % (dev))
+			try:
+				f = open(dev, "w")
+				f.write("cfs")
+				f.close()
+			except (OSError,IOError) as e:
+				log.error("Setting elevator on %s error: %s" % (dev, e))
+
 	def _call_scripts(self, arg = "start"):
 		for script in self._scripts:
-			try: 
+			try:
 				proc = Popen([script, arg], stdout=PIPE, stderr=PIPE)
 				out, err = proc.communicate()
 
 				if proc.returncode:
 					log.error("script %s error: %s" % (script, err[:-1]))
-			except OSError as e:
+			except (OSError,IOError) as e:
 				log.error("Script %s error: %s" % (script, e))
 		return True
 
@@ -93,6 +124,12 @@ class Profile(object):
 			script = os.path.abspath(cfg.get("main", "script"))
 			if not script in self._scripts:
 				self._scripts.append(script)
+
+		if cfg.has_option("main", "elevator"):
+			self._elevator = cfg.get("main", "elevator")
+
+		if cfg.has_option("main", "elevator_tune_devs"):
+			self._elevator_devs = cfg.get("main", "elevator_tune_devs")
 
 		self._load_sysctl(cfg)
 
@@ -113,8 +150,9 @@ class Profile(object):
 		return True
 
 	def load(self):
-		return self._load_config(self._manager, self._config_file) and self._apply_sysctl() and self._call_scripts()
+		return self._load_config(self._manager, self._config_file) and self._apply_sysctl() and self._apply_elevator() and self._call_scripts()
 
 	def cleanup(self):
 		self._revert_sysctl()
+		self._revert_elevator()
 		self._call_scripts("stop")
