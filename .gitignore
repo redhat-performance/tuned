@@ -1,3 +1,4 @@
 *.pyc
 latest-archive
 *.tar.bz2
+*~

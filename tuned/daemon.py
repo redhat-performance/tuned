@@ -23,6 +23,7 @@ import monitors
 import plugins
 import threading
 import ConfigParser
+import profile
 
 log = logs.get()
 
@@ -32,38 +33,10 @@ class Daemon(object):
 	def __init__(self):
 		log.info("initializing Daemon")
 		self._config_file = DEFAULT_CONFIG_FILE
+		self._profile = None
 
 		self._thread = None
 		self._terminate = threading.Event()
-
-	# TODO: Move me to different class probably?
-	def _load_config(self, manager, config):
-		if not os.path.exists(config):
-			log.error("Config file %s does not exist" % (config))
-			return
-
-		cfg = ConfigParser.SafeConfigParser()
-		cfg.read(config)
-
-		if cfg.has_option("main", "include"):
-			self._load_config(manager, cfg.get("main", "include"))
-
-		for section in cfg.sections():
-			if section == "main":
-				continue
-
-			if not cfg.has_option(section, "type"):
-				log.error("No 'type' option for %s plugin" % (section))
-				continue
-
-			plugin = cfg.get(section, "type")
-			plugin_cfg = dict(cfg.items(section))
-			del plugin_cfg["type"]
-
-			p = manager.create(section, plugin, plugin_cfg)
-
-	def _load_plugins(self, manager):
-		self._load_config(manager, self._config_file)
 
 	def _thread_code(self):
 		self._terminate.clear()
@@ -73,7 +46,8 @@ class Daemon(object):
 		monitors_repo = monitors.get_repository()
 		plugins_repo = plugins.get_repository()
 
-		self._load_plugins(manager)
+		self._profile = profile.Profile(manager, self._config_file)
+		self._profile.load()
 
 		while not self._terminate.wait(10):
 			log.debug("updating monitors")
@@ -117,6 +91,11 @@ class Daemon(object):
 		self._terminate.set()
 		self._thread.join()
 		self._thread = None
+
+		if self._profile:
+			self._profile.cleanup()
+			self._profile = None
+
 		return True
 
 	def cleanup(self):
