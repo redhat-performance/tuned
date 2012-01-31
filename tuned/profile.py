@@ -166,7 +166,9 @@ class Profile(object):
 		return True
 
 	def load(self):
-		return self._load_config(self._manager, self._config_file) and self._load_ktuned() and self._apply_sysctl() and self._apply_elevator() and self._call_scripts()
+		return (self._load_config(self._manager, self._config_file) and
+			self._load_ktuned() and self._apply_sysctl() and
+			self._apply_elevator() and self._call_scripts())
 
 	def cleanup(self):
 		self._revert_sysctl()
