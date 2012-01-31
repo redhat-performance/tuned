@@ -43,6 +43,21 @@ class Profile(object):
 		if cfg.has_section("sysctl"):
 			self._sysctl.update(cfg.items("sysctl"))
 
+	def _load_ktuned(self):
+		for cfg in glob.glob("/etc/ktune.d/*.conf"):
+			f = open(os.path.join("/etc/ktune.d/", cfg))
+			for line in f.readlines():
+				if not line.strip().startswith("#") and line.find("=") != -1:
+					k = out.split('=')[0].strip()
+					v = out.split('=')[1].strip()
+					self._sysctl[k] = v
+			f.close()
+		for sh in glob.glob("/etc/ktune.d/*.sh"):
+			script = os.path.join("/etc/ktune.d/", sh)
+			if not script in self._scripts:
+				self._scripts.append(script)
+		return True
+
 	def _exec_sysctl(self, data, write = False):
 		if write:
 			log.debug("Setting sysctl: %s" % (data))
@@ -77,7 +92,6 @@ class Profile(object):
 			self._exec_sysctl(key + "=" + value, True)
 
 	def _apply_elevator(self):
-		print glob.glob(self._elevator_devs)
 		for dev in glob.glob(self._elevator_devs):
 			log.debug("Applying elevator: %s < %s" % (dev, self._elevator))
 			try:
@@ -86,6 +100,7 @@ class Profile(object):
 				f.close()
 			except (OSError,IOError) as e:
 				log.error("Setting elevator on %s error: %s" % (dev, e))
+		return True
 
 	def _revert_elevator(self):
 		for dev in glob.glob(self._elevator_devs):
@@ -99,6 +114,7 @@ class Profile(object):
 
 	def _call_scripts(self, arg = "start"):
 		for script in self._scripts:
+			log.info("Calling script %s" % (script))
 			try:
 				proc = Popen([script, arg], stdout=PIPE, stderr=PIPE)
 				out, err = proc.communicate()
@@ -150,7 +166,7 @@ class Profile(object):
 		return True
 
 	def load(self):
-		return self._load_config(self._manager, self._config_file) and self._apply_sysctl() and self._apply_elevator() and self._call_scripts()
+		return self._load_config(self._manager, self._config_file) and self._load_ktuned() and self._apply_sysctl() and self._apply_elevator() and self._call_scripts()
 
 	def cleanup(self):
 		self._revert_sysctl()
