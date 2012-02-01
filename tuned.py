@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
 	if daemon:
 		log.switch_to_file()
-		if tuned.utils.daemonize():
+		if tuned.utils.daemonize(3):
 			log.debug("successfully daemonized")
 		else:
 			log.critical("cannot daemonize")

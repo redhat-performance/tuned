@@ -7,6 +7,10 @@ import sys
 
 log = tuned.logs.get()
 
+def handle_signal(signals, handler, pass_args = True):
+	for s in signals:
+		signal.signal(s, handler)
+
 def daemonize(timeout):
 	"""
 	Perform current process daemonization. Kills current SIGALRM, SIGUSR1, and SIGUSR2 signal handlers.
