@@ -34,17 +34,11 @@ class Profile(object):
 	def __init__(self, manager, config_file):
 		self._manager = manager
 		self._config_file = config_file
-		self._sysctl = {}
-		self._sysctl_original = {}
 		self._scripts = []
 		self._elevator = ""
 		# TODO: match cciss* somehow
 		self._elevator_devs = "/sys/block/sd*/queue/scheduler"
 		self._plugin_configs = {}
-
-	def _load_sysctl(self, cfg):
-		if cfg.has_section("sysctl"):
-			self._sysctl.update(cfg.items("sysctl"))
 
 	def _load_ktuned(self):
 		for cfg in glob.glob("/etc/ktune.d/*.conf"):
@@ -60,39 +54,6 @@ class Profile(object):
 			if not script in self._scripts:
 				self._scripts.append(script)
 		return True
-
-	def _exec_sysctl(self, data, write = False):
-		if write:
-			log.debug("Setting sysctl: %s" % (data))
-			proc = Popen(["/sbin/sysctl", "-q", "-w", data], stdout=PIPE, stderr=PIPE)
-		else:
-			proc = Popen(["/sbin/sysctl", "-e", data], stdout=PIPE, stderr=PIPE)
-		out, err = proc.communicate()
-
-		if proc.returncode:
-			log.error("sysctl error: %s" % (err[:-1]))
-		return (proc.returncode, out, err)
-
-	def _apply_sysctl(self):
-		if len(self._elevator) == 0:
-			return
-
-		for key, value in self._sysctl.iteritems():
-			returncode, out, err = self._exec_sysctl(key)
-			if not returncode:
-				k = out.split('=')[0].strip()
-				v = out.split('=')[1].strip()
-				self._sysctl_original[k] = v
-
-			self._exec_sysctl(key + "=" + value, True)
-		return True
-
-	def _revert_sysctl(self):
-		if len(self._elevator) == 0:
-			return
-
-		for key, value in self._sysctl_original.iteritems():
-			self._exec_sysctl(key + "=" + value, True)
 
 	def _apply_elevator(self):
 		for dev in glob.glob(self._elevator_devs):
@@ -193,6 +154,7 @@ class Profile(object):
 
 		if plugin_cfg.has_key("merge"):
 			self._merge_plugin(name, plugin_cfg)
+			del plugin_cfg["merge"]
 		else:
 			self._replace_plugin(name, plugin_cfg)
 		self._plugin_configs[name] = plugin_cfg
@@ -225,12 +187,7 @@ class Profile(object):
 		if cfg.has_option("main", "elevator_tune_devs"):
 			self._elevator_devs = cfg.get("main", "elevator_tune_devs")
 
-		self._load_sysctl(cfg)
-
 		for section in cfg.sections():
-			if section in ["main", "sysctl"]:
-				continue
-
 			if not cfg.has_option(section, "type"):
 				log.error("No 'type' option for %s plugin" % (section))
 				continue
@@ -241,10 +198,9 @@ class Profile(object):
 
 	def load(self):
 		return (self._load_config(self._manager, self._config_file) and
-			self._apply_config() and self._load_ktuned() and self._apply_sysctl() and
+			self._apply_config() and self._load_ktuned() and
 			self._apply_elevator() and self._call_scripts())
 
 	def cleanup(self):
-		self._revert_sysctl()
 		self._revert_elevator()
 		self._call_scripts("stop")
