@@ -7,6 +7,7 @@ class Plugin(object):
 
 	Methods requiring reimplementation:
 	 - update_tuning(self)
+	 - tunable_devices(cls)
 	"""
 
 	# class methods
@@ -14,6 +15,10 @@ class Plugin(object):
 	@classmethod
 	def _get_default_options(cls):
 		return {}
+
+	@classmethod
+	def tunable_devices(cls):
+		return None
 
 	# instance methods
 

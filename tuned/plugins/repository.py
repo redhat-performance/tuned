@@ -23,6 +23,14 @@ class PluginRepository(tuned.patterns.Singleton):
 			plugin_exception = tuned.plugins.exception.LoadPluginException(plugin_name, exception)
 			raise plugin_exception
 
+	def tunable_devices(self, plugin_name):
+		try:
+			plugin_cls = self._loader.load(plugin_name)
+			return plugin_cls.tunable_devices()
+		except Exception as exception:
+			plugin_exception = tuned.plugins.exception.LoadPluginException(plugin_name, exception)
+			raise plugin_exception
+
 	def delete(self, plugin):
 		assert isinstance(plugin, self._loader.interface)
 		plugin.cleanup()

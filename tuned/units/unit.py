@@ -40,8 +40,8 @@ class Unit(object):
 		devices = None
 		assert type(config) is dict
 		if "devices" in config:
-			devices = config[devices].strip().split()
-			if len(devices) == 0:
+			devices = config["devices"]
+			if devices and len(devices) == 0:
 				devices = None
 			del(config["devices"])
 

@@ -26,6 +26,8 @@ import ConfigParser
 import glob
 from subprocess import *
 
+import tuned.plugins
+
 log = logs.get()
 
 class Profile(object):
@@ -38,6 +40,7 @@ class Profile(object):
 		self._elevator = ""
 		# TODO: match cciss* somehow
 		self._elevator_devs = "/sys/block/sd*/queue/scheduler"
+		self._plugin_configs = {}
 
 	def _load_sysctl(self, cfg):
 		if cfg.has_section("sysctl"):
@@ -125,6 +128,81 @@ class Profile(object):
 				log.error("Script %s error: %s" % (script, e))
 		return True
 
+	def _replace_plugin(self, name, plugin_cfg):
+		# Iterates over already loaded plugins.
+		# If the already loaded plugin contains the same device as the newly
+		# loaded one, remove the device from the already loaded one.
+		plugins_to_remove = []
+		for plugin, cfg in self._plugin_configs.iteritems():
+			if cfg["type"] != plugin_cfg["type"]:
+				continue
+
+			if cfg.has_key("devices") and cfg["devices"] != None:
+				for device in plugin_cfg["devices"]:
+					if device in cfg["devices"]:
+						cfg["devices"].remove(device)
+						log.debug("Replacing plugin %s device %s by %s" % (plugin, device, name))
+				# If we removed all devices, this plugin is not useful anymore,
+				# so we should remove it too:
+				if (len(cfg["devices"]) == 0):
+					plugins_to_remove.append(plugin)
+			else:
+				log.debug("Replacing plugin %s by %s" % (plugin, name))
+				plugins_to_remove.append(plugin)
+
+		for plugin in plugins_to_remove:
+			log.debug("Removing plugin %s because it is useless after replace" % (plugin))
+			del self._plugin_configs[plugin]
+
+	def _merge_plugin(self, name, plugin_cfg):
+		# Iterates over already loaded plugins.
+		# Merges the option of two plugins with the same types together
+		plugins_to_remove = []
+		for plugin, cfg in self._plugin_configs.iteritems():
+			if cfg["type"] != plugin_cfg["type"]:
+				continue
+
+			if cfg.has_key("devices") and cfg["devices"] != None:
+				for device in plugin_cfg["devices"]:
+					if device in cfg["devices"]:
+						log.debug("Merging plugin %s with %s" % (name, plugin))
+						plugin_cfg.update(cfg)
+						plugins_to_remove.append(plugin)
+						break
+			else:
+				log.debug("Merging plugin %s with %s" % (name, plugin))
+				plugin_cfg.update(cfg)
+				plugins_to_remove.append(plugin)
+				
+		for plugin in plugins_to_remove:
+			log.debug("Removing plugin %s because it is useless after merge" % (plugin))
+			del self._plugin_configs[plugin]
+
+	def _store_plugin_config(self, name, plugin_cfg):
+		plugin = plugin_cfg["type"]
+		# If there are no devices set, set all tunable_devices as default
+		if not plugin_cfg.has_key("devices"):
+			try:
+				plugin_cfg["devices"] = tuned.plugins.get_repository().tunable_devices(plugin)
+			except tuned.exceptions.TunedException as e:
+				e.log()
+				log.error("unable to create unit %s" % plugin)
+				return
+		else:
+			plugin_cfg["devices"] = plugin_cfg["devices"].split(",")
+
+		if plugin_cfg.has_key("merge"):
+			self._merge_plugin(name, plugin_cfg)
+		else:
+			self._replace_plugin(name, plugin_cfg)
+		self._plugin_configs[name] = plugin_cfg
+
+	def _apply_config(self):
+		for name, cfg in self._plugin_configs.iteritems():
+			plugin = cfg["type"]
+			del cfg["type"]
+			p = self._manager.create(name, plugin, cfg)
+
 	def _load_config(self, manager, config):
 		if not os.path.exists(config):
 			log.error("Config file %s does not exist" % (config))
@@ -157,17 +235,13 @@ class Profile(object):
 				log.error("No 'type' option for %s plugin" % (section))
 				continue
 
-			plugin = cfg.get(section, "type")
-			plugin_cfg = dict(cfg.items(section))
-			del plugin_cfg["type"]
-
-			p = manager.create(section, plugin, plugin_cfg)
+			self._store_plugin_config(section, dict(cfg.items(section)))
 
 		return True
 
 	def load(self):
 		return (self._load_config(self._manager, self._config_file) and
-			self._load_ktuned() and self._apply_sysctl() and
+			self._apply_config() and self._load_ktuned() and self._apply_sysctl() and
 			self._apply_elevator() and self._call_scripts())
 
 	def cleanup(self):
