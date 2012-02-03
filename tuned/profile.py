@@ -34,60 +34,7 @@ class Profile(object):
 	def __init__(self, manager, config_file):
 		self._manager = manager
 		self._config_file = config_file
-		self._scripts = []
-		self._elevator = ""
-		# TODO: match cciss* somehow
-		self._elevator_devs = "/sys/block/sd*/queue/scheduler"
 		self._plugin_configs = {}
-
-	def _load_ktuned(self):
-		for cfg in glob.glob("/etc/ktune.d/*.conf"):
-			f = open(os.path.join("/etc/ktune.d/", cfg))
-			for line in f.readlines():
-				if not line.strip().startswith("#") and line.find("=") != -1:
-					k = out.split('=')[0].strip()
-					v = out.split('=')[1].strip()
-					self._sysctl[k] = v
-			f.close()
-		for sh in glob.glob("/etc/ktune.d/*.sh"):
-			script = os.path.join("/etc/ktune.d/", sh)
-			if not script in self._scripts:
-				self._scripts.append(script)
-		return True
-
-	def _apply_elevator(self):
-		for dev in glob.glob(self._elevator_devs):
-			log.debug("Applying elevator: %s < %s" % (dev, self._elevator))
-			try:
-				f = open(dev, "w")
-				f.write(self._elevator)
-				f.close()
-			except (OSError,IOError) as e:
-				log.error("Setting elevator on %s error: %s" % (dev, e))
-		return True
-
-	def _revert_elevator(self):
-		for dev in glob.glob(self._elevator_devs):
-			log.debug("Applying elevator: %s < cfs" % (dev))
-			try:
-				f = open(dev, "w")
-				f.write("cfs")
-				f.close()
-			except (OSError,IOError) as e:
-				log.error("Setting elevator on %s error: %s" % (dev, e))
-
-	def _call_scripts(self, arg = "start"):
-		for script in self._scripts:
-			log.info("Calling script %s" % (script))
-			try:
-				proc = Popen([script, arg], stdout=PIPE, stderr=PIPE)
-				out, err = proc.communicate()
-
-				if proc.returncode:
-					log.error("script %s error: %s" % (script, err[:-1]))
-			except (OSError,IOError) as e:
-				log.error("Script %s error: %s" % (script, e))
-		return True
 
 	def _replace_plugin(self, name, plugin_cfg):
 		# Iterates over already loaded plugins.
@@ -176,18 +123,9 @@ class Profile(object):
 		if cfg.has_option("main", "include"):
 			self._load_config(manager, cfg.get("main", "include"))
 
-		if cfg.has_option("main", "script"):
-			script = os.path.abspath(cfg.get("main", "script"))
-			if not script in self._scripts:
-				self._scripts.append(script)
-
-		if cfg.has_option("main", "elevator"):
-			self._elevator = cfg.get("main", "elevator")
-
-		if cfg.has_option("main", "elevator_tune_devs"):
-			self._elevator_devs = cfg.get("main", "elevator_tune_devs")
-
 		for section in cfg.sections():
+			if section == "main":
+				continue
 			if not cfg.has_option(section, "type"):
 				log.error("No 'type' option for %s plugin" % (section))
 				continue
@@ -198,9 +136,7 @@ class Profile(object):
 
 	def load(self):
 		return (self._load_config(self._manager, self._config_file) and
-			self._apply_config() and self._load_ktuned() and
-			self._apply_elevator() and self._call_scripts())
+			self._apply_config())
 
 	def cleanup(self):
-		self._revert_elevator()
-		self._call_scripts("stop")
+		pass

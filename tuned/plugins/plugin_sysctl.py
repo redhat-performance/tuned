@@ -3,6 +3,7 @@ import tuned.logs
 import tuned.monitors
 import os
 import struct
+import glob
 from subprocess import *
 
 log = tuned.logs.get()
@@ -16,9 +17,20 @@ class SysctlPlugin(tuned.plugins.Plugin):
 		"""
 		super(self.__class__, self).__init__(None, options)
 		self._options = options
-		self._latency = None
 		self._updated = False
 		self._sysctl_original = {}
+		self._load_ktuned()
+
+	def _load_ktuned(self):
+		for cfg in glob.glob("/etc/ktune.d/*.conf"):
+			f = open(os.path.join("/etc/ktune.d/", cfg))
+			for line in f.readlines():
+				if not line.strip().startswith("#") and line.find("=") != -1:
+					k = line.split('=')[0].strip()
+					v = line.split('=')[1].strip()
+					self._options[k] = v
+			f.close()
+		return True
 
 	def _exec_sysctl(self, data, write = False):
 		if write:
@@ -49,7 +61,6 @@ class SysctlPlugin(tuned.plugins.Plugin):
 
 	def cleanup(self):
 		self._revert_sysctl()
-		os.close(self._cpu_latency_fd)
 
 	def update_tuning(self):
 		if self._updated:
@@ -57,5 +68,3 @@ class SysctlPlugin(tuned.plugins.Plugin):
 
 		self._updated = True
 		self._apply_sysctl()
-
-
