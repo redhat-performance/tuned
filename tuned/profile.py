@@ -55,6 +55,8 @@ class Profile(object):
 				if (len(cfg["devices"]) == 0):
 					plugins_to_remove.append(plugin)
 			else:
+				# If the plugin does not have any device set, it can be
+				# run only once, so remove previous occurence
 				log.debug("Replacing plugin %s by %s" % (plugin, name))
 				plugins_to_remove.append(plugin)
 

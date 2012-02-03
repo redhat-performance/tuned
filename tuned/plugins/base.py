@@ -7,7 +7,6 @@ class Plugin(object):
 
 	Methods requiring reimplementation:
 	 - update_tuning(self)
-	 - tunable_devices(cls)
 	"""
 
 	# class methods
