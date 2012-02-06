@@ -56,13 +56,14 @@ class Monitor(object):
 			self._init_class()
 			assert hasattr(self, "_class_initialized")
 
+		self._register_instance(self)
+
 		if devices is not None:
 			self.devices = devices
 		else:
 			self.devices = self.get_available_devices()
 
 		self.update()
-		self._register_instance(self)
 
 	def __del__(self):
 		try:
