@@ -49,7 +49,6 @@ class NetTuningPlugin(tuned.plugins.Plugin):
 		load = self._load_monitor.get_load()
 		for dev, devload in load.iteritems():
 			self._updateIdle(dev, devload)
-			print self.devidle
 			if self.devidle[dev]["LEVEL"] == 0 and self.devidle[dev]["READ"] >= 6 and self.devidle[dev]["WRITE"] >= 6:
 				self.devidle[dev]["LEVEL"] = 1
 
