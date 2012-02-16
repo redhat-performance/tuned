@@ -14,20 +14,18 @@ class MonitorRepository(tuned.patterns.Singleton):
 		log.debug("creating monitor %s" % plugin_name)
 		# TODO: exception handling
 		monitor_cls = self._loader.load(plugin_name)
-
-		for monitor in self._monitors:
-			if (isinstance(monitor, monitor_cls) and 
-				(monitor.devices == devices or devices == None)):
-				return monitor
-
 		monitor_instance = monitor_cls(devices)
-		self._monitors.add(monitor_instance)
+
+		if not monitor_cls in self._monitors:
+			 self._monitors.add(monitor_cls)
 		return monitor_instance
 
 	def delete(self, monitor):
 		assert isinstance(monitor, self._loader.interface)
 		monitor.cleanup()
-		self._monitors.remove(monitor)
+
+		if len(monitor._instances) == 0:
+			self._monitors.remove(type(monitor))
 
 	def update(self):
 		for monitor in self._monitors:
