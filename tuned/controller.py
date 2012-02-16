@@ -111,7 +111,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("", "s")
 	def active_profile(self):
-		return self.config_file.split("/")[-2]
+		return "default"
 
 	@exports.export("", "a{bb}")
 	def status(self):

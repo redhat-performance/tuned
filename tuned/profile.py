@@ -25,6 +25,7 @@ import threading
 import ConfigParser
 import glob
 from subprocess import *
+import pprint
 
 import tuned.plugins
 
@@ -109,6 +110,9 @@ class Profile(object):
 		self._plugin_configs[name] = plugin_cfg
 
 	def _apply_config(self):
+		pp = pprint.PrettyPrinter(indent=4)
+		log.debug("Loaded config: %s" % (pp.pformat(self._plugin_configs)))
+
 		for name, cfg in self._plugin_configs.iteritems():
 			plugin = cfg["type"]
 			del cfg["type"]
