@@ -102,11 +102,11 @@ class Profile(object):
 		else:
 			plugin_cfg["devices"] = plugin_cfg["devices"].split(",")
 
-		if plugin_cfg.has_key("merge"):
-			self._merge_plugin(name, plugin_cfg)
-			del plugin_cfg["merge"]
-		else:
+		if plugin_cfg.has_key("replace"):
 			self._replace_plugin(name, plugin_cfg)
+			del plugin_cfg["replace"]
+		else:
+			self._merge_plugin(name, plugin_cfg)
 		self._plugin_configs[name] = plugin_cfg
 
 	def _apply_config(self):
