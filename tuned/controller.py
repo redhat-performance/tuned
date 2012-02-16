@@ -100,7 +100,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("s", "b")
 	def switch_profile(self, profile):
-		cfg = "/etc/tune-profiles/%s/tuned.conf" % (profile)
+		cfg = "/usr/lib/tuned/%s/tuned.conf" % (profile)
 		try:
 			self.config_file = cfg
 		except ValueError as e:
@@ -111,7 +111,9 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("", "s")
 	def active_profile(self):
-		return "default"
+		if self.config_file.startswith("/usr/lib/tuned/"):
+			return self.config_file.split("/")[-2]
+		return self.config_file
 
 	@exports.export("", "a{bb}")
 	def status(self):
