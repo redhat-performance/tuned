@@ -16,11 +16,7 @@ class NetMonitor(tuned.monitors.Monitor):
 
 		for dev in available:
 			max_speed = cls._calcspeed(ethcard(dev).get_max_speed())
-			cls._load[dev] = {}
-			cls._load[dev]["new"] = ['0', '0', '0', '0']
-			cls._load[dev]["max"] = [max_speed, 1, max_speed, 1]
-			cls._updateStat(dev)
-			cls._load[dev]["max"] = [max_speed, 1, max_speed, 1]
+			cls._load[dev] = ['0', '0', '0', '0', max_speed]
 
 	@classmethod
 	def _calcspeed(cls, speed):
@@ -31,31 +27,11 @@ class NetMonitor(tuned.monitors.Monitor):
 		return (int) (0.6 * 1024 * 1024 * speed / 8)
 
 	@classmethod
-	def _calcdiff(cls, dev):
-		l = []
-		for i in xrange(len(cls._load[dev]["old"])):
-			l.append(int(cls._load[dev]["new"][i]) - int(cls._load[dev]["old"][i]))
-		return l
-
-	@classmethod
 	def _updateStat(cls, dev):
-		cls._load[dev]["old"] = cls._load[dev]["new"][:]
-		l = open("/sys/class/net/"+dev+"/statistics/rx_bytes", "r").read().strip()
-		cls._load[dev]["new"][0] = l
-		l = open("/sys/class/net/"+dev+"/statistics/rx_packets", "r").read().strip()
-		cls._load[dev]["new"][1] = l
-		l = open("/sys/class/net/"+dev+"/statistics/tx_bytes", "r").read().strip()
-		cls._load[dev]["new"][2] = l
-		l = open("/sys/class/net/"+dev+"/statistics/tx_packets", "r").read().strip()
-		cls._load[dev]["new"][3] = l
-		l = cls._calcdiff(dev)
-		for i in xrange(len(l)):
-			if l[i] > cls._load[dev]["max"][i]:
-				cls._load[dev]["max"][i] = l[i]
-		cls._load[dev]["diff"] = cls._calcdiff(dev)
-
-		cls._load[dev]["READ"] = float(cls._load[dev]["diff"][0]) / float(cls._load[dev]["max"][0])
-		cls._load[dev]["WRITE"] = float(cls._load[dev]["diff"][2]) / float(cls._load[dev]["max"][2])
+		files = ["rx_bytes", "rx_packets", "tx_bytes", "tx_packets"]
+		for i,f in enumerate(files):
+			with open("/sys/class/net/" + dev + "/statistics/" + f) as statfile:
+				cls._load[dev]["new"][i] = statfile.read().strip()
 
 	@classmethod
 	def update(cls):

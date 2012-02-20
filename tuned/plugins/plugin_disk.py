@@ -16,6 +16,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 		super(self.__class__, self).__init__(None, options)
 
 		self.devidle = {}
+		self.stats = {}
 		self.power = ["255", "225", "195", "165", "145", "125", "105", "85", "70", "55", "30", "20"]
 		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
 		self.levels = len(self.power)
@@ -38,17 +39,42 @@ class DiskPlugin(tuned.plugins.Plugin):
 
 		return vendor in cls._supported_vendors
 
-	def _updateIdle(self, dev, devload):
+	def _update_idle(self, dev):
 		idle = self.devidle.setdefault(dev, {})
 		idle.setdefault("LEVEL", 0)
-		for type in ("READ", "WRITE"):
-			if devload[type] == 0.0:
+		for type in ("read", "write"):
+			if self.stats[dev][type] == 0.0:
 				idle.setdefault(type, 0)
 				idle[type] += 1
 			else:
 				idle.setdefault(type, 0)
 				idle[type] = 0
 
+	def _init_stats(self, dev):
+		if not self.stats.has_key(dev):
+			self.stats[dev] = {}
+			self.stats[dev]["new"] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+			self.stats[dev]["old"] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+			self.stats[dev]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+	def _calc_diff(self, dev):
+		l = []
+		for i in xrange(len(self.stats[dev]["old"])):
+			l.append(int(self.stats[dev]["new"][i]) - int(self.stats[dev]["old"][i]))
+		return l
+
+	def _update_stats(self, dev, devload):
+		self.stats[dev]["old"] = self.stats[dev]["new"]
+		self.stats[dev]["new"] = devload
+		l = self._calc_diff(dev)
+		for i in xrange(len(l)):
+			if l[i] > self.stats[dev]["max"][i]:
+				self.stats[dev]["max"][i] = l[i]
+
+		self.stats[dev]["diff"] = l
+	
+		self.stats[dev]["read"] = float(self.stats[dev]["diff"][1]) / float(self.stats[dev]["max"][1])
+		self.stats[dev]["write"] = float(self.stats[dev]["diff"][5]) / float(self.stats[dev]["max"][5])
 
 	def cleanup(self):
 		log.debug("Cleanup")
@@ -60,9 +86,11 @@ class DiskPlugin(tuned.plugins.Plugin):
 	def update_tuning(self):
 		load = self._load_monitor.get_load()
 		for dev, devload in load.iteritems():
-			self._updateIdle(dev, devload)
+			self._init_stats(dev)
+			self._update_stats(dev, devload)
+			self._update_idle(dev)
 
-			if self.devidle[dev]["LEVEL"] < self.levels-1 and self.devidle[dev]["READ"] >= 6 and self.devidle[dev]["WRITE"] >= 6:
+			if self.devidle[dev]["LEVEL"] < self.levels-1 and self.devidle[dev]["read"] >= 6 and self.devidle[dev]["write"] >= 6:
 				self.devidle[dev].setdefault("LEVEL", 0)
 				self.devidle[dev]["LEVEL"] += 1
 				level = self.devidle[dev]["LEVEL"]
@@ -70,7 +98,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 				log.debug("Level changed to %d (power %s, spindown %s)" % (level, self.power[level], self.spindown[level]))
 				os.system("hdparm -S"+self.power[level]+" -B"+self.spindown[level]+" /dev/"+dev+" > /dev/null 2>&1")
 
-			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["READ"] == 0 or self.devidle[dev]["WRITE"] == 0):
+			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["read"] == 0 or self.devidle[dev]["write"] == 0):
 				self.devidle[dev].setdefault("LEVEL", 0)
 				self.devidle[dev]["LEVEL"] -= 2
 				if self.devidle[dev]["LEVEL"] < 0:
@@ -80,5 +108,5 @@ class DiskPlugin(tuned.plugins.Plugin):
 				log.debug("Level changed to %d (power %s, spindown %s)" % (level, self.power[level], self.spindown[level]))
 				os.system("hdparm -S"+self.power[level]+" -B"+self.spindown[level]+" /dev/"+dev+" > /dev/null 2>&1")
 
-			log.debug("%s load: read %f, write %f" % (dev, load[dev]["READ"], load[dev]["WRITE"]))
-			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["READ"], self.devidle[dev]["WRITE"], self.devidle[dev]["LEVEL"]))
+			log.debug("%s load: read %f, write %f" % (dev, self.stats[dev]["read"], self.stats[dev]["write"]))
+			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))

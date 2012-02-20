@@ -12,11 +12,7 @@ class DiskMonitor(tuned.monitors.Monitor):
 		cls._available_devices = available
 
 		for d in available:
-			cls._load[d] = {}
-			cls._load[d]["new"] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
-			cls._load[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-			cls._update_disk(d)
-			cls._load[d]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+			cls._load[d] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
 
 	@classmethod
 	def _is_device_supported(cls, device):
@@ -36,21 +32,5 @@ class DiskMonitor(tuned.monitors.Monitor):
 
 	@classmethod
 	def _update_disk(cls, dev):
-		l = open("/sys/block/"+dev+"/stat", "r").read()
-		cls._load[dev]["old"] = cls._load[dev]["new"]
-		cls._load[dev]["new"] = l.split()
-		l = cls._calcdiff(dev)
-		for i in xrange(len(l)):
-			if l[i] > cls._load[dev]["max"][i]:
-				cls._load[dev]["max"][i] = l[i]
-
-		cls._load[dev]['diff'] = cls._calcdiff(dev)
-		cls._load[dev]["READ"] = float(cls._load[dev]["diff"][1]) / float(cls._load[dev]["max"][1])
-		cls._load[dev]["WRITE"] = float(cls._load[dev]["diff"][5]) / float(cls._load[dev]["max"][5])
-
-	@classmethod
-	def _calcdiff(cls, dev):
-		l = []
-		for i in xrange(len(cls._load[dev]["old"])):
-			l.append(int(cls._load[dev]["new"][i]) - int(cls._load[dev]["old"][i]))
-		return l
+		with open("/sys/block/" + dev + "/stat") as statfile:
+			cls._load[dev] = statfile.read().split()
