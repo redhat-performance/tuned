@@ -20,6 +20,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 		self.power = ["255", "225", "195", "165", "145", "125", "105", "85", "70", "55", "30", "20"]
 		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
 		self.levels = len(self.power)
+		self._elevator_set = False
 
 		self._load_monitor = tuned.monitors.get_repository().create("disk", devices)
 
@@ -38,6 +39,37 @@ class DiskPlugin(tuned.plugins.Plugin):
 			return False
 
 		return vendor in cls._supported_vendors
+
+	@classmethod
+	def _get_default_options(cls):
+		return {
+			"elevator"   : "",
+		}
+
+	def _apply_elevator(self, dev):
+		if len(self._options["elevator"]) == 0:
+			return False
+
+		log.debug("Applying elevator: %s < %s" % (dev, self._options["elevator"]))
+		try:
+			f = open(os.path.join("/sys/block/", dev, "queue/scheduler"), "w")
+			f.write(self._options["elevator"])
+			f.close()
+		except (OSError,IOError) as e:
+			log.error("Setting elevator on %s error: %s" % (dev, e))
+		return True
+
+	def _revert_elevator(self, dev):
+		if len(self._options["elevator"]) == 0:
+			return
+
+		log.debug("Applying elevator: %s < cfs" % (dev))
+		try:
+			f = open(os.path.join("/sys/block/", dev, "queue/scheduler"), "w")
+			f.write("cfs")
+			f.close()
+		except (OSError,IOError) as e:
+			log.error("Setting elevator on %s error: %s" % (dev, e))
 
 	def _update_idle(self, dev):
 		idle = self.devidle.setdefault(dev, {})
@@ -82,10 +114,14 @@ class DiskPlugin(tuned.plugins.Plugin):
 		for dev in self.devidle.keys():
 			if self.devidle[dev]["LEVEL"] > 0:
 				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
+			self._revert_elevator(dev)
 
 	def update_tuning(self):
 		load = self._load_monitor.get_load()
 		for dev, devload in load.iteritems():
+			if not self._elevator_set:
+				self._apply_elevator(dev)
+
 			self._init_stats(dev)
 			self._update_stats(dev, devload)
 			self._update_idle(dev)
@@ -110,3 +146,5 @@ class DiskPlugin(tuned.plugins.Plugin):
 
 			log.debug("%s load: read %f, write %f" % (dev, self.stats[dev]["read"], self.stats[dev]["write"]))
 			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))
+
+		self._elevator_set = True

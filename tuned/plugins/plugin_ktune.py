@@ -23,11 +23,8 @@ class KTunePlugin(tuned.plugins.Plugin):
 
 	@classmethod
 	def _get_default_options(cls):
-		# TODO: match cciss* somehow
 		return {
-			"elevator" : "",
 			"script"   : "",
-			"elevator_devs"   : "/sys/block/sd*/queue/scheduler",
 		}
 
 	def _load_ktuned(self):
@@ -37,26 +34,6 @@ class KTunePlugin(tuned.plugins.Plugin):
 				self._scripts.append(script)
 		return True
 
-	def _apply_elevator(self):
-		for dev in glob.glob(self._options["elevator_devs"]):
-			log.debug("Applying elevator: %s < %s" % (dev, self._options["elevator"]))
-			try:
-				f = open(dev, "w")
-				f.write(self._options["elevator"])
-				f.close()
-			except (OSError,IOError) as e:
-				log.error("Setting elevator on %s error: %s" % (dev, e))
-		return True
-
-	def _revert_elevator(self):
-		for dev in glob.glob(self._options["elevator_devs"]):
-			log.debug("Applying elevator: %s < cfs" % (dev))
-			try:
-				f = open(dev, "w")
-				f.write("cfs")
-				f.close()
-			except (OSError,IOError) as e:
-				log.error("Setting elevator on %s error: %s" % (dev, e))
 
 	def _call_scripts(self, arg = "start"):
 		for script in self._scripts:
@@ -72,7 +49,6 @@ class KTunePlugin(tuned.plugins.Plugin):
 		return True
 
 	def cleanup(self):
-		self._revert_elevator()
 		self._call_scripts("stop")
 
 	def update_tuning(self):
@@ -80,5 +56,4 @@ class KTunePlugin(tuned.plugins.Plugin):
 			return
 
 		self._updated = True
-		self._apply_elevator()
 		self._call_scripts()
