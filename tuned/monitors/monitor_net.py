@@ -15,8 +15,8 @@ class NetMonitor(tuned.monitors.Monitor):
 		cls._available_devices = set(available)
 
 		for dev in available:
-			max_speed = cls._calcspeed(ethcard(dev).get_max_speed())
-			cls._load[dev] = ['0', '0', '0', '0', max_speed]
+			#max_speed = cls._calcspeed(ethcard(dev).get_max_speed())
+			cls._load[dev] = ['0', '0', '0', '0']
 
 	@classmethod
 	def _calcspeed(cls, speed):
@@ -31,7 +31,7 @@ class NetMonitor(tuned.monitors.Monitor):
 		files = ["rx_bytes", "rx_packets", "tx_bytes", "tx_packets"]
 		for i,f in enumerate(files):
 			with open("/sys/class/net/" + dev + "/statistics/" + f) as statfile:
-				cls._load[dev]["new"][i] = statfile.read().strip()
+				cls._load[dev][i] = statfile.read().strip()
 
 	@classmethod
 	def update(cls):
