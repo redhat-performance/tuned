@@ -8,7 +8,7 @@ from subprocess import *
 
 log = tuned.logs.get()
 
-class KTunePlugin(tuned.plugins.Plugin):
+class ScriptPlugin(tuned.plugins.Plugin):
 	"""
 	"""
 
