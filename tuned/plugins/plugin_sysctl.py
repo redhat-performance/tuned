@@ -1,6 +1,7 @@
 import tuned.plugins
 import tuned.logs
 import tuned.monitors
+import tuned.utils.storage
 import os
 import struct
 import glob
@@ -53,6 +54,11 @@ class SysctlPlugin(tuned.plugins.Plugin):
 				self._sysctl_original[k] = v
 
 			self._exec_sysctl(key + "=" + value, True)
+
+		storage = tuned.utils.storage.Storage.get_instance()
+		storage.data = {"sysctl" : self._sysctl_original}
+		storage.save()
+
 		return True
 
 	def _revert_sysctl(self):
