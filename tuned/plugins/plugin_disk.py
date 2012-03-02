@@ -23,7 +23,8 @@ class DiskPlugin(tuned.plugins.Plugin):
 		self._elevator_set = False
 		self._old_elevator = ""
 
-		tuned.utils.storage.Storage.get_instance().data["disk"] = {}
+		if not tuned.utils.storage.Storage.get_instance().data.has_key("disk"):
+			tuned.utils.storage.Storage.get_instance().data["disk"] = {}
 		self._load_monitor = tuned.monitors.get_repository().create("disk", devices)
 
 	@classmethod
@@ -49,11 +50,17 @@ class DiskPlugin(tuned.plugins.Plugin):
 		}
 
 	def _apply_elevator(self, dev):
+		storage = tuned.utils.storage.Storage.get_instance()
+		if storage.data["disk"].has_key(dev):
+			self._old_elevator = storage.data["disk"][dev]
+			self._revert_elevator(dev)
+			del storage.data["disk"][dev]
+
 		if len(self._options["elevator"]) == 0:
 			return False
 
 		try:
-			f = open(os.path.join("/sys/block/", dev, "queue/scheduler"), "w")
+			f = open(os.path.join("/sys/block/", dev, "queue/scheduler"), "r")
 			self._old_elevator = f.read()
 			f.close()
 		except (OSError,IOError) as e:
@@ -73,13 +80,13 @@ class DiskPlugin(tuned.plugins.Plugin):
 		return True
 
 	def _revert_elevator(self, dev):
-		if len(self._options["elevator"]) == 0:
+		if len(self._old_elevator) == 0:
 			return
 
-		log.debug("Applying elevator: %s < cfs" % (dev))
+		log.debug("Applying elevator: %s < %s" % (dev, self._old_elevator))
 		try:
 			f = open(os.path.join("/sys/block/", dev, "queue/scheduler"), "w")
-			f.write("cfs")
+			f.write(self._old_elevator)
 			f.close()
 		except (OSError,IOError) as e:
 			log.error("Setting elevator on %s error: %s" % (dev, e))
