@@ -4,7 +4,6 @@
 
 start() {
 	set_cpu_governor performance
-#	set_disk_scheduler_quantum 10
 	enable_transparent_hugepages
 
 	# Find non-root and non-boot partitions, disable barriers on them
@@ -22,7 +21,6 @@ start() {
 
 stop() {
 	restore_cpu_governor
-#	restore_disk_scheduler_quantum
 	restore_transparent_hugepages
 
 	# Find non-root and non-boot partitions, re-enable barriers
