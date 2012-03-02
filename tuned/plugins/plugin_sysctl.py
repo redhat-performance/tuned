@@ -20,6 +20,14 @@ class SysctlPlugin(tuned.plugins.Plugin):
 		self._options = options
 		self._updated = False
 		self._sysctl_original = {}
+
+		# Set default sysctl from the previously running tuned2
+		data = tuned.utils.storage.Storage.get_instance().data
+		if data.has_key("sysctl"):
+			for key, value in data["sysctl"].iteritems():
+				self._exec_sysctl(key + "=" + value, True)
+		tuned.utils.storage.Storage.get_instance().data["sysctl"] = {}
+
 		self._load_ktuned()
 
 	def _load_ktuned(self):

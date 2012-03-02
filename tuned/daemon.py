@@ -24,6 +24,7 @@ import plugins
 import threading
 import ConfigParser
 import profile
+import tuned.utils.storage
 
 log = logs.get()
 
@@ -56,6 +57,7 @@ class Daemon(object):
 			plugins_repo.update()
 
 		manager.delete_all()
+		tuned.utils.storage.Storage.get_instance().cleanup()
 
 	@property
 	def config_file(self):

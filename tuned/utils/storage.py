@@ -19,6 +19,7 @@ import tuned.patterns
 import tuned.logs
 import tuned.utils
 import pickle
+import os
 
 log = tuned.logs.get()
 
@@ -56,3 +57,9 @@ class Storage(tuned.patterns.Singleton):
 		except EOFError:
 			self._data = {}
 
+	def cleanup(self):
+		self._data = {}
+		try:
+			os.unlink(DEFAULT_STORAGE_FILE)
+		except (OSError,IOError) as e:
+			log.error("Error removing storage file %s: %s" % (DEFAULT_STORAGE_FILE, e))
