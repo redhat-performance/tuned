@@ -40,6 +40,7 @@ class Storage(tuned.patterns.Singleton):
 
 	def save(self):
 		try:
+			log.debug("Storing %s" % (str(self._data)))
 			with open(DEFAULT_STORAGE_FILE, "w") as f:
 				pickle.dump(self._data, f)
 		except (OSError,IOError) as e:

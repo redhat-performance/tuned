@@ -21,7 +21,9 @@ class DiskPlugin(tuned.plugins.Plugin):
 		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
 		self.levels = len(self.power)
 		self._elevator_set = False
+		self._old_elevator = ""
 
+		tuned.utils.storage.Storage.get_instance().data["disk"] = {}
 		self._load_monitor = tuned.monitors.get_repository().create("disk", devices)
 
 	@classmethod
@@ -49,6 +51,17 @@ class DiskPlugin(tuned.plugins.Plugin):
 	def _apply_elevator(self, dev):
 		if len(self._options["elevator"]) == 0:
 			return False
+
+		try:
+			f = open(os.path.join("/sys/block/", dev, "queue/scheduler"), "w")
+			self._old_elevator = f.read()
+			f.close()
+		except (OSError,IOError) as e:
+			log.error("Getting elevator of %s error: %s" % (dev, e))
+
+		storage = tuned.utils.storage.Storage.get_instance()
+		storage.data["disk"] = {dev : self._old_elevator}
+		storage.save()
 
 		log.debug("Applying elevator: %s < %s" % (dev, self._options["elevator"]))
 		try:
