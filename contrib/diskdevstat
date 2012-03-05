@@ -1,13 +1,4 @@
 #!/usr/bin/stap
-#
-# diskdevstat: A simple systemtap script to record harddisk activity
-# 	       of processes and display statistics for read/write operations
-#
-# Usage: diskdevstat [Update interval] [Total duration] [Display histogram at the end]
-#
-# Update interval and total duration are in seconds. Display histogram only requires a
-# 3rd option to exist to be enabled.
-#
 # Copyright (C) 2008, 2009 Red Hat, Inc.
 # Authors: Phil Knirsch
 #
@@ -31,6 +22,18 @@
 
 global ifavg, iflast, rtime, interval, duration, histogram
 
+function help()
+{
+	print(
+	"A simple systemtap script to record harddisk activity of processes and display\n"
+	"statistics for read/write operations.\n\n"
+        "usage: diskdevstat [update-interval] [total-duration] [display-histogram]\n\n"
+	"       update-interval      in seconds, the default is 5\n"
+	"       total-interval       in seconds, the default is 86400\n"
+	"       display-histogram    anything, unset by default\n"
+	);
+}
+
 probe begin
 {
 	rtime = 0;
@@ -38,9 +41,14 @@ probe begin
 	duration = 86400;
 	histogram = 0;
 
-%( $# > 0 %? interval = $1; %)
-%( $# > 1 %? duration = $2; %)
-%( $# > 2 %? histogram = 1; %)
+	%( $# > 0 %? interval = strtol(@1,10); %)
+	%( $# > 1 %? duration = strtol(@2,10); %)
+	%( $# > 2 %? histogram = 1; %)
+
+	if ($# >= 4 || interval <= 0 || duration <= 0) {
+		help();
+		exit();
+	}
 }
 
 probe vfs.write
