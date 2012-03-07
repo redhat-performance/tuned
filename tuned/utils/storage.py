@@ -23,7 +23,7 @@ import os
 
 log = tuned.logs.get()
 
-DEFAULT_STORAGE_FILE = "/var/lib/tuned/save.pickle"
+DEFAULT_STORAGE_FILE = "/var/run/tuned/save.pickle"
 
 class Storage(tuned.patterns.Singleton):
 	def __init__(self):
