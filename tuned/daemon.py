@@ -50,6 +50,8 @@ class Daemon(object):
 		self._profile = profile.Profile(manager, self._config_file)
 		self._profile.load()
 
+		self.save_active_profile()
+
 		while not self._terminate.wait(10):
 			log.debug("updating monitors")
 			monitors_repo.update()
@@ -58,6 +60,13 @@ class Daemon(object):
 
 		manager.delete_all()
 		tuned.utils.storage.Storage.get_instance().cleanup()
+
+	def save_active_profile(self):
+		try:
+			with open("/etc/tuned/active_profile", "w") as f:
+				f.write(self._config_file)
+		except (OSError,IOError) as e:
+			log.error("Cannot write active profile into /etc/tuned/active_profile: %s" % (e))
 
 	@property
 	def config_file(self):

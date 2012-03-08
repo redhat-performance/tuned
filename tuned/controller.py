@@ -45,6 +45,8 @@ class Controller(exports.interfaces.ExportableInterface):
 		self._terminate = threading.Event()
 		if config_file:
 			self.config_file = config_file
+		else:
+			self.config_file = self.get_default_profile()
 
 	def run(self):
 		"""
@@ -65,6 +67,24 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	def terminate(self):
 		self._terminate.set()
+
+	def get_default_profile(self):
+		try:
+			with open("/etc/tuned/active_profile", "r") as f:
+				profile = f.read()
+				if not profile.startswith("/"):
+					profile = "/usr/lib/tuned/%s/tuned.conf" % (profile)
+				return profile
+		except (OSError,IOError,EOFError) as e:
+			log.error("Cannot read active profile from /etc/tuned/active_profile: %s" % (e))
+			return ""
+
+	def switch_to_default_profile(self):
+		profile = self.get_default_profile()
+
+		if len(profile) != 0:
+			return switch_profile(profile)
+		return False
 
 	@property
 	def config_file(self):
@@ -100,7 +120,9 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("s", "b")
 	def switch_profile(self, profile):
-		cfg = "/usr/lib/tuned/%s/tuned.conf" % (profile)
+		cfg = profile
+		if not profile.startswith("/"):
+			cfg = "/usr/lib/tuned/%s/tuned.conf" % (profile)
 		try:
 			self.config_file = cfg
 		except ValueError as e:
