@@ -1,0 +1,12 @@
+[Unit]
+Description=Dynamic System Tuning Daemon
+After=syslog.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/tuned/tuned.pid
+BusName=com.redhat.tuned
+ExecStart=/usr/sbin/tuned -d -c /etc/tuned.conf
+
+[Install]
+WantedBy=multi-user.target
