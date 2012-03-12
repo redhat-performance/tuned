@@ -11,14 +11,14 @@ def handle_signal(signals, handler, pass_args = True):
 	for s in signals:
 		signal.signal(s, handler)
 
-def daemonize(timeout):
+def daemonize(timeout, pidfile = "/var/run/tuned/tuned.pid"):
 	"""
 	Perform current process daemonization. Kills current SIGALRM, SIGUSR1, and SIGUSR2 signal handlers.
 	"""
 	parent_pid = os.getpid()
 	handle_signal([signal.SIGALRM, signal.SIGUSR1, signal.SIGUSR2], _daemonize_handle_signal, pass_args=True)
 
-	if _daemonize_fork(timeout):
+	if _daemonize_fork(timeout, pidfile):
 		os.kill(parent_pid, signal.SIGUSR1)
 		result = True
 	else:
@@ -28,7 +28,7 @@ def daemonize(timeout):
 	handle_signal([signal.SIGALRM, signal.SIGUSR1, signal.SIGUSR2], signal.SIG_DFL)
 	return result
 
-def _daemonize_fork(timeout):
+def _daemonize_fork(timeout, pidfile):
 	try:
 		pid = os.fork()
 		if pid > 0:
@@ -56,6 +56,13 @@ def _daemonize_fork(timeout):
 	os.dup2(si.fileno(), sys.stdin.fileno())
 	os.dup2(so.fileno(), sys.stdout.fileno())
 	os.dup2(se.fileno(), sys.stderr.fileno())
+
+	try:
+		#os.makedirs(os.path.dirname(pidfile))
+		with open(pidfile, "w") as f:
+			f.write(str(os.getpid()))
+	except (OSError,IOError) as e:
+		log.critical("Cannot write the PID to %s: %s" % (pidfile, str(e)))
 
 	return True
 
