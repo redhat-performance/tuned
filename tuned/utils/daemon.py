@@ -58,7 +58,8 @@ def _daemonize_fork(timeout, pidfile):
 	os.dup2(se.fileno(), sys.stderr.fileno())
 
 	try:
-		#os.makedirs(os.path.dirname(pidfile))
+		if not os.path.exists(os.path.dirname(pidfile)):
+			os.makedirs(os.path.dirname(pidfile))
 		with open(pidfile, "w") as f:
 			f.write(str(os.getpid()))
 	except (OSError,IOError) as e:
