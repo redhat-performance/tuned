@@ -1,0 +1,76 @@
+
+Author:
+  Jan Hutar <jhutar@redhat.com>
+
+Prepare your system:
+
+# yum install systemtap
+# debuginfo-install kernel
+
+
+Usage scomes
+
+Binary you want to measure must be named uniquely (or ensure there are no other binaries with same name running on the system).
+
+Now run the scomes with the command-line option being name of the binary and then run the binary:
+
+# scomes -c "<binary> [<binary args> ...]  <timer>
+		<binary> [<binary arg> ...]   - measured program
+		<timer>  how often you want to see current results, value is in seconds and 0 means "show only last results"
+
+
+scomes will start to output statistics each <timer> seconds and once binary ends, it will output final statistic like this:
+
+Monitored execname: my_binary_3d4f8
+Number of syscalls: 0
+Kernel/Userspace ticks: 0/0
+Read/Written bytes: 0
+Transmitted/Recived bytes: 0
+Polling syscalls: 0
+SCORE: 0
+-----------------------------------
+Monitored execname: my_binary_3d4f8
+Number of syscalls: 3716
+Kernel/Userspace ticks: 34/339
+Read/Written bytes: 446282
+Transmitted/Recived bytes: 16235
+Polling syscalls: 2
+SCORE: 4479767
+-----------------------------------
+LAST RESULTS:
+-----------------------------------
+Monitored execname: my_binary_3d4f8
+Number of syscalls: 4529
+Kernel/Userspace ticks: 44/446
+Read/Written bytes: 454352
+Transmitted/Recived bytes: 22003
+Polling syscalls: 3
+SCORE: 4566459
+-----------------------------------
+QUITTING
+-----------------------------------
+
+Note: on F11 please call scomes with stap --skip-badvars scomes.stp.
+
+Explain statistics
+
+Monitored execname
+    name of the binary (passed as a command-line argument) 
+Number of syscalls
+    number of all syscalls performed by the binary 
+Kernel/Userspace ticks
+
+    count of the processor ticks binary uses in the kernel or in userspace respectively (kticks and uticks variables) 
+Read/Written bytes
+
+    sum of the read and written bytes from the file binary does (readwrites variable) 
+Transmitted/Recived bytes
+
+    sum of the read and written bytes from the network binary does (ifxmit and ifrecv variables) 
+Polling syscalls
+    "bad" pooling syscals binary does (poll, select, epoll, itimer, futex, nanosleep, signal) 
+SCORE
+
+    TODO - but for now: SCORE = kticks + 2*uticks + 10*readwrites + ifxmit + ifrecv 
+
+

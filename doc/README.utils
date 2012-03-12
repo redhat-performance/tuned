@@ -1,0 +1,108 @@
+Systemtap disk and network statistic monitoring tools
+=====================================================
+
+The netdevstat and diskdevstat are 2 systemtap tools that allow the user to
+collect detailed information about network and disk activity of all
+applications running on a system. These 2 tools were inspired by powertop,
+which shows number of wakeups for every application per second.
+
+The basic idea is to collect statistic about the running applications in
+a form that allows a user to identify power greedy applications.
+That means f.e. instead of doing fewer and bigger IO operations they
+do more and smaller ones. Current monitoring tools show typically only
+the transfer speeds, which isn't very meaningful in that context.
+
+To run those tools, you need to have systemtap installed.
+Then you can simply type
+
+ netdevstat
+
+or
+
+ diskdevstat
+
+and the scripts will start. Both can take up to 3 parameters:
+
+diskdevstat [Update interval] [Total duration] [Display histogram at the end]
+netdevstat [Update interval] [Total duration] [Display histogram at the end]
+
+Update interval:
+    Time in seconds between updates for the display. Default: 5
+
+Total duration:
+    Time in seconds for the whole run. Default: 86400 (1 day)
+
+Display histogram at the end:
+    Flag if at the end of the execution a histogram for the whole collected
+    data.
+
+The output will look similar to top and/or powertop. Here a sample output of
+a longer diskdevstat run on a Fedora 10 system running KDE 4.2:
+
+
+  PID   UID DEV     WRITE_CNT WRITE_MIN WRITE_MAX WRITE_AVG    READ_CNT  READ_MIN  READ_MAX  READ_AVG COMMAND        
+ 2789  2903 sda1          854     0.000   120.000    39.836           0     0.000     0.000     0.000 plasma            
+15494     0 sda1            0     0.000     0.000     0.000         758     0.000     0.012     0.000 0logwatch         
+15520     0 sda1            0     0.000     0.000     0.000         140     0.000     0.009     0.000 perl              
+15549     0 sda1            0     0.000     0.000     0.000         140     0.000     0.009     0.000 perl              
+15585     0 sda1            0     0.000     0.000     0.000         108     0.001     0.002     0.000 perl              
+ 2573     0 sda1           63     0.033  3600.015   515.226           0     0.000     0.000     0.000 auditd            
+15429     0 sda1            0     0.000     0.000     0.000          62     0.009     0.009     0.000 crond             
+15379     0 sda1            0     0.000     0.000     0.000          62     0.008     0.008     0.000 crond             
+15473     0 sda1            0     0.000     0.000     0.000          62     0.008     0.008     0.000 crond             
+15415     0 sda1            0     0.000     0.000     0.000          62     0.008     0.008     0.000 crond             
+15433     0 sda1            0     0.000     0.000     0.000          62     0.008     0.008     0.000 crond             
+15425     0 sda1            0     0.000     0.000     0.000          62     0.007     0.007     0.000 crond             
+15375     0 sda1            0     0.000     0.000     0.000          62     0.008     0.008     0.000 crond             
+15477     0 sda1            0     0.000     0.000     0.000          62     0.007     0.007     0.000 crond             
+15469     0 sda1            0     0.000     0.000     0.000          62     0.007     0.007     0.000 crond             
+15419     0 sda1            0     0.000     0.000     0.000          62     0.008     0.008     0.000 crond             
+15481     0 sda1            0     0.000     0.000     0.000          61     0.000     0.001     0.000 crond             
+15355     0 sda1            0     0.000     0.000     0.000          37     0.000     0.014     0.001 laptop_mode       
+ 2153     0 sda1           26     0.003  3600.029  1290.730           0     0.000     0.000     0.000 rsyslogd          
+15575     0 sda1            0     0.000     0.000     0.000          16     0.000     0.000     0.000 cat               
+15581     0 sda1            0     0.000     0.000     0.000          12     0.001     0.002     0.000 perl              
+15582     0 sda1            0     0.000     0.000     0.000          12     0.001     0.002     0.000 perl              
+15579     0 sda1            0     0.000     0.000     0.000          12     0.000     0.001     0.000 perl              
+15580     0 sda1            0     0.000     0.000     0.000          12     0.001     0.001     0.000 perl              
+15354     0 sda1            0     0.000     0.000     0.000          12     0.000     0.170     0.014 sh                
+15584     0 sda1            0     0.000     0.000     0.000          12     0.001     0.002     0.000 perl              
+15548     0 sda1            0     0.000     0.000     0.000          12     0.001     0.014     0.001 perl              
+15577     0 sda1            0     0.000     0.000     0.000          12     0.001     0.003     0.000 perl              
+15519     0 sda1            0     0.000     0.000     0.000          12     0.001     0.005     0.000 perl              
+15578     0 sda1            0     0.000     0.000     0.000          12     0.001     0.001     0.000 perl              
+15583     0 sda1            0     0.000     0.000     0.000          12     0.001     0.001     0.000 perl              
+15547     0 sda1            0     0.000     0.000     0.000          11     0.000     0.002     0.000 perl              
+15576     0 sda1            0     0.000     0.000     0.000          11     0.001     0.001     0.000 perl              
+15518     0 sda1            0     0.000     0.000     0.000          11     0.000     0.001     0.000 perl              
+15354     0 sda1            0     0.000     0.000     0.000          10     0.053     0.053     0.005 lm_lid.sh         
+
+
+Here a quick explanation of each column:
+
+PID:       Process ID of the application
+UID:       User ID under which the applications is running
+DEV:       Device on which the IO took place
+WRITE_CNT: Total number of write operations
+WRITE_MIN: Lowest time in seconds for 2 consecutive writes
+WRITE_MAX: Largest time in seconds for 2 consecutive writes
+WRITE_AVG: Average time in seconds for 2 consecutive writes
+READ_CNT:  Total number of read operations
+READ_MIN:  Lowest time in seconds for 2 consecutive reads
+READ_MAX:  Largest time in seconds for 2 consecutive reads
+READ_AVG:  Average time in seconds for 2 consecutive reads
+COMMAND:   Name of the process
+
+In this example 3 very obvious applications stand out:
+
+  PID   UID DEV     WRITE_CNT WRITE_MIN WRITE_MAX WRITE_AVG    READ_CNT  READ_MIN  READ_MAX  READ_AVG COMMAND
+ 2789  2903 sda1          854     0.000   120.000    39.836           0     0.000     0.000     0.000 plasma
+ 2573     0 sda1           63     0.033  3600.015   515.226           0     0.000     0.000     0.000 auditd
+ 2153     0 sda1           26     0.003  3600.029  1290.730           0     0.000     0.000     0.000 rsyslogd
+
+Those are the 3 applications that have a WRITE_CNT > 0, meaning they performed
+some form of write during the measurement. Of those, plasma was the worst
+offender by a large amount. For one in total number of writes and of course
+the average time between writes was also the lowest. This would be the best
+candidate to investigate if you're concerned about power inefficient
+applications.

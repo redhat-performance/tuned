@@ -1,0 +1,33 @@
+.TH "varnetload" "8" "13 Jan 2011" "Phil Knirsch" "Tool to create reproducable network traffic"
+.SH NAME
+varnetload \- tool to create reproducable network traffic
+.SH SYNOPSIS
+\fBvarnetload\fP [\fI-d delay\fP] [\fI-t time to run\fP] [\fI-u url\fP]
+.SH DESCRIPTION
+\fBvarnetload\fR is a simple python script to create reproducable sustained network traffic.
+
+In order to use it effectively, you need to have an HTTP server present in your local LAN where you
+can put files. Upload a large HTML (or any other kind of file) to the HTTP server. Use the -u option
+of the script to point to that URL. Play with the delay option to vary the load put on your network.
+
+.TP
+delay
+Sets delay between individual downloads in miliseconds. Default value is 1000. But you my find values
+range from 0 to 500 more useful.
+.TP
+time to run
+Sets total run time in seconds. Default value is 60.
+.TP
+url
+Sets downloaded resource. Default is http://myhost.mydomain/index.html.
+
+.SH "SEE ALSO"
+.LP
+tuned(8)
+diskdevstat(8)
+netdevstat(8)
+scomes(8)
+.SH AUTHOR
+Written by Phil Knirsch <pknirsch@redhat.com>.
+.SH REPORTING BUGS
+Report bugs to <pknirsch@redhat.com>.

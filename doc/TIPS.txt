@@ -1,0 +1,39 @@
+=== Simple user tips for improving power usage ===
+* Use a properly dimensioned system for the job (no need for overpowered systems for simple Desktop use e.g.).
+* For servers consolidate services on fewer systems to maximize efficiency of each system.
+* For a server farm consolidating all physical machines on one bigger server and then using Virtualization.
+* Enforce turning of machines that are not used (e.g. company policy).
+* Try to establish a company culture that is Green "aware", including but not limited to the above point.
+* Unplug and/or turn of peripherals that aren't used (e.g. external USB devices, monitors, printers, scanners).
+* Turn of unused hardware already in BIOS.
+* Disable power hungry features.
+* Enable CPU scaling if supported for ondemand CPU governor. DONT use powersave governor, typically uses more power than ondemand
+(race to idle).
+* Put network card to 100 mbit/10 mbit:
+** 10 mbit: ethtool -s eth0 advertise 0x002
+** 100 mbit: ethtool -s eth0 advertise 0x008
+** Doesn't work for every card
+* Put harddisk to spindown fast and full power saving:
+** hdparm -S240 /dev/sda (20m idle to spindown)
+** hdparm -B1 /dev/sda (Max powersave mode)
+* Make sure writes to hd don't wake it up too quickly:
+** Set flushing to once per 5 minutes
+** echo "3000" > /proc/sys/vm/dirty_writeback_centisecs
+** Enable laptop mode
+** echo "5" > /proc/sys/vm/laptop_mode
+* Use relatime for your / partition
+** mount -o remount,relatime / 
+* Enable USB autosuspend by adding the following to the kernel boot commandline:
+** usbcore.autosuspend=5 
+* Screensaver needs to dpms off the screen, not just make colors black.  To turn of monitor after 120s when X is running:
+** xset dpms 0 0 120
+
+=== Simple programmer tips for improving power usage ===
+* Avoid unnecessary work/computation
+* Use efficient algorithms 
+* Wake up only when necessary/real work is pending
+* Do not actively poll in programs or use short regular timeouts, rather react to events 
+* If you wake up, do everything at once (race to idle) and as fast as possible
+* Use large buffers to avoid frequent disk access. Write one large block at a time
+* Don't use [f]sync() if not necessary
+* Group timers across applications if possible (even systems)
