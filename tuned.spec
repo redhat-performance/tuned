@@ -7,7 +7,7 @@ License: GPLv2
 # following commands to get the corresponding tarball:
 #  git clone git://git.fedorahosted.org/git/tuned.git
 #  cd tuned
-#  git checkout v%{version}
+#  git checkout v%%{version}
 #  make archive
 Source: tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
@@ -77,38 +77,18 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt ktune/README.ktune doc/examples
-%config(noreplace) %{_sysconfdir}/tuned.conf
-%config(noreplace) %{_sysconfdir}/pam.d/tuned-adm
-%config(noreplace) %{_sysconfdir}/security/console.apps/tuned-adm
-%{_sysconfdir}/bash_completion.d
+%doc AUTHORS
+%doc COPYING
+%doc README
+%doc doc/TIPS.txt
+%{python_sitelib}/tuned
 %{_sbindir}/tuned
-%{_sbindir}/tuned-adm
-# consolehelper hard link
-%{_bindir}/tuned-adm
-%config(noreplace) %{_sysconfdir}/tune-profiles/active-profile
-%{_sysconfdir}/tune-profiles
-%{_datadir}/tuned
-%{_mandir}/man1/tuned-adm.*
-%{_mandir}/man5/tuned.conf.*
-%{_mandir}/man8/tuned.*
-%config(noreplace) %{_sysconfdir}/sysconfig/ktune
-%config(noreplace) %{_sysconfdir}/ktune.d/tunedadm.conf
-%dir %{_sysconfdir}/ktune.d
-%dir %{_localstatedir}/log/tuned
-%dir %{_localstatedir}/run/tuned
-%attr(0755,root,root) /lib/udev/tuned-mpath-iosched
-/lib/udev/rules.d/*
-%{_libexecdir}/tuned/
-%if %uses_systemd
+%{_prefix}/lib/tuned
+%config(noreplace) %{_sysconfdir}/tuned/active_profile
 %{_sysconfdir}/tmpfiles.d
 %{_unitdir}/tuned.service
-# compatibility
-%{_initddir}/ktune
-%else
-%{_initddir}/tuned
-%{_initddir}/ktune
-%endif
+%dir %{_localstatedir}/log/tuned
+%dir %{_localstatedir}/run/tuned
 
 %files utils
 %defattr(-,root,root,-)
