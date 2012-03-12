@@ -131,6 +131,8 @@ class DiskPlugin(tuned.plugins.Plugin):
 	def cleanup(self):
 		log.debug("Cleanup")
 
+		tuned.monitors.get_repository().delete(self._load_monitor)
+
 		for dev in self.devidle.keys():
 			if self.devidle[dev]["LEVEL"] > 0:
 				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")

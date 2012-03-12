@@ -76,6 +76,8 @@ class NetTuningPlugin(tuned.plugins.Plugin):
 	def cleanup(self):
 		log.info("Cleanup")
 
+		tuned.monitors.get_repository().delete(self._load_monitor)
+
 		for dev in self.devidle.keys():
 			if self.devidle[dev]["LEVEL"] > 0:
 				ethcard(dev).set_max_speed()

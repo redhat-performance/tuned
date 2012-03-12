@@ -24,6 +24,7 @@ class MonitorRepository(tuned.patterns.Singleton):
 		assert isinstance(monitor, self._loader.interface)
 		monitor.cleanup()
 
+		log.info(monitor._instances)
 		if len(monitor._instances) == 0:
 			self._monitors.remove(type(monitor))
 

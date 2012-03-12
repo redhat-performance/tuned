@@ -28,6 +28,8 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 		}
 
 	def cleanup(self):
+		tuned.monitors.get_repository().delete(self._load_monitor)
+
 		os.close(self._cpu_latency_fd)
 
 	def update_tuning(self):

@@ -47,6 +47,7 @@ class Daemon(object):
 		monitors_repo = monitors.get_repository()
 		plugins_repo = plugins.get_repository()
 
+		log.debug("Loading %s" % (self._config_file))
 		self._profile = profile.Profile(manager, self._config_file)
 		self._profile.load()
 

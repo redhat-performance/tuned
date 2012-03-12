@@ -33,8 +33,9 @@ class PluginRepository(tuned.patterns.Singleton):
 
 	def delete(self, plugin):
 		assert isinstance(plugin, self._loader.interface)
-		plugin.cleanup()
+		log.debug("removing plugin %s" % plugin)
 		self._plugins.remove(plugin)
+		plugin.cleanup()
 
 	def update(self):
 		for plugin in self._plugins:

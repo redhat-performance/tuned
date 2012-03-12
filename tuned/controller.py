@@ -81,9 +81,10 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	def switch_to_default_profile(self):
 		profile = self.get_default_profile()
+		log.info("Switching to default profile: %s" % (profile))
 
 		if len(profile) != 0:
-			return switch_profile(profile)
+			return self.switch_profile(profile)
 		return False
 
 	@property

@@ -70,9 +70,6 @@ if __name__ == "__main__":
 
 	controller = tuned.Controller(config_file, debug)
 
-	tuned.utils.handle_signal(signal.SIGHUP, controller.switch_to_default_profile)
-	tuned.utils.handle_signal([signal.SIGINT, signal.SIGTERM], controller.terminate)
-
 	if daemon:
 		log.switch_to_file()
 		if tuned.utils.daemonize(3):
@@ -80,5 +77,8 @@ if __name__ == "__main__":
 		else:
 			log.critical("cannot daemonize")
 			sys.exit(1)
+
+	tuned.utils.handle_signal(signal.SIGHUP, controller.switch_to_default_profile)
+	tuned.utils.handle_signal([signal.SIGINT, signal.SIGTERM], controller.terminate)
 
 	controller.run()
