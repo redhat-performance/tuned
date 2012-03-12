@@ -1,4 +1,4 @@
 *.pyc
-latest-archive
-*.tar.bz2
+*.pyo
+tuned-*.tar.bz2
 *~
