@@ -1,0 +1,6 @@
+Installation instructions
+*************************
+
+The tuned daemon is written in pure Python. Nothing requires to be built.
+
+For installation use 'make install'. Optionally DESTDIR can be appended.
