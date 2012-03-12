@@ -1,0 +1,158 @@
+#!/usr/bin/stap
+# Copyright (C) 2008, 2009 Red Hat, Inc.
+# Authors: Phil Knirsch
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to:
+#
+# Free Software Foundation, Inc.
+# 51 Franklin Street, Fifth Floor
+# Boston, MA  02110-1301, USA.
+#
+
+global ifavg, iflast, rtime, interval, duration, histogram
+
+function help()
+{
+	print(
+	"A simple systemtap script to record network activity of processes and display\n"
+	"statistics for transmit/receive operations.\n\n"
+	"usage: netdevstat [update-interval] [total-duration] [display-histogram]\n\n"
+	"       update-interval      in seconds, the default is 5\n"
+	"       total-interval       in seconds, the default is 86400\n"
+	"       display-histogram    anything, unset by default\n"
+	);
+}
+
+probe begin
+{
+	rtime = 0;
+	interval = 5;
+	duration = 86400;
+	histogram = 0;
+
+	%( $# > 0 %? interval = strtol(@1,10); %)
+	%( $# > 1 %? duration = strtol(@2,10); %)
+	%( $# > 2 %? histogram = 1; %)
+
+	if ($# >= 4 || interval <= 0 || duration <= 0) {
+		help();
+		exit();
+	}
+}
+
+probe netdev.transmit
+{
+	if(pid() == 0) {
+		next;
+	}
+	ms = gettimeofday_ms();
+	if(iflast[0, pid(), dev_name, execname(), uid()] == 0) {
+		iflast[0, pid(), dev_name, execname(), uid()] = ms;
+	} else {
+		diff = ms - iflast[0, pid(), dev_name, execname(), uid()];
+		iflast[0, pid(), dev_name, execname(), uid()] = ms;
+		ifavg[0, pid(), dev_name, execname(), uid()] <<< diff;
+	}
+}
+
+probe netdev.receive
+{
+	if(pid() == 0) {
+		next;
+	}
+	ms = gettimeofday_ms();
+	if(iflast[1, pid(), dev_name, execname(), uid()] == 0) {
+		iflast[1, pid(), dev_name, execname(), uid()] = ms;
+	} else {
+		diff = ms - iflast[1, pid(), dev_name, execname(), uid()];
+		iflast[1, pid(), dev_name, execname(), uid()] = ms;
+		ifavg[1, pid(), dev_name, execname(), uid()] <<< diff;
+	}
+}
+
+function print_activity()
+{
+	printf("\033[2J\033[1;1H")
+	printf("%5s %5s %-7s %9s %9s %9s %9s   %9s %9s %9s %9s %-15s\n",
+		"PID", "UID", "DEV",
+		"XMIT_CNT", "XMIT_MIN", "XMIT_MAX", "XMIT_AVG",
+		"RECV_CNT", "RECV_MIN", "RECV_MAX", "RECV_AVG",
+		"COMMAND")
+
+	 foreach ([type, pid, dev, exec, uid] in ifavg-) {
+		nxmit = @count(ifavg[0, pid, dev, exec, uid])
+		nrecv = @count(ifavg[1, pid, dev, exec, uid])
+		xmit_min = nxmit ? @min(ifavg[0, pid, dev, exec, uid]) : 0
+		xmit_max = nxmit ? @max(ifavg[0, pid, dev, exec, uid]) : 0
+		xmit_avg = nxmit ? @avg(ifavg[0, pid, dev, exec, uid]) : 0
+		recv_min = nrecv ? @min(ifavg[1, pid, dev, exec, uid]) : 0
+		recv_max = nrecv ? @max(ifavg[1, pid, dev, exec, uid]) : 0
+		recv_avg = nrecv ? @avg(ifavg[1, pid, dev, exec, uid]) : 0
+		if(type == 0 || nxmit == 0) {
+			printf("%5d %5d %-7s %9d %5d.%03d %5d.%03d %5d.%03d   ",
+				pid, uid, dev, nxmit,
+				xmit_min/1000, xmit_min%1000,
+				xmit_max/1000, xmit_max%1000,
+				xmit_avg/1000, xmit_avg%1000)
+			printf("%9d %5d.%03d %5d.%03d %5d.%03d %-15s\n",
+				nrecv,
+				recv_min/1000, recv_min%1000,
+				recv_max/1000, recv_max%1000,
+				recv_avg/1000, recv_avg%1000,
+				exec)
+		}
+	}
+
+	print("\n")
+}
+
+function print_histogram()
+{
+	foreach ([type+, pid, dev, exec, uid] in ifavg) {
+		nxmit = @count(ifavg[0, pid, dev, exec, uid])
+		nrecv = @count(ifavg[1, pid, dev, exec, uid])
+		if (type == 0 || nxmit == 0) {
+			printf("%5d %5d %-7s %-15s\n", pid, uid, dev, exec)
+
+			if (nxmit > 0) {
+				printf("  WRITE histogram\n")
+				print(@hist_log(ifavg[0, pid, dev, exec, uid]))
+			}
+
+			if (nrecv > 0) {
+				printf("  READ histogram\n")
+				print(@hist_log(ifavg[1, pid, dev, exec, uid]))
+			}
+		}
+	}
+}
+
+probe timer.s(1)
+{
+	rtime = rtime + 1;
+	if (rtime % interval == 0) {
+		print_activity()
+	}
+	if (rtime >= duration) {
+		exit();
+	}
+}
+
+probe end, error
+{
+	if (histogram == 1) {
+		print_histogram();
+	}
+	exit();
+}

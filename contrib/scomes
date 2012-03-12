@@ -1,0 +1,208 @@
+#!/usr/bin/stap
+
+# ===================================================================
+# Do this when we have started
+global report_period = 0
+# For watch_forked variable:
+#    0 = watch only main thread
+#    1 = watch forked with same execname as well
+#    2 = watch all forked processes
+global watch_forked = 2
+probe begin {
+  if ($# == 1) {
+    report_period = $1
+  }
+  print("Collecting data...\n")
+  printf("... for pid %d - %s\n", target(), pid2execname(target()))
+}
+
+# ===================================================================
+# Define helper function for printing results
+function compute_score() {
+  # new empirical formula that was proposed by Vratislav Podzimek <vpodzime@redhat.com> in his bachelor thesis
+  return syscalls + (poll_timeout + epoll_timeout + select_timeout + itimer_timeout + nanosleep_timeout + futex_timeout + signal_timeout) * 4 + (reads + writes) / 5000 + (ifxmit + ifrecv) * 25
+}
+
+function print_status() {
+  printf("-----------------------------------\n")
+  ###target_set_report()
+  printf("Monitored process: %d (%s)\n", target(), pid2execname(target()))
+  printf("Number of syscalls: %d\n", syscalls)
+  printf("Kernel/Userspace ticks: %d/%d (%d)\n", kticks, uticks, kticks+uticks)
+  printf("Read/Written bytes (from/to devices): %d/%d (%d)\n", reads, writes, reads+writes)
+  printf("Read/Written bytes (from/to N/A device): %d/%d (%d)\n", reads_c, writes_c, reads_c+writes_c)
+  printf("Transmitted/Recived bytes: %d/%d (%d)\n", ifxmit, ifrecv, ifxmit+ifrecv)
+  printf("Polling syscalls: %d\n", poll_timeout+epoll_timeout+select_timeout+itimer_timeout+nanosleep_timeout+futex_timeout+signal_timeout)
+  printf("SCORE: %d\n", compute_score())
+}
+
+# ===================================================================
+# Define helper function for comparing if this is relevant pid
+# and for watching if our watched pid forked
+# ... from http://sourceware.org/systemtap/wiki/systemtapstarters
+global PIDS = 1   # as target() is already running
+function is_watched(p) {
+  if ( (watch_forked == 0 && p == target()) || (watch_forked == 1 && target_set_pid(p) && pid2execname(target()) == pid2execname(p)) || (watch_forked == 2 && target_set_pid(p)) ) {
+    #printf("Process %d is relevant to process %d\n", p, target())
+    return 1   # yes, we are watching this pid
+  } else {
+    return 0   # no, we are not watching this pid
+  }
+}
+# Add a relevant forked process to the list of watched processes
+probe kernel.function("do_fork") {
+  #printf("Fork of %d (%s) detected\n", pid(), execname())
+  if (is_watched(pid())) {
+    #printf("Proces %d forked\n", pid())
+    PIDS = PIDS + 1
+    #printf("Currently watching %d pids (1 just added)\n", PIDS)
+  }
+}
+# Remove pid from the list of watched pids and print report when
+# all relevant processes ends
+probe syscall.exit {
+  if (is_watched(pid())) {
+    #printf("Removing process %d\n", pid())
+    PIDS = PIDS - 1
+  }
+  #printf("Currently watching %d pids (1 just removed)\n", PIDS)
+  if (PIDS == 0) {
+    printf("-----------------------------------\n")
+    printf("LAST RESULTS:\n")
+    print_status()
+    exit()
+  }
+}
+
+# ===================================================================
+# Check all syscalls
+# ... from syscalls_by_pid.stp
+global syscalls
+probe syscall.* {
+  if (is_watched(pid())) {
+    syscalls++
+    #printf ("%s(%d) syscall %s\n", execname(), pid(), name)
+  }
+}
+
+# ===================================================================
+# Check read/written bytes
+# ... from disktop.stp
+global reads, writes, reads_c, writes_c
+probe vfs.read.return {
+  if (is_watched(pid()) && $return>0) {
+    if (devname!="N/A") {
+      reads += $return
+    } else {
+      reads_c += $return
+    }
+  }
+}
+probe vfs.write.return {
+  if (is_watched(pid()) && $return>0) {
+    if (devname!="N/A") {
+      writes += $return
+    } else {
+      writes_c += $return
+    }
+  }
+}
+
+# ===================================================================
+# Check kernel and userspace CPU ticks
+# ... from thread-times.stp
+global kticks, uticks
+probe timer.profile {
+  if (is_watched(pid())) {
+    if (!user_mode())
+      kticks++
+    else
+      uticks++
+  }
+}
+
+# ===================================================================
+# Check polling
+# ... from timeout.stp
+global poll_timeout, epoll_timeout, select_timeout, itimer_timeout
+global nanosleep_timeout, futex_timeout, signal_timeout
+global to
+probe syscall.poll, syscall.epoll_wait {
+  if (timeout) to[pid()]=timeout
+}
+probe syscall.poll.return {
+  if ($return == 0 && is_watched(pid()) && to[pid()] > 0) {
+    poll_timeout++
+    delete to[pid()]
+  }
+}
+probe syscall.epoll_wait.return {
+  if ($return == 0 && is_watched(pid()) && to[pid()] > 0) {
+    epoll_timeout++
+    delete to[pid()]
+  }
+}
+probe syscall.select.return {
+  if ($return == 0 && is_watched(pid())) {
+    select_timeout++
+  }
+}
+probe syscall.futex.return {
+  if ($return == 0 && is_watched(pid()) && errno_str($return) == "ETIMEDOUT") {
+    futex_timeout++
+  }
+}
+probe syscall.nanosleep.return {
+  if ($return == 0 && is_watched(pid())) {
+    nanosleep_timeout++
+  }
+}
+probe kernel.function("it_real_fn") {
+  if (is_watched(pid())) {
+    itimer_timeout++
+  }
+}
+probe syscall.rt_sigtimedwait.return {
+   if (is_watched(pid()) && errno_str($return) == "EAGAIN") {
+     signal_timeout++
+   }
+}
+
+# ===================================================================
+# Check network traffic
+# ... from nettop.stp
+global ifxmit, ifrecv
+probe netdev.transmit {
+  if (is_watched(pid()) && dev_name!="lo") {
+    ifxmit += length
+  }
+}
+probe netdev.receive {
+  if (is_watched(pid()) && dev_name!="lo") {
+    ifrecv += length
+  }
+}
+
+# ===================================================================
+# Print report each X seconds
+global counter
+probe timer.s(1) {
+  if (report_period != 0) {
+    counter++
+    if (counter == report_period) {
+      print_status()
+      counter = 0
+    }
+  }
+}
+
+# ===================================================================
+# Print quit message
+probe end {
+  printf("-----------------------------------\n")
+  printf("LAST RESULTS:\n")
+  print_status()
+  printf("-----------------------------------\n")
+  printf("QUITTING\n")
+  printf("-----------------------------------\n")
+}
