@@ -1,0 +1,76 @@
+.TH "tuned.cfg" "5" "13 Mar 2012" "Jan Kaluza" "tuned.cfg file format description"
+.SH NAME
+tuned.cfg \- Tuned profile definition
+.SH DESCRIPTION
+This man page documents format of Tuned 2.0 profile definition files. Profile is
+stored in /etc/tuned/<profile_name>/tuned.cfg or in 
+/usr/lib/tuned/<profile_name>/tuned.cfg file where the /etc/tuned/ directory has 
+higher priority.
+
+The \fBtuned.cfg\fR configures the profile and it is in ini-file format.
+
+.SH MAIN SECTION
+The main section is called "[main]" and can contain following options:
+
+.TP
+include=
+Includes config file defined as value. Config file can be defined as full path
+or by the profile name to which it belongs.
+If this parameter is present, the histogram will be shown at the end of the measurement.
+
+.SH PLUGINS
+Every other section defines one plugin. The name of the section is used as name
+for the plugin and is used in logs to identify the plugin. There can be only
+one plugin of particular type tuning particular device. Conflicts are by
+default fixed by merging the options of both plugins together. This can be
+changed by "replace" option.
+
+Every plugin section can contain following sections:
+
+.TP
+type=
+Plugin type. Currently there are following plugins: disk, script, net, cpu.
+.TP
+devices=
+Comma separated list of devices which should be tuned by this plugin instance.
+If you omit this option, all found devices will be tuned.
+.TP
+replace=1
+If there is conflict between two plugins (meaning two plugins of the same
+type are trying to configure the same devices), then the plugin defined as
+last replaces all options defined by the previosly defined plugin.
+.LP
+Plugins can also have plugin related options.
+
+.SH "EXAMPLE"
+.nf
+[main]
+# Includes plugins defined in "included" profile.
+include=included
+
+# Define my_sysctl plugin
+[my_sysctl]
+type=sysctl
+# This plugin will replace any sysctl plugin defined in "included" profile
+replace=1
+# 256 KB default performs well experimentally.
+net.core.rmem_default = 262144
+net.core.wmem_default = 262144
+
+# Define my_script plugin
+# Since there is no "replace=1" option, this plugin will not replace
+# any script plugin defined in "included" profile and both scripts
+# (profile.sh from this profile and script from "included" profile)
+# will be run.
+[my_script]
+type=script
+script=profile.sh
+.fi
+
+.SH "SEE ALSO"
+.LP
+tuned(8)
+.SH AUTHOR
+Written by Jan Kaluza <jkaluza@redhat.com>.
+.SH REPORTING BUGS
+Report bugs to <jkaluza@redhat.com>.
