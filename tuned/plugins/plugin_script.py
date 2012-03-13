@@ -19,7 +19,10 @@ class ScriptPlugin(tuned.plugins.Plugin):
 		self._updated = False
 		self._scripts = []
 		self._load_ktuned()
-		self._scripts.append(self._options["script"])
+		if self._options["script"].startswith("/"):
+			self._scripts.append(self._options["script"])
+		else:
+			self._scripts.append(os.path.join(self._options["_load_path"], self._options["script"]))
 
 	@classmethod
 	def _get_default_options(cls):

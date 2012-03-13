@@ -24,6 +24,7 @@ class Plugin(object):
 	def __init__(self, devices = None, options = None):
 		self._devices = devices
 		self._options = self._get_default_options()
+		self._options["_load_path"] = ""
 		if options is not None:
 			self._merge_options(options)
 

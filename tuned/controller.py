@@ -22,6 +22,7 @@ import exports
 import exports.dbus
 import logs
 import threading
+from profile import Profile
 
 log = logs.get()
 
@@ -71,9 +72,7 @@ class Controller(exports.interfaces.ExportableInterface):
 	def get_default_profile(self):
 		try:
 			with open("/etc/tuned/active_profile", "r") as f:
-				profile = f.read()
-				if not profile.startswith("/"):
-					profile = "/usr/lib/tuned/%s/tuned.conf" % (profile)
+				profile = Profile.find_profile(f.read())
 				return profile
 		except (OSError,IOError,EOFError) as e:
 			log.error("Cannot read active profile from /etc/tuned/active_profile: %s" % (e))
@@ -121,9 +120,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("s", "b")
 	def switch_profile(self, profile):
-		cfg = profile
-		if not profile.startswith("/"):
-			cfg = "/usr/lib/tuned/%s/tuned.conf" % (profile)
+		cfg = Profile.find_profile(profile)
 		try:
 			self.config_file = cfg
 		except ValueError as e:

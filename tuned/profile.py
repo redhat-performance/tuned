@@ -37,6 +37,21 @@ class Profile(object):
 		self._config_file = config_file
 		self._plugin_configs = {}
 
+	@classmethod
+	def find_profile(cls, name):
+		if name.startswith("/"):
+			return name
+
+		profile = "/etc/tuned/%s/tuned.cfg" % (name)
+		if os.path.exists(profile):
+			return profile
+
+		profile = "/usr/lib/tuned/%s/tuned.cfg" % (name)
+		if os.path.exists(profile):
+			return profile
+
+		return name
+
 	def _replace_plugin(self, name, plugin_cfg):
 		# Iterates over already loaded plugins.
 		# If the already loaded plugin contains the same device as the newly
@@ -127,7 +142,8 @@ class Profile(object):
 		cfg.read(config)
 
 		if cfg.has_option("main", "include"):
-			self._load_config(manager, cfg.get("main", "include"))
+			included_cfg = self.find_profile(cfg.get("main", "include"))
+			self._load_config(manager, included_cfg)
 
 		for section in cfg.sections():
 			if section == "main":
@@ -135,6 +151,7 @@ class Profile(object):
 			if not cfg.has_option(section, "type"):
 				log.error("No 'type' option for %s plugin" % (section))
 				continue
+			cfg.set(section, "_load_path", os.path.dirname(config))
 
 			self._store_plugin_config(section, dict(cfg.items(section)))
 
