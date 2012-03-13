@@ -40,6 +40,9 @@ commands:
   profile <profile-name>         switch to given profile
 """
 
+def listdir_joined(path):
+	return [os.path.join(path, entry) for entry in os.listdir(path)]
+
 class Tuned_adm:
 
 	def error(self, msg, exit_code = 1):
@@ -52,7 +55,7 @@ class Tuned_adm:
 
 	def run(self, args):
 		if args[0] == "list":
-			#self.list()
+			self.show_profiles()
 			pass
 		elif args[0] == "active":
 			#self.active()
@@ -70,6 +73,20 @@ class Tuned_adm:
 				self.error("Invalid profile specification. Use 'tuned-adm list' to get all available profiles.")
 		else:
 			self.error("Nonexistent argument '%s'." % args[0])
+
+	def show_profiles(self):
+		profiles = []
+		try:
+			profiles += listdir_joined("/usr/lib/tuned")
+		except:
+			pass
+		try:
+			profiles += listdir_joined("/etc/tuned")
+		except:
+			pass
+		for profile in profiles:
+			if os.path.exists(os.path.join(profile, "tuned.cfg")):
+				print "-", os.path.basename(profile)
 
 	def set_active_profile(self, profile):
 		pid = 0
