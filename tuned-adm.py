@@ -58,7 +58,7 @@ class Tuned_adm:
 			self.show_profiles()
 			pass
 		elif args[0] == "active":
-			#self.active()
+			self.show_active_profile()
 			#self.service_status("tuned")
 			#self.service_status("ktune")
 			pass
@@ -73,6 +73,13 @@ class Tuned_adm:
 				self.error("Invalid profile specification. Use 'tuned-adm list' to get all available profiles.")
 		else:
 			self.error("Nonexistent argument '%s'." % args[0])
+
+	def show_active_profile(self):
+		try:
+			with open("/etc/tuned/active_profile") as f:
+				print "Current active profile:", f.read()
+		except:
+			pass
 
 	def show_profiles(self):
 		profiles = []
