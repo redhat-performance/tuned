@@ -44,17 +44,11 @@ process $@
 """
 
 
-TUNED_CONF = """#
-# tuned configuration file
-#
-
+TUNED_CONF = """
 [main]
-# Interval for monitoring and tuning. Default is 10s.
-# interval=10
 %s
 
 [powertop_ktune]
-merge=1
 script=ktune.sh
 """
 
@@ -173,13 +167,9 @@ class PowertopProfile:
 		return True
 
 	def generateTunedConf(self, profile):
-		f = open(os.path.join(self.output, "tuned.conf"), "w")
-		f.write(TUNED_CONF % ("include=" + os.path.join("/etc/tune-profiles", profile, "tuned.conf")))
+		f = open(os.path.join(self.output, "tuned.cfg"), "w")
+		f.write(TUNED_CONF % ("include=" + profile))
 		f.close()
-
-	def copyProfile(self, profile):
-		for f in os.listdir(os.path.join("/etc/tune-profiles", profile)):
-			shutil.copy(os.path.join("/etc/tune-profiles", profile, f), self.output)
 
 	def generate(self):
 		generated_html = False
@@ -206,9 +196,6 @@ class PowertopProfile:
 
 		if not os.path.exists(self.output):
 			os.makedirs(self.output)
-
-		if profile != "default":
-			self.copyProfile(profile)
 
 		if not self.generateShellScript(profile, data):
 			return self.BAD_KTUNSH
