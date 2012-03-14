@@ -56,15 +56,13 @@ class Tuned_adm:
 	def run(self, args):
 		if args[0] == "list":
 			self.show_profiles()
-			pass
 		elif args[0] == "active":
 			self.show_active_profile()
 			#self.service_status("tuned")
 			#self.service_status("ktune")
-			pass
 		elif args[0] == "off":
 			self.check_permissions()
-			#self.off()
+			self.off()
 		elif args[0] == "profile":
 			if len(args) == 2:
 				self.check_permissions()
@@ -73,6 +71,16 @@ class Tuned_adm:
 				self.error("Invalid profile specification. Use 'tuned-adm list' to get all available profiles.")
 		else:
 			self.error("Nonexistent argument '%s'." % args[0])
+
+	def off(self):
+		pid = 0
+		try:
+			with open(PIDFILE) as f:
+				pid = int(f.read())
+		except (OSError,IOError) as e:
+			pass
+		if pid:
+			os.kill(pid, signal.SIGTERM)
 
 	def show_active_profile(self):
 		try:
@@ -91,9 +99,13 @@ class Tuned_adm:
 			profiles += listdir_joined("/etc/tuned")
 		except:
 			pass
+
+		print "Available profiles:"
 		for profile in profiles:
 			if os.path.exists(os.path.join(profile, "tuned.cfg")):
 				print "-", os.path.basename(profile)
+
+		self.show_active_profile()
 
 	def set_active_profile(self, profile):
 		pid = 0
