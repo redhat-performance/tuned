@@ -165,8 +165,8 @@ install-parts-systemd:
 	install -m 0644 tuned.tmpfiles $(DESTDIR)/etc/tmpfiles.d/tuned.conf
 
 	# systemd units
-	mkdir -p $(DESTDIR)/lib/systemd/system
-	install -m 0644 tuned.service $(DESTDIR)/lib/systemd/system
+	mkdir -p $(DESTDIR)/usr/lib/systemd/system
+	install -m 0644 tuned.service $(DESTDIR)/usr/lib/systemd/system
 
 	# ktune: sysvinit compatiblity
 	mkdir -p $(DESTDIR)/etc/rc.d/init.d
