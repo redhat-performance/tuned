@@ -1,3 +1,222 @@
+commit 0427cea0d801b03ab5fbfdeb3c26922c6eaa2247
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Mar 5 08:51:53 2012 +0100
+
+    netdevstat: cmdline error handling
+
+commit 81590cf7705e982c7880c69d01ea6d02a6e7a2e4
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Mar 5 08:45:50 2012 +0100
+
+    diskdevstat: cmdline error handling
+
+commit 3b10ac690bc6164b721236702cb5eb8493278f1e
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Mar 2 09:59:29 2012 +0100
+
+    virtual-guest: cleanup ktune.sh
+    
+    References: rhbz#740976, rhbz#740977
+
+commit 90afd92add2facb02596a7e8e1341f252ae3684d
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Mar 2 09:00:26 2012 +0100
+
+    virtual-host: tune virtual memory settings
+    
+    References: rhbz#740976
+
+commit 78012939d465405587a6607838f15e8c06cbd5a3
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jan 11 13:38:28 2012 +0100
+
+    tuned-adm: sort list of available profiles
+
+commit e30a77ede22df20232547b6243107b57ed0ad0ee
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jan 11 13:35:45 2012 +0100
+
+    tuned-adm man: add virtual-host profile decription
+
+commit 5984ad2de7e2e5ee76d54191f03515ae55739a4e
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jan 11 13:26:31 2012 +0100
+
+    add virtual-host profile
+
+commit 0e4826f78b14f219c876bc9d3b35834cd7a18311
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jan 11 12:59:48 2012 +0100
+
+    tuned-adm: fix crash when active-profile file is missing
+
+commit 0754d462ff72ed69b704b3a4a4d7a5ecc77df655
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jan 11 12:55:22 2012 +0100
+
+    tuned-adm man: add virtual-guest profile decription
+
+commit 8bb2e57c523cc27915b422d077ba5c644bd85f6a
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jan 11 12:48:19 2012 +0100
+
+    add virtual-guest profile
+
+commit 8bd483a47c4e00cf106fb16d50ac5d0c61f21ab8
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jan 11 12:40:23 2012 +0100
+
+    functions: support for disk scheduler quantum setting
+
+commit b5297bcc8cdb71b7c7fff17b7a18ea194952cc1c
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jan 11 12:39:47 2012 +0100
+
+    functions: update disks detection mechanism
+
+commit f11bae54bc26e2969ab1413995baeae472e75b60
+Author: Jaroslav Škarvada <jskarvad@redhat.com>
+Date:   Sat Dec 3 15:31:29 2011 +0100
+
+    set_radeon_powersave: fixed profile name
+
+commit 229b5f7874c406f702b7f1fd9d4e18a1df0e575e
+Author: Jaroslav Škarvada <jskarvad@redhat.com>
+Date:   Sat Dec 3 15:14:06 2011 +0100
+
+    Changed Radeon PM to auto in laptop-battery-powersave
+    
+    It should be safer for presenters, because the more
+    aggresive dynpm doesn't support multi heads.
+
+commit 60f78e3dc83907d558913473acc145ce864d4c26
+Author: Jaroslav Škarvada <jskarvad@redhat.com>
+Date:   Sat Dec 3 14:32:39 2011 +0100
+
+    Improved radeon powersavings settings in tuned profiles
+
+commit 9280e4ee158792973112ea78c3848bc25609c51e
+Author: Jaroslav Škarvada <jskarvad@redhat.com>
+Date:   Sat Dec 3 14:09:27 2011 +0100
+
+    set_radeon_powersave: added support for auto profile
+
+commit cc4ff67c4e556b1ede8138c220917c07594aab1b
+Author: Jaroslav Škarvada <jskarvad@redhat.com>
+Date:   Thu Dec 1 16:22:57 2011 +0100
+
+    Improved formula for calculation of scomes score
+    
+    Changed formula for scomes score calculation according to
+    Vratislav Podzimek <vpodzime@redhat.com> proposal.
+
+commit 0b09aaf11d75c8871ea5adea5084d16207a7b9a7
+Author: Jaroslav Škarvada <jskarvad@redhat.com>
+Date:   Thu Dec 1 15:36:01 2011 +0100
+
+    Add support for radeon power savings
+
+commit 662fe7223007bc2b5dc390bb58440eea37ecfd16
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Oct 12 16:06:56 2011 +0200
+
+    ktune.sysconfig: add vd* to tuned devices
+
+commit 69fdbcf75b03d339fa8d405366381c2b8385eff3
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Sep 29 10:46:07 2011 +0200
+
+    Revert "throughput-performance: add cpu_dma_latency=0"
+    
+    This reverts commit bab72a171e78730730647896f58c4efe53f821e8.
+
+commit 8c034fec0df68c9399068d9aacff9c883bc4a70e
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Sep 29 10:43:33 2011 +0200
+
+    pmqos-static.py: no error messages upon start
+
+commit b90a6890b0b44174500d04c6b99b7b11654dbe23
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Sep 27 23:51:38 2011 +0200
+
+    net: device type determination, handle IOError
+    
+    Update for commit: ba38290
+
+commit 31639fdec76b294fd67c78ec332fe26bf0ad7bb9
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Sep 27 23:55:21 2011 +0200
+
+    latency-performance: add cpu_dma_latency=0
+
+commit bab72a171e78730730647896f58c4efe53f821e8
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Sep 27 23:46:08 2011 +0200
+
+    throughput-performance: add cpu_dma_latency=0
+
+commit e60e9505da372654fae799dcf28d36c32d860c5c
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Sep 27 16:19:46 2011 +0200
+
+    pmqos-static.py: terminate previous instance when started
+
+commit edc85cb8ac5772071a8ae282ec29a6bb7ae37eda
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Sep 27 16:01:29 2011 +0200
+
+    add pmqos-static.py daemon
+    
+    Designed to be invoked by 'ktune.sh' scripts to set static values
+    of PM QoS. The tool should not be called manually.
+
+commit a957ea14bbd0632c2675a424c7f67ba79df42ad3
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jul 20 17:05:32 2011 +0200
+
+    tuned-adm: changes for services enabling/disabling
+    
+    Services are now controlled by calling 'chkconfig $service on/off',
+    instead of 'chkconfig --add/--del $service'. This change is necessary
+    to provide desired functionality for both SysVInit and systemd.
+
+commit 9521c71dce9c6742eb593fd2c230c4b4dad72559
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jul 20 17:00:07 2011 +0200
+
+    systemd: service file for tuned daemon
+    
+    Compatibility with SysVInit is preserved.
+
+commit 995461b8dbf2456f608bf926a2dc83ed41c91dea
+Author: Jaroslav Skarvada <jskarvad@redhat.com>
+Date:   Wed Jul 20 10:01:18 2011 +0200
+
+    doc: remove mentions of HAL
+    
+    Signed-off-by: Jan Vcelak <jvcelak@redhat.com>
+
+commit 185baab4f67294a91ecb263bfff9cd1b52b3dc8c
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Jun 29 19:55:07 2011 +0200
+
+    daemonization: terminate main process after init
+    
+    Main process waits for signal (SIGUSR1) from the last forked child.
+    Timeout is set to 3 seconds, after which the main process exits with
+    non-zero (1) exit code.
+    
+    Without this fix, we can encounter race condition with systemd when
+    starting the service. If the main process is terminated and
+    deamonization is not finished, systemd kills the whole process group.
+
+commit 385768f1a35d65bdf89878991997ba71d67eda4d
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jun 21 13:42:26 2011 +0200
+
+    version bump
+
 commit ccecd6fa7d4ed038ad72ac46eb76ef89aaefb3c8
 Author: Phil Knirsch <pknirsch@redhat.com>
 Date:   Tue Jun 21 13:46:01 2011 +0200

@@ -2,7 +2,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.21
+Version: 0.2.22
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -132,6 +132,25 @@ fi
 
 
 %changelog
+* Tue Mar 20 2012 Jan Vcelak <jvcelak@redhat.com> 0.2.22-1
+- fix: daemonization race with systemd
+- enhancement: add pmqos-static daemon (used by ktune to set kernel PM QoS parameters)
+- fix: handle IOError in net plugin
+- enhancement: add support for radeon power savings
+- enhancement: better formula for calculation scomes scores
+- enhancement: better disks detection mechanism
+- enhancement: support for disk scheduler quantum setting
+- enhancement: diskdevstat, netdevstat cmdline error handling
+- tuned-adm:
+  + fix: enabling services compatibly with systemd and sysvinit
+  + fix: crash when active-profile file is missing
+  + enhancement: sort list of profiles
+- profile changes:
+  + latency-performance: add cpu_dma_latency=0
+  + all: add virtual disks (vd*) to ktune.sysconfig
+  + new profile: virtual-host
+  + new profile: virtual-guest
+
 * Tue Jun 21 2011 Jan Vcelak <jvcelak@redhat.com> 0.2.21-1
 - fix: crash when ethtool advertised modes in unknown format (#689715)
 - fix: check if ELEVATOR_KTUNE_DEVS is set
