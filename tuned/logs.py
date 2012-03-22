@@ -43,6 +43,7 @@ def get():
 	elif name.startswith("tuned."):
 		(root, child) = name.split(".", 1)
 		child_logger = root_logger.getChild(child)
+		child_logger.remove_all_handlers()
 		child_logger.setLevel("NOTSET")
 		return child_logger
 	else:
@@ -58,7 +59,6 @@ class TunedLogger(logging.getLoggerClass()):
 		super(self.__class__, self).__init__(*args, **kwargs)
 		self.setLevel(logging.INFO)
 		self.switch_to_console()
-		self.propagate = False
 
 	def set_level(self, level, default = logging.NOTSET):
 		"""Set logging level. The 'level' parameter can be str or logging module constant."""
@@ -68,13 +68,17 @@ class TunedLogger(logging.getLoggerClass()):
 
 	def switch_to_console(self):
 		self._setup_console_handler()
+		self.remove_all_handlers()
 		self.addHandler(self._console_handler)
-		self.removeHandler(self._file_handler)
 
 	def switch_to_file(self):
 		self._setup_file_handler()
+		self.remove_all_handlers()
 		self.addHandler(self._file_handler)
-		self.removeHandler(self._console_handler)
+
+	def remove_all_handlers(self):
+		for handler in self.handlers:
+			self.removeHandler(handler)
 
 	@classmethod
 	def _setup_console_handler(cls):

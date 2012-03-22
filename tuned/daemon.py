@@ -32,7 +32,7 @@ DEFAULT_CONFIG_FILE = "/etc/tuned/tuned.conf"
 
 class Daemon(object):
 	def __init__(self):
-		log.info("initializing Daemon")
+		log.debug("initializing daemon")
 		self._config_file = DEFAULT_CONFIG_FILE
 		self._profile = None
 
