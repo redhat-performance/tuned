@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.0
-Release: 0.1.alpha%{?dist}
+Release: 0.2.alpha%{?dist}
 License: GPLv2
 # The source for this package was pulled from upstream git.  Use the
 # following commands to get the corresponding tarball:
@@ -83,12 +83,14 @@ fi
 %doc doc/TIPS.txt
 %{python_sitelib}/tuned
 %{_sbindir}/tuned
+%{_sbindir}/tuned-adm
 %{_prefix}/lib/tuned
 %config(noreplace) %{_sysconfdir}/tuned/active_profile
 %{_sysconfdir}/tmpfiles.d
 %{_unitdir}/tuned.service
 %dir %{_localstatedir}/log/tuned
 %dir %{_localstatedir}/run/tuned
+%{_mandir}/man5/tuned.*
 
 %files utils
 %defattr(-,root,root,-)
@@ -106,5 +108,8 @@ fi
 
 
 %changelog
+* Mon Mar 22 2012 Jan Kaluza <jkaluza@redhat.com> 2.0-0.2.alpha
+- Added tuned-adm and tuned.cfg man page
+
 * Mon Mar 12 2012 Jan Vcelak <jvcelak@redhat.com> 2.0-0.1.alpha
 - brand new (pre)release of tuned

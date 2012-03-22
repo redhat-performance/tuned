@@ -12,7 +12,7 @@ archive: clean
 
 	cp AUTHORS COPYING INSTALL README $(VERSIONED_NAME)
 
-	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile $(VERSIONED_NAME)
+	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py $(VERSIONED_NAME)
 	cp -a doc experiments man profiles systemtap tuned $(VERSIONED_NAME)
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
@@ -35,6 +35,7 @@ install:
 	# binaries
 	mkdir -p $(DESTDIR)/usr/sbin
 	install -m 0755 tuned.py $(DESTDIR)/usr/sbin/tuned
+	install -m 0755 tuned-adm.py $(DESTDIR)/usr/sbin/tuned-adm
 	for file in systemtap/*; do \
 		install -m 0755 $$file $(DESTDIR)/usr/sbin/; \
 	done
@@ -59,10 +60,16 @@ install:
 	mkdir -p $(DESTDIR)/lib/systemd/system
 	install -m 0644 tuned.service $(DESTDIR)/lib/systemd/system
 
-	# manual pages
+	# manual pages *.8
 	mkdir -p $(DESTDIR)/usr/share/man/man8
 	for file in man/*.8; do \
 		install -m 0644 $$file $(DESTDIR)/usr/share/man/man8; \
+	done
+
+	# manual pages *.5
+	mkdir -p $(DESTDIR)/usr/share/man/man5
+	for file in man/*.5; do \
+		install -m 0644 $$file $(DESTDIR)/usr/share/man/man5; \
 	done
 
 	# documentation
