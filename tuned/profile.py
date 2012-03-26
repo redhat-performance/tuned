@@ -170,7 +170,7 @@ class Profile(object):
 		n = name
 		while n in self._plugin_configs.keys():
 			n = name + "_" + str(i)
-		print n
+			i += 1
 		return n
 
 	def _load_config(self, manager, config):
