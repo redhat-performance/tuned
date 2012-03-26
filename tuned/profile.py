@@ -52,6 +52,34 @@ class Profile(object):
 
 		return name
 
+	def _disable_plugin(self, name, plugin_cfg):
+		# Iterates over already loaded plugins.
+		# If the already loaded plugin contains the same device as the newly
+		# loaded one, remove the device from the already loaded one.
+		plugins_to_remove = []
+		for plugin, cfg in self._plugin_configs.iteritems():
+			if cfg["type"] != plugin_cfg["type"]:
+				continue
+
+			if cfg.has_key("devices") and cfg["devices"] != None:
+				for device in plugin_cfg["devices"]:
+					if device in cfg["devices"]:
+						cfg["devices"].remove(device)
+						log.debug("Disabling plugin %s device %s" % (plugin, device))
+				# If we removed all devices, this plugin is not useful anymore,
+				# so we should remove it too:
+				if (len(cfg["devices"]) == 0):
+					plugins_to_remove.append(plugin)
+			else:
+				# If the plugin does not have any device set, it can be
+				# run only once, so remove previous occurence
+				log.debug("Disabling plugin %s" % (plugin))
+				plugins_to_remove.append(plugin)
+
+		for plugin in plugins_to_remove:
+			log.debug("Removing plugin %s because it is useless after disabling" % (plugin))
+			del self._plugin_configs[plugin]
+
 	def _replace_plugin(self, name, plugin_cfg):
 		# Iterates over already loaded plugins.
 		# If the already loaded plugin contains the same device as the newly
@@ -116,6 +144,10 @@ class Profile(object):
 				return
 		else:
 			plugin_cfg["devices"] = plugin_cfg["devices"].split(",")
+
+		if plugin_cfg.has_key("disable"):
+			self._disable_plugin(name, plugin_cfg)
+			return
 
 		if plugin_cfg.has_key("replace"):
 			self._replace_plugin(name, plugin_cfg)
