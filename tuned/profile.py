@@ -165,6 +165,14 @@ class Profile(object):
 			del cfg["type"]
 			p = self._manager.create(name, plugin, cfg)
 
+	def _get_unique_name(self, name):
+		i = 1
+		n = name
+		while n in self._plugin_configs.keys():
+			n = name + "_" + str(i)
+		print n
+		return n
+
 	def _load_config(self, manager, config):
 		if not os.path.exists(config):
 			log.error("Config file %s does not exist" % (config))
@@ -185,7 +193,7 @@ class Profile(object):
 				continue
 			cfg.set(section, "_load_path", os.path.dirname(config))
 
-			self._store_plugin_config(section, dict(cfg.items(section)))
+			self._store_plugin_config(self._get_unique_name(section), dict(cfg.items(section)))
 
 		return True
 
