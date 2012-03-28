@@ -183,9 +183,9 @@ restore_disk_scheduler_quantum() {
 # CPU tuning
 #
 
-CPUSPEED_SAVE_FILE="${STORAGE}/ktune-cpuspeed${STORAGE_SUFFIX}"
-CPUSPEED_ORIG_GOV="${STORAGE}/ktune-cpuspeed-governor-%s${STORAGE_SUFFIX}"
-CPUSPEED_STARTED="${STORAGE}/ktune-cpuspeed-started"
+CPUSPEED_SAVE_FILE="${STORAGE}/cpuspeed${STORAGE_SUFFIX}"
+CPUSPEED_ORIG_GOV="${STORAGE}/cpuspeed-governor-%s${STORAGE_SUFFIX}"
+CPUSPEED_STARTED="${STORAGE}/cpuspeed-started"
 CPUSPEED_CFG="/etc/sysconfig/cpuspeed"
 CPUSPEED_INIT="/etc/init.d/cpuspeed"
 CPUS="$(ls -d1 /sys/devices/system/cpu/cpu* | sed 's;^.*/;;' |  grep "cpu[0-9]\+")"
@@ -278,7 +278,7 @@ disable_cpu_multicore_powersave() {
 #
 
 THP_ENABLE="/sys/kernel/mm/redhat_transparent_hugepage/enabled"
-THP_SAVE="${STORAGE}/ktune-thp${STORAGE_SUFFIX}"
+THP_SAVE="${STORAGE}/thp${STORAGE_SUFFIX}"
 
 enable_transparent_hugepages() {
 	if [ -e $THP_ENABLE ]; then
@@ -411,7 +411,7 @@ restore_radeon_powersave () {
 #
 
 RSYSLOG_CFG="/etc/rsyslog.conf"
-RSYSLOG_SAVE="${STORAGE}/ktune-cpuspeed${STORAGE_SUFFIX}"
+RSYSLOG_SAVE="${STORAGE}/cpuspeed${STORAGE_SUFFIX}"
 
 disable_logs_syncing() {
 	cp -p $RSYSLOG_CFG $RSYSLOG_SAVE
@@ -445,20 +445,17 @@ eee_set_normal_fsb() {
 }
 
 #
-# KTUNE ACTION PROCESSING
+# ACTION PROCESSING
 #
 
 error_not_implemented() {
-	echo "tuned: ktune script function '$1' is not implemented." >&2
+	echo "tuned: script function '$1' is not implemented." >&2
 }
 
 # implicit actions, will be used if not provided by profile script:
 #
 # * start    must be implemented
 # * stop     must be implemented
-# * reload   runs start
-# * restart  runs stop + start
-# * status   returns 0
 
 start() {
 	error_not_implemented start
@@ -470,55 +467,22 @@ stop() {
 	return 16
 }
 
-reload() {
-	start
-	return $?
-}
-
-restart() {
-	stop && start
-	return $?
-}
-
-status() {
-	return 0
-}
-
+#
 # main processing
+#
 
 process() {
-	VAR_SUBSYS_KTUNE="/var/lock/subsys/ktune"
-
 	case "$1" in
 	start)
-		[ -f "$VAR_SUBSYS_KTUNE" ] && exit 0
 		start
 		RETVAL=$?
 		;;
 	stop)
-		[ -f "$VAR_SUBSYS_KTUNE" ] || exit 0
 		stop
 		RETVAL=$?
 		;;
-	reload)
-		[ -f "$VAR_SUBSYS_KTUNE" ] && reload
-		RETVAL=$?
-		;;
-	restart|force-reload)
-		[ -f "$VAR_SUBSYS_KTUNE" ] && restart
-		RETVAL=$?
-		;;
-	condrestart|try-restart)
-		[ -f "$VAR_SUBSYS_KTUNE" ] || exit 0
-		restart
-		RETVAL=$?
-		;;
-	status)
-		status
-		RETVAL=$?
-		;;
-		*)
-		echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	*)
+		echo $"Usage: $0 {start|stop}"
 		RETVAL=2
 		;;
 	esac
