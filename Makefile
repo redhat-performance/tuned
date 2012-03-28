@@ -12,7 +12,7 @@ archive: clean
 
 	cp AUTHORS COPYING INSTALL README $(VERSIONED_NAME)
 
-	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py $(VERSIONED_NAME)
+	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py tuned.bash $(VERSIONED_NAME)
 	cp -a doc experiments man profiles systemtap tuned $(VERSIONED_NAME)
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
