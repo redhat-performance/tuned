@@ -103,7 +103,8 @@ fi
 %{_unitdir}/tuned.service
 %dir %{_localstatedir}/log/tuned
 %dir %{_localstatedir}/run/tuned
-%{_mandir}/man5/tuned.*
+%{_mandir}/man5/tuned*
+%{_mandir}/man8/tuned*
 
 %files utils
 %defattr(-,root,root,-)
@@ -135,6 +136,7 @@ fi
 - Added powersave profile
 - Reduced number of installed profiles, others added into profiles-compat subpackage
 - Added tuned_powertop_profile.py into utils subpackage
+- Added tuned, tuned-adm man pages
 
 * Mon Mar 22 2012 Jan Kaluza <jkaluza@redhat.com> 2.0-0.2.alpha
 - Added tuned-adm and tuned.cfg man page

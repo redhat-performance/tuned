@@ -1,0 +1,126 @@
+.\"/* 
+.\" * All rights reserved
+.\" * Copyright (C) 2009-2012 Red Hat, Inc.
+.\" * Authors: Jan Kaluža, Jan Včelák, Jaroslav Škarvada,
+.\" *          Marcela Mašláňová, Phil Knirsch
+.\" *
+.\" * This program is free software; you can redistribute it and/or
+.\" * modify it under the terms of the GNU General Public License
+.\" * as published by the Free Software Foundation; either version 2
+.\" * of the License, or (at your option) any later version.
+.\" *
+.\" * This program is distributed in the hope that it will be useful,
+.\" * but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" * GNU General Public License for more details.
+.\" *
+.\" * You should have received a copy of the GNU General Public License
+.\" * along with this program; if not, write to the Free Software
+.\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+.\" */
+.\" 
+.TH TUNED_ADM "8" "28 Mar 2012" "Fedora Power Management SIG" "tuned"
+.SH NAME
+tuned-adm \- commandline tool for switching between different tuning profiles
+.SH SYNOPSIS
+.B tuned-adm 
+.B 
+.BR [ " help ", " list ", " active ", " profile <profile> ", " off " ]
+.br
+.SH DESCRIPTION
+This command line utility allows user to switch between user definable tuning profiles. Several predefined profiles are already included. You can even create your own profile, either based on one of the existing ones by copying it or make a completely new one. The distribution provided profiles are stored in subdirectories below /usr/lib/tuned and the user defined profiles in subdirectories below /etc/tuned. If there are same profiles on both places, User defined profiles have precedence. 	
+
+The power saving profiles contain settings that are typically not enabled by default as they will noticeably impact the latency/performance of your system as opposed to the power saving mechanisms that are enabled by default. On the other hand the performance profiles disable the additional power saving mechanisms of tuned as they would negatively impact throughput or latency.
+
+.SH "OPTIONS"
+
+.SS
+.TP
+.B help
+Print out the list of commands. It's also the default if you start tuned-adm without any commands.
+
+.TP
+.B list
+List all available profiles.
+
+.TP
+.B active
+Show current active profile.
+
+.TP
+.B profile <profile>
+Switches to the given profilename. If none is given or no valid one is given the command gracefully exits without performing any operation.
+
+.TP
+.B off
+Switch off tuned.
+
+.SH PREDEFINED PROFILES
+At the moment we're providing the following pre defined profiles:
+
+.TP
+.BI "default"
+This is the default power saving profile. It is the lowest of the available profiles in regard to power saving and only enables CPU and disk plugins of tuned.
+
+.TP
+.BI "powersave"
+Maximal power saving, at the moment it enables USB autosuspend (in case environment variable USB_AUTOSUSPEND is set to 1), enables ALPM power saving for SATA host adapters, enables WiFi power saving, enables multi core power savings scheduler for low wakeup systems and makes sure the ondemand governor is active. It also enables AC97 audio power saving or (it depends on your system) HDA-Intel power savings (with 10 seconds timeout). In case your system contains supported Radeon graphics card (and KMS is enabled) it is configured to automatic power saving. On Asus Eee PCs dynamic Super Hybrid Engine is enabled.
+
+.TP
+.BI throughput-performance
+Profile for typical throughput performance tuning. Disables power saving mechanisms and enables sysctl settings that improve the throughput performance of your disk and network IO and switches to the deadline scheduler. CPU governor is set to performance.
+
+.TP
+.BI latency-performance
+Profile for low latency performance tuning. Disables power saving mechanisms and enables deadline IO scheduler. CPU governor is set to performance.
+
+.TP
+.BI "virtual-guest"
+Profile optimized for virtual guests based on enterprise-storage profile. It additionally decreases virtual memory swapiness.
+
+.TP
+.BI "virtual-host"
+Profile optimized for virtual hosts based on enterprise-storage profile. It additionally decreases virtual memory swapiness and enables more aggresive writeback of dirty pages.
+
+.SH PREDEFINED COMPAT PROFILES
+We are also providing so called "compat" profiles that are here mostly for backward compatibility with tuned 1.0. They are oriented to more specific scenarios.
+
+.TP
+.BI "desktop-powersave"
+A power saving profile directed at desktop systems. Enables ALPM power saving for SATA host adapters as well as the CPU, ethernet and disk plugins of tuned.
+
+.TP
+.BI server-powersave
+A power saving profile directed at server systems. Enables ALPM power saving for SATA host adapters, and activates the CPU and disk plugins of tuned.
+
+.TP
+.BI laptop-ac-powersave
+Medium power saving profile directed at laptops running on AC. Enables ALPM power saving for SATA host adapters,  WiFi power saving as well as CPU, ethernet and disk plugins of tuned.
+
+.TP
+.BI laptop-battery-powersave
+Strong power saving profile directed at laptops running on battery. Currently an alias to powersave profile.
+
+.TP
+.BI "spindown-disk"
+Strong power saving profile directed at machines with classic HDDs. It enables aggressive disk spin-down. Disk writeback values are increased and disk swappiness is lowered. Log syncing is disabled. All partitions are remounted with 'noatime' option. All tuned plugins are disabled.
+
+.TP
+.BI "enterprise-storage"
+Server profile for high disk throughput performace tuning. Disables power saving mechanisms and enables deadline IO scheduler. Enables hugepages and disables disk barriers. Disk readahead values are increased. CPU governor is set to performance.
+
+.SH "FILES"
+.nf
+/etc/tuned/*
+/usr/lib/tuned/*
+
+.SH "SEE ALSO"
+.BR tuned (8)
+.BR tuned-conf (5)
+.SH AUTHOR
+.nf
+Jan Kaluža <jkaluza@redhat.com>
+Jan Včelák <jvcelak@redhat.com>
+Jaroslav Škarvada <jskarvad@redhat.com>
+Marcela Mašláňová <mmaslano@redhat.com>
+Phil Knirsch <pknirsch@redhat.com>

@@ -1,0 +1,58 @@
+.\"/*.
+.\" * All rights reserved
+.\" * Copyright (C) 2009-2012 Red Hat, Inc.
+.\" * Authors: Jan Kaluža, Jan Včelák, Jaroslav Škarvada,
+.\" *          Phil Knirsch
+.\" *
+.\" * This program is free software; you can redistribute it and/or
+.\" * modify it under the terms of the GNU General Public License
+.\" * as published by the Free Software Foundation; either version 2
+.\" * of the License, or (at your option) any later version.
+.\" *
+.\" * This program is distributed in the hope that it will be useful,
+.\" * but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" * GNU General Public License for more details.
+.\" *
+.\" * You should have received a copy of the GNU General Public License
+.\" * along with this program; if not, write to the Free Software
+.\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+.\" */
+.\".
+.TH "tuned" "8" "28 Mar 2012" "Fedora Power Management SIG" "Adaptive system tuning daemon"
+.SH NAME
+tuned \- dynamic adaptive system tuning daemon
+.SH SYNOPSIS
+\fBtuned\fP [\fIoptions\fP]
+.SH DESCRIPTION
+\fBtuned\fR is a dynamic adaptive system tuning daemon
+that tunes system settings dynamically depending on
+usage. 
+
+.SH OPTIONS
+.TP 12
+.BI \-d "\fR, \fP" \--daemon
+This options starts tuned as a daemon as opposed to
+in the foreground without forking at startup.
+.TP 12
+.BI \-c "\fR, \fP" \--conffile=" conffile"
+Specify the name and path of the configuration file, default is \fB/etc/tuned.conf\fR.
+.TP 12
+.BI \-D "\fR, \fP" \--debug
+Sets the highest logging level. This could be very useful when having trouble with tuned.
+.SH "FILES"
+.nf
+/etc/tuned
+/usr/share/doc/tuned-*/README
+.SH "SEE ALSO"
+.LP
+tuned.conf(5)
+tuned-adm(8)
+.SH AUTHOR
+.nf
+Jan Kaluža <jkaluza@redhat.com>
+Jan Včelák <jvcelak@redhat.com>
+Jaroslav Škarvada <jskarvad@redhat.com>
+Phil Knirsch <pknirsch@redhat.com>
+.SH REPORTING BUGS
+Report bugs to <power-management@lists.fedoraproject.org>.
