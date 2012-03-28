@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.0
-Release: 0.2.alpha%{?dist}
+Release: 0.3.alpha%{?dist}
 License: GPLv2
 # The source for this package was pulled from upstream git.  Use the
 # following commands to get the corresponding tarball:
@@ -35,6 +35,13 @@ minimal, maximal and average time between operations to be able to
 identify applications that behave power inefficient (many small operations
 instead of fewer large ones).
 
+%package profiles-compat
+Summary: Additional tuned profiles mainly for backward compatibility with tuned 1.0
+Requires: %{name} = %{version}-%{release}
+
+%description profiles-compat
+Additional tuned profiles mainly for backward compatibility with tuned 1.0.
+It can be also used to fine tune your system for specific scenarios.
 
 %prep
 %setup -q
@@ -84,6 +91,12 @@ fi
 %{python_sitelib}/tuned
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
+%exclude %{_prefix}/lib/tuned/desktop-powersave
+%exclude %{_prefix}/lib/tuned/laptop-ac-powersave
+%exclude %{_prefix}/lib/tuned/server-powersave
+%exclude %{_prefix}/lib/tuned/laptop-battery-powersave
+%exclude %{_prefix}/lib/tuned/enterprise-storage
+%exclude %{_prefix}/lib/tuned/spindown-disk
 %{_prefix}/lib/tuned
 %config(noreplace) %{_sysconfdir}/tuned/active_profile
 %{_sysconfdir}/tmpfiles.d
@@ -106,8 +119,21 @@ fi
 %{_mandir}/man8/diskdevstat.*
 %{_mandir}/man8/scomes.*
 
+%files profiles-compat
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/desktop-powersave
+%{_prefix}/lib/tuned/laptop-ac-powersave
+%{_prefix}/lib/tuned/server-powersave
+%{_prefix}/lib/tuned/laptop-battery-powersave
+%{_prefix}/lib/tuned/enterprise-storage
+%{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Wed Mar 28 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0-0.3.alpha
+- Converted profiles from tuned 1.0
+- Added powersave profile
+- Reduced number of installed profiles, others added into profiles-compat subpackage
+
 * Mon Mar 22 2012 Jan Kaluza <jkaluza@redhat.com> 2.0-0.2.alpha
 - Added tuned-adm and tuned.cfg man page
 
