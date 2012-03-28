@@ -19,3 +19,5 @@ stop() {
     multiply_disk_readahead 0.25
     return 0
 }
+
+process $@

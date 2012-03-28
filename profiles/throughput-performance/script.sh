@@ -15,3 +15,5 @@ stop() {
     restore_transparent_hugepages
     return 0
 }
+
+process $@

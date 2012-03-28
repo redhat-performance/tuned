@@ -11,3 +11,5 @@ stop() {
     set_disk_alpm max_performance
     return 0
 }
+
+process $@

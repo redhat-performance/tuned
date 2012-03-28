@@ -11,3 +11,5 @@ stop() {
     disable_wifi_powersave
     return 0
 }
+
+process $@

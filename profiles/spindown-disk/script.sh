@@ -35,3 +35,5 @@ stop() {
 
     return 0
 }
+
+process $@

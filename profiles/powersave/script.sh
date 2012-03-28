@@ -25,3 +25,5 @@ stop() {
     restore_radeon_powersave
     return 0
 }
+
+process $@
