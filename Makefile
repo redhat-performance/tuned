@@ -52,6 +52,10 @@ install:
 	mkdir -p $(DESTDIR)$(TUNED_PROFILESDIR)
 	cp -a profiles/* $(DESTDIR)$(TUNED_PROFILESDIR)/
 
+	# Install bash completion
+	mkdir -p $(DESTDIR)/etc/bash_completion.d
+	install -m 0644 tuned.bash $(DESTDIR)/etc/bash_completion.d/tuned.bash
+
 	# log dir
 	mkdir -p $(DESTDIR)/var/log/tuned
 
