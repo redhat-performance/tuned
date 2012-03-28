@@ -114,6 +114,7 @@ fi
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 %{_sbindir}/scomes
+%{_bindir}/tuned_powertop_profile.py
 %{_mandir}/man8/varnetload.*
 %{_mandir}/man8/netdevstat.*
 %{_mandir}/man8/diskdevstat.*
@@ -133,6 +134,7 @@ fi
 - Converted profiles from tuned 1.0
 - Added powersave profile
 - Reduced number of installed profiles, others added into profiles-compat subpackage
+- Added tuned_powertop_profile.py into utils subpackage
 
 * Mon Mar 22 2012 Jan Kaluza <jkaluza@redhat.com> 2.0-0.2.alpha
 - Added tuned-adm and tuned.cfg man page
