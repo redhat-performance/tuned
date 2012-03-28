@@ -42,11 +42,11 @@ class Profile(object):
 		if name.startswith("/"):
 			return name
 
-		profile = "/etc/tuned/%s/tuned.cfg" % (name)
+		profile = "/etc/tuned/%s/tuned.conf" % (name)
 		if os.path.exists(profile):
 			return profile
 
-		profile = "/usr/lib/tuned/%s/tuned.cfg" % (name)
+		profile = "/usr/lib/tuned/%s/tuned.conf" % (name)
 		if os.path.exists(profile):
 			return profile
 

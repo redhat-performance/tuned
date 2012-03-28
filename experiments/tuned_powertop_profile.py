@@ -142,8 +142,8 @@ class PowertopProfile:
 		return True
 
 	def generateTunedConf(self, profile):
-		print "Generating Tuned config file", os.path.join(self.output, "tuned.cfg")
-		f = open(os.path.join(self.output, "tuned.cfg"), "w")
+		print "Generating Tuned config file", os.path.join(self.output, "tuned.conf")
+		f = open(os.path.join(self.output, "tuned.conf"), "w")
 		f.write(TUNED_CONF % ("include=" + profile))
 		f.close()
 

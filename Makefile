@@ -40,6 +40,10 @@ install:
 		install -m 0755 $$file $(DESTDIR)/usr/sbin/; \
 	done
 
+	# tools
+	mkdir -p $(DESTDIR)/usr/bin
+	install -m 0755 experiments/tuned_powertop_profile.py $(DESTDIR)/usr/bin
+
 	# configuration files
 	mkdir -p $(DESTDIR)/etc/tuned
 	echo -n default > $(DESTDIR)/etc/tuned/active_profile

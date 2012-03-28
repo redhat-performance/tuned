@@ -1,13 +1,13 @@
-.TH "tuned.cfg" "5" "13 Mar 2012" "Jan Kaluza" "tuned.cfg file format description"
+.TH "tuned.conf" "5" "13 Mar 2012" "Jan Kaluza" "tuned.conf file format description"
 .SH NAME
-tuned.cfg \- Tuned profile definition
+tuned.conf \- Tuned profile definition
 .SH DESCRIPTION
 This man page documents format of Tuned 2.0 profile definition files. Profile is
-stored in /etc/tuned/<profile_name>/tuned.cfg or in 
-/usr/lib/tuned/<profile_name>/tuned.cfg file where the /etc/tuned/ directory has 
+stored in /etc/tuned/<profile_name>/tuned.conf or in 
+/usr/lib/tuned/<profile_name>/tuned.conf file where the /etc/tuned/ directory has 
 higher priority.
 
-The \fBtuned.cfg\fR configures the profile and it is in ini-file format.
+The \fBtuned.conf\fR configures the profile and it is in ini-file format.
 
 .SH MAIN SECTION
 The main section is called "[main]" and can contain following options:
@@ -58,10 +58,9 @@ net.core.rmem_default = 262144
 net.core.wmem_default = 262144
 
 # Define my_script plugin
-# Since there is no "replace=1" option, this plugin will not replace
-# any script plugin defined in "included" profile and both scripts
-# (profile.sh from this profile and script from "included" profile)
-# will be run.
+# Both scripts (profile.sh from this profile and script from "included"
+# profile) will be run, because if there is no "replace=1" option the
+# default action is merge.
 [my_script]
 type=script
 script=profile.sh

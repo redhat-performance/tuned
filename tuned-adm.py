@@ -102,7 +102,7 @@ class Tuned_adm:
 
 		print "Available profiles:"
 		for profile in profiles:
-			if os.path.exists(os.path.join(profile, "tuned.cfg")):
+			if os.path.exists(os.path.join(profile, "tuned.conf")):
 				print "-", os.path.basename(profile)
 
 		self.show_active_profile()
