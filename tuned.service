@@ -6,7 +6,7 @@ After=syslog.target
 Type=forking
 PIDFile=/var/run/tuned/tuned.pid
 BusName=com.redhat.tuned
-ExecStart=/usr/sbin/tuned -d -c /etc/tuned.conf
+ExecStart=/usr/sbin/tuned -d
 
 [Install]
 WantedBy=multi-user.target
