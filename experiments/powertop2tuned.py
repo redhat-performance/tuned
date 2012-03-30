@@ -103,7 +103,7 @@ class PowertopProfile:
 		output = proc.communicate()[0]
 		if output and output.find("Current active profile: ") == 0:
 			return output[len("Current active profile: "):output.find("\n")]
-		return "default"
+		return "unknown"
 
 	def checkPrivs(self):
 		myuid = os.getuid()

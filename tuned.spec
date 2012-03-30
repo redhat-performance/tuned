@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.0
-Release: 0.3.alpha%{?dist}
+Release: 0.4.alpha%{?dist}
 License: GPLv2
 # The source for this package was pulled from upstream git.  Use the
 # following commands to get the corresponding tarball:
@@ -92,6 +92,7 @@ fi
 %{python_sitelib}/tuned
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
+%exclude %{_prefix}/lib/tuned/default
 %exclude %{_prefix}/lib/tuned/desktop-powersave
 %exclude %{_prefix}/lib/tuned/laptop-ac-powersave
 %exclude %{_prefix}/lib/tuned/server-powersave
@@ -124,6 +125,7 @@ fi
 
 %files profiles-compat
 %defattr(-,root,root,-)
+%{_prefix}/lib/tuned/default
 %{_prefix}/lib/tuned/desktop-powersave
 %{_prefix}/lib/tuned/laptop-ac-powersave
 %{_prefix}/lib/tuned/server-powersave
@@ -132,6 +134,11 @@ fi
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Fri Mar 30 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0-0.4.alpha
+- Added balanced profile and it is the default now
+- Profile default moved to profiles-compat
+- Improved powertop2tuned script
+
 * Wed Mar 28 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0-0.3.alpha
 - Converted profiles from tuned 1.0
 - Added powersave profile

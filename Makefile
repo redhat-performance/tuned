@@ -46,7 +46,7 @@ install:
 
 	# configuration files
 	mkdir -p $(DESTDIR)/etc/tuned
-	echo -n default > $(DESTDIR)/etc/tuned/active_profile
+	echo -n balanced > $(DESTDIR)/etc/tuned/active_profile
 
 	# profiles
 	mkdir -p $(DESTDIR)$(TUNED_PROFILESDIR)
