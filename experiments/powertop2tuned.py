@@ -54,7 +54,7 @@ script=script.sh
 
 
 class PowertopHTMLParser(HTMLParser):
-	def __init__(self):
+	def __init__(self, enable_tunings):
 		HTMLParser.__init__(self)
 
 		self.inProperTable = False
@@ -62,6 +62,10 @@ class PowertopHTMLParser(HTMLParser):
 		self.tdCounter = 0
 		self.lastDesc = ""
 		self.data = ""
+		if enable_tunings:
+			self.prefix = ""
+		else:
+			self.prefix = "#"
 
 	def getParsedData(self):
 		return self.data
@@ -78,16 +82,18 @@ class PowertopHTMLParser(HTMLParser):
 			self.tdCounter = 0
 
 	def handle_data(self, data):
+		prefix = self.prefix
 		if self.lastStartTag == "h2" and data == "Software settings in need of tuning":
 			self.inProperTable = True
 		if self.inProperTable and self.tdCounter == 1:
 			self.lastDesc = data
 			if self.lastDesc.lower().find("autosuspend") != -1 and (self.lastDesc.lower().find("keyboard") != -1 or self.lastDesc.lower().find("mouse") != -1):
 					self.lastDesc += "\n\t# WARNING: For some devices, uncommenting this command can disable the device."
+					prefix = "#"
 		if self.inProperTable and self.tdCounter == 2:
 			self.tdCounter = 0
 			self.data += "\t# " + self.lastDesc + "\n"
-			self.data += "\t#" + data + "\n\n"
+			self.data += "\t" + prefix + data + "\n\n"
 
 class PowertopProfile:
 	BAD_PRIVS = 100
@@ -124,9 +130,9 @@ class PowertopProfile:
 
 		return name;
 
-	def parseHTML(self):
+	def parseHTML(self, enable_tunings):
 		f = open(self.name)
-		parser = PowertopHTMLParser()
+		parser = PowertopHTMLParser(enable_tunings)
 		parser.feed(f.read())
 		f.close()
 
@@ -149,7 +155,7 @@ class PowertopProfile:
 		f.write(TUNED_CONF_EPILOG)
 		f.close()
 
-	def generate(self, new_profile):
+	def generate(self, new_profile, enable_tunings):
 		generated_html = False
 		if len(self.name) == 0:
 			generated_html = True
@@ -161,7 +167,7 @@ class PowertopProfile:
 				return name
 			self.name = name
 
-		data = self.parseHTML()
+		data = self.parseHTML(enable_tunings)
 
 		if generated_html:
 			os.unlink(self.name)
@@ -183,13 +189,13 @@ class PowertopProfile:
 		return 0
 
 if __name__ == "__main__":
-	new_profile = False	
 	parser = argparse.ArgumentParser(description='Creates Tuned profile from Powertop HTML output.')
 	parser.add_argument('profile', metavar='profile_name', type=unicode, nargs='?', help='Name for the profile to be written.')
 	parser.add_argument('-i', '--input', metavar='input_html', type=unicode, help='Path to Powertop HTML report. If not given, it is generated automatically.')
 	parser.add_argument('-o', '--output', metavar='output_directory', type=unicode, help='Directory where the profile will be written, default is /etc/tuned/profile_name directory.')
 	parser.add_argument('-n', '--new-profile', action='store_true', help='Creates new profile, otherwise it merges (include) your current profile.')
 	parser.add_argument('-f', '--force', action='store_true', help='Overwrites the output directory if it already exists.')
+	parser.add_argument('--enable', action='store_true', help='Enable all tunings (not recommended). Even with this enabled tunings known to be harmful (like USB_AUTOSUSPEND) won''t be enabled.')
 	args = parser.parse_args()
 	args = vars(args)
 
@@ -207,13 +213,10 @@ if __name__ == "__main__":
 	if not args['input']:
 		args['input'] = ''
 
-	if args['new_profile']:
-		new_profile = True
-
 	if os.path.exists(args['output']) and not args['force']:
 		print >> sys.stderr, 'Output directory already exists, use --force to overwrite it.'
 		sys.exit(-1)
 
 	p = PowertopProfile(args['output'], args['input'])
-	sys.exit(p.generate(new_profile))
+	sys.exit(p.generate(args['new_profile'], args['enable']))
 
