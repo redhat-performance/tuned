@@ -116,7 +116,7 @@ fi
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 %{_sbindir}/scomes
-%{_bindir}/tuned_powertop_profile.py
+%{_bindir}/powertop2tuned
 %{_mandir}/man8/varnetload.*
 %{_mandir}/man8/netdevstat.*
 %{_mandir}/man8/diskdevstat.*

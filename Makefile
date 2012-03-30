@@ -42,7 +42,7 @@ install:
 
 	# tools
 	mkdir -p $(DESTDIR)/usr/bin
-	install -m 0755 experiments/tuned_powertop_profile.py $(DESTDIR)/usr/bin
+	install -m 0755 experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
 
 	# configuration files
 	mkdir -p $(DESTDIR)/etc/tuned

@@ -1,6 +1,8 @@
 #
 # This is library of helper functions that can be used in scripts in tuned profiles.
 #
+# API provided by this library is under heavy development and could be changed anytime
+#
 
 #
 # Config
@@ -14,40 +16,41 @@ STORAGE_SUFFIX=".save"
 
 # Save sysfs value
 # $0 STORAGE_NAME SYSFS_NAME
-_save_sys() {
+save_sys() {
 	[ "$#" -ne 2 ] && return
-	[ -r "$2" ] && cat "$2" > "${STORAGE}/${1}${STORAGE_SUFFIX}"
+	[ -r "$2" -a ! -e "${STORAGE}/${1}${STORAGE_SUFFIX}" ] && cat "$2" > "${STORAGE}/${1}${STORAGE_SUFFIX}"
 }
 
 # Set sysfs value
 # $0 SYSFS_NAME VALUE
-_set_sys() {
+set_sys() {
 	[ "$#" -ne 2 ] && return
 	[ -w "$1" ] && echo "$2" > "$1"
 }
 
 # Save and set sysfs value
 # $0 STORAGE_NAME SYSFS_NAME VALUE
-_save_set_sys() {
+save_set_sys() {
 	[ "$#" -ne 3 ] && return
-	_save_sys "$1" "$2"
-	_set_sys "$2" "$3"
+	save_sys "$1" "$2"
+	set_sys "$2" "$3"
 }
 
 # Get stored sysfs value from storage
 # $0 STORAGE_NAME
-_get_stored_sys() {
+get_stored_sys() {
 	[ "$#" -ne 1 ] && return
 	[ -r "${STORAGE}/${1}${STORAGE_SUFFIX}" ] && cat "${STORAGE}/${1}${STORAGE_SUFFIX}"
 }
 
 # Restore sysfs value from storage, if nothing is stored, use VALUE
 # $0 STORAGE_NAME SYSFS_NAME [VALUE]
-_restore_sys() {
+restore_sys() {
 	[ "$#" -lt 2 -o "$#" -gt 3 ] && return
-	_rs_value="`_get_stored_sys \"$1\"`"
+	_rs_value="`get_stored_sys \"$1\"`"
+	unlink "${STORAGE}/${1}${STORAGE_SUFFIX}" >/dev/null 2>&1
 	[ "$_rs_value" ] || _rs_value="$3"
-	[ "$_rs_value" ] && _set_sys "$2" "$_rs_value"
+	[ "$_rs_value" ] && set_sys "$2" "$_rs_value"
 }
 
 
@@ -80,14 +83,14 @@ _set_elevator_helper() {
 
 # $0 DEVICES ELEVATOR
 set_elevator() {
-	_set_elevator_helper _save_set_sys "$1" "$2"
+	_set_elevator_helper save_set_sys "$1" "$2"
 }
 
 # $0 DEVICES [ELEVATOR]
 restore_elevator() {
 	re_elevator="$2"
 	[ "$re_elevator" ] || re_elevator = cfq
-	_set_elevator_helper _restore_sys "$1" "$re_elevator"
+	_set_elevator_helper restore_sys "$1" "$re_elevator"
 }
 
 # SATA Aggressive Link Power Management
@@ -361,23 +364,23 @@ disable_usb_autosuspend() {
 #
 
 enable_snd_ac97_powersave() {
-	_save_set_sys ac97 /sys/module/snd_ac97_codec/parameters/power_save Y
+	save_set_sys ac97 /sys/module/snd_ac97_codec/parameters/power_save Y
 }
 
 disable_snd_ac97_powersave() {
-	_save_set_sys ac97 /sys/module/snd_ac97_codec/parameters/power_save N
+	save_set_sys ac97 /sys/module/snd_ac97_codec/parameters/power_save N
 }
 
 restore_snd_ac97_powersave() {
-	_restore_sys ac97 /sys/module/snd_ac97_codec/parameters/power_save $1
+	restore_sys ac97 /sys/module/snd_ac97_codec/parameters/power_save $1
 }
 
 set_hda_intel_powersave() {
-	_save_set_sys hda_intel /sys/module/snd_hda_intel/parameters/power_save $1
+	save_set_sys hda_intel /sys/module/snd_hda_intel/parameters/power_save $1
 }
 
 restore_hda_intel_powersave() {
-	_restore_sys hda_intel /sys/module/snd_hda_intel/parameters/power_save $1
+	restore_sys hda_intel /sys/module/snd_hda_intel/parameters/power_save $1
 }
 
 #
@@ -391,19 +394,19 @@ set_radeon_powersave () {
 	[ -e /sys/class/drm/card0/device/power_method ] || return
 	if [ "$1" = default -o "$1" = auto -o "$1" = low -o "$1" = med -o "$1" = high ]; then
 		[ -w /sys/class/drm/card0/device/power_profile ] || return
-		_save_sys radeon_profile /sys/class/drm/card0/device/power_profile
-		_save_set_sys radeon_method /sys/class/drm/card0/device/power_method profile
-		_set_sys /sys/class/drm/card0/device/power_profile "$1"
+		save_sys radeon_profile /sys/class/drm/card0/device/power_profile
+		save_set_sys radeon_method /sys/class/drm/card0/device/power_method profile
+		set_sys /sys/class/drm/card0/device/power_profile "$1"
 	elif [ "$1" = dynpm ]; then
-		_save_sys radeon_profile /sys/class/drm/card0/device/power_profile
-		_save_set_sys radeon_method /sys/class/drm/card0/device/power_method dynpm
+		save_sys radeon_profile /sys/class/drm/card0/device/power_profile
+		save_set_sys radeon_method /sys/class/drm/card0/device/power_method dynpm
 	fi
 }
 
 restore_radeon_powersave () {
-  _restore_sys radeon_method /sys/class/drm/card0/device/power_method profile
-  _rrp_method="`_get_stored_sys radeon_method`"
-  [ -z "$_rrp_method" -o _rrp_method="profile" ] && _restore_sys radeon_profile /sys/class/drm/card0/device/power_profile default
+  restore_sys radeon_method /sys/class/drm/card0/device/power_method profile
+  _rrp_method="`get_stored_sys radeon_method`"
+  [ -z "$_rrp_method" -o _rrp_method="profile" ] && restore_sys radeon_profile /sys/class/drm/card0/device/power_profile default
 }
 
 #
