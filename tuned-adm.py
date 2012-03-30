@@ -89,7 +89,7 @@ class Tuned_adm:
 		except:
 			pass
 
-	def show_profiles(self):
+	def get_profiles(self):
 		profiles = []
 		try:
 			profiles += listdir_joined("/usr/lib/tuned")
@@ -100,11 +100,13 @@ class Tuned_adm:
 		except:
 			pass
 
-		print "Available profiles:"
-		for profile in profiles:
-			if os.path.exists(os.path.join(profile, "tuned.conf")):
-				print "-", os.path.basename(profile)
+		return map(lambda p: os.path.basename(p), \
+			filter(lambda p: os.path.exists(os.path.join(p, "tuned.conf")), profiles))
 
+	def show_profiles(self):
+		print "Available profiles:"
+		for p in self.get_profiles():
+			print "- " + p
 		self.show_active_profile()
 
 	def set_active_profile(self, profile):
@@ -114,6 +116,9 @@ class Tuned_adm:
 				pid = int(f.read())
 		except (OSError,IOError) as e:
 			self.error("Cannot read %s: %s" % (PIDFILE, str(e)))
+
+		if not profile in self.get_profiles():
+			self.error("Profile %s does''t exist." % profile)
 
 		if pid:
 			try:
