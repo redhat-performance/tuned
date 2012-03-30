@@ -1,7 +1,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.0
-Release: 0.4.alpha%{?dist}
+Release: 1%{?dist}
 License: GPLv2
 # The source for this package was pulled from upstream git.  Use the
 # following commands to get the corresponding tarball:
@@ -134,21 +134,5 @@ fi
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
-* Fri Mar 30 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0-0.4.alpha
-- Added balanced profile and it is the default now
-- Profile default moved to profiles-compat
-- Improved powertop2tuned script
-
-* Wed Mar 28 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0-0.3.alpha
-- Converted profiles from tuned 1.0
-- Added powersave profile
-- Reduced number of installed profiles, others added into profiles-compat subpackage
-- Added tuned_powertop_profile.py into utils subpackage
-- Added tuned, tuned-adm man pages
-- Added bash-completion
-
-* Mon Mar 22 2012 Jan Kaluza <jkaluza@redhat.com> 2.0-0.2.alpha
-- Added tuned-adm and tuned.cfg man page
-
-* Mon Mar 12 2012 Jan Vcelak <jvcelak@redhat.com> 2.0-0.1.alpha
-- brand new (pre)release of tuned
+* Fri Mar 30 2012 Jan Vcelak <jvcelak@redhat.com> 2.0-1
+- first stable release

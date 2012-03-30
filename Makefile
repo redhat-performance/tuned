@@ -65,8 +65,8 @@ install:
 	install -m 0644 tuned.tmpfiles $(DESTDIR)/etc/tmpfiles.d/tuned.conf
 
 	# systemd units
-	mkdir -p $(DESTDIR)/lib/systemd/system
-	install -m 0644 tuned.service $(DESTDIR)/lib/systemd/system
+	mkdir -p $(DESTDIR)/usr/lib/systemd/system
+	install -m 0644 tuned.service $(DESTDIR)/usr/lib/systemd/system/tuned.service
 
 	# manual pages *.8
 	mkdir -p $(DESTDIR)/usr/share/man/man8

@@ -1,8 +1,0 @@
-TODO
-====
-
-- complete missing features from old tuned
-  + create compatibility symlinks for old profiles
-  + tuned-adm
-  + bash completion for tuned-adm
-  + add manual pages
