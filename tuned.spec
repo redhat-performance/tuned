@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.0
+Version: 2.0.1
 Release: 1%{?dist}
 License: GPLv2
 # The source for this package was pulled from upstream git.  Use the
@@ -134,5 +134,8 @@ fi
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Tue Apr 03 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0.1-1
+- new version
+
 * Fri Mar 30 2012 Jan Vcelak <jvcelak@redhat.com> 2.0-1
 - first stable release
