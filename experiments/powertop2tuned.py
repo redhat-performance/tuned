@@ -25,6 +25,7 @@ import shutil
 import argparse
 from subprocess import *
 from HTMLParser import HTMLParser
+from htmlentitydefs import name2codepoint
 
 SCRIPT_SH = """#!/bin/sh
 
@@ -58,6 +59,7 @@ class PowertopHTMLParser(HTMLParser):
 		HTMLParser.__init__(self)
 
 		self.inProperTable = False
+		self.inScript = False
 		self.lastStartTag = ""
 		self.tdCounter = 0
 		self.lastDesc = ""
@@ -80,6 +82,13 @@ class PowertopHTMLParser(HTMLParser):
 			self.inProperTable = False
 		if tag == "tr":
 			self.tdCounter = 0
+		if self.inScript:
+			self.inScript = False
+			self.data += "\n\n"
+
+	def handle_entityref(self, name):
+		if self.inScript:
+			self.data += unichr(name2codepoint[name])
 
 	def handle_data(self, data):
 		prefix = self.prefix
@@ -90,10 +99,14 @@ class PowertopHTMLParser(HTMLParser):
 			if self.lastDesc.lower().find("autosuspend") != -1 and (self.lastDesc.lower().find("keyboard") != -1 or self.lastDesc.lower().find("mouse") != -1):
 					self.lastDesc += "\n\t# WARNING: For some devices, uncommenting this command can disable the device."
 					prefix = "#"
-		if self.inProperTable and self.tdCounter == 2:
+		if (self.inProperTable and self.tdCounter == 2) or self.inScript:
 			self.tdCounter = 0
-			self.data += "\t# " + self.lastDesc + "\n"
-			self.data += "\t" + prefix + data + "\n\n"
+			if not self.inScript:
+				self.data += "\t# " + self.lastDesc + "\n"
+				self.data += "\t" + prefix + data
+				self.inScript = True
+			else:
+				self.data += data
 
 class PowertopProfile:
 	BAD_PRIVS = 100
