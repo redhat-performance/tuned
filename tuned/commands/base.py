@@ -15,7 +15,7 @@ class Command(object):
 
 	@property
 	def name(self):
-		return self._desc
+		return self._name
 
 	@property
 	def desc(self):
