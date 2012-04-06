@@ -118,7 +118,7 @@ class Tuned_adm:
 			self.error("Cannot read %s: %s" % (PIDFILE, str(e)))
 
 		if not profile in self.get_profiles():
-			self.error("Profile %s does''t exist." % profile)
+			self.error("Profile %s doesn't exist." % profile)
 
 		if pid:
 			try:
