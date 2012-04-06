@@ -26,6 +26,7 @@ network and ATA harddisk devices are implemented.
 
 %package utils
 Summary: Disk and net statistic monitoring systemtap scripts
+Requires: %{name} = %{version}-%{release}
 Requires: systemtap
 
 %description utils
