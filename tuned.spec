@@ -16,6 +16,7 @@ BuildRequires: python, systemd-units
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
+Requires: python-decorator
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
