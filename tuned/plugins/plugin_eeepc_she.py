@@ -17,11 +17,14 @@ class EeePCSHEPlugin(tuned.plugins.Plugin):
 
 		self._she_mode = None
 		self._load_monitor = tuned.monitors.get_repository().create("load", devices)
+
+	@classmethod
+	def is_supported(cls):
 		try:
 			os.open("/sys/devices/platform/eeepc/cpufv", os.O_WRONLY)
+			return True
 		except:
-			log.info("eeepc_she is not supported on you system")
-			raise
+			return False
 
 	@classmethod
 	def _get_default_options(cls):

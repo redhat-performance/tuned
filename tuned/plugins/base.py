@@ -19,6 +19,10 @@ class Plugin(object):
 	def tunable_devices(cls):
 		return None
 
+	@classmethod
+	def is_supported(cls):
+		return True
+
 	# instance methods
 
 	def __init__(self, devices = None, options = None):
