@@ -134,6 +134,12 @@ class Profile(object):
 
 	def _store_plugin_config(self, name, plugin_cfg):
 		plugin = plugin_cfg["type"]
+
+		# Check if the plugin is supported on this HW
+		if not tuned.plugins.get_repository().is_supported(plugin):
+			log.info("Plugin %s is not supported on this HW" % (plugin))
+			return
+
 		# If there are no devices set, set all tunable_devices as default
 		if not plugin_cfg.has_key("devices"):
 			try:
