@@ -2,7 +2,6 @@ import os, copy
 import tuned.plugins
 import tuned.logs
 import tuned.monitors
-import tuned.commands
 import struct
 
 log = tuned.logs.get()
@@ -137,13 +136,13 @@ class DiskPlugin(tuned.plugins.Plugin):
 		for dev in self.devidle.keys():
 			if self.devidle[dev]["LEVEL"] > 0:
 				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
-			tuned.commands.get_repository().revert("set_elevator")
+			self._revert_elevator(dev)
 
 	def update_tuning(self):
 		load = self._load_monitor.get_load()
 		for dev, devload in load.iteritems():
-			if not self._elevator_set and len(self._options["elevator"]) != 0:
-				tuned.commands.get_repository().execute("set_elevator", [dev, self._options["elevator"]])
+			if not self._elevator_set:
+				self._apply_elevator(dev)
 
 			self._init_stats(dev)
 			self._update_stats(dev, devload)
