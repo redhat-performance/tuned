@@ -2,6 +2,7 @@ import os, copy
 import tuned.plugins
 import tuned.logs
 import tuned.monitors
+import tuned.utils.commands
 import struct
 
 log = tuned.logs.get()
@@ -23,9 +24,10 @@ class DiskPlugin(tuned.plugins.Plugin):
 		self._elevator_set = False
 		self._old_elevator = ""
 
+		self._load_monitor = tuned.monitors.get_repository().create("disk", devices)
+
 		if not tuned.utils.storage.Storage.get_instance().data.has_key("disk"):
 			tuned.utils.storage.Storage.get_instance().data["disk"] = {}
-		self._load_monitor = tuned.monitors.get_repository().create("disk", devices)
 
 	@classmethod
 	def tunable_devices(cls):
@@ -50,46 +52,18 @@ class DiskPlugin(tuned.plugins.Plugin):
 		}
 
 	def _apply_elevator(self, dev):
-		storage = tuned.utils.storage.Storage.get_instance()
-		if storage.data["disk"].has_key(dev):
-			self._old_elevator = storage.data["disk"][dev]
-			self._revert_elevator(dev)
-			del storage.data["disk"][dev]
+		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
+		tuned.utils.commands.revert_file("disk", "elevator_" + dev, sys_file)
 
 		if len(self._options["elevator"]) == 0:
 			return False
 
-		try:
-			f = open(os.path.join("/sys/block/", dev, "queue/scheduler"), "r")
-			self._old_elevator = f.read()
-			f.close()
-		except (OSError,IOError) as e:
-			log.error("Getting elevator of %s error: %s" % (dev, e))
-
-		storage = tuned.utils.storage.Storage.get_instance()
-		storage.data["disk"] = {dev : self._old_elevator}
-		storage.save()
-
-		log.debug("Applying elevator: %s < %s" % (dev, self._options["elevator"]))
-		try:
-			f = open(os.path.join("/sys/block/", dev, "queue/scheduler"), "w")
-			f.write(self._options["elevator"])
-			f.close()
-		except (OSError,IOError) as e:
-			log.error("Setting elevator on %s error: %s" % (dev, e))
+		tuned.utils.commands.set_file("disk", "elevator_" + dev, sys_file, self._options["elevator"])
 		return True
 
 	def _revert_elevator(self, dev):
-		if len(self._old_elevator) == 0:
-			return
-
-		log.debug("Applying elevator: %s < %s" % (dev, self._old_elevator))
-		try:
-			f = open(os.path.join("/sys/block/", dev, "queue/scheduler"), "w")
-			f.write(self._old_elevator)
-			f.close()
-		except (OSError,IOError) as e:
-			log.error("Setting elevator on %s error: %s" % (dev, e))
+		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
+		tuned.utils.commands.revert_file("disk", "elevator_" + dev, sys_file)
 
 	def _update_idle(self, dev):
 		idle = self.devidle.setdefault(dev, {})
