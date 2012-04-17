@@ -49,21 +49,8 @@ class DiskPlugin(tuned.plugins.Plugin):
 	def _get_default_options(cls):
 		return {
 			"elevator"   : "",
+			"disk_alpm"  : "",
 		}
-
-	def _apply_elevator(self, dev):
-		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
-		tuned.utils.commands.revert_file("disk", "elevator_" + dev, sys_file)
-
-		if len(self._options["elevator"]) == 0:
-			return False
-
-		tuned.utils.commands.set_file("disk", "elevator_" + dev, sys_file, self._options["elevator"])
-		return True
-
-	def _revert_elevator(self, dev):
-		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
-		tuned.utils.commands.revert_file("disk", "elevator_" + dev, sys_file)
 
 	def _update_idle(self, dev):
 		idle = self.devidle.setdefault(dev, {})
@@ -112,6 +99,8 @@ class DiskPlugin(tuned.plugins.Plugin):
 				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
 			self._revert_elevator(dev)
 
+		self._revert_disk_alpm()
+
 	def update_tuning(self):
 		load = self._load_monitor.get_load()
 		for dev, devload in load.iteritems():
@@ -143,4 +132,58 @@ class DiskPlugin(tuned.plugins.Plugin):
 			log.debug("%s load: read %f, write %f" % (dev, self.stats[dev]["read"], self.stats[dev]["write"]))
 			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))
 
+		if not self._elevator_set:
+			self._apply_disk_alpm()
+
 		self._elevator_set = True
+
+	# Commands:
+
+	def _apply_elevator(self, dev):
+		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
+		tuned.utils.commands.revert_file("disk", "elevator_" + dev, sys_file)
+
+		if len(self._options["elevator"]) == 0:
+			return False
+
+		tuned.utils.commands.set_file("disk", "elevator_" + dev, sys_file, self._options["elevator"])
+		return True
+
+	def _revert_elevator(self, dev):
+		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
+		tuned.utils.commands.revert_file("disk", "elevator_" + dev, sys_file)
+
+	def _apply_disk_alpm(self):
+		for host in os.listdir("/sys/class/scsi_host/"):
+			sys_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
+			tuned.utils.commands.revert_file("disk", "disk_alpm", sys_file)
+
+		if len(self._options["disk_alpm"]) == 0:
+			return False
+
+		for host in os.listdir("/sys/class/scsi_host/"):
+			port_cmd_path = os.path.join("/sys/class/scsi_host/", host, "ahci_port_cmd")
+			try:
+				port_cmd = open(port_cmd_path).read().strip()
+			except (OSError,IOError) as e:
+				log.error("Reading %s error: %s" % (port_cmd_path, e))
+				continue
+			try:
+				port_cmd_int = int("0x" + port_cmd, 16)
+			except ValueError:
+				log.error("Unexpected value in %s" % (port_cmd_path))
+				continue
+
+			policy = self._options["disk_alpm"]
+			if port_cmd_int & 24000 != 0:
+				policy = "max_performance"
+
+			sys_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
+			tuned.utils.commands.set_file("disk", "disk_alpm", sys_file, policy)
+
+		return True
+
+	def _revert_disk_alpm(self):
+		for host in os.listdir("/sys/class/scsi_host/"):
+			sys_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
+			tuned.utils.commands.revert_file("disk", "disk_alpm", sys_file)

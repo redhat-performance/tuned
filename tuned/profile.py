@@ -122,7 +122,7 @@ class Profile(object):
 			if not tuned.plugins.get_repository().is_supported(plugin):
 				log.info("Plugin %s is not supported on this HW" % (plugin))
 				return
-		except:
+		except tuned.exceptions.TunedException as e:
 			e.log()
 			log.error("unable to create unit %s" % plugin)
 			return
