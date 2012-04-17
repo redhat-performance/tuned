@@ -3,6 +3,7 @@ import tuned.plugins
 import tuned.logs
 import tuned.monitors
 import tuned.utils.commands
+import tuned.utils.storage
 import struct
 
 log = tuned.logs.get()
@@ -50,6 +51,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 		return {
 			"elevator"   : "",
 			"disk_alpm"  : "",
+			"disk_apm"  : "",
 		}
 
 	def _update_idle(self, dev):
@@ -98,6 +100,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 			if self.devidle[dev]["LEVEL"] > 0:
 				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
 			self._revert_elevator(dev)
+			self._revert_disk_apm(dev)
 
 		self._revert_disk_alpm()
 
@@ -106,6 +109,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 		for dev, devload in load.iteritems():
 			if not self._elevator_set:
 				self._apply_elevator(dev)
+				self._apply_disk_apm(dev)
 
 			self._init_stats(dev)
 			self._update_stats(dev, devload)
@@ -140,12 +144,12 @@ class DiskPlugin(tuned.plugins.Plugin):
 	# Commands:
 
 	def _apply_elevator(self, dev):
-		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
-		tuned.utils.commands.revert_file("disk", "elevator_" + dev, sys_file)
+		self._revert_elevator(dev)
 
 		if len(self._options["elevator"]) == 0:
 			return False
 
+		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
 		tuned.utils.commands.set_file("disk", "elevator_" + dev, sys_file, self._options["elevator"])
 		return True
 
@@ -154,9 +158,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 		tuned.utils.commands.revert_file("disk", "elevator_" + dev, sys_file)
 
 	def _apply_disk_alpm(self):
-		for host in os.listdir("/sys/class/scsi_host/"):
-			sys_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
-			tuned.utils.commands.revert_file("disk", "disk_alpm", sys_file)
+		self._revert_disk_alpm()
 
 		if len(self._options["disk_alpm"]) == 0:
 			return False
@@ -187,3 +189,20 @@ class DiskPlugin(tuned.plugins.Plugin):
 		for host in os.listdir("/sys/class/scsi_host/"):
 			sys_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
 			tuned.utils.commands.revert_file("disk", "disk_alpm", sys_file)
+
+	def _apply_disk_apm(self, dev):
+		self._revert_disk_apm(dev)
+
+		if len(self._options["disk_apm"]) == 0:
+			return False
+
+		#TODO: get current value using hdparm -B. My disk does not support it...
+		tuned.utils.commands.execute(["hdparm", "-B", self._options["disk_apm"], "/dev/" + dev])
+		return True
+
+	def _revert_disk_apm(self, dev):
+		storage = tuned.utils.storage.Storage.get_instance()
+		if storage.data["disk"].has_key("disk_apm_" + dev):
+			tuned.utils.commands.execute(["hdparm", "-B", storage.data["disk"]["disk_apm_" + dev], "/dev/" + dev])
+			del storage.data["disk"]["disk_apm_" + dev]
+		

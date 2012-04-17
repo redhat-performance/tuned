@@ -21,6 +21,7 @@ import tuned.logs
 import tuned.monitors
 import tuned.utils.storage
 import struct
+from subprocess import *
 
 log = tuned.logs.get()
 
@@ -70,4 +71,16 @@ def set_file(key, subkey, f, data):
 	storage.save()
 
 	_write_to_file(f, data)
+
+def execute(args):
+	out = ""
+	try:
+		proc = Popen(args, stdout=PIPE, stderr=PIPE)
+		out, err = proc.communicate()
+
+		if proc.returncode:
+			log.error("Executing %s error: %s" % (args[0], err[:-1]))
+	except (OSError,IOError) as e:
+		log.error("Executing %s error: %s" % (args[0], e))
+	return out
 
