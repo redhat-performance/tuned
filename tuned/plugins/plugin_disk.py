@@ -52,6 +52,8 @@ class DiskPlugin(tuned.plugins.Plugin):
 			"elevator"   : "",
 			"disk_alpm"  : "",
 			"disk_apm"  : "",
+			"disk_spindown"  : "",
+			"disk_readahead_multiplier" : "",
 		}
 
 	def _update_idle(self, dev):
@@ -101,6 +103,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
 			self._revert_elevator(dev)
 			self._revert_disk_apm(dev)
+			self._revert_disk_readahead_multiplier(dev)
 
 		self._revert_disk_alpm()
 
@@ -110,6 +113,8 @@ class DiskPlugin(tuned.plugins.Plugin):
 			if not self._elevator_set:
 				self._apply_elevator(dev)
 				self._apply_disk_apm(dev)
+				self._apply_disk_spindown(dev)
+				self._apply_disk_readahead_multiplier(dev)
 
 			self._init_stats(dev)
 			self._update_stats(dev, devload)
@@ -205,4 +210,33 @@ class DiskPlugin(tuned.plugins.Plugin):
 		if storage.data["disk"].has_key("disk_apm_" + dev):
 			tuned.utils.commands.execute(["hdparm", "-B", storage.data["disk"]["disk_apm_" + dev], "/dev/" + dev])
 			del storage.data["disk"]["disk_apm_" + dev]
+
+	def _apply_disk_spindown(self, dev):
+		if len(self._options["disk_spindown"]) == 0:
+			return False
+
+		tuned.utils.commands.execute(["hdparm", "-S", self._options["disk_spindown"], "/dev/" + dev])
+		return True
+
+	def _apply_disk_readahead_multiplier(self, dev):
+		self._revert_elevator(dev)
+
+		if len(self._options["elevator"]) == 0:
+			return False
+
+		sys_file = os.path.join("/sys/block/", dev, "queue/read_ahead_kb")
+		try:
+			value = open(sys_file).read().strip()
+		except (OSError,IOError) as e:
+			log.error("Reading %s error: %s" % (sys_file, e))
+			return
+
+		new_value = int(int(value) * float(self._options["disk_readahead_multiplier"]))
 		
+		tuned.utils.commands.set_file("disk", "disk_readahead_multiplier_" + dev, sys_file, str(new_value))
+		return True
+
+	def _revert_disk_readahead_multiplier(self, dev):
+		sys_file = os.path.join("/sys/block/", dev, "queue/read_ahead_kb")
+		tuned.utils.commands.revert_file("disk", "disk_readahead_multiplier_" + dev, sys_file)
+
