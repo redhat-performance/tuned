@@ -31,10 +31,12 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 			"latency_low"    : 100,
 			"latency_high"   : 1000,
 			"cpu_governor"   : "",
+			"cpu_multicore_powersave" : "",
 		}
 
 	def cleanup(self):
 		self._revert_cpu_governor()
+		self._revert_cpu_multicore_powersave()
 		tuned.monitors.get_repository().delete(self._load_monitor)
 
 		os.close(self._cpu_latency_fd)
@@ -42,6 +44,7 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 	def update_tuning(self):
 		if not self._commands_run:
 			self._apply_cpu_governor()
+			self._apply_cpu_multicore_powersave()
 			self._commands_run = True
 
 		load = self._load_monitor.get_load()["system"]
@@ -86,6 +89,37 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 			tuned.utils.commands.execute(["cpupower", "frequency-set", "-g", storage.data["cpu"]["cpu_governor"]])
 			del storage.data["cpu"]["cpu_governor"]
 
-		
+	def _apply_cpu_multicore_powersave(self):
+		self._revert_cpu_multicore_powersave()
+
+		if len(self._options["cpu_multicore_powersave"]) == 0:
+			return False
+
+		storage = tuned.utils.storage.Storage.get_instance()
+		old_value = tuned.utils.commands.execute(["cpupower", "info", "-m"])
+		if old_value.find("not supported") != -1:
+			log.info("cpu_multicore_powersave is not supported by this system")
+			return False
+
+		if old_value.startswith("System's multi core scheduler setting"):
+			try:
+				old_value = old_value.split(' ')[:-1][:-1] # get "2\n" and remove '\n'
+				storage.data["cpu"]["cpu_multicore_powersave"] = old_value
+				storage.save()
+			except IndexError:
+				pass
+				
+
+		tuned.utils.commands.execute(["cpupower", "set", "-m", storage.data["cpu"]["cpu_multicore_powersave"]])
+		return True
+
+	def _revert_cpu_multicore_powersave(self):
+		storage = tuned.utils.storage.Storage.get_instance()
+		if storage.data["cpu"].has_key("cpu_multicore_powersave"):
+			tuned.utils.commands.execute(["cpupower", "set", "-m", storage.data["cpu"]["cpu_multicore_powersave"]])
+			del storage.data["cpu"]["cpu_multicore_powersave"]
+
+
+
 
 			
