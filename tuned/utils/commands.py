@@ -26,7 +26,7 @@ from subprocess import *
 log = tuned.logs.get()
 
 
-def _write_to_file(f, data):
+def write_to_file(f, data):
 	log.debug("Writing to file: %s < %s" % (f, data))
 	try:
 		fd = open(f, "w")
@@ -35,7 +35,7 @@ def _write_to_file(f, data):
 	except (OSError,IOError) as e:
 		log.error("Writing to file %s error: %s" % (f, e))
 
-def _read_file(f):
+def read_file(f):
 	old_value = ""
 	try:
 		f = open(f, "r")
@@ -56,7 +56,7 @@ def revert_file(key, subkey, f):
 		return
 
 	old_value = storage.data[key][subkey]
-	_write_to_file(f, old_value)
+	write_to_file(f, old_value)
 
 	del storage.data[key][subkey]
 
@@ -66,11 +66,11 @@ def set_file(key, subkey, f, data):
 		log.error("Storage file does not contain item with key %s" % (key))
 		return
 
-	old_value = _read_file(f)
+	old_value = read_file(f)
 	storage.data[key][subkey] = old_value
 	storage.save()
 
-	_write_to_file(f, data)
+	write_to_file(f, data)
 
 def execute(args):
 	out = ""
