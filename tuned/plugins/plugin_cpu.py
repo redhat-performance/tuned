@@ -1,7 +1,7 @@
 import tuned.plugins
 import tuned.logs
 import tuned.monitors
-import tuned.utils.commands
+from tuned.utils.commands import *
 import os
 import struct
 
@@ -24,6 +24,13 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 		if not tuned.utils.storage.Storage.get_instance().data.has_key("cpu"):
 			tuned.utils.storage.Storage.get_instance().data["cpu"] = {}
 
+		self.register_command("cpu_governor",
+								self._set_cpu_governor,
+								self._revert_cpu_governor)
+		self.register_command("cpu_multicore_powersave",
+								self._set_cpu_multicore_powersave,
+								self._revert_cpu_multicore_powersave)
+
 	@classmethod
 	def _get_default_options(cls):
 		return {
@@ -35,16 +42,14 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 		}
 
 	def cleanup(self):
-		self._revert_cpu_governor()
-		self._revert_cpu_multicore_powersave()
+		self.cleanup_commands()
 		tuned.monitors.get_repository().delete(self._load_monitor)
 
 		os.close(self._cpu_latency_fd)
 
 	def update_tuning(self):
 		if not self._commands_run:
-			self._apply_cpu_governor()
-			self._apply_cpu_multicore_powersave()
+			self.execute_commands()
 			self._commands_run = True
 
 		load = self._load_monitor.get_load()["system"]
@@ -61,65 +66,39 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 			os.write(self._cpu_latency_fd, latency_bin)
 			self._latency = latency
 
-# COMMANDS:
-
-	def _apply_cpu_governor(self):
-		self._revert_cpu_governor()
-
-		if len(self._options["cpu_governor"]) == 0:
-			return False
-
-		storage = tuned.utils.storage.Storage.get_instance()
+	@command("cpu", "cpu_governor")
+	def _set_cpu_governor(self, value):
 		old_value = tuned.utils.commands.execute(["cpupower", "frequency-info", "-p"])
 		if old_value.startswith("analyzing CPU"):
 			try:
 				old_value = old_value.split('\n')[1].split(' ')[2]
-				storage.data["cpu"]["cpu_governor"] = old_value
-				storage.save()
 			except IndexError:
+				old_value = ""
 				pass
-				
 
-		tuned.utils.commands.execute(["cpupower", "frequency-set", "-g", self._options["cpu_governor"]])
-		return True
+		tuned.utils.commands.execute(["cpupower", "frequency-set", "-g", value])
+		return old_value
 
-	def _revert_cpu_governor(self):
-		storage = tuned.utils.storage.Storage.get_instance()
-		if storage.data["cpu"].has_key("cpu_governor"):
-			tuned.utils.commands.execute(["cpupower", "frequency-set", "-g", storage.data["cpu"]["cpu_governor"]])
-			del storage.data["cpu"]["cpu_governor"]
+	@command_revert("cpu", "cpu_governor")
+	def _revert_cpu_governor(self, value):
+		tuned.utils.commands.execute(["cpupower", "frequency-set", "-g", value])
 
-	def _apply_cpu_multicore_powersave(self):
-		self._revert_cpu_multicore_powersave()
-
-		if len(self._options["cpu_multicore_powersave"]) == 0:
-			return False
-
-		storage = tuned.utils.storage.Storage.get_instance()
+	@command("cpu", "cpu_multicore_powersave")
+	def _set_cpu_multicore_powersave(self, value):
 		old_value = tuned.utils.commands.execute(["cpupower", "info", "-m"])
 		if old_value.find("not supported") != -1:
 			log.info("cpu_multicore_powersave is not supported by this system")
-			return False
+			return ""
 
 		if old_value.startswith("System's multi core scheduler setting"):
 			try:
 				old_value = old_value.split(' ')[:-1][:-1] # get "2\n" and remove '\n'
-				storage.data["cpu"]["cpu_multicore_powersave"] = old_value
-				storage.save()
 			except IndexError:
-				pass
-				
+				old_value = ""
 
-		tuned.utils.commands.execute(["cpupower", "set", "-m", storage.data["cpu"]["cpu_multicore_powersave"]])
-		return True
+		tuned.utils.commands.execute(["cpupower", "set", "-m", value])
+		return old_value
 
-	def _revert_cpu_multicore_powersave(self):
-		storage = tuned.utils.storage.Storage.get_instance()
-		if storage.data["cpu"].has_key("cpu_multicore_powersave"):
-			tuned.utils.commands.execute(["cpupower", "set", "-m", storage.data["cpu"]["cpu_multicore_powersave"]])
-			del storage.data["cpu"]["cpu_multicore_powersave"]
-
-
-
-
-			
+	@command_revert("cpu", "cpu_multicore_powersave")
+	def _revert_cpu_multicore_powersave(self, value):
+		tuned.utils.commands.execute(["cpupower", "set", "-m", value])

@@ -2,7 +2,7 @@ import os, copy
 import tuned.plugins
 import tuned.logs
 import tuned.monitors
-import tuned.utils.commands
+from tuned.utils.commands import *
 import tuned.utils.storage
 import struct
 
@@ -29,6 +29,25 @@ class DiskPlugin(tuned.plugins.Plugin):
 
 		if not tuned.utils.storage.Storage.get_instance().data.has_key("disk"):
 			tuned.utils.storage.Storage.get_instance().data["disk"] = {}
+
+		self.register_command("elevator",
+								self._set_elevator,
+								self._revert_elevator,
+								is_per_dev = True)
+		self.register_command("disk_readahead_multiplier",
+								self._set_disk_readahead_multiplier,
+								self._revert_disk_readahead_multiplier,
+								is_per_dev = True)
+		self.register_command("disk_alpm",
+								self._set_disk_alpm,
+								self._revert_disk_alpm)
+		self.register_command("disk_apm",
+								self._set_disk_apm,
+								self._revert_disk_apm,
+								is_per_dev = True)
+		self.register_command("disk_spindown",
+								self._set_disk_spindown,
+								is_per_dev = True)
 
 	@classmethod
 	def tunable_devices(cls):
@@ -101,21 +120,12 @@ class DiskPlugin(tuned.plugins.Plugin):
 		for dev in self.devidle.keys():
 			if self.devidle[dev]["LEVEL"] > 0:
 				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
-			self._revert_elevator(dev)
-			self._revert_disk_apm(dev)
-			self._revert_disk_readahead_multiplier(dev)
 
-		self._revert_disk_alpm()
+		self.cleanup_commands(self.devidle.keys())
 
 	def update_tuning(self):
 		load = self._load_monitor.get_load()
 		for dev, devload in load.iteritems():
-			if not self._elevator_set:
-				self._apply_elevator(dev)
-				self._apply_disk_apm(dev)
-				self._apply_disk_spindown(dev)
-				self._apply_disk_readahead_multiplier(dev)
-
 			self._init_stats(dev)
 			self._update_stats(dev, devload)
 			self._update_idle(dev)
@@ -142,32 +152,24 @@ class DiskPlugin(tuned.plugins.Plugin):
 			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))
 
 		if not self._elevator_set:
-			self._apply_disk_alpm()
+			self.execute_commands(load.keys())
+			self._elevator_set = True
 
-		self._elevator_set = True
-
-	# Commands:
-
-	def _apply_elevator(self, dev):
-		self._revert_elevator(dev)
-
-		if len(self._options["elevator"]) == 0:
-			return False
-
+	@command("disk", "elevator")
+	def _set_elevator(self, dev, value):
 		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
-		tuned.utils.commands.set_file("disk", "elevator_" + dev, sys_file, self._options["elevator"])
-		return True
+		old_value = tuned.utils.commands.read_file(sys_file)
+		tuned.utils.commands.write_to_file(sys_file, value)
+		return old_value
 
-	def _revert_elevator(self, dev):
+	@command_revert("disk", "elevator")
+	def _revert_elevator(self, dev, value):
 		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
-		tuned.utils.commands.revert_file("disk", "elevator_" + dev, sys_file)
+		tuned.utils.commands.write_to_file(sys_file, value)
 
-	def _apply_disk_alpm(self):
-		self._revert_disk_alpm()
-
-		if len(self._options["disk_alpm"]) == 0:
-			return False
-
+	@command("disk", "disk_alpm")
+	def _set_disk_alpm(self, value):
+		old_value = ""
 		for host in os.listdir("/sys/class/scsi_host/"):
 			port_cmd_path = os.path.join("/sys/class/scsi_host/", host, "ahci_port_cmd")
 			try:
@@ -186,57 +188,46 @@ class DiskPlugin(tuned.plugins.Plugin):
 				policy = "max_performance"
 
 			sys_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
-			tuned.utils.commands.set_file("disk", "disk_alpm", sys_file, policy)
+			if len(old_value) == 0:
+				old_value = tuned.utils.commands.read_file(sys_file)
+			tuned.utils.commands.write_to_file(sys_file, policy)
 
-		return True
+		return old_value
 
-	def _revert_disk_alpm(self):
+	@command_revert("disk", "disk_alpm")
+	def _revert_disk_alpm(self, value):
 		for host in os.listdir("/sys/class/scsi_host/"):
-			sys_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
-			tuned.utils.commands.revert_file("disk", "disk_alpm", sys_file)
+			tuned.utils.commands.write_to_file(sys_file, value)
 
-	def _apply_disk_apm(self, dev):
-		self._revert_disk_apm(dev)
-
-		if len(self._options["disk_apm"]) == 0:
-			return False
-
+	@command("disk", "disk_apm")
+	def _set_disk_apm(self, dev, value):
 		#TODO: get current value using hdparm -B. My disk does not support it...
-		tuned.utils.commands.execute(["hdparm", "-B", self._options["disk_apm"], "/dev/" + dev])
-		return True
+		tuned.utils.commands.execute(["hdparm", "-B", value, "/dev/" + dev])
+		return ""
 
-	def _revert_disk_apm(self, dev):
-		storage = tuned.utils.storage.Storage.get_instance()
-		if storage.data["disk"].has_key("disk_apm_" + dev):
-			tuned.utils.commands.execute(["hdparm", "-B", storage.data["disk"]["disk_apm_" + dev], "/dev/" + dev])
-			del storage.data["disk"]["disk_apm_" + dev]
+	@command_revert("disk", "disk_apm")
+	def _revert_disk_apm(self, dev, value):
+		tuned.utils.commands.execute(["hdparm", "-B", value, "/dev/" + dev])
 
-	def _apply_disk_spindown(self, dev):
-		if len(self._options["disk_spindown"]) == 0:
-			return False
+	@command("disk", "disk_spindown")
+	def _set_disk_spindown(self, dev, value):
+		# There's no way how to get current/old spindown value...
+		tuned.utils.commands.execute(["hdparm", "-S", value, "/dev/" + dev])
 
-		tuned.utils.commands.execute(["hdparm", "-S", self._options["disk_spindown"], "/dev/" + dev])
-		return True
-
-	def _apply_disk_readahead_multiplier(self, dev):
-		self._revert_elevator(dev)
-
-		if len(self._options["elevator"]) == 0:
-			return False
-
+	@command("disk", "disk_readahead_multiplier")
+	def _set_disk_readahead_multiplier(self, dev, value):
 		sys_file = os.path.join("/sys/block/", dev, "queue/read_ahead_kb")
-		try:
-			value = open(sys_file).read().strip()
-		except (OSError,IOError) as e:
-			log.error("Reading %s error: %s" % (sys_file, e))
-			return
 
-		new_value = int(int(value) * float(self._options["disk_readahead_multiplier"]))
+		old_value = tuned.utils.commands.read_file(sys_file).strip()
+		if len(old_value) == 0:
+			return ""
+		new_value = int(int(old_value) * float(value))
 		
-		tuned.utils.commands.set_file("disk", "disk_readahead_multiplier_" + dev, sys_file, str(new_value))
-		return True
+		tuned.utils.commands.write_to_file(sys_file, new_value)
+		return old_value
 
-	def _revert_disk_readahead_multiplier(self, dev):
+	@command_revert("disk", "disk_readahead_multiplier")
+	def _revert_disk_readahead_multiplier(self, dev, value):
 		sys_file = os.path.join("/sys/block/", dev, "queue/read_ahead_kb")
-		tuned.utils.commands.revert_file("disk", "disk_readahead_multiplier_" + dev, sys_file)
+		tuned.utils.commands.write_to_file(sys_file, value)
 

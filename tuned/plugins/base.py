@@ -27,16 +27,45 @@ class Plugin(object):
 
 	def __init__(self, devices = None, options = None):
 		self._devices = devices
+		self._commands = {}
 		self._options = self._get_default_options()
 		self._options["_load_path"] = ""
 		if options is not None:
 			self._merge_options(options)
 
-	def __del__(self):
-		try:
-			self.cleanup()
-		except:
-			pass
+	#def __del__(self):
+		#try:
+			#self.cleanup()
+		#except:
+			#pass
+
+	def register_command(self, option, set_fnc, revert_fnc = None, is_per_dev = False):
+		self._commands[option] = (is_per_dev, set_fnc, revert_fnc)
+
+	def execute_commands(self, devices = []):
+		for option, (is_per_dev, set_fnc, revert_fnc) in self._commands.iteritems():
+			if not self._options.has_key(option):
+				continue
+
+			if is_per_dev:
+				for dev in devices:
+					set_fnc(dev, self._options[option])
+			else:
+				set_fnc(self._options[option])
+
+	def cleanup_commands(self, devices = []):
+		for option, (is_per_dev, set_fnc, revert_fnc) in self._commands.iteritems():
+			if not self._options.has_key(option):
+				continue
+
+			if revert_fnc:
+				set_fnc = revert_fnc
+
+			if is_per_dev:
+				for dev in devices:
+					set_fnc(dev, None)
+			else:
+				set_fnc(None)
 
 	def cleanup(self):
 		pass
