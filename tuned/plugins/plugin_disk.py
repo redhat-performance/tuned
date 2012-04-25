@@ -48,6 +48,10 @@ class DiskPlugin(tuned.plugins.Plugin):
 		self.register_command("disk_spindown",
 								self._set_disk_spindown,
 								is_per_dev = True)
+		self.register_command("disk_scheduler_quantum",
+								self._set_disk_scheduler_quantum,
+								self._revert_disk_scheduler_quantum,
+								is_per_dev = True)
 
 	@classmethod
 	def tunable_devices(cls):
@@ -73,6 +77,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 			"disk_apm"  : "",
 			"disk_spindown"  : "",
 			"disk_readahead_multiplier" : "",
+			"disk_scheduler_quantum" : "",
 		}
 
 	def _update_idle(self, dev):
@@ -229,5 +234,22 @@ class DiskPlugin(tuned.plugins.Plugin):
 	@command_revert("disk", "disk_readahead_multiplier")
 	def _revert_disk_readahead_multiplier(self, dev, value):
 		sys_file = os.path.join("/sys/block/", dev, "queue/read_ahead_kb")
+		tuned.utils.commands.write_to_file(sys_file, value)
+
+	@command("disk", "disk_scheduler_quantum")
+	def _set_disk_scheduler_quantum(self, dev, value):
+		sys_file = os.path.join("/sys/block/", dev, "queue/iosched/quantum")
+
+		old_value = tuned.utils.commands.read_file(sys_file).strip()
+		if len(old_value) == 0:
+			log.info("disk_scheduler_quantum option is not supported by this HW")
+			return ""
+
+		tuned.utils.commands.write_to_file(sys_file, value)
+		return old_value
+
+	@command_revert("disk", "disk_scheduler_quantum")
+	def _revert_disk_scheduler_quantum(self, dev, value):
+		sys_file = os.path.join("/sys/block/", dev, "queue/iosched/quantum")
 		tuned.utils.commands.write_to_file(sys_file, value)
 
