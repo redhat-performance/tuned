@@ -17,9 +17,7 @@ class VideoPlugin(tuned.plugins.Plugin):
 	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(None, options)
-
-		self._commands_run = False
+		super(self.__class__, self).__init__(devices, options)
 
 		if not tuned.utils.storage.Storage.get_instance().data.has_key(STORAGE_CATEGORY):
 			tuned.utils.storage.Storage.get_instance().data[STORAGE_CATEGORY] = {}
@@ -36,15 +34,14 @@ class VideoPlugin(tuned.plugins.Plugin):
 		return {
 			"enable_ac97_powersave" : "",
 			"hda_intel_powersave" : "",
+			"dynamic_tuning" : "0",
 		}
 
 	def cleanup(self):
-		self.cleanup_commands()
+		pass
 
 	def update_tuning(self):
-		if not self._commands_run:
-			self.execute_commands()
-			self._commands_run = True
+		pass
 
 	@command(STORAGE_CATEGORY, "enable_ac97_powersave")
 	def _set_enable_ac97_powersave(self, value):

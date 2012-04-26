@@ -12,12 +12,15 @@ class NetTuningPlugin(tuned.plugins.Plugin):
 	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(None, options)
+		super(self.__class__, self).__init__(devices, options)
 
 		self.devidle = {}
 		self.stats = {}
 		log.info("Devices: %s" % str(devices));
-		self._load_monitor = tuned.monitors.get_repository().create("net", devices)
+
+		self._load_monitor = None
+		if self.dynamic_tuning:
+			self._load_monitor = tuned.monitors.get_repository().create("net", devices)
 
 	@classmethod
 	def tunable_devices(cls):
@@ -76,11 +79,12 @@ class NetTuningPlugin(tuned.plugins.Plugin):
 	def cleanup(self):
 		log.info("Cleanup")
 
-		tuned.monitors.get_repository().delete(self._load_monitor)
+		if self._load_monitor:
+			tuned.monitors.get_repository().delete(self._load_monitor)
 
-		for dev in self.devidle.keys():
-			if self.devidle[dev]["LEVEL"] > 0:
-				ethcard(dev).set_max_speed()
+			for dev in self.devidle.keys():
+				if self.devidle[dev]["LEVEL"] > 0:
+					ethcard(dev).set_max_speed()
 
 	def update_tuning(self):
 		load = self._load_monitor.get_load()

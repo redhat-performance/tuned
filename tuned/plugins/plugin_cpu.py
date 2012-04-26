@@ -15,12 +15,14 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(None, options)
+		super(self.__class__, self).__init__(devices, options)
 
 		self._latency = None
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
-		self._load_monitor = tuned.monitors.get_repository().create("load", devices)
-		self._commands_run = False
+
+		self.dynamic_tuning = None
+		if self.dynamic_tuning:
+			self._load_monitor = tuned.monitors.get_repository().create("load", devices)
 
 		if not tuned.utils.storage.Storage.get_instance().data.has_key("cpu"):
 			tuned.utils.storage.Storage.get_instance().data["cpu"] = {}
@@ -47,16 +49,12 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 		}
 
 	def cleanup(self):
-		self.cleanup_commands()
-		tuned.monitors.get_repository().delete(self._load_monitor)
+		if self._load_monitor:
+			tuned.monitors.get_repository().delete(self._load_monitor)
 
 		os.close(self._cpu_latency_fd)
 
 	def update_tuning(self):
-		if not self._commands_run:
-			self.execute_commands()
-			self._commands_run = True
-
 		load = self._load_monitor.get_load()["system"]
 		if load < self._options["load_threshold"]:
 			self._set_latency(self._options["latency_high"])

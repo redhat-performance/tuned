@@ -16,10 +16,10 @@ class SysctlPlugin(tuned.plugins.Plugin):
 	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(None, options)
-		self._options = options
-		self._updated = False
+		super(self.__class__, self).__init__(devices, options)
 		self._sysctl_original = {}
+		self._sysctl = options
+		del self._sysctl["_load_path"]
 
 		# Set default sysctl from the previously running tuned2
 		data = tuned.utils.storage.Storage.get_instance().data
@@ -30,6 +30,12 @@ class SysctlPlugin(tuned.plugins.Plugin):
 
 		self._load_ktuned()
 
+	@classmethod
+	def _get_default_options(cls):
+		return {
+			"dynamic_tuning"   : "0",
+		}
+
 	def _load_ktuned(self):
 		for cfg in glob.glob("/etc/ktune.d/*.conf"):
 			f = open(os.path.join("/etc/ktune.d/", cfg))
@@ -37,7 +43,7 @@ class SysctlPlugin(tuned.plugins.Plugin):
 				if not line.strip().startswith("#") and line.find("=") != -1:
 					k = line.split('=')[0].strip()
 					v = line.split('=')[1].strip()
-					self._options[k] = v
+					self._sysctl[k] = v
 			f.close()
 		return True
 
@@ -54,7 +60,7 @@ class SysctlPlugin(tuned.plugins.Plugin):
 		return (proc.returncode, out, err)
 
 	def _apply_sysctl(self):
-		for key, value in self._options.iteritems():
+		for key, value in self._sysctl.iteritems():
 			returncode, out, err = self._exec_sysctl(key)
 			if not returncode and len(out.split('=')) == 2:
 				k = out.split('=')[0].strip()
@@ -73,12 +79,14 @@ class SysctlPlugin(tuned.plugins.Plugin):
 		for key, value in self._sysctl_original.iteritems():
 			self._exec_sysctl(key + "=" + value, True)
 
-	def cleanup(self):
+	def cleanup_commands(self):
 		self._revert_sysctl()
 
-	def update_tuning(self):
-		if self._updated:
-			return
-
-		self._updated = True
+	def execute_commands(self):
 		self._apply_sysctl()
+
+	def cleanup(self):
+		pass
+
+	def update_tuning(self):
+		pass

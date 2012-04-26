@@ -15,17 +15,18 @@ class DiskPlugin(tuned.plugins.Plugin):
 	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(None, options)
+		super(self.__class__, self).__init__(devices, options)
 
+		
 		self.devidle = {}
 		self.stats = {}
 		self.power = ["255", "225", "195", "165", "145", "125", "105", "85", "70", "55", "30", "20"]
 		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
 		self.levels = len(self.power)
-		self._elevator_set = False
-		self._old_elevator = ""
 
-		self._load_monitor = tuned.monitors.get_repository().create("disk", devices)
+		self._load_monitor = None
+		if self.dynamic_tuning:
+			self._load_monitor = tuned.monitors.get_repository().create("disk", devices)
 
 		if not tuned.utils.storage.Storage.get_instance().data.has_key("disk"):
 			tuned.utils.storage.Storage.get_instance().data["disk"] = {}
@@ -57,7 +58,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 	def tunable_devices(cls):
 		block_devices = os.listdir("/sys/block")
 		available = set(filter(cls._is_device_supported, block_devices))
-		cls._available_devices = available
+		return available
 
 	@classmethod
 	def _is_device_supported(cls, device):
@@ -120,13 +121,12 @@ class DiskPlugin(tuned.plugins.Plugin):
 	def cleanup(self):
 		log.debug("Cleanup")
 
-		tuned.monitors.get_repository().delete(self._load_monitor)
+		if self._load_monitor:
+			tuned.monitors.get_repository().delete(self._load_monitor)
 
-		for dev in self.devidle.keys():
-			if self.devidle[dev]["LEVEL"] > 0:
-				os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
-
-		self.cleanup_commands(self.devidle.keys())
+			for dev in self.devidle.keys():
+				if self.devidle[dev]["LEVEL"] > 0:
+					os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
 
 	def update_tuning(self):
 		load = self._load_monitor.get_load()
@@ -155,10 +155,6 @@ class DiskPlugin(tuned.plugins.Plugin):
 
 			log.debug("%s load: read %f, write %f" % (dev, self.stats[dev]["read"], self.stats[dev]["write"]))
 			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))
-
-		if not self._elevator_set:
-			self.execute_commands(load.keys())
-			self._elevator_set = True
 
 	@command("disk", "elevator")
 	def _set_elevator(self, dev, value):

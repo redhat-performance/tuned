@@ -53,6 +53,8 @@ class Daemon(object):
 
 		self.save_active_profile()
 
+		plugins_repo.do_static_tuning()
+
 		while not self._terminate.wait(10):
 			log.debug("updating monitors")
 			monitors_repo.update()

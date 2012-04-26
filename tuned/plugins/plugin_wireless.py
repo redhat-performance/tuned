@@ -15,9 +15,7 @@ class WirelessPlugin(tuned.plugins.Plugin):
 	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(None, options)
-
-		self._commands_run = False
+		super(self.__class__, self).__init__(devices, options)
 
 		if not tuned.utils.storage.Storage.get_instance().data.has_key("wireless"):
 			tuned.utils.storage.Storage.get_instance().data["wireless"] = {}
@@ -28,19 +26,16 @@ class WirelessPlugin(tuned.plugins.Plugin):
 	@classmethod
 	def _get_default_options(cls):
 		return {
+			"dynamic_tuning" : "0",
 			"wifi_power_level" : "",
 			"enable_bluetooth" : "",
 		}
 
 	def cleanup(self):
-		self.cleanup_commands()
+		pass
 
 	def update_tuning(self):
-		if not self._commands_run:
-			self.execute_commands()
-			self._commands_run = True
-
-# COMMANDS:
+		pass
 
 	@command("wireless", "wifi_power_level")
 	def _set_wifi_power_level(self, power_level):

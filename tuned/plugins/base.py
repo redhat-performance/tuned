@@ -25,13 +25,27 @@ class Plugin(object):
 
 	# instance methods
 
-	def __init__(self, devices = None, options = None):
+	def __init__(self, devices = [], options = None):
 		self._devices = devices
+		if not self._devices:
+			self._devices = []
 		self._commands = {}
 		self._options = self._get_default_options()
 		self._options["_load_path"] = ""
+		if not self._options.has_key("dynamic_tuning"):
+			self._options["dynamic_tuning"] = "1"
+		if not self._options.has_key("static_tuning"):
+			self._options["static_tuning"] = "1"
 		if options is not None:
 			self._merge_options(options)
+
+	@property
+	def dynamic_tuning(self):
+		return self._options["dynamic_tuning"] in ["1", "true"]
+
+	@property
+	def static_tuning(self):
+		return self._options["static_tuning"] in ["1", "true"]
 
 	#def __del__(self):
 		#try:
@@ -42,18 +56,18 @@ class Plugin(object):
 	def register_command(self, option, set_fnc, revert_fnc = None, is_per_dev = False):
 		self._commands[option] = (is_per_dev, set_fnc, revert_fnc)
 
-	def execute_commands(self, devices = []):
+	def execute_commands(self):
 		for option, (is_per_dev, set_fnc, revert_fnc) in self._commands.iteritems():
 			if not self._options.has_key(option):
 				continue
 
 			if is_per_dev:
-				for dev in devices:
+				for dev in self._devices:
 					set_fnc(dev, self._options[option])
 			else:
 				set_fnc(self._options[option])
 
-	def cleanup_commands(self, devices = []):
+	def cleanup_commands(self):
 		for option, (is_per_dev, set_fnc, revert_fnc) in self._commands.iteritems():
 			if not self._options.has_key(option):
 				continue
@@ -62,7 +76,7 @@ class Plugin(object):
 				set_fnc = revert_fnc
 
 			if is_per_dev:
-				for dev in devices:
+				for dev in self._devices:
 					set_fnc(dev, None)
 			else:
 				set_fnc(None)

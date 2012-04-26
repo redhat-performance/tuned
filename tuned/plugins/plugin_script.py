@@ -15,8 +15,7 @@ class ScriptPlugin(tuned.plugins.Plugin):
 	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(None, options)
-		self._updated = False
+		super(self.__class__, self).__init__(devices, options)
 		self._scripts = []
 		self._load_ktuned()
 		if self._options["script"].startswith("/"):
@@ -28,6 +27,7 @@ class ScriptPlugin(tuned.plugins.Plugin):
 	def _get_default_options(cls):
 		return {
 			"script"   : "",
+			"dynamic_tuning" : "0",
 		}
 
 	def _load_ktuned(self):
@@ -51,12 +51,14 @@ class ScriptPlugin(tuned.plugins.Plugin):
 				log.error("Script %s error: %s" % (script, e))
 		return True
 
-	def cleanup(self):
+	def execute_commands(self):
+		self._call_scripts()
+
+	def cleanup_commands(self):
 		self._call_scripts("stop")
 
-	def update_tuning(self):
-		if self._updated:
-			return
+	def cleanup(self):
+		pass
 
-		self._updated = True
-		self._call_scripts()
+	def update_tuning(self):
+		pass

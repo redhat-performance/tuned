@@ -39,13 +39,24 @@ class PluginRepository(tuned.patterns.Singleton):
 			plugin_exception = tuned.plugins.exception.LoadPluginException(plugin_name, exception)
 			raise plugin_exception
 
+	def do_static_tuning(self):
+		for plugin in self._plugins:
+			if not plugin.static_tuning:
+				continue
+			
+			log.debug("running static tuning for plugin %s" % plugin)
+			plugin.execute_commands()
+
 	def delete(self, plugin):
 		assert isinstance(plugin, self._loader.interface)
 		log.debug("removing plugin %s" % plugin)
+		plugin.cleanup_commands()
 		plugin.cleanup()
 		self._plugins.remove(plugin)
 
 	def update(self):
 		for plugin in self._plugins:
+			if not plugin.dynamic_tuning:
+				continue
 			log.debug("updating %s" % plugin)
 			plugin.update_tuning()

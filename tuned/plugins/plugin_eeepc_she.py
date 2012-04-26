@@ -13,10 +13,12 @@ class EeePCSHEPlugin(tuned.plugins.Plugin):
 	def __init__(self, devices, options):
 		"""
 		"""
-		super(self.__class__, self).__init__(None, options)
+		super(self.__class__, self).__init__(devices, options)
 
 		self._she_mode = None
-		self._load_monitor = tuned.monitors.get_repository().create("load", devices)
+		self._load_monitor = None
+		if self.dynamic_tuning:
+			self._load_monitor = tuned.monitors.get_repository().create("load", devices)
 
 	@classmethod
 	def is_supported(cls):
@@ -36,7 +38,8 @@ class EeePCSHEPlugin(tuned.plugins.Plugin):
 		}
 
 	def cleanup(self):
-		tuned.monitors.get_repository().delete(self._load_monitor)
+		if self._load_monitor:
+			tuned.monitors.get_repository().delete(self._load_monitor)
 
 	def update_tuning(self):
 		load = self._load_monitor.get_load()["system"]
