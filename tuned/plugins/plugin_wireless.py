@@ -23,11 +23,13 @@ class WirelessPlugin(tuned.plugins.Plugin):
 			tuned.utils.storage.Storage.get_instance().data["wireless"] = {}
 
 		self.register_command("wifi_power_level", self._set_wifi_power_level)
+		self.register_command("enable_bluetooth", self._set_enable_bluetooth)
 
 	@classmethod
 	def _get_default_options(cls):
 		return {
 			"wifi_power_level" : "",
+			"enable_bluetooth" : "",
 		}
 
 	def cleanup(self):
@@ -71,3 +73,20 @@ class WirelessPlugin(tuned.plugins.Plugin):
 			tuned.utils.commands.write_to_file(sys_file, power_level)
 
 		return old_value
+
+	@command("wireless", "enable_bluetooth")
+	def _set_enable_bluetooth(self, value):
+		old_value = "" # TODO: Set old_value properly
+		if value == "1" or value == "true":
+			tuned.utils.commands.execute(["modprobe", "hci_usb"])
+			tuned.utils.commands.execute(["hciconfig", "hci0", "up"])
+		elif value == "0" or value == "false":
+			tuned.utils.commands.execute(["hciconfig", "hci0", "down"])
+			tuned.utils.commands.execute(["rmmod", "hci_usb"])
+		else:
+			log.warn("Incorrect enable_bluetooth value.")
+			return ""
+
+		return old_value
+
+		
