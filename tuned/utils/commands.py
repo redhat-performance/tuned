@@ -26,7 +26,6 @@ from functools import wraps
 
 log = tuned.logs.get()
 
-# command decorator
 def command(plugin, key):
 	"""
 	This decorator makes adding new commands easier. The only thing you have to do is
@@ -99,8 +98,22 @@ def command(plugin, key):
 
 	return my_decorator
 
-# command_revert decorator
 def command_revert(plugin, key):
+	"""
+	This decorator makes adding new commands easier. Use this decorator
+	for method which just reverts the particular setting to the previous
+	value.
+	
+	Here is example of method like that:
+		@command_revert("disk", "elevator")
+		def _revert_elevator(self, dev, value):
+			sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
+			tuned.utils.commands.write_to_file(sys_file, value)
+
+	This decorator works then like this:
+		1. Tries to revert to previously stored value in Storage class if
+		   it's set
+	"""
 	def my_decorator(target):
 		def wrapper(self, *args, **kwargs):
 			dev = ""
@@ -150,32 +163,6 @@ def read_file(f):
 		log.error("Reading %s error: %s" % (f, e))
 	return old_value
 	
-
-def revert_file(key, subkey, f):
-	storage = tuned.utils.storage.Storage.get_instance()
-	if not storage.data.has_key(key):
-		log.error("Storage file does not contain item with key %s" % (key))
-		return
-
-	if not storage.data[key].has_key(subkey):
-		return
-
-	old_value = storage.data[key][subkey]
-	write_to_file(f, old_value)
-
-	del storage.data[key][subkey]
-
-def set_file(key, subkey, f, data):
-	storage = tuned.utils.storage.Storage.get_instance()
-	if not storage.data.has_key(key):
-		log.error("Storage file does not contain item with key %s" % (key))
-		return
-
-	old_value = read_file(f)
-	storage.data[key][subkey] = old_value
-	storage.save()
-
-	write_to_file(f, data)
 
 def execute(args):
 	out = ""
