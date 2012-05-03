@@ -26,7 +26,7 @@ class ScriptPlugin(tuned.plugins.Plugin):
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"script"   : "",
+			"script"   : None,
 			"dynamic_tuning" : "0",
 		}
 

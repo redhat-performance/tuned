@@ -88,7 +88,7 @@ def command(plugin, key):
 				return False
 
 			old_value = target(self, *args, **kwargs)
-			if len(old_value) != 0:
+			if old_value and len(old_value) != 0:
 				storage.data[plugin][key + dev] = old_value
 				storage.save()
 			return True

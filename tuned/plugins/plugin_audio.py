@@ -32,8 +32,8 @@ class VideoPlugin(tuned.plugins.Plugin):
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"enable_ac97_powersave" : "",
-			"hda_intel_powersave" : "",
+			"enable_ac97_powersave" : None,
+			"hda_intel_powersave" : None,
 			"dynamic_tuning" : "0",
 		}
 
@@ -51,11 +51,11 @@ class VideoPlugin(tuned.plugins.Plugin):
 			value = "N"
 		else:
 			log.warn("Incorrect enable_ac97_powersave value.")
-			return ""
+			return
 
 		sys_file = "/sys/module/snd_ac97_codec/parameters/power_save"
 		if not os.path.exists(sys_file):
-			return ""
+			return
 
 		old_value = tuned.utils.commands.read_file(sys_file)
 		tuned.utils.commands.write_to_file(sys_file, value)
@@ -73,7 +73,7 @@ class VideoPlugin(tuned.plugins.Plugin):
 	def _set_hda_intel_powersave(self, value):
 		sys_file = "/sys/module/snd_hda_intel/parameters/power_save"
 		if not os.path.exists(sys_file):
-			return ""
+			return
 
 		old_value = tuned.utils.commands.read_file(sys_file)
 		tuned.utils.commands.write_to_file(sys_file, value)

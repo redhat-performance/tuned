@@ -47,10 +47,10 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 			"load_threshold" : 0.2,
 			"latency_low"    : 100,
 			"latency_high"   : 1000,
-			"latency"        : "",
-			"cpu_governor"   : "",
-			"cpu_multicore_powersave" : "",
-			"enable_usb_autosupend" : "",
+			"latency"        : None,
+			"cpu_governor"   : None,
+			"cpu_multicore_powersave" : None,
+			"enable_usb_autosupend" : None,
 		}
 
 	def cleanup(self):
@@ -107,7 +107,7 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 		old_value = tuned.utils.commands.execute(["cpupower", "info", "-m"])
 		if old_value.find("not supported") != -1:
 			log.info("cpu_multicore_powersave is not supported by this system")
-			return ""
+			return
 
 		if old_value.startswith("System's multi core scheduler setting"):
 			try:
@@ -132,7 +132,7 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 			value = "0"
 		else:
 			log.warn("Incorrect enable_bluetooth value.")
-			return ""
+			return
 		for sys_file in glob.glob("/sys/bus/usb/devices/*/power/autosuspend"):
 			old_value[sys_file] = tuned.utils.commands.read_file(sys_file)
 			tuned.utils.commands.write_to_file(sys_file, value)

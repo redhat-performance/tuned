@@ -30,7 +30,7 @@ class VideoPlugin(tuned.plugins.Plugin):
 	def _get_default_options(cls):
 		return {
 			"dynamic_tuning" : "0",
-			"radeon_powersave" : "",
+			"radeon_powersave" : None,
 		}
 
 	def cleanup(self):
@@ -42,7 +42,7 @@ class VideoPlugin(tuned.plugins.Plugin):
 	@command(STORAGE_CATEGORY, "radeon_powersave")
 	def _set_radeon_powersave(self, value):
 		if not os.path.exists("/sys/class/drm/card0/device/power_method"):
-			return ""
+			return
 
 		old_values = []
 		if value in ["default", "auto", "low", "med", "high"]:

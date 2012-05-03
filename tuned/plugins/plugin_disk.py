@@ -73,12 +73,12 @@ class DiskPlugin(tuned.plugins.Plugin):
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"elevator"   : "",
-			"disk_alpm"  : "",
-			"disk_apm"  : "",
-			"disk_spindown"  : "",
-			"disk_readahead_multiplier" : "",
-			"disk_scheduler_quantum" : "",
+			"elevator"   : None,
+			"disk_alpm"  : None,
+			"disk_apm"  : None,
+			"disk_spindown"  : None,
+			"disk_readahead_multiplier" : None,
+			"disk_scheduler_quantum" : None,
 		}
 
 	def _update_idle(self, dev):
@@ -204,7 +204,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 	def _set_disk_apm(self, dev, value):
 		#TODO: get current value using hdparm -B. My disk does not support it...
 		tuned.utils.commands.execute(["hdparm", "-B", value, "/dev/" + dev])
-		return ""
+		return
 
 	@command_revert("disk", "disk_apm")
 	def _revert_disk_apm(self, dev, value):
@@ -221,7 +221,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 
 		old_value = tuned.utils.commands.read_file(sys_file).strip()
 		if len(old_value) == 0:
-			return ""
+			return
 		new_value = int(int(old_value) * float(value))
 		
 		tuned.utils.commands.write_to_file(sys_file, new_value)
@@ -239,7 +239,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 		old_value = tuned.utils.commands.read_file(sys_file).strip()
 		if len(old_value) == 0:
 			log.info("disk_scheduler_quantum option is not supported by this HW")
-			return ""
+			return
 
 		tuned.utils.commands.write_to_file(sys_file, value)
 		return old_value

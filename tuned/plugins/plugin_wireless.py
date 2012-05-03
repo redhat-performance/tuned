@@ -27,8 +27,8 @@ class WirelessPlugin(tuned.plugins.Plugin):
 	def _get_default_options(cls):
 		return {
 			"dynamic_tuning" : "0",
-			"wifi_power_level" : "",
-			"enable_bluetooth" : "",
+			"wifi_power_level" : None,
+			"enable_bluetooth" : None,
 		}
 
 	def cleanup(self):
@@ -43,7 +43,7 @@ class WirelessPlugin(tuned.plugins.Plugin):
 			lines = open("/proc/net/wireless").readlines()
 		except (OSError,IOError) as e:
 			log.error("Error reading wifi devices from /proc/net/wireless: %s" % (e))
-			return ""
+			return
 
 		ifaces = []
 		for line in lines:
@@ -56,7 +56,7 @@ class WirelessPlugin(tuned.plugins.Plugin):
 
 		if len(ifaces) == 0:
 			log.info("No wifi interfaces found")
-			return ""
+			return
 
 		# TODO: set old_value properly. Is there "get_power"? I don't have wifi here
 		old_value = "5"
@@ -80,7 +80,7 @@ class WirelessPlugin(tuned.plugins.Plugin):
 			tuned.utils.commands.execute(["rmmod", "hci_usb"])
 		else:
 			log.warn("Incorrect enable_bluetooth value.")
-			return ""
+			return
 
 		return old_value
 
