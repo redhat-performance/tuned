@@ -37,9 +37,6 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 		self.register_command("cpu_multicore_powersave",
 								self._set_cpu_multicore_powersave,
 								self._revert_cpu_multicore_powersave)
-		self.register_command("enable_usb_autosupend",
-								self._set_enable_usb_autosupend,
-								self._revert_enable_usb_autosupend)
 
 	@classmethod
 	def _get_default_options(cls):
@@ -50,7 +47,6 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 			"latency"        : None,
 			"cpu_governor"   : None,
 			"cpu_multicore_powersave" : None,
-			"enable_usb_autosupend" : None,
 		}
 
 	def cleanup(self):
@@ -121,25 +117,3 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 	@command_revert("cpu", "cpu_multicore_powersave")
 	def _revert_cpu_multicore_powersave(self, value):
 		tuned.utils.commands.execute(["cpupower", "set", "-m", value])
-
-	#TODO: Move USB to different plugin, I'm just not sure which one...
-	@command("cpu", "enable_usb_autosupend")
-	def _set_enable_usb_autosupend(self, value):
-		old_value = {}
-		if value == "1" or value == "true":
-			value = "1"
-		elif value == "0" or value == "false":
-			value = "0"
-		else:
-			log.warn("Incorrect enable_bluetooth value.")
-			return
-		for sys_file in glob.glob("/sys/bus/usb/devices/*/power/autosuspend"):
-			old_value[sys_file] = tuned.utils.commands.read_file(sys_file)
-			tuned.utils.commands.write_to_file(sys_file, value)
-
-		return old_value
-
-	@command_revert("cpu", "enable_usb_autosupend")
-	def _revert_enable_usb_autosupend(self, values):
-		for sys_file, value in values.iteritems():
-			tuned.utils.commands.write_to_file(sys_file, value)
