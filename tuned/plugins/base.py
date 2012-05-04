@@ -47,12 +47,6 @@ class Plugin(object):
 	def static_tuning(self):
 		return self._options["static_tuning"] in ["1", "true"]
 
-	#def __del__(self):
-		#try:
-			#self.cleanup()
-		#except:
-			#pass
-
 	def register_command(self, option, set_fnc, revert_fnc = None, is_per_dev = False):
 		self._commands[option] = (is_per_dev, set_fnc, revert_fnc)
 
