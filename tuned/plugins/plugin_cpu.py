@@ -2,9 +2,9 @@ import tuned.plugins
 import tuned.logs
 import tuned.monitors
 from tuned.utils.commands import *
+import glob
 import os
 import struct
-import glob
 
 log = tuned.logs.get()
 
@@ -21,16 +21,9 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 		self._load_monitor = None
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
 
-		self._load_monitor = None
-		if self.dynamic_tuning:
-			self._load_monitor = tuned.monitors.get_repository().create("load", devices)
-
 		if not tuned.utils.storage.Storage.get_instance().data.has_key("cpu"):
 			tuned.utils.storage.Storage.get_instance().data["cpu"] = {}
 
-		self.register_command("latency",
-								self._set_latency,
-								self._revert_latency)
 		self.register_command("cpu_governor",
 								self._set_cpu_governor,
 								self._revert_cpu_governor)
@@ -38,48 +31,54 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 								self._set_cpu_multicore_powersave,
 								self._revert_cpu_multicore_powersave)
 
+	def _delayed_init(self):
+		if self._options["force_latency"] is None:
+			self._load_monitor = tuned.monitors.get_repository().create("load", self._devices)
+			self.update_tuning = self._update_tuning_dynamic
+		else:
+			self._set_latency(self._options["force_latency"])
+			self.update_tuning = self._update_tuning_forced
+
 	@classmethod
 	def _get_default_options(cls):
 		return {
 			"load_threshold" : 0.2,
 			"latency_low"    : 100,
 			"latency_high"   : 1000,
-			"latency"        : None,
+			"force_latency"  : None,
 			"cpu_governor"   : None,
 			"cpu_multicore_powersave" : None,
 		}
 
 	def cleanup(self):
-		if self._load_monitor:
+		if self._load_monitor is not None:
 			tuned.monitors.get_repository().delete(self._load_monitor)
 
 		os.close(self._cpu_latency_fd)
 
 	def update_tuning(self):
+		old_update_tuning = self.update_tuning
+		self._delayed_init()
+		assert self.update_tuning != old_update_tuning
+		self.update_tuning()
+
+	def _update_tuning_forced(self):
+		pass
+
+	def _update_tuning_dynamic(self):
 		load = self._load_monitor.get_load()["system"]
 		if load < self._options["load_threshold"]:
-			self._set_latency_dynamic(self._options["latency_high"])
+			self._set_latency(self._options["latency_high"])
 		else:
-			self._set_latency_dynamic(self._options["latency_low"])
+			self._set_latency(self._options["latency_low"])
 
-	def _set_latency_dynamic(self, latency):
+	def _set_latency(self, latency):
 		latency = int(latency)
 		if self._latency != latency:
 			log.info("new cpu latency %d" % latency)
 			latency_bin = struct.pack("i", latency)
 			os.write(self._cpu_latency_fd, latency_bin)
 			self._latency = latency
-
-	@command("cpu", "latency")
-	def _set_latency(self, value):
-		latency_bin = tuned.utils.commands.read_file("/dev/cpu_dma_latency")
-		old_value = str(struct.unpack("i", latency_bin)[0])
-		self._set_latency_dynamic(value)
-		return old_value
-
-	@command_revert("cpu", "latency")
-	def _revert_latency(self, value):
-		self._set_latency_dynamic(value)
 
 	@command("cpu", "cpu_governor")
 	def _set_cpu_governor(self, value):
