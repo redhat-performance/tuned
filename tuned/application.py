@@ -34,14 +34,14 @@ class Application(object):
 		self._controller = controller.Controller(self._daemon, config_file)
 
 		self._dbus_exporter = None
-#		if enable_dbus:
-#			self._init_dbus()
+		if enable_dbus:
+			self._init_dbus()
 
 		self._init_signals()
 
 	def _init_dbus(self):
 		self._dbus_exporter = exports.dbus.DBusExporter(DBUS_BUS, DBUS_INTERFACE, DBUS_OBJECT)
-		exports.register_exporter(_dbus_exporter)
+		exports.register_exporter(self._dbus_exporter)
 		exports.register_object(self._controller)
 
 	def _init_signals(self):
