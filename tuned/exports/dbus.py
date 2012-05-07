@@ -103,7 +103,7 @@ class DBusExporter(tuned.exports.interfaces.ExporterInterface):
 	def _thread_code(self):
 		dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
-		bus = dbus.SessionBus()
+		bus = dbus.SystemBus()
 		bus_name = dbus.service.BusName(self._bus_name, bus)
 		bus_object = self._dbus_object_cls(bus, self._object_name, bus_name)
 

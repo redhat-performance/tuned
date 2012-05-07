@@ -12,7 +12,7 @@ archive: clean
 
 	cp AUTHORS COPYING INSTALL README $(VERSIONED_NAME)
 
-	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py tuned.bash $(VERSIONED_NAME)
+	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py tuned.bash dbus.conf $(VERSIONED_NAME)
 	cp -a doc experiments man profiles systemtap tuned $(VERSIONED_NAME)
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
@@ -67,6 +67,10 @@ install:
 	# systemd units
 	mkdir -p $(DESTDIR)/usr/lib/systemd/system
 	install -m 0644 tuned.service $(DESTDIR)/usr/lib/systemd/system/tuned.service
+
+	# dbus configuration
+	mkdir -p $(DESTDIR)/etc/dbus-1/system.d
+	install -m 0644 dbus.conf $(DESTDIR)/etc/dbus-d/system.d/com.redhat.tuned.conf
 
 	# manual pages *.8
 	mkdir -p $(DESTDIR)/usr/share/man/man8
