@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2011 Red Hat, Inc.
+# Copyright (C) 2008-2012 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,21 +17,12 @@
 
 __all__ = ["Controller"]
 
-import daemon
 import exports
-import exports.dbus
 import logs
+import profile
 import threading
-from profile import Profile
 
 log = logs.get()
-
-DBUS_BUS = "com.redhat.tuned"
-DBUS_INTERFACE = "com.redhat.tuned.control"
-DBUS_OBJECT = "/Tuned"
-
-dbus_exporter = exports.dbus.DBusExporter(DBUS_BUS, DBUS_INTERFACE, DBUS_OBJECT)
-exports.register_exporter(dbus_exporter)
 
 class Controller(exports.interfaces.ExportableInterface):
 	"""
@@ -39,10 +30,9 @@ class Controller(exports.interfaces.ExportableInterface):
 	and export the controller interface (currently only over D-Bus).
 	"""
 
-	def __init__(self, config_file, debug):
+	def __init__(self, daemon, config_file):
 		super(self.__class__, self).__init__()
-		exports.register_object(self)
-		self._daemon = daemon.Daemon()
+		self._daemon = daemon
 		self._terminate = threading.Event()
 		if config_file:
 			if not isinstance(config_file, list):
@@ -56,7 +46,6 @@ class Controller(exports.interfaces.ExportableInterface):
 		Controller main loop. The call is blocking.
 		"""
 		log.info("starting controller")
-		exports.start()
 		self.start()
 
 		self._terminate.clear()
@@ -65,7 +54,6 @@ class Controller(exports.interfaces.ExportableInterface):
 			pass
 
 		log.info("terminating controller")
-		exports.stop()
 		self.stop()
 
 	def terminate(self):
@@ -76,7 +64,7 @@ class Controller(exports.interfaces.ExportableInterface):
 			with open("/etc/tuned/active_profile", "r") as f:
 				profiles = f.read().split("\n")
 				for i in range(len(profiles)):
-					profiles[i] = Profile.find_profile(profiles[i])
+					profiles[i] = profile.Profile.find_profile(profiles[i])
 				return profiles
 		except (OSError,IOError,EOFError) as e:
 			log.error("Cannot read active profile from /etc/tuned/active_profile: %s" % (e))
@@ -122,9 +110,14 @@ class Controller(exports.interfaces.ExportableInterface):
 		else:
 			return self.stop() and self.start()
 
-	@exports.export("s", "b")
-	def switch_profile(self, profile):
-		cfg = Profile.find_profile(profile)
+	@exports.export("as", "b")
+	def switch_profile(self, profiles):
+
+		print profiles
+
+		return False
+
+		cfg = profile.Profile.find_profile(profile)
 		try:
 			self.config_file = cfg
 		except ValueError as e:
@@ -139,7 +132,6 @@ class Controller(exports.interfaces.ExportableInterface):
 			return self.config_file.split("/")[-2]
 		return self.config_file
 
-	@exports.export("", "a{bb}")
+	@exports.export("", "b")
 	def status(self):
-		# TODO: add ktune status
-		return [ self._daemon.is_running(), False ]
+		return self._daemon.is_running()

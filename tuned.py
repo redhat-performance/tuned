@@ -23,7 +23,6 @@
 import tuned
 import getopt
 import os
-import signal
 import sys
 
 def usage():
@@ -34,7 +33,7 @@ def error(message):
 
 if __name__ == "__main__":
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "dc:D", ["daemon", "config=", "debug"])
+		opts, args = getopt.getopt(sys.argv[1:], "dc:D", ["daemon", "config=", "debug", "no-dbus"])
 	except getopt.error as e:
 		error("Error parsing command-line arguments: %s" % e)
 		usage()
@@ -46,31 +45,34 @@ if __name__ == "__main__":
 		sys.exit(1)
 
 	config_file = []
-	daemon = False
+	daemonize = False
 	debug = False
+	dbus = True
 
 	for (opt, val) in opts:
-		if   opt in ['-d', "--daemon"]:
-			daemon = True
-		elif opt in ['-c', "--config"]:
+		if   opt in ["-d", "--daemon"]:
+			daemonize = True
+		elif opt in ["-c", "--config"]:
 			config_file.append(val)
-		elif opt in ['-D', "--debug"]:
+		elif opt in ["-D", "--debug"]:
 			debug = True
+		elif opt == "--no-dbus":
+			dbus = False
 
 	log = tuned.logs.get()
 	if (debug):
 		log.setLevel("DEBUG")
 
 	if os.getuid() != 0:
-		if daemon:
+		if daemonize:
 			log.critical("Superuser permissions are needed.")
 			sys.exit(1)
 		else:
 			log.warn("Superuser permissions are needed. Most tunings will not work!")
 
-	controller = tuned.Controller(config_file, debug)
+	app = tuned.Application(config_file, dbus)
 
-	if daemon:
+	if daemonize:
 		log.switch_to_file()
 		if tuned.utils.daemonize(3):
 			log.debug("successfully daemonized")
@@ -78,7 +80,4 @@ if __name__ == "__main__":
 			log.critical("cannot daemonize")
 			sys.exit(1)
 
-	tuned.utils.handle_signal(signal.SIGHUP, controller.switch_to_default_profile)
-	tuned.utils.handle_signal([signal.SIGINT, signal.SIGTERM], controller.terminate)
-
-	controller.run()
+	app.run()
