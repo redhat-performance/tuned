@@ -45,6 +45,8 @@ class Controller(exports.interfaces.ExportableInterface):
 		self._daemon = daemon.Daemon()
 		self._terminate = threading.Event()
 		if config_file:
+			if not isinstance(config_file, list):
+				config_file = [config_file]
 			self.config_file = config_file
 		else:
 			self.config_file = self.get_default_profile()
@@ -72,11 +74,13 @@ class Controller(exports.interfaces.ExportableInterface):
 	def get_default_profile(self):
 		try:
 			with open("/etc/tuned/active_profile", "r") as f:
-				profile = Profile.find_profile(f.read())
-				return profile
+				profiles = f.read().split("\n")
+				for i in range(len(profiles)):
+					profiles[i] = Profile.find_profile(profiles[i])
+				return profiles
 		except (OSError,IOError,EOFError) as e:
 			log.error("Cannot read active profile from /etc/tuned/active_profile: %s" % (e))
-			return ""
+			return []
 
 	def switch_to_default_profile(self):
 		profile = self.get_default_profile()

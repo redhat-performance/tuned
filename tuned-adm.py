@@ -64,11 +64,11 @@ class Tuned_adm:
 			self.check_permissions()
 			self.off()
 		elif args[0] == "profile":
-			if len(args) == 2:
-				self.check_permissions()
-				self.set_active_profile(args[1])
-			else:
-				self.error("Invalid profile specification. Use 'tuned-adm list' to get all available profiles.")
+			#if len(args) == 2:
+			self.check_permissions()
+			self.set_active_profile(args[1:])
+			#else:
+				#self.error("Invalid profile specification. Use 'tuned-adm list' to get all available profiles.")
 		else:
 			self.error("Nonexistent argument '%s'." % args[0])
 
@@ -85,7 +85,7 @@ class Tuned_adm:
 	def show_active_profile(self):
 		try:
 			with open("/etc/tuned/active_profile") as f:
-				print "Current active profile:", f.read()
+				print "Current active profile:", f.read().replace("\n", " ")
 		except:
 			pass
 
@@ -109,7 +109,7 @@ class Tuned_adm:
 			print "- " + p
 		self.show_active_profile()
 
-	def set_active_profile(self, profile):
+	def set_active_profile(self, profiles):
 		pid = 0
 		try:
 			with open(PIDFILE) as f:
@@ -117,13 +117,14 @@ class Tuned_adm:
 		except (OSError,IOError) as e:
 			self.error("Cannot read %s: %s" % (PIDFILE, str(e)))
 
-		if not profile in self.get_profiles():
-			self.error("Profile %s doesn't exist." % profile)
+		for profile in profiles:
+			if not profile in self.get_profiles():
+				self.error("Profile %s doesn't exist." % profile)
 
 		if pid:
 			try:
 				with open("/etc/tuned/active_profile", "w") as f:
-					f.write(profile)
+					f.write('\n'.join(profiles))
 			except (OSError,IOError) as e:
 				log.error("Cannot write profile into /etc/tuned/active_profile: %s" % (e))
 			os.kill(pid, signal.SIGHUP)

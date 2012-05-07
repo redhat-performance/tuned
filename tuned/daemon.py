@@ -28,7 +28,7 @@ import tuned.utils.storage
 
 log = logs.get()
 
-DEFAULT_CONFIG_FILE = "/etc/tuned/tuned.conf"
+DEFAULT_CONFIG_FILE = ["/etc/tuned/tuned.conf"]
 
 class Daemon(object):
 	def __init__(self):
@@ -67,7 +67,8 @@ class Daemon(object):
 	def save_active_profile(self):
 		try:
 			with open("/etc/tuned/active_profile", "w") as f:
-				f.write(self._config_file)
+				data = "\n".join(self._config_file)
+				f.write(data)
 		except (OSError,IOError) as e:
 			log.error("Cannot write active profile into /etc/tuned/active_profile: %s" % (e))
 
