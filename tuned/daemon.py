@@ -77,8 +77,11 @@ class Daemon(object):
 
 	@config_file.setter
 	def config_file(self, value):
-		if not os.path.exists(value):
-			raise ValueError("Config file does not exist")
+		if not isinstance(value, list):
+			value = [value]
+		for cfg in value:
+			if not os.path.exists(cfg):
+				raise ValueError("Config file %s does not exist" % (cfg))
 
 		self._config_file = value
 		# TODO: Maybe restart the daemon here?

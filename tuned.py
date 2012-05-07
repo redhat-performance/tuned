@@ -45,7 +45,7 @@ if __name__ == "__main__":
 		usage()
 		sys.exit(1)
 
-	config_file = None
+	config_file = []
 	daemon = False
 	debug = False
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 		if   opt in ['-d', "--daemon"]:
 			daemon = True
 		elif opt in ['-c', "--config"]:
-			config_file = val
+			config_file.append(val)
 		elif opt in ['-D', "--debug"]:
 			debug = True
 

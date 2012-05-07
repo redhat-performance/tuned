@@ -39,9 +39,6 @@ class Profile(object):
 
 	@classmethod
 	def find_profile(cls, name):
-		if name.startswith("/"):
-			return name
-
 		profile = "/etc/tuned/%s/tuned.conf" % (name)
 		if os.path.exists(profile):
 			return profile
@@ -106,12 +103,16 @@ class Profile(object):
 						break
 			else:
 				log.debug("Merging plugin %s with %s" % (name, plugin))
-				plugin_cfg.update(cfg)
+				tmp_cfg = cfg
+				tmp_cfg.update(plugin_cfg)
+				plugin_cfg = tmp_cfg
 				plugins_to_remove.append(plugin)
 				
 		for plugin in plugins_to_remove:
 			log.debug("Removing plugin %s because it is useless after merge" % (plugin))
 			del self._plugin_configs[plugin]
+
+		return plugin_cfg
 
 
 	def _store_plugin_config(self, name, plugin_cfg):
@@ -146,7 +147,7 @@ class Profile(object):
 			self._disable_plugin(name, plugin_cfg)
 			del plugin_cfg["replace"]
 		else:
-			self._merge_plugin(name, plugin_cfg)
+			plugin_cfg = self._merge_plugin(name, plugin_cfg)
 		self._plugin_configs[name] = plugin_cfg
 
 	def _get_unique_plugin_name(self, name):
@@ -185,7 +186,16 @@ class Profile(object):
 		return self._load_plugins(cfg, os.path.dirname(config))
 
 	def load(self):
-		return (self._load_config(self._config_file) and self._apply_config())
+		parsed = False
+		# Load more config files stored as list
+		if isinstance(self._config_file, list):
+			for cfg in self._config_file:
+				parsed = self._load_config(cfg)
+				if not parsed:
+					break
+		else:
+			parsed = self._load_config(self._config_file)
+		return (parsed and self._apply_config())
 
 	def cleanup(self):
 		pass
