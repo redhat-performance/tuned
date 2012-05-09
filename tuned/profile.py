@@ -26,6 +26,7 @@ import ConfigParser
 import glob
 from subprocess import *
 import pprint
+import fnmatch
 
 import tuned.plugins
 
@@ -114,6 +115,11 @@ class Profile(object):
 
 		return plugin_cfg
 
+	def _fnmatch_list(self, tunable, devs):
+		for dev in devs:
+			if fnmatch.fnmatch(tunable, dev):
+				return True
+		return False
 
 	def _store_plugin_config(self, name, plugin_cfg):
 		plugin = plugin_cfg["type"]
@@ -137,7 +143,11 @@ class Profile(object):
 				log.error("unable to create unit %s" % plugin)
 				return
 		else:
-			plugin_cfg["devices"] = plugin_cfg["devices"].split(",")
+			devs = plugin_cfg["devices"].split(",") # [sd*, dm*, sda1, sda2]
+			tunable_devices = tuned.plugins.get_repository().tunable_devices(plugin)
+			# Filter out devices which are not mentioned in 'devs'. This is
+			# here because of wildcard-matching support.
+			plugin_cfg["devices"] = [tunable for tunable in tunable_devices if self._fnmatch_list(tunable, devs)]
 
 		if plugin_cfg.has_key("disable"):
 			self._disable_plugin(name, plugin_cfg)
