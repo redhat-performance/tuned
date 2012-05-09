@@ -117,16 +117,21 @@ class Controller(exports.interfaces.ExportableInterface):
 		try:
 			self.config_file = profiles
 		except ValueError as e:
-			log.error("Unable to open profile's config file %s" % (cfg) )
+			log.error("Unable to open profile's config file: %s" % (str(e)) )
 			return False
 
 		return self.reload()
 
-	@exports.export("", "s")
+	@exports.export("", "as")
 	def active_profile(self):
-		if self.config_file.startswith("/usr/lib/tuned/"):
-			return self.config_file.split("/")[-2]
-		return self.config_file
+		profiles = []
+		for cfg in self.config_file:
+			try:
+				profiles.append(cfg.split('/')[-2])
+			except IndexError:
+				profiles.append(cfg)
+
+		return profiles
 
 	@exports.export("", "b")
 	def status(self):
