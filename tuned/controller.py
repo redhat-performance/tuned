@@ -112,14 +112,10 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("as", "b")
 	def switch_profile(self, profiles):
-
-		print profiles
-
-		return False
-
-		cfg = profile.Profile.find_profile(profile)
+		for i in range(len(profiles)):
+			profiles[i] = profile.Profile.find_profile(profiles[i])
 		try:
-			self.config_file = cfg
+			self.config_file = profiles
 		except ValueError as e:
 			log.error("Unable to open profile's config file %s" % (cfg) )
 			return False
