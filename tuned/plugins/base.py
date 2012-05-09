@@ -39,6 +39,12 @@ class Plugin(object):
 		if options is not None:
 			self._merge_options(options)
 
+		# TODO: cannot be injected now
+		self._storage = tuned.utils.storage.Storage.get_instance()
+
+		self._autoregister_commands()
+		assert self._commands_are_valid()
+
 	@property
 	def dynamic_tuning(self):
 		return self._options["dynamic_tuning"] in ["1", "true"]
@@ -47,33 +53,99 @@ class Plugin(object):
 	def static_tuning(self):
 		return self._options["static_tuning"] in ["1", "true"]
 
-	def register_command(self, option, set_fnc, revert_fnc = None, is_per_dev = False):
-		self._commands[option] = (is_per_dev, set_fnc, revert_fnc)
+	def _autoregister_commands(self):
+		"""
+		Register all commands marked using @command_set and @command_get decorators.
+		"""
+
+		for member_name in self.__class__.__dict__:
+			if member_name.startswith("__"):
+				continue
+			member = getattr(self, member_name)
+			if not hasattr(member, "_command"):
+				continue
+
+			command_name = member._command["name"]
+			info = self._commands.get(command_name, {})
+
+			if "set" in member._command:
+				info["set"] = member
+				info["per_device"] = member._command["per_device"]
+			elif "get" in member._command:
+				info["get"] = member
+
+			self._commands["command_name"] = info
+
+	def _commands_are_valid(self):
+		for command in commands:
+			if "get" not in command or "set" not in command:
+				return False
+		return True
+
+	# TODO: should be in storage class
+	def _storage_key(self, command_name, device):
+		if device is not None:
+			return "%s@%s" % [command_name, device]
+		else
+			return command_name
+
+	# TODO: should be in storage class
+	def _storage_get(self, command_name, device = None):
+		if not self._storage.data.has_key(self.__class__):
+			return None
+		key = self._storage_key(command_name, device)
+		return self._storage.data[self.__class__].get(key, None)
+
+	# TODO: should be in storage class
+	def _storage_set(self, value, command_name, device = None):
+		self._storage.data.setdefault(self.__class__, [])
+		key = self._storage_key(command_name, device)
+		self._storage.data[self.__class__][key] = value
+
+	# TODO: should be in storage class
+	def _storage_remove(self, command_name, device = None):
+		self._storage.data.setdefault(self.__class__, [])
+		key = self._storage_key(command_name, device)
+		del self._storage.data[self.__class__][key]
 
 	def execute_commands(self):
-		for option, (is_per_dev, set_fnc, revert_fnc) in self._commands.iteritems():
-			if not self._options.has_key(option):
+		for command_name, command in self._commands.iteritems():
+			if not self._options.has_key(command_name):
 				continue
 
-			if is_per_dev:
-				for dev in self._devices:
-					set_fnc(dev, self._options[option])
+			new_value = self._options[command_name]
+
+			# FIXME: should we revert old settings before applying the new one?
+			#        can we call cleanup_commands() instead
+
+			# TODO: refactor
+			if command["per_device"]:
+				for device in self._devices:
+					current_value = command["get"](device)
+					self._storage_set(current_value, command_name, device)
+					command["set"](new_value, device)
 			else:
-				set_fnc(self._options[option])
+				current_value = command["get"]()
+				self._storage_set(current_valuie, command_name)
+				command["set"](new_value)
 
 	def cleanup_commands(self):
-		for option, (is_per_dev, set_fnc, revert_fnc) in self._commands.iteritems():
+		for command_name, command in self._commands.iteritems():
 			if not self._options.has_key(option):
 				continue
 
-			if revert_fnc:
-				set_fnc = revert_fnc
-
-			if is_per_dev:
-				for dev in self._devices:
-					set_fnc(dev, None)
+			# TODO: refactor
+			if command["per_device"]:
+				for device in self._devices:
+					old_value = self._storage_get(command_name, device)
+					if old_value is not None:
+						command["set"](old_value, device)
+						self._storage_remove(command_name, device)
 			else:
-				set_fnc(None)
+				old_value = self._storage_get(command_name)
+				if old_value is not None:
+					commad["set"](old_value)
+					self._storage_remove(command_name)
 
 	def cleanup(self):
 		pass
