@@ -1,7 +1,7 @@
 import tuned.plugins
 import tuned.logs
 import tuned.monitors
-from tuned.utils.commands import *
+from tuned.plugins.decorator import *
 import glob
 import os
 import struct
@@ -80,8 +80,12 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 			os.write(self._cpu_latency_fd, latency_bin)
 			self._latency = latency
 
-	@command("cpu", "cpu_governor")
-	def _set_cpu_governor(self, value):
+	@command_set("governor")
+	def _set_governor(self, value):
+		tuned.utils.commands.execute(["cpupower", "frequency-set", "-g", value])
+
+	@command_get("governor")
+	def _get_governor(self):
 		old_value = tuned.utils.commands.execute(["cpupower", "frequency-info", "-p"])
 		if old_value.startswith("analyzing CPU"):
 			try:
@@ -89,30 +93,23 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 			except IndexError:
 				old_value = ""
 				pass
-
-		tuned.utils.commands.execute(["cpupower", "frequency-set", "-g", value])
 		return old_value
 
-	@command_revert("cpu", "cpu_governor")
-	def _revert_cpu_governor(self, value):
-		tuned.utils.commands.execute(["cpupower", "frequency-set", "-g", value])
+	@command_set("multicore_powersave")
+	def _set_multicore_powersave(self, value):
+		tuned.utils.commands.execute(["cpupower", "set", "-m", value])
 
-	@command("cpu", "cpu_multicore_powersave")
-	def _set_cpu_multicore_powersave(self, value):
+	@command_get("multicore_powersave")
+	def _get_multicore_powersave(self):
 		old_value = tuned.utils.commands.execute(["cpupower", "info", "-m"])
 		if old_value.find("not supported") != -1:
 			log.info("cpu_multicore_powersave is not supported by this system")
-			return
+			return None
 
 		if old_value.startswith("System's multi core scheduler setting"):
 			try:
 				old_value = old_value.split(' ')[:-1][:-1] # get "2\n" and remove '\n'
 			except IndexError:
-				old_value = ""
+				old_value = None
 
-		tuned.utils.commands.execute(["cpupower", "set", "-m", value])
 		return old_value
-
-	@command_revert("cpu", "cpu_multicore_powersave")
-	def _revert_cpu_multicore_powersave(self, value):
-		tuned.utils.commands.execute(["cpupower", "set", "-m", value])
