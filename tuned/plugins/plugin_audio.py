@@ -1,40 +1,23 @@
 import tuned.plugins
 import tuned.logs
 import tuned.monitors
-from tuned.utils.commands import *
+from tuned.plugins.decorator import *
 import os
 import struct
 import glob
 
 log = tuned.logs.get()
 
-STORAGE_CATEGORY = "audio"
-
 class VideoPlugin(tuned.plugins.Plugin):
 	"""
 	"""
 
-	def __init__(self, devices, options):
-		"""
-		"""
-		super(self.__class__, self).__init__(devices, options)
-
-		if not tuned.utils.storage.Storage.get_instance().data.has_key(STORAGE_CATEGORY):
-			tuned.utils.storage.Storage.get_instance().data[STORAGE_CATEGORY] = {}
-
-		self.register_command("enable_ac97_powersave",
-								self._set_enable_ac97_powersave,
-								self._revert_enable_ac97_powersave)
-		self.register_command("hda_intel_powersave",
-								self._set_hda_intel_powersave,
-								self._revert_hda_intel_powersave)
-
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"enable_ac97_powersave" : None,
+			"ac97_powersave"      : None,
 			"hda_intel_powersave" : None,
-			"dynamic_tuning" : "0",
+			"dynamic_tuning"      : False,
 		}
 
 	def cleanup(self):
@@ -43,46 +26,38 @@ class VideoPlugin(tuned.plugins.Plugin):
 	def update_tuning(self):
 		pass
 
-	@command(STORAGE_CATEGORY, "enable_ac97_powersave")
-	def _set_enable_ac97_powersave(self, value):
+	@command_set("ac97_powersave")
+	def _set_ac97_powersave(self, value):
 		if value == "1" or value == "true":
 			value = "Y"
 		elif value == "0" or value == "false":
 			value = "N"
 		else:
-			log.warn("Incorrect enable_ac97_powersave value.")
+			log.warn("Incorrect ac97_powersave value.")
 			return
 
 		sys_file = "/sys/module/snd_ac97_codec/parameters/power_save"
 		if not os.path.exists(sys_file):
 			return
-
-		old_value = tuned.utils.commands.read_file(sys_file)
 		tuned.utils.commands.write_to_file(sys_file, value)
-		return old_value
 
-	@command_revert(STORAGE_CATEGORY, "enable_ac97_powersave")
-	def _revert_enable_ac97_powersave(self, value):
+	@command_get("ac97_powersave")
+	def _get_ac97_powersave(self, value):
 		sys_file = "/sys/module/snd_ac97_codec/parameters/power_save"
 		if not os.path.exists(sys_file):
-			return
+			return None
+		return tuned.utils.commands.read_file(sys_file)
 
-		tuned.utils.commands.write_to_file(sys_file, value)
-
-	@command(STORAGE_CATEGORY, "hda_intel_powersave")
+	@command_set("hda_intel_powersave")
 	def _set_hda_intel_powersave(self, value):
 		sys_file = "/sys/module/snd_hda_intel/parameters/power_save"
 		if not os.path.exists(sys_file):
 			return
-
-		old_value = tuned.utils.commands.read_file(sys_file)
 		tuned.utils.commands.write_to_file(sys_file, value)
-		return old_value
 
-	@command_revert(STORAGE_CATEGORY, "hda_intel_powersave")
+	@command_get("hda_intel_powersave")
 	def _revert_hda_intel_powersave(self, value):
 		sys_file = "/sys/module/snd_hda_intel/parameters/power_save"
 		if not os.path.exists(sys_file):
-			return
-
-		tuned.utils.commands.write_to_file(sys_file, value)
+			return None
+		return tuned.utils.commands.read_file(sys_file)
