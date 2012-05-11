@@ -115,9 +115,6 @@ class Plugin(object):
 
 			new_value = self._options[command_name]
 
-			# FIXME: should we revert old settings before applying the new one?
-			#        can we call cleanup_commands() instead
-
 			# TODO: refactor
 			if command["per_device"]:
 				for device in self._devices:

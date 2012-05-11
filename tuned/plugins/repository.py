@@ -45,6 +45,7 @@ class PluginRepository(tuned.patterns.Singleton):
 				continue
 			
 			log.debug("running static tuning for plugin %s" % plugin)
+			plugin.cleanup_commands()
 			plugin.execute_commands()
 
 	def delete(self, plugin):
