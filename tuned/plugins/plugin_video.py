@@ -2,36 +2,30 @@ import tuned.plugins
 import tuned.logs
 import tuned.monitors
 from tuned.utils.commands import *
+import glob
 import os
 import struct
-import glob
 
 log = tuned.logs.get()
 
-STORAGE_CATEGORY = "video"
-
 class VideoPlugin(tuned.plugins.Plugin):
 	"""
+	Plugin for tuning powersave options for some graphic cards.
 	"""
-
-	def __init__(self, devices, options):
-		"""
-		"""
-		super(self.__class__, self).__init__(devices, options)
-
-		if not tuned.utils.storage.Storage.get_instance().data.has_key(STORAGE_CATEGORY):
-			tuned.utils.storage.Storage.get_instance().data[STORAGE_CATEGORY] = {}
-
-		self.register_command("radeon_powersave",
-								self._set_radeon_powersave,
-								self._revert_radeon_powersave)
 
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"dynamic_tuning" : "0",
+			"dynamic_tuning"   : "0",
 			"radeon_powersave" : None,
 		}
+
+	@classmethod
+	def tunable_devices(cls):
+		# radeon_powersave is currently the only condition
+		config_files = glob.glob("/sys/class/drm/*/device/power_method")
+		available = set(map(lambda name: name.split("/")[4], config_files))
+		return available
 
 	def cleanup(self):
 		pass
@@ -39,31 +33,24 @@ class VideoPlugin(tuned.plugins.Plugin):
 	def update_tuning(self):
 		pass
 
-	@command(STORAGE_CATEGORY, "radeon_powersave")
-	def _set_radeon_powersave(self, value):
-		if not os.path.exists("/sys/class/drm/card0/device/power_method"):
-			return
+	def _radeon_powersave_files(self, device):
+		return {
+			"method" : "/sys/class/drm/%s/device/power_method" % device,
+			"profile": "/sys/class/drm/%s/device/power_profile" % device,
+		]
 
-		old_values = []
+	@command_set("radeon_powersave", per_device=True)
+	def _set_radeon_powersave(self, value, device):
+		sys_files = self._radeon_powersave_files(device)
 		if value in ["default", "auto", "low", "med", "high"]:
-			power_profile = tuned.utils.commands.read_file("/sys/class/drm/card0/device/power_profile")
-			power_method = tuned.utils.commands.read_file("/sys/class/drm/card0/device/power_method")
-			old_values = [power_profile, power_method]
-			
-			tuned.utils.commands.write_to_file("/sys/class/drm/card0/device/power_method", "profile")
-			tuned.utils.commands.write_to_file("/sys/class/drm/card0/device/power_profile", value)
+			tuned.utils.commands.write_to_file(sys_files["method"], "profile")
+			tuned.utils.commands.write_to_file(sys_files["profile"], value)
 		elif value == "dynpm":
-			power_profile = tuned.utils.commands.read_file("/sys/class/drm/card0/device/power_profile")
-			power_method = tuned.utils.commands.read_file("/sys/class/drm/card0/device/power_method")
-			old_values = [None, power_method]
-			
-			tuned.utils.commands.write_to_file("/sys/class/drm/card0/device/power_method", "dynpm")
-		return old_values
+			tuned.utils.commands.write_to_file(sys_files["method"], "dynpm")
+		else:
+			log.warn("Invalid option for radeon_powersave.")
 
-	@command_revert(STORAGE_CATEGORY, "radeon_powersave")
-	def _revert_radeon_powersave(self, values):
-		power_profile, power_method = values
-
-		tuned.utils.commands.write_to_file("/sys/class/drm/card0/device/power_method", power_method)
-		if power_profile:
-			tuned.utils.commands.write_to_file("/sys/class/drm/card0/device/power_profile", power_profile)
+	@command_get("radeon_powersave")
+	def _get_radeon_powersave(self, device):
+		sys_files = self._radeon_powersave_files(device)
+		return tuned.utils.commands.read_file(sys_files["profile"])
