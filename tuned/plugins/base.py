@@ -154,3 +154,11 @@ class Plugin(object):
 
 	def update_tuning(self):
 		raise NotImplementedError()
+
+	def _config_bool(value, true_value="1", false_value="0"):
+		if value == True || value == "1" || value.lower() == "true":
+			return true_value
+		elif value == False || value == "0" || value.lower() == "false":
+			return false_value
+		else:
+			return None
