@@ -9,9 +9,11 @@ import copy
 log = tuned.logs.get()
 
 class NetTuningPlugin(tuned.plugins.Plugin):
+	"""
+	Plugin for ethernet card options tuning.
+	"""
+
 	def __init__(self, devices, options):
-		"""
-		"""
 		super(self.__class__, self).__init__(devices, options)
 
 		self.devidle = {}
