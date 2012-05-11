@@ -8,12 +8,13 @@ import struct
 log = tuned.logs.get()
 
 class DiskPlugin(tuned.plugins.Plugin):
+	"""
+	Plugin for tuning options of disks.
+	"""
 
 	_supported_vendors = ["ATA", "SCSI"]
 
 	def __init__(self, devices, options):
-		"""
-		"""
 		super(self.__class__, self).__init__(devices, options)
 
 		
@@ -130,15 +131,18 @@ class DiskPlugin(tuned.plugins.Plugin):
 			log.debug("%s load: read %f, write %f" % (dev, self.stats[dev]["read"], self.stats[dev]["write"]))
 			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))
 
+	def _elevator_file(self, device):
+		return os.path.join("/sys/block/", device, "queue/scheduler")
+
 	@command_set("elevator", per_device=True)
 	def _set_elevator(self, value, device):
-		sys_file = os.path.join("/sys/block/", device, "queue/scheduler")
+		sys_file = self._elevator_file(device)
 		tuned.utils.commands.write_to_file(sys_file, value)
 
 	@command_get("elevator")
 	def _get_elevator(self, device):
 		# TODO: ticket #21, does not work
-		sys_file = os.path.join("/sys/block/", device, "queue/scheduler")
+		sys_file = self._elevator_file(device)
 		return tuned.utils.commands.read_file(sys_file)
 
 	def _alpm_policy_files(self):
@@ -193,14 +197,17 @@ class DiskPlugin(tuned.plugins.Plugin):
 		# TODO: ticket #23, There's no way how to get current/old spindown value.
 		tuned.utils.commands.execute(["hdparm", "-S", value, "/dev/" + device])
 
+	def _readahead_file(self, device):
+		return os.path.join("/sys/block/", device, "queue/read_ahead_kb")
+
 	@command_set("readahead", per_device=True)
 	def _set_readahead(self, value, device):
-		sys_file = os.path.join("/sys/block/", device, "queue/read_ahead_kb")
+		sys_file = self._readahead_file(device)
 		tuned.utils.commands.write_to_file(sys_file, "%d" % value)
 
 	@command_get("readahead", per_device=True)
 	def _get_readahead(self, device):
-		sys_file = os.path.join("/sys/block/", device, "queue/read_ahead_kb")
+		sys_file = self._readahead_file(device)
 		value = tuned.utils.commands.read_file(sys_file).strip()
 		if len(value) == 0:
 			return None
@@ -214,14 +221,17 @@ class DiskPlugin(tuned.plugins.Plugin):
 		log.warn("readhead_multiply not implemented")
 		#self._set_readahead(new_value, device)
 
+	def _scheduler_quantum_file(self, device):
+		return os.path.join("/sys/block/", device, "queue/iosched/quantum")
+
 	@command_set("scheduler_quantum", per_device=True)
 	def _set_scheduler_quantum(self, value, device):
-		sys_file = os.path.join("/sys/block/", device, "queue/iosched/quantum")
+		sys_file = self._scheduler_quantum_file(device)
 		tuned.utils.commands.write_to_file(sys_file, value)
 
 	@command_get("scheduler_quantum")
 	def _get_scheduler_quantum(self, device):
-		sys_file = os.path.join("/sys/block/", device, "queue/iosched/quantum")
+		sys_file = self._scheduler_quantum_file(device)
 		value = tuned.utils.commands.read_file(sys_file).strip()
 		if len(value) == 0:
 			log.info("disk_scheduler_quantum option is not supported by this HW")
