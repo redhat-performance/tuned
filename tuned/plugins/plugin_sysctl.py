@@ -11,6 +11,7 @@ log = tuned.logs.get()
 
 class SysctlPlugin(tuned.plugins.Plugin):
 	"""
+	Plugin for applying custom sysctl options.
 	"""
 
 	def __init__(self, devices, options):
@@ -28,24 +29,11 @@ class SysctlPlugin(tuned.plugins.Plugin):
 				self._exec_sysctl(key + "=" + value, True)
 		tuned.utils.storage.Storage.get_instance().data["sysctl"] = {}
 
-		self._load_ktuned()
-
 	@classmethod
 	def _get_default_options(cls):
 		return {
 			"dynamic_tuning"   : "0",
 		}
-
-	def _load_ktuned(self):
-		for cfg in glob.glob("/etc/ktune.d/*.conf"):
-			f = open(os.path.join("/etc/ktune.d/", cfg))
-			for line in f.readlines():
-				if not line.strip().startswith("#") and line.find("=") != -1:
-					k = line.split('=')[0].strip()
-					v = line.split('=')[1].strip()
-					self._sysctl[k] = v
-			f.close()
-		return True
 
 	def _exec_sysctl(self, data, write = False):
 		if write:

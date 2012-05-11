@@ -1,23 +1,22 @@
 import tuned.plugins
 import tuned.logs
 import tuned.monitors
+import glob
 import os
 import struct
-import glob
 from subprocess import *
 
 log = tuned.logs.get()
 
 class ScriptPlugin(tuned.plugins.Plugin):
 	"""
+	Plugin for running custom scripts with profile activation and deactivation.
 	"""
 
 	def __init__(self, devices, options):
-		"""
-		"""
 		super(self.__class__, self).__init__(devices, options)
+
 		self._scripts = []
-		self._load_ktuned()
 		if self._options["script"].startswith("/"):
 			self._scripts.append(self._options["script"])
 		else:
@@ -29,14 +28,6 @@ class ScriptPlugin(tuned.plugins.Plugin):
 			"script"   : None,
 			"dynamic_tuning" : "0",
 		}
-
-	def _load_ktuned(self):
-		for sh in glob.glob("/etc/ktune.d/*.sh"):
-			script = os.path.join("/etc/ktune.d/", sh)
-			if not script in self._scripts:
-				self._scripts.append(script)
-		return True
-
 
 	def _call_scripts(self, arg = "start"):
 		for script in self._scripts:
