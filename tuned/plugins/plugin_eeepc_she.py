@@ -8,6 +8,7 @@ log = tuned.logs.get()
 
 class EeePCSHEPlugin(tuned.plugins.Plugin):
 	"""
+	Plugin for tuning FSB (front side bus) speed on Asus EEE PCs with SHE (Super Hybrid Engine) support.
 	"""
 
 	def __init__(self, devices, options):
