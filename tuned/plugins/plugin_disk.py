@@ -2,8 +2,7 @@ import os, copy
 import tuned.plugins
 import tuned.logs
 import tuned.monitors
-from tuned.utils.commands import *
-import tuned.utils.storage
+from tuned.plugins.decorator import *
 import struct
 
 log = tuned.logs.get()
@@ -28,32 +27,6 @@ class DiskPlugin(tuned.plugins.Plugin):
 		if self.dynamic_tuning:
 			self._load_monitor = tuned.monitors.get_repository().create("disk", devices)
 
-		if not tuned.utils.storage.Storage.get_instance().data.has_key("disk"):
-			tuned.utils.storage.Storage.get_instance().data["disk"] = {}
-
-		self.register_command("elevator",
-								self._set_elevator,
-								self._revert_elevator,
-								is_per_dev = True)
-		self.register_command("disk_readahead_multiplier",
-								self._set_disk_readahead_multiplier,
-								self._revert_disk_readahead_multiplier,
-								is_per_dev = True)
-		self.register_command("disk_alpm",
-								self._set_disk_alpm,
-								self._revert_disk_alpm)
-		self.register_command("disk_apm",
-								self._set_disk_apm,
-								self._revert_disk_apm,
-								is_per_dev = True)
-		self.register_command("disk_spindown",
-								self._set_disk_spindown,
-								is_per_dev = True)
-		self.register_command("disk_scheduler_quantum",
-								self._set_disk_scheduler_quantum,
-								self._revert_disk_scheduler_quantum,
-								is_per_dev = True)
-
 	@classmethod
 	def tunable_devices(cls):
 		block_devices = os.listdir("/sys/block")
@@ -73,12 +46,13 @@ class DiskPlugin(tuned.plugins.Plugin):
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"elevator"   : None,
-			"disk_alpm"  : None,
-			"disk_apm"  : None,
-			"disk_spindown"  : None,
-			"disk_readahead_multiplier" : None,
-			"disk_scheduler_quantum" : None,
+			"elevator"           : None,
+			"alpm"               : None,
+			"apm"                : None,
+			"spindown"           : None,
+			"readahead"          : None,
+			"readahead_multiply" : None,
+			"scheduler_quantum"  : None,
 		}
 
 	def _update_idle(self, dev):
@@ -156,21 +130,19 @@ class DiskPlugin(tuned.plugins.Plugin):
 			log.debug("%s load: read %f, write %f" % (dev, self.stats[dev]["read"], self.stats[dev]["write"]))
 			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))
 
-	@command("disk", "elevator")
-	def _set_elevator(self, dev, value):
-		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
-		old_value = tuned.utils.commands.read_file(sys_file)
-		tuned.utils.commands.write_to_file(sys_file, value)
-		return old_value
-
-	@command_revert("disk", "elevator")
-	def _revert_elevator(self, dev, value):
-		sys_file = os.path.join("/sys/block/", dev, "queue/scheduler")
+	@command_set("elevator", per_device=True)
+	def _set_elevator(self, value, device):
+		sys_file = os.path.join("/sys/block/", device, "queue/scheduler")
 		tuned.utils.commands.write_to_file(sys_file, value)
 
-	@command("disk", "disk_alpm")
-	def _set_disk_alpm(self, value):
-		old_value = ""
+	@command_get("elevator")
+	def _get_elevator(self, device):
+		# TODO: ticket #21, does not work
+		sys_file = os.path.join("/sys/block/", device, "queue/scheduler")
+		return tuned.utils.commands.read_file(sys_file)
+
+	def _alpm_policy_files(self):
+		policy_files = []
 		for host in os.listdir("/sys/class/scsi_host/"):
 			port_cmd_path = os.path.join("/sys/class/scsi_host/", host, "ahci_port_cmd")
 			try:
@@ -184,68 +156,74 @@ class DiskPlugin(tuned.plugins.Plugin):
 				log.error("Unexpected value in %s" % (port_cmd_path))
 				continue
 
-			policy = self._options["disk_alpm"]
-			if port_cmd_int & 24000 != 0:
-				policy = "max_performance"
+			policy_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
+			policy_files.append(policy_file)
 
-			sys_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
-			if len(old_value) == 0:
-				old_value = tuned.utils.commands.read_file(sys_file)
-			tuned.utils.commands.write_to_file(sys_file, policy)
+		return policy_files
 
-		return old_value
+	@command_set("alpm")
+	def _set_alpm(self, policy):
+		if policy & 24000 != 0:
+			policy = "max_performance"
 
-	@command_revert("disk", "disk_alpm")
-	def _revert_disk_alpm(self, value):
-		for host in os.listdir("/sys/class/scsi_host/"):
-			tuned.utils.commands.write_to_file(sys_file, value)
+		for policy_file in self._alpm_policy_files():
+			tuned.utils.commands.write_to_file(policy_file, policy)
 
-	@command("disk", "disk_apm")
-	def _set_disk_apm(self, dev, value):
-		#TODO: get current value using hdparm -B. My disk does not support it...
-		tuned.utils.commands.execute(["hdparm", "-B", value, "/dev/" + dev])
-		return
+	@command_get("alpm")
+	def _get_alpm(self):
+		for policy_file in self._alpm_policy_files():
+			return tuned.utils.commands.read_file(policy_file)
+		return None
 
-	@command_revert("disk", "disk_apm")
-	def _revert_disk_apm(self, dev, value):
-		tuned.utils.commands.execute(["hdparm", "-B", value, "/dev/" + dev])
+	@command_set("apm", per_device=True)
+	def _set_apm(self, value, device):
+		tuned.utils.commands.execute(["hdparm", "-B", value, "/dev/" + device])
 
-	@command("disk", "disk_spindown")
-	def _set_disk_spindown(self, dev, value):
-		# There's no way how to get current/old spindown value...
-		tuned.utils.commands.execute(["hdparm", "-S", value, "/dev/" + dev])
+	@command_get("apm")
+	def _get_apm(self, device):
+		# TODO: ticket #22, get current value using hdparm -B. My disk does not support it...
+		return None
 
-	@command("disk", "disk_readahead_multiplier")
-	def _set_disk_readahead_multiplier(self, dev, value):
-		sys_file = os.path.join("/sys/block/", dev, "queue/read_ahead_kb")
+	@command_set("spindown", per_device=True)
+	def _set_spindown(self, value, device):
+		pass
 
-		old_value = tuned.utils.commands.read_file(sys_file).strip()
-		if len(old_value) == 0:
-			return
-		new_value = int(int(old_value) * float(value))
-		
-		tuned.utils.commands.write_to_file(sys_file, new_value)
-		return old_value
+	@command_get("spindown"):
+	def _get_spindown(self, device):
+		# TODO: ticket #23, There's no way how to get current/old spindown value.
+		tuned.utils.commands.execute(["hdparm", "-S", value, "/dev/" + device])
 
-	@command_revert("disk", "disk_readahead_multiplier")
-	def _revert_disk_readahead_multiplier(self, dev, value):
-		sys_file = os.path.join("/sys/block/", dev, "queue/read_ahead_kb")
+	@command_set("readahead", per_device=True)
+	def _set_readahead(self, value, device):
+		sys_file = os.path.join("/sys/block/", device, "queue/read_ahead_kb")
+		tuned.utils.commands.write_to_file(sys_file, "%d" % value)
+
+	@command_get("readahead", per_device=True)
+	def _get_readahead(self, device):
+		sys_file = os.path.join("/sys/block/", device, "queue/read_ahead_kb")
+		value = tuned.utils.commands.read_file(sys_file).strip()
+		if len(value) == 0:
+			return None
+		return int(value)
+
+	@command_set("readahead_multiply", per_device=True) #, revert_as="readhead")
+	def _multiply_readahead(self, mulitplier, device):
+		old_value = self._get_readahead(device)
+		new_value = int(old_value * float(multiplier))
+		# TODO: implement revert_as (or something suitable)
+		log.warn("readhead_multiply not implemented")
+		#self._set_readahead(new_value, device)
+
+	@command_set("scheduler_quantum", per_device=True)
+	def _set_scheduler_quantum(self, value, device):
+		sys_file = os.path.join("/sys/block/", device, "queue/iosched/quantum")
 		tuned.utils.commands.write_to_file(sys_file, value)
 
-	@command("disk", "disk_scheduler_quantum")
-	def _set_disk_scheduler_quantum(self, dev, value):
-		sys_file = os.path.join("/sys/block/", dev, "queue/iosched/quantum")
-
-		old_value = tuned.utils.commands.read_file(sys_file).strip()
-		if len(old_value) == 0:
+	@command_get("scheduler_quantum")
+	def _get_scheduler_quantum(self, device):
+		sys_file = os.path.join("/sys/block/", device, "queue/iosched/quantum")
+		value = tuned.utils.commands.read_file(sys_file).strip()
+		if len(value) == 0:
 			log.info("disk_scheduler_quantum option is not supported by this HW")
-			return
-
-		tuned.utils.commands.write_to_file(sys_file, value)
-		return old_value
-
-	@command_revert("disk", "disk_scheduler_quantum")
-	def _revert_disk_scheduler_quantum(self, dev, value):
-		sys_file = os.path.join("/sys/block/", dev, "queue/iosched/quantum")
-		tuned.utils.commands.write_to_file(sys_file, value)
-
+			return None
+		return int(value)
