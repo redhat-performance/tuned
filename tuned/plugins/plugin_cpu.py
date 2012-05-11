@@ -21,16 +21,6 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 		self._load_monitor = None
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
 
-		if not tuned.utils.storage.Storage.get_instance().data.has_key("cpu"):
-			tuned.utils.storage.Storage.get_instance().data["cpu"] = {}
-
-		self.register_command("cpu_governor",
-								self._set_cpu_governor,
-								self._revert_cpu_governor)
-		self.register_command("cpu_multicore_powersave",
-								self._set_cpu_multicore_powersave,
-								self._revert_cpu_multicore_powersave)
-
 	def _delayed_init(self):
 		if self._options["force_latency"] is None:
 			self._load_monitor = tuned.monitors.get_repository().create("load", self._devices)
@@ -42,12 +32,12 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"load_threshold" : 0.2,
-			"latency_low"    : 100,
-			"latency_high"   : 1000,
-			"force_latency"  : None,
-			"cpu_governor"   : None,
-			"cpu_multicore_powersave" : None,
+			"load_threshold"      : 0.2,
+			"latency_low"         : 100,
+			"latency_high"        : 1000,
+			"force_latency"       : None,
+			"governor"            : None,
+			"multicore_powersave" : None,
 		}
 
 	def cleanup(self):
@@ -108,7 +98,8 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 
 		if old_value.startswith("System's multi core scheduler setting"):
 			try:
-				old_value = old_value.split(' ')[:-1][:-1] # get "2\n" and remove '\n'
+				# get "2\n" and remove '\n'
+				old_value = old_value.split(' ')[:-1][:-1]
 			except IndexError:
 				old_value = None
 
