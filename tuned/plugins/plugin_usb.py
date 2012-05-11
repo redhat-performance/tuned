@@ -1,44 +1,44 @@
 import tuned.plugins
 import tuned.log
+from tuned.utils.commands import *
+import glob
+
+log = tuned.log.get()
 
 class USBPlugin(tuned.plugins.Plugin):
 	"""
+	Plugin for tuning various options of USB subsystem.
 	"""
-
-	def __init__(self, devices, options):
-		super(self.__class__, self).__init__(devices, options)
-
-		self.register_command("enable_usb_autosupend",
-								self._set_enable_usb_autosupend,
-								self._revert_enable_usb_autosupend)
 
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"enable_usb_autosuspend": None,
+			"autosuspend" : None,
 		}
+
+	@classmethod
+	def tunable_devices(cls):
+		control_files = glob.glob("/sys/bus/usb/devices/*/power/control")
+		available = set(map(lambda name, name.split("/")[5], control_files))
+		return available
 
 	def update_tuning(self):
 		# FIXME: can we drop this method?
 		pass
 
-	@command("usb", "enable_usb_autosupend")
-	def _set_enable_usb_autosupend(self, value):
-		old_value = {}
-		if value == "1" or value == "true":
-			value = "1"
-		elif value == "0" or value == "false":
-			value = "0"
-		else:
-			log.warn("Incorrect enable_usb_autosuspend value.")
-			return
-		for sys_file in glob.glob("/sys/bus/usb/devices/*/power/autosuspend"):
-			old_value[sys_file] = tuned.utils.commands.read_file(sys_file)
-			tuned.utils.commands.write_to_file(sys_file, value)
+	def _autosuspend_sysfile(self, device):
+		return "/sys/bus/usb/devices/%s/power/autosuspend" % device
 
-		return old_value
+	@command_set("autosuspend", per_device=True)
+	def _set_autosuspend(self, value, device):
+		value = self._config_bool(value)
+		if value is None:
+			log.warn("Invalid value for USB autosuspend.")
 
-	@command_revert("usb", "enable_usb_autosupend")
-	def _revert_enable_usb_autosupend(self, values):
-		for sys_file, value in values.iteritems():
-			tuned.utils.commands.write_to_file(sys_file, value)
+		sys_file = self._autosuspend_sysfile(device)
+		tuned.utils.commands.write_to_file(sys_file, value)
+
+	@command_get("autosuspend"):
+	def _get_autosuspend(self, device)
+		sys_file = self._autosuspend_sysfile(device)
+		return tuned.utils.commands.read_file(sys_file)
