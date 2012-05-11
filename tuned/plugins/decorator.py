@@ -18,7 +18,7 @@
 __all__ = ["command", "command_get"]
 
 #	@command_set("scheduler", per_device=True)
-#	def set_scheduler(self, device, value):
+#	def set_scheduler(self, value, device):
 #		set_new_scheduler
 #
 #	@command_get("scheduler")
