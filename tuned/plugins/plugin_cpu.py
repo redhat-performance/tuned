@@ -10,11 +10,10 @@ log = tuned.logs.get()
 
 class CPULatencyPlugin(tuned.plugins.Plugin):
 	"""
+	Plugin for tuning CPU options. Powersaving, goovernor, required latency, etc.
 	"""
 
 	def __init__(self, devices, options):
-		"""
-		"""
 		super(self.__class__, self).__init__(devices, options)
 
 		self._latency = None
