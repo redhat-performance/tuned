@@ -1,11 +1,14 @@
-import base
-import repository
-import rfkill
+from base import *
+from rfkill import *
+from decorator import *
 
-__all__ = ["repository", "get_repository", "Plugin", "RFKillPlugin"]
+import repository
+
+__all__ = [
+	"repository", "get_repository",
+	"Plugin", "RFKillPlugin",
+	"command_set", "command_get",
+]
 
 def get_repository():
 	return repository.PluginRepository.get_instance()
-
-Plugin = base.Plugin
-RFKillPlugin = rfkill.RFKillPlugin

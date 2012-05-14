@@ -1,10 +1,11 @@
-import tuned.plugins
-import tuned.log
+import base
+from decorator import *
+import tuned.logs
 from tuned.utils.commands import *
 
-log = tuned.log.get()
+log = tuned.logs.get()
 
-class RFKillPlugin(tuned.plugins.Plugin):
+class RFKillPlugin(base.Plugin):
 	"""
 	Base class for plugins which can be enabled/disabled using rfkill.
 	"""

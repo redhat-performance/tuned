@@ -15,7 +15,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-__all__ = ["command", "command_get"]
+__all__ = ["command_set", "command_get"]
 
 #	@command_set("scheduler", per_device=True)
 #	def set_scheduler(self, value, device):
