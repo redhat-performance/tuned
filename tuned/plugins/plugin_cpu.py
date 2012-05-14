@@ -1,14 +1,14 @@
-import tuned.plugins
+import base
 import tuned.logs
 import tuned.monitors
-from tuned.plugins.decorator import *
+from decorator import *
 import glob
 import os
 import struct
 
 log = tuned.logs.get()
 
-class CPULatencyPlugin(tuned.plugins.Plugin):
+class CPULatencyPlugin(base.Plugin):
 	"""
 	Plugin for tuning CPU options. Powersaving, goovernor, required latency, etc.
 	"""
@@ -19,6 +19,7 @@ class CPULatencyPlugin(tuned.plugins.Plugin):
 		self._latency = None
 		self._load_monitor = None
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
+
 
 	def _delayed_init(self):
 		if self._options["force_latency"] is None:

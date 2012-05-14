@@ -192,7 +192,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 	def _set_spindown(self, value, device):
 		pass
 
-	@command_get("spindown"):
+	@command_get("spindown")
 	def _get_spindown(self, device):
 		# TODO: ticket #23, There's no way how to get current/old spindown value.
 		tuned.utils.commands.execute(["hdparm", "-S", value, "/dev/" + device])
@@ -205,7 +205,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 		sys_file = self._readahead_file(device)
 		tuned.utils.commands.write_to_file(sys_file, "%d" % value)
 
-	@command_get("readahead", per_device=True)
+	@command_get("readahead")
 	def _get_readahead(self, device):
 		sys_file = self._readahead_file(device)
 		value = tuned.utils.commands.read_file(sys_file).strip()
