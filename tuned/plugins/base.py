@@ -86,7 +86,7 @@ class Plugin(object):
 	def _storage_key(self, command_name, device):
 		if device is not None:
 			return "%s@%s" % [command_name, device]
-		else
+		else:
 			return command_name
 
 	# TODO: should be in storage class
@@ -156,9 +156,9 @@ class Plugin(object):
 		raise NotImplementedError()
 
 	def _config_bool(value, true_value="1", false_value="0"):
-		if value == True || value == "1" || value.lower() == "true":
+		if value == True or value == "1" or value.lower() == "true":
 			return true_value
-		elif value == False || value == "0" || value.lower() == "false":
+		elif value == False or value == "0" or value.lower() == "false":
 			return false_value
 		else:
 			return None
