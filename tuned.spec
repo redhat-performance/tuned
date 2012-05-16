@@ -104,7 +104,7 @@ fi
 %{_prefix}/lib/tuned
 %config(noreplace) %{_sysconfdir}/tuned/active_profile
 %{_sysconfdir}/tmpfiles.d
-%{_sysconfdir}/dbus-1/systemd.d/com.redhat.tuned.conf
+%{_sysconfdir}/dbus-1/system.d/com.redhat.tuned.conf
 %{_unitdir}/tuned.service
 %dir %{_localstatedir}/log/tuned
 %dir %{_localstatedir}/run/tuned

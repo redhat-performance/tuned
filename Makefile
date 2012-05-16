@@ -70,7 +70,7 @@ install:
 
 	# dbus configuration
 	mkdir -p $(DESTDIR)/etc/dbus-1/system.d
-	install -m 0644 dbus.conf $(DESTDIR)/etc/dbus-d/system.d/com.redhat.tuned.conf
+	install -m 0644 dbus.conf $(DESTDIR)/etc/dbus-1/system.d/com.redhat.tuned.conf
 
 	# manual pages *.8
 	mkdir -p $(DESTDIR)/usr/share/man/man8

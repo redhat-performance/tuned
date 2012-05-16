@@ -19,7 +19,7 @@ class USBPlugin(tuned.plugins.Plugin):
 	@classmethod
 	def tunable_devices(cls):
 		control_files = glob.glob("/sys/bus/usb/devices/*/power/control")
-		available = set(map(lambda name, name.split("/")[5], control_files))
+		available = set(map(lambda name: name.split("/")[5], control_files))
 		return available
 
 	def update_tuning(self):
@@ -38,7 +38,7 @@ class USBPlugin(tuned.plugins.Plugin):
 		sys_file = self._autosuspend_sysfile(device)
 		tuned.utils.commands.write_to_file(sys_file, value)
 
-	@command_get("autosuspend"):
-	def _get_autosuspend(self, device)
+	@command_get("autosuspend")
+	def _get_autosuspend(self, device):
 		sys_file = self._autosuspend_sysfile(device)
 		return tuned.utils.commands.read_file(sys_file)

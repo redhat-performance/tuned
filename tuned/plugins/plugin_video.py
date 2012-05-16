@@ -37,7 +37,7 @@ class VideoPlugin(tuned.plugins.Plugin):
 		return {
 			"method" : "/sys/class/drm/%s/device/power_method" % device,
 			"profile": "/sys/class/drm/%s/device/power_profile" % device,
-		]
+		}
 
 	@command_set("radeon_powersave", per_device=True)
 	def _set_radeon_powersave(self, value, device):
