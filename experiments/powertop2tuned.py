@@ -80,6 +80,8 @@ class PowertopHTMLParser(HTMLParser):
 
 	def handle_starttag(self, tag, attrs):
 		self.lastStartTag = tag
+		if self.lastStartTag == "div" and dict(attrs)["id"]  == "tuning":
+			self.inProperTable = True
 		if self.inProperTable and tag == "td":
 			self.tdCounter += 1
 
@@ -122,6 +124,7 @@ class PowertopHTMLParser(HTMLParser):
 		if tag == "tr":
 			self.tdCounter = 0
 		if self.inScript:
+			print self.currentScript
 			self.inScript = False
 			# Command is not handled, so just store it in the script
 			if not self.parse_command(self.currentScript.split("\n")[-1]):
@@ -133,8 +136,6 @@ class PowertopHTMLParser(HTMLParser):
 
 	def handle_data(self, data):
 		prefix = self.prefix
-		if self.lastStartTag == "h2" and data == "Software settings in need of tuning":
-			self.inProperTable = True
 		if self.inProperTable and self.tdCounter == 1:
 			self.lastDesc = data
 			if self.lastDesc.lower().find("autosuspend") != -1 and (self.lastDesc.lower().find("keyboard") != -1 or self.lastDesc.lower().find("mouse") != -1):
@@ -144,10 +145,10 @@ class PowertopHTMLParser(HTMLParser):
 			self.tdCounter = 0
 			if not self.inScript:
 				self.currentScript += "\t# " + self.lastDesc + "\n"
-				self.currentScript += "\t" + prefix + data
+				self.currentScript += "\t" + prefix + data.strip()
 				self.inScript = True
 			else:
-				self.currentScript += data
+				self.currentScript += data.strip()
 
 class PowertopProfile:
 	BAD_PRIVS = 100
