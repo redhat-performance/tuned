@@ -116,7 +116,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 				level = self.devidle[dev]["LEVEL"]
 
 				log.debug("Level changed to %d (power %s, spindown %s)" % (level, self.power[level], self.spindown[level]))
-				os.system("hdparm -S"+self.power[level]+" -B"+self.spindown[level]+" /dev/"+dev+" > /dev/null 2>&1")
+				os.system("hdparm -S"+self.spindown[level]+" -B"+self.power[level]+" /dev/"+dev+" > /dev/null 2>&1")
 
 			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["read"] == 0 or self.devidle[dev]["write"] == 0):
 				self.devidle[dev].setdefault("LEVEL", 0)
@@ -126,7 +126,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 				level = self.devidle[dev]["LEVEL"]
 
 				log.debug("Level changed to %d (power %s, spindown %s)" % (level, self.power[level], self.spindown[level]))
-				os.system("hdparm -S"+self.power[level]+" -B"+self.spindown[level]+" /dev/"+dev+" > /dev/null 2>&1")
+				os.system("hdparm -S"+self.spindown[level]+" -B"+self.power[level]+" /dev/"+dev+" > /dev/null 2>&1")
 
 			log.debug("%s load: read %f, write %f" % (dev, self.stats[dev]["read"], self.stats[dev]["write"]))
 			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))
