@@ -1,22 +1,20 @@
-import os, copy
-import tuned.plugins
+import base
+from decorators import *
 import tuned.logs
-import tuned.monitors
-from tuned.plugins.decorator import *
-import struct
+
+import os
 
 log = tuned.logs.get()
 
-class DiskPlugin(tuned.plugins.Plugin):
+class DiskPlugin(base.Plugin):
 	"""
 	Plugin for tuning options of disks.
 	"""
 
 	_supported_vendors = ["ATA", "SCSI"]
 
-	def __init__(self, devices, options):
-		super(self.__class__, self).__init__(devices, options)
-
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
 		
 		self.devidle = {}
 		self.stats = {}
@@ -26,7 +24,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 
 		self._load_monitor = None
 		if self.dynamic_tuning:
-			self._load_monitor = tuned.monitors.get_repository().create("disk", devices)
+			self._load_monitor = self._monitors_repository.create("disk", self._devices)
 
 	@classmethod
 	def tunable_devices(cls):
@@ -97,7 +95,7 @@ class DiskPlugin(tuned.plugins.Plugin):
 		log.debug("Cleanup")
 
 		if self._load_monitor:
-			tuned.monitors.get_repository().delete(self._load_monitor)
+			self._monitors_repository.delete(self._load_monitor)
 
 			for dev in self.devidle.keys():
 				if self.devidle[dev]["LEVEL"] > 0:
@@ -213,13 +211,13 @@ class DiskPlugin(tuned.plugins.Plugin):
 			return None
 		return int(value)
 
-	@command_set("readahead_multiply", per_device=True) #, revert_as="readhead")
-	def _multiply_readahead(self, mulitplier, device):
-		old_value = self._get_readahead(device)
-		new_value = int(old_value * float(multiplier))
-		# TODO: implement revert_as (or something suitable)
-		log.warn("readhead_multiply not implemented")
-		#self._set_readahead(new_value, device)
+#	@command_set("readahead_multiply", per_device=True) #, revert_as="readhead")
+#	def _multiply_readahead(self, mulitplier, device):
+#		old_value = self._get_readahead(device)
+#		new_value = int(old_value * float(multiplier))
+#		# TODO: implement revert_as (or something suitable)
+#		log.warn("readhead_multiply not implemented")
+#		#self._set_readahead(new_value, device)
 
 	def _scheduler_quantum_file(self, device):
 		return os.path.join("/sys/block/", device, "queue/iosched/quantum")
