@@ -15,22 +15,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import os
-import units
-import utils
 import logs
-import monitors
-import plugins
-import threading
-import ConfigParser
-import glob
-from subprocess import *
-import pprint
-import fnmatch
 
-import tuned.plugins
+import ConfigParser
+import fnmatch
+import os
+import pprint
 
 log = logs.get()
+
+__all__ = ["Profile"]
 
 class Profile(object):
 	def __init__(self, manager, config_file):
