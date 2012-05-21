@@ -25,11 +25,11 @@ class Plugin(object):
 
 	# instance methods
 
-	def __init__(self, devices = [], options = None):
+	def __init__(self, storage_factory, devices=None, options=None):
+		if devices is None:
+			devices = []
 		self._devices = devices
-		if not self._devices:
-			self._devices = []
-		self._commands = {}
+
 		self._options = self._get_default_options()
 		self._options["_load_path"] = ""
 		if not self._options.has_key("dynamic_tuning"):
@@ -39,9 +39,9 @@ class Plugin(object):
 		if options is not None:
 			self._merge_options(options)
 
-		# TODO: cannot be injected now
-		self._storage = tuned.utils.storage.Storage.get_instance()
+		self._storage = storage_factory.create(self.__class__.__name__)
 
+		self._commands = {}
 		self._autoregister_commands()
 		assert self._commands_are_valid()
 
@@ -82,67 +82,45 @@ class Plugin(object):
 				return False
 		return True
 
-	# TODO: should be in storage class
-	def _storage_key(self, command_name, device):
+	def _storage_key(self, command_name, device = None):
 		if device is not None:
-			return "%s@%s" % [command_name, device]
+			return "%s@%s" % (command_name, device)
 		else:
 			return command_name
 
-	# TODO: should be in storage class
-	def _storage_get(self, command_name, device = None):
-		if not self._storage.data.has_key(self.__class__):
-			return None
-		key = self._storage_key(command_name, device)
-		return self._storage.data[self.__class__].get(key, None)
+	def execute_command(self, command_name, command):
+		if not self._options.has_key(command_name):
+			continue
 
-	# TODO: should be in storage class
-	def _storage_set(self, value, command_name, device = None):
-		self._storage.data.setdefault(self.__class__, [])
-		key = self._storage_key(command_name, device)
-		self._storage.data[self.__class__][key] = value
+		new_value = self._options[command_name]
 
-	# TODO: should be in storage class
-	def _storage_remove(self, command_name, device = None):
-		self._storage.data.setdefault(self.__class__, [])
-		key = self._storage_key(command_name, device)
-		del self._storage.data[self.__class__][key]
+		devices = self._devices if command["per_device"] else [None]
+		for device in devices:
+			current_value = command["get"](device)
+			storage_key = self._storage_key(command_name, device)
+			self._storage.set(storage_key, current_value)
+			command["set"](new_value, device)
+
+	def cleanup_command(self, command_name, command):
+		if not self._options.has_key(option):
+			continue
+
+		devices = self._devices if command["per_device"] else [None]
+		for device in devices:
+			storage_key = self._storage_key(command_name, device)
+			old_value = self._storage.get(storage_key)
+			if old_value is None:
+				continue
+			command["set"](old_value, device)
+			self._storage.unset(storage_key)
 
 	def execute_commands(self):
 		for command_name, command in self._commands.iteritems():
-			if not self._options.has_key(command_name):
-				continue
-
-			new_value = self._options[command_name]
-
-			# TODO: refactor
-			if command["per_device"]:
-				for device in self._devices:
-					current_value = command["get"](device)
-					self._storage_set(current_value, command_name, device)
-					command["set"](new_value, device)
-			else:
-				current_value = command["get"]()
-				self._storage_set(current_valuie, command_name)
-				command["set"](new_value)
+			self.execute_command(command_name, command)
 
 	def cleanup_commands(self):
 		for command_name, command in self._commands.iteritems():
-			if not self._options.has_key(option):
-				continue
-
-			# TODO: refactor
-			if command["per_device"]:
-				for device in self._devices:
-					old_value = self._storage_get(command_name, device)
-					if old_value is not None:
-						command["set"](old_value, device)
-						self._storage_remove(command_name, device)
-			else:
-				old_value = self._storage_get(command_name)
-				if old_value is not None:
-					commad["set"](old_value)
-					self._storage_remove(command_name)
+			self.cleanup_command(command_name, command)
 
 	def cleanup(self):
 		pass
