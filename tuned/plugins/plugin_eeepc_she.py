@@ -1,12 +1,11 @@
-import tuned.plugins
+import base
 import tuned.logs
-import tuned.monitors
+
 import os
-import struct
 
 log = tuned.logs.get()
 
-class EeePCSHEPlugin(tuned.plugins.Plugin):
+class EeePCSHEPlugin(base.Plugin):
 	"""
 	Plugin for tuning FSB (front side bus) speed on Asus EEE PCs with SHE (Super Hybrid Engine) support.
 	"""
@@ -19,7 +18,7 @@ class EeePCSHEPlugin(tuned.plugins.Plugin):
 		self._she_mode = None
 		self._load_monitor = None
 		if self.dynamic_tuning:
-			self._load_monitor = tuned.monitors.get_repository().create("load", devices)
+			self._load_monitor = self._monitors_repository.create("load", devices)
 
 	@classmethod
 	def is_supported(cls):
@@ -40,7 +39,7 @@ class EeePCSHEPlugin(tuned.plugins.Plugin):
 
 	def cleanup(self):
 		if self._load_monitor:
-			tuned.monitors.get_repository().delete(self._load_monitor)
+			self._monitors_repository.delete(self._load_monitor)
 
 	def update_tuning(self):
 		load = self._load_monitor.get_load()["system"]
