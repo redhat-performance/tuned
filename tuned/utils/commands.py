@@ -15,14 +15,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import os, copy
-import tuned.plugins
 import tuned.logs
-import tuned.monitors
-import tuned.utils.storage
-import struct
-from subprocess import *
-from functools import wraps
+
+import copy
+import os
 
 log = tuned.logs.get()
 
