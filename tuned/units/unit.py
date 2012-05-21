@@ -9,17 +9,19 @@ class Unit(object):
 	device.
 	"""
 
-	__slots__ = ["_name", "_plugin"]
+	__slots__ = ["_name", "_plugin", "_plugin_repository", "_monitor_repository"]
 
-	def __init__(self, name, plugin_name, config):
+	def __init__(self, plugin_repository, monitor_repository, name, plugin_name, config):
 		assert type(name) is str
 		assert type(plugin_name) is str
 		assert config is None or type(config) is dict
 
-		(devices, options) = self._get_plugin_params(config)
-
+		self._plugin_repository = plugin_repository
+		self._monitor_repository = monitor_repository
 		self._name = name
-		self._plugin = tuned.plugins.get_repository().create(plugin_name, devices, options)
+
+		(devices, options) = self._get_plugin_params(config)
+		self._plugin = self._plugin_repository.create(monitor_repository, plugin_name, devices, options)
 
 	@property
 	def name(self):
@@ -30,7 +32,7 @@ class Unit(object):
 		return self._plugin
 
 	def clean(self):
-		tuned.plugins.get_repository().delete(self._plugin)
+		self._plugin_repository.delete(self._plugin)
 		self._plugin = None
 
 	def _get_plugin_params(self, config):
