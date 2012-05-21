@@ -1,4 +1,3 @@
-import tuned.patterns
 import tuned.logs
 import tuned.utils
 import tuned.plugins
@@ -6,17 +5,23 @@ import tuned.plugins.exception
 
 log = tuned.logs.get()
 
-class PluginRepository(tuned.patterns.Singleton):
-	def __init__(self):
+__all__ = ["Repository"]
+
+class Repository(object):
+
+	__slots__ = ["_loader", "_plugins", "_storage_factory"]
+
+	def __init__(self, storage_factory):
 		super(self.__class__, self).__init__()
 		self._loader = tuned.utils.PluginLoader("tuned.plugins", "plugin_", tuned.plugins.Plugin)
 		self._plugins = set()
+		self._storage_factory = storage_factory
 
-	def create(self, plugin_name, devices, options):
+	def create(self, monitor_repository, plugin_name, devices, options):
 		log.debug("creating plugin %s" % plugin_name)
 		try:
 			plugin_cls = self._loader.load(plugin_name)
-			plugin_instance = plugin_cls(devices, options)
+			plugin_instance = plugin_cls(monitor_repository, storage_factory, devices, options)
 			self._plugins.add(plugin_instance)
 			return plugin_instance
 		except Exception as exception:

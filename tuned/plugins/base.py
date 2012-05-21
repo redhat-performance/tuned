@@ -25,7 +25,7 @@ class Plugin(object):
 
 	# instance methods
 
-	def __init__(self, storage_factory, devices=None, options=None):
+	def __init__(self, monitor_repository, storage_factory, devices=None, options=None):
 		if devices is None:
 			devices = []
 		self._devices = devices
@@ -39,6 +39,7 @@ class Plugin(object):
 		if options is not None:
 			self._merge_options(options)
 
+		self._monitor_repository = monitor_repository
 		self._storage = storage_factory.create(self.__class__.__name__)
 
 		self._commands = {}
@@ -90,7 +91,7 @@ class Plugin(object):
 
 	def execute_command(self, command_name, command):
 		if not self._options.has_key(command_name):
-			continue
+			return
 
 		new_value = self._options[command_name]
 
@@ -103,14 +104,14 @@ class Plugin(object):
 
 	def cleanup_command(self, command_name, command):
 		if not self._options.has_key(option):
-			continue
+			return
 
 		devices = self._devices if command["per_device"] else [None]
 		for device in devices:
 			storage_key = self._storage_key(command_name, device)
 			old_value = self._storage.get(storage_key)
 			if old_value is None:
-				continue
+				return
 			command["set"](old_value, device)
 			self._storage.unset(storage_key)
 
