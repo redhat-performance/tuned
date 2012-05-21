@@ -25,7 +25,7 @@ class Plugin(object):
 
 	# instance methods
 
-	def __init__(self, monitor_repository, storage_factory, devices=None, options=None):
+	def __init__(self, monitors_repository, storage_factory, devices=None, options=None):
 		if devices is None:
 			devices = []
 		self._devices = devices
@@ -39,7 +39,7 @@ class Plugin(object):
 		if options is not None:
 			self._merge_options(options)
 
-		self._monitor_repository = monitor_repository
+		self._monitors_repository = monitors_repository
 		self._storage = storage_factory.create(self.__class__.__name__)
 
 		self._commands = {}

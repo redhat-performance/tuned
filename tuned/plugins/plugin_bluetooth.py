@@ -1,9 +1,6 @@
-import tuned.plugins
-import tuned.log
+import rfkill
 
-log = tuned.log.get()
-
-class BluetoothPlugin(tuned.plugins.RFKillPlugin):
+class BluetoothPlugin(rfkill.RFKillPlugin):
 	"""
 	Plugin for tuning bluetooth devices.
 	"""

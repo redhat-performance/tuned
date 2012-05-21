@@ -1,8 +1,7 @@
 import base
+from decorators import *
 import tuned.logs
-import tuned.monitors
-from decorator import *
-import glob
+
 import os
 import struct
 
@@ -13,17 +12,16 @@ class CPULatencyPlugin(base.Plugin):
 	Plugin for tuning CPU options. Powersaving, goovernor, required latency, etc.
 	"""
 
-	def __init__(self, devices, options):
-		super(self.__class__, self).__init__(devices, options)
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
 
 		self._latency = None
 		self._load_monitor = None
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
 
-
 	def _delayed_init(self):
 		if self._options["force_latency"] is None:
-			self._load_monitor = tuned.monitors.get_repository().create("load", self._devices)
+			self._load_monitor = tuned._monitors_repository.create("load", self._devices)
 			self.update_tuning = self._update_tuning_dynamic
 		else:
 			self._set_latency(self._options["force_latency"])
@@ -42,7 +40,7 @@ class CPULatencyPlugin(base.Plugin):
 
 	def cleanup(self):
 		if self._load_monitor is not None:
-			tuned.monitors.get_repository().delete(self._load_monitor)
+			self._monitors_repository.delete(self._load_monitor)
 
 		os.close(self._cpu_latency_fd)
 
@@ -85,11 +83,11 @@ class CPULatencyPlugin(base.Plugin):
 				pass
 		return old_value
 
-	@command_set("multicore_powersave")
+#	@command_set("multicore_powersave")
 	def _set_multicore_powersave(self, value):
 		tuned.utils.commands.execute(["cpupower", "set", "-m", value])
 
-	@command_get("multicore_powersave")
+#	@command_get("multicore_powersave")
 	def _get_multicore_powersave(self):
 		old_value = tuned.utils.commands.execute(["cpupower", "info", "-m"])
 		if old_value.find("not supported") != -1:
