@@ -1,28 +1,25 @@
-import tuned.plugins
+import base
 import tuned.logs
-import tuned.monitors
 from tuned.utils.nettool import ethcard
 import os
-import struct
-import copy
 
 log = tuned.logs.get()
 
-class NetTuningPlugin(tuned.plugins.Plugin):
+class NetTuningPlugin(base.Plugin):
 	"""
 	Plugin for ethernet card options tuning.
 	"""
 
-	def __init__(self, devices, options):
-		super(self.__class__, self).__init__(devices, options)
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
 
 		self.devidle = {}
 		self.stats = {}
-		log.info("Devices: %s" % str(devices));
+		log.info("Devices: %s" % str(self._devices));
 
 		self._load_monitor = None
 		if self.dynamic_tuning:
-			self._load_monitor = tuned.monitors.get_repository().create("net", devices)
+			self._load_monitor = self._monitors_repository.create("net", self._devices)
 
 	@classmethod
 	def tunable_devices(cls):
@@ -82,7 +79,7 @@ class NetTuningPlugin(tuned.plugins.Plugin):
 		log.info("Cleanup")
 
 		if self._load_monitor:
-			tuned.monitors.get_repository().delete(self._load_monitor)
+			self._monitors_repository.delete(self._load_monitor)
 
 			for dev in self.devidle.keys():
 				if self.devidle[dev]["LEVEL"] > 0:
