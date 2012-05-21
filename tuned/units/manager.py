@@ -21,14 +21,14 @@ class UnitManager(tuned.patterns.Singleton):
 		return self._units.copy()
 
 	def create(self, name, plugin_name, config):
-		log.info("creating unit %s" % name)
+		log.info("creating unit '%s'" % name)
 		try:
 			new_unit = tuned.units.unit.Unit(name, plugin_name, config)
 			self._units.add(new_unit)
 			return new_unit
 		except tuned.exceptions.TunedException as e:
 			e.log()
-			log.error("unable to create unit %s" % name)
+			log.error("unable to create unit '%s'" % name)
 
 	def delete(self, unit):
 		assert type(unit) is tuned.units.unit.Unit

@@ -72,7 +72,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	def switch_to_default_profile(self):
 		profile = self.get_default_profile()
-		log.info("Switching to default profile: %s" % (profile))
+		log.info("Switching to default profile: %s" % profile)
 
 		if len(profile) != 0:
 			return self.switch_profile(profile)
@@ -117,7 +117,7 @@ class Controller(exports.interfaces.ExportableInterface):
 		try:
 			self.config_file = profiles
 		except ValueError as e:
-			log.error("Unable to open profile's config file: %s" % (str(e)) )
+			log.error("Unable to open profile's config file: %s" % e)
 			return False
 
 		return self.reload()
