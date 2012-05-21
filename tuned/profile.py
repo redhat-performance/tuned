@@ -126,7 +126,7 @@ class Profile(object):
 
 		# Check if the plugin is supported on this HW
 		try:
-			if not tuned.plugins.get_repository().is_supported(plugin):
+			if not self._manager.plugins_repository.is_supported(plugin):
 				log.info("Plugin %s is not supported on this HW" % (plugin))
 				return
 		except tuned.exceptions.TunedException as e:
@@ -137,14 +137,14 @@ class Profile(object):
 		# If there are no devices set, set all tunable_devices as default
 		if not plugin_cfg.has_key("devices"):
 			try:
-				plugin_cfg["devices"] = tuned.plugins.get_repository().tunable_devices(plugin)
+				plugin_cfg["devices"] = self._manager.plugins_repository.tunable_devices(plugin)
 			except tuned.exceptions.TunedException as e:
 				e.log()
 				log.error("unable to create unit %s" % plugin)
 				return
 		else:
 			devs = plugin_cfg["devices"].split(",") # [sd*, dm*, sda1, sda2]
-			tunable_devices = tuned.plugins.get_repository().tunable_devices(plugin)
+			tunable_devices = self._manager.plugins_repository.tunable_devices(plugin)
 			# Filter out devices which are not mentioned in 'devs'. This is
 			# here because of wildcard-matching support.
 			plugin_cfg["devices"] = [tunable for tunable in tunable_devices if self._fnmatch_list(tunable, devs)]
