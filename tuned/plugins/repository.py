@@ -26,7 +26,7 @@ class Repository(object):
 			self._plugins.add(plugin_instance)
 			return plugin_instance
 		except Exception as exception:
-			plugin_exception = tuned.plugins.exception.LoadPluginException(plugin_name, exception)
+			plugin_exception = exceptions.LoadPluginException(plugin_name, exception)
 			raise plugin_exception
 
 	def tunable_devices(self, plugin_name):

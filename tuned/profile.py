@@ -15,6 +15,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+import exceptions
 import logs
 
 import ConfigParser
@@ -123,7 +124,7 @@ class Profile(object):
 			if not self._manager.plugins_repository.is_supported(plugin):
 				log.info("Plugin %s is not supported on this HW" % (plugin))
 				return
-		except tuned.exceptions.TunedException as e:
+		except exceptions.TunedException as e:
 			e.log()
 			log.error("unable to create unit %s" % plugin)
 			return
@@ -132,7 +133,7 @@ class Profile(object):
 		if not plugin_cfg.has_key("devices"):
 			try:
 				plugin_cfg["devices"] = self._manager.plugins_repository.tunable_devices(plugin)
-			except tuned.exceptions.TunedException as e:
+			except exceptions.TunedException as e:
 				e.log()
 				log.error("unable to create unit %s" % plugin)
 				return
