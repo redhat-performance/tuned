@@ -1,14 +1,10 @@
-import tuned.plugins
-import tuned.logs
-import tuned.monitors
-from tuned.utils.commands import *
-import os
-import struct
-import glob
+import rfkill
+from decorators import *
+#import tuned.logs
 
-log = tuned.logs.get()
+#log = tuned.logs.get()
 
-class WirelessPlugin(tuned.plugins.RFKillPlugin):
+class WirelessPlugin(rfkill.RFKillPlugin):
 	"""
 	Plugin for setting wireless powersaving options.
 	"""
