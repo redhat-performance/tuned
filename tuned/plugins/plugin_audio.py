@@ -1,14 +1,15 @@
-import tuned.plugins
+import base
+from decorators import *
 import tuned.logs
-import tuned.monitors
-from tuned.plugins.decorator import *
+import tuned.utils.commands
+
 import os
 import struct
 import glob
 
 log = tuned.logs.get()
 
-class AudioPlugin(tuned.plugins.Plugin):
+class AudioPlugin(base.Plugin):
 	"""
 	Plugin for tuning audio cards powersaving options.
 	"""
@@ -44,7 +45,7 @@ class AudioPlugin(tuned.plugins.Plugin):
 		tuned.utils.commands.write_to_file(sys_file, value)
 
 	@command_get("ac97_powersave")
-	def _get_ac97_powersave(self, value):
+	def _get_ac97_powersave(self):
 		sys_file = self._ac97_powersave_file()
 		if not os.path.exists(sys_file):
 			return None
@@ -61,7 +62,7 @@ class AudioPlugin(tuned.plugins.Plugin):
 		tuned.utils.commands.write_to_file(sys_file, value)
 
 	@command_get("hda_intel_powersave")
-	def _revert_hda_intel_powersave(self, value):
+	def _get_hda_intel_powersave(self):
 		sys_file = self._hda_intel_powersave_file()
 		if not os.path.exists(sys_file):
 			return None
