@@ -1,14 +1,13 @@
-import tuned.plugins
+import base
+from decorators import *
 import tuned.logs
-import tuned.monitors
 from tuned.utils.commands import *
+
 import glob
-import os
-import struct
 
 log = tuned.logs.get()
 
-class VideoPlugin(tuned.plugins.Plugin):
+class VideoPlugin(base.Plugin):
 	"""
 	Plugin for tuning powersave options for some graphic cards.
 	"""
