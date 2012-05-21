@@ -1,39 +1,32 @@
-import tuned.plugins
+import base
+from decorators import *
 import tuned.logs
-import tuned.monitors
-import tuned.utils.storage
-import os
-import struct
-import glob
 from subprocess import *
 
 log = tuned.logs.get()
 
-class SysctlPlugin(tuned.plugins.Plugin):
+class SysctlPlugin(base.Plugin):
 	"""
 	Plugin for applying custom sysctl options.
 	"""
 
-	def __init__(self, devices, options):
-		"""
-		"""
-		super(self.__class__, self).__init__(devices, options)
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+
 		self._sysctl_original = {}
-		self._sysctl = options
+		self._sysctl = self._options
 		del self._sysctl["_load_path"]
 
-		# Set default sysctl from the previously running tuned2
-		data = tuned.utils.storage.Storage.get_instance().data
-		if data.has_key("sysctl"):
-			for key, value in data["sysctl"].iteritems():
-				self._exec_sysctl(key + "=" + value, True)
-		tuned.utils.storage.Storage.get_instance().data["sysctl"] = {}
+		old_sysctl_options = self._storage.get("options", {})
+		for key, value in old_sysctl_options.iteritems():
+			self._exec_sysctl(key + "=" + value, True)
+		self._storage.unset("options")
+		# FIXME: do this globally
+		#self._storage.save()
 
 	@classmethod
 	def _get_default_options(cls):
-		return {
-			"dynamic_tuning"   : "0",
-		}
+		return {}
 
 	def _exec_sysctl(self, data, write = False):
 		if write:
@@ -57,9 +50,9 @@ class SysctlPlugin(tuned.plugins.Plugin):
 
 			self._exec_sysctl(key + "=" + value, True)
 
-		storage = tuned.utils.storage.Storage.get_instance()
-		storage.data = {"sysctl" : self._sysctl_original}
-		storage.save()
+		self._storage.set("options", self._sysctl_original)
+		# FIXME: do this globally
+		#self._storage.save()
 
 		return True
 
