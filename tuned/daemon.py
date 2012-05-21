@@ -15,24 +15,26 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import os
-import units
-import utils
-import logs
 import monitors
 import plugins
-import threading
-import ConfigParser
 import profile
-import tuned.utils.storage
+import storage
+import units
+import utils
 
+import ConfigParser
+import os
+import threading
+
+import logs
 log = logs.get()
 
 DEFAULT_CONFIG_FILE = ["/etc/tuned/tuned.conf"]
 
 class Daemon(object):
-	def __init__(self):
+	def __init__(self, unit_manager):
 		log.debug("initializing daemon")
+		self._unit_manager = unit_manager
 		self._config_file = DEFAULT_CONFIG_FILE
 		self._profile = None
 
@@ -40,29 +42,20 @@ class Daemon(object):
 		self._terminate = threading.Event()
 
 	def _thread_code(self):
-		self._terminate.clear()
-
-		# TODO: temporary code
-		manager = units.get_manager()
-		monitors_repo = monitors.get_repository()
-		plugins_repo = plugins.get_repository()
-
-		log.debug("Loading %s" % (self._config_file))
-		self._profile = profile.Profile(manager, self._config_file)
+		self._profile = profile.Profile(self._unit_manager, self._config_file)
 		self._profile.load()
 
 		self.save_active_profile()
+		self._unit_manager.plugins_repository.do_static_tuning()
 
-		plugins_repo.do_static_tuning()
-
+		self._terminate.clear()
 		while not self._terminate.wait(10):
 			log.debug("updating monitors")
-			monitors_repo.update()
+			self._unit_manager.monitors_repository.update()
 			log.debug("performing tunings")
-			plugins_repo.update()
+			self._unit_manager.plugins_repository.update()
 
-		manager.delete_all()
-		tuned.utils.storage.Storage.get_instance().cleanup()
+		self._unit_manager.delete_all()
 
 	def save_active_profile(self):
 		try:

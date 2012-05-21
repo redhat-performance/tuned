@@ -21,7 +21,11 @@ import controller
 import daemon
 import exports
 import exports.dbus
+import monitors
+import plugins
 import signal
+import storage
+import units
 import utils
 
 DBUS_BUS = "com.redhat.tuned"
@@ -30,7 +34,14 @@ DBUS_OBJECT = "/Tuned"
 
 class Application(object):
 	def __init__(self, config_file, enable_dbus = True):
-		self._daemon = daemon.Daemon()
+		self._storage_provider = storage.PickleProvider()
+		self._storage_factory = storage.Factory(self._storage_provider)
+
+		self._plugins_repository = plugins.Repository(self._storage_provider)
+		self._monitors_repository = monitors.Repository()
+		self._unit_manager = units.Manager(self._plugins_repository, self._monitors_repository)
+
+		self._daemon = daemon.Daemon(self._unit_manager)
 		self._controller = controller.Controller(self._daemon, config_file)
 
 		self._dbus_exporter = None
