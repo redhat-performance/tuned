@@ -47,6 +47,9 @@ def command_set(name, per_device=False):
 
 def command_get(name):
 	def wrapper(method):
-		method._command = { "get": True }
+		method._command = {
+			"get": True,
+			"name": name,
+		}
 		return method
 	return wrapper
