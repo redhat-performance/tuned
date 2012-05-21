@@ -1,11 +1,12 @@
-import tuned.plugins
-import tuned.log
-from tuned.utils.commands import *
+import base
+from decorators import *
+import tuned.logs
+import tuned.utils.commands
 import glob
 
-log = tuned.log.get()
+log = tuned.logs.get()
 
-class USBPlugin(tuned.plugins.Plugin):
+class USBPlugin(base.Plugin):
 	"""
 	Plugin for tuning various options of USB subsystem.
 	"""
