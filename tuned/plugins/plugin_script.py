@@ -1,22 +1,21 @@
-import tuned.plugins
+import base
 import tuned.logs
-import tuned.monitors
-import glob
 import os
-import struct
-from subprocess import *
 
 log = tuned.logs.get()
 
-class ScriptPlugin(tuned.plugins.Plugin):
+class ScriptPlugin(base.Plugin):
 	"""
 	Plugin for running custom scripts with profile activation and deactivation.
 	"""
 
-	def __init__(self, devices, options):
-		super(self.__class__, self).__init__(devices, options)
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
 
 		self._scripts = []
+		if self._options["script"] is None:
+			return
+
 		if self._options["script"].startswith("/"):
 			self._scripts.append(self._options["script"])
 		else:
@@ -25,7 +24,7 @@ class ScriptPlugin(tuned.plugins.Plugin):
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"script"   : None,
+			"script"         : None,
 			"dynamic_tuning" : "0",
 		}
 
