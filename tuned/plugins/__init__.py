@@ -1,6 +1,6 @@
 from base import *
 from rfkill import *
-from decorator import *
+from decorators import *
 
 import repository
 

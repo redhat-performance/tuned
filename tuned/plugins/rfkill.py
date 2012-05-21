@@ -1,7 +1,6 @@
 import base
-from decorator import *
+from decorators import *
 import tuned.logs
-from tuned.utils.commands import *
 
 log = tuned.logs.get()
 
