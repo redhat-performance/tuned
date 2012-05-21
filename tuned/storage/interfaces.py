@@ -9,6 +9,9 @@ class Provider(object):
 	def get(self, namespace, option, default=None):
 		raise NotImplementedError()
 
+	def unset(self, namespace, option):
+		raise NotImplementedError()
+
 	def clear(self):
 		raise NotImplementedError()
 

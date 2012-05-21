@@ -24,6 +24,11 @@ class PickleProvider(interfaces.Provider):
 		self._data.setdefault(namespace, {})
 		return self._data[namespace].get(option, default)
 
+	def unset(self, namespace, option):
+		self._data.setdefault(namespace, {})
+		if option in self._data[namespace]:
+			del self._data[namespace][option]
+
 	def save(self):
 		try:
 			log.debug("Saving %s" % str(self._data))

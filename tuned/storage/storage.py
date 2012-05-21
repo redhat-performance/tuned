@@ -10,3 +10,6 @@ class Storage(object):
 
 	def get(self, option, default=None):
 		return self._storage_provider.get(self._namespace, option, default)
+
+	def unset(self, option):
+		self._storage_provider.unset(self._namespace, option)

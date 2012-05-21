@@ -69,6 +69,11 @@ class StoragePickleProviderTestCase(unittest.TestCase):
 		self.assertEqual("value2", provider.get("ns1", "opt2"))
 		self.assertEqual("value3", provider.get("ns2", "opt1"))
 
+		provider.unset("ns1", "opt1")
+
+		self.assertIsNone(provider.get("ns1", "opt1"))
+		self.assertEqual("value2", provider.get("ns1", "opt2"))
+
 		provider.clear()
 
 		self.assertIsNone(provider.get("ns1", "opt1"))
