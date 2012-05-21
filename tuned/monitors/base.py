@@ -1,6 +1,7 @@
 import tuned.logs
-
 log = tuned.logs.get()
+
+__all__ = ["Monitor"]
 
 class Monitor(object):
 	"""
