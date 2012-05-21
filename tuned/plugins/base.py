@@ -44,7 +44,7 @@ class Plugin(object):
 
 		self._commands = {}
 		self._autoregister_commands()
-		assert self._commands_are_valid()
+		assert self._commands_are_valid(), "Plugin commands are not defined correctly."
 
 	@property
 	def dynamic_tuning(self):
@@ -75,15 +75,15 @@ class Plugin(object):
 			elif "get" in member._command:
 				info["get"] = member
 
-			self._commands["command_name"] = info
+			self._commands[command_name] = info
 
 	def _commands_are_valid(self):
-		for command in commands:
+		for command_name, command in self._commands.iteritems():
 			if "get" not in command or "set" not in command:
 				return False
 		return True
 
-	def _storage_key(self, command_name, device = None):
+	def _storage_key(self, command_name, device=None):
 		if device is not None:
 			return "%s@%s" % (command_name, device)
 		else:
@@ -94,20 +94,36 @@ class Plugin(object):
 			return
 
 		new_value = self._options[command_name]
+		if new_value is None:
+			return
 
-		devices = self._devices if command["per_device"] else [None]
-		for device in devices:
+		if not command["per_device"]:
+			current_value = command["get"]()
+			storage_key = self._storage_key(command_name)
+			self._storage.set(command_name, current_value)
+			command["set"](new_value)
+			return
+
+		for device in self._devices:
 			current_value = command["get"](device)
 			storage_key = self._storage_key(command_name, device)
 			self._storage.set(storage_key, current_value)
 			command["set"](new_value, device)
 
 	def cleanup_command(self, command_name, command):
-		if not self._options.has_key(option):
+		if not self._options.has_key(command_name):
 			return
 
-		devices = self._devices if command["per_device"] else [None]
-		for device in devices:
+		if not command["per_device"]:
+			storage_key = self._storage_key(command_name)
+			old_value = self._storage.get(storage_key)
+			if old_value is None:
+				return
+			command["set"](old_value)
+			self._storage.unset(storage_key)
+			return
+
+		for device in self._devices:
 			storage_key = self._storage_key(command_name, device)
 			old_value = self._storage.get(storage_key)
 			if old_value is None:
@@ -134,7 +150,7 @@ class Plugin(object):
 	def update_tuning(self):
 		raise NotImplementedError()
 
-	def _config_bool(value, true_value="1", false_value="0"):
+	def _config_bool(self, value, true_value="1", false_value="0"):
 		if value == True or value == "1" or value.lower() == "true":
 			return true_value
 		elif value == False or value == "0" or value.lower() == "false":

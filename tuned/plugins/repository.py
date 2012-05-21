@@ -1,7 +1,8 @@
+import base
+import exceptions
+
 import tuned.logs
 import tuned.utils
-import tuned.plugins
-import tuned.plugins.exception
 
 log = tuned.logs.get()
 
@@ -13,7 +14,7 @@ class Repository(object):
 
 	def __init__(self, storage_factory):
 		super(self.__class__, self).__init__()
-		self._loader = tuned.utils.PluginLoader("tuned.plugins", "plugin_", tuned.plugins.Plugin)
+		self._loader = tuned.utils.PluginLoader("tuned.plugins", "plugin_", base.Plugin)
 		self._plugins = set()
 		self._storage_factory = storage_factory
 
@@ -21,7 +22,7 @@ class Repository(object):
 		log.debug("creating plugin %s" % plugin_name)
 		try:
 			plugin_cls = self._loader.load(plugin_name)
-			plugin_instance = plugin_cls(monitor_repository, storage_factory, devices, options)
+			plugin_instance = plugin_cls(monitor_repository, self._storage_factory, devices, options)
 			self._plugins.add(plugin_instance)
 			return plugin_instance
 		except Exception as exception:
@@ -32,16 +33,16 @@ class Repository(object):
 		try:
 			plugin_cls = self._loader.load(plugin_name)
 			return plugin_cls.tunable_devices()
-		except Exception as exception:
-			plugin_exception = tuned.plugins.exception.LoadPluginException(plugin_name, exception)
+		except Exception as e:
+			plugin_exception = exceptions.LoadPluginException(plugin_name, e)
 			raise plugin_exception
 
 	def is_supported(self, plugin_name):
 		try:
 			plugin_cls = self._loader.load(plugin_name)
 			return plugin_cls.is_supported()
-		except Exception as exception:
-			plugin_exception = tuned.plugins.exception.LoadPluginException(plugin_name, exception)
+		except Exception as e:
+			plugin_exception = exceptions.LoadPluginException(plugin_name, e)
 			raise plugin_exception
 
 	def do_static_tuning(self):
@@ -49,7 +50,8 @@ class Repository(object):
 			if not plugin.static_tuning:
 				continue
 			
-			log.debug("running static tuning for plugin %s" % plugin)
+			# TODO: plugin to str conversion, not ideal now
+			log.debug("running static tuning for plugin '%s'" % plugin)
 			plugin.cleanup_commands()
 			plugin.execute_commands()
 
