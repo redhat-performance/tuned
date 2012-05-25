@@ -34,12 +34,9 @@ class Plugin(object):
 		Plugin instance constructor. Plugins should not override this function in general,
 		_post_init method should be used instead.
 		"""
-		if devices is None:
-			devices = []
 		self._devices = devices
 
 		self._options = self._get_default_options()
-		self._options["_load_path"] = ""
 		if options is not None:
 			self._merge_options(options)
 
@@ -113,6 +110,8 @@ class Plugin(object):
 			command["set"](new_value)
 			return
 
+		assert self._devices is not None
+
 		for device in self._devices:
 			current_value = command["get"](device)
 			storage_key = self._storage_key(command_name, device)
@@ -131,6 +130,8 @@ class Plugin(object):
 			command["set"](old_value)
 			self._storage.unset(storage_key)
 			return
+
+		assert self._devices is not None
 
 		for device in self._devices:
 			storage_key = self._storage_key(command_name, device)
