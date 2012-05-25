@@ -1,7 +1,9 @@
 import base
 from decorators import *
 import tuned.logs
+import tuned.utils.commands
 
+import fnmatch
 import os
 import struct
 
@@ -9,8 +11,14 @@ log = tuned.logs.get()
 
 class CPULatencyPlugin(base.Plugin):
 	"""
-	Plugin for tuning CPU options. Powersaving, goovernor, required latency, etc.
+	Plugin for tuning CPU options. Powersaving, governor, required latency, etc.
 	"""
+
+	@classmethod
+	def tunable_devices(self):
+		files = os.listdir("/sys/devices/system/cpu")
+		cpus = fnmatch.filter(files, "cpu[0-9]*")
+		return map(lambda name: name[3:], cpus)
 
 	def _post_init(self):
 		self._latency = None
@@ -18,7 +26,7 @@ class CPULatencyPlugin(base.Plugin):
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
 
 		if self._options["force_latency"] is None:
-			self._load_monitor = self._monitors_repository.create("load", self._devices)
+			self._load_monitor = self._monitors_repository.create("load", None)
 		else:
 			self._dynamic_tuning = False
 			self._set_latency(self._options["force_latency"])
@@ -55,37 +63,48 @@ class CPULatencyPlugin(base.Plugin):
 			os.write(self._cpu_latency_fd, latency_bin)
 			self._latency = latency
 
-	@command_set("governor")
-	def _set_governor(self, value):
-		tuned.utils.commands.execute(["cpupower", "frequency-set", "-g", value])
+	@command_set("governor", per_device=True)
+	def _set_governor(self, governor, device):
+		log.info("setting governor '%s' on cpu '%s'" % (governor, device))
+		tuned.utils.commands.execute(["cpupower", "-c", device, "frequency-set", "-g", governor])
 
 	@command_get("governor")
-	def _get_governor(self):
-		old_value = tuned.utils.commands.execute(["cpupower", "frequency-info", "-p"])
-		if old_value.startswith("analyzing CPU"):
-			try:
-				old_value = old_value.split('\n')[1].split(' ')[2]
-			except IndexError:
-				old_value = ""
-				pass
-		return old_value
+	def _get_governor(self, device):
+		governor = None
+		try:
+			lines = tuned.utils.commands.execute(["cpupower", "-c", device, "frequency-info", "-p"]).splitlines()
+			for line in lines:
+				if line.startswith("analyzing"):
+					continue
+				(drop, drop, governor) = line.split()
+				break
+		except:
+			log.error("could not get current governor on cpu '%s'" % device)
+			governor = None
 
-#	@command_set("multicore_powersave")
+		return governor
+
+	@command_set("multicore_powersave")
 	def _set_multicore_powersave(self, value):
-		tuned.utils.commands.execute(["cpupower", "set", "-m", value])
+		value = int(value)
+		if value not in [0, 1, 2]:
+			log.error("invalid value of 'multicore_powersave' option")
+			return
 
-#	@command_get("multicore_powersave")
+		log.info("setting CPU multicore scheduler to '%d'" % value)
+		tuned.utils.commands.execute(["cpupower", "set", "-m", str(value)])
+
+	@command_get("multicore_powersave")
 	def _get_multicore_powersave(self):
-		old_value = tuned.utils.commands.execute(["cpupower", "info", "-m"])
-		if old_value.find("not supported") != -1:
-			log.info("cpu_multicore_powersave is not supported by this system")
-			return None
+		scheduler = None
+		try:
+			line = tuned.utils.commands.execute(["cpupower", "info", "-m"])
+			if line.find("not supported") != -1:
+				log.info("'multicore_powersave' is not supported by this system")
+			elif line.startswith("System's multi core scheduler setting"):
+				(drop, scheduler) = line.split(": ")
+		except:
+			log.error("could not get current 'multicore_powersave' value")
+			scheduler = None
 
-		if old_value.startswith("System's multi core scheduler setting"):
-			try:
-				# get "2\n" and remove '\n'
-				old_value = old_value.split(' ')[:-1][:-1]
-			except IndexError:
-				old_value = None
-
-		return old_value
+		return scheduler

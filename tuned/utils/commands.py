@@ -19,6 +19,7 @@ import tuned.logs
 
 import copy
 import os
+from subprocess import *
 
 log = tuned.logs.get()
 
