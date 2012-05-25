@@ -13,18 +13,17 @@ class DiskPlugin(base.Plugin):
 
 	_supported_vendors = ["ATA", "SCSI"]
 
-	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
-		
+	def _post_init(self):
 		self.devidle = {}
 		self.stats = {}
 		self.power = ["255", "225", "195", "165", "145", "125", "105", "85", "70", "55", "30", "20"]
 		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
 		self.levels = len(self.power)
 
-		self._load_monitor = None
-		if self.dynamic_tuning:
+		if self._option_bool(self._options["dynamic"]):
 			self._load_monitor = self._monitors_repository.create("disk", self._devices)
+		else:
+			self._dynamic_tuning = False
 
 	@classmethod
 	def tunable_devices(cls):
@@ -45,6 +44,7 @@ class DiskPlugin(base.Plugin):
 	@classmethod
 	def _get_default_options(cls):
 		return {
+			"dynamic"            : True, # FIXME: do we want this default?
 			"elevator"           : None,
 			"alpm"               : None,
 			"apm"                : None,

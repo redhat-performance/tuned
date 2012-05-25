@@ -10,16 +10,11 @@ class NetTuningPlugin(base.Plugin):
 	Plugin for ethernet card options tuning.
 	"""
 
-	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
-
+	def _post_init(self):
 		self.devidle = {}
 		self.stats = {}
-		log.info("Devices: %s" % str(self._devices));
-
-		self._load_monitor = None
-		if self.dynamic_tuning:
-			self._load_monitor = self._monitors_repository.create("net", self._devices)
+		log.info("devices: %s" % str(self._devices));
+		self._load_monitor = self._monitors_repository.create("net", self._devices)
 
 	@classmethod
 	def tunable_devices(cls):

@@ -10,15 +10,10 @@ class EeePCSHEPlugin(base.Plugin):
 	Plugin for tuning FSB (front side bus) speed on Asus EEE PCs with SHE (Super Hybrid Engine) support.
 	"""
 
-	def __init__(self, devices, options):
-		"""
-		"""
-		super(self.__class__, self).__init__(devices, options)
-
+	def _post_init(self):
 		self._she_mode = None
 		self._load_monitor = None
-		if self.dynamic_tuning:
-			self._load_monitor = self._monitors_repository.create("load", devices)
+		self._load_monitor = self._monitors_repository.create("load", devices)
 
 	@classmethod
 	def is_supported(cls):

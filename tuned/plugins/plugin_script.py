@@ -9,9 +9,8 @@ class ScriptPlugin(base.Plugin):
 	Plugin for running custom scripts with profile activation and deactivation.
 	"""
 
-	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
-
+	def _post_init(self):
+		self._dynamic_tuning = False
 		self._scripts = []
 		if self._options["script"] is None:
 			return
@@ -24,8 +23,7 @@ class ScriptPlugin(base.Plugin):
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"script"         : None,
-			"dynamic_tuning" : "0",
+			"script" : None,
 		}
 
 	def _call_scripts(self, arg = "start"):
@@ -46,9 +44,3 @@ class ScriptPlugin(base.Plugin):
 
 	def cleanup_commands(self):
 		self._call_scripts("stop")
-
-	def cleanup(self):
-		pass
-
-	def update_tuning(self):
-		pass

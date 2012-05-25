@@ -9,18 +9,14 @@ class WirelessPlugin(rfkill.RFKillPlugin):
 	Plugin for setting wireless powersaving options.
 	"""
 
+	def _post_init(self):
+		self._dynamic_tuning = False
+
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"dynamic_tuning" : "0",
 			"power_level"    : None,
 		}
-
-	def cleanup(self):
-		pass
-
-	def update_tuning(self):
-		pass
 
 	@command_set("power_level", per_device=True)
 	def _set_power_level(self, value, device):

@@ -47,9 +47,6 @@ class Repository(object):
 
 	def do_static_tuning(self):
 		for plugin in self._plugins:
-			if not plugin.static_tuning:
-				continue
-			
 			# TODO: plugin to str conversion, not ideal now
 			log.debug("running static tuning for plugin '%s'" % plugin)
 			plugin.cleanup_commands()

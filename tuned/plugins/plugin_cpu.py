@@ -12,20 +12,16 @@ class CPULatencyPlugin(base.Plugin):
 	Plugin for tuning CPU options. Powersaving, goovernor, required latency, etc.
 	"""
 
-	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
-
+	def _post_init(self):
 		self._latency = None
 		self._load_monitor = None
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
 
-	def _delayed_init(self):
 		if self._options["force_latency"] is None:
 			self._load_monitor = tuned._monitors_repository.create("load", self._devices)
-			self.update_tuning = self._update_tuning_dynamic
 		else:
+			self._dynamic_tuning = False
 			self._set_latency(self._options["force_latency"])
-			self.update_tuning = self._update_tuning_forced
 
 	@classmethod
 	def _get_default_options(cls):
@@ -45,15 +41,6 @@ class CPULatencyPlugin(base.Plugin):
 		os.close(self._cpu_latency_fd)
 
 	def update_tuning(self):
-		old_update_tuning = self.update_tuning
-		self._delayed_init()
-		assert self.update_tuning != old_update_tuning
-		self.update_tuning()
-
-	def _update_tuning_forced(self):
-		pass
-
-	def _update_tuning_dynamic(self):
 		load = self._load_monitor.get_load()["system"]
 		if load < self._options["load_threshold"]:
 			self._set_latency(self._options["latency_high"])

@@ -12,10 +12,12 @@ class VideoPlugin(base.Plugin):
 	Plugin for tuning powersave options for some graphic cards.
 	"""
 
+	def _post_init(self):
+		self._dynamic_tuning = False
+
 	@classmethod
 	def _get_default_options(cls):
 		return {
-			"dynamic_tuning"   : "0",
 			"radeon_powersave" : None,
 		}
 
@@ -25,12 +27,6 @@ class VideoPlugin(base.Plugin):
 		config_files = glob.glob("/sys/class/drm/*/device/power_method")
 		available = set(map(lambda name: name.split("/")[4], config_files))
 		return available
-
-	def cleanup(self):
-		pass
-
-	def update_tuning(self):
-		pass
 
 	def _radeon_powersave_files(self, device):
 		return {

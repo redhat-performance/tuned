@@ -11,6 +11,9 @@ class USBPlugin(base.Plugin):
 	Plugin for tuning various options of USB subsystem.
 	"""
 
+	def _post_init(self):
+		self._dynamic_tuning = False
+
 	@classmethod
 	def _get_default_options(cls):
 		return {
@@ -22,10 +25,6 @@ class USBPlugin(base.Plugin):
 		control_files = glob.glob("/sys/bus/usb/devices/*/power/control")
 		available = set(map(lambda name: name.split("/")[5], control_files))
 		return available
-
-	def update_tuning(self):
-		# FIXME: can we drop this method?
-		pass
 
 	def _autosuspend_sysfile(self, device):
 		return "/sys/bus/usb/devices/%s/power/autosuspend" % device

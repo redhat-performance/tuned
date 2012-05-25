@@ -10,19 +10,16 @@ class SysctlPlugin(base.Plugin):
 	Plugin for applying custom sysctl options.
 	"""
 
-	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
-
+	def _post_init(self):
+		self._dynamic_tuning = False
 		self._sysctl_original = {}
 		self._sysctl = self._options
-		del self._sysctl["_load_path"]
+		del self._sysctl["_load_path"] # TODO: drop this ugly hack!
 
 		old_sysctl_options = self._storage.get("options", {})
 		for key, value in old_sysctl_options.iteritems():
 			self._exec_sysctl(key + "=" + value, True)
 		self._storage.unset("options")
-		# FIXME: do this globally
-		#self._storage.save()
 
 	@classmethod
 	def _get_default_options(cls):
@@ -65,9 +62,3 @@ class SysctlPlugin(base.Plugin):
 
 	def execute_commands(self):
 		self._apply_sysctl()
-
-	def cleanup(self):
-		pass
-
-	def update_tuning(self):
-		pass

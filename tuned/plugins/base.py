@@ -26,16 +26,16 @@ class Plugin(object):
 	# instance methods
 
 	def __init__(self, monitors_repository, storage_factory, devices=None, options=None):
+		"""
+		Plugin instance constructor. Plugins should not override this function in general,
+		_post_init method should be used instead.
+		"""
 		if devices is None:
 			devices = []
 		self._devices = devices
 
 		self._options = self._get_default_options()
 		self._options["_load_path"] = ""
-		if not self._options.has_key("dynamic_tuning"):
-			self._options["dynamic_tuning"] = "1"
-		if not self._options.has_key("static_tuning"):
-			self._options["static_tuning"] = "1"
 		if options is not None:
 			self._merge_options(options)
 
@@ -46,13 +46,18 @@ class Plugin(object):
 		self._autoregister_commands()
 		assert self._commands_are_valid(), "Plugin commands are not defined correctly."
 
-	@property
-	def dynamic_tuning(self):
-		return self._options["dynamic_tuning"] in ["1", "true"]
+		self._dynamic_tuning = True
+
+		self._post_init()
+
+	def _post_init(self):
+		"""
+		"""
+		pass
 
 	@property
-	def static_tuning(self):
-		return self._options["static_tuning"] in ["1", "true"]
+	def dynamic_tuning(self):
+		return self._dynamic_tuning
 
 	def _autoregister_commands(self):
 		"""
@@ -149,6 +154,12 @@ class Plugin(object):
 
 	def update_tuning(self):
 		raise NotImplementedError()
+
+	def _option_bool(self, value):
+		if type(value) is bool:
+			return value
+		value = str(value).lower()
+		return value == "true" or value == "1"
 
 	def _config_bool(self, value, true_value="1", false_value="0"):
 		if value == True or value == "1" or value.lower() == "true":

@@ -14,19 +14,15 @@ class AudioPlugin(base.Plugin):
 	Plugin for tuning audio cards powersaving options.
 	"""
 
+	def _post_init(self):
+		self._dynamic_tuning = False
+
 	@classmethod
 	def _get_default_options(cls):
 		return {
 			"ac97_powersave"      : None,
 			"hda_intel_powersave" : None,
-			"dynamic_tuning"      : False,
 		}
-
-	def cleanup(self):
-		pass
-
-	def update_tuning(self):
-		pass
 
 	def _ac97_powersave_file(self):
 		return "/sys/module/snd_ac97_codec/parameters/power_save"

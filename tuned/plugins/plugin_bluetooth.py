@@ -9,4 +9,5 @@ class BluetoothPlugin(rfkill.RFKillPlugin):
 	# TODO: ticket #24
 	#
 
-	pass
+	def _post_init(self):
+		self._dynamic_tuning = False
