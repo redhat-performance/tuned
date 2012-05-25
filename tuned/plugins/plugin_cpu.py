@@ -18,7 +18,7 @@ class CPULatencyPlugin(base.Plugin):
 		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
 
 		if self._options["force_latency"] is None:
-			self._load_monitor = tuned._monitors_repository.create("load", self._devices)
+			self._load_monitor = self._monitors_repository.create("load", self._devices)
 		else:
 			self._dynamic_tuning = False
 			self._set_latency(self._options["force_latency"])
