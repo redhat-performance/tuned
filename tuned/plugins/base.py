@@ -1,3 +1,7 @@
+import tuned.logs
+
+log = tuned.logs.get()
+
 class Plugin(object):
 	"""
 	Base class for all plugins.
@@ -151,6 +155,8 @@ class Plugin(object):
 		for key in options:
 			if key in self._options:
 				self._options[key] = options[key]
+			else:
+				log.warn("Unknown option '%s' for plugin '%s'." % (key, self.__class__.__name__))
 
 	def update_tuning(self):
 		raise NotImplementedError()

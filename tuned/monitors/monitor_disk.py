@@ -29,7 +29,6 @@ class DiskMonitor(tuned.monitors.Monitor):
 		for device in cls._updating_devices:
 			cls._update_disk(device)
 
-
 	@classmethod
 	def _update_disk(cls, dev):
 		with open("/sys/block/" + dev + "/stat") as statfile:
