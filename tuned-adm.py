@@ -100,8 +100,8 @@ class Tuned_adm:
 		except:
 			pass
 
-		return map(lambda p: os.path.basename(p), \
-			filter(lambda p: os.path.exists(os.path.join(p, "tuned.conf")), profiles))
+		return sorted(map(lambda p: os.path.basename(p), \
+			filter(lambda p: os.path.exists(os.path.join(p, "tuned.conf")), profiles)))
 
 	def show_profiles(self):
 		print "Available profiles:"
