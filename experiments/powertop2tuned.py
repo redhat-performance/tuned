@@ -124,7 +124,7 @@ class PowertopHTMLParser(HTMLParser):
 		if tag == "tr":
 			self.tdCounter = 0
 		if self.inScript:
-			print self.currentScript
+			#print self.currentScript
 			self.inScript = False
 			# Command is not handled, so just store it in the script
 			if not self.parse_command(self.currentScript.split("\n")[-1]):
@@ -174,16 +174,18 @@ class PowertopProfile:
 		return True
 
 	def generateHTML(self):
-		f = tempfile.NamedTemporaryFile()
-		name = unicode(f.name)
-		f.close()
-		
-		ret = os.system('powertop --html="%s"' % (name))
-		if ret != 0:
-			os.unlink(name)
+		proc = Popen(["powertop", "--html=/tmp/powertop"], stdout=PIPE)
+		output = proc.communicate()[0]
+		if proc.returncode != 0:
 			return ret
 
-		return name;
+		prefix = "PowerTOP outputing using base filename "
+		if output.find(prefix) == -1:
+			return -1
+
+		name = output[output.find(prefix)+len(prefix):-1]
+		#print "Parsed filename=", [name]
+		return name
 
 	def parseHTML(self, enable_tunings):
 		f = open(self.name)
