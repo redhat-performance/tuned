@@ -90,9 +90,9 @@ class Tuned:
 
 	def run(self):
 		try:
-			f = open(self.pidfile, "w")
-			f.write("%d" % os.getpid())
-			f.close()
+			fd = os.open(self.pidfile, os.O_CREAT|os.O_TRUNC|os.O_WRONLY , 0644)
+			os.write(fd, "%d" % os.getpid())
+			os.close(fd)
 		except:
 			log.warning("Cannot write to pidfile (%s)" % self.pidfile)
 
