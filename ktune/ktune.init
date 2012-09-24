@@ -41,7 +41,15 @@ KERNEL_ELEVATOR="cfq"
 /bin/fgrep -q 'elevator=' /proc/cmdline
 CMDLINE_ELEVATOR=$?
 if [ -n "$ELEVATOR_TUNE_DEVS" ]; then
-	SYS_BLOCK_SDX=$(eval LANG=C /bin/ls -1 "${ELEVATOR_TUNE_DEVS}" 2>/dev/null)
+	SYS_BLOCK_SDX=
+	for file in $(eval LANG=C /bin/ls -1d "${ELEVATOR_TUNE_DEVS}" 2>/dev/null); do
+		if ! expr match $(readlink -f "$file") '^/sys/.*/queue/scheduler$' >/dev/null; then
+			printf $"$0: '%s' is not a scheduler control file." "$file"
+			warning; echo
+		else
+			SYS_BLOCK_SDX="$SYS_BLOCK_SDX $file"
+		fi
+	done
 else
 	SYS_BLOCK_SDX=
 fi
