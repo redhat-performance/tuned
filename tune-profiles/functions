@@ -59,16 +59,6 @@ multiply_disk_readahead() {
 	done
 }
 
-# usage: remount_disk options partition1 partition2 ...
-remount_partitions() {
-	options=$1
-	shift
-
-	for partition in $@; do
-		mount -o remount,$options $partition
-	done
-}
-
 DISK_QUANTUM_SAVE="/var/run/tuned/disk_quantum.save"
 
 set_disk_scheduler_quantum() {
@@ -86,6 +76,53 @@ restore_disk_scheduler_quantum() {
 		/bin/sh "$DISK_QUANTUM_SAVE" &>/dev/null
 		rm -f "$DISK_QUANTUM_SAVE"
 	fi
+}
+
+_devices_no_write_back_cache() {
+	for device in $@; do
+		grep -q "write back" /sys/block/"$device"/device/scsi_disk/*/cache_type 2>/dev/null && return 1
+	done
+	return 0
+}
+
+_disk_barriers_remount() {
+	mount_options="$1"
+
+	lsblk -lno TYPE,KNAME,MOUNTPOINT | \
+	awk '
+		{ type=$1; name=$2; mountpoint=$3; }
+
+		(type == "disk") {
+				device=name
+				next
+		}
+
+		(mountpoint ~ /^\// && mountpoint != "/" && mountpoint != "/boot") {
+			mountpoints[mountpoint] = mountpoints[mountpoint] " " device
+		}
+
+		END {
+			for (mountpoint in mountpoints) {
+				print mountpoint, mountpoints[mountpoint]
+			}
+		}
+	' | \
+	while read mountpoint devices; do
+		if _devices_no_write_back_cache $devices; then
+			mount -o remount,"$mount_options" "$mountpoint"
+		fi
+	done
+}
+
+# remounts all non-root and non-boot partitions with nobarrier option
+# SCSI drives with write back cache are skipped
+disable_disk_barriers() {
+	_disk_barriers_remount nobarrier
+}
+
+# see: disable_disk_barriers
+enable_disk_barriers() {
+	_disk_barriers_remount barrier
 }
 
 #
