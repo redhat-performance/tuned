@@ -6,7 +6,7 @@ import tuned.profiles.loader
 
 # DI: return config itself instead of the profile
 class TestLoader(tuned.profiles.loader.Loader):
-	def _create_profile(self, config):
+	def _create_profile(self, profile_name, config):
 		return config
 
 class LoaderTestCase(unittest.TestCase):

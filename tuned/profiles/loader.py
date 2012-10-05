@@ -20,8 +20,8 @@ class Loader(object):
 
 		self._load_directories = load_directories
 
-	def _create_profile(self, config):
-		return tuned.profiles.profile.Profile(config)
+	def _create_profile(self, profile_name, config):
+		return tuned.profiles.profile.Profile(profile_name, config)
 
 	@property
 	def load_directories(self):
@@ -40,7 +40,7 @@ class Loader(object):
 
 		# merging is removed temporarily
 
-		return self._create_profile(config)
+		return self._create_profile(profile_name, config)
 
 	def _find_config(self, profile_name, skip_files=None):
 		for dir_name in reversed(self._load_directories):

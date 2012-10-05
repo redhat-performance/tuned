@@ -32,9 +32,10 @@ log = logs.get()
 DEFAULT_CONFIG_FILE = ["/etc/tuned/tuned.conf"]
 
 class Daemon(object):
-	def __init__(self, unit_manager):
+	def __init__(self, unit_manager, profile_loader):
 		log.debug("initializing daemon")
 		self._unit_manager = unit_manager
+		self._profile_loader = profile_loader
 		self._config_file = DEFAULT_CONFIG_FILE
 		self._profile = None
 
@@ -42,8 +43,8 @@ class Daemon(object):
 		self._terminate = threading.Event()
 
 	def _thread_code(self):
-		self._profile = profile.Profile(self._unit_manager, self._config_file)
-		self._profile.load()
+		self._profile = self._profile_loader.load("default")
+#		self._profile = profile.Profile(self._unit_manager, self._config_file)
 
 		self.save_active_profile()
 		self._unit_manager.plugins_repository.do_static_tuning()

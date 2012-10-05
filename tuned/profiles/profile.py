@@ -5,9 +5,10 @@ class Profile(object):
 	Representation of a tuning profile.
 	"""
 
-	__slots__ = ["_config", "_options", "_units"]
+	__slots__ = ["_name", "_config", "_options", "_units"]
 
-	def __init__(self, config):
+	def __init__(self, name, config):
+		self._name = name
 		self._config = config
 		self._init_options(config)
 		self._init_units(config)
@@ -28,6 +29,13 @@ class Profile(object):
 		options = config_options.copy()
 		plugin = options.pop("type")
 		return tuned.profiles.unit.Unit(name, plugin, options)
+
+	@property
+	def name(self):
+		"""
+		Profile name.
+		"""
+		return self._name
 
 	@property
 	def units(self):
