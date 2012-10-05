@@ -1,6 +1,7 @@
 import base
 import tuned.logs
 import os
+from subprocess import Popen
 
 log = tuned.logs.get()
 
