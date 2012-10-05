@@ -94,5 +94,8 @@ clean:
 	find -name "*.pyc" | xargs rm -f
 	rm -rf $(VERSIONED_NAME) rpm-build-dir
 
-.PHONY: clean archive srpm tag
+test:
+	python -m unittest discover tests
+
+.PHONY: clean archive srpm tag test
 
