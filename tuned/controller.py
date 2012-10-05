@@ -19,7 +19,6 @@ __all__ = ["Controller"]
 
 import exports
 import logs
-import profile
 import threading
 
 log = logs.get()
@@ -30,16 +29,10 @@ class Controller(exports.interfaces.ExportableInterface):
 	and export the controller interface (currently only over D-Bus).
 	"""
 
-	def __init__(self, daemon, config_file):
+	def __init__(self, daemon):
 		super(self.__class__, self).__init__()
 		self._daemon = daemon
 		self._terminate = threading.Event()
-		if config_file:
-			if not isinstance(config_file, list):
-				config_file = [config_file]
-			self.config_file = config_file
-		else:
-			self.config_file = self.get_default_profile()
 
 	def run(self):
 		"""
@@ -58,25 +51,6 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	def terminate(self):
 		self._terminate.set()
-
-	def get_default_profile(self):
-		try:
-			with open("/etc/tuned/active_profile", "r") as f:
-				profiles = f.read().split("\n")
-				for i in range(len(profiles)):
-					profiles[i] = profile.Profile.find_profile(profiles[i])
-				return profiles
-		except (OSError,IOError,EOFError) as e:
-			log.error("Cannot read active profile from /etc/tuned/active_profile: %s" % (e))
-			return []
-
-	def switch_to_default_profile(self):
-		profile = self.get_default_profile()
-		log.info("Switching to default profile: %s" % profile)
-
-		if len(profile) != 0:
-			return self.switch_profile(profile)
-		return False
 
 	@property
 	def config_file(self):
@@ -110,8 +84,8 @@ class Controller(exports.interfaces.ExportableInterface):
 		else:
 			return self.stop() and self.start()
 
-	@exports.export("as", "b")
-	def switch_profile(self, profiles):
+	@exports.export("s", "b")
+	def switch_profile(self, profile):
 		for i in range(len(profiles)):
 			profiles[i] = profile.Profile.find_profile(profiles[i])
 		try:
@@ -122,16 +96,9 @@ class Controller(exports.interfaces.ExportableInterface):
 
 		return self.reload()
 
-	@exports.export("", "as")
+	@exports.export("", "s")
 	def active_profile(self):
-		profiles = []
-		for cfg in self.config_file:
-			try:
-				profiles.append(cfg.split('/')[-2])
-			except IndexError:
-				profiles.append(cfg)
-
-		return profiles
+		return self._profile
 
 	@exports.export("", "b")
 	def status(self):

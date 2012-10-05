@@ -26,14 +26,14 @@ import os
 import sys
 
 def usage():
-	print "Usage: tuned [-d|--daemon] [-c conffile|--config=conffile] [-D|--debug]"
+	print "Usage: tuned [-d|--daemon] [-p name|--profile=name] [-D|--debug]"
 
 def error(message):
 	print >>sys.stderr, message
 
 if __name__ == "__main__":
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "dc:D", ["daemon", "config=", "debug", "no-dbus"])
+		opts, args = getopt.getopt(sys.argv[1:], "dp:D", ["daemon", "profile=", "debug", "no-dbus"])
 	except getopt.error as e:
 		error("Error parsing command-line arguments: %s" % e)
 		usage()
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 		usage()
 		sys.exit(1)
 
-	config_file = []
+	profile = None
 	daemonize = False
 	debug = False
 	dbus = True
@@ -52,8 +52,8 @@ if __name__ == "__main__":
 	for (opt, val) in opts:
 		if   opt in ["-d", "--daemon"]:
 			daemonize = True
-		elif opt in ["-c", "--config"]:
-			config_file.append(val)
+		elif opt in ["-p", "--profile"]:
+			profile = val
 		elif opt in ["-D", "--debug"]:
 			debug = True
 		elif opt == "--no-dbus":
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 		else:
 			log.warn("Superuser permissions are needed. Most tunings will not work!")
 
-	app = tuned.Application(config_file, dbus)
+	app = tuned.Application(profile, dbus)
 
 	if daemonize:
 		log.switch_to_file()

@@ -23,6 +23,7 @@ import exports
 import exports.dbus
 import monitors
 import plugins
+import profiles
 import signal
 import storage
 import units
@@ -33,7 +34,7 @@ DBUS_INTERFACE = "com.redhat.tuned.control"
 DBUS_OBJECT = "/Tuned"
 
 class Application(object):
-	def __init__(self, config_file, enable_dbus = True):
+	def __init__(self, profile_name, enable_dbus = True):
 		self._storage_provider = storage.PickleProvider()
 		self._storage_factory = storage.Factory(self._storage_provider)
 
@@ -41,8 +42,10 @@ class Application(object):
 		self._monitors_repository = monitors.Repository()
 		self._unit_manager = units.Manager(self._plugins_repository, self._monitors_repository)
 
-		self._daemon = daemon.Daemon(self._unit_manager)
-		self._controller = controller.Controller(self._daemon, config_file)
+		self._profile_loader = profiles.Loader()
+
+		self._daemon = daemon.Daemon(self._unit_manager, self._profile_loader, profile_name)
+		self._controller = controller.Controller(self._daemon)
 
 		self._dbus_exporter = None
 		if enable_dbus:
@@ -56,7 +59,7 @@ class Application(object):
 		exports.register_object(self._controller)
 
 	def _init_signals(self):
-		utils.handle_signal(signal.SIGHUP, self._controller.switch_to_default_profile)
+		utils.handle_signal(signal.SIGHUP, self._controller.reload)
 		utils.handle_signal([signal.SIGINT, signal.SIGTERM], self._controller.terminate)
 
 	@property

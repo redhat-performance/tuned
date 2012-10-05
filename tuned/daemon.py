@@ -29,24 +29,35 @@ import threading
 import logs
 log = logs.get()
 
-DEFAULT_CONFIG_FILE = ["/etc/tuned/tuned.conf"]
+ACTIVE_PROFILE_FILENAME = "/etc/tuned/saved_profile"
+DEFAULT_PROFILE_NAME = "balanced"
 
 class Daemon(object):
-	def __init__(self, unit_manager, profile_loader):
+	def __init__(self, unit_manager, profile_loader, profile_name=None):
 		log.debug("initializing daemon")
 		self._unit_manager = unit_manager
 		self._profile_loader = profile_loader
-		self._config_file = DEFAULT_CONFIG_FILE
-		self._profile = None
-
 		self._thread = None
 		self._terminate = threading.Event()
 
+		if profile_name is None:
+			profile_name = self.get_active_profile()
+		self.set_profile(profile_name)
+
+	def set_profile(self, profile_name):
+		if self.is_running():
+			raise Exception("Cannot set profile while the daemon is running.")
+		self._profile = self._profile_loader.load(profile_name)
+
 	def _thread_code(self):
-		self._profile = self._profile_loader.load("default")
-#		self._profile = profile.Profile(self._unit_manager, self._config_file)
+		if self._profile is None:
+			raise Exception("Cannot start the daemon without setting a profile.")
+
+		for unit_info in self._profile.units:
+			self._unit_manager.create(unit_info.name, unit_info.plugin, unit_info.options)
 
 		self.save_active_profile()
+
 		self._unit_manager.plugins_repository.do_static_tuning()
 
 		self._terminate.clear()
@@ -60,11 +71,18 @@ class Daemon(object):
 
 	def save_active_profile(self):
 		try:
-			with open("/etc/tuned/active_profile", "w") as f:
-				data = "\n".join(self._config_file)
-				f.write(data)
+			with open(ACTIVE_PROFILE_FILENAME, "w") as f:
+				f.write(self._profile.name)
 		except (OSError,IOError) as e:
-			log.error("Cannot write active profile into /etc/tuned/active_profile: %s" % (e))
+			log.error("Cannot write active profile into %s: %s" % (ACTIVE_PROFILE_FILENAME, e))
+
+	def get_active_profile(self):
+		try:
+			with open(ACTIVE_PROFILE_FILENAME, "r") as f:
+				return f.read().strip()
+		except (OSError, IOError, EOFError) as e:
+			log.error("Cannot read active profile, setting default.")
+			return DEFAULT_PROFILE_NAME
 
 	@property
 	def config_file(self):
@@ -103,10 +121,6 @@ class Daemon(object):
 		self._terminate.set()
 		self._thread.join()
 		self._thread = None
-
-		if self._profile:
-			self._profile.cleanup()
-			self._profile = None
 
 		return True
 
