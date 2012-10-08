@@ -10,7 +10,7 @@ class Monitor(object):
 	Monitors provide data about the running system to Plugin objects, which use the data
 	to tune system parameters.
 
-	Following methods require reimlementation:
+	Following methods require reimplementation:
 	  - _init_available_devices(cls)
 	  - update(cls)
 	"""
@@ -49,6 +49,10 @@ class Monitor(object):
 	@classmethod
 	def _deregister_instance(cls, instance):
 		cls._instances.remove(instance)
+
+	@classmethod
+	def instances(cls):
+		return cls._instances
 
 	# instance properties
 
