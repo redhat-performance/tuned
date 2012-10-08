@@ -85,16 +85,13 @@ class Controller(exports.interfaces.ExportableInterface):
 			return self.stop() and self.start()
 
 	@exports.export("s", "b")
-	def switch_profile(self, profile):
-		for i in range(len(profiles)):
-			profiles[i] = profile.Profile.find_profile(profiles[i])
-		try:
-			self.config_file = profiles
-		except ValueError as e:
-			log.error("Unable to open profile's config file: %s" % e)
-			return False
+	def switch_profile(self, profile_name):
+		was_running = self._daemon.is_running()
+		if was_running:	self._daemon.stop()
+		self._daemon.set_profile(profile_name)
+		if was_running: self._daemon.start()
 
-		return self.reload()
+		return True
 
 	@exports.export("", "s")
 	def active_profile(self):
