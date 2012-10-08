@@ -15,18 +15,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import monitors
-import plugins
-import profile
-import storage
-import units
-import utils
-
-import ConfigParser
 import os
 import threading
-
 import logs
+
 log = logs.get()
 
 ACTIVE_PROFILE_FILENAME = "/etc/tuned/saved_profile"

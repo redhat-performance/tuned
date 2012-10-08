@@ -20,7 +20,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import tuned
+import tuned.application
+import tuned.logs
 import getopt
 import os
 import sys
@@ -70,7 +71,7 @@ if __name__ == "__main__":
 		else:
 			log.warn("Superuser permissions are needed. Most tunings will not work!")
 
-	app = tuned.Application(profile, dbus)
+	app = tuned.application.Application(profile, dbus)
 
 	if daemonize:
 		log.switch_to_file()
