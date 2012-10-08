@@ -18,6 +18,7 @@ class LoaderTestCase(unittest.TestCase):
 
 		cls._create_profile(tmpdir1, "default", "[main]\n\n[network]\ntype=net\ndevices=em*\n\n[disk]\nenabled=false\n")
 		cls._create_profile(tmpdir1, "invalid", "INVALID")
+		cls._create_profile(tmpdir1, "expand", "[expand]\ntype=script\nscript=runme.sh\n")
 		cls._create_profile(tmpdir2, "empty", "")
 
 		cls._create_profile(tmpdir1, "custom", "[custom]\ntype=one\n")
@@ -114,3 +115,10 @@ class LoaderTestCase(unittest.TestCase):
 		loader = tuned.profiles.loader.Loader(self._tmp_load_dirs)
 		config = loader.load("empty")
 		self.assertIs(type(config), tuned.profiles.profile.Profile)
+
+	def test_script_expand_names(self):
+		loader = TestLoader(self._tmp_load_dirs)
+		config = loader.load("expand")
+
+		expected_name = os.path.join(self._tmp_load_dirs[0], "expand", "runme.sh")
+		self.assertEqual(config["expand"]["script"], expected_name)
