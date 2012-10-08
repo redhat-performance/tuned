@@ -27,7 +27,7 @@ import os
 import sys
 
 def usage():
-	print "Usage: tuned [-d|--daemon] [-p name|--profile=name] [-D|--debug]"
+	print "Usage: tuned [-d|--daemon] [-p name|--profile=name] [--no-dbus] [-D|--debug]"
 
 def error(message):
 	print >>sys.stderr, message
