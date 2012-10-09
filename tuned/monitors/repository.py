@@ -25,7 +25,7 @@ class Repository(PluginLoader):
 		return monitor_instance
 
 	def delete(self, monitor):
-		assert isinstance(monitor, self._loader.interface)
+		assert isinstance(monitor, self._interface)
 		monitor.cleanup()
 		self._monitors.remove(monitor)
 
