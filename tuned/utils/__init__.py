@@ -17,4 +17,3 @@
 
 from signals import *
 from daemon import *
-from pluginloader import *

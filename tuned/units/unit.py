@@ -21,7 +21,7 @@ class Unit(object):
 		self._name = name
 
 		(devices, options) = self._get_plugin_params(config)
-		self._plugin = self._plugin_repository.create(monitor_repository, plugin_name, devices, options)
+		self._plugin = self._plugin_repository.create(plugin_name, devices, options)
 
 	@property
 	def name(self):

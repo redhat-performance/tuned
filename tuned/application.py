@@ -38,8 +38,8 @@ class Application(object):
 		self._storage_provider = storage.PickleProvider()
 		self._storage_factory = storage.Factory(self._storage_provider)
 
-		self._plugins_repository = plugins.Repository(self._storage_factory)
 		self._monitors_repository = monitors.Repository()
+		self._plugins_repository = plugins.Repository(self._storage_factory, self._monitors_repository)
 		self._unit_manager = units.Manager(self._plugins_repository, self._monitors_repository)
 
 		self._profile_loader = profiles.Loader()

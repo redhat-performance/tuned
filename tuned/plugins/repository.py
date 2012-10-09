@@ -1,49 +1,38 @@
-import base
-import exceptions
-
+from tuned.utils.plugin_loader import PluginLoader
+import tuned.plugins.base
 import tuned.logs
-import tuned.utils
 
 log = tuned.logs.get()
 
 __all__ = ["Repository"]
 
-class Repository(object):
+class Repository(PluginLoader):
 
-	__slots__ = ["_loader", "_plugins", "_storage_factory"]
-
-	def __init__(self, storage_factory):
+	def __init__(self, storage_factory, monitor_repository):
 		super(self.__class__, self).__init__()
-		self._loader = tuned.utils.PluginLoader("tuned.plugins", "plugin_", base.Plugin)
 		self._plugins = set()
 		self._storage_factory = storage_factory
+		self._monitor_repository = monitor_repository
 
-	def create(self, monitor_repository, plugin_name, devices, options):
+	def _set_loader_parameters(self):
+		self._namespace = "tuned.plugins"
+		self._prefix = "plugin_"
+		self._interface = tuned.plugins.base.Plugin
+
+	def create(self, plugin_name, devices, options):
 		log.debug("creating plugin %s" % plugin_name)
-		try:
-			plugin_cls = self._loader.load(plugin_name)
-			plugin_instance = plugin_cls(monitor_repository, self._storage_factory, devices, options)
-			self._plugins.add(plugin_instance)
-			return plugin_instance
-		except Exception as exception:
-			plugin_exception = exceptions.LoadPluginException(plugin_name, exception)
-			raise plugin_exception
+		plugin_cls = self.load_plugin(plugin_name)
+		plugin_instance = plugin_cls(self._monitor_repository, self._storage_factory, devices, options)
+		self._plugins.add(plugin_instance)
+		return plugin_instance
 
 	def tunable_devices(self, plugin_name):
-		try:
-			plugin_cls = self._loader.load(plugin_name)
-			return plugin_cls.tunable_devices()
-		except Exception as e:
-			plugin_exception = exceptions.LoadPluginException(plugin_name, e)
-			raise plugin_exception
+		plugin_cls = self.load_plugin(plugin_name)
+		return plugin_cls.tunable_devices()
 
 	def is_supported(self, plugin_name):
-		try:
-			plugin_cls = self._loader.load(plugin_name)
-			return plugin_cls.is_supported()
-		except Exception as e:
-			plugin_exception = exceptions.LoadPluginException(plugin_name, e)
-			raise plugin_exception
+		plugin_cls = self.load_plugin(plugin_name)
+		return plugin_cls.is_supported()
 
 	def do_static_tuning(self):
 		for plugin in self._plugins:
@@ -53,7 +42,7 @@ class Repository(object):
 			plugin.execute_commands()
 
 	def delete(self, plugin):
-		assert isinstance(plugin, self._loader.interface)
+		assert isinstance(plugin, self._interface)
 		log.debug("removing plugin %s" % plugin)
 		plugin.cleanup_commands()
 		plugin.cleanup()
