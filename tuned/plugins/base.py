@@ -110,7 +110,8 @@ class Plugin(object):
 			command["set"](new_value)
 			return
 
-		assert self._devices is not None
+		if self._devices is None:
+			return
 
 		for device in self._devices:
 			current_value = command["get"](device)
@@ -131,7 +132,8 @@ class Plugin(object):
 			self._storage.unset(storage_key)
 			return
 
-		assert self._devices is not None
+		if self._devices is None:
+			return
 
 		for device in self._devices:
 			storage_key = self._storage_key(command_name, device)
