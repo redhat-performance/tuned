@@ -31,7 +31,7 @@ install:
 
 	# library
 	mkdir -p $(DESTDIR)$(PYTHON_SITELIB)
-	cp -a tuned $(DESTDIR)$(PYTHON_SITELIB)/tuned
+	cp -a tuned $(DESTDIR)$(PYTHON_SITELIB)
 
 	# binaries
 	mkdir -p $(DESTDIR)/usr/sbin
