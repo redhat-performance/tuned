@@ -1,5 +1,5 @@
 import unittest
-import tests.mock
+import tests.globals
 import tuned.monitors.base
 
 # TODO: multiple instances share the same data source (_available_devices vs _updating_devices)

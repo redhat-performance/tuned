@@ -13,4 +13,3 @@ class StorageFactoryTestCase(unittest.TestCase):
 		self.assertIsInstance(storage_foo, tuned.storage.Storage)
 		self.assertIsInstance(storage_bar, tuned.storage.Storage)
 		self.assertIsNot(storage_foo, storage_bar)
-

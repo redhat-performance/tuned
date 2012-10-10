@@ -34,26 +34,26 @@ class Plugin(object):
 		Plugin instance constructor. Plugins should not override this function in general,
 		_post_init method should be used instead.
 		"""
+		self._monitors_repository = monitors_repository
+		self._storage = storage_factory.create(self.__class__.__name__)
 		self._devices = devices
-
 		self._options = self._get_default_options()
 		if options is not None:
 			self._merge_options(options)
-
-		self._monitors_repository = monitors_repository
-		self._storage = storage_factory.create(self.__class__.__name__)
-
-		self._commands = {}
-		self._autoregister_commands()
-		assert self._commands_are_valid(), "Plugin commands are not defined correctly."
-
 		self._dynamic_tuning = True
 
+		self._init_commands()
 		self._post_init()
 
+	def _init_commands(self):
+		self._commands = {}
+		self._autoregister_commands()
+
+		for command_name, command in self._commands.iteritems():
+			if "get" not in command or "set" not in command:
+				raise TypeError("Plugin command '%s' is not defined correctly" % command_name)
+
 	def _post_init(self):
-		"""
-		"""
 		pass
 
 	@property
@@ -83,21 +83,15 @@ class Plugin(object):
 
 			self._commands[command_name] = info
 
-	def _commands_are_valid(self):
-		for command_name, command in self._commands.iteritems():
-			if "get" not in command or "set" not in command:
-				return False
-		return True
-
 	def _storage_key(self, command_name, device=None):
 		if device is not None:
 			return "%s@%s" % (command_name, device)
 		else:
 			return command_name
 
-	def execute_command(self, command_name, command):
+	def _execute_command(self, command_name, command):
 		if not self._options.has_key(command_name):
-			return
+			raise ValueError("Command is not supported.")
 
 		new_value = self._options[command_name]
 		if new_value is None:
@@ -111,7 +105,7 @@ class Plugin(object):
 			return
 
 		if self._devices is None:
-			return
+			raise TypeError("No devices were specified.")
 
 		for device in self._devices:
 			current_value = command["get"](device)
@@ -119,37 +113,36 @@ class Plugin(object):
 			self._storage.set(storage_key, current_value)
 			command["set"](new_value, device)
 
-	def cleanup_command(self, command_name, command):
+	def _cleanup_command(self, command_name, command):
 		if not self._options.has_key(command_name):
+			raise ValueError("Command is not supported.")
+
+		if self._options[command_name] is None:
 			return
 
 		if not command["per_device"]:
 			storage_key = self._storage_key(command_name)
 			old_value = self._storage.get(storage_key)
-			if old_value is None:
-				return
 			command["set"](old_value)
 			self._storage.unset(storage_key)
 			return
 
 		if self._devices is None:
-			return
+			raise TypeError("No devices were specified.")
 
 		for device in self._devices:
 			storage_key = self._storage_key(command_name, device)
 			old_value = self._storage.get(storage_key)
-			if old_value is None:
-				return
 			command["set"](old_value, device)
 			self._storage.unset(storage_key)
 
 	def execute_commands(self):
 		for command_name, command in self._commands.iteritems():
-			self.execute_command(command_name, command)
+			self._execute_command(command_name, command)
 
 	def cleanup_commands(self):
 		for command_name, command in self._commands.iteritems():
-			self.cleanup_command(command_name, command)
+			self._cleanup_command(command_name, command)
 
 	def cleanup(self):
 		pass
