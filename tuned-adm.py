@@ -64,11 +64,11 @@ class Tuned_adm:
 			self.check_permissions()
 			self.off()
 		elif args[0] == "profile":
-			#if len(args) == 2:
-			self.check_permissions()
-			self.set_active_profile(args[1:])
-			#else:
-				#self.error("Invalid profile specification. Use 'tuned-adm list' to get all available profiles.")
+			if len(args) >= 2:
+			  self.check_permissions()
+			  self.set_active_profile(args[1:])
+			else:
+				self.error("Invalid profile specification. Use 'tuned-adm list' to get all available profiles.")
 		else:
 			self.error("Nonexistent argument '%s'." % args[0])
 
