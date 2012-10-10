@@ -1,0 +1,2 @@
+# restart ktune daemon if a new block device is added
+ACTION=="add", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", RUN+="/sbin/service ktune condrestart"
