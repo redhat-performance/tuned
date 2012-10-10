@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.0.1
+Version: 2.0.2
 Release: 1%{?dist}
 License: GPLv2
 # The source for this package was pulled from upstream git.  Use the
@@ -26,12 +26,20 @@ power saving modes to adapt to the current usage. Currently only ethernet
 network and ATA harddisk devices are implemented.
 
 %package utils
+Requires: %{name} = %{version}-%{release}
+Summary: Various tuned utilities
+
+%description utils
+This package contains utilities that can help you to fine tune your
+system and manage tuned profiles.
+
+%package utils-systemtap
 Summary: Disk and net statistic monitoring systemtap scripts
 Requires: %{name} = %{version}-%{release}
 Requires: systemtap
 
-%description utils
-The tuned-utils package contains several systemtap scripts to allow detailed
+%description utils-systemtap
+This package contains several systemtap scripts to allow detailed
 manual monitoring of the system. Instead of the typical IO/sec it collects
 minimal, maximal and average time between operations to be able to
 identify applications that behave power inefficient (many small operations
@@ -113,6 +121,11 @@ fi
 
 %files utils
 %defattr(-,root,root,-)
+%doc COPYING
+%{_bindir}/powertop2tuned
+
+%files utils-systemtap
+%defattr(-,root,root,-)
 %doc doc/README.utils
 %doc doc/README.scomes
 %doc COPYING
@@ -120,7 +133,6 @@ fi
 %{_sbindir}/netdevstat
 %{_sbindir}/diskdevstat
 %{_sbindir}/scomes
-%{_bindir}/powertop2tuned
 %{_mandir}/man8/varnetload.*
 %{_mandir}/man8/netdevstat.*
 %{_mandir}/man8/diskdevstat.*
@@ -137,6 +149,20 @@ fi
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Mon Oct 08 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0.2-1
+- New version
+- Systemtap scripts moved to utils-systemtap subpackage
+
+* Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.0.1-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Tue Jun 12 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0.1-3
+- another powertop-2.0 compatibility fix
+  Resolves: rhbz#830415
+
+* Tue Jun 12 2012 Jan Kaluza <jkaluza@redhat.com> - 2.0.1-2
+- fixed powertop2tuned compatibility with powertop-2.0
+
 * Tue Apr 03 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0.1-1
 - new version
 
