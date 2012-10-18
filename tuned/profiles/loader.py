@@ -4,7 +4,6 @@ import os.path
 
 from tuned.profiles.exceptions import InvalidProfileException
 
-
 class Loader(object):
 	"""
 	Profiles loader.
@@ -30,19 +29,37 @@ class Loader(object):
 	def add_directory(self, new_dir):
 		self._load_directories.append(new_dir)
 
-	def load(self, profile_name):
-		file_name = self._find_config(profile_name)
-		if file_name is None:
-			raise InvalidProfileException("Profile '%s' not found." % profile_name)
+	def load(self, profile_names):
+		configs = []
+		processed_files = []
+		if type(profile_names) is str:
+			profile_names = [profile_names]
 
-		config = self._load_config(file_name)
-		self._clean_config(config, file_name)
+		readable_name = ",".join
 
-		# merging is removed temporarily
+		while len(profile_names) > 0:
+			name = profile_names.pop(0)
+			filename = self._find_config_file(name, processed_files)
+			if filename is None:
+				raise InvalidProfileException("Cannot find profile '%s'." % name)
+			processed_files.append(filename)
 
-		return self._create_profile(profile_name, config)
+			config = self._load_config_data(filename)
 
-	def _find_config(self, profile_name, skip_files=None):
+			if "main" in config and config["main"].get("include", None) is not None:
+				profile_names.insert(0, config["main"]["include"])
+				del config["main"]["include"]
+
+			configs.insert(0, config)
+
+		if len(configs) == 1:
+			final_config = configs[0]
+		else:
+			final_config = self._merger.merge(configs)
+
+		return self._create_profile(readable_name, final_config)
+
+	def _find_config_file(self, profile_name, skip_files=None):
 		for dir_name in reversed(self._load_directories):
 			config_file = os.path.join(dir_name, profile_name, "tuned.conf")
 			config_file = os.path.normpath(config_file)
@@ -53,7 +70,7 @@ class Loader(object):
 			if os.path.exists(config_file):
 				return config_file
 
-	def _load_config(self, file_name):
+	def _load_config_data(self, file_name):
 		parser = ConfigParser.SafeConfigParser(allow_no_value=True)
 		try:
 			parser.read(file_name)
@@ -65,9 +82,11 @@ class Loader(object):
 			data[section] = {}
 			for option, value in parser.items(section):
 				data[section][option] = value
+
+		self._clean_config_data(data, file_name)
 		return data
 
-	def _clean_config(self, config, file_name):
+	def _clean_config_data(self, config, file_name):
 		for unit_name in config:
 			# nothing special for global options
 			if unit_name == "main":

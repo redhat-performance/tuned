@@ -20,6 +20,7 @@ class LoaderTestCase(unittest.TestCase):
 		cls._create_profile(tmpdir1, "invalid", "INVALID")
 		cls._create_profile(tmpdir1, "expand", "[expand]\ntype=script\nscript=runme.sh\n")
 		cls._create_profile(tmpdir2, "empty", "")
+		cls._create_profile(tmpdir2, "hasinclude", "[main]\ninclude=default\n\n[other]\nenabled=true")
 
 		cls._create_profile(tmpdir1, "custom", "[custom]\ntype=one\n")
 		cls._create_profile(tmpdir2, "custom", "[custom]\ntype=two\n")
@@ -119,6 +120,17 @@ class LoaderTestCase(unittest.TestCase):
 	def test_script_expand_names(self):
 		loader = TestLoader(self._tmp_load_dirs)
 		config = loader.load("expand")
-
 		expected_name = os.path.join(self._tmp_load_dirs[0], "expand", "runme.sh")
 		self.assertEqual(config["expand"]["script"], expected_name)
+
+	def test_load_multiple_profiles(self):
+		loader = TestLoader(self._tmp_load_dirs)
+		config = loader.load(["default", "expand"])
+		self.assertIn("network", config)
+		self.assertIn("expand", config)
+
+	def test_include_directive(self):
+		loader = TestLoader(self._tmp_load_dirs)
+		config = loader.load("hasinclude")
+		self.assertIn("network", config)
+		self.assertIn("other", config)
