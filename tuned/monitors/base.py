@@ -51,6 +51,14 @@ class Monitor(object):
 		cls._instances.remove(instance)
 
 	@classmethod
+	def _refresh_updating_devices(cls):
+		new_updating = set()
+		for instance in cls._instances:
+			new_updating |= instance.devices
+		cls._updating_devices.clear()
+		cls._updating_devices.update(new_updating)
+
+	@classmethod
 	def instances(cls):
 		return cls._instances
 
@@ -78,6 +86,7 @@ class Monitor(object):
 
 	def cleanup(self):
 		self._deregister_instance(self)
+		self._refresh_updating_devices()
 
 	@property
 	def devices(self):
@@ -87,12 +96,7 @@ class Monitor(object):
 	def devices(self, value):
 		new_devices = self._available_devices & set(value)
 		self._devices = new_devices
-
-		new_updating = set()
-		for instance in self._instances:
-			new_updating |= instance.devices
-		self._updating_devices.clear()
-		self._updating_devices.update(new_updating)
+		self._refresh_updating_devices()
 
 	def add_device(self, device):
 		assert type(device) is str
