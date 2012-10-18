@@ -18,6 +18,10 @@ class MonitorBaseClassTestCase(unittest.TestCase):
 		with self.assertRaises(NotImplementedError):
 			tuned.monitors.base.Monitor()
 
+	def test_update_fail_with_base_class(self):
+		with self.assertRaises(NotImplementedError):
+			tuned.monitors.base.Monitor.update()
+
 	def test_available_devices(self):
 		monitor = MockMonitor()
 		devices = MockMonitor.get_available_devices()
