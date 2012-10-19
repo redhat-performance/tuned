@@ -50,7 +50,7 @@ class Tuned_adm:
 		sys.exit(exit_code)
 
 	def check_permissions(self):
-		if not os.getuid() == 0:
+		if not os.geteuid() == 0:
 			self.error("Only root can run this script.", 2)
 
 	def run(self, args):
