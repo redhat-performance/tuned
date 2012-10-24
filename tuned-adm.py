@@ -26,7 +26,7 @@ import sys
 import locale
 import signal
 
-PIDFILE = "/var/run/tuned/tuned.pid"
+PIDFILE = "/run/tuned/tuned.pid"
 
 def usage():
 	print """

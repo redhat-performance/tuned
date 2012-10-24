@@ -4,7 +4,7 @@ After=syslog.target
 
 [Service]
 Type=forking
-PIDFile=/var/run/tuned/tuned.pid
+PIDFile=/run/tuned/tuned.pid
 BusName=com.redhat.tuned
 ExecStart=/usr/sbin/tuned -d
 

@@ -61,7 +61,7 @@ install:
 	mkdir -p $(DESTDIR)/var/log/tuned
 
 	# runtime directory
-	mkdir -p $(DESTDIR)/var/run/tuned
+	mkdir -p $(DESTDIR)/run/tuned
 	mkdir -p $(DESTDIR)/etc/tmpfiles.d
 	install -m 0644 tuned.tmpfiles $(DESTDIR)/etc/tmpfiles.d/tuned.conf
 

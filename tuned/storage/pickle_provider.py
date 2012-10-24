@@ -5,7 +5,7 @@ import os
 
 log = tuned.logs.get()
 
-DEFAULT_STORAGE_FILE = "/var/run/tuned/save.pickle"
+DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
 
 class PickleProvider(interfaces.Provider):
 	__slots__ = ["_path", "_data"]

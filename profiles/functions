@@ -7,7 +7,7 @@
 #
 # Config
 #
-STORAGE=/var/run/tuned
+STORAGE=/run/tuned
 STORAGE_SUFFIX=".save"
 
 #

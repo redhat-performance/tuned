@@ -5,7 +5,7 @@ import os
 import signal
 import sys
 
-PIDFILE = "/var/run/tuned/tuned.pid"
+PIDFILE = "/run/tuned/tuned.pid"
 
 log = tuned.logs.get()
 

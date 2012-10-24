@@ -53,7 +53,7 @@ class StoragePickleProviderTestCase(unittest.TestCase):
 		self.assertEqual(self._temp_filename, provider._path)
 
 		provider = tuned.storage.PickleProvider()
-		self.assertEqual("/var/run/tuned/save.pickle", provider._path)
+		self.assertEqual("/run/tuned/save.pickle", provider._path)
 
 	def test_memory_persistence(self):
 		provider = tuned.storage.PickleProvider(self._temp_filename)
