@@ -1,9 +1,11 @@
-__all__ = ["daemonize"]
+__all__ = ["daemonize", "write_pidfile"]
 
 import tuned.logs
 import os
 import signal
 import sys
+
+PIDFILE = "/var/run/tuned/tuned.pid"
 
 log = tuned.logs.get()
 
@@ -11,7 +13,7 @@ def handle_signal(signals, handler, pass_args = True):
 	for s in signals:
 		signal.signal(s, handler)
 
-def daemonize(timeout, pidfile = "/var/run/tuned/tuned.pid"):
+def daemonize(timeout, pidfile = PIDFILE):
 	"""
 	Perform current process daemonization. Kills current SIGALRM, SIGUSR1, and SIGUSR2 signal handlers.
 	"""
@@ -27,6 +29,15 @@ def daemonize(timeout, pidfile = "/var/run/tuned/tuned.pid"):
 
 	handle_signal([signal.SIGALRM, signal.SIGUSR1, signal.SIGUSR2], signal.SIG_DFL)
 	return result
+
+def write_pidfile(pidfile = PIDFILE):
+	try:
+		if not os.path.exists(os.path.dirname(pidfile)):
+			os.makedirs(os.path.dirname(pidfile))
+		with open(pidfile, "w") as f:
+			f.write(str(os.getpid()))
+	except (OSError,IOError) as e:
+		log.critical("Cannot write the PID to %s: %s" % (pidfile, str(e)))
 
 def _daemonize_fork(timeout, pidfile):
 	try:
@@ -57,13 +68,7 @@ def _daemonize_fork(timeout, pidfile):
 	os.dup2(so.fileno(), sys.stdout.fileno())
 	os.dup2(se.fileno(), sys.stderr.fileno())
 
-	try:
-		if not os.path.exists(os.path.dirname(pidfile)):
-			os.makedirs(os.path.dirname(pidfile))
-		with open(pidfile, "w") as f:
-			f.write(str(os.getpid()))
-	except (OSError,IOError) as e:
-		log.critical("Cannot write the PID to %s: %s" % (pidfile, str(e)))
+	write_pidfile(pidfile)
 
 	return True
 

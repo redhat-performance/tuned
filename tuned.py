@@ -79,5 +79,7 @@ if __name__ == "__main__":
 		else:
 			log.critical("cannot daemonize")
 			sys.exit(1)
+	else:
+		tuned.utils.write_pidfile()
 
 	app.run()
