@@ -1,6 +1,8 @@
 import tuned.profiles.profile
+import tuned.profiles.merger
 import ConfigParser
 import os.path
+import collections
 
 from tuned.profiles.exceptions import InvalidProfileException
 
@@ -9,15 +11,13 @@ class Loader(object):
 	Profiles loader.
 	"""
 
-	__slots__ = [ "_load_directories" ]
+	__slots__ = [ "_merger", "_load_directories" ]
 
-	def __init__(self, load_directories = None):
-		if load_directories is None:
-			load_directories = [ "/var/lib/tuned", "/etc/tuned" ]
-		elif type(load_directories) is not list:
+	def __init__(self, load_directories, merger):
+		if type(load_directories) is not list:
 			raise TypeError("load_directories parameter is not a list")
-
 		self._load_directories = load_directories
+		self._merger = merger
 
 	def _create_profile(self, profile_name, config):
 		return tuned.profiles.profile.Profile(profile_name, config)
@@ -35,29 +35,31 @@ class Loader(object):
 		if type(profile_names) is str:
 			profile_names = [profile_names]
 
-		readable_name = ",".join
+		readable_name = ",".join(profile_names)
 
-		while len(profile_names) > 0:
-			name = profile_names.pop(0)
+		configs = []
+		processed_files = []
+		self._load_recursive(profile_names, configs, processed_files)
+
+		if len(configs) > 1:
+			final_config = self._merger.merge(configs)
+		else:
+			final_config = configs[0]
+
+		return self._create_profile(readable_name, final_config)
+
+	def _load_recursive(self, profile_names, configs, processed_files):
+		for name in profile_names:
 			filename = self._find_config_file(name, processed_files)
 			if filename is None:
 				raise InvalidProfileException("Cannot find profile '%s'." % name)
 			processed_files.append(filename)
 
 			config = self._load_config_data(filename)
-
 			if "main" in config and config["main"].get("include", None) is not None:
-				profile_names.insert(0, config["main"]["include"])
-				del config["main"]["include"]
+				self._load_recursive([config["main"]["include"]], configs, processed_files)
 
-			configs.insert(0, config)
-
-		if len(configs) == 1:
-			final_config = configs[0]
-		else:
-			final_config = self._merger.merge(configs)
-
-		return self._create_profile(readable_name, final_config)
+			configs.append(config)
 
 	def _find_config_file(self, profile_name, skip_files=None):
 		for dir_name in reversed(self._load_directories):
@@ -77,9 +79,16 @@ class Loader(object):
 		except ConfigParser.Error as e:
 			raise InvalidProfileException("Cannot load profile.", e)
 
-		data = {}
+		data = collections.OrderedDict()
 		for section in parser.sections():
-			data[section] = {}
+			data[section] = collections.OrderedDict()
+
+			if section != "main":
+				data[section]["enabled"] = True
+				data[section]["replace"] = False
+				data[section]["devices"] = "*"
+				data[section]["type"] = section
+
 			for option, value in parser.items(section):
 				data[section][option] = value
 
@@ -91,10 +100,6 @@ class Loader(object):
 			# nothing special for global options
 			if unit_name == "main":
 				continue
-
-			# no plugin type specified, assume it matches the unit name
-			if not "type" in config[unit_name]:
-				config[unit_name]["type"] = unit_name
 
 			# special case: script names have to be expanded
 			if config[unit_name]["type"] == "script" and "script" in config[unit_name]:

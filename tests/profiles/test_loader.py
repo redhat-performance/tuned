@@ -5,9 +5,13 @@ import os.path
 import tuned.profiles.loader
 
 # DI: return config itself instead of the profile
-class TestLoader(tuned.profiles.loader.Loader):
+class MockLoader(tuned.profiles.loader.Loader):
 	def _create_profile(self, profile_name, config):
 		return config
+
+class MockMerger(object):
+	def merge(self, configs):
+		return configs
 
 class LoaderTestCase(unittest.TestCase):
 	@classmethod
@@ -39,29 +43,16 @@ class LoaderTestCase(unittest.TestCase):
 			conf_file.write(tuned_conf_content)
 
 	def test_init(self):
-		tuned.profiles.loader.Loader()
-		tuned.profiles.loader.Loader([])
-		tuned.profiles.loader.Loader(["/tmp"])
-		tuned.profiles.loader.Loader(["/foo", "/bar"])
+		tuned.profiles.loader.Loader([], None)
+		tuned.profiles.loader.Loader(["/tmp"], None)
+		tuned.profiles.loader.Loader(["/foo", "/bar"], None)
 
 	def test_init_wrong_type(self):
 		with self.assertRaises(TypeError):
 			tuned.profiles.loader.Loader(False)
 
-	def test_init_extra_params(self):
-		with self.assertRaises(TypeError):
-			tuned.profiles.loader.Loader([], "extra")
-
-	def test_default_load_directories(self):
-		loader = tuned.profiles.loader.Loader()
-
-		# order is important
-		self.assertEqual(len(loader.load_directories), 2)
-		self.assertEqual(loader.load_directories[0], "/var/lib/tuned")
-		self.assertEqual(loader.load_directories[1], "/etc/tuned")
-
 	def test_add_directory(self):
-		loader = tuned.profiles.loader.Loader([])
+		loader = tuned.profiles.loader.Loader([], None)
 		self.assertEqual(len(loader.load_directories), 0);
 
 		loader.add_directory("/a")
@@ -74,63 +65,72 @@ class LoaderTestCase(unittest.TestCase):
 		self.assertEqual(loader.load_directories[1], "/b")
 
 	def test_load(self):
-		loader = TestLoader(self._tmp_load_dirs)
+		loader = MockLoader(self._tmp_load_dirs, None)
 		default_config = loader.load("default")
 
 		self.assertIn("main", default_config)
 		self.assertIn("network", default_config)
 		self.assertIn("disk", default_config)
 
-		self.assertNotIn("type", default_config["main"])
-		self.assertEquals(default_config["network"]["type"], "net")
-		self.assertEquals(default_config["disk"]["type"], "disk")
-
-		self.assertEquals(len(default_config["main"]), 0);
-		self.assertEquals(len(default_config["network"]), 2);
-		self.assertEquals(len(default_config["disk"]), 2);
-
 		self.assertEquals(default_config["network"]["devices"], "em*")
 		self.assertEquals(default_config["disk"]["enabled"], "false") # TODO: improve parser
 
+	def test_unit_set_correct_type(self):
+		loader = MockLoader(self._tmp_load_dirs, None)
+		config = loader.load("default")
+		self.assertEqual("net", config["network"]["type"])
+		self.assertEqual("disk", config["disk"]["type"])
+
 	def test_load_empty(self):
-		loader = TestLoader(self._tmp_load_dirs)
+		loader = MockLoader(self._tmp_load_dirs, None)
 		empty_config = loader.load("empty")
 		self.assertEquals(empty_config, {})
 
 	def test_load_invalid(self):
-		loader = TestLoader(self._tmp_load_dirs)
+		loader = MockLoader(self._tmp_load_dirs, None)
 		with self.assertRaises(tuned.profiles.exceptions.InvalidProfileException):
 			invalid_config = loader.load("invalid")
 
 	def test_load_nonexistent(self):
-		loader = TestLoader(self._tmp_load_dirs)
+		loader = MockLoader(self._tmp_load_dirs, None)
 		with self.assertRaises(tuned.profiles.exceptions.InvalidProfileException):
 			config = loader.load("nonexistent")
 
 	def test_load_order(self):
-		loader = TestLoader(self._tmp_load_dirs)
+		loader = MockLoader(self._tmp_load_dirs, None)
 		custom_config = loader.load("custom")
 		self.assertEquals(custom_config["custom"]["type"], "two")
 
 	def test_default_load(self):
-		loader = tuned.profiles.loader.Loader(self._tmp_load_dirs)
+		loader = tuned.profiles.loader.Loader(self._tmp_load_dirs, None)
 		config = loader.load("empty")
 		self.assertIs(type(config), tuned.profiles.profile.Profile)
 
+	def test_default_unit_options(self):
+		loader = MockLoader(self._tmp_load_dirs, None)
+		config = loader.load("default")
+		self.assertIn("network", config)
+		self.assertIn("enabled", config["network"])
+		self.assertIn("replace", config["network"])
+		self.assertIn("devices", config["network"])
+		self.assertIn("type", config["network"])
+
 	def test_script_expand_names(self):
-		loader = TestLoader(self._tmp_load_dirs)
+		loader = MockLoader(self._tmp_load_dirs, None)
 		config = loader.load("expand")
 		expected_name = os.path.join(self._tmp_load_dirs[0], "expand", "runme.sh")
 		self.assertEqual(config["expand"]["script"], expected_name)
 
 	def test_load_multiple_profiles(self):
-		loader = TestLoader(self._tmp_load_dirs)
+		merger = MockMerger()
+		loader = MockLoader(self._tmp_load_dirs, merger)
 		config = loader.load(["default", "expand"])
-		self.assertIn("network", config)
-		self.assertIn("expand", config)
+		self.assertIn("network", config[0])
+		self.assertIn("expand", config[1])
 
 	def test_include_directive(self):
-		loader = TestLoader(self._tmp_load_dirs)
+		merger = MockMerger()
+		loader = MockLoader(self._tmp_load_dirs, merger)
 		config = loader.load("hasinclude")
-		self.assertIn("network", config)
-		self.assertIn("other", config)
+		self.assertIn("network", config[0])
+		self.assertIn("other", config[1])

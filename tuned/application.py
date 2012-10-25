@@ -42,7 +42,8 @@ class Application(object):
 		self._plugins_repository = plugins.Repository(self._storage_factory, self._monitors_repository)
 		self._unit_manager = units.Manager(self._plugins_repository, self._monitors_repository)
 
-		self._profile_loader = profiles.Loader()
+		self._profile_merger = profiles.Merger()
+		self._profile_loader = profiles.Loader(["/var/lib/tuned", "/etc/tuned"], self._profile_merger)
 
 		self._daemon = daemon.Daemon(self._unit_manager, self._profile_loader, profile_name)
 		self._controller = controller.Controller(self._daemon)
