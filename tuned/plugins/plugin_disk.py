@@ -165,9 +165,6 @@ class DiskPlugin(base.Plugin):
 
 	@command_set("alpm")
 	def _set_alpm(self, policy):
-		if policy & 24000 != 0:
-			policy = "max_performance"
-
 		for policy_file in self._alpm_policy_files():
 			tuned.utils.commands.write_to_file(policy_file, policy)
 
