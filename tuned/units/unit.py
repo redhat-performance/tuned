@@ -12,10 +12,6 @@ class Unit(object):
 	__slots__ = ["_name", "_plugin", "_plugin_repository", "_monitor_repository"]
 
 	def __init__(self, plugin_repository, monitor_repository, name, plugin_name, config):
-		assert type(name) is str
-		assert type(plugin_name) is str
-		assert config is None or type(config) is dict
-
 		self._plugin_repository = plugin_repository
 		self._monitor_repository = monitor_repository
 		self._name = name
@@ -40,7 +36,6 @@ class Unit(object):
 			return (None, {})
 
 		devices = None
-		assert type(config) is dict
 		if "devices" in config:
 			devices = config["devices"]
 			if devices and len(devices) == 0:
