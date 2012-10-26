@@ -3,4 +3,5 @@ from tuned.profiles.profile import *
 from tuned.profiles.unit import *
 from tuned.profiles.exceptions import *
 from tuned.profiles.device_matcher import *
+from tuned.profiles.factory import *
 from tuned.profiles.merger import *
