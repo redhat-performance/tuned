@@ -8,8 +8,7 @@ class DeviceMatcher(object):
 	The rules have a syntax of shell-style wildcards and are either positive
 	or negative. The negative rules are prefixed with an exclamation mark.
 	"""
-	@classmethod
-	def match(cls, rules_str, device_name):
+	def match(self, rules_str, device_name):
 		"""
 		Match a device against the specification in the profile.
 
@@ -36,3 +35,15 @@ class DeviceMatcher(object):
 				break
 
 		return matches
+
+	def match_list(self, rules_str, device_list):
+		"""
+		Match a device list against the specification in the profile. Returns
+		the list, which is a subset of devices which match.
+		"""
+		matching_devices = []
+		for device in device_list:
+			if self.match(rules_str, device):
+				matching_devices.append(device)
+
+		return matching_devices
