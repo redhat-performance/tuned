@@ -35,17 +35,18 @@ DBUS_OBJECT = "/Tuned"
 
 class Application(object):
 	def __init__(self, profile_name, enable_dbus = True):
-		self._storage_provider = storage.PickleProvider()
-		self._storage_factory = storage.Factory(self._storage_provider)
+		storage_provider = storage.PickleProvider()
+		storage_factory = storage.Factory(storage_provider)
 
-		self._monitors_repository = monitors.Repository()
-		self._plugins_repository = plugins.Repository(self._storage_factory, self._monitors_repository)
-		self._unit_manager = units.Manager(self._plugins_repository, self._monitors_repository)
+		monitors_repository = monitors.Repository()
+		plugins_repository = plugins.Repository(storage_factory, monitors_repository)
+		unit_manager = units.Manager(plugins_repository, monitors_repository)
 
-		self._profile_merger = profiles.Merger()
-		self._profile_loader = profiles.Loader(["/var/lib/tuned", "/etc/tuned"], self._profile_merger)
+		profile_factory = profiles.Factory()
+		profile_merger = profiles.Merger()
+		profile_loader = profiles.Loader(["/var/lib/tuned", "/etc/tuned"], profile_factory, profile_merger)
 
-		self._daemon = daemon.Daemon(self._unit_manager, self._profile_loader, profile_name)
+		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name)
 		self._controller = controller.Controller(self._daemon)
 
 		self._dbus_exporter = None

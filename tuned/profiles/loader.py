@@ -1,5 +1,4 @@
 import tuned.profiles.profile
-import tuned.profiles.merger
 import ConfigParser
 import os.path
 import collections
@@ -11,13 +10,15 @@ class Loader(object):
 	Profiles loader.
 	"""
 
-	__slots__ = [ "_merger", "_load_directories" ]
+	__slots__ = ["_load_directories", "_profile_merger", "_profile_factory"]
 
-	def __init__(self, load_directories, merger):
+	def __init__(self, load_directories, profile_factory, profile_merger):
 		if type(load_directories) is not list:
 			raise TypeError("load_directories parameter is not a list")
+
 		self._load_directories = load_directories
-		self._merger = merger
+		self._profile_factory = profile_factory
+		self._profile_merger = profile_merger
 
 	def _create_profile(self, profile_name, config):
 		return tuned.profiles.profile.Profile(profile_name, config)
@@ -26,29 +27,26 @@ class Loader(object):
 	def load_directories(self):
 		return self._load_directories
 
-	def add_directory(self, new_dir):
-		self._load_directories.append(new_dir)
-
 	def load(self, profile_names):
-		configs = []
-		processed_files = []
 		if type(profile_names) is str:
+			readable_name = profile_names
 			profile_names = [profile_names]
-
-		readable_name = ",".join(profile_names)
-
-		configs = []
-		processed_files = []
-		self._load_recursive(profile_names, configs, processed_files)
-
-		if len(configs) > 1:
-			final_config = self._merger.merge(configs)
 		else:
-			final_config = configs[0]
+			readable_name = ",".join(profile_names)
 
-		return self._create_profile(readable_name, final_config)
+		profiles = []
+		processed_files = []
+		self._load_profile(profile_names, profiles, processed_files)
 
-	def _load_recursive(self, profile_names, configs, processed_files):
+		if len(profiles) > 1:
+			final_profile = self._profile_merger.merge(profiles)
+		else:
+			final_profile = profiles[0]
+
+		final_profile.name = readable_name
+		return final_profile
+
+	def _load_profile(self, profile_names, profiles, processed_files):
 		for name in profile_names:
 			filename = self._find_config_file(name, processed_files)
 			if filename is None:
@@ -56,10 +54,12 @@ class Loader(object):
 			processed_files.append(filename)
 
 			config = self._load_config_data(filename)
-			if "main" in config and config["main"].get("include", None) is not None:
-				self._load_recursive([config["main"]["include"]], configs, processed_files)
+			profile = self._profile_factory.create(name, config)
+			if "include" in profile.options:
+				include_name = profile.options.pop("include")
+				self._load_profile([include_name], profiles, processed_files)
 
-			configs.append(config)
+			profiles.append(profile)
 
 	def _find_config_file(self, profile_name, skip_files=None):
 		for dir_name in reversed(self._load_directories):
@@ -77,32 +77,19 @@ class Loader(object):
 		try:
 			parser.read(file_name)
 		except ConfigParser.Error as e:
-			raise InvalidProfileException("Cannot load profile.", e)
+			raise InvalidProfileException("Cannot parse '%s'." % file_name, e)
 
-		data = collections.OrderedDict()
+		config = collections.OrderedDict()
 		for section in parser.sections():
-			data[section] = collections.OrderedDict()
-
-			if section != "main":
-				data[section]["enabled"] = True
-				data[section]["replace"] = False
-				data[section]["devices"] = "*"
-				data[section]["type"] = section
-
+			config[section] = collections.OrderedDict()
 			for option, value in parser.items(section):
-				data[section][option] = value
+				config[section][option] = value
 
-		self._clean_config_data(data, file_name)
-		return data
-
-	def _clean_config_data(self, config, file_name):
+		# TODO: HACK, this needs to be solved in a better way (better config parser)
 		for unit_name in config:
-			# nothing special for global options
-			if unit_name == "main":
-				continue
-
-			# special case: script names have to be expanded
-			if config[unit_name]["type"] == "script" and "script" in config[unit_name]:
+			if config[unit_name].get("type", None) == "script" and "script" in config[unit_name]:
 				dir_name = os.path.dirname(file_name)
 				script_path = os.path.join(dir_name, config[unit_name]["script"])
 				config[unit_name]["script"] = os.path.normpath(script_path)
+
+		return config

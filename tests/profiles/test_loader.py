@@ -2,18 +2,33 @@ import unittest
 import tempfile
 import shutil
 import os.path
-import tuned.profiles.loader
+import tuned.profiles.exceptions
+from tuned.profiles.loader import Loader
+from flexmock import flexmock
 
-# DI: return config itself instead of the profile
-class MockLoader(tuned.profiles.loader.Loader):
-	def _create_profile(self, profile_name, config):
-		return config
+class MockProfile(object):
+	def __init__(self, name, config):
+		self.name = name
+		self.options = {}
+		self.units = {}
+		self.test_config = config
 
-class MockMerger(object):
-	def merge(self, configs):
-		return configs
+class MockProfileFactory(object):
+	def create(self, name, config):
+		return MockProfile(name, config)
+
+class MockProfileMerger(object):
+	def merge(self, profiles):
+		new = MockProfile("merged", {})
+		new.test_merged = profiles
+		return new
 
 class LoaderTestCase(unittest.TestCase):
+	def setUp(self):
+		self.factory = MockProfileFactory()
+		self.merger = MockProfileMerger()
+		self.loader = Loader(self._tmp_load_dirs, self.factory, self.merger)
+
 	@classmethod
 	def setUpClass(cls):
 		tmpdir1 = tempfile.mkdtemp()
@@ -24,7 +39,6 @@ class LoaderTestCase(unittest.TestCase):
 		cls._create_profile(tmpdir1, "invalid", "INVALID")
 		cls._create_profile(tmpdir1, "expand", "[expand]\ntype=script\nscript=runme.sh\n")
 		cls._create_profile(tmpdir2, "empty", "")
-		cls._create_profile(tmpdir2, "hasinclude", "[main]\ninclude=default\n\n[other]\nenabled=true")
 
 		cls._create_profile(tmpdir1, "custom", "[custom]\ntype=one\n")
 		cls._create_profile(tmpdir2, "custom", "[custom]\ntype=two\n")
@@ -43,94 +57,55 @@ class LoaderTestCase(unittest.TestCase):
 			conf_file.write(tuned_conf_content)
 
 	def test_init(self):
-		tuned.profiles.loader.Loader([], None)
-		tuned.profiles.loader.Loader(["/tmp"], None)
-		tuned.profiles.loader.Loader(["/foo", "/bar"], None)
+		Loader([], None, None)
+		Loader(["/tmp"], None, None)
+		Loader(["/foo", "/bar"], None, None)
 
 	def test_init_wrong_type(self):
 		with self.assertRaises(TypeError):
-			tuned.profiles.loader.Loader(False)
-
-	def test_add_directory(self):
-		loader = tuned.profiles.loader.Loader([], None)
-		self.assertEqual(len(loader.load_directories), 0);
-
-		loader.add_directory("/a")
-		self.assertEqual(len(loader.load_directories), 1);
-
-		loader.add_directory("/b")
-		self.assertEqual(len(loader.load_directories), 2);
-
-		self.assertEqual(loader.load_directories[0], "/a")
-		self.assertEqual(loader.load_directories[1], "/b")
+			Loader(False, self.factory, self.merger)
 
 	def test_load(self):
-		loader = MockLoader(self._tmp_load_dirs, None)
-		default_config = loader.load("default")
-
-		self.assertIn("main", default_config)
-		self.assertIn("network", default_config)
-		self.assertIn("disk", default_config)
-
-		self.assertEquals(default_config["network"]["devices"], "em*")
-		self.assertEquals(default_config["disk"]["enabled"], "false") # TODO: improve parser
-
-	def test_unit_set_correct_type(self):
-		loader = MockLoader(self._tmp_load_dirs, None)
-		config = loader.load("default")
-		self.assertEqual("net", config["network"]["type"])
-		self.assertEqual("disk", config["disk"]["type"])
+		profile = self.loader.load("default")
+		self.assertIn("main", profile.test_config)
+		self.assertIn("disk", profile.test_config)
+		self.assertEquals(profile.test_config["network"]["devices"], "em*")
 
 	def test_load_empty(self):
-		loader = MockLoader(self._tmp_load_dirs, None)
-		empty_config = loader.load("empty")
-		self.assertEquals(empty_config, {})
+		profile = self.loader.load("empty")
+		self.assertDictEqual(profile.test_config, {})
 
 	def test_load_invalid(self):
-		loader = MockLoader(self._tmp_load_dirs, None)
 		with self.assertRaises(tuned.profiles.exceptions.InvalidProfileException):
-			invalid_config = loader.load("invalid")
+			invalid_config = self.loader.load("invalid")
 
 	def test_load_nonexistent(self):
-		loader = MockLoader(self._tmp_load_dirs, None)
 		with self.assertRaises(tuned.profiles.exceptions.InvalidProfileException):
-			config = loader.load("nonexistent")
+			config = self.loader.load("nonexistent")
 
 	def test_load_order(self):
-		loader = MockLoader(self._tmp_load_dirs, None)
-		custom_config = loader.load("custom")
-		self.assertEquals(custom_config["custom"]["type"], "two")
+		profile = self.loader.load("custom")
+		self.assertEquals(profile.test_config["custom"]["type"], "two")
 
 	def test_default_load(self):
-		loader = tuned.profiles.loader.Loader(self._tmp_load_dirs, None)
-		config = loader.load("empty")
-		self.assertIs(type(config), tuned.profiles.profile.Profile)
-
-	def test_default_unit_options(self):
-		loader = MockLoader(self._tmp_load_dirs, None)
-		config = loader.load("default")
-		self.assertIn("network", config)
-		self.assertIn("enabled", config["network"])
-		self.assertIn("replace", config["network"])
-		self.assertIn("devices", config["network"])
-		self.assertIn("type", config["network"])
+		profile = self.loader.load("empty")
+		self.assertIs(type(profile), MockProfile)
 
 	def test_script_expand_names(self):
-		loader = MockLoader(self._tmp_load_dirs, None)
-		config = loader.load("expand")
+		profile = self.loader.load("expand")
 		expected_name = os.path.join(self._tmp_load_dirs[0], "expand", "runme.sh")
-		self.assertEqual(config["expand"]["script"], expected_name)
+		self.assertEqual(profile.test_config["expand"]["script"], expected_name)
 
 	def test_load_multiple_profiles(self):
-		merger = MockMerger()
-		loader = MockLoader(self._tmp_load_dirs, merger)
-		config = loader.load(["default", "expand"])
-		self.assertIn("network", config[0])
-		self.assertIn("expand", config[1])
+		profile = self.loader.load(["default", "expand"])
+		self.assertEqual(len(profile.test_merged), 2)
 
 	def test_include_directive(self):
-		merger = MockMerger()
-		loader = MockLoader(self._tmp_load_dirs, merger)
-		config = loader.load("hasinclude")
-		self.assertIn("network", config[0])
-		self.assertIn("other", config[1])
+		profile1 = MockProfile("first", {})
+		profile1.options = {"include": "default"}
+		profile2 = MockProfile("second", {})
+
+		flexmock(self.factory).should_receive("create").and_return(profile1).and_return(profile2).twice()
+		profile = self.loader.load("empty")
+
+		self.assertEqual(len(profile.test_merged), 2)

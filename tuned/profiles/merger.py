@@ -1,6 +1,10 @@
 import collections
 
 class Merger(object):
+	"""
+	Tool for merging multiple profiles into one.
+	"""
+
 	def __init__(self):
 		pass
 
