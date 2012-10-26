@@ -1,26 +1,36 @@
 import unittest
-import tuned.profiles
+from tuned.profiles import Unit
 
 class UnitTestCase(unittest.TestCase):
 
-	def test_init(self):
-		unit = tuned.profiles.Unit("network", "net", {})
+	def test_default_options(self):
+		unit = Unit("sample", {})
+		self.assertEqual(unit.name, "sample")
+		self.assertEqual(unit.type, "sample")
+		self.assertTrue(unit.enabled)
+		self.assertFalse(unit.replace)
+		self.assertDictEqual(unit.options, {})
 
-	def test_init_missing_params(self):
-		with self.assertRaises(TypeError):
-			tuned.profiles.Unit()
+	def test_option_type(self):
+		unit = Unit("sample", {"type": "net"})
+		self.assertEqual(unit.type, "net")
 
-	def test_init_extra_params(self):
-		with self.assertRaises(TypeError):
-			tuned.profiles.Unit("a", "b", {}, "c")
+	def test_option_enabled(self):
+		unit = Unit("sample", {"enabled": False})
+		self.assertFalse(unit.enabled)
+		unit.enabled = True
+		self.assertTrue(unit.enabled)
 
-	def test_attributes(self):
-		unit = tuned.profiles.Unit("network", "net", {"devices": "em1"})
-		self.assertEqual(unit.name, "network")
-		self.assertEqual(unit.plugin, "net")
-		self.assertEqual(unit.options["devices"], "em1")
+	def test_option_replace(self):
+		unit = Unit("sample", {"replace": True})
+		self.assertTrue(unit.replace)
 
-		unit2 = tuned.profiles.Unit("test", "disk", {"enabled": True})
-		self.assertEqual(unit2.name, "test")
-		self.assertEqual(unit2.plugin, "disk")
-		self.assertTrue(unit2.options["enabled"])
+	def test_option_custom(self):
+		unit = Unit("sample", {"enabled": True, "type": "net", "custom": "value", "foo": "bar"})
+		self.assertDictEqual(unit.options, {"custom": "value", "foo": "bar"})
+		unit.options = {"hello": "world"}
+		self.assertDictEqual(unit.options, {"hello": "world"})
+
+	def test_parsing_options(self):
+		unit = Unit("sample", {"type": "net", "enabled": True, "replace": True, "other": "foo"})
+		self.assertEqual(unit.type, "net")
