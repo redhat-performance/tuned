@@ -60,6 +60,10 @@ class Plugin(object):
 	def dynamic_tuning(self):
 		return self._dynamic_tuning
 
+	@property
+	def devices(self):
+		return self._devices
+
 	def _autoregister_commands(self):
 		"""
 		Register all commands marked using @command_set and @command_get decorators.

@@ -45,9 +45,7 @@ class Daemon(object):
 		if self._profile is None:
 			raise Exception("Cannot start the daemon without setting a profile.")
 
-		for unit_info in self._profile.units:
-			self._unit_manager.create(unit_info.name, unit_info.plugin, unit_info.options)
-
+		self._unit_manager.create(self._profile.units)
 		self.save_active_profile()
 
 		self._unit_manager.plugins_repository.do_static_tuning()

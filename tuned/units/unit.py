@@ -9,37 +9,25 @@ class Unit(object):
 	device.
 	"""
 
-	__slots__ = ["_name", "_plugin", "_plugin_repository", "_monitor_repository"]
+	__slots__ = ["_name", "_type", "_plugin"]
 
-	def __init__(self, plugin_repository, monitor_repository, name, plugin_name, config):
-		self._plugin_repository = plugin_repository
-		self._monitor_repository = monitor_repository
+	def __init__(self, name, type, plugin):
 		self._name = name
-
-		(devices, options) = self._get_plugin_params(config)
-		self._plugin = self._plugin_repository.create(plugin_name, devices, options)
+		self._type = type
+		self._plugin = plugin
 
 	@property
 	def name(self):
 		return self._name
 
 	@property
+	def type(self):
+		return self._type
+
+	@property
+	def devices(self):
+		return self._plugin.devices
+
+	@property
 	def plugin(self):
 		return self._plugin
-
-	def clean(self):
-		self._plugin_repository.delete(self._plugin)
-		self._plugin = None
-
-	def _get_plugin_params(self, config):
-		if config is None:
-			return (None, {})
-
-		devices = None
-		if "devices" in config:
-			devices = config["devices"]
-			if devices and len(devices) == 0:
-				devices = None
-			del(config["devices"])
-
-		return (devices, config)

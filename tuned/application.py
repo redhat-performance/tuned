@@ -38,9 +38,11 @@ class Application(object):
 		storage_provider = storage.PickleProvider()
 		storage_factory = storage.Factory(storage_provider)
 
+		unit_factory = units.Factory()
+		device_matcher = units.DeviceMatcher()
 		monitors_repository = monitors.Repository()
 		plugins_repository = plugins.Repository(storage_factory, monitors_repository)
-		unit_manager = units.Manager(plugins_repository, monitors_repository)
+		unit_manager = units.Manager(plugins_repository, monitors_repository, unit_factory, device_matcher)
 
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()
