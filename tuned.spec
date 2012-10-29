@@ -70,6 +70,9 @@ if [ $1 -eq 1 ]; then
 	/usr/bin/systemctl daemon-reload &>/dev/null || :
 fi
 
+# convert active_profile from full path to name (if needed)
+sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
+
 
 %preun
 # package removal, not upgrade
