@@ -21,7 +21,7 @@ import logs
 
 log = logs.get()
 
-ACTIVE_PROFILE_FILENAME = "/etc/tuned/saved_profile"
+ACTIVE_PROFILE_FILENAME = "/etc/tuned/active_profile"
 DEFAULT_PROFILE_NAME = "balanced"
 
 class Daemon(object):
