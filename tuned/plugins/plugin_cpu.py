@@ -66,13 +66,13 @@ class CPULatencyPlugin(base.Plugin):
 	@command_set("governor", per_device=True)
 	def _set_governor(self, governor, device):
 		log.info("setting governor '%s' on cpu '%s'" % (governor, device))
-		tuned.utils.commands.execute(["cpupower", "-c", device, "frequency-set", "-g", governor])
+		tuned.utils.commands.execute(["cpupower", "-c", str(device), "frequency-set", "-g", str(governor)])
 
 	@command_get("governor")
 	def _get_governor(self, device):
 		governor = None
 		try:
-			lines = tuned.utils.commands.execute(["cpupower", "-c", device, "frequency-info", "-p"]).splitlines()
+			lines = tuned.utils.commands.execute(["cpupower", "-c", str(device), "frequency-info", "-p"]).splitlines()
 			for line in lines:
 				if line.startswith("analyzing"):
 					continue
