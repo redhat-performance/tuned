@@ -118,7 +118,7 @@ fi
 %{_sysconfdir}/dbus-1/system.d/com.redhat.tuned.conf
 %{_unitdir}/tuned.service
 %dir %{_localstatedir}/log/tuned
-%dir %{_localstatedir}/run/tuned
+%dir /run/tuned
 %{_mandir}/man5/tuned*
 %{_mandir}/man8/tuned*
 
