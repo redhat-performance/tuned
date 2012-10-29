@@ -60,17 +60,17 @@ class Manager(object):
 
 	def _possible_devices(self, unit_info):
 		tunable_devices = self._plugins_repository.tunable_devices(unit_info.type)
-		if len(tunable_devices) == 0:
+		if not tunable_devices:
 			log.info("skipping unit '%s', no devices available" % unit_info.name)
 			return None
 
 		available_devices = [dev for dev in tunable_devices if dev not in self._seized_devices(unit_info.type)]
-		if len(available_devices) == 0:
+		if not available_devices:
 			log.info("skipping unit '%s', all devices are already claimed by another unit" % unit_info.name)
 			return None
 
 		devices = self._device_matcher.match_list(unit_info.devices, available_devices)
-		if len(devices) == 0:
+		if not devices:
 			log.info("skipping unit '%s', no matching devices available" % unit_info.name)
 			return None
 
