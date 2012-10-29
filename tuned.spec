@@ -16,7 +16,7 @@ BuildRequires: python, systemd-units
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
-Requires: python-decorator, dbus-python, pygobject2
+Requires: python-decorator, dbus-python, pygobject2, /usr/bin/cpupower
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
