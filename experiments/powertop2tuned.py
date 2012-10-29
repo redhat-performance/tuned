@@ -175,7 +175,8 @@ class PowertopProfile:
 		return True
 
 	def generateHTML(self):
-		proc = Popen("LANG= powertop --html=/tmp/powertop", stdout=PIPE, stderr=PIPE, shell=True)
+		print "Running PowerTOP, please wait..."
+		proc = Popen("LANG= powertop --html=/tmp/powertop --time=1", stdout=PIPE, stderr=PIPE, shell=True)
 		output = proc.communicate()[1]
 		if proc.returncode != 0:
 			return ret
