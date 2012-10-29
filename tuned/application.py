@@ -46,7 +46,7 @@ class Application(object):
 
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()
-		profile_loader = profiles.Loader(["/var/lib/tuned", "/etc/tuned"], profile_factory, profile_merger)
+		profile_loader = profiles.Loader(["/usr/lib/tuned", "/etc/tuned"], profile_factory, profile_merger)
 
 		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name)
 		self._controller = controller.Controller(self._daemon)
