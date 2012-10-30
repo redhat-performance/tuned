@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -Es
 #
 # tuned-adm: A command line utility for switching between user 
 #            definable tuning profiles.

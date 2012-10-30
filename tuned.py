@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -Es
 #
 # tuned: A simple daemon that performs monitoring and adaptive configuration
 #        of devices in the system

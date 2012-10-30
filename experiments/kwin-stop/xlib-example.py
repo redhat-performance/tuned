@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -Es
 import os
 import Xlib
 
@@ -43,4 +43,3 @@ def loop():
 
 if __name__ == '__main__':
 	loop()
-    
