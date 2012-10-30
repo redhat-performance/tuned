@@ -95,7 +95,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("", "s")
 	def active_profile(self):
-		return self._profile
+		return self._daemon.profile.name
 
 	@exports.export("", "b")
 	def status(self):

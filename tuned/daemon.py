@@ -41,6 +41,10 @@ class Daemon(object):
 			raise Exception("Cannot set profile while the daemon is running.")
 		self._profile = self._profile_loader.load(profile_name)
 
+	@property
+	def profile(self):
+		return self._profile
+
 	def _thread_code(self):
 		if self._profile is None:
 			raise Exception("Cannot start the daemon without setting a profile.")
@@ -113,7 +117,3 @@ class Daemon(object):
 		self._thread = None
 
 		return True
-
-	def cleanup(self):
-		# TODO: do we need it?
-		pass

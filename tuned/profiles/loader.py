@@ -28,7 +28,7 @@ class Loader(object):
 		return self._load_directories
 
 	def load(self, profile_names):
-		if type(profile_names) is str:
+		if type(profile_names) is not list:
 			readable_name = profile_names
 			profile_names = [profile_names]
 		else:
