@@ -2,6 +2,7 @@ import tuned.profiles.profile
 import ConfigParser
 import os.path
 import collections
+import re
 
 from tuned.profiles.exceptions import InvalidProfileException
 
@@ -27,12 +28,17 @@ class Loader(object):
 	def load_directories(self):
 		return self._load_directories
 
+	@classmethod
+	def safe_name(cls, profile_name):
+		return re.match(r'^[a-zA-Z0-9_.-]+$', profile_name)
+
 	def load(self, profile_names):
 		if type(profile_names) is not list:
-			readable_name = profile_names
-			profile_names = [profile_names]
-		else:
-			readable_name = ",".join(profile_names)
+			profile_names = profile_names.split()
+
+		profile_names = filter(self.safe_name, profile_names)
+		if len(profile_names) == 0:
+			raise InvalidProfileException("No profile or invalid profiles were specified.")
 
 		profiles = []
 		processed_files = []
@@ -43,7 +49,7 @@ class Loader(object):
 		else:
 			final_profile = profiles[0]
 
-		final_profile.name = readable_name
+		final_profile.name = " ".join(profile_names)
 		return final_profile
 
 	def _load_profile(self, profile_names, profiles, processed_files):
