@@ -1,4 +1,5 @@
 import tuned.profiles.unit
+import collections
 
 class Profile(object):
 	"""
@@ -18,11 +19,11 @@ class Profile(object):
 			self._options = dict(config["main"])
 
 	def _init_units(self, config):
-		self._units = []
+		self._units = collections.OrderedDict()
 		for unit_name in config:
 			if unit_name != "main":
 				new_unit = self._create_unit(unit_name, config[unit_name])
-				self._units.append(new_unit)
+				self._units[unit_name] = new_unit
 
 	def _create_unit(self, name, config):
 		return tuned.profiles.unit.Unit(name, config)

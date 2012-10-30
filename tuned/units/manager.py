@@ -36,7 +36,8 @@ class Manager(object):
 
 	def create(self, units):
 		# reverse order, newer units have priority to claim a device
-		for unit_info in reversed(units):
+		for unit_name in reversed(units):
+			unit_info = units[unit_name]
 			if not unit_info.enabled:
 				log.debug("skipping disabled unit '%s'" % unit_info.name)
 				continue

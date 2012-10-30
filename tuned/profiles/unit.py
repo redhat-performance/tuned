@@ -21,6 +21,10 @@ class Unit(object):
 	def type(self):
 		return self._type
 
+	@type.setter
+	def type(self, value):
+		self._type = value
+
 	@property
 	def enabled(self):
 		return self._enabled
@@ -36,6 +40,10 @@ class Unit(object):
 	@property
 	def devices(self):
 		return self._devices
+
+	@devices.setter
+	def devices(self, value):
+		self._devices = value
 
 	@property
 	def options(self):
