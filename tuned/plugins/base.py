@@ -127,7 +127,7 @@ class Plugin(object):
 		if not command["per_device"]:
 			storage_key = self._storage_key(command_name)
 			old_value = self._storage.get(storage_key)
-			if old_value:
+			if old_value is not None:
 				command["set"](old_value)
 			self._storage.unset(storage_key)
 			return
@@ -138,7 +138,7 @@ class Plugin(object):
 		for device in self._devices:
 			storage_key = self._storage_key(command_name, device)
 			old_value = self._storage.get(storage_key)
-			if old_value:
+			if old_value is not None:
 				command["set"](old_value, device)
 			self._storage.unset(storage_key)
 
