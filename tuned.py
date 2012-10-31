@@ -64,7 +64,7 @@ if __name__ == "__main__":
 	if (debug):
 		log.setLevel("DEBUG")
 
-	if os.getuid() != 0:
+	if os.geteuid() != 0:
 		if daemonize:
 			log.critical("Superuser permissions are needed.")
 			sys.exit(1)

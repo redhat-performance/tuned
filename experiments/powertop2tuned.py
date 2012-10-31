@@ -168,7 +168,7 @@ class PowertopProfile:
 		return "unknown"
 
 	def checkPrivs(self):
-		myuid = os.getuid()
+		myuid = os.geteuid()
 		if myuid != 0:
 			print >> sys.stderr, 'Run this program as root'
 			return False
