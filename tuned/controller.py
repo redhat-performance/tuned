@@ -20,6 +20,7 @@ __all__ = ["Controller"]
 import exports
 import logs
 import threading
+import tuned.exceptions
 
 log = logs.get()
 
@@ -52,15 +53,6 @@ class Controller(exports.interfaces.ExportableInterface):
 	def terminate(self):
 		self._terminate.set()
 
-	@property
-	def config_file(self):
-		return self._config_file
-
-	@config_file.setter
-	def config_file(self, value):
-		self._daemon.config_file = value
-		self._config_file = value
-
 	@exports.export("", "b")
 	def start(self):
 		if self._daemon.is_running():
@@ -87,16 +79,38 @@ class Controller(exports.interfaces.ExportableInterface):
 	@exports.export("s", "b")
 	def switch_profile(self, profile_name):
 		was_running = self._daemon.is_running()
-		if was_running:	self._daemon.stop()
-		self._daemon.set_profile(profile_name)
-		if was_running: self._daemon.start()
+		success = True
+		try:
+			if was_running:
+				self._daemon.stop()
+			self._daemon.set_profile(profile_name)
+		except tuned.exceptions.TunedException:
+			success = False
+		finally:
+			if was_running:
+				self._daemon.start()
 
-		return True
+		return success
 
 	@exports.export("", "s")
 	def active_profile(self):
-		return self._daemon.profile.name
+		if self._daemon.profile is not None:
+			return self._daemon.profile.name
+		else:
+			return ""
 
 	@exports.export("", "b")
-	def status(self):
+	def disable(self):
+		if self._daemon.is_running():
+			self._daemon.stop()
+		if self._daemon.is_enabled():
+			self._daemon.set_profile(None, save_instantly=True)
+		return True
+
+	@exports.export("", "b")
+	def is_running(self):
 		return self._daemon.is_running()
+
+	@exports.export("", "as")
+	def profiles(self):
+		return ["a", "b", "c"]

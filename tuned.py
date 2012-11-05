@@ -38,7 +38,7 @@ if __name__ == "__main__":
 	except getopt.error as e:
 		error("Error parsing command-line arguments: %s" % e)
 		usage()
-	        sys.exit(1)
+		sys.exit(1)
 
 	if len(args) > 0:
 		error("Too many arguments.")
