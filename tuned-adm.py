@@ -3,8 +3,7 @@
 # tuned-adm: A command line utility for switching between user 
 #            definable tuning profiles.
 #
-# Copyright (C) 2012 Red Hat, Inc.
-# Authors: Jan Kaluza
+# Copyright (C) 2008-2012 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -21,127 +20,57 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import os
+import argparse
 import sys
-import locale
-import signal
+import traceback
+import tuned.admin
 
-PIDFILE = "/run/tuned/tuned.pid"
-
-def usage():
-	print """
-Usage: tuned-adm <command>
-
-commands:
-  help                           show this help message and exit
-  list                           list all available and active profiles
-  active                         show current active profile
-  off                            switch off all tunning
-  profile <profile-name>         switch to given profile
-"""
-
-def listdir_joined(path):
-	return [os.path.join(path, entry) for entry in os.listdir(path)]
-
-class Tuned_adm:
-
-	def error(self, msg, exit_code = 1):
-		print >>sys.stderr, msg
-		sys.exit(exit_code)
-
-	def check_permissions(self):
-		if not os.geteuid() == 0:
-			self.error("Only root can run this script.", 2)
-
-	def run(self, args):
-		if args[0] == "list":
-			self.show_profiles()
-		elif args[0] == "active":
-			self.show_active_profile()
-			#self.service_status("tuned")
-			#self.service_status("ktune")
-		elif args[0] == "off":
-			self.check_permissions()
-			self.off()
-		elif args[0] == "profile":
-			if len(args) >= 2:
-			  self.check_permissions()
-			  self.set_active_profile(args[1:])
-			else:
-				self.error("Invalid profile specification. Use 'tuned-adm list' to get all available profiles.")
-		else:
-			self.error("Nonexistent argument '%s'." % args[0])
-
-	def off(self):
-		pid = 0
-		try:
-			with open(PIDFILE) as f:
-				pid = int(f.read())
-		except (OSError,IOError) as e:
-			pass
-		if pid:
-			os.kill(pid, signal.SIGTERM)
-
-	def show_active_profile(self):
-		try:
-			with open("/etc/tuned/active_profile") as f:
-				print "Current active profile:", f.read().replace("\n", " ")
-		except:
-			pass
-
-	def get_profiles(self):
-		profiles = []
-		try:
-			profiles += listdir_joined("/usr/lib/tuned")
-		except:
-			pass
-		try:
-			profiles += listdir_joined("/etc/tuned")
-		except:
-			pass
-
-		return sorted(map(lambda p: os.path.basename(p), \
-			filter(lambda p: os.path.exists(os.path.join(p, "tuned.conf")), profiles)))
-
-	def show_profiles(self):
-		print "Available profiles:"
-		for p in self.get_profiles():
-			print "- " + p
-		self.show_active_profile()
-
-	def set_active_profile(self, profiles):
-		pid = 0
-		try:
-			with open(PIDFILE) as f:
-				pid = int(f.read())
-		except (OSError,IOError) as e:
-			self.error("Cannot read %s: %s" % (PIDFILE, str(e)))
-
-		for profile in profiles:
-			if not profile in self.get_profiles():
-				self.error("Profile %s doesn't exist." % profile)
-
-		if pid:
-			try:
-				with open("/etc/tuned/active_profile", "w") as f:
-					f.write('\n'.join(profiles))
-			except (OSError,IOError) as e:
-				log.error("Cannot write profile into /etc/tuned/active_profile: %s" % (e))
-			os.kill(pid, signal.SIGHUP)
-		
+DBUS_BUS = "com.redhat.tuned"
+DBUS_OBJECT = "/Tuned"
+DBUS_INTERFACE = "com.redhat.tuned.control"
 
 if __name__ == "__main__":
-	args = sys.argv[1:]
+	parser = argparse.ArgumentParser(description="Manage tuned daemon.")
+	parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
+	subparsers = parser.add_subparsers()
 
-	if len(args) < 1:
-		print >>sys.stderr, "Missing arguments."
-		usage()
+	parser_list = subparsers.add_parser("list", help="list available profiles")
+	parser_list.set_defaults(action="list")
+
+	parser_active = subparsers.add_parser("active", help="show active profile")
+	parser_active.set_defaults(action="active")
+
+	parser_off = subparsers.add_parser("off", help="switch off all tunings")
+	parser_off.set_defaults(action="off")
+
+	parser_profile = subparsers.add_parser("profile", help="switch to a given profile")
+	parser_profile.set_defaults(action="profile")
+	parser_profile.add_argument("profiles", metavar="profile", type=str, nargs="+", help="profile name")
+
+	args = parser.parse_args(sys.argv[1:])
+
+	options = vars(args)
+	debug = options.pop("debug")
+	action_name = options.pop("action")
+	result = False
+
+	try:
+		controller = tuned.admin.DBusController(DBUS_BUS, DBUS_OBJECT, DBUS_INTERFACE)
+		admin = tuned.admin.Admin(controller)
+
+		action = getattr(admin, action_name)
+		result = action(**options)
+	except tuned.admin.TunedAdminException as e:
+		if not debug:
+			print >>sys.stderr, e
+		else:
+			traceback.print_exc()
+		sys.exit(2)
+	except:
+		traceback.print_exc()
+		sys.exit(3)
+
+	if result == False:
 		sys.exit(1)
-
-	if args[0] in [ "help", "--help", "-h" ]:
-		usage()
+	else:
 		sys.exit(0)
-
-	tuned_adm = Tuned_adm()
-	tuned_adm.run(args)
-
