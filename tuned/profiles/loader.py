@@ -11,26 +11,23 @@ class Loader(object):
 	Profiles loader.
 	"""
 
-	__slots__ = ["_load_directories", "_profile_merger", "_profile_factory"]
+	__slots__ = ["_profile_locator", "_profile_merger", "_profile_factory"]
 
-	def __init__(self, load_directories, profile_factory, profile_merger):
-		if type(load_directories) is not list:
-			raise TypeError("load_directories parameter is not a list")
-
-		self._load_directories = load_directories
+	def __init__(self, profile_locator, profile_factory, profile_merger):
+		self._profile_locator = profile_locator
 		self._profile_factory = profile_factory
 		self._profile_merger = profile_merger
 
 	def _create_profile(self, profile_name, config):
 		return tuned.profiles.profile.Profile(profile_name, config)
 
-	@property
-	def load_directories(self):
-		return self._load_directories
-
 	@classmethod
 	def safe_name(cls, profile_name):
 		return re.match(r'^[a-zA-Z0-9_.-]+$', profile_name)
+
+	@property
+	def profile_locator(self):
+		return self._profile_locator
 
 	def load(self, profile_names):
 		if type(profile_names) is not list:
@@ -54,7 +51,7 @@ class Loader(object):
 
 	def _load_profile(self, profile_names, profiles, processed_files):
 		for name in profile_names:
-			filename = self._find_config_file(name, processed_files)
+			filename = self._profile_locator.get_config(name, processed_files)
 			if filename is None:
 				raise InvalidProfileException("Cannot find profile '%s' in '%s'." % (name, list(reversed(self._load_directories))))
 			processed_files.append(filename)
@@ -66,17 +63,6 @@ class Loader(object):
 				self._load_profile([include_name], profiles, processed_files)
 
 			profiles.append(profile)
-
-	def _find_config_file(self, profile_name, skip_files=None):
-		for dir_name in reversed(self._load_directories):
-			config_file = os.path.join(dir_name, profile_name, "tuned.conf")
-			config_file = os.path.normpath(config_file)
-
-			if skip_files is not None and config_file in skip_files:
-				continue
-
-			if os.path.exists(config_file):
-				return config_file
 
 	def _load_config_data(self, file_name):
 		parser = ConfigParser.SafeConfigParser(allow_no_value=True)
