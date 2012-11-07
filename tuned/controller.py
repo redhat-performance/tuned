@@ -113,4 +113,4 @@ class Controller(exports.interfaces.ExportableInterface):
 
 	@exports.export("", "as")
 	def profiles(self):
-		return ["a", "b", "c"]
+		return self._daemon.profile_loader.profile_locator.get_known_names()

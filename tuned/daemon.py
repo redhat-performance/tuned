@@ -65,6 +65,10 @@ class Daemon(object):
 	def profile(self):
 		return self._profile
 
+	@property
+	def profile_loader(self):
+		return self._profile_loader
+
 	def _thread_code(self):
 		if self._profile is None:
 			raise TunedException("Cannot start the daemon without setting a profile.")
