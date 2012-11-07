@@ -34,8 +34,13 @@ def write_pidfile(pidfile = PIDFILE):
 	try:
 		if not os.path.exists(os.path.dirname(pidfile)):
 			os.makedirs(os.path.dirname(pidfile))
-		with open(pidfile, "w") as f:
-			f.write(str(os.getpid()))
+
+		if os.path.exists(pidfile):
+			os.unlink(pidfile)
+
+		fd = os.open(pidfile, os.O_CREAT|os.O_TRUNC|os.O_WRONLY , 0644)
+		os.write(fd, "%d" % os.getpid())
+		os.close(fd)
 	except (OSError,IOError) as e:
 		log.critical("Cannot write the PID to %s: %s" % (pidfile, str(e)))
 
