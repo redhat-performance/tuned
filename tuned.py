@@ -20,60 +20,35 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-import tuned.application
-import tuned.logs
-import getopt
+import argparse
 import os
 import sys
-
-def usage():
-	print "Usage: tuned [-d|--daemon] [-p name|--profile=name] [--no-dbus] [-D|--debug]"
-
-def error(message):
-	print >>sys.stderr, message
+import tuned.application
+import tuned.logs
 
 if __name__ == "__main__":
-	try:
-		opts, args = getopt.getopt(sys.argv[1:], "dp:D", ["daemon", "profile=", "debug", "no-dbus"])
-	except getopt.error as e:
-		error("Error parsing command-line arguments: %s" % e)
-		usage()
-		sys.exit(1)
+	parser = argparse.ArgumentParser(description="Daemon for monitoring and adaptive tuning of system devices.")
+	parser.add_argument("--daemon", "-d", action="store_true", help="run on background")
+	parser.add_argument("--debug", "-D", action="store_true", help="show/log debugging messages")
+	parser.add_argument("--no-dbus", action="store_true", help="do not attach to DBus")
+	parser.add_argument("--profile", "-p", action="store", type=str, metavar="name", help="tuning profile to be activated")
 
-	if len(args) > 0:
-		error("Too many arguments.")
-		usage()
-		sys.exit(1)
-
-	profile = None
-	daemonize = False
-	debug = False
-	dbus = True
-
-	for (opt, val) in opts:
-		if   opt in ["-d", "--daemon"]:
-			daemonize = True
-		elif opt in ["-p", "--profile"]:
-			profile = val
-		elif opt in ["-D", "--debug"]:
-			debug = True
-		elif opt == "--no-dbus":
-			dbus = False
+	args = parser.parse_args(sys.argv[1:])
 
 	log = tuned.logs.get()
-	if (debug):
+	if (args.debug):
 		log.setLevel("DEBUG")
 
 	if os.geteuid() != 0:
-		if daemonize:
+		if args.daemon:
 			log.critical("Superuser permissions are needed.")
 			sys.exit(1)
 		else:
 			log.warn("Superuser permissions are needed. Most tunings will not work!")
 
-	app = tuned.application.Application(profile, dbus)
+	app = tuned.application.Application(args.profile, not args.no_dbus)
 
-	if daemonize:
+	if args.daemon:
 		log.switch_to_file()
 		if tuned.utils.daemonize(3):
 			log.debug("successfully daemonized")
