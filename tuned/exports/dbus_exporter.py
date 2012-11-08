@@ -15,9 +15,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-from __future__ import absolute_import
-
-import tuned.exports.interfaces
+import interfaces
 import decorator
 import dbus.service
 import dbus.mainloop.glib
@@ -25,9 +23,7 @@ import gobject
 import inspect
 import threading
 
-gobject.threads_init()
-
-class DBusExporter(tuned.exports.interfaces.ExporterInterface):
+class DBusExporter(interfaces.ExporterInterface):
 	"""
 	Export method calls through DBus Interface.
 
@@ -38,6 +34,8 @@ class DBusExporter(tuned.exports.interfaces.ExporterInterface):
 	"""
 
 	def __init__(self, bus_name, interface_name, object_name):
+		gobject.threads_init()
+
 		self._dbus_object_cls = None
 		self._dbus_object = None
 		self._dbus_methods = {}

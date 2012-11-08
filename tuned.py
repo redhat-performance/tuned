@@ -23,8 +23,17 @@
 import argparse
 import os
 import sys
-import tuned.application
+import traceback
 import tuned.logs
+import tuned.daemon
+import tuned.exceptions
+
+DBUS_BUS = "com.redhat.tuned"
+DBUS_OBJECT = "/Tuned"
+DBUS_INTERFACE = "com.redhat.tuned.control"
+
+def error(message):
+	print >>sys.stderr, message
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Daemon for monitoring and adaptive tuning of system devices.")
@@ -35,27 +44,29 @@ if __name__ == "__main__":
 
 	args = parser.parse_args(sys.argv[1:])
 
+	if os.geteuid() != 0:
+		error("Superuser permissions are required to run the daemon.")
+		sys.exit(1)
+
 	log = tuned.logs.get()
-	if (args.debug):
+	if args.debug:
 		log.setLevel("DEBUG")
 
-	if os.geteuid() != 0:
+	try:
+		app = tuned.daemon.Application(args.profile)
+
+		if not args.no_dbus:
+			app.attach_to_dbus(DBUS_BUS, DBUS_OBJECT, DBUS_INTERFACE)
+
 		if args.daemon:
-			log.critical("Superuser permissions are needed.")
-			sys.exit(1)
+				app.daemonize()
+				log.switch_to_file()
+
+		app.run()
+
+	except tuned.exceptions.TunedException as exception:
+		if (args.debug):
+			traceback.print_exc()
 		else:
-			log.warn("Superuser permissions are needed. Most tunings will not work!")
-
-	app = tuned.application.Application(args.profile, not args.no_dbus)
-
-	if args.daemon:
-		log.switch_to_file()
-		if tuned.utils.daemonize(3):
-			log.debug("successfully daemonized")
-		else:
-			log.critical("cannot daemonize")
+			error(str(exception))
 			sys.exit(1)
-	else:
-		tuned.utils.write_pidfile()
-
-	app.run()

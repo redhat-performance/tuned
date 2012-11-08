@@ -17,14 +17,14 @@
 
 __all__ = ["Controller"]
 
-import exports
-import logs
-import threading
+from tuned import exports
+import tuned.logs
 import tuned.exceptions
+import threading
 
-log = logs.get()
+log = tuned.logs.get()
 
-class Controller(exports.interfaces.ExportableInterface):
+class Controller(tuned.exports.interfaces.ExportableInterface):
 	"""
 	Controller's purpose is to keep the program running, start/stop the tuning,
 	and export the controller interface (currently only over D-Bus).

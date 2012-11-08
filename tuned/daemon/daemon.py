@@ -17,10 +17,10 @@
 
 import os
 import threading
-import logs
+import tuned.logs
 from tuned.exceptions import TunedException
 
-log = logs.get()
+log = tuned.logs.get()
 
 ACTIVE_PROFILE_FILENAME = "/etc/tuned/active_profile"
 DEFAULT_PROFILE_NAME = "balanced"
