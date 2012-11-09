@@ -25,7 +25,7 @@ tuned-adm \- commandline tool for switching between different tuning profiles
 .SH SYNOPSIS
 .B tuned-adm 
 .B 
-.BR [ " help ", " list ", " active ", " profile <profile> ", " off " ]
+.BR [ " list ", " active ", " profile <profile> ", " off " ]
 .br
 .SH DESCRIPTION
 This command line utility allows user to switch between user definable tuning profiles. Several predefined profiles are already included. You can even create your own profile, either based on one of the existing ones by copying it or make a completely new one. The distribution provided profiles are stored in subdirectories below /usr/lib/tuned and the user defined profiles in subdirectories below /etc/tuned. If there are same profiles on both places, User defined profiles have precedence. 	
@@ -35,10 +35,6 @@ The power saving profiles contain settings that are typically not enabled by def
 .SH "OPTIONS"
 
 .SS
-.TP
-.B help
-Print out the list of commands. It's also the default if you start tuned-adm without any commands.
-
 .TP
 .B list
 List all available profiles.
