@@ -1,6 +1,6 @@
 #!/usr/bin/python -Es
 #
-# Copyright (C) 2012 Red Hat, Inc.
+# Copyright (C) 2008-2012 Red Hat, Inc.
 # Authors: Jan Kaluza <jkaluza@redhat.com>
 #
 # This program is free software; you can redistribute it and/or

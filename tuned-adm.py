@@ -1,7 +1,6 @@
 #!/usr/bin/python -Es
 #
-# tuned-adm: A command line utility for switching between user 
-#            definable tuning profiles.
+# tuned: daemon for monitoring and adaptive tuning of system devices
 #
 # Copyright (C) 2008-2012 Red Hat, Inc.
 #

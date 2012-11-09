@@ -2,7 +2,7 @@
  * varcpuload: Simple tool to create reproducable artifical sustained load on
  *             a machine.
  *
- * Copyright (C) 2008, 2009 Red Hat, Inc.
+ * Copyright (C) 2008-2012 Red Hat, Inc.
  * Authors: Phil Knirsch
  *
  * This program is free software; you can redistribute it and/or

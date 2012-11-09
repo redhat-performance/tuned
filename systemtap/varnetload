@@ -1,18 +1,8 @@
 #!/usr/bin/python -Es
 #
 # varnetload: A python script to create reproducable sustained network traffic
-#
-# Usage: varnetload [-d delay in milliseconds] [-t runtime in seconds] [-u URL]
-#
-# Howto use it:
-#  - In order to effectively use it you need to have a http server in your local
-#  LAN where you can put files.
-#  - Upload a large HTML (or any other kind of file) to the http server.
-#  - Use the -u option of the script to point to that URL
-#  - Play with the delay option to vary the load put on your network. Typical
-#    useful values range from 0 to 500.
-#
-# Copyright (C) 2009 Red Hat, Inc.
+
+# Copyright (C) 2008-2012 Red Hat, Inc.
 # Authors: Phil Knirsch
 #
 # This program is free software; you can redistribute it and/or
@@ -26,11 +16,19 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to:
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
-# Free Software Foundation, Inc.
-# 51 Franklin Street, Fifth Floor
-# Boston, MA  02110-1301, USA.
+#
+# Usage: varnetload [-d delay in milliseconds] [-t runtime in seconds] [-u URL]
+#
+# Howto use it:
+#  - In order to effectively use it you need to have a http server in your local
+#  LAN where you can put files.
+#  - Upload a large HTML (or any other kind of file) to the http server.
+#  - Use the -u option of the script to point to that URL
+#  - Play with the delay option to vary the load put on your network. Typical
+#    useful values range from 0 to 500.
 #
 
 import time, getopt, sys

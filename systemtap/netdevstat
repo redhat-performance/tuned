@@ -1,5 +1,6 @@
 #!/usr/bin/stap
-# Copyright (C) 2008, 2009 Red Hat, Inc.
+#
+# Copyright (C) 2008-2012 Red Hat, Inc.
 # Authors: Phil Knirsch
 #
 # This program is free software; you can redistribute it and/or
@@ -13,11 +14,8 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to:
-#
-# Free Software Foundation, Inc.
-# 51 Franklin Street, Fifth Floor
-# Boston, MA  02110-1301, USA.
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
 global ifavg, iflast, rtime, interval, duration, histogram

@@ -1,9 +1,8 @@
 #!/usr/bin/python -Es
 #
-# tuned: A simple daemon that performs monitoring and adaptive configuration
-#        of devices in the system
+# tuned: daemon for monitoring and adaptive tuning of system devices
 #
-# Copyright (C) 2008-2011 Red Hat, Inc.
+# Copyright (C) 2008-2012 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
