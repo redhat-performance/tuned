@@ -100,8 +100,8 @@ class PowertopHTMLParser(HTMLParser):
 			value = splitted[1]
 			path = splitted[3]
 			path = path.replace("/proc/sys/", "").replace("/", ".")
-			self.plugins.setdefault("sysfs", "[sysfs]\ndynamic_tuning=0\n")
-			self.plugins["sysfs"] += "#%s\n%s%s=%s\n\n" % (self.lastDesc, prefix, path, value)
+			self.plugins.setdefault("sysctl", "[sysctl]\ndynamic_tuning=0\n")
+			self.plugins["sysctl"] += "#%s\n%s%s=%s\n\n" % (self.lastDesc, prefix, path, value)
 		# TODO: plugins/plugin_sysfs.py doesn't support this so far, it has to be implemented to 
 		# let it work properly.
 		elif command.startswith("echo") and (command.find("'/sys/") != -1 or command.find("\"/sys/") != -1):
