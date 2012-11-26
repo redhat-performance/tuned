@@ -61,6 +61,7 @@ class PowertopHTMLParser(HTMLParser):
 
 		self.inProperTable = False
 		self.inScript = False
+		self.intd = False
 		self.lastStartTag = ""
 		self.tdCounter = 0
 		self.lastDesc = ""
@@ -85,6 +86,7 @@ class PowertopHTMLParser(HTMLParser):
 			self.inProperTable = True
 		if self.inProperTable and tag == "td":
 			self.tdCounter += 1
+			self.intd = True
 
 	def parse_command(self, command):
 		prefix = ""
@@ -122,8 +124,12 @@ class PowertopHTMLParser(HTMLParser):
 	def handle_endtag(self, tag):
 		if self.inProperTable and tag == "table":
 			self.inProperTable = False
+			self.intd = False
 		if tag == "tr":
 			self.tdCounter = 0
+			self.intd = False
+		if tag == "td":
+			self.intd = False
 		if self.inScript:
 			#print self.currentScript
 			self.inScript = False
@@ -137,12 +143,12 @@ class PowertopHTMLParser(HTMLParser):
 
 	def handle_data(self, data):
 		prefix = self.prefix
-		if self.inProperTable and self.tdCounter == 1:
+		if self.inProperTable and self.intd and self.tdCounter == 1:
 			self.lastDesc = data
 			if self.lastDesc.lower().find("autosuspend") != -1 and (self.lastDesc.lower().find("keyboard") != -1 or self.lastDesc.lower().find("mouse") != -1):
 					self.lastDesc += "\n\t# WARNING: For some devices, uncommenting this command can disable the device."
 					prefix = "#"
-		if (self.inProperTable and self.tdCounter == 2) or self.inScript:
+		if self.intd and ((self.inProperTable and self.tdCounter == 2) or self.inScript):
 			self.tdCounter = 0
 			if not self.inScript:
 				self.currentScript += "\t# " + self.lastDesc + "\n"
