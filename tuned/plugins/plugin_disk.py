@@ -2,7 +2,6 @@ import base
 from decorators import *
 import tuned.logs
 import tuned.utils.commands
-
 import os
 
 log = tuned.logs.get()
@@ -191,12 +190,12 @@ class DiskPlugin(base.Plugin):
 
 	@command_set("spindown", per_device=True)
 	def _set_spindown(self, value, device):
-		pass
+		tuned.utils.commands.execute(["hdparm", "-S", value, "/dev/" + device])
 
 	@command_get("spindown")
 	def _get_spindown(self, device):
 		# TODO: ticket #23, There's no way how to get current/old spindown value.
-		tuned.utils.commands.execute(["hdparm", "-S", value, "/dev/" + device])
+		pass
 
 	def _readahead_file(self, device):
 		return os.path.join("/sys/block/", device, "queue/read_ahead_kb")

@@ -28,6 +28,7 @@ def read_file(f):
 	
 
 def execute(args):
+	log.debug("Executing %s." % str(args))
 	out = ""
 	try:
 		proc = Popen(args, stdout=PIPE, stderr=PIPE)
