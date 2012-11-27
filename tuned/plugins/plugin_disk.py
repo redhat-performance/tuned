@@ -227,7 +227,7 @@ class DiskPlugin(base.Plugin):
 	@command_set("scheduler_quantum", per_device=True)
 	def _set_scheduler_quantum(self, value, device):
 		sys_file = self._scheduler_quantum_file(device)
-		tuned.utils.commands.write_to_file(sys_file, value)
+		tuned.utils.commands.write_to_file(sys_file, "%d" % int(value))
 
 	@command_get("scheduler_quantum")
 	def _get_scheduler_quantum(self, device):
