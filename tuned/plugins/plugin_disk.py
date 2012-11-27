@@ -203,7 +203,7 @@ class DiskPlugin(base.Plugin):
 	@command_set("readahead", per_device=True)
 	def _set_readahead(self, value, device):
 		sys_file = self._readahead_file(device)
-		tuned.utils.commands.write_to_file(sys_file, "%d" % value)
+		tuned.utils.commands.write_to_file(sys_file, "%d" % int(value))
 
 	@command_get("readahead")
 	def _get_readahead(self, device):
