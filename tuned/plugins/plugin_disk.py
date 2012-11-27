@@ -1,6 +1,7 @@
 import base
 from decorators import *
 import tuned.logs
+import tuned.utils.commands
 
 import os
 
@@ -139,9 +140,14 @@ class DiskPlugin(base.Plugin):
 
 	@command_get("elevator")
 	def _get_elevator(self, device):
-		# TODO: ticket #21, does not work
 		sys_file = self._elevator_file(device)
-		return tuned.utils.commands.read_file(sys_file)
+		# example of scheduler file content:
+		# noop deadline [cfq]
+		schedulers = tuned.utils.commands.read_file(sys_file).split()
+		for scheduler in schedulers:
+			if scheduler[0] == "[" and scheduler[-1] == "]":
+				return scheduler[1:-1]
+		return schedulers[0]
 
 	def _alpm_policy_files(self):
 		policy_files = []
