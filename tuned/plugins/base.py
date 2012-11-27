@@ -50,6 +50,9 @@ class Plugin(object):
 		self._autoregister_commands()
 
 		for command_name, command in self._commands.iteritems():
+			if command.get("custom", False):
+				continue
+
 			if "get" not in command or "set" not in command:
 				raise TypeError("Plugin command '%s' is not defined correctly" % command_name)
 
@@ -80,10 +83,14 @@ class Plugin(object):
 			info = self._commands.get(command_name, {})
 
 			if "set" in member._command:
+				info["custom"] = None
 				info["set"] = member
 				info["per_device"] = member._command["per_device"]
 			elif "get" in member._command:
 				info["get"] = member
+			elif "custom" in member._command:
+				info["custom"] = member
+				info["per_device"] = member._command["per_device"]
 
 			self._commands[command_name] = info
 
@@ -102,20 +109,26 @@ class Plugin(object):
 			return
 
 		if not command["per_device"]:
-			current_value = command["get"]()
-			storage_key = self._storage_key(command_name)
-			self._storage.set(command_name, current_value)
-			command["set"](new_value)
+			if command["custom"] is not None:
+				command["custom"](True, new_value)
+			else:
+				current_value = command["get"]()
+				storage_key = self._storage_key(command_name)
+				self._storage.set(command_name, current_value)
+				command["set"](new_value)
 			return
 
 		if self._devices is None:
 			raise TypeError("No devices were specified.")
 
 		for device in self._devices:
-			current_value = command["get"](device)
-			storage_key = self._storage_key(command_name, device)
-			self._storage.set(storage_key, current_value)
-			command["set"](new_value, device)
+			if command["custom"] is not None:
+				command["custom"](True, new_value, device)
+			else:
+				current_value = command["get"](device)
+				storage_key = self._storage_key(command_name, device)
+				self._storage.set(storage_key, current_value)
+				command["set"](new_value, device)
 
 	def _cleanup_command(self, command_name, command):
 		if not self._options.has_key(command_name):
@@ -125,22 +138,28 @@ class Plugin(object):
 			return
 
 		if not command["per_device"]:
-			storage_key = self._storage_key(command_name)
-			old_value = self._storage.get(storage_key)
-			if old_value is not None:
-				command["set"](old_value)
-			self._storage.unset(storage_key)
+			if command["custom"] is not None:
+				command["custom"](False, None)
+			else:
+				storage_key = self._storage_key(command_name)
+				old_value = self._storage.get(storage_key)
+				if old_value is not None:
+					command["set"](old_value)
+				self._storage.unset(storage_key)
 			return
 
 		if self._devices is None:
 			raise TypeError("No devices were specified.")
 
 		for device in self._devices:
-			storage_key = self._storage_key(command_name, device)
-			old_value = self._storage.get(storage_key)
-			if old_value is not None:
-				command["set"](old_value, device)
-			self._storage.unset(storage_key)
+			if command["custom"] is not None:
+				command["custom"](False, None, device)
+			else:
+				storage_key = self._storage_key(command_name, device)
+				old_value = self._storage.get(storage_key)
+				if old_value is not None:
+					command["set"](old_value, device)
+				self._storage.unset(storage_key)
 
 	def execute_commands(self):
 		for command_name, command in self._commands.iteritems():

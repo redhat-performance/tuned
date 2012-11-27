@@ -1,4 +1,4 @@
-__all__ = ["command_set", "command_get"]
+__all__ = ["command_set", "command_get", "command_custom"]
 
 #	@command_set("scheduler", per_device=True)
 #	def set_scheduler(self, value, device):
@@ -33,6 +33,16 @@ def command_get(name):
 		method._command = {
 			"get": True,
 			"name": name,
+		}
+		return method
+	return wrapper
+
+def command_custom(name, per_device=False):
+	def wrapper(method):
+		method._command = {
+			"custom": True,
+			"name": name,
+			"per_device": per_device,
 		}
 		return method
 	return wrapper
