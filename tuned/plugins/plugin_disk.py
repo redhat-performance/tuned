@@ -213,13 +213,22 @@ class DiskPlugin(base.Plugin):
 			return None
 		return int(value)
 
-#	@command_set("readahead_multiply", per_device=True) #, revert_as="readhead")
-#	def _multiply_readahead(self, mulitplier, device):
-#		old_value = self._get_readahead(device)
-#		new_value = int(old_value * float(multiplier))
-#		# TODO: implement revert_as (or something suitable)
-#		log.warn("readhead_multiply not implemented")
-#		#self._set_readahead(new_value, device)
+	@command_custom("readahead_multiply", per_device=True)
+	def _multiply_readahead(self, enabling, multiplier, device):
+		storage_key = self._storage_key("readahead_multiply", device)
+		if enabling:
+			old_readahead = self._get_readahead(device)
+			if old_readahead is None:
+				return
+			new_readahead = int(float(multiplier) * old_readahead)
+			self._storage.set(storage_key, old_readahead)
+			self._set_readahead(new_readahead, device)
+		else:
+			old_readahead = self._storage.get(storage_key)
+			if old_readahead is None:
+				return
+			self._set_readahead(old_readahead, device)
+			self._storage.unset(storage_key)
 
 	def _scheduler_quantum_file(self, device):
 		return os.path.join("/sys/block/", device, "queue/iosched/quantum")
