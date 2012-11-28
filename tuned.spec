@@ -2,7 +2,7 @@ Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.0.2
 Release: 1%{?dist}
-License: GPLv2
+License: GPLv2+
 # The source for this package was pulled from upstream git.  Use the
 # following commands to get the corresponding tarball:
 #  git clone git://git.fedorahosted.org/git/tuned.git
