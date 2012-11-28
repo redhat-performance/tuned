@@ -23,6 +23,7 @@ import sys
 import tempfile
 import shutil
 import argparse
+import codecs
 from subprocess import *
 from HTMLParser import HTMLParser
 from htmlentitydefs import name2codepoint
@@ -196,7 +197,7 @@ class PowertopProfile:
 		return name
 
 	def parseHTML(self, enable_tunings):
-		f = open(self.name)
+		f = codecs.open(self.name, "r", "utf-8")
 		parser = PowertopHTMLParser(enable_tunings)
 		parser.feed(f.read())
 		f.close()
@@ -205,7 +206,7 @@ class PowertopProfile:
 
 	def generateShellScript(self, profile, data):
 		print "Generating shell script", os.path.join(self.output, "script.sh")
-		f = open(os.path.join(self.output, "script.sh"), "w")
+		f = codecs.open(os.path.join(self.output, "script.sh"), "w", "utf-8")
 		f.write(SCRIPT_SH % (data, ""))
 		os.fchmod(f.fileno(), 0755)
 		f.close()
@@ -213,7 +214,7 @@ class PowertopProfile:
 
 	def generateTunedConf(self, profile, new_profile, plugins):
 		print "Generating Tuned config file", os.path.join(self.output, "tuned.conf")
-		f = open(os.path.join(self.output, "tuned.conf"), "w")
+		f = codecs.open(os.path.join(self.output, "tuned.conf"), "w", "utf-8")
 		f.write(TUNED_CONF_PROLOG)
 		if not new_profile:
 			f.write(TUNED_CONF_INCLUDE % ("include=" + profile))
