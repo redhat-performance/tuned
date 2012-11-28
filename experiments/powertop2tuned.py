@@ -204,7 +204,7 @@ class PowertopProfile:
 
 		return parser.getParsedData(), parser.getPlugins()
 
-	def generateShellScript(self, profile, data):
+	def generateShellScript(self, data):
 		print "Generating shell script", os.path.join(self.output, "script.sh")
 		f = codecs.open(os.path.join(self.output, "script.sh"), "w", "utf-8")
 		f.write(SCRIPT_SH % (data, ""))
@@ -246,12 +246,15 @@ class PowertopProfile:
 			print >> sys.stderr, 'Your Powertop version is incompatible (maybe too old) or the generated HTML output is malformed'
 			return self.PARSING_ERROR
 
-		profile = self.currentActiveProfile()
+		if not new_profile:
+			profile = self.currentActiveProfile()
+		else:
+			profile = None
 
 		if not os.path.exists(self.output):
 			os.makedirs(self.output)
 
-		if not self.generateShellScript(profile, data):
+		if not self.generateShellScript(data):
 			return self.BAD_SCRIPTSH
 
 		self.generateTunedConf(profile, new_profile, plugins)
