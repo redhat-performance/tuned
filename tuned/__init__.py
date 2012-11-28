@@ -19,5 +19,5 @@
 #
 
 __copyright__ = "Copyright 2008-2012 Red Hat, Inc."
-__license__ = "GPL"
+__license__ = "GPLv2+"
 __email__ = "power-management@lists.fedoraproject.org"
