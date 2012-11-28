@@ -201,8 +201,8 @@ class DiskPlugin(base.Plugin):
 
 	@command_get("spindown")
 	def _get_spindown(self, device):
-		# TODO: ticket #23, There's no way how to get current/old spindown value.
-		pass
+		# There's no way how to get current/old spindown value, hardcoding vendor specific 253
+		return 253
 
 	def _readahead_file(self, device):
 		return os.path.join("/sys/block/", device, "queue/read_ahead_kb")
