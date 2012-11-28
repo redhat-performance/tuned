@@ -3,6 +3,7 @@ from decorators import *
 import tuned.logs
 import tuned.utils.commands
 import os
+import re
 
 log = tuned.logs.get()
 
@@ -87,7 +88,7 @@ class DiskPlugin(base.Plugin):
 				self.stats[dev]["max"][i] = l[i]
 
 		self.stats[dev]["diff"] = l
-	
+
 		self.stats[dev]["read"] = float(self.stats[dev]["diff"][1]) / float(self.stats[dev]["max"][1])
 		self.stats[dev]["write"] = float(self.stats[dev]["diff"][5]) / float(self.stats[dev]["max"][5])
 
@@ -185,8 +186,14 @@ class DiskPlugin(base.Plugin):
 
 	@command_get("apm")
 	def _get_apm(self, device):
-		# TODO: ticket #22, get current value using hdparm -B. My disk does not support it...
-		return None
+		value = None
+		try:
+			m = re.match(r".*=\s*(\d+).*", tuned.utils.commands.execute(["hdparm", "-B", "/dev/" + device]), re.S)
+			if m:
+				value = int(m.group(1))
+		except:
+			log.error("could not get current APM settings for device '%s'" % device)
+		return value
 
 	@command_set("spindown", per_device=True)
 	def _set_spindown(self, value, device):
