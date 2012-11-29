@@ -2,7 +2,7 @@
 
 _tuned_adm()
 {
-	local commands="active list off profile"
+	local commands="active list off profile recommend"
 	local current="${COMP_WORDS[$COMP_CWORD]}"
 	local previous="${COMP_WORDS[$COMP_CWORD-1]}"
 
