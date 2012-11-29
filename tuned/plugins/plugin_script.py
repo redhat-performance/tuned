@@ -22,6 +22,10 @@ class ScriptPlugin(base.Plugin):
 			self._scripts.append(os.path.join(self._options["_load_path"], self._options["script"]))
 
 	@classmethod
+	def tunable_devices(self):
+		return ["script"]
+
+	@classmethod
 	def _get_default_options(cls):
 		return {
 			"script" : None,

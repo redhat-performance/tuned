@@ -16,6 +16,10 @@ class EeePCSHEPlugin(base.Plugin):
 		self._load_monitor = self._monitors_repository.create("load", devices)
 
 	@classmethod
+	def tunable_devices(self):
+		return ["she"]
+
+	@classmethod
 	def is_supported(cls):
 		try:
 			os.open("/sys/devices/platform/eeepc/cpufv", os.O_WRONLY)

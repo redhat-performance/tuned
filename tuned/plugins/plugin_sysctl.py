@@ -22,6 +22,10 @@ class SysctlPlugin(base.Plugin):
 		self._storage.unset("options")
 
 	@classmethod
+	def tunable_devices(self):
+		return ["sysctl"]
+
+	@classmethod
 	def _get_default_options(cls):
 		return {}
 
