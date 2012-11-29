@@ -13,10 +13,11 @@ Source: tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
 BuildArch: noarch
 BuildRequires: python, systemd-units
-Requires(post): systemd-units
+Requires(post): systemd-units, virt-what
 Requires(preun): systemd-units
 Requires(postun): systemd-units
 Requires: python-decorator, dbus-python, pygobject2, /usr/bin/cpupower
+Requires: virt-what
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
