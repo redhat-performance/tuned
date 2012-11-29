@@ -70,7 +70,9 @@ class Manager(object):
 			log.info("skipping unit '%s', all devices are already claimed by another unit" % unit_info.name)
 			return None
 
-		devices = self._device_matcher.match_list(unit_info.devices, available_devices)
+		devices = []
+		for dev in unit_info.devices.split(","):
+			devices += self._device_matcher.match_list(str(dev).strip(), available_devices)
 		if not devices:
 			log.info("skipping unit '%s', no matching devices available" % unit_info.name)
 			return None
