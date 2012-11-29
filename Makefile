@@ -13,7 +13,8 @@ archive: clean
 
 	cp AUTHORS COPYING INSTALL README $(VERSIONED_NAME)
 
-	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py tuned.bash dbus.conf $(VERSIONED_NAME)
+	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
+		tuned.bash dbus.conf recommend.conf $(VERSIONED_NAME)
 	cp -a doc experiments man profiles systemtap tuned $(VERSIONED_NAME)
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
@@ -47,11 +48,13 @@ install:
 
 	# configuration files
 	mkdir -p $(DESTDIR)/etc/tuned
-	echo -n balanced > $(DESTDIR)/etc/tuned/active_profile
+	# None profile in the moment, autodetection will be used
+	echo -n > $(DESTDIR)/etc/tuned/active_profile
 
-	# profiles
+	# profiles & system config
 	mkdir -p $(DESTDIR)$(TUNED_PROFILESDIR)
 	cp -a profiles/* $(DESTDIR)$(TUNED_PROFILESDIR)/
+	install -m 0644 recommend.conf $(DESTDIR)$(TUNED_PROFILESDIR)/recommend.conf
 
 	# Install bash completion
 	mkdir -p $(DESTDIR)/etc/bash_completion.d

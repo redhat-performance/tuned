@@ -1,5 +1,6 @@
 import dbus
 import dbus.exceptions
+import tuned.utils.commands
 from exceptions import TunedAdminException
 
 __all__ = ["DBusController"]
@@ -52,6 +53,13 @@ class DBusController(object):
 			return self._call("switch_profile", new_profile)
 		else:
 			return False
+
+	def recommend_profile(self):
+		try:
+			profile = self._call("recommend_profile")
+		except TunedAdminException:
+			profile = tuned.utils.commands.recommend_profile()
+		return profile
 
 	def off(self):
 		return self._call("disable")

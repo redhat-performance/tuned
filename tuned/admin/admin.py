@@ -36,6 +36,9 @@ class Admin(object):
 
 		return True
 
+	def recommend_profile(self):
+		print self._controller.recommend_profile()
+
 	def off(self):
 		result = self._controller.off()
 		if not result:

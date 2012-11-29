@@ -70,9 +70,16 @@ if [ $1 -eq 1 ]; then
 	/usr/bin/systemctl daemon-reload &>/dev/null || :
 fi
 
+# try to autodetect the best profile for the system in case there is none preset
+if [ ! -f /etc/tuned/active_profile -o -z "`cat /etc/tuned/active_profile 2>/dev/null`" ]
+then
+	PROFILE=`/usr/sbin/tuned-adm recommend 2>/dev/null`
+	[ "$PROFILE" ] || PROFILE=balanced
+	/usr/sbin/tuned-adm profile "$PROFILE" 2>/dev/null || echo -n "$PROFILE" > /etc/tuned/active_profile
+fi
+
 # convert active_profile from full path to name (if needed)
 sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
-
 
 %preun
 # package removal, not upgrade

@@ -48,6 +48,10 @@ Show current active profile.
 Switches to the given profilename. If none is given or no valid one is given the command gracefully exits without performing any operation.
 
 .TP
+.B recommend
+Recommend profile suitable for your system. Currently only static detection is implemented - it decides according to data in /etc/system-release-cpe and virt-what output. The rules for autodetection are defined in recommend.conf in profile directory. They can be overriden by user by putting the recommend.conf into /etc/tuned. The default rules recommends profiles targeted to the best performance or balanced profile if unsure.
+
+.TP
 .B off
 Switch off tuned.
 

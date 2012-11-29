@@ -7,6 +7,7 @@ import signal
 import os
 import sys
 import select
+import tuned.consts as consts
 
 PID_FILE = "/run/tuned/tuned.pid"
 DAEMONIZE_PARENT_TIMEOUT = 5
@@ -28,7 +29,7 @@ class Application(object):
 
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()
-		profile_locator = profiles.Locator(["/usr/lib/tuned", "/etc/tuned"])
+		profile_locator = profiles.Locator(consts.LOAD_DIRECTORIES)
 		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger)
 
 		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name)

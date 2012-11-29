@@ -46,6 +46,9 @@ if __name__ == "__main__":
 	parser_profile.set_defaults(action="profile")
 	parser_profile.add_argument("profiles", metavar="profile", type=str, nargs="+", help="profile name")
 
+	parser_off = subparsers.add_parser("recommend", help="recommend profile")
+	parser_off.set_defaults(action="recommend_profile")
+
 	args = parser.parse_args(sys.argv[1:])
 
 	options = vars(args)

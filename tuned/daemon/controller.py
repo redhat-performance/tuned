@@ -2,6 +2,7 @@ from tuned import exports
 import tuned.logs
 import tuned.exceptions
 import threading
+import tuned.utils.commands
 
 __all__ = ["Controller"]
 
@@ -97,3 +98,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	@exports.export("", "as")
 	def profiles(self):
 		return self._daemon.profile_loader.profile_locator.get_known_names()
+
+	@exports.export("", "s")
+	def recommend_profile(self):
+		return tuned.utils.commands.recommend_profile()
