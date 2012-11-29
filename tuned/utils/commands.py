@@ -34,7 +34,7 @@ def execute(args):
 	log.debug("Executing %s." % str(args))
 	out = ""
 	try:
-		proc = Popen(args, stdout=PIPE, stderr=PIPE)
+		proc = Popen("LANG= " + " ".join(args), stdout = PIPE, stderr = PIPE, shell = True)
 		out, err = proc.communicate()
 
 		if proc.returncode:
