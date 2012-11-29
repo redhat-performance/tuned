@@ -16,7 +16,7 @@ class ScriptPlugin(base.Plugin):
 		if self._options["script"] is None:
 			return
 
-		self._scripts.append(self._options["script"])
+		self._scripts.extend(self._options["script"])
 
 	@classmethod
 	def tunable_devices(self):
@@ -30,7 +30,7 @@ class ScriptPlugin(base.Plugin):
 
 	def _call_scripts(self, arg = "start"):
 		for script in self._scripts:
-			log.info("Calling script %s" % (script))
+			log.info("Calling script %s with arg %s" % (script, arg))
 			try:
 				proc = Popen([script, arg], stdout=PIPE, stderr=PIPE)
 				out, err = proc.communicate()

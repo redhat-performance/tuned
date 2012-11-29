@@ -86,9 +86,9 @@ class Loader(object):
 
 		# TODO: HACK, this needs to be solved in a better way (better config parser)
 		for unit_name in config:
-			if config[unit_name].get("type", None) == "script" and "script" in config[unit_name]:
+			if "script" in config[unit_name] and config[unit_name].get("script", None) is not None:
 				dir_name = os.path.dirname(file_name)
 				script_path = os.path.join(dir_name, config[unit_name]["script"])
-				config[unit_name]["script"] = os.path.normpath(script_path)
+				config[unit_name]["script"] = [os.path.normpath(script_path)]
 
 		return config
