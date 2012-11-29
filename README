@@ -39,6 +39,14 @@ To switch to a different profile, run:
 
 And to disable all tunings, run:
 
+# tuned-adm recommend
+Recommend profile suitable for your system. Currently only static detection is
+implemented - it decides according to data in /etc/system-release-cpe and
+virt-what output. The rules for autodetection are defined in recommend.conf
+in profile directory. They can be overriden by user by putting the
+recommend.conf into /etc/tuned. The default rules recommends profiles targeted
+to the best performance or balanced profile if unsure.
+
 # tuned-adm off
 
 Your profile choice is also written into /etc/tuned/active_profile and this
