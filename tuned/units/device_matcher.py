@@ -1,4 +1,5 @@
 import fnmatch
+import re
 
 class DeviceMatcher(object):
 	"""
@@ -16,7 +17,7 @@ class DeviceMatcher(object):
 		which matches all devices is added. The device matches if and only
 		if it matches some positive rule, but no negative rule.
 		"""
-		rules = rules_str.split()
+		rules = re.split(r"\s|,\s*", rules_str)
 		positive_rules = filter(lambda rule: not rule.startswith("!"), rules)
 		negative_rules = [rule[1:] for rule in rules if rule not in positive_rules]
 
