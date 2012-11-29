@@ -16,10 +16,7 @@ class ScriptPlugin(base.Plugin):
 		if self._options["script"] is None:
 			return
 
-		if self._options["script"].startswith("/"):
-			self._scripts.append(self._options["script"])
-		else:
-			self._scripts.append(os.path.join(self._options["_load_path"], self._options["script"]))
+		self._scripts.append(self._options["script"])
 
 	@classmethod
 	def tunable_devices(self):

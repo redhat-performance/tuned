@@ -14,7 +14,6 @@ class SysctlPlugin(base.Plugin):
 		self._dynamic_tuning = False
 		self._sysctl_original = {}
 		self._sysctl = self._options
-		del self._sysctl["_load_path"] # TODO: drop this ugly hack!
 
 		old_sysctl_options = self._storage.get("options", {})
 		for key, value in old_sysctl_options.iteritems():
