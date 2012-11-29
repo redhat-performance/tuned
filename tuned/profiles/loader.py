@@ -2,9 +2,12 @@ import tuned.profiles.profile
 import ConfigParser
 import os.path
 import collections
+import tuned.logs
 import re
 
 from tuned.profiles.exceptions import InvalidProfileException
+
+log = tuned.logs.get()
 
 class Loader(object):
 	"""
@@ -37,6 +40,10 @@ class Loader(object):
 		if len(profile_names) == 0:
 			raise InvalidProfileException("No profile or invalid profiles were specified.")
 
+		if len(profile_names) > 1:
+			log.info("loading profiles: %s" % ", ".join(profile_names))
+		else:
+			log.info("loading profile: %s" % profile_names[0])
 		profiles = []
 		processed_files = []
 		self._load_profile(profile_names, profiles, processed_files)
