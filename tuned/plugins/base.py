@@ -174,7 +174,7 @@ class Plugin(object):
 
 	def _merge_options(self, options):
 		for key in options:
-			if key in self._options:
+			if key in self._options or self.__class__.__name__ == "SysctlPlugin":
 				self._options[key] = options[key]
 			else:
 				log.warn("Unknown option '%s' for plugin '%s'." % (key, self.__class__.__name__))
