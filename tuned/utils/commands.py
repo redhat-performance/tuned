@@ -16,8 +16,11 @@ def write_to_file(f, data):
 		fd = open(f, "w")
 		fd.write(str(data))
 		fd.close()
+		rc = True
 	except (OSError,IOError) as e:
+		rc = False
 		log.error("Writing to file %s error: %s" % (f, e))
+	return rc
 
 def read_file(f):
 	old_value = ""
