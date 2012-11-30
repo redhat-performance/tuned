@@ -178,7 +178,7 @@ class DiskPlugin(base.Plugin):
 
 	@command_set("apm", per_device=True)
 	def _set_apm(self, value, device):
-		tuned.utils.commands.execute(["hdparm", "-B", value, "/dev/" + device])
+		tuned.utils.commands.execute(["hdparm", "-B", str(value), "/dev/" + device])
 
 	@command_get("apm")
 	def _get_apm(self, device):
@@ -193,7 +193,7 @@ class DiskPlugin(base.Plugin):
 
 	@command_set("spindown", per_device=True)
 	def _set_spindown(self, value, device):
-		tuned.utils.commands.execute(["hdparm", "-S", value, "/dev/" + device])
+		tuned.utils.commands.execute(["hdparm", "-S", str(value), "/dev/" + device])
 
 	@command_get("spindown")
 	def _get_spindown(self, device):
