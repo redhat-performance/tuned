@@ -147,7 +147,7 @@ class PowertopHTMLParser(HTMLParser):
 		if self.inProperTable and self.intd and self.tdCounter == 1:
 			self.lastDesc = data
 			if self.lastDesc.lower().find("autosuspend") != -1 and (self.lastDesc.lower().find("keyboard") != -1 or self.lastDesc.lower().find("mouse") != -1):
-					self.lastDesc += "\n\t# WARNING: For some devices, uncommenting this command can disable the device."
+					self.lastDesc += "\n# WARNING: For some devices, uncommenting this command can disable the device."
 					prefix = "#"
 		if self.intd and ((self.inProperTable and self.tdCounter == 2) or self.inScript):
 			self.tdCounter = 0
