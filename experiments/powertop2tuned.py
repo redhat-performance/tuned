@@ -183,7 +183,9 @@ class PowertopProfile:
 
 	def generateHTML(self):
 		print "Running PowerTOP, please wait..."
-		proc = Popen("LANG= powertop --html=/tmp/powertop --time=1", stdout=PIPE, stderr=PIPE, shell=True)
+		environment = os.environ.copy()
+		environment["LC_ALL"] = "C"
+		proc = Popen("powertop --html=/tmp/powertop --time=1", stdout=PIPE, stderr=PIPE, env=environment)
 		output = proc.communicate()[1]
 		if proc.returncode != 0:
 			return ret
