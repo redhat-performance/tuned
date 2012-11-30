@@ -5,9 +5,6 @@
 EXT_PARTITIONS=$(mount | grep -E "type ext(3|4)" | cut -d" " -f1)
 
 start() {
-    set_disk_alpm medium_power
-    set_disk_apm 128
-    set_disk_spindown 6
 
     [ "$USB_AUTOSUSPEND" = 1 ] && enable_usb_autosuspend
     disable_bluetooth
@@ -22,9 +19,6 @@ start() {
 }
 
 stop() {
-    set_disk_alpm max_power
-    set_disk_apm 255
-    set_disk_spindown 0
 
     [ "$USB_AUTOSUSPEND" = 1 ] && disable_usb_autosuspend
     enable_bluetooth
