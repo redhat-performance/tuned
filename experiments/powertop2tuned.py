@@ -101,7 +101,7 @@ class PowertopHTMLParser(HTMLParser):
 			value = splitted[1]
 			path = splitted[3]
 			path = path.replace("/proc/sys/", "").replace("/", ".")
-			self.plugins.setdefault("sysctl", "[sysctl]\ndynamic_tuning=0\n")
+			self.plugins.setdefault("sysctl", "[sysctl]\n")
 			self.plugins["sysctl"] += "#%s\n%s%s=%s\n\n" % (self.lastDesc, prefix, path, value)
 		# TODO: plugins/plugin_sysfs.py doesn't support this so far, it has to be implemented to 
 		# let it work properly.
@@ -110,13 +110,13 @@ class PowertopHTMLParser(HTMLParser):
 			value = splitted[1]
 			path = splitted[3]
 			if path == "/sys/module/snd_hda_intel/parameters/power_save":
-				self.plugins.setdefault("audio", "[audio]\ndynamic_tuning=0\n")
+				self.plugins.setdefault("audio", "[audio]\n")
 				self.plugins["audio"] += "#%s\n%shda_intel_powersave=1\n" % (self.lastDesc, prefix)
 			else:
-				self.plugins.setdefault("sysfs", "[sysfs]\ndynamic_tuning=0\n")
+				self.plugins.setdefault("sysfs", "[sysfs]\n")
 				self.plugins["sysfs"] += "#%s\n%s%s=%s\n\n" % (self.lastDesc, prefix, path, value)
 		elif command.startswith("ethtool -s ") and command.endswith("wol d;"):
-			self.plugins.setdefault("net", "[net]\ndynamic_tuning=0\n")
+			self.plugins.setdefault("net", "[net]\n")
 			self.plugins["net"] += "#%s\n%swake_on_lan=0\n" % (self.lastDesc, prefix)
 		else:
 			return False
