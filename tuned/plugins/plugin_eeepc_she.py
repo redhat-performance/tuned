@@ -1,6 +1,7 @@
 import base
+import os.path
 import tuned.logs
-
+import tuned.utils.commands
 import os
 
 log = tuned.logs.get()
@@ -21,11 +22,7 @@ class EeePCSHEPlugin(base.Plugin):
 
 	@classmethod
 	def is_supported(cls):
-		try:
-			os.open("/sys/devices/platform/eeepc/cpufv", os.O_WRONLY)
-			return True
-		except:
-			return False
+		return os.path.isfile(EeePCSHEPlugin._she_control_file())
 
 	@classmethod
 	def _get_default_options(cls):
@@ -35,6 +32,10 @@ class EeePCSHEPlugin(base.Plugin):
 			"she_powersave"            : 2,
 			"she_normal"               : 1,
 		}
+
+	@classmethod
+	def _she_control_file(self):
+		return "/sys/devices/platform/eeepc/cpufv"
 
 	def cleanup(self):
 		if self._load_monitor:
@@ -58,8 +59,5 @@ class EeePCSHEPlugin(base.Plugin):
 		she_mode = int(she_mode)
 		if self._she_mode != she_mode:
 			log.info("new eeepc_she mode %s" % self._lookup_she(she_mode))
-			try:
-				os.open("/sys/devices/platform/eeepc/cpufv", os.O_WRONLY).write(str(she_mode) + "\n")
-			except:
-				pass
+			tuned.utils.commands.write_to_file(EeePCSHEPlugin._she_control_file(), str(she_mode) + "\n")
 			self._she_mode = she_mode
