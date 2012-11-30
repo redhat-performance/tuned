@@ -49,11 +49,13 @@ def execute(args):
 # Helper for parsing kernel options like:
 # [always] never
 # It will return 'always'
-def get_active_option(options):
+def get_active_option(options, dosplit = True):
 	m = re.match(r'.*\[([^\]]+)\].*', options)
 	if m:
 		return m.group(1)
-	return options.split()[0]
+	if dosplit:
+		return options.split()[0]
+	return options
 
 def recommend_profile():
 	profile = consts.DEFAULT_PROFILE
