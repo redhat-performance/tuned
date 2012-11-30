@@ -189,9 +189,9 @@ class Plugin(object):
 		return value == "true" or value == "1"
 
 	def _config_bool(self, value, true_value="1", false_value="0"):
-		if value == True or value == "1" or value.lower() == "true":
+		if value == True or value == "1" or str(value).lower() == "true":
 			return true_value
-		elif value == False or value == "0" or value.lower() == "false":
+		elif value == False or value == "0" or str(value).lower() == "false":
 			return false_value
 		else:
 			return None
