@@ -31,13 +31,16 @@ def read_file(f):
 	except (OSError,IOError) as e:
 		log.error("Reading %s error: %s" % (f, e))
 	return old_value
-	
 
 def execute(args):
+	if not hasattr(execute, "_environment"):
+		execute._environment = os.environ.copy()
+		execute._environment["LC_ALL"] = "C"
+
 	log.debug("Executing %s." % str(args))
 	out = ""
 	try:
-		proc = Popen("LANG= " + " ".join(args), stdout = PIPE, stderr = PIPE, shell = True)
+		proc = Popen(args, stdout=PIPE, stderr=PIPE, env=execute._environment)
 		out, err = proc.communicate()
 
 		if proc.returncode:
