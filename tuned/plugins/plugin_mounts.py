@@ -18,7 +18,23 @@ class MountsPlugin(base.Plugin):
 		self._dynamic_tuning = False
 
 	@classmethod
+	def tunable_devices(cls):
+		if cls._mountpoint_topology is None:
+			cls._generate_mountpoint_topology()
+		return set(cls._mountpoint_topology.keys())
+
+	@classmethod
+	def _get_default_options(cls):
+		return {
+			"disable_barriers": None,
+		}
+
+	@classmethod
 	def _generate_mountpoint_topology(cls):
+		"""
+		Gets the information about disks, partitions and mountpoints. Stores information about used filesystem and
+		creates a list of all underlying devices (in case of LVM) for each mountpoint.
+		"""
 		mountpoint_topology = {}
 		current_disk = None
 
@@ -44,31 +60,28 @@ class MountsPlugin(base.Plugin):
 
 		cls._mountpoint_topology = mountpoint_topology
 
-	@classmethod
-	def tunable_devices(cls):
-		if cls._mountpoint_topology is None:
-			cls._generate_mountpoint_topology()
-		return set(cls._mountpoint_topology.keys())
-
-	@classmethod
-	def _get_default_options(cls):
-		return {
-			"disable_barriers": None,
-		}
-
 	def _get_device_cache_type(self, device):
+		"""
+		Get device cache type. This will work only for devices on SCSI kernel subsystem.
+		"""
 		source_filenames = glob.glob("/sys/block/%s/device/scsi_disk/*/cache_type" % device)
 		for source_filename in source_filenames:
 			return tuned.utils.commands.read_file(source_filename).strip()
 		return None
 
 	def _mountpoint_has_writeback_cache(self, mountpoint):
+		"""
+		Checks if the device has 'write back' cache. If the cache type cannot be determined, asume some other cache.
+		"""
 		for device in self._mountpoint_topology[mountpoint]["disks"]:
 			if self._get_device_cache_type(device) == "write back":
 				return True
 		return False
 
 	def _mountpoint_has_barriers(self, mountpoint):
+		"""
+		Checks if a given mountpoint is mounted with barriers enabled or disabled.
+		"""
 		with open("/proc/mounts") as mounts_file:
 			for line in mounts_file:
 				# device mountpoint filesystem options dump check
@@ -95,6 +108,9 @@ class MountsPlugin(base.Plugin):
 			return True
 
 	def _remount_partition(self, partition, options):
+		"""
+		Remounts partition.
+		"""
 		remount_command = ["/usr/bin/mount", partition, "-o", "remount,%s" % options]
 		tuned.utils.commands.execute(remount_command)
 
