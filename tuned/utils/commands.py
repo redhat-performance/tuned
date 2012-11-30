@@ -43,6 +43,15 @@ def execute(args):
 		log.error("Executing %s error: %s" % (args[0], e))
 	return out
 
+# Helper for parsing kernel options like:
+# [always] never
+# It will return 'always'
+def get_active_option(options):
+	m = re.match(r'.*\[([^\]]+)\].*', options)
+	if m:
+		return m.group(1)
+	return options.split()[0]
+
 def recommend_profile():
 	profile = consts.DEFAULT_PROFILE
 	for f in consts.LOAD_DIRECTORIES:

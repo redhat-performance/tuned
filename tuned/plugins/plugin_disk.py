@@ -143,11 +143,7 @@ class DiskPlugin(base.Plugin):
 		sys_file = self._elevator_file(device)
 		# example of scheduler file content:
 		# noop deadline [cfq]
-		schedulers = tuned.utils.commands.read_file(sys_file).split()
-		for scheduler in schedulers:
-			if scheduler[0] == "[" and scheduler[-1] == "]":
-				return scheduler[1:-1]
-		return schedulers[0]
+		return tuned.utils.commands.get_active_option(tuned.utils.commands.read_file(sys_file))
 
 	def _alpm_policy_files(self):
 		policy_files = []
