@@ -126,15 +126,11 @@ class MountsPlugin(base.Plugin):
 
 			reject_reason = None
 
-			if not force:
-				if mountpoint in ["/", "/boot"]:
-					reject_reason = "system boot protection"
-				elif not self._mountpoint_topology[mountpoint]["filesystem"].startswith("ext"):
-					reject_reason = "filesystem not supported"
-				elif self._mountpoint_has_writeback_cache(mountpoint):
-					reject_reason = "device uses write back cache"
-
-			if reject_reason is None:
+			if not self._mountpoint_topology[mountpoint]["filesystem"].startswith("ext"):
+				reject_reason = "filesystem not supported"
+			elif not force and self._mountpoint_has_writeback_cache(mountpoint):
+				reject_reason = "device uses write back cache"
+			else:
 				original_value = self._mountpoint_has_barriers(mountpoint)
 				if original_value is None:
 					reject_reason = "unknown current setting"
