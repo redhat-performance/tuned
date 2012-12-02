@@ -1,4 +1,5 @@
 import base
+import re
 import os.path
 from decorators import *
 import tuned.logs
@@ -18,6 +19,10 @@ class SysfsPlugin(base.Plugin):
 		self._sysfs_original = {}
 		self._sysfs = self._options
 
+		_sysfs = {}
+		for key, value in self._sysfs.iteritems():
+			_sysfs[os.path.normpath(key)] = value
+		self._sysfs = _sysfs
 		for key, value in self._sysfs.iteritems():
 			self._sysfs_original[key] = self._read_sysfs(key)
 
@@ -29,15 +34,24 @@ class SysfsPlugin(base.Plugin):
 	def _get_default_options(cls):
 		return {}
 
+	def _check_sysfs(self, sysfs_file):
+		if not re.match(r"^/sys/.*", sysfs_file):
+			log.error("rejecting access to '%s', it doesn't seem to be sysfs tuning" % sysfs_file)
+			return False
+		return True
+
 	def _read_sysfs(self, sysfs_file):
-		data = tuned.utils.commands.read_file(sysfs_file)
 		value = None
-		if len(data):
-			value = tuned.utils.commands.get_active_option(data, False)
+		if self._check_sysfs(sysfs_file):
+			data = tuned.utils.commands.read_file(sysfs_file)
+			if len(data):
+				value = tuned.utils.commands.get_active_option(data, False)
 		return value
 
 	def _write_sysfs(self, sysfs_file, value):
-		return tuned.utils.commands.write_to_file(sysfs_file, value)
+		if self._check_sysfs(sysfs_file):
+			return tuned.utils.commands.write_to_file(sysfs_file, value)
+		return False
 
 	def _apply_sysfs(self):
 		for key, value in self._sysfs.iteritems():
