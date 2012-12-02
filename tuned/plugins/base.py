@@ -13,6 +13,8 @@ class Plugin(object):
 	 - update_tuning(self)
 	"""
 
+	_has_dynamic_options = False
+
 	# class methods
 
 	@classmethod
@@ -174,7 +176,7 @@ class Plugin(object):
 
 	def _merge_options(self, options):
 		for key in options:
-			if key in self._options or self.__class__.__name__ in ["SysctlPlugin", "SysfsPlugin"]:
+			if key in self._options or self.__class__._has_dynamic_options:
 				self._options[key] = options[key]
 			else:
 				log.warn("Unknown option '%s' for plugin '%s'." % (key, self.__class__.__name__))

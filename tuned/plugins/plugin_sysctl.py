@@ -10,6 +10,8 @@ class SysctlPlugin(base.Plugin):
 	Plugin for applying custom sysctl options.
 	"""
 
+	_has_dynamic_options = True
+
 	def _post_init(self):
 		self._dynamic_tuning = False
 		self._sysctl_original = {}

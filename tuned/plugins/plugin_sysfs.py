@@ -13,6 +13,8 @@ class SysfsPlugin(base.Plugin):
 	Plugin for applying custom sysfs options, using specific plugins is preferred.
 	"""
 
+	_has_dynamic_options = True
+
 # TODO: resolve possible conflicts with sysctl settings from other plugins
 	def _post_init(self):
 		self._dynamic_tuning = False
