@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.0.2
+Version: 2.1.0
 Release: 1%{?dist}
 License: GPLv2+
 # The source for this package was pulled from upstream git.  Use the
@@ -160,6 +160,28 @@ fi
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Mon Dec 03 2012 Jan Vcelak <jvcelak@redhat.com> 2.1.0-1
+- new release:
+  - daemon: allow running without selected profile
+  - daemon: fix profile merging, allow only safe characters in profile names
+  - daemon: implement missing methods in DBus interface
+  - daemon: implement profile recommendation
+  - daemon: improve daemonization, PID file handling
+  - daemon: improved device matching in profiles, negation possible
+  - daemon: various internal improvements
+  - executables: check for EUID instead of UID
+  - executables: run python with -Es to increase security
+  - plugins: cpu - fix cpupower execution
+  - plugins: disk - fix option setting
+  - plugins: mounts - new, currently supports only barriers control
+  - plugins: sysctl - fix a bug preventing settings application
+  - powertop2tuned: speedup, fix crashes with non-C locales
+  - powertop2tuned: support for powertop 2.2 output
+  - profiles: progress on replacing scripts with plugins
+  - tuned-adm: bash completion - suggest profiles from all supported locations
+  - tuned-adm: complete switch to D-bus
+  - tuned-adm: full control to users with physical access
+
 * Mon Oct 08 2012 Jaroslav Škarvada <jskarvad@redhat.com> - 2.0.2-1
 - New version
 - Systemtap scripts moved to utils-systemtap subpackage
