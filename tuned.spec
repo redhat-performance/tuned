@@ -121,6 +121,7 @@ fi
 %exclude %{_prefix}/lib/tuned/enterprise-storage
 %exclude %{_prefix}/lib/tuned/spindown-disk
 %{_prefix}/lib/tuned
+%dir %{_sysconfdir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned/active_profile
 %{_sysconfdir}/tmpfiles.d
 %{_sysconfdir}/dbus-1/system.d/com.redhat.tuned.conf
