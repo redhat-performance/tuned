@@ -280,7 +280,7 @@ if __name__ == "__main__":
 		sys.exit(-1)
 
 	if not args['output']:
-		args['output'] = "/etc/tuned"	
+		args['output'] = "/etc/tuned"
 
 	if args['profile']:
 		args['output'] = os.path.join(args['output'], args['profile'])
