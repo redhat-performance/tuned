@@ -172,7 +172,7 @@ class PowertopProfile:
 		output = proc.communicate()[0]
 		if output and output.find("Current active profile: ") == 0:
 			return output[len("Current active profile: "):output.find("\n")]
-		return "unknown"
+		return None
 
 	def checkPrivs(self):
 		myuid = os.geteuid()
@@ -218,7 +218,7 @@ class PowertopProfile:
 		print "Generating Tuned config file", os.path.join(self.output, "tuned.conf")
 		f = codecs.open(os.path.join(self.output, "tuned.conf"), "w", "utf-8")
 		f.write(TUNED_CONF_PROLOG)
-		if not new_profile:
+		if not new_profile and profile is not None:
 			f.write(TUNED_CONF_INCLUDE % ("include=" + profile))
 
 		for plugin in plugins.values():
