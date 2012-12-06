@@ -1,15 +1,9 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.1.0
+Version: 2.1.1
 Release: 1%{?dist}
 License: GPLv2+
-# The source for this package was pulled from upstream git.  Use the
-# following commands to get the corresponding tarball:
-#  git clone git://git.fedorahosted.org/git/tuned.git
-#  cd tuned
-#  git checkout v%%{version}
-#  make archive
-Source: tuned-%{version}.tar.bz2
+Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
 BuildArch: noarch
 BuildRequires: python, systemd-units
@@ -161,6 +155,10 @@ fi
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Thu Dec 06 2012 Jan Vcelak <jvcelak@redhat.com> 2.1.1-1
+- fix: powertop2tuned execution
+- fix: ownership of /etc/tuned
+
 * Mon Dec 03 2012 Jan Vcelak <jvcelak@redhat.com> 2.1.0-1
 - new release:
   - daemon: allow running without selected profile
