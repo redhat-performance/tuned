@@ -15,10 +15,8 @@ class CPULatencyPlugin(base.Plugin):
 	"""
 
 	@classmethod
-	def tunable_devices(self):
-		files = os.listdir("/sys/devices/system/cpu")
-		cpus = fnmatch.filter(files, "cpu[0-9]*")
-		return map(lambda name: name[3:], cpus)
+	def device_requirements(self):
+		return {"subsystem": "cpu"}
 
 	def _post_init(self):
 		self._latency = None
