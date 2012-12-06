@@ -2,6 +2,7 @@ import base
 import tuned.logs
 from tuned.utils.nettool import ethcard
 import os
+import re
 
 log = tuned.logs.get()
 
@@ -10,20 +11,18 @@ class NetTuningPlugin(base.Plugin):
 	Plugin for ethernet card options tuning.
 	"""
 
+	@classmethod
+	def device_requirements(cls):
+		return {
+			"subsystem": "net",
+			"device_path": re.compile('(?!.*/virtual/.*)')
+		}
+
 	def _post_init(self):
 		self.devidle = {}
 		self.stats = {}
 		log.info("devices: %s" % str(self._devices));
 		self._load_monitor = self._monitors_repository.create("net", self._devices)
-
-	@classmethod
-	def tunable_devices(cls):
-		available = []
-		for root, dirs, files in os.walk("/sys/devices"):
-			if root.endswith("/net") and not root.endswith("/virtual/net"):
-				available += dirs
-		log.info("Tunable devices: %s" % str(available))
-		return available
 
 	def _calc_speed(self, speed):
 		# 0.6 is just a magical constant (empirical value): Typical workload on netcard won't exceed
