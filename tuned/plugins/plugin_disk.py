@@ -12,7 +12,18 @@ class DiskPlugin(base.Plugin):
 	Plugin for tuning options of disks.
 	"""
 
-	_supported_vendors = ["ATA", "SCSI"]
+	@classmethod
+	def device_requirements(cls):
+		return {
+			"subsystem": "block",
+			"device_type": "disk",
+			"custom": cls._is_supported_disk,
+		}
+
+	@classmethod
+	def _is_supported_disk(cls, device):
+		return device.attributes["removable"] == "0" \
+			and device.parent is not None and device.parent.subsystem in ["scsi", "virtio"]
 
 	def _post_init(self):
 		self.devidle = {}
@@ -25,22 +36,6 @@ class DiskPlugin(base.Plugin):
 			self._load_monitor = self._monitors_repository.create("disk", self._devices)
 		else:
 			self._dynamic_tuning = False
-
-	@classmethod
-	def tunable_devices(cls):
-		block_devices = os.listdir("/sys/block")
-		available = set(filter(cls._is_device_supported, block_devices))
-		return available
-
-	@classmethod
-	def _is_device_supported(cls, device):
-		vendor_file = "/sys/block/%s/device/vendor" % device
-		try:
-			vendor = open(vendor_file).read().strip()
-		except IOError:
-			return False
-
-		return vendor in cls._supported_vendors
 
 	@classmethod
 	def _get_default_options(cls):
