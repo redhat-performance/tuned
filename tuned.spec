@@ -10,7 +10,7 @@ BuildRequires: python, systemd-units
 Requires(post): systemd-units, virt-what
 Requires(preun): systemd-units
 Requires(postun): systemd-units
-Requires: python-decorator, dbus-python, pygobject2, /usr/bin/cpupower
+Requires: python-decorator, dbus-python, pygobject2, python-pyudev, /usr/bin/cpupower
 Requires: virt-what, python-configobj
 
 %description
