@@ -8,11 +8,12 @@ __all__ = ["Repository"]
 
 class Repository(PluginLoader):
 
-	def __init__(self, storage_factory, monitor_repository):
+	def __init__(self, storage_factory, monitor_repository, hardware_enumerator):
 		super(self.__class__, self).__init__()
 		self._plugins = set()
 		self._storage_factory = storage_factory
 		self._monitor_repository = monitor_repository
+		self._hardware_enumerator = hardware_enumerator
 
 	def _set_loader_parameters(self):
 		self._namespace = "tuned.plugins"
@@ -28,7 +29,10 @@ class Repository(PluginLoader):
 
 	def tunable_devices(self, plugin_name):
 		plugin_cls = self.load_plugin(plugin_name)
-		return plugin_cls.tunable_devices()
+		device_requirements = plugin_cls.device_requirements()
+		devices = self._hardware_enumerator.get_devices(**device_requirements)
+
+		return map(lambda device: device.sys_name, devices)
 
 	def is_supported(self, plugin_name):
 		plugin_cls = self.load_plugin(plugin_name)

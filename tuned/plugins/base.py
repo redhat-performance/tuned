@@ -10,6 +10,7 @@ class Plugin(object):
 	saving. Plugins use Monitor objects to get information from the running system.
 
 	Methods requiring reimplementation:
+	 - device_requirements(cls)
 	 - update_tuning(self)
 	"""
 
@@ -22,7 +23,8 @@ class Plugin(object):
 		return {}
 
 	@classmethod
-	def tunable_devices(cls):
+	def device_requirements(cls):
+		raise Exception("device_requirements not implemented")
 		return None
 
 	@classmethod
