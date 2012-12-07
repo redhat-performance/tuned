@@ -29,7 +29,7 @@ function help()
 	"statistics for read/write operations.\n\n"
         "usage: diskdevstat [update-interval] [total-duration] [display-histogram]\n\n"
 	"       update-interval      in seconds, the default is 5\n"
-	"       total-interval       in seconds, the default is 86400\n"
+	"       total-duration       in seconds, the default is 86400\n"
 	"       display-histogram    anything, unset by default\n"
 	);
 }
