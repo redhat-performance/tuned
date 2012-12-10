@@ -1,5 +1,5 @@
 import tuned.profiles.profile
-import ConfigParser
+from configobj import ConfigObj
 import os.path
 import collections
 import tuned.logs
@@ -72,17 +72,16 @@ class Loader(object):
 			profiles.append(profile)
 
 	def _load_config_data(self, file_name):
-		parser = ConfigParser.SafeConfigParser(allow_no_value=True)
 		try:
-			parser.read(file_name)
-		except ConfigParser.Error as e:
+			config_obj = ConfigObj(file_name, raise_errors=True)
+		except ConfigObjError as e:
 			raise InvalidProfileException("Cannot parse '%s'." % file_name, e)
 
 		config = collections.OrderedDict()
-		for section in parser.sections():
+		for section in config_obj.keys():
 			config[section] = collections.OrderedDict()
-			for option, value in parser.items(section):
-				config[section][option] = value
+			for option in config_obj[section].keys():
+				config[section][option] = config_obj[section][option]
 
 		# TODO: HACK, this needs to be solved in a better way (better config parser)
 		for unit_name in config:

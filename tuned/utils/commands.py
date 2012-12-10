@@ -2,7 +2,7 @@ import tuned.logs
 import copy
 import os
 import tuned.consts as consts
-import ConfigParser
+from configobj import ConfigObj
 import re
 from subprocess import *
 
@@ -63,15 +63,11 @@ def get_active_option(options, dosplit = True):
 def recommend_profile():
 	profile = consts.DEFAULT_PROFILE
 	for f in consts.LOAD_DIRECTORIES:
-		parser = ConfigParser.SafeConfigParser(allow_no_value = False)
-		try:
-			parser.read(os.path.join(f, consts.AUTODETECT_FILE))
-		except:
-			continue
-		for section in reversed(parser.sections()):
+		config = ConfigObj(os.path.join(f, consts.AUTODETECT_FILE))
+		for section in reversed(config.keys()):
 			match1 = match2 = True
-			for option, value in parser.items(section):
-				value = str(value)
+			for option in config[section].keys():
+				value = config[section][option]
 				if value == "":
 					value = r"^$"
 				if option == "virt":

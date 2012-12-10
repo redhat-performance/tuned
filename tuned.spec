@@ -11,7 +11,7 @@ Requires(post): systemd-units, virt-what
 Requires(preun): systemd-units
 Requires(postun): systemd-units
 Requires: python-decorator, dbus-python, pygobject2, /usr/bin/cpupower
-Requires: virt-what
+Requires: virt-what, python-configobj
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
