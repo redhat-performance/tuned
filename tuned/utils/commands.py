@@ -40,7 +40,7 @@ def execute(args):
 	log.debug("Executing %s." % str(args))
 	out = ""
 	try:
-		proc = Popen(args, stdout=PIPE, stderr=PIPE, env=execute._environment)
+		proc = Popen(args, stdout=PIPE, stderr=PIPE, env=execute._environment, close_fds=True)
 		out, err = proc.communicate()
 
 		if proc.returncode:

@@ -33,9 +33,9 @@ class SysctlPlugin(base.Plugin):
 	def _exec_sysctl(self, data, write = False):
 		if write:
 			log.debug("Setting sysctl: %s" % (data))
-			proc = Popen(["/sbin/sysctl", "-q", "-w", data], stdout=PIPE, stderr=PIPE)
+			proc = Popen(["/sbin/sysctl", "-q", "-w", data], stdout=PIPE, stderr=PIPE, close_fds=True)
 		else:
-			proc = Popen(["/sbin/sysctl", "-e", data], stdout=PIPE, stderr=PIPE)
+			proc = Popen(["/sbin/sysctl", "-e", data], stdout=PIPE, stderr=PIPE, close_fds=True)
 		out, err = proc.communicate()
 
 		if proc.returncode:

@@ -32,7 +32,7 @@ class ScriptPlugin(base.Plugin):
 		for script in self._scripts:
 			log.info("Calling script %s with arg %s" % (script, arg))
 			try:
-				proc = Popen([script, arg], stdout=PIPE, stderr=PIPE)
+				proc = Popen([script, arg], stdout=PIPE, stderr=PIPE, close_fds=True)
 				out, err = proc.communicate()
 
 				if proc.returncode:

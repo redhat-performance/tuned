@@ -38,7 +38,7 @@ class MountsPlugin(base.Plugin):
 		mountpoint_topology = {}
 		current_disk = None
 
-		stdout, stderr = Popen(["/usr/bin/lsblk", "-rno", "TYPE,RM,KNAME,FSTYPE,MOUNTPOINT"], stdout=PIPE, stderr=PIPE).communicate()
+		stdout, stderr = Popen(["/usr/bin/lsblk", "-rno", "TYPE,RM,KNAME,FSTYPE,MOUNTPOINT"], stdout=PIPE, stderr=PIPE, close_fds=True).communicate()
 		for columns in map(lambda line: line.split(), stdout.splitlines()):
 			device_type, device_removable, device_name = columns[:3]
 			filesystem = columns[3] if len(columns) > 3 else None

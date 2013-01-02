@@ -57,13 +57,13 @@ class Nettool:
 		if not self.supported_autoneg:
 			return False
 
-		return 0 == call(["ethtool", "-s", self._interface, "autoneg", "on" if enable else "off"])
+		return 0 == call(["ethtool", "-s", self._interface, "autoneg", "on" if enable else "off"], close_fds=True)
 
 	def _set_advertise(self, value):
 		if not self._set_autonegotiation(True):
 			return False
 
-		return 0 == call(["ethtool", "-s", self._interface, "advertise", "0x%03x" % value])
+		return 0 == call(["ethtool", "-s", self._interface, "advertise", "0x%03x" % value], close_fds=True)
 
 	def get_max_speed(self):
 		max = 0
@@ -113,8 +113,8 @@ class Nettool:
 
 		# run ethtool and preprocess output
 
-		p_ethtool = Popen(["ethtool", self._interface], stdout=PIPE, stderr=PIPE)
-		p_filter = Popen(["sed", "s/^\s*//;s/:\s*/:\\n/g"], stdin=p_ethtool.stdout, stdout=PIPE)
+		p_ethtool = Popen(["ethtool", self._interface], stdout=PIPE, stderr=PIPE, close_fds=True)
+		p_filter = Popen(["sed", "s/^\s*//;s/:\s*/:\\n/g"], stdin=p_ethtool.stdout, stdout=PIPE, close_fds=True)
 
 		output = p_filter.communicate()[0]
 		errors = p_ethtool.communicate()[1]
