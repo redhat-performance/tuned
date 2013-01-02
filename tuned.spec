@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.1.1
+Version: 2.1.2
 Release: 1%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -155,6 +155,13 @@ fi
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Wed Jan  2 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 2.1.2-1
+- new release:
+  - systemtap {disk,net}devstat: fix typo in usage
+  - switched to configobj parser
+  - latency-performance: disabled THP
+  - fixed fd leaks on subprocesses
+
 * Thu Dec 06 2012 Jan Vcelak <jvcelak@redhat.com> 2.1.1-1
 - fix: powertop2tuned execution
 - fix: ownership of /etc/tuned
