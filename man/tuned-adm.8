@@ -77,11 +77,11 @@ Profile for low latency performance tuning. Disables power saving mechanisms and
 
 .TP
 .BI "virtual-guest"
-Profile optimized for virtual guests based on enterprise-storage profile. It additionally decreases virtual memory swapiness.
+Profile optimized for virtual guests based on throughput-performance profile. It additionally decreases virtual memory swapiness. It doesn't disable disk barriers. Disk readahead values are increased.
 
 .TP
 .BI "virtual-host"
-Profile optimized for virtual hosts based on enterprise-storage profile. It additionally decreases virtual memory swapiness and enables more aggresive writeback of dirty pages.
+Profile optimized for virtual hosts based on throughput-performance profile. It additionally decreases virtual memory swapiness and enables more aggresive writeback of dirty pages. Disk readahead values are increased.
 
 .SH PREDEFINED COMPAT PROFILES
 We are also providing so called "compat" profiles that are here mostly for backward compatibility with tuned 1.0. They are oriented to more specific scenarios.
