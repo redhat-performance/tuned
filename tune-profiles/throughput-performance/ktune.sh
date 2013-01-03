@@ -4,7 +4,7 @@
 
 start() {
 	set_cpu_governor performance
-	enable_transparent_hugepages
+	set_transparent_hugepages always
 
 	return 0
 }

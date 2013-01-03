@@ -226,10 +226,10 @@ disable_cpu_multicore_powersave() {
 THP_ENABLE="/sys/kernel/mm/redhat_transparent_hugepage/enabled"
 THP_SAVE="/var/run/tuned/ktune-thp.save"
 
-enable_transparent_hugepages() {
+set_transparent_hugepages() {
 	if [ -e $THP_ENABLE ]; then
 		cut -f2 -d'[' $THP_ENABLE  | cut -f1 -d']' > $THP_SAVE
-		(echo always > $THP_ENABLE) &> /dev/null
+		(echo "$1" > $THP_ENABLE) &> /dev/null
 	fi
 }
 

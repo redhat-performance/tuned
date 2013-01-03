@@ -4,7 +4,7 @@
 
 start() {
 	set_cpu_governor performance
-	enable_transparent_hugepages
+	set_transparent_hugepages always
 	disable_disk_barriers
 	multiply_disk_readahead 4
 
