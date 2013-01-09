@@ -2,11 +2,10 @@ import os
 import threading
 import tuned.logs
 from tuned.exceptions import TunedException
+import tuned.consts
 
 log = tuned.logs.get()
 
-ACTIVE_PROFILE_FILENAME = "/etc/tuned/active_profile"
-DEFAULT_PROFILE_NAME = "balanced"
 
 class Daemon(object):
 	def __init__(self, unit_manager, profile_loader, profile_name=None):
@@ -72,18 +71,18 @@ class Daemon(object):
 
 	def _save_active_profile(self, profile_name):
 		try:
-			with open(ACTIVE_PROFILE_FILENAME, "w") as f:
+			with open(tuned.consts.ACTIVE_PROFILE_FILE, "w") as f:
 				f.write(profile_name)
 		except (OSError,IOError) as e:
-			log.error("Cannot write active profile into %s: %s" % (ACTIVE_PROFILE_FILENAME, str(e)))
+			log.error("Cannot write active profile into %s: %s" % (tuned.consts.ACTIVE_PROFILE_FILE, str(e)))
 
 	def _get_active_profile(self):
 		try:
-			with open(ACTIVE_PROFILE_FILENAME, "r") as f:
+			with open(tuned.consts.ACTIVE_PROFILE_FILE, "r") as f:
 				return f.read().strip()
 		except (OSError, IOError, EOFError) as e:
 			log.error("Cannot read active profile, setting default.")
-			return DEFAULT_PROFILE_NAME
+			return tuned.consts.DEFAULT_PROFILE
 
 	def is_enabled(self):
 		return self._profile is not None
