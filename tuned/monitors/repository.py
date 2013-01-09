@@ -12,6 +12,10 @@ class Repository(PluginLoader):
 		super(self.__class__, self).__init__()
 		self._monitors = set()
 
+	@property
+	def monitors(self):
+		return self._monitors
+
 	def _set_loader_parameters(self):
 		self._namespace = "tuned.monitors"
 		self._prefix = "monitor_"
@@ -28,8 +32,3 @@ class Repository(PluginLoader):
 		assert isinstance(monitor, self._interface)
 		monitor.cleanup()
 		self._monitors.remove(monitor)
-
-	def update(self):
-		for monitor in self._monitors:
-			log.debug("updating %s" % monitor)
-			monitor.update()

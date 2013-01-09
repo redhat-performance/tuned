@@ -58,16 +58,17 @@ class Daemon(object):
 
 		self._unit_manager.create(self._profile.units)
 		self._save_active_profile(self._profile.name)
-		self._unit_manager.plugins_repository.do_static_tuning()
+		self._unit_manager.start_tuning()
 
 		self._terminate.clear()
 		while not self._terminate.wait(10):
 			log.debug("updating monitors")
-			self._unit_manager.monitors_repository.update()
+			self._unit_manager.update_monitors()
 			log.debug("performing tunings")
-			self._unit_manager.plugins_repository.update()
+			self._unit_manager.update_tuning()
 
-		self._unit_manager.delete_all()
+		self._unit_manager.stop_tuning()
+		self._unit_manager.destroy_all()
 
 	def _save_active_profile(self, profile_name):
 		try:

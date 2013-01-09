@@ -21,12 +21,13 @@ class Application(object):
 		storage_provider = storage.PickleProvider()
 		storage_factory = storage.Factory(storage_provider)
 
-		unit_factory = units.Factory()
-		device_matcher = units.DeviceMatcher()
-		hardware_enumerator = hardware.Enumerator()
 		monitors_repository = monitors.Repository()
-		plugins_repository = plugins.Repository(storage_factory, monitors_repository, hardware_enumerator)
-		unit_manager = units.Manager(plugins_repository, monitors_repository, unit_factory, device_matcher)
+		hardware_inventory = hardware.Inventory()
+		device_matcher = hardware.DeviceMatcher()
+		plugin_instance_factory = plugins.instance.Factory()
+
+		plugins_repository = plugins.Repository(monitors_repository, storage_factory, hardware_inventory, device_matcher, plugin_instance_factory)
+		unit_manager = units.Manager(plugins_repository, monitors_repository)
 
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()

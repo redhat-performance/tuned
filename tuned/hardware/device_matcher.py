@@ -1,6 +1,8 @@
 import fnmatch
 import re
 
+__all__ = ["DeviceMatcher"]
+
 class DeviceMatcher(object):
 	"""
 	Device name matching against the devices specification in tuning profiles.

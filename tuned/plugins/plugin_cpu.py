@@ -3,34 +3,32 @@ from decorators import *
 import tuned.logs
 import tuned.utils.commands
 
-import fnmatch
 import os
 import struct
 
 log = tuned.logs.get()
+
+# TODO: force_latency -> command
 
 class CPULatencyPlugin(base.Plugin):
 	"""
 	Plugin for tuning CPU options. Powersaving, governor, required latency, etc.
 	"""
 
-	@classmethod
-	def device_requirements(self):
-		return {"subsystem": "cpu"}
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		self._init_devices()
 
-	def _post_init(self):
-		self._latency = None
-		self._load_monitor = None
-		self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
+	def _init_devices(self):
+		self._devices = set()
+		# current list of devices
+		for device in self._hardware_inventory.get_devices("cpu"):
+			self._devices.add(device.sys_name)
 
-		if self._options["force_latency"] is None:
-			self._load_monitor = self._monitors_repository.create("load", None)
-		else:
-			self._dynamic_tuning = False
-			self._set_latency(self._options["force_latency"])
+		self._assigned_devices = set()
+		self._free_devices = self._devices.copy()
 
-	@classmethod
-	def _get_default_options(cls):
+	def _get_config_options(self):
 		return {
 			"load_threshold"      : 0.2,
 			"latency_low"         : 100,
@@ -40,13 +38,44 @@ class CPULatencyPlugin(base.Plugin):
 			"multicore_powersave" : None,
 		}
 
-	def cleanup(self):
-		if self._load_monitor is not None:
-			self._monitors_repository.delete(self._load_monitor)
+	def _instance_init(self, instance):
+		instance._has_static_tuning = True
+		instance._has_dynamic_tuning = False
 
-		os.close(self._cpu_latency_fd)
+		# only the first instance of the plugin can control the latency
+		if self._instances.values()[0] == instance:
+			instance._controls_latency = True
+			self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
+			self._latency = None
 
-	def update_tuning(self):
+			if instance.options["force_latency"] is None:
+				instance._load_monitor = self._monitors_repository.create("load", None)
+				instance._dynamic_tuning = True
+			else:
+				instance._load_monitor = None
+
+		else:
+			instance._controls_latency = False
+			log.info("Latency settings from non-first CPU plugin instance '%s' will be ignored." % instance.name)
+
+	def _instance_cleanup(self, instance):
+		if instance._controls_latency:
+			os.close(self._cpu_latency_fd)
+			if instance._load_monitor is not None:
+				self._monitors_repository.delete(instance._load_monitor)
+
+	def _instance_apply_static(self, instance):
+		super(self.__class__, self)._instance_apply_static(instance)
+
+		if not instance._controls_latency:
+			return
+
+		force_latency_value = instance.options["force_latency"]
+		if force_latency_value is not None:
+			self._set_latency(force_latency_value)
+
+	def _instance_apply_dynamic(self, instance):
+		assert(instance._controls_latency)
 		load = self._load_monitor.get_load()["system"]
 		if load < self._options["load_threshold"]:
 			self._set_latency(self._options["latency_high"])
@@ -56,7 +85,7 @@ class CPULatencyPlugin(base.Plugin):
 	def _set_latency(self, latency):
 		latency = int(latency)
 		if self._latency != latency:
-			log.info("new cpu latency %d" % latency)
+			log.info("setting new cpu latency %d" % latency)
 			latency_bin = struct.pack("i", latency)
 			os.write(self._cpu_latency_fd, latency_bin)
 			self._latency = latency
@@ -64,13 +93,15 @@ class CPULatencyPlugin(base.Plugin):
 	@command_set("governor", per_device=True)
 	def _set_governor(self, governor, device):
 		log.info("setting governor '%s' on cpu '%s'" % (governor, device))
-		tuned.utils.commands.execute(["cpupower", "-c", str(device), "frequency-set", "-g", str(governor)])
+		cpu_id = device.lstrip("cpu")
+		tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-set", "-g", str(governor)])
 
 	@command_get("governor")
 	def _get_governor(self, device):
 		governor = None
 		try:
-			lines = tuned.utils.commands.execute(["cpupower", "-c", str(device), "frequency-info", "-p"]).splitlines()
+			cpu_id = device.lstrip("cpu")
+			lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"]).splitlines()
 			for line in lines:
 				if line.startswith("analyzing"):
 					continue
