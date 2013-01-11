@@ -15,10 +15,6 @@ class CPULatencyPlugin(base.Plugin):
 	Plugin for tuning CPU options. Powersaving, governor, required latency, etc.
 	"""
 
-	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
-		self._init_devices()
-
 	def _init_devices(self):
 		self._devices = set()
 		# current list of devices

@@ -12,33 +12,31 @@ class DiskPlugin(base.Plugin):
 	Plugin for tuning options of disks.
 	"""
 
-	@classmethod
-	def device_requirements(cls):
-		return {
-			"subsystem": "block",
-			"device_type": "disk",
-			"custom": cls._is_supported_disk,
-		}
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
 
-	@classmethod
-	def _is_supported_disk(cls, device):
-		return device.attributes["removable"] == "0" \
-			and device.parent is not None and device.parent.subsystem in ["scsi", "virtio"]
+		self._power_levels = [255, 225, 195, 165, 145, 125, 105, 85, 70, 55, 30, 20]
+		self._spindown_levels = [0, 250, 230, 210, 190, 170, 150, 130, 110, 90, 70, 60]
+		self._levels = len(self._power_levels)
+		self._level_steps = 6
+		self._load_smallest = 0.01
 
-	def _post_init(self):
-		self.devidle = {}
-		self.stats = {}
-		self.power = ["255", "225", "195", "165", "145", "125", "105", "85", "70", "55", "30", "20"]
-		self.spindown = ["0", "250", "230", "210", "190", "170", "150", "130", "110", "90", "70", "60"]
-		self.levels = len(self.power)
+	def _init_devices(self):
+		self._devices = set()
+		for device in self._hardware_inventory.get_devices("block"):
+			if self._device_is_supported(device):
+				self._devices.add(device.sys_name)
 
-		if self._option_bool(self._options["dynamic"]):
-			self._load_monitor = self._monitors_repository.create("disk", self._devices)
-		else:
-			self._dynamic_tuning = False
+		self._assigned_devices = set()
+		self._free_devices = self._devices.copy()
 
-	@classmethod
-	def _get_default_options(cls):
+	def _device_is_supported(cls, device):
+		return  device.device_type == "disk" \
+			and device.attributes["removable"] == "0" \
+			and device.parent is not None \
+			and device.parent.subsystem in ["scsi", "virtio"]
+
+	def _get_config_options(cls):
 		return {
 			"dynamic"            : True, # FIXME: do we want this default?
 			"elevator"           : None,
@@ -50,80 +48,94 @@ class DiskPlugin(base.Plugin):
 			"scheduler_quantum"  : None,
 		}
 
-	def _update_idle(self, dev):
-		idle = self.devidle.setdefault(dev, {})
-		idle.setdefault("LEVEL", 0)
-		for type in ("read", "write"):
-			if self.stats[dev][type] == 0.0:
-				idle.setdefault(type, 0)
-				idle[type] += 1
+	def _instance_init(self, instance):
+		instance._has_static_tuning = True
+
+		if self._option_bool(instance.options["dynamic"]):
+			instance._has_dynamic_tuning = True
+			instance._load_monitor = self._monitors_repository.create("disk", instance.devices)
+			instance._device_idle = {}
+			instance._stats = {}
+			instance._idle = {}
+		else:
+			instance._has_dynamic_tuning = False
+			instance._load_monitor = None
+
+	def _instance_cleanup(self, instance):
+		if instance._load_monitor is not None:
+			self._monitors_repository.delete(instance._load_monitor)
+			instance._load_monitor = None
+
+	def _instance_apply_dynamic(self, instance):
+		pass
+
+	def _instance_update_dynamic(self, instance):
+		loads = instance._load_monitor.get_load()
+		for device, load in loads.iteritems():
+			if not device in instance._stats:
+				self._init_stats_and_idle(instance, device)
+			self._update_stats(instance, device, load)
+			self._update_idle(instance, device)
+
+			stats = instance._stats[device]
+			idle = instance._idle[device]
+
+			# level change decision
+
+			if idle["level"] + 1 < self._levels and idle["read"] >= self._level_steps and idle["write"] >= self._level_steps:
+				level_change = 1
+			elif idle["level"] > 0 and (idle["read"] == 0 or idle["write"] == 0):
+				level_change = -1
 			else:
-				idle.setdefault(type, 0)
-				idle[type] = 0
+				level_change = 0
 
-	def _init_stats(self, dev):
-		if not self.stats.has_key(dev):
-			self.stats[dev] = {}
-			self.stats[dev]["new"] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
-			self.stats[dev]["old"] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
-			self.stats[dev]["max"] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+			# change level if decided
 
-	def _calc_diff(self, dev):
-		l = []
-		for i in xrange(len(self.stats[dev]["old"])):
-			l.append(int(self.stats[dev]["new"][i]) - int(self.stats[dev]["old"][i]))
-		return l
+			if level_change != 0:
+				idle["level"] += level_change
+				new_power_level = self._power_levels[idle["level"]]
+				new_spindown_level = self._spindown_levels[idle["level"]]
 
-	def _update_stats(self, dev, devload):
-		self.stats[dev]["old"] = self.stats[dev]["new"]
-		self.stats[dev]["new"] = devload
-		l = self._calc_diff(dev)
-		for i in xrange(len(l)):
-			if l[i] > self.stats[dev]["max"][i]:
-				self.stats[dev]["max"][i] = l[i]
+				log.debug("tuning level changed to %d (power %d, spindown %d)" % (idle["level"], new_power_level, new_spindown_level))
+				tuned.utils.commands.execute(["hdparm", "-S%d" % new_spindown_level, "-B%d" % new_power_level, "/dev/%s" % device])
 
-		self.stats[dev]["diff"] = l
+			log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
+			log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
 
-		self.stats[dev]["read"] = float(self.stats[dev]["diff"][1]) / float(self.stats[dev]["max"][1])
-		self.stats[dev]["write"] = float(self.stats[dev]["diff"][5]) / float(self.stats[dev]["max"][5])
+	def _init_stats_and_idle(self, instance, device):
+		instance._stats[device] = { "new": 11 * [0], "old": 11 * [0], "max": 11 * [1] }
+		instance._idle[device] = { "level": 0, "read": 0, "write": 0 }
 
-	def cleanup(self):
-		log.debug("Cleanup")
+	def _update_stats(self, instance, device, new_load):
+		instance._stats[device]["old"] = old_load = instance._stats[device]["new"]
+		instance._stats[device]["new"] = new_load
 
-		if self._load_monitor:
-			self._monitors_repository.delete(self._load_monitor)
+		# load difference
+		diff = map(lambda (new, old): new - old, zip(new_load, old_load))
+		instance._stats[device]["diff"] = diff
 
-			for dev in self.devidle.keys():
-				if self.devidle[dev]["LEVEL"] > 0:
-					os.system("hdparm -S0 -B255 /dev/"+dev+" > /dev/null 2>&1")
+		# adapt maximum expected load if the difference is higer
+		old_max_load = instance._stats[device]["max"]
+		max_load = map(lambda pair: max(pair), zip(old_max_load, diff))
+		instance._stats[device]["max"] = max_load
 
-	def update_tuning(self):
-		load = self._load_monitor.get_load()
-		for dev, devload in load.iteritems():
-			self._init_stats(dev)
-			self._update_stats(dev, devload)
-			self._update_idle(dev)
+		# read/write ratio
+		instance._stats[device]["read"] =  float(diff[1]) / float(max_load[1])
+		instance._stats[device]["write"] = float(diff[5]) / float(max_load[5])
 
-			if self.devidle[dev]["LEVEL"] < self.levels-1 and self.devidle[dev]["read"] >= 6 and self.devidle[dev]["write"] >= 6:
-				self.devidle[dev].setdefault("LEVEL", 0)
-				self.devidle[dev]["LEVEL"] += 1
-				level = self.devidle[dev]["LEVEL"]
+	def _update_idle(self, instance, device):
+		# increase counter if there is no load, otherwise reset the counter
+		for operation in ["read", "write"]:
+			if instance._stats[device][operation] < self._load_smallest:
+				instance._idle[device][operation] += 1
+			else:
+				instance._idle[device][operation] = 0
 
-				log.debug("Level changed to %d (power %s, spindown %s)" % (level, self.power[level], self.spindown[level]))
-				os.system("hdparm -S"+self.spindown[level]+" -B"+self.power[level]+" /dev/"+dev+" > /dev/null 2>&1")
-
-			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["read"] == 0 or self.devidle[dev]["write"] == 0):
-				self.devidle[dev].setdefault("LEVEL", 0)
-				self.devidle[dev]["LEVEL"] -= 2
-				if self.devidle[dev]["LEVEL"] < 0:
-					self.devidle[dev]["LEVEL"] = 0
-				level = self.devidle[dev]["LEVEL"]
-
-				log.debug("Level changed to %d (power %s, spindown %s)" % (level, self.power[level], self.spindown[level]))
-				os.system("hdparm -S"+self.spindown[level]+" -B"+self.power[level]+" /dev/"+dev+" > /dev/null 2>&1")
-
-			log.debug("%s load: read %f, write %f" % (dev, self.stats[dev]["read"], self.stats[dev]["write"]))
-			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))
+	def _instance_unapply_dynamic(self, instance):
+		for device in instance._idle.keys():
+			if instance._idle[device]["level"] > 0:
+				log.debug("%s restoring power and spindown settings" % device)
+				tuned.utils.commands.execute(["hdparm", "-S0", "-B255", "/dev/%s" % device])
 
 	def _elevator_file(self, device):
 		return os.path.join("/sys/block/", device, "queue/scheduler")

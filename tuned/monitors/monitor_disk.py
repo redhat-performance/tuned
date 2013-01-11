@@ -12,7 +12,7 @@ class DiskMonitor(tuned.monitors.Monitor):
 		cls._available_devices = available
 
 		for d in available:
-			cls._load[d] = ['0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0']
+			cls._load[d] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 	@classmethod
 	def _is_device_supported(cls, device):
@@ -32,4 +32,4 @@ class DiskMonitor(tuned.monitors.Monitor):
 	@classmethod
 	def _update_disk(cls, dev):
 		with open("/sys/block/" + dev + "/stat") as statfile:
-			cls._load[dev] = statfile.read().split()
+			cls._load[dev] = map(int, statfile.read().split())

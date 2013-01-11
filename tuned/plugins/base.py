@@ -26,6 +26,8 @@ class Plugin(object):
 		self._init_commands()
 		self._init_devices()
 
+		self._has_dynamic_options = False
+
 	def cleanup(self):
 		self._destroy_all_instances()
 
@@ -78,7 +80,6 @@ class Plugin(object):
 		effective_options = self._get_effective_options(options)
 		instance = self._instance_factory.create(self, name, devices_expression, effective_options)
 		self._instances[name] = instance
-		self._instance_init(instance)
 
 		return instance
 
@@ -92,6 +93,11 @@ class Plugin(object):
 		instance = self._instances[instance.name]
 		self._destroy_instance(instance)
 		del self._instances[instance.name]
+
+	def initialize_instance(self, instance):
+		"""Initialize instance."""
+		assert(instance._plugin == self)
+		self._instance_init(instance)
 
 	def _destroy_instance(self, instance):
 		log.debug("destroying instance %s (%s)" % (instance.name, self.name))
@@ -199,6 +205,9 @@ class Plugin(object):
 		raise NotImplementedError()
 
 	def _instance_unapply_dynamic(self, instance):
+		raise NotImplementedError()
+
+	def _instance_update_dynamic(self, instance):
 		raise NotImplementedError()
 
 	#

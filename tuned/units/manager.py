@@ -47,7 +47,8 @@ class Manager(object):
 			#	log.info("skipping plugin '%s', not supported on your system" % plugin_name)
 			#   continue
 			except Exception as e:
-				log.error("failed to initialize plugin %s (%s)" % (plugin_name, e))
+				log.error("failed to initialize plugin %s" % plugin_name)
+				log.exception(e)
 				continue
 
 			# create instances, seize devices in reverse order
@@ -55,13 +56,17 @@ class Manager(object):
 
 			created_instances = []
 			for instance_info in instances_info:
-				log.debug("creating '%s' instance '%s'" % (instance_info.type, instance_info.name))
+				log.debug("creating '%s' (%s)" % (instance_info.name, instance_info.type))
 				new_instance = plugin.create_instance(instance_info.name, instance_info.devices, instance_info.options)
 				created_instances.append(new_instance)
 
 			for instance in reversed(created_instances):
 				log.debug("assigning devices to '%s'" % instance.name)
 				plugin.assign_free_devices(instance)
+
+			for instance in created_instances:
+				log.debug("initializing '%s'" % instance.name)
+				plugin.initialize_instance(instance)
 
 			self._instances.extend(created_instances)
 
