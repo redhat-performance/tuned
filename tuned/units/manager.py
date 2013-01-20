@@ -60,9 +60,7 @@ class Manager(object):
 				new_instance = plugin.create_instance(instance_info.name, instance_info.devices, instance_info.options)
 				created_instances.append(new_instance)
 
-			for instance in reversed(created_instances):
-				log.debug("assigning devices to '%s'" % instance.name)
-				plugin.assign_free_devices(instance)
+			plugin.assign_free_devices()
 
 			for instance in created_instances:
 				log.debug("initializing '%s'" % instance.name)

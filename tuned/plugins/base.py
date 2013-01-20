@@ -124,7 +124,7 @@ class Plugin(object):
 		self._assigned_devices = set()
 		self._free_devices = set()
 
-	def assign_free_devices(self, instance):
+	def _assign_free_devices_to_instance(self, instance):
 		# devices are not supported
 		if self._devices is None:
 			return
@@ -146,6 +146,11 @@ class Plugin(object):
 		instance.devices.update(to_assign) # cannot use |=
 		self._assigned_devices |= to_assign
 		self._free_devices -= to_assign
+
+	def assign_free_devices(self):
+		log.debug("assigning devices to all instances")
+		for instance in reversed(self._instances):
+			self._assign_free_devices_to_instance(self._instances[instance])
 
 	def release_devices(self, instance):
 		# devices are not supported
