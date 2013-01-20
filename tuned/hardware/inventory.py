@@ -1,4 +1,9 @@
 import pyudev
+import tuned.logs
+
+__all__ = ["Inventory"]
+
+log = tuned.logs.get()
 
 class Inventory(object):
 	"""
@@ -6,17 +11,79 @@ class Inventory(object):
 	about related hardware events.
 	"""
 
-	def __init__(self, udev_context=None):
+	def __init__(self, udev_context=None, udev_monitor_cls=None, monitor_observer_factory=None):
 		if udev_context is not None:
 			self._udev_context = udev_context
 		else:
 			self._udev_context = pyudev.Context()
 
+		if udev_monitor_cls is None:
+			udev_monitor_cls = pyudev.Monitor
+		self._udev_monitor = udev_monitor_cls.from_netlink(self._udev_context)
+
+		if monitor_observer_factory is None:
+			monitor_observer_factory = _MonitorObserverFactory()
+		self._monitor_observer = monitor_observer_factory.create(self._udev_monitor, self._handle_udev_event)
+
+		self._subscriptions = {}
+
 	def get_devices(self, subsystem):
+		"""Get list of devices on a given subsystem."""
 		return self._udev_context.list_devices(subsystem=subsystem)
 
+	def _remove_unused_filters(self):
+		self._udev_monitor.remove_filter()
+		for subsystem in self._subscriptions:
+			self._udev_monitor.filter_by(subsystem)
+
+	def _handle_udev_event(self, event, device):
+		if not device.subsystem in self._subscriptions:
+			return
+
+		for (plugin, callback) in self._subscriptions[device.subsystem]:
+			try:
+				callback(event, device)
+			except Exception as e:
+				log.error("Exception occured in event handler of '%s'." % plugin)
+				log.exception(e)
+
 	def subscribe(self, plugin, subsystem, callback):
-		pass
+		"""Register handler of device events on a given subsystem."""
+		log.debug("adding handler: %s (%s)" % (subsystem, plugin))
+		callback_data = (plugin, callback)
+		if subsystem in self._subscriptions:
+			self._subscriptions[subsystem].append(callback_data)
+		else:
+			self._subscriptions[subsystem] = [callback_data, ]
+			self._udev_monitor.filter_by(subsystem)
+
+		if not self._monitor_observer.is_alive():
+			log.debug("starting monitor observer")
+			self._monitor_observer.start()
+
+	def _unsubscribe_subsystem(self, plugin, subsystem):
+		for callback_data in self._subscriptions[subsystem]:
+			(_plugin, callback) = callback_data
+			if plugin == _plugin:
+				log.debug("removing handler: %s (%s)" % (subsystem, plugin))
+				self._subscriptions[subsystem].remove(callback_data)
 
 	def unsubscribe(self, plugin, subsystem=None):
-		pass
+		"""Unregister handler registered with subscribe method."""
+		empty_subsystems = []
+		for _subsystem in self._subscriptions:
+			if subsystem is None or _subsystem == subsystem:
+				self._unsubscribe_subsystem(plugin, _subsystem)
+				if len(self._subscriptions[_subsystem]) == 0:
+					empty_subsystems.append(_subsystem)
+
+		for _subsystem in empty_subsystems:
+			del self._subscriptions[_subsystem]
+
+		if len(self._subscriptions) == 0 and self._monitor_observer.is_alive():
+			log.debug("stopping monitor observer")
+			self._monitor_observer.stop()
+
+class _MonitorObserverFactory(object):
+	def create(self, *args, **kwargs):
+		return pyudev.MonitorObserver(*args, **kwargs)
