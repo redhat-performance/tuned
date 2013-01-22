@@ -26,7 +26,7 @@ class Monitor(object):
 		cls._load = {}
 
 		cls._init_available_devices()
-		assert(type(cls._available_devices) is set)
+		assert isinstance(cls._available_devices, set)
 		cls._class_initialized = True
 		log.debug("available devices: %s" % ", ".join(cls._available_devices))
 
@@ -99,13 +99,13 @@ class Monitor(object):
 		self._refresh_updating_devices()
 
 	def add_device(self, device):
-		assert type(device) is str
+		assert isinstance(device, basestring)
 		if device in self._available_devices:
 			self._devices.add(device)
 			self._updating_devices.add(device)
 
 	def remove_device(self, device):
-		assert type(device) is str
+		assert isinstance(device, basestring)
 		if device in self._devices:
 			self._devices.remove(device)
 			self._updating_devices.remove(device)
