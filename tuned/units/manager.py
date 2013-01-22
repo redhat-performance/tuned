@@ -51,9 +51,6 @@ class Manager(object):
 				log.exception(e)
 				continue
 
-			# create instances, seize devices in reverse order
-			# FIXME: hmm, is this rational?
-
 			created_instances = []
 			for instance_info in instances_info:
 				log.debug("creating '%s' (%s)" % (instance_info.name, instance_info.type))

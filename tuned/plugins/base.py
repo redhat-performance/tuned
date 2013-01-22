@@ -171,16 +171,26 @@ class Plugin(object):
 	# Tuning activation and deactivation.
 	#
 
+	def _run_for_each_device(self, instance, callback):
+		if self._devices_supported():
+			devices = instance.devices
+		else:
+			devices = [None, ]
+
+		for device in devices:
+			callback(instance, device)
+
 	def instance_apply_tuning(self, instance):
 		"""
 		Apply static and dynamic tuning if the plugin instance is active.
 		"""
 		if not instance.active:
 			return
+
 		if instance.has_static_tuning:
 			self._instance_apply_static(instance)
 		if instance.has_dynamic_tuning:
-			self._instance_update_dynamic(instance)
+			self._run_for_each_device(instance, self._instance_apply_dynamic)
 
 	def instance_update_tuning(self, instance):
 		"""
@@ -189,33 +199,32 @@ class Plugin(object):
 		if not instance.active:
 			return
 		if instance.has_dynamic_tuning:
-			self._instance_update_dynamic(instance)
+			self._run_for_each_device(instance, self._instance_update_dynamic)
 
 	def instance_unapply_tuning(self, instance):
 		"""
 		Remove all tunings applied by the plugin instance.
 		"""
 		if instance.has_dynamic_tuning:
-			self._instance_unapply_dynamic(instance)
+			self._run_for_each_device(instance, self._instance_unapply_dynamic)
 		if instance.has_static_tuning:
 			self._instance_unapply_static(instance)
 
-
 	def _instance_apply_static(self, instance):
-		for command in self._commands.values():
-			self._execute_command(instance, command)
+		self._execute_all_non_device_commands(instance)
+		self._execute_all_device_commands(instance, instance.devices)
 
 	def _instance_unapply_static(self, instance):
-		for command in self._commands.values():
-			self._cleanup_command(instance, command)
+		self._cleanup_all_device_commands(instance, instance.devices)
+		self._cleanup_all_non_device_commands(instance)
 
-	def _instance_apply_dynamic(self, instance):
+	def _instance_apply_dynamic(self, instance, device):
 		raise NotImplementedError()
 
-	def _instance_unapply_dynamic(self, instance):
+	def _instance_unapply_dynamic(self, instance, device):
 		raise NotImplementedError()
 
-	def _instance_update_dynamic(self, instance):
+	def _instance_update_dynamic(self, instance, device):
 		raise NotImplementedError()
 
 	#
@@ -294,16 +303,19 @@ class Plugin(object):
 	# Command execution and cleanup.
 	#
 
-	def _execute_command(self, instance, command):
-		new_value = instance.options.get(command["name"], None)
-		if new_value is None:
-			return
+	def _execute_all_non_device_commands(self, instance):
+		for command in filter(lambda command: not command["per_device"], self._commands.values()):
+			new_value = instance.options.get(command["name"], None)
+			if new_value is not None:
+				self._execute_non_device_command(instance, command, new_value)
 
-		if command["per_device"]:
-			for device in instance.devices:
+	def _execute_all_device_commands(self, instance, devices):
+		for command in filter(lambda command: command["per_device"], self._commands.values()):
+			new_value = instance.options.get(command["name"], None)
+			if new_value is None:
+				continue
+			for device in devices:
 				self._execute_device_command(instance, command, device, new_value)
-		else:
-			self._execute_non_device_command(instance, command, new_value)
 
 	def _execute_device_command(self, instance, command, device, new_value):
 		if command["custom"] is not None:
@@ -321,15 +333,17 @@ class Plugin(object):
 			self._storage_set(instance, command_name, current_value)
 			command["set"](new_value)
 
-	def _cleanup_command(self, instance, command):
-		if instance.options.get(command["name"], None) is None:
-			return
+	def _cleanup_all_non_device_commands(self, instance):
+		for command in filter(lambda command: not command["per_device"], self._commands.values()):
+			if instance.options.get(command["name"], None) is not None:
+				self._cleanup_non_device_command(instance, command)
 
-		if command["per_device"]:
-			for device in instance.devices:
+	def _cleanup_all_device_commands(self, instance, devices):
+		for command in filter(lambda command: command["per_device"], self._commands.values()):
+			if instance.options.get(command["name"], None) is None:
+				continue
+			for device in devices:
 				self._cleanup_device_command(instance, command, device)
-		else:
-			self._cleanup_non_device_command(instance, command)
 
 	def _cleanup_device_command(self, instance, command, device):
 		if command["custom"] is not None:
