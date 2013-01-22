@@ -129,32 +129,24 @@ class Plugin(object):
 	def _devices_supported(self):
 		return self._devices is not None
 
-	def _assign_free_devices_to_instance(self, instance):
+	def _get_matching_devices(self, instance, devices):
+		return set(self._device_matcher.match_list(instance.devices_expression, devices))
+
+	def assign_free_devices(self):
 		if not self._devices_supported():
 			return
 
-		assert(isinstance(self._devices, set))
-		assert(isinstance(self._assigned_devices, set))
-		assert(isinstance(self._free_devices, set))
-
-		to_assign = set(self._device_matcher.match_list(instance.devices_expression, self._free_devices))
-
-		if len(to_assign) == 0:
-			log.warn("instance '%s': no matching devices available" % instance.name)
-			instance.active = False
-			return
-
-		log.info("instance '%s': assigning devices %s" % (instance.name, ", ".join(to_assign)))
-
-		instance.active = True
-		instance.devices.update(to_assign) # cannot use |=
-		self._assigned_devices |= to_assign
-		self._free_devices -= to_assign
-
-	def assign_free_devices(self):
 		log.debug("assigning devices to all instances")
-		for instance in reversed(self._instances):
-			self._assign_free_devices_to_instance(self._instances[instance])
+		for instance_name, instance in reversed(self._instances.items()):
+			to_assign = self._get_matching_devices(instance, self._free_devices)
+			instance.active = len(to_assign) > 0
+			if not instance.active:
+				log.warn("instance %s: no matching devices available" % instance_name)
+			else:
+				log.info("instance %s: assigning devices %s" % (instance_name, ", ".join(to_assign)))
+				instance.devices.update(to_assign) # cannot use |=
+				self._assigned_devices |= to_assign
+				self._free_devices -= to_assign
 
 	def release_devices(self, instance):
 		if not self._devices_supported():
