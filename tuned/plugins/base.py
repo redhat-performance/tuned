@@ -126,9 +126,11 @@ class Plugin(object):
 		self._assigned_devices = set()
 		self._free_devices = set()
 
+	def _devices_supported(self):
+		return self._devices is not None
+
 	def _assign_free_devices_to_instance(self, instance):
-		# devices are not supported
-		if self._devices is None:
+		if not self._devices_supported():
 			return
 
 		assert(isinstance(self._devices, set))
@@ -155,8 +157,7 @@ class Plugin(object):
 			self._assign_free_devices_to_instance(self._instances[instance])
 
 	def release_devices(self, instance):
-		# devices are not supported
-		if self._devices is None:
+		if not self._devices_supported():
 			return
 
 		to_release = instance.devices & self._devices
