@@ -46,7 +46,7 @@ class CPULatencyPlugin(base.Plugin):
 
 			if instance.options["force_latency"] is None:
 				instance._load_monitor = self._monitors_repository.create("load", None)
-				instance._dynamic_tuning = True
+				instance._has_dynamic_tuning = True
 			else:
 				instance._load_monitor = None
 
@@ -70,13 +70,16 @@ class CPULatencyPlugin(base.Plugin):
 		if force_latency_value is not None:
 			self._set_latency(force_latency_value)
 
-	def _instance_apply_dynamic(self, instance):
+	def _instance_apply_dynamic(self, instance, device):
 		assert(instance._controls_latency)
-		load = self._load_monitor.get_load()["system"]
-		if load < self._options["load_threshold"]:
-			self._set_latency(self._options["latency_high"])
+		load = instance._load_monitor.get_load()["system"]
+		if load < instance.options["load_threshold"]:
+			self._set_latency(instance.options["latency_high"])
 		else:
-			self._set_latency(self._options["latency_low"])
+			self._set_latency(instance.options["latency_low"])
+
+	def _instance_unapply_dynamic(self, instance, device):
+		pass
 
 	def _set_latency(self, latency):
 		latency = int(latency)
