@@ -66,41 +66,48 @@ class DiskPlugin(base.Plugin):
 			self._monitors_repository.delete(instance._load_monitor)
 			instance._load_monitor = None
 
-	def _instance_apply_dynamic(self, instance):
+	def _instance_apply_dynamic(self, instance, device):
 		pass
 
-	def _instance_update_dynamic(self, instance):
-		loads = instance._load_monitor.get_load()
-		for device, load in loads.iteritems():
-			if not device in instance._stats:
-				self._init_stats_and_idle(instance, device)
-			self._update_stats(instance, device, load)
-			self._update_idle(instance, device)
+	def instance_update_tuning(self, instance):
+		instance.current_load = instance._load_monitor.get_load()
+		super(self.__class__, self).instance_update_tuning(instance)
 
-			stats = instance._stats[device]
-			idle = instance._idle[device]
+	def _instance_update_dynamic(self, instance, device):
+		if not device in instance.current_load:
+			return
 
-			# level change decision
+		load = instance.current_load[device]
+		if not device in instance._stats:
+			self._init_stats_and_idle(instance, device)
 
-			if idle["level"] + 1 < self._levels and idle["read"] >= self._level_steps and idle["write"] >= self._level_steps:
-				level_change = 1
-			elif idle["level"] > 0 and (idle["read"] == 0 or idle["write"] == 0):
-				level_change = -1
-			else:
-				level_change = 0
+		self._update_stats(instance, device, load)
+		self._update_idle(instance, device)
 
-			# change level if decided
+		stats = instance._stats[device]
+		idle = instance._idle[device]
 
-			if level_change != 0:
-				idle["level"] += level_change
-				new_power_level = self._power_levels[idle["level"]]
-				new_spindown_level = self._spindown_levels[idle["level"]]
+		# level change decision
 
-				log.debug("tuning level changed to %d (power %d, spindown %d)" % (idle["level"], new_power_level, new_spindown_level))
-				tuned.utils.commands.execute(["hdparm", "-S%d" % new_spindown_level, "-B%d" % new_power_level, "/dev/%s" % device])
+		if idle["level"] + 1 < self._levels and idle["read"] >= self._level_steps and idle["write"] >= self._level_steps:
+			level_change = 1
+		elif idle["level"] > 0 and (idle["read"] == 0 or idle["write"] == 0):
+			level_change = -1
+		else:
+			level_change = 0
 
-			log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
-			log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
+		# change level if decided
+
+		if level_change != 0:
+			idle["level"] += level_change
+			new_power_level = self._power_levels[idle["level"]]
+			new_spindown_level = self._spindown_levels[idle["level"]]
+
+			log.debug("tuning level changed to %d (power %d, spindown %d)" % (idle["level"], new_power_level, new_spindown_level))
+			tuned.utils.commands.execute(["hdparm", "-S%d" % new_spindown_level, "-B%d" % new_power_level, "/dev/%s" % device])
+
+		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
+		log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
 
 	def _init_stats_and_idle(self, instance, device):
 		instance._stats[device] = { "new": 11 * [0], "old": 11 * [0], "max": 11 * [1] }
@@ -131,11 +138,10 @@ class DiskPlugin(base.Plugin):
 			else:
 				instance._idle[device][operation] = 0
 
-	def _instance_unapply_dynamic(self, instance):
-		for device in instance._idle.keys():
-			if instance._idle[device]["level"] > 0:
-				log.debug("%s restoring power and spindown settings" % device)
-				tuned.utils.commands.execute(["hdparm", "-S0", "-B255", "/dev/%s" % device])
+	def _instance_unapply_dynamic(self, instance, device):
+		if device in instance._idle and instance._idle[device]["level"] > 0:
+			log.debug("%s restoring power and spindown settings" % device)
+			tuned.utils.commands.execute(["hdparm", "-S0", "-B255", "/dev/%s" % device])
 
 	def _elevator_file(self, device):
 		return os.path.join("/sys/block/", device, "queue/scheduler")
