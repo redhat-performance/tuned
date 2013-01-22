@@ -61,10 +61,7 @@ class Manager(object):
 				created_instances.append(new_instance)
 
 			plugin.assign_free_devices()
-
-			for instance in created_instances:
-				log.debug("initializing '%s'" % instance.name)
-				plugin.initialize_instance(instance)
+			plugin.initialize_instances()
 
 			self._instances.extend(created_instances)
 

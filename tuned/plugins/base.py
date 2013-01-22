@@ -29,7 +29,7 @@ class Plugin(object):
 		self._has_dynamic_options = False
 
 	def cleanup(self):
-		self._destroy_all_instances()
+		self.destroy_instances()
 
 	@property
 	def name(self):
@@ -94,20 +94,22 @@ class Plugin(object):
 		self._destroy_instance(instance)
 		del self._instances[instance.name]
 
-	def initialize_instance(self, instance):
-		"""Initialize instance."""
-		assert(instance._plugin == self)
-		self._instance_init(instance)
+	def initialize_instances(self):
+		"""Initialize all created instances."""
+		for (instance_name, instance) in self._instances.items():
+			log.debug("initializing instance %s (%s)" % (instance_name, self.name))
+			self._instance_init(instance)
 
-	def _destroy_instance(self, instance):
-		log.debug("destroying instance %s (%s)" % (instance.name, self.name))
-		self.release_devices(instance)
-		self._instance_cleanup(instance)
-
-	def _destroy_all_instances(self):
+	def destroy_instances(self):
+		"""Destroy all instances."""
 		for instance in self._instances.values():
+			log.debug("destroying instance %s (%s)" % (instance.name, self.name))
 			self._destroy_instance(instance)
 		self._instances.clear()
+
+	def _destroy_instance(self, instance):
+		self.release_devices(instance)
+		self._instance_cleanup(instance)
 
 	def _instance_init(self, instance):
 		raise NotImplementedError()
