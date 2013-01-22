@@ -1,4 +1,4 @@
-import base
+import hotplug
 from decorators import *
 import tuned.logs
 import tuned.utils.commands
@@ -7,7 +7,7 @@ import re
 
 log = tuned.logs.get()
 
-class DiskPlugin(base.Plugin):
+class DiskPlugin(hotplug.Plugin):
 	"""
 	Plugin for tuning options of disks.
 	"""
@@ -35,6 +35,27 @@ class DiskPlugin(base.Plugin):
 			and device.attributes.get("removable", None) == "0" \
 			and device.parent is not None \
 			and device.parent.subsystem in ["scsi", "virtio"]
+
+	def _hardware_events_init(self):
+		self._hardware_inventory.subscribe(self, "block", self._hardware_events_callback)
+
+	def _hardware_events_cleanup(self):
+		self._hardware_inventory.unsubscribe(self)
+
+	def _hardware_events_callback(self, event, device):
+		if self._device_is_supported(device):
+			super(self.__class__, self)._hardware_events_callback(event, device)
+
+	def _added_device_apply_tuning(self, instance, device_name):
+		if instance._load_monitor is not None:
+			log.critical("%s" % device_name)
+			instance._load_monitor.add_device(device_name)
+		super(self.__class__, self)._added_device_apply_tuning(instance, device_name)
+
+	def _removed_device_unapply_tuning(self, instance, device_name):
+		if instance._load_monitor is not None:
+			instance._load_monitor.remove_device(device_name)
+		super(self.__class__, self)._removed_device_unapply_tuning(instance, device_name)
 
 	def _get_config_options(cls):
 		return {
