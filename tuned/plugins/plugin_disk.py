@@ -32,7 +32,7 @@ class DiskPlugin(base.Plugin):
 
 	def _device_is_supported(cls, device):
 		return  device.device_type == "disk" \
-			and device.attributes["removable"] == "0" \
+			and device.attributes.get("removable", None) == "0" \
 			and device.parent is not None \
 			and device.parent.subsystem in ["scsi", "virtio"]
 
