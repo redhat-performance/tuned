@@ -54,6 +54,8 @@ class CPULatencyPlugin(base.Plugin):
 			instance._controls_latency = False
 			log.info("Latency settings from non-first CPU plugin instance '%s' will be ignored." % instance.name)
 
+		instance._first_device = list(instance.devices)[0]
+
 	def _instance_cleanup(self, instance):
 		if instance._controls_latency:
 			os.close(self._cpu_latency_fd)
@@ -71,7 +73,13 @@ class CPULatencyPlugin(base.Plugin):
 			self._set_latency(force_latency_value)
 
 	def _instance_apply_dynamic(self, instance, device):
+		self._instance_update_dynamic(instance, device)
+
+	def _instance_update_dynamic(self, instance, device):
 		assert(instance._controls_latency)
+		if device != instance._first_device:
+			return
+
 		load = instance._load_monitor.get_load()["system"]
 		if load < instance.options["load_threshold"]:
 			self._set_latency(instance.options["latency_high"])

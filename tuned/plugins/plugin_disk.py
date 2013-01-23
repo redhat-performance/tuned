@@ -48,7 +48,6 @@ class DiskPlugin(hotplug.Plugin):
 
 	def _added_device_apply_tuning(self, instance, device_name):
 		if instance._load_monitor is not None:
-			log.critical("%s" % device_name)
 			instance._load_monitor.add_device(device_name)
 		super(self.__class__, self)._added_device_apply_tuning(instance, device_name)
 
