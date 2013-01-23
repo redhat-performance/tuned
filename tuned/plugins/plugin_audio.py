@@ -12,63 +12,65 @@ log = tuned.logs.get()
 class AudioPlugin(base.Plugin):
 	"""
 	Plugin for tuning audio cards powersaving options.
+
+	Power management is supported per module, not device. From this reason,
+	we take kernel module names as device names.
 	"""
 
-	@classmethod
-	def tunable_devices(self):
-		# hack, it should be splitted to ac97 and hda_intel devices
-		if os.path.isfile(AudioPlugin._ac97_powersave_file()) or os.path.isfile(AudioPlugin._hda_intel_powersave_file()):
-			devices = ["audio"]
-		return devices
+	def _init_devices(self):
+		self._devices = set()
+		self._assigned_devices = set()
 
-	def _post_init(self):
-		self._dynamic_tuning = False
+		for device in self._hardware_inventory.get_devices("sound").match_sys_name("card*"):
+			module_name = self._device_module_name(device)
+			if module_name in ["snd_hda_intel", "snd_ac97_codec"]:
+				self._devices.add(module_name)
 
-	@classmethod
-	def _get_default_options(cls):
+		self._free_devices = self._devices.copy()
+
+	def _instance_init(self, instance):
+		instance._has_static_tuning = True
+		instance._has_dynamic_tuning = False
+
+	def _instance_cleanup(self, instance):
+		pass
+
+	def _device_module_name(self, device):
+		try:
+			return device.parent.driver
+		except:
+			return None
+
+	def _get_config_options(cls):
 		return {
-			"ac97_powersave"      : None,
-			"hda_intel_powersave" : None,
+			"timeout":          0,
+			"reset_controller": False,
 		}
 
-	@classmethod
-	def _ac97_powersave_file(self):
-		return "/sys/module/snd_ac97_codec/parameters/power_save"
+	def _timeout_path(self, device):
+		return "/sys/module/%s/parameters/power_save" % device
 
-	@command_set("ac97_powersave")
-	def _set_ac97_powersave(self, value):
-		value = self._config_bool(value, "Y", "N")
-		if value is None:
-			log.warn("Incorrect ac97_powersave value.")
-			return
+	def _reset_controller_path(self, device):
+		return "/sys/module/%s/parameters/power_save_controller" % device
 
-		sys_file = AudioPlugin._ac97_powersave_file()
-		if not os.path.exists(sys_file):
-			return
+	@command_set("timeout", per_device=True)
+	def _set_timeout(self, value, device):
+		timeout = int(value)
+		if timeout >= 0:
+			sys_file = self._timeout_path(device)
+			tuned.utils.commands.write_to_file(sys_file, "%d" % timeout)
 
-		tuned.utils.commands.write_to_file(sys_file, value)
-
-	@command_get("ac97_powersave")
-	def _get_ac97_powersave(self):
-		sys_file = AudioPlugin._ac97_powersave_file()
-		if not os.path.exists(sys_file):
+	@command_get("timeout")
+	def _get_timeout(self, device):
+		sys_file = self._timeout_path(device)
+		try:
+			value = tuned.utils.commands.read_file(sys_file)
+			return int(value)
+		except:
 			return None
-		return tuned.utils.commands.read_file(sys_file)
 
-	@classmethod
-	def _hda_intel_powersave_file(self):
-		return "/sys/module/snd_hda_intel/parameters/power_save"
-
-	@command_set("hda_intel_powersave")
-	def _set_hda_intel_powersave(self, value):
-		sys_file = self._hda_intel_powersave_file()
-		if not os.path.exists(sys_file):
-			return
-		tuned.utils.commands.write_to_file(sys_file, value)
-
-	@command_get("hda_intel_powersave")
-	def _get_hda_intel_powersave(self):
-		sys_file = self._hda_intel_powersave_file()
-		if not os.path.exists(sys_file):
-			return None
-		return tuned.utils.commands.read_file(sys_file)
+	@command_custom("reset_controller", per_device=True)
+	def _reset_controller(self, enabling, value, device):
+		sys_file = self._reset_controller_path(device)
+		if os.path.exists(sys_file):
+			tuned.utils.commands.write_to_file(sys_file, "1")
