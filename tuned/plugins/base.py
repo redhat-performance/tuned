@@ -227,7 +227,7 @@ class Plugin(object):
 		"""
 		Initialize commands.
 		"""
-		self._commands = {}
+		self._commands = collections.OrderedDict()
 		self._autoregister_commands()
 		self._check_commands()
 
@@ -249,13 +249,18 @@ class Plugin(object):
 				info["custom"] = None
 				info["set"] = member
 				info["per_device"] = member._command["per_device"]
+				info["priority"] = member._command["priority"]
 			elif "get" in member._command:
 				info["get"] = member
 			elif "custom" in member._command:
 				info["custom"] = member
 				info["per_device"] = member._command["per_device"]
+				info["priority"] = member._command["priority"]
 
 			self._commands[command_name] = info
+
+		# sort commands by priority
+		self._commands = collections.OrderedDict(sorted(self._commands.iteritems(), key=lambda (name, info): info["priority"]))
 
 	def _check_commands(self):
 		"""

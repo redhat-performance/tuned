@@ -17,12 +17,13 @@ __all__ = ["command_set", "command_get", "command_custom"]
 #		return current_foo
 #
 
-def command_set(name, per_device=False):
+def command_set(name, per_device=False, priority=0):
 	def wrapper(method):
 		method._command = {
 			"set": True,
 			"name": name,
 			"per_device": per_device,
+			"priority": priority,
 		}
 		return method
 
@@ -37,12 +38,13 @@ def command_get(name):
 		return method
 	return wrapper
 
-def command_custom(name, per_device=False):
+def command_custom(name, per_device=False, priority=0):
 	def wrapper(method):
 		method._command = {
 			"custom": True,
 			"name": name,
 			"per_device": per_device,
+			"priority": priority,
 		}
 		return method
 	return wrapper
