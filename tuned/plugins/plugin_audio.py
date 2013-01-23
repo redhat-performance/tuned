@@ -69,7 +69,7 @@ class AudioPlugin(base.Plugin):
 		except:
 			return None
 
-	@command_custom("reset_controller", per_device=True)
+	@command_custom("reset_controller", per_device=True, priority=10)
 	def _reset_controller(self, enabling, value, device):
 		sys_file = self._reset_controller_path(device)
 		if os.path.exists(sys_file):
