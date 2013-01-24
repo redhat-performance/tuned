@@ -87,17 +87,13 @@ class DiskPlugin(hotplug.Plugin):
 			instance._load_monitor = None
 
 	def _instance_apply_dynamic(self, instance, device):
-		pass
-
-	def instance_update_tuning(self, instance):
-		instance.current_load = instance._load_monitor.get_load()
-		super(self.__class__, self).instance_update_tuning(instance)
+		self._instance_update_dynamic(instance, device)
 
 	def _instance_update_dynamic(self, instance, device):
-		if not device in instance.current_load:
+		load = instance._load_monitor.get_device_load(device)
+		if load is None:
 			return
 
-		load = instance.current_load[device]
 		if not device in instance._stats:
 			self._init_stats_and_idle(instance, device)
 
