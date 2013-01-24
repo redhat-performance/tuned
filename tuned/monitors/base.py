@@ -112,3 +112,6 @@ class Monitor(object):
 
 	def get_load(self):
 		return dict(filter(lambda (dev, load): dev in self._devices, self._load.items()))
+
+	def get_device_load(self, device):
+		return self._load.get(device, None)
