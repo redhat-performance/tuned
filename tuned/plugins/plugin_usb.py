@@ -11,32 +11,38 @@ class USBPlugin(base.Plugin):
 	Plugin for tuning various options of USB subsystem.
 	"""
 
-	def _post_init(self):
-		self._dynamic_tuning = False
+	def _init_devices(self):
+		self._devices = set()
+		self._assigned_devices = set()
 
-	@classmethod
-	def _get_default_options(cls):
+		for device in self._hardware_inventory.get_devices("usb").match_property("DEVTYPE", "usb_device"):
+			self._devices.add(device.sys_name)
+
+		self._free_devices = self._devices.copy()
+
+	def _get_config_options(self):
 		return {
 			"autosuspend" : None,
 		}
 
-	@classmethod
-	def tunable_devices(cls):
-		control_files = glob.glob("/sys/bus/usb/devices/*/power/control")
-		available = set(map(lambda name: name.split("/")[5], control_files))
-		return available
+	def _instance_init(self, instance):
+		instance._has_static_tuning = True
+		instance._has_dynamic_tuning = False
+
+	def _instance_cleanup(self, instance):
+		pass
 
 	def _autosuspend_sysfile(self, device):
 		return "/sys/bus/usb/devices/%s/power/autosuspend" % device
 
 	@command_set("autosuspend", per_device=True)
 	def _set_autosuspend(self, value, device):
-		value = self._config_bool(value)
-		if value is None:
-			log.warn("Invalid value for USB autosuspend.")
+		enable = self._option_bool(value)
+		if enable is None:
+			return
 
 		sys_file = self._autosuspend_sysfile(device)
-		tuned.utils.commands.write_to_file(sys_file, value)
+		tuned.utils.commands.write_to_file(sys_file, "1" if enable else "0")
 
 	@command_get("autosuspend")
 	def _get_autosuspend(self, device):
