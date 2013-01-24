@@ -11,91 +11,104 @@ class NetTuningPlugin(base.Plugin):
 	Plugin for ethernet card options tuning.
 	"""
 
-	@classmethod
-	def device_requirements(cls):
-		return {
-			"subsystem": "net",
-			"device_path": re.compile('(?!.*/virtual/.*)')
-		}
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		self._load_smallest = 0.05
+		self._level_steps = 6
 
-	def _post_init(self):
-		self.devidle = {}
-		self.stats = {}
+	def _init_devices(self):
+		self._devices = set()
+		self._assigned_devices = set()
+
+		re_not_virtual = re.compile('(?!.*/virtual/.*)')
+		for device in self._hardware_inventory.get_devices("net"):
+			if re_not_virtual.match(device.device_path):
+				self._devices.add(device.sys_name)
+
+		self._free_devices = self._devices.copy()
 		log.info("devices: %s" % str(self._devices));
-		self._load_monitor = self._monitors_repository.create("net", self._devices)
+
+	def _instance_init(self, instance):
+		instance._has_static_tuning = False
+		instance._has_dynamic_tuning = True
+
+		instance._load_monitor = self._monitors_repository.create("net", instance.devices)
+		instance._idle = {}
+		instance._stats = {}
+
+	def _instance_cleanup(self, instance):
+		if instance._load_monitor is not None:
+			self._monitors_repository.delete(instance._load_monitor)
+			instance._load_monitor = None
+
+	def _instance_apply_dynamic(self, instance, device):
+		self._instance_update_dynamic(instance, device)
+
+	def _instance_update_dynamic(self, instance, device):
+		load = map(lambda value: int(value), instance._load_monitor.get_device_load(device))
+		if load is None:
+			return
+
+		if not device in instance._stats:
+			self._init_stats_and_idle(instance, device)
+		self._update_stats(instance, device, load)
+		self._update_idle(instance, device)
+
+		stats = instance._stats[device]
+		idle = instance._idle[device]
+
+		if idle["level"] == 0 and idle["read"] >= self._level_steps and idle["write"] >= self._level_steps:
+			idle["level"] = 1
+			log.info("%s: setting 100Mbps" % device)
+			ethcard(device).set_speed(100)
+		elif idle["level"] == 1 and (idle["read"] == 0 or idle["write"] == 0):
+			idle["level"] = 0
+			log.info("%s: setting max speed" % device)
+			ethcard(device).set_max_speed()
+
+		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
+		log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
+
+	def _init_stats_and_idle(self, instance, device):
+		max_speed = self._calc_speed(ethcard(device).get_max_speed())
+		instance._stats[device] = { "new": 4 * [0], "max": 2 * [max_speed, 1] }
+		instance._idle[device] = { "level": 0, "read": 0, "write": 0 }
+
+	def _update_stats(self, instance, device, new_load):
+		# put new to old
+		instance._stats[device]["old"] = old_load = instance._stats[device]["new"]
+		instance._stats[device]["new"] = new_load
+
+		# load difference
+		diff = map(lambda (new, old): new - old, zip(new_load, old_load))
+		instance._stats[device]["diff"] = diff
+
+		# adapt maximum expected load if the difference is higer
+		old_max_load = instance._stats[device]["max"]
+		max_load = map(lambda pair: max(pair), zip(old_max_load, diff))
+		instance._stats[device]["max"] = max_load
+
+		# read/write ratio
+		instance._stats[device]["read"] =  float(diff[0]) / float(max_load[0])
+		instance._stats[device]["write"] = float(diff[2]) / float(max_load[2])
+
+	def _update_idle(self, instance, device):
+		# increase counter if there is no load, otherwise reset the counter
+		for operation in ["read", "write"]:
+			if instance._stats[device][operation] < self._load_smallest:
+				instance._idle[device][operation] += 1
+			else:
+				instance._idle[device][operation] = 0
+
+	def _instance_unapply_dynamic(self, instance, device):
+		if device in instance._idle and instance._idle[device]["level"] > 0:
+			instance._idle[device]["level"] = 0
+			log.info("%s: setting max speed" % device)
+			ethcard(device).set_max_speed()
 
 	def _calc_speed(self, speed):
 		# 0.6 is just a magical constant (empirical value): Typical workload on netcard won't exceed
 		# that and if it does, then the code is smart enough to adapt it.
 		# 1024 * 1024 as for MB -> B
-		# speed / 8  Mb -> MB
+		# speed / 7  Mb -> MB
 		return (int) (0.6 * 1024 * 1024 * speed / 8)
-
-	def _calc_diff(self, dev):
-		l = []
-		for i in xrange(len(self.stats[dev]["old"])):
-			l.append(int(self.stats[dev]["new"][i]) - int(self.stats[dev]["old"][i]))
-		return l
-
-	def _update_idle(self, dev):
-		idle = self.devidle.setdefault(dev, {})
-		idle.setdefault("LEVEL", 0)
-		for _type in ("read", "write"):
-			if self.stats[dev][_type] <= 0.05:
-				idle.setdefault(_type, 0)
-				idle[_type] += 1
-			else:
-				idle.setdefault(_type, 0)
-				idle[_type] = 0
-
-	def _init_stats(self, dev):
-		if not self.stats.has_key(dev):
-			max_speed = self._calc_speed(ethcard(dev).get_max_speed())
-			self.stats[dev] = {}
-			self.stats[dev]["new"] = ['0', '0', '0', '0']
-			self.stats[dev]["max"] = [max_speed, 1, max_speed, 1]
-			self.stats[dev]["max"] = [max_speed, 1, max_speed, 1]
-
-	def _update_stats(self, dev, devload):
-		self.stats[dev]["old"] = list(self.stats[dev]["new"])
-		self.stats[dev]["new"] = list(devload)
-		l = self._calc_diff(dev)
-		for i in xrange(len(l)):
-			if l[i] > self.stats[dev]["max"][i]:
-				self.stats[dev]["max"][i] = l[i]
-
-		self.stats[dev]["diff"] = l
-	
-		self.stats[dev]["read"] = float(self.stats[dev]["diff"][0]) / float(self.stats[dev]["max"][0])
-		self.stats[dev]["write"] = float(self.stats[dev]["diff"][2]) / float(self.stats[dev]["max"][2])
-
-	def cleanup(self):
-		log.info("Cleanup")
-
-		if self._load_monitor:
-			self._monitors_repository.delete(self._load_monitor)
-
-			for dev in self.devidle.keys():
-				if self.devidle[dev]["LEVEL"] > 0:
-					ethcard(dev).set_max_speed()
-
-	def update_tuning(self):
-		load = self._load_monitor.get_load()
-		for dev, devload in load.iteritems():
-			self._init_stats(dev)
-			self._update_stats(dev, devload)
-			self._update_idle(dev)
-
-			if self.devidle[dev]["LEVEL"] == 0 and self.devidle[dev]["read"] >= 6 and self.devidle[dev]["write"] >= 6:
-				self.devidle[dev]["LEVEL"] = 1
-
-				log.info("%s: setting 100Mbps" % dev)
-				ethcard(dev).set_speed(100)
-			if self.devidle[dev]["LEVEL"] > 0 and (self.devidle[dev]["read"] == 0 or self.devidle[dev]["write"] == 0):
-				self.devidle[dev]["LEVEL"] = 0
-
-				log.info("%s: setting maximal speed" % dev)
-				ethcard(dev).set_max_speed()
-
-			log.debug("%s load: read %f, write %f" % (dev, self.stats[dev]["read"], self.stats[dev]["write"]))
-			log.debug("%s idle: read %d, write %d, level %d" % (dev, self.devidle[dev]["read"], self.devidle[dev]["write"], self.devidle[dev]["LEVEL"]))
