@@ -203,7 +203,7 @@ class Plugin(object):
 		self._cleanup_all_non_device_commands(instance)
 
 	def _instance_apply_dynamic(self, instance, device):
-		raise NotImplementedError()
+		self._instance_update_dynamic(instance, device)
 
 	def _instance_unapply_dynamic(self, instance, device):
 		raise NotImplementedError()
