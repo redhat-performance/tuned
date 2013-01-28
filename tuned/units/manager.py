@@ -1,5 +1,6 @@
 import tuned.exceptions
 import tuned.logs
+import tuned.plugins.exceptions
 
 log = tuned.logs.get()
 
@@ -43,9 +44,9 @@ class Manager(object):
 			try:
 				plugin = self._plugins_repository.create(plugin_name)
 				self._plugins.append(plugin)
-			#except NotSupportedPlugin:
-			#	log.info("skipping plugin '%s', not supported on your system" % plugin_name)
-			#   continue
+			except tuned.plugins.exceptions.NotSupportedPluginException:
+				log.info("skipping plugin '%s', not supported on your system" % plugin_name)
+				continue
 			except Exception as e:
 				log.error("failed to initialize plugin %s" % plugin_name)
 				log.exception(e)
