@@ -13,59 +13,43 @@ class SysfsPlugin(base.Plugin):
 	Plugin for applying custom sysfs options, using specific plugins is preferred.
 	"""
 
-	_has_dynamic_options = True
+	# TODO: resolve possible conflicts with sysctl settings from other plugins
 
-# TODO: resolve possible conflicts with sysctl settings from other plugins
-	def _post_init(self):
-		self._dynamic_tuning = False
-		self._sysfs_original = {}
-		self._sysfs = self._options
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		self._has_dynamic_options = True
 
-		_sysfs = {}
-		for key, value in self._sysfs.iteritems():
-			_sysfs[os.path.normpath(key)] = value
-		self._sysfs = _sysfs
-		for key, value in self._sysfs.iteritems():
-			self._sysfs_original[key] = self._read_sysfs(key)
+	def _instance_init(self, instance):
+		instance._has_dynamic_tuning = False
+		instance._has_static_tuning = True
 
-	@classmethod
-	def tunable_devices(self):
-		return ["sysfs"]
+		instance._sysfs = dict(map(lambda (key, value): (os.path.normpath(key), value), instance.options.items()))
+		instance._sysfs_original = {}
 
-	@classmethod
-	def _get_default_options(cls):
-		return {}
+	def _instance_cleanup(self, instance):
+		pass
+
+	def _instance_apply_static(self, instance):
+		for key, value in instance._sysfs.iteritems():
+			if self._check_sysfs(key):
+				instance._sysfs_original[key] = self._read_sysfs(key)
+				self._write_sysfs(key, value)
+			else:
+				log.error("rejecting write to '%s' (not inside /sys)" % key)
+
+	def _instance_unapply_static(self, instance):
+		for key, value in instance._sysfs_original.iteritems():
+			self._write_sysfs(key, value)
 
 	def _check_sysfs(self, sysfs_file):
-		if not re.match(r"^/sys/.*", sysfs_file):
-			log.error("rejecting access to '%s', it doesn't seem to be sysfs tuning" % sysfs_file)
-			return False
-		return True
+		return re.match(r"^/sys/.*", sysfs_file)
 
 	def _read_sysfs(self, sysfs_file):
-		value = None
-		if self._check_sysfs(sysfs_file):
-			data = tuned.utils.commands.read_file(sysfs_file)
-			if len(data):
-				value = tuned.utils.commands.get_active_option(data, False)
-		return value
+		data = tuned.utils.commands.read_file(sysfs_file)
+		if len(data) > 0:
+			return tuned.utils.commands.get_active_option(data, False)
+		else:
+			return None
 
 	def _write_sysfs(self, sysfs_file, value):
-		if self._check_sysfs(sysfs_file):
-			return tuned.utils.commands.write_to_file(sysfs_file, value)
-		return False
-
-	def _apply_sysfs(self):
-		for key, value in self._sysfs.iteritems():
-			self._write_sysfs(key, value)
-		return True
-
-	def _revert_sysfs(self):
-		for key, value in self._sysfs_original.iteritems():
-			self._write_sysfs(key, value)
-
-	def cleanup_commands(self):
-		self._revert_sysfs()
-
-	def execute_commands(self):
-		self._apply_sysfs()
+		return tuned.utils.commands.write_to_file(sysfs_file, value)
