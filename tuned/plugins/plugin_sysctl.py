@@ -10,60 +10,62 @@ class SysctlPlugin(base.Plugin):
 	Plugin for applying custom sysctl options.
 	"""
 
-	_has_dynamic_options = True
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		self._has_dynamic_options = True
 
-	def _post_init(self):
-		self._dynamic_tuning = False
-		self._sysctl_original = {}
-		self._sysctl = self._options
+	def _sysctl_storage_key(self, instance):
+		return "%s/options" % instance.name
 
-		old_sysctl_options = self._storage.get("options", {})
-		for key, value in old_sysctl_options.iteritems():
-			self._exec_sysctl(key + "=" + value, True)
-		self._storage.unset("options")
+	def _instance_init(self, instance):
+		instance._has_dynamic_tuning = False
+		instance._has_static_tuning = True
 
-	@classmethod
-	def tunable_devices(self):
-		return ["sysctl"]
+		# FIXME: do we want to do this here?
+		# recover original values in case of crash
+		instance._sysctl_original = self._storage.get(self._sysctl_storage_key(instance), {})
+		if len(instance._sysctl_original) > 0:
+			log.info("recovering old sysctl settings from previous run")
+			self._instance_unapply_static(instance)
+			instance._sysctl_original = {}
+			self._storage.unset(self._sysctl_storage_key(instance))
 
-	@classmethod
-	def _get_default_options(cls):
-		return {}
+		instance._sysctl = instance.options
 
-	def _exec_sysctl(self, data, write = False):
-		if write:
-			log.debug("Setting sysctl: %s" % (data))
-			proc = Popen(["/sbin/sysctl", "-q", "-w", data], stdout=PIPE, stderr=PIPE, close_fds=True)
-		else:
-			proc = Popen(["/sbin/sysctl", "-e", data], stdout=PIPE, stderr=PIPE, close_fds=True)
+	def _instance_cleanup(self, instance):
+		self._storage.unset(self._sysctl_storage_key(instance))
+
+	def _instance_apply_static(self, instance):
+		for option, value in instance._sysctl.iteritems():
+			original_value = self._read_sysctl(option)
+			if original_value != None:
+				instance._sysctl_original[option] = original_value
+			self._write_sysctl(option, value)
+
+		self._storage.set("options", instance._sysctl_original)
+
+	def _instance_unapply_static(self, instance):
+		for option, value in instance._sysctl_original.iteritems():
+			self._write_sysctl(option, value)
+
+	def _execute_sysctl(self, arguments):
+		execute = ["/sbin/sysctl"] + arguments
+		log.debug("executing %s" % execute)
+		proc = Popen(execute, stdout=PIPE, stderr=PIPE, close_fds=True)
 		out, err = proc.communicate()
-
 		if proc.returncode:
 			log.error("sysctl error: %s" % (err[:-1]))
 		return (proc.returncode, out, err)
 
-	def _apply_sysctl(self):
-		for key, value in self._sysctl.iteritems():
-			returncode, out, err = self._exec_sysctl(key)
-			if not returncode and len(out.split('=')) == 2:
-				k = out.split('=')[0].strip()
-				v = out.split('=')[1].strip()
-				self._sysctl_original[k] = v
+	def _read_sysctl(self, option):
+		retcode, stdout, stderr = self._execute_sysctl(["-e", option])
+		if retcode == 0:
+			parts = map(lambda value: value.strip(), stdout.split("=", 1))
+			if len(parts) == 2:
+				option, value = parts
+				return value
+		return None
 
-			self._exec_sysctl(key + "=" + value, True)
-
-		self._storage.set("options", self._sysctl_original)
-		# FIXME: do this globally
-		#self._storage.save()
-
-		return True
-
-	def _revert_sysctl(self):
-		for key, value in self._sysctl_original.iteritems():
-			self._exec_sysctl(key + "=" + value, True)
-
-	def cleanup_commands(self):
-		self._revert_sysctl()
-
-	def execute_commands(self):
-		self._apply_sysctl()
+	def _write_sysctl(self, option, value):
+		retcode, stdout, stderr = self._execute_sysctl(["-q", "-w", "%s=%s" % (option, value)])
+		return retcode == 0
