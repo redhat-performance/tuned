@@ -1,5 +1,5 @@
 import base
-import os.path
+import exceptions
 import tuned.logs
 import tuned.utils.commands
 import os
@@ -11,21 +11,13 @@ class EeePCSHEPlugin(base.Plugin):
 	Plugin for tuning FSB (front side bus) speed on Asus EEE PCs with SHE (Super Hybrid Engine) support.
 	"""
 
-	def _post_init(self):
-		self._she_mode = None
-		self._load_monitor = None
-		self._load_monitor = self._monitors_repository.create("load", devices)
+	def __init__(self, *args, **kwargs):
+		self._control_file = "/sys/devices/platform/eeepc/cpufv"
+		if not os.path.isfile(self._control_file):
+			raise exceptions.NotSupportedPluginException("Plugin is not supported on your hardware.")
+		super(self.__class__, self).__init__(*args, **kwargs)
 
-	@classmethod
-	def tunable_devices(self):
-		return ["she"]
-
-	@classmethod
-	def is_supported(cls):
-		return os.path.isfile(EeePCSHEPlugin._she_control_file())
-
-	@classmethod
-	def _get_default_options(cls):
+	def _get_config_options(self):
 		return {
 			"load_threshold_normal"    : 0.6,
 			"load_threshold_powersave" : 0.4,
@@ -33,31 +25,31 @@ class EeePCSHEPlugin(base.Plugin):
 			"she_normal"               : 1,
 		}
 
-	@classmethod
-	def _she_control_file(self):
-		return "/sys/devices/platform/eeepc/cpufv"
+	def _instance_init(self, instance):
+		instance._has_static_tuning = False
+		instance._has_dynamic_tuning = True
+		instance._she_mode = None
+		instance._load_monitor = self._monitors_repository.create("load", None)
 
-	def cleanup(self):
-		if self._load_monitor:
-			self._monitors_repository.delete(self._load_monitor)
+	def _instance_cleanup(self, instance):
+		if instance._load_monitor is not None:
+			self._monitors_repository.delete(instance._load_monitor)
+			instance._load_monitor = None
 
-	def update_tuning(self):
-		load = self._load_monitor.get_load()["system"]
-		if load <= self._options["load_threshold_powersave"]:
-			self._set_she_mode(self._options["she_powersave"])
-		elif load >= self._options["load_threshold_normal"]:
-			self._set_she_mode(self._options["she_normal"])
+	def _instance_update_dynamic(self, instance, device):
+		load = instance._load_monitor.get_load()["system"]
+		if load <= instance.options["load_threshold_powersave"]:
+			self._set_she_mode(instance, "powersave")
+		elif load >= instance.options["load_threshold_normal"]:
+			self._set_she_mode(instance, "normal")
 
-	def _lookup_she(self, she_mode):
-		if she_mode == self._options["she_powersave"]:
-			return "powersave"
-		elif she_mode == self._options["she_normal"]:
-			return "normal"
-		return str(she_mode)
+	def _instance_unapply_dynamic(self, instance, device):
+		# FIXME: restore previous value
+		self._set_she_mode(instance, "normal")
 
-	def _set_she_mode(self, she_mode):
-		she_mode = int(she_mode)
-		if self._she_mode != she_mode:
-			log.info("new eeepc_she mode %s" % self._lookup_she(she_mode))
-			tuned.utils.commands.write_to_file(EeePCSHEPlugin._she_control_file(), str(she_mode) + "\n")
-			self._she_mode = she_mode
+	def _set_she_mode(self, instance, new_mode):
+		new_mode_numeric = int(instance.options["she_%s" % new_mode])
+		if instance._she_mode != new_mode_numeric:
+			log.info("new eeepc_she mode %s (%d) " % (new_mode, new_mode_numeric))
+			tuned.utils.commands.write_to_file(self._control_file, "%s" % new_mode_numeric)
+			self._she_mode = new_mode_numeric
