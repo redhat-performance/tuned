@@ -12,23 +12,6 @@ class MountsPlugin(base.Plugin):
 	Plugin for tuning options of mount-points.
 	"""
 
-	_mountpoint_topology = None
-
-	def _post_init(self):
-		self._dynamic_tuning = False
-
-	@classmethod
-	def tunable_devices(cls):
-		if cls._mountpoint_topology is None:
-			cls._generate_mountpoint_topology()
-		return set(cls._mountpoint_topology.keys())
-
-	@classmethod
-	def _get_default_options(cls):
-		return {
-			"disable_barriers": None,
-		}
-
 	@classmethod
 	def _generate_mountpoint_topology(cls):
 		"""
@@ -59,6 +42,24 @@ class MountsPlugin(base.Plugin):
 			mountpoint_topology[mountpoint]["disks"].add(current_disk)
 
 		cls._mountpoint_topology = mountpoint_topology
+
+	def _init_devices(self):
+		self._generate_mountpoint_topology()
+		self._devices = set(self._mountpoint_topology.keys())
+		self._assigned_devices = set()
+		self._free_devices = self._devices.copy()
+
+	def _get_config_options(self):
+		return {
+			"disable_barriers": None,
+		}
+
+	def _instance_init(self, instance):
+		instance._has_dynamic_tuning = False
+		instance._has_static_tuning = True
+
+	def _instance_cleanup(self, instance):
+		pass
 
 	def _get_device_cache_type(self, device):
 		"""
@@ -118,7 +119,7 @@ class MountsPlugin(base.Plugin):
 	def _disable_barriers(self, start, value, mountpoint):
 		storage_key = self._storage_key("disable_barriers", mountpoint)
 		force = str(value).lower() == "force"
-		value = force or self._config_bool(value)
+		value = force or self._option_bool(value)
 
 		if start:
 			if not value:
