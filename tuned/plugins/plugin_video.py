@@ -2,8 +2,7 @@ import base
 from decorators import *
 import tuned.logs
 from tuned.utils.commands import *
-
-import glob
+import os
 
 log = tuned.logs.get()
 
@@ -12,21 +11,27 @@ class VideoPlugin(base.Plugin):
 	Plugin for tuning powersave options for some graphic cards.
 	"""
 
-	def _post_init(self):
-		self._dynamic_tuning = False
+	def _init_devices(self):
+		self._devices = set()
+		self._assigned_devices = set()
 
-	@classmethod
-	def _get_default_options(cls):
+		# FIXME: this is a blind shot, needs testing
+		for device in self._hardware_inventory.get_devices("drm").match_sys_name("card*").match_property("DEVTYPE", "drm_minor"):
+			self._devices.add(device.sys_name)
+
+		self._free_devices = self._devices.copy()
+
+	def _get_config_options(self):
 		return {
 			"radeon_powersave" : None,
 		}
 
-	@classmethod
-	def tunable_devices(cls):
-		# radeon_powersave is currently the only condition
-		config_files = glob.glob("/sys/class/drm/*/device/power_method")
-		available = set(map(lambda name: name.split("/")[4], config_files))
-		return available
+	def _instance_init(self, instance):
+		instance._has_dynamic_tuning = False
+		instance._has_static_tuning = True
+
+	def _instance_cleanup(self, instance):
+		pass
 
 	def _radeon_powersave_files(self, device):
 		return {
@@ -37,6 +42,10 @@ class VideoPlugin(base.Plugin):
 	@command_set("radeon_powersave", per_device=True)
 	def _set_radeon_powersave(self, value, device):
 		sys_files = self._radeon_powersave_files(device)
+		if not os.path.exists(sys_files["method"]):
+			log.warn("radeon_powersave is not supported on '%s'" % device)
+			return
+
 		if value in ["default", "auto", "low", "med", "high"]:
 			tuned.utils.commands.write_to_file(sys_files["method"], "profile")
 			tuned.utils.commands.write_to_file(sys_files["profile"], value)
