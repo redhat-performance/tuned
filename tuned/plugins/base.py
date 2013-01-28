@@ -319,7 +319,7 @@ class Plugin(object):
 			command["custom"](True, new_value)
 		else:
 			current_value = command["get"]()
-			self._storage_set(instance, command_name, current_value)
+			self._storage_set(instance, command, current_value)
 			command["set"](new_value)
 
 	def _cleanup_all_non_device_commands(self, instance):
