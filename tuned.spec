@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.1.2
+Version: 2.2.0
 Release: 1%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -155,6 +155,13 @@ fi
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Mon Jan 28 2013 Jan Vcelak <jvcelak@redhat.com> 2.2.0-1
+- new release:
+  - remove nobarrier from virtual-guest (data loss prevention)
+  - devices enumeration via udev, instead of manual retrieval
+  - support for dynamically inserted devices (currently disk plugin)
+  - dropped rfkill plugins (bluetooth and wifi), the code didn't work
+
 * Wed Jan  2 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 2.1.2-1
 - new release:
   - systemtap {disk,net}devstat: fix typo in usage
