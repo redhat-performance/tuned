@@ -11,7 +11,7 @@ class DeviceMatcher(object):
 	The rules have a syntax of shell-style wildcards and are either positive
 	or negative. The negative rules are prefixed with an exclamation mark.
 	"""
-	def match(self, rules_str, device_name):
+	def match(self, rules, device_name):
 		"""
 		Match a device against the specification in the profile.
 
@@ -19,7 +19,9 @@ class DeviceMatcher(object):
 		which matches all devices is added. The device matches if and only
 		if it matches some positive rule, but no negative rule.
 		"""
-		rules = re.split(r"\s|,\s*", rules_str)
+		if isinstance(rules, basestring):
+			rules = re.split(r"\s|,\s*", rules)
+
 		positive_rules = filter(lambda rule: not rule.startswith("!"), rules)
 		negative_rules = [rule[1:] for rule in rules if rule not in positive_rules]
 
@@ -39,14 +41,14 @@ class DeviceMatcher(object):
 
 		return matches
 
-	def match_list(self, rules_str, device_list):
+	def match_list(self, rules, device_list):
 		"""
 		Match a device list against the specification in the profile. Returns
 		the list, which is a subset of devices which match.
 		"""
 		matching_devices = []
 		for device in device_list:
-			if self.match(rules_str, device):
+			if self.match(rules, device):
 				matching_devices.append(device)
 
 		return matching_devices
