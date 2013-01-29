@@ -1,16 +1,113 @@
-commit 0427cea0d801b03ab5fbfdeb3c26922c6eaa2247
+[33mcommit adf6d855789f1e5738ae0a113a96d914b480e23f[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 29 16:05:50 2013 +0100
+
+    udev rules: ask tuned to restart ktune instead of restarting it directly
+
+[33mcommit afd26f62774daf81a9f95d256d415547300f7757[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 29 13:26:25 2013 +0100
+
+    tuned: restart ktune 10 seconds after last SIGUSR2 was received
+    
+    When multiple devices are added into the system, udev restarted ktune
+    daemon for each new device. This can cause races within ktune. This
+    mechanism allows triggering just one ktune restart when multiple
+    devices are inserted.
+
+[33mcommit 6fc759a9fff5801a9f80e672207fc41f95b3ae7b[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Jan 29 14:32:30 2013 +0100
+
+    functions: implement support for readahead restore
+
+[33mcommit f46c9d05477f93f31e3c5ee1c24637f4adde743c[m
+Author: Jaroslav Škarvada <jskarvad@redhat.com>
+Date:   Thu Jan 3 17:03:43 2013 +0100
+
+    profiles: removed the nobarrier from the virtual-guest profile
+    
+    resolves: #886956
+
+[33mcommit 355fd87b1b2304863fe04266e290dc99394587ad[m
+Author: Jaroslav Škarvada <jskarvad@redhat.com>
+Date:   Thu Jan 3 17:01:48 2013 +0100
+
+    disabled transparent hugepages in latency-performance profile
+    
+    resolves: rhbz#887355
+
+[33mcommit 66d8e396db3845463abc181c541ee09c686b1ff1[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Fri Dec 7 14:06:09 2012 +0100
+
+    {disk,net}devstat: fix typo in usage
+
+[33mcommit c1b7f35546a23b409ca0e1479d928b8d7f57c06b[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Wed Oct 10 10:47:26 2012 +0200
+
+    udev: add rule to restart ktune in new block device is added
+    
+    Resolves: #847445
+
+[33mcommit 64b45e8a04b06c0f554c64b458c590c9904f7f5f[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Thu Sep 27 13:40:38 2012 +0200
+
+    profiles: do not disable barriers on devices with write back cache
+    
+    Resolves: #801561
+
+[33mcommit 9e8f67009568adce6b9a2f1d4c4c828b2192cba8[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Sep 24 15:08:19 2012 +0200
+
+    tuned: create PID file with proper permissions
+    
+    Resolves: #845336
+
+[33mcommit 84536e5a5917282821a654cb5d47ac3505d9506e[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Mon Sep 24 14:51:59 2012 +0200
+
+    ktune: validate value of ELEVATOR_TUNE_DEVS
+    
+    Resolves: #784308
+
+[33mcommit d4c0b5a2d145da188b995419764f9c969b9afdbb[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 20 14:29:04 2012 +0100
+
+    update systemd unit file install path
+    
+    required by /lib -> /usr/lib feature
+
+[33mcommit 9dfa60a1f4166aab80e400d88a3ee28bcc256efc[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 20 14:16:42 2012 +0100
+
+    spec: missing system-units build requirement
+
+[33mcommit cbb2bf6e85117a0f245de5010e70c75a8ccc35b6[m
+Author: Jan Vcelak <jvcelak@redhat.com>
+Date:   Tue Mar 20 13:55:48 2012 +0100
+
+    version bump
+
+[33mcommit 0427cea0d801b03ab5fbfdeb3c26922c6eaa2247[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Mar 5 08:51:53 2012 +0100
 
     netdevstat: cmdline error handling
 
-commit 81590cf7705e982c7880c69d01ea6d02a6e7a2e4
+[33mcommit 81590cf7705e982c7880c69d01ea6d02a6e7a2e4[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Mar 5 08:45:50 2012 +0100
 
     diskdevstat: cmdline error handling
 
-commit 3b10ac690bc6164b721236702cb5eb8493278f1e
+[33mcommit 3b10ac690bc6164b721236702cb5eb8493278f1e[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Mar 2 09:59:29 2012 +0100
 
@@ -18,7 +115,7 @@ Date:   Fri Mar 2 09:59:29 2012 +0100
     
     References: rhbz#740976, rhbz#740977
 
-commit 90afd92add2facb02596a7e8e1341f252ae3684d
+[33mcommit 90afd92add2facb02596a7e8e1341f252ae3684d[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Mar 2 09:00:26 2012 +0100
 
@@ -26,61 +123,61 @@ Date:   Fri Mar 2 09:00:26 2012 +0100
     
     References: rhbz#740976
 
-commit 78012939d465405587a6607838f15e8c06cbd5a3
+[33mcommit 78012939d465405587a6607838f15e8c06cbd5a3[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jan 11 13:38:28 2012 +0100
 
     tuned-adm: sort list of available profiles
 
-commit e30a77ede22df20232547b6243107b57ed0ad0ee
+[33mcommit e30a77ede22df20232547b6243107b57ed0ad0ee[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jan 11 13:35:45 2012 +0100
 
     tuned-adm man: add virtual-host profile decription
 
-commit 5984ad2de7e2e5ee76d54191f03515ae55739a4e
+[33mcommit 5984ad2de7e2e5ee76d54191f03515ae55739a4e[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jan 11 13:26:31 2012 +0100
 
     add virtual-host profile
 
-commit 0e4826f78b14f219c876bc9d3b35834cd7a18311
+[33mcommit 0e4826f78b14f219c876bc9d3b35834cd7a18311[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jan 11 12:59:48 2012 +0100
 
     tuned-adm: fix crash when active-profile file is missing
 
-commit 0754d462ff72ed69b704b3a4a4d7a5ecc77df655
+[33mcommit 0754d462ff72ed69b704b3a4a4d7a5ecc77df655[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jan 11 12:55:22 2012 +0100
 
     tuned-adm man: add virtual-guest profile decription
 
-commit 8bb2e57c523cc27915b422d077ba5c644bd85f6a
+[33mcommit 8bb2e57c523cc27915b422d077ba5c644bd85f6a[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jan 11 12:48:19 2012 +0100
 
     add virtual-guest profile
 
-commit 8bd483a47c4e00cf106fb16d50ac5d0c61f21ab8
+[33mcommit 8bd483a47c4e00cf106fb16d50ac5d0c61f21ab8[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jan 11 12:40:23 2012 +0100
 
     functions: support for disk scheduler quantum setting
 
-commit b5297bcc8cdb71b7c7fff17b7a18ea194952cc1c
+[33mcommit b5297bcc8cdb71b7c7fff17b7a18ea194952cc1c[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jan 11 12:39:47 2012 +0100
 
     functions: update disks detection mechanism
 
-commit f11bae54bc26e2969ab1413995baeae472e75b60
+[33mcommit f11bae54bc26e2969ab1413995baeae472e75b60[m
 Author: Jaroslav Škarvada <jskarvad@redhat.com>
 Date:   Sat Dec 3 15:31:29 2011 +0100
 
     set_radeon_powersave: fixed profile name
 
-commit 229b5f7874c406f702b7f1fd9d4e18a1df0e575e
+[33mcommit 229b5f7874c406f702b7f1fd9d4e18a1df0e575e[m
 Author: Jaroslav Škarvada <jskarvad@redhat.com>
 Date:   Sat Dec 3 15:14:06 2011 +0100
 
@@ -89,19 +186,19 @@ Date:   Sat Dec 3 15:14:06 2011 +0100
     It should be safer for presenters, because the more
     aggresive dynpm doesn't support multi heads.
 
-commit 60f78e3dc83907d558913473acc145ce864d4c26
+[33mcommit 60f78e3dc83907d558913473acc145ce864d4c26[m
 Author: Jaroslav Škarvada <jskarvad@redhat.com>
 Date:   Sat Dec 3 14:32:39 2011 +0100
 
     Improved radeon powersavings settings in tuned profiles
 
-commit 9280e4ee158792973112ea78c3848bc25609c51e
+[33mcommit 9280e4ee158792973112ea78c3848bc25609c51e[m
 Author: Jaroslav Škarvada <jskarvad@redhat.com>
 Date:   Sat Dec 3 14:09:27 2011 +0100
 
     set_radeon_powersave: added support for auto profile
 
-commit cc4ff67c4e556b1ede8138c220917c07594aab1b
+[33mcommit cc4ff67c4e556b1ede8138c220917c07594aab1b[m
 Author: Jaroslav Škarvada <jskarvad@redhat.com>
 Date:   Thu Dec 1 16:22:57 2011 +0100
 
@@ -110,19 +207,19 @@ Date:   Thu Dec 1 16:22:57 2011 +0100
     Changed formula for scomes score calculation according to
     Vratislav Podzimek <vpodzime@redhat.com> proposal.
 
-commit 0b09aaf11d75c8871ea5adea5084d16207a7b9a7
+[33mcommit 0b09aaf11d75c8871ea5adea5084d16207a7b9a7[m
 Author: Jaroslav Škarvada <jskarvad@redhat.com>
 Date:   Thu Dec 1 15:36:01 2011 +0100
 
     Add support for radeon power savings
 
-commit 662fe7223007bc2b5dc390bb58440eea37ecfd16
+[33mcommit 662fe7223007bc2b5dc390bb58440eea37ecfd16[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Oct 12 16:06:56 2011 +0200
 
     ktune.sysconfig: add vd* to tuned devices
 
-commit 69fdbcf75b03d339fa8d405366381c2b8385eff3
+[33mcommit 69fdbcf75b03d339fa8d405366381c2b8385eff3[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Sep 29 10:46:07 2011 +0200
 
@@ -130,13 +227,13 @@ Date:   Thu Sep 29 10:46:07 2011 +0200
     
     This reverts commit bab72a171e78730730647896f58c4efe53f821e8.
 
-commit 8c034fec0df68c9399068d9aacff9c883bc4a70e
+[33mcommit 8c034fec0df68c9399068d9aacff9c883bc4a70e[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Sep 29 10:43:33 2011 +0200
 
     pmqos-static.py: no error messages upon start
 
-commit b90a6890b0b44174500d04c6b99b7b11654dbe23
+[33mcommit b90a6890b0b44174500d04c6b99b7b11654dbe23[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Sep 27 23:51:38 2011 +0200
 
@@ -144,25 +241,25 @@ Date:   Tue Sep 27 23:51:38 2011 +0200
     
     Update for commit: ba38290
 
-commit 31639fdec76b294fd67c78ec332fe26bf0ad7bb9
+[33mcommit 31639fdec76b294fd67c78ec332fe26bf0ad7bb9[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Sep 27 23:55:21 2011 +0200
 
     latency-performance: add cpu_dma_latency=0
 
-commit bab72a171e78730730647896f58c4efe53f821e8
+[33mcommit bab72a171e78730730647896f58c4efe53f821e8[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Sep 27 23:46:08 2011 +0200
 
     throughput-performance: add cpu_dma_latency=0
 
-commit e60e9505da372654fae799dcf28d36c32d860c5c
+[33mcommit e60e9505da372654fae799dcf28d36c32d860c5c[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Sep 27 16:19:46 2011 +0200
 
     pmqos-static.py: terminate previous instance when started
 
-commit edc85cb8ac5772071a8ae282ec29a6bb7ae37eda
+[33mcommit edc85cb8ac5772071a8ae282ec29a6bb7ae37eda[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Sep 27 16:01:29 2011 +0200
 
@@ -171,7 +268,7 @@ Date:   Tue Sep 27 16:01:29 2011 +0200
     Designed to be invoked by 'ktune.sh' scripts to set static values
     of PM QoS. The tool should not be called manually.
 
-commit a957ea14bbd0632c2675a424c7f67ba79df42ad3
+[33mcommit a957ea14bbd0632c2675a424c7f67ba79df42ad3[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jul 20 17:05:32 2011 +0200
 
@@ -181,7 +278,7 @@ Date:   Wed Jul 20 17:05:32 2011 +0200
     instead of 'chkconfig --add/--del $service'. This change is necessary
     to provide desired functionality for both SysVInit and systemd.
 
-commit 9521c71dce9c6742eb593fd2c230c4b4dad72559
+[33mcommit 9521c71dce9c6742eb593fd2c230c4b4dad72559[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jul 20 17:00:07 2011 +0200
 
@@ -189,7 +286,7 @@ Date:   Wed Jul 20 17:00:07 2011 +0200
     
     Compatibility with SysVInit is preserved.
 
-commit 995461b8dbf2456f608bf926a2dc83ed41c91dea
+[33mcommit 995461b8dbf2456f608bf926a2dc83ed41c91dea[m
 Author: Jaroslav Skarvada <jskarvad@redhat.com>
 Date:   Wed Jul 20 10:01:18 2011 +0200
 
@@ -197,7 +294,7 @@ Date:   Wed Jul 20 10:01:18 2011 +0200
     
     Signed-off-by: Jan Vcelak <jvcelak@redhat.com>
 
-commit 185baab4f67294a91ecb263bfff9cd1b52b3dc8c
+[33mcommit 185baab4f67294a91ecb263bfff9cd1b52b3dc8c[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Jun 29 19:55:07 2011 +0200
 
@@ -211,13 +308,13 @@ Date:   Wed Jun 29 19:55:07 2011 +0200
     starting the service. If the main process is terminated and
     deamonization is not finished, systemd kills the whole process group.
 
-commit 385768f1a35d65bdf89878991997ba71d67eda4d
+[33mcommit 385768f1a35d65bdf89878991997ba71d67eda4d[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jun 21 13:42:26 2011 +0200
 
     version bump
 
-commit ccecd6fa7d4ed038ad72ac46eb76ef89aaefb3c8
+[33mcommit ccecd6fa7d4ed038ad72ac46eb76ef89aaefb3c8[m
 Author: Phil Knirsch <pknirsch@redhat.com>
 Date:   Tue Jun 21 13:46:01 2011 +0200
 
@@ -226,7 +323,7 @@ Date:   Tue Jun 21 13:46:01 2011 +0200
     Resolves: #695480
     Signed-off-by: Jan Vcelak <jvcelak@redhat.com>
 
-commit 53ad121de8eb0ec9bcf2a2f73c6f5ad010006987
+[33mcommit 53ad121de8eb0ec9bcf2a2f73c6f5ad010006987[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jun 21 12:50:36 2011 +0200
 
@@ -237,7 +334,7 @@ Date:   Tue Jun 21 12:50:36 2011 +0200
     
     Resolves: #690177
 
-commit 2884a1ac3627aa75ea6a2a7d35fc2e070b67be5b
+[33mcommit 2884a1ac3627aa75ea6a2a7d35fc2e070b67be5b[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jun 21 12:36:33 2011 +0200
 
@@ -247,7 +344,7 @@ Date:   Tue Jun 21 12:36:33 2011 +0200
     
     Resolves: #710920
 
-commit ba38290e921b4727c00d6f40924b4c586655622a
+[33mcommit ba38290e921b4727c00d6f40924b4c586655622a[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue May 24 10:24:04 2011 +0200
 
@@ -255,7 +352,7 @@ Date:   Tue May 24 10:24:04 2011 +0200
     
     - handle the situation, when checked /path does not exist (bz #707079)
 
-commit d78b41e9ff7bf54666c23ae14390aaab591569fe
+[33mcommit d78b41e9ff7bf54666c23ae14390aaab591569fe[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu May 19 09:29:43 2011 +0200
 
@@ -263,7 +360,7 @@ Date:   Thu May 19 09:29:43 2011 +0200
     
     Thanks to Jaroslav Skarvada <jskarvad@redhat.com>
 
-commit c6875ac43df639b5079bd55318e301f2dabc214a
+[33mcommit c6875ac43df639b5079bd55318e301f2dabc214a[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Mar 23 16:02:36 2011 +0100
 
@@ -272,7 +369,7 @@ Date:   Wed Mar 23 16:02:36 2011 +0100
     When ELEVATOR_TUNE_DEVS variable is not set, all files from current
     directory will propagate to SYS_BLOCK_SDX variable.
 
-commit ac079d8f40a53c5ca4efe1ff917a5337c8d9d508
+[33mcommit ac079d8f40a53c5ca4efe1ff917a5337c8d9d508[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Mar 23 14:56:26 2011 +0100
 
@@ -280,13 +377,13 @@ Date:   Wed Mar 23 14:56:26 2011 +0100
     
     Resolves: #689715 (RHEL)
 
-commit 08da2b82beaf2426cc30e0d6058c87859dc3017c
+[33mcommit 08da2b82beaf2426cc30e0d6058c87859dc3017c[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Mar 18 11:23:25 2011 +0100
 
     version bump
 
-commit 9f490b6cb16b378c37c440dafb8d8ac32da2ec90
+[33mcommit 9f490b6cb16b378c37c440dafb8d8ac32da2ec90[m
 Author: Jaroslav Škarvada <jskarvad@redhat.com>
 Date:   Mon Mar 14 09:49:26 2011 +0100
 
@@ -298,7 +395,7 @@ Date:   Mon Mar 14 09:49:26 2011 +0100
     
     Signed-off-by: Jan Vcelak <jvcelak@redhat.com>
 
-commit fd2656d591082539d00fd9d56441dc9d9adea531
+[33mcommit fd2656d591082539d00fd9d56441dc9d9adea531[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Mar 8 19:02:36 2011 +0100
 
@@ -310,19 +407,19 @@ Date:   Tue Mar 8 19:02:36 2011 +0100
     - exclude all untunable devices
       (ethtool reports no modes, maximal speed is lower than 1000Mbit)
 
-commit 31cd75fa772a93024b88acbb6606b0d2716ebe7e
+[33mcommit 31cd75fa772a93024b88acbb6606b0d2716ebe7e[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Mar 8 17:42:37 2011 +0100
 
     code cleanup: net plugin variable names
 
-commit c36714fd02e8dc995a13d666b4a0654456e981ef
+[33mcommit c36714fd02e8dc995a13d666b4a0654456e981ef[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Mar 8 17:41:57 2011 +0100
 
     code cleanup: too much underscores
 
-commit ae41fe8929116bd8616c5b3d09d30cd8c8863cf8
+[33mcommit ae41fe8929116bd8616c5b3d09d30cd8c8863cf8[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Mar 8 17:27:35 2011 +0100
 
@@ -331,7 +428,7 @@ Date:   Tue Mar 8 17:27:35 2011 +0100
     https://fedoraproject.org/wiki/Features/ConsistentNetworkDeviceNaming
     Resolves: #682379
 
-commit a1d1df7bb1f6ccec698c7e5d661d5a0b8f6744c7
+[33mcommit a1d1df7bb1f6ccec698c7e5d661d5a0b8f6744c7[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jan 25 15:05:32 2011 +0100
 
@@ -339,25 +436,25 @@ Date:   Tue Jan 25 15:05:32 2011 +0100
     
     Resolves: #659968
 
-commit a251de81fee5ae1674ec261f9379510e5fdfffc9
+[33mcommit a251de81fee5ae1674ec261f9379510e5fdfffc9[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 13 18:11:04 2011 +0100
 
     tuned.spec: move man pages for utils to subpackage
 
-commit 5299225ea95d7bfbd2b2c1084c3dd501c0e07e5a
+[33mcommit 5299225ea95d7bfbd2b2c1084c3dd501c0e07e5a[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 13 15:35:53 2011 +0100
 
     man: tuned-adm - update profiles description
 
-commit a351b52ff3ddb22f0ec23608ca5e81c333acf5e9
+[33mcommit a351b52ff3ddb22f0ec23608ca5e81c333acf5e9[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 13 14:58:07 2011 +0100
 
     man: tuned.conf - plugins description
 
-commit f6d80577d32690715878030c1d29985a913fc444
+[33mcommit f6d80577d32690715878030c1d29985a913fc444[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 13 16:30:28 2011 +0100
 
@@ -366,61 +463,61 @@ Date:   Thu Jan 13 16:30:28 2011 +0100
     Not providing tuned.conf caused, that default or previous
     tuned configuration was used instead of disabling tuned.
 
-commit c53cf2a2ee780a44b7bcf8d38abc9aaf00d43d48
+[33mcommit c53cf2a2ee780a44b7bcf8d38abc9aaf00d43d48[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 13 14:24:21 2011 +0100
 
     laptop-battery-powersave: ktune script typos
 
-commit 840c0e8232711d86a1fc466932cd88be910083dd
+[33mcommit 840c0e8232711d86a1fc466932cd88be910083dd[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 13 14:02:28 2011 +0100
 
     Makefile: added new manpages
 
-commit 97306e2b55dc2acccceadda203857747fbcea6ab
+[33mcommit 97306e2b55dc2acccceadda203857747fbcea6ab[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 13 13:50:36 2011 +0100
 
     new man pages: diskdevstat netdevstat scomes varnetload
 
-commit 0e7e22ef3120b2f2fa703a9330bc1174cadade7f
+[33mcommit 0e7e22ef3120b2f2fa703a9330bc1174cadade7f[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Jan 10 20:20:09 2011 +0100
 
     version bump
 
-commit d6377a8f8a52376b546601f4e6bd901e38abf79a
+[33mcommit d6377a8f8a52376b546601f4e6bd901e38abf79a[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Jan 10 18:48:19 2011 +0100
 
     udev: fixed tuned-mpath-iosched script name typo
 
-commit 66fcc79706eb5fcdfc2ca8fc8d6ba596a570273e
+[33mcommit 66fcc79706eb5fcdfc2ca8fc8d6ba596a570273e[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Sat Jan 8 18:51:57 2011 +0100
 
     udev: fix rules permissions
 
-commit 9fae405df20a8b41adccdd1b3d0b960afb6c9566
+[33mcommit 9fae405df20a8b41adccdd1b3d0b960afb6c9566[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jan 7 17:07:17 2011 +0100
 
     udev: specfile changes
 
-commit 12307a51327eeeac731264cfad04049bf9e554a7
+[33mcommit 12307a51327eeeac731264cfad04049bf9e554a7[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jan 7 17:00:53 2011 +0100
 
     udev: add related files into Makefile
 
-commit 35b44f0b7fa7d6600c2e65bb4bdfaaa289154dea
+[33mcommit 35b44f0b7fa7d6600c2e65bb4bdfaaa289154dea[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jan 7 17:00:22 2011 +0100
 
     udev: add rules for scheduler tuning
 
-commit 4e9b48112d7fc48ad19c4285b105f4e83ba3f644
+[33mcommit 4e9b48112d7fc48ad19c4285b105f4e83ba3f644[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jan 4 18:13:45 2011 +0100
 
@@ -428,7 +525,7 @@ Date:   Tue Jan 4 18:13:45 2011 +0100
     
     Resolves: #658843
 
-commit 54b1caece582b8c63d644d0dba1753bed3b006c0
+[33mcommit 54b1caece582b8c63d644d0dba1753bed3b006c0[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jan 4 18:00:58 2011 +0100
 
@@ -436,7 +533,7 @@ Date:   Tue Jan 4 18:00:58 2011 +0100
     
     forgotten 'set -x' removed
 
-commit 339381786368baccf4d9983395a12ab5e76f83b8
+[33mcommit 339381786368baccf4d9983395a12ab5e76f83b8[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jan 4 17:41:20 2011 +0100
 
@@ -446,13 +543,13 @@ Date:   Tue Jan 4 17:41:20 2011 +0100
     
     Resolves: #624494
 
-commit 572c9d6d16af9f3e62f4ea44c2c099796d4b5fe4
+[33mcommit 572c9d6d16af9f3e62f4ea44c2c099796d4b5fe4[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jan 4 17:39:10 2011 +0100
 
     initiscript: localization of insufficient privilege error
 
-commit 1f60e8f952527667fc4fc884e6d62f2bf67f26d0
+[33mcommit 1f60e8f952527667fc4fc884e6d62f2bf67f26d0[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jan 4 15:30:24 2011 +0100
 
@@ -460,19 +557,19 @@ Date:   Tue Jan 4 15:30:24 2011 +0100
     
     Resolves: #621122
 
-commit 93ad579f6953261ce7bc6c34f0ca4cb9d3c8b33d
+[33mcommit 93ad579f6953261ce7bc6c34f0ca4cb9d3c8b33d[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Dec 22 15:34:13 2010 +0100
 
     all ktune.sh updated to use common functions file
 
-commit 436f4d234bceb797752c3cd16702db05cf9d44cc
+[33mcommit 436f4d234bceb797752c3cd16702db05cf9d44cc[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Dec 22 15:32:56 2010 +0100
 
     consolidated ktune scripts functions
 
-commit 732e072dc06306ac1c02713ade78a34a73da98dd
+[33mcommit 732e072dc06306ac1c02713ade78a34a73da98dd[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Nov 29 19:05:35 2010 +0100
 
@@ -480,25 +577,25 @@ Date:   Mon Nov 29 19:05:35 2010 +0100
     
     profile: laptop-battery-powersave
 
-commit 58a2c0093dd408948e701278621560961b38a2c0
+[33mcommit 58a2c0093dd408948e701278621560961b38a2c0[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Nov 29 11:38:25 2010 +0100
 
     version bump
 
-commit ec9e9ae10fb34a661805ef2a20cde44f874dcb50
+[33mcommit ec9e9ae10fb34a661805ef2a20cde44f874dcb50[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Nov 29 11:37:21 2010 +0100
 
     tmpfiles.d config to autocreate runtime directory on F15
 
-commit 594d652b4b293f7cda432c287e15c70f630ec799
+[33mcommit 594d652b4b293f7cda432c287e15c70f630ec799[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Nov 18 15:02:34 2010 +0100
 
     fix hal-disable-polling if no CD drives present
 
-commit d7169cf0b221a5c67e28836d2b182a1c4020386e
+[33mcommit d7169cf0b221a5c67e28836d2b182a1c4020386e[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Oct 6 10:35:37 2010 +0200
 
@@ -509,19 +606,19 @@ Date:   Wed Oct 6 10:35:37 2010 +0200
     0.2.16-1 merged with 0.2.17-1, as the dates in previsous entries were
     crossed. Sorry for doing this.
 
-commit 6a24f54c24a5a24e0a58177762ae04935b3d6733
+[33mcommit 6a24f54c24a5a24e0a58177762ae04935b3d6733[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Oct 6 10:29:01 2010 +0200
 
     changelog, new version
 
-commit 6a64e3d0c6da871797882ec74f87356132c8b22b
+[33mcommit 6a64e3d0c6da871797882ec74f87356132c8b22b[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Oct 6 10:22:17 2010 +0200
 
     sync specfile with Fedora
 
-commit cee19fbf001258020d42e5520c71dbf2bfa8a52d
+[33mcommit cee19fbf001258020d42e5520c71dbf2bfa8a52d[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Sep 30 11:34:11 2010 +0200
 
@@ -529,7 +626,7 @@ Date:   Thu Sep 30 11:34:11 2010 +0200
     
     Workarounds: #554886
 
-commit e78494e1c5d3683df4dac8984f4845204f348a54
+[33mcommit e78494e1c5d3683df4dac8984f4845204f348a54[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Sep 29 09:12:05 2010 +0200
 
@@ -537,14 +634,14 @@ Date:   Wed Sep 29 09:12:05 2010 +0200
     
     Resolves: #636548
 
-commit d7bf3c1d1013df8ffe350f78ebff70a08ae772e4
+[33mcommit d7bf3c1d1013df8ffe350f78ebff70a08ae772e4[m
 Merge: a0222d7 b90ba21
 Author: Jarod Wilson <jarod@redhat.com>
 Date:   Wed Aug 18 10:00:03 2010 -0400
 
     Merge branch 'master' of ssh://git.fedorahosted.org/git/tuned
 
-commit a0222d7fcb7790cdd629c506bae9998f44aed8bc
+[33mcommit a0222d7fcb7790cdd629c506bae9998f44aed8bc[m
 Author: Jarod Wilson <jarod@redhat.com>
 Date:   Wed Aug 18 09:59:54 2010 -0400
 
@@ -552,7 +649,7 @@ Date:   Wed Aug 18 09:59:54 2010 -0400
     
     Signed-off-by: Jarod Wilson <jarod@redhat.com>
 
-commit b90ba21fd225fc61dd40dfb4aa80dc1d0174bd99
+[33mcommit b90ba21fd225fc61dd40dfb4aa80dc1d0174bd99[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Aug 18 12:37:25 2010 +0200
 
@@ -560,7 +657,7 @@ Date:   Wed Aug 18 12:37:25 2010 +0200
     
     bz #619377 kernel: Process scheduler tuning recommendation for s390
 
-commit 3bcac3095cb7604cc29d18d7cf0b1c0650146b86
+[33mcommit 3bcac3095cb7604cc29d18d7cf0b1c0650146b86[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Aug 18 12:35:04 2010 +0200
 
@@ -573,7 +670,7 @@ Date:   Wed Aug 18 12:35:04 2010 +0200
     tunning is required. Adding 'sysctl.s390x.ktune' file into profile will
     cause loading of this file instead of 'sysctl.ktune'.
 
-commit bdce7eb69d2f737aa277c152a64f4971a5a275b0
+[33mcommit bdce7eb69d2f737aa277c152a64f4971a5a275b0[m
 Author: Jarod Wilson <jarod@redhat.com>
 Date:   Tue Aug 17 14:04:57 2010 -0400
 
@@ -585,7 +682,7 @@ Date:   Tue Aug 17 14:04:57 2010 -0400
     
     Signed-off-by: Jarod Wilson <jarod@redhat.com>
 
-commit bdd933246b31ce7897b47985058c0987ea30f9c1
+[33mcommit bdd933246b31ce7897b47985058c0987ea30f9c1[m
 Author: Jarod Wilson <jarod@redhat.com>
 Date:   Tue Aug 17 13:16:58 2010 -0400
 
@@ -593,20 +690,20 @@ Date:   Tue Aug 17 13:16:58 2010 -0400
     
     Signed-off-by: Jarod Wilson <jarod@redhat.com>
 
-commit 1f017e33b5f0ed484a17c8c86ae815d5306ae82d
+[33mcommit 1f017e33b5f0ed484a17c8c86ae815d5306ae82d[m
 Author: Phil Knirsch <pknirsch@redhat.com>
 Date:   Tue Aug 3 12:09:37 2010 +0200
 
     - Forgot to bump version and added a changelog.
 
-commit 64edcee9a765361b4fedf4d8f0c1e1c0e33e71eb
+[33mcommit 64edcee9a765361b4fedf4d8f0c1e1c0e33e71eb[m
 Author: Phil Knirsch <pknirsch@redhat.com>
 Date:   Tue Aug 3 11:42:18 2010 +0200
 
     - Fixed problem with network cards that provide unparsable supported network modes
       Resolves: #620686
 
-commit 927529c1ccf0e917b9bd5a46adbdfb86145e3d2d
+[33mcommit 927529c1ccf0e917b9bd5a46adbdfb86145e3d2d[m
 Author: Jarod Wilson <jarod@redhat.com>
 Date:   Wed Jul 14 11:21:30 2010 -0400
 
@@ -620,13 +717,13 @@ Date:   Wed Jul 14 11:21:30 2010 -0400
     
     Signed-off-by: Jarod Wilson <jarod@redhat.com>
 
-commit 53442a48afe9c2451a376f67dcfd1b27b2b0bca3
+[33mcommit 53442a48afe9c2451a376f67dcfd1b27b2b0bca3[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 20:15:26 2010 +0200
 
     changelog, new version
 
-commit 3be92554725f1471a52ab4b112433ebcd6ec70f5
+[33mcommit 3be92554725f1471a52ab4b112433ebcd6ec70f5[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 19:55:29 2010 +0200
 
@@ -646,25 +743,25 @@ Date:   Tue Jul 13 19:55:29 2010 +0200
     - latency-performance
     - throughput-performance
 
-commit 01230c06e22f42f748f1cc9d8448d04bc484cca7
+[33mcommit 01230c06e22f42f748f1cc9d8448d04bc484cca7[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 15:34:24 2010 +0200
 
     tuned: added /var/run/tuned into specfile
 
-commit 34cd670b21681ba2990205cbb75f98fd3170e041
+[33mcommit 34cd670b21681ba2990205cbb75f98fd3170e041[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 15:06:05 2010 +0200
 
     laptop-battery-powersave: enable ondemand governor
 
-commit 1d32fcb0e7a528a5597852697631f02a1a288b45
+[33mcommit 1d32fcb0e7a528a5597852697631f02a1a288b45[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 15:05:40 2010 +0200
 
     latency-performance: enable performance governor
 
-commit 34a8129ea8c061dd208125e0999bb5526694eee3
+[33mcommit 34a8129ea8c061dd208125e0999bb5526694eee3[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 14:33:36 2010 +0200
 
@@ -679,7 +776,7 @@ Date:   Tue Jul 13 14:33:36 2010 +0200
      - server-powersave
      - spindown-disk
 
-commit 347a24aa21c44c2bdcdc1e4d43d0b1520d65278b
+[33mcommit 347a24aa21c44c2bdcdc1e4d43d0b1520d65278b[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 14:38:14 2010 +0200
 
@@ -688,7 +785,7 @@ Date:   Tue Jul 13 14:38:14 2010 +0200
     All save files will be in /var/run/tuned directory.
     This is being done to comply with SELinux policy.
 
-commit d8fa2ca16b690c6f68914fa3c6a0f010b7716b2f
+[33mcommit d8fa2ca16b690c6f68914fa3c6a0f010b7716b2f[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 14:22:04 2010 +0200
 
@@ -698,7 +795,7 @@ Date:   Tue Jul 13 14:22:04 2010 +0200
     /var/run/tuned/ is intended to be a new home of any runtime files
     created by tuned itself or tuned plugins.
 
-commit e12dc4fb78aead57487d5d68c743c5aa960d1917
+[33mcommit e12dc4fb78aead57487d5d68c743c5aa960d1917[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 12:57:58 2010 +0200
 
@@ -707,7 +804,7 @@ Date:   Tue Jul 13 12:57:58 2010 +0200
     Services tuned and ktune have to be stopped before removing configration
     files. The ktune.sh script may need to do some stop operations.
 
-commit 02c585de00562310dbbff1f6b723621948307e44
+[33mcommit 02c585de00562310dbbff1f6b723621948307e44[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jul 13 15:47:43 2010 +0200
 
@@ -715,7 +812,7 @@ Date:   Tue Jul 13 15:47:43 2010 +0200
     
     /etc/tune-profiles/active-profile is generated from Makefile
 
-commit 5d9f0c6b0c757e97178d9b33a0d8dae2218cba87
+[33mcommit 5d9f0c6b0c757e97178d9b33a0d8dae2218cba87[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Jul 12 17:44:13 2010 +0200
 
@@ -724,13 +821,13 @@ Date:   Mon Jul 12 17:44:13 2010 +0200
     'tuned-adm active' newly shows tuned and ktune services status as
     enabled/disabled, running/stopped.
 
-commit 4fff6793229f752009d18aa366d6686d775900ac
+[33mcommit 4fff6793229f752009d18aa366d6686d775900ac[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Jul 12 17:01:09 2010 +0200
 
     latency-performance: removed sysctl 'net' bits
 
-commit 335edca35d653809a133c01c1a72efd464273126
+[33mcommit 335edca35d653809a133c01c1a72efd464273126[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Jul 12 16:57:46 2010 +0200
 
@@ -739,7 +836,7 @@ Date:   Mon Jul 12 16:57:46 2010 +0200
     File COPYING was added into tuned-utils subpackage to meet new Fedora
     Licensing Guidelines.
 
-commit 12968c1f2634ff4b54f88125e6ca7d203caa1919
+[33mcommit 12968c1f2634ff4b54f88125e6ca7d203caa1919[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Jul 12 16:18:29 2010 +0200
 
@@ -748,13 +845,13 @@ Date:   Mon Jul 12 16:18:29 2010 +0200
     After fresh installation, configuration files will be symbolic links to
     appropriate files in 'default' profile.
 
-commit acad0bbd7ac04d42ff145ba78f25df306185df3b
+[33mcommit acad0bbd7ac04d42ff145ba78f25df306185df3b[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Jul 12 15:21:36 2010 +0200
 
     tuned-adm: better active profile displaying
 
-commit c62252bb0cccf87df271e7a8f65ee35fb94b8a4f
+[33mcommit c62252bb0cccf87df271e7a8f65ee35fb94b8a4f[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Jul 12 15:08:11 2010 +0200
 
@@ -763,7 +860,7 @@ Date:   Mon Jul 12 15:08:11 2010 +0200
     /etc/sysctl.ktune is no longer used, sysctl.ktune from profile
     is loaded through /etc/ktune.d/tunedadm.conf
 
-commit 6982c57e8c4da71a5c9ba95e63471d919f74da68
+[33mcommit 6982c57e8c4da71a5c9ba95e63471d919f74da68[m
 Author: Jarod Wilson <jarod@redhat.com>
 Date:   Fri Jul 9 17:06:09 2010 -0400
 
@@ -771,7 +868,7 @@ Date:   Fri Jul 9 17:06:09 2010 -0400
     
     Signed-off-by: Jarod Wilson <jarod@redhat.com>
 
-commit d88e88579f10c8a53e68bad7daf06b2c537a9092
+[33mcommit d88e88579f10c8a53e68bad7daf06b2c537a9092[m
 Author: Jarod Wilson <jarod@redhat.com>
 Date:   Thu Jul 8 17:38:32 2010 -0400
 
@@ -787,7 +884,7 @@ Date:   Thu Jul 8 17:38:32 2010 -0400
     
     Signed-off-by: Jarod Wilson <jarod@redhat.com>
 
-commit 88ed6a3138eca59e02634cf8233b6470e58a292f
+[33mcommit 88ed6a3138eca59e02634cf8233b6470e58a292f[m
 Author: Jarod Wilson <jarod@redhat.com>
 Date:   Thu Jul 8 17:20:49 2010 -0400
 
@@ -807,68 +904,68 @@ Date:   Thu Jul 8 17:20:49 2010 -0400
     
     Signed-off-by: Jarod Wilson <jarod@redhat.com>
 
-commit 7a639e4c3fe9d61b35b768a1f33c3f2270a45efb
+[33mcommit 7a639e4c3fe9d61b35b768a1f33c3f2270a45efb[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jun 4 14:17:07 2010 +0200
 
     tuned.spec: fixed unowned /etc/bash_completion.d
 
-commit ccabfd8cd61cfd8ce012fc62fa849dc21207464c
+[33mcommit ccabfd8cd61cfd8ce012fc62fa849dc21207464c[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jun 4 14:01:52 2010 +0200
 
     changelog, new version
 
-commit 00e2281db3a47ce158cefa44cbccb73e910135db
+[33mcommit 00e2281db3a47ce158cefa44cbccb73e910135db[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jun 1 19:03:04 2010 +0200
 
     bash completion for tuned and tuned-adm
 
-commit 0483497c7f832e304e606f2c87afafd4c282f9f7
+[33mcommit 0483497c7f832e304e606f2c87afafd4c282f9f7[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jun 1 17:58:19 2010 +0200
 
     tuned-adm: removed '-p' option
 
-commit 3b370c5c2e169a14f2189c9a0a42653285cf945e
+[33mcommit 3b370c5c2e169a14f2189c9a0a42653285cf945e[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jun 1 10:18:47 2010 +0200
 
     tuned_adm: fixed active profile displaying
 
-commit 7e9001fdb2720e02494656518e5481fe966ceba4
+[33mcommit 7e9001fdb2720e02494656518e5481fe966ceba4[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jun 1 10:12:15 2010 +0200
 
     tuned: fixed error message when invalid arguments
 
-commit 4a4023fc19a1becc69fc62bc742cc47c18beb7c2
+[33mcommit 4a4023fc19a1becc69fc62bc742cc47c18beb7c2[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon May 31 14:15:14 2010 +0200
 
     tuned_adm: profile validity check and code cleanup
 
-commit 0a746648dfabdef61ce94d571ca429fdcfd9d3a8
+[33mcommit 0a746648dfabdef61ce94d571ca429fdcfd9d3a8[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue May 4 15:30:27 2010 +0200
 
     changelog, new version
 
-commit eb141446432d96f84e223b8e752965bbb36fb44b
+[33mcommit eb141446432d96f84e223b8e752965bbb36fb44b[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue May 4 14:15:29 2010 +0200
 
     removing global /etc/sysctl.ktune
 
-commit 9e5a9880a0c00fd88fbea6caf443b4c809c7b994
+[33mcommit 9e5a9880a0c00fd88fbea6caf443b4c809c7b994[m
 Author: Thomas Woerner <twoerner@redhat.com>
 Date:   Tue May 4 11:46:06 2010 +0200
 
     - use "sysctl -e -p" to apply settings from SYSCTL_POST (/etc/sysctl.conf) to
       be consistent with /etc/rc.sysinit (rhbz#577971)
 
-commit 6e17f8c329240aaf3cd4bf54d0857bd4ac1986bb
+[33mcommit 6e17f8c329240aaf3cd4bf54d0857bd4ac1986bb[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Apr 12 14:32:51 2010 +0200
 
@@ -877,19 +974,19 @@ Date:   Mon Apr 12 14:32:51 2010 +0200
     Running on foreground without superuser permissions emits warning.
     Running as daemon without superuser permissions causes graceful crash.
 
-commit 9e1c4960b8b763ae07d79eb8ed1f6e4a2580c62d
+[33mcommit 9e1c4960b8b763ae07d79eb8ed1f6e4a2580c62d[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Apr 12 13:59:09 2010 +0200
 
     logging: handlers initialization by need
 
-commit 7e8fc881d077a6fb53d559a2d034d6beb0bb58ee
+[33mcommit 7e8fc881d077a6fb53d559a2d034d6beb0bb58ee[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Mar 30 14:28:43 2010 +0200
 
     changelog, new version
 
-commit ce20fa296e35bc43f69107daa581c03fe2950759
+[33mcommit ce20fa296e35bc43f69107daa581c03fe2950759[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Mar 30 10:22:21 2010 +0200
 
@@ -897,174 +994,174 @@ Date:   Tue Mar 30 10:22:21 2010 +0200
     
     tuned: AttributeError: Nettool instance has no attribute 'interface'
 
-commit e2736a96f2963ff60b03e7db3900942072024c61
+[33mcommit e2736a96f2963ff60b03e7db3900942072024c61[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Mar 23 13:49:38 2010 +0100
 
     changelog update
 
-commit 89da4e25e135b35d5deff6f69965062fd0350cce
+[33mcommit 89da4e25e135b35d5deff6f69965062fd0350cce[m
 Merge: 62cd551 4c89a38
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Mar 23 12:43:01 2010 +0100
 
     Merge branch 'master' of ssh://git.fedorahosted.org/git/tuned
 
-commit 62cd55141dbc0e29f369ec227a779626e3aa275e
+[33mcommit 62cd55141dbc0e29f369ec227a779626e3aa275e[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Mar 23 12:42:27 2010 +0100
 
     - Added missing tuned-adm.conf file
 
-commit 4c89a3865ef24c592005c165b202f31a0fd525d0
+[33mcommit 4c89a3865ef24c592005c165b202f31a0fd525d0[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Mar 23 11:59:21 2010 +0100
 
     minor changes, changelog update
 
-commit cad3726c321885a6e5db2dbb15c77de3a866f662
+[33mcommit cad3726c321885a6e5db2dbb15c77de3a866f662[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Mon Mar 22 19:14:34 2010 +0100
 
     - Added support for display of currently active profile
     - Fix missing help command
 
-commit 16cad923e0fcfe0b8b119917ae4d8ed5f8968734
+[33mcommit 16cad923e0fcfe0b8b119917ae4d8ed5f8968734[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Fri Mar 19 17:38:41 2010 +0100
 
     - Large update to documentation and manpages
     - Updated several of the profiles
 
-commit db9c8a82031fa583dc50c18084fe3ca7b47cef4f
+[33mcommit db9c8a82031fa583dc50c18084fe3ca7b47cef4f[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Thu Mar 18 14:28:48 2010 +0100
 
     - Updated ALPM powersave code in the various powersave profiles
     - Disabled USB autosuspend in laptop-battery-powersave for now
 
-commit 4bfefca84ea64b98b6ce07759477b95afd202094
+[33mcommit 4bfefca84ea64b98b6ce07759477b95afd202094[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Feb 3 18:17:31 2010 +0100
 
     changelog update
 
-commit 951aaba78d27f0e6a15b66b4f0387f943fcf7b30
+[33mcommit 951aaba78d27f0e6a15b66b4f0387f943fcf7b30[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Feb 3 18:15:33 2010 +0100
 
     logging: log file moved into separate directory
 
-commit ed3e42d48f82aed34c138236149ead50edc0b30a
+[33mcommit ed3e42d48f82aed34c138236149ead50edc0b30a[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Feb 1 15:00:02 2010 +0100
 
     tuned.spec: version typo in changelog
 
-commit 3be18f6c63db619a1c9ab102abe19d0197571fb5
+[33mcommit 3be18f6c63db619a1c9ab102abe19d0197571fb5[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Feb 1 14:11:31 2010 +0100
 
     ChangeLog update
 
-commit eb7f90f7e37ef6842262d9fafe9d537978623ba1
+[33mcommit eb7f90f7e37ef6842262d9fafe9d537978623ba1[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Feb 1 13:50:14 2010 +0100
 
     tuned.spec: synchronized with Fedora changelog
 
-commit 7dbf7151f37588f61f2c57fe4f374e3bd8c7d145
+[33mcommit 7dbf7151f37588f61f2c57fe4f374e3bd8c7d145[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Jan 26 16:19:51 2010 +0100
 
     logging: initialization fix, module inclusion into result rpm package
 
-commit 98063947dd683e89e15aebca05fc464605fe479c
+[33mcommit 98063947dd683e89e15aebca05fc464605fe479c[m
 Author: Thomas Woerner <twoerner@redhat.com>
 Date:   Fri Jan 22 19:00:41 2010 +0100
 
     - ktune: added insufficient user rights test to start, reload, stop and status
       service commands
 
-commit 53dc5e9d9f5bf563d8e42ed28909c5a9a91bcf5f
+[33mcommit 53dc5e9d9f5bf563d8e42ed28909c5a9a91bcf5f[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jan 8 17:27:02 2010 +0100
 
     Makefile: added missing filename with logging code
 
-commit a65d361b40fa2668902ad22443f098afa43924bb
+[33mcommit a65d361b40fa2668902ad22443f098afa43924bb[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jan 8 17:13:25 2010 +0100
 
     Changelog update
 
-commit 583be1877dcca96cca3833b4aa46e3b052c78d07
+[33mcommit 583be1877dcca96cca3833b4aa46e3b052c78d07[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jan 8 15:36:56 2010 +0100
 
     tuned: fixed logging output in deamon mode, log filename change
 
-commit e57b96ddc3fd8093cde7c11238db3bbeefe35a87
+[33mcommit e57b96ddc3fd8093cde7c11238db3bbeefe35a87[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jan 8 14:54:31 2010 +0100
 
     manpage update: added --debug option description
 
-commit d949fa39a113754c0d82978790c3f2ebf63d1dc9
+[33mcommit d949fa39a113754c0d82978790c3f2ebf63d1dc9[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Fri Jan 8 14:04:13 2010 +0100
 
     plugins: fixed logging level setting for plugins
 
-commit 0d94ee8f174867181777c9f1497ea86713714945
+[33mcommit 0d94ee8f174867181777c9f1497ea86713714945[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 7 15:17:56 2010 +0100
 
     tuned.conf: added new logging directives and description
 
-commit d0b5d0cc65c693ab21fff85d2cc2854c3fc08d6d
+[33mcommit d0b5d0cc65c693ab21fff85d2cc2854c3fc08d6d[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 7 15:17:18 2010 +0100
 
     tuned.py: logging level can be set separately for each module
 
-commit e0b52c07e55a3f2db4a9c021282bc2d0dcf1bf83
+[33mcommit e0b52c07e55a3f2db4a9c021282bc2d0dcf1bf83[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 7 15:16:55 2010 +0100
 
     tuned: added support for --debug option
 
-commit c39e1c389842f4ff5029576700923a156aeb5995
+[33mcommit c39e1c389842f4ff5029576700923a156aeb5995[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 7 15:07:17 2010 +0100
 
     tuned.py: logging support
 
-commit e45ed546240e33c563e39258cd8218d52959a8dd
+[33mcommit e45ed546240e33c563e39258cd8218d52959a8dd[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 7 15:05:29 2010 +0100
 
     nettool: logging support
 
-commit 4f1d0f8d45acfe98243c77de309ee6edf5f08d7b
+[33mcommit 4f1d0f8d45acfe98243c77de309ee6edf5f08d7b[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 7 14:34:35 2010 +0100
 
     plugins: basic logging support
 
-commit 52399d8451a7002cb3fd9a78cd64c6259beeff65
+[33mcommit 52399d8451a7002cb3fd9a78cd64c6259beeff65[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 7 14:24:48 2010 +0100
 
     tuned: basic logging
 
-commit 41570a1b26e586dae3ab691603b2bde32bfd9f13
+[33mcommit 41570a1b26e586dae3ab691603b2bde32bfd9f13[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Jan 7 13:58:09 2010 +0100
 
     logging: adds logger class with few modifications
 
-commit 94b46b4e38fa056e21e35087681c06a00ad9d0ff
+[33mcommit 94b46b4e38fa056e21e35087681c06a00ad9d0ff[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Dec 21 13:14:45 2009 +0100
 
@@ -1077,7 +1174,7 @@ Date:   Mon Dec 21 13:14:45 2009 +0100
     Cannot get wake-on-lan settings: Operation not permitted
     Cannot get link status: Operation not permitted
 
-commit da353c39e15022eb745adcd39d83e9d88da13ac2
+[33mcommit da353c39e15022eb745adcd39d83e9d88da13ac2[m
 Author: Thomas Woerner <twoerner@redhat.com>
 Date:   Fri Dec 11 13:19:05 2009 +0100
 
@@ -1085,7 +1182,7 @@ Date:   Fri Dec 11 13:19:05 2009 +0100
       - Supports start and stop options in profile scripts calls
       - Fixed CMDLINE_ELEVATOR test (rhbz#496940#c9)
 
-commit 20ece57af84f5cacbd8e1378da16a2f1d60b1d0d
+[33mcommit 20ece57af84f5cacbd8e1378da16a2f1d60b1d0d[m
 Author: Thomas Woerner <twoerner@redhat.com>
 Date:   Fri Dec 11 13:01:44 2009 +0100
 
@@ -1094,13 +1191,13 @@ Date:   Fri Dec 11 13:01:44 2009 +0100
       - fixed CMDLINE_ELEVATOR test (rhbz#496940#c9)
     - new README.ktune
 
-commit 9d9984b1808a100f4fc5a00c42082b85208a340d
+[33mcommit 9d9984b1808a100f4fc5a00c42082b85208a340d[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Dec 8 15:01:49 2009 +0100
 
     - Fixed changelog
 
-commit 8d7ab53cbf88cfb889ea21e7f8169a5b692b4f77
+[33mcommit 8d7ab53cbf88cfb889ea21e7f8169a5b692b4f77[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Dec 8 14:59:19 2009 +0100
 
@@ -1109,13 +1206,13 @@ Date:   Tue Dec 8 14:59:19 2009 +0100
     - Fixed ktune.sh script for laptop-battery-powersave profile to stop printing
       errors when files in /sys are missing
 
-commit c3707d179d0b898df40fc501ff4af09ba1f315d4
+[33mcommit c3707d179d0b898df40fc501ff4af09ba1f315d4[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Tue Dec 1 12:22:23 2009 +0100
 
     tuned-spec: python in BuildRequires is sufficient (instead of pyhon-devel)
 
-commit 461ae6d2466cb47736ccbdf964e96c5c4b01d9bd
+[33mcommit 461ae6d2466cb47736ccbdf964e96c5c4b01d9bd[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Nov 26 11:33:11 2009 +0100
 
@@ -1123,20 +1220,20 @@ Date:   Thu Nov 26 11:33:11 2009 +0100
     
     Added python-devel into BuildRequires. Compiled files (.pyc and .pyo) are now created automatically during package build.
 
-commit 70e3767f73be346060ef5d5e3e16763725a54707
+[33mcommit 70e3767f73be346060ef5d5e3e16763725a54707[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Fri Nov 6 17:15:08 2009 +0100
 
     - Fix traceback when tuned was started with non-connected ethernet
 
-commit e4aad64bc7eb9947a19d8a3321ff82025517057c
+[33mcommit e4aad64bc7eb9947a19d8a3321ff82025517057c[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Nov 3 14:23:41 2009 +0100
 
     - Moved from prerelease to normal
     - Added missing ethtool requires
 
-commit 0603af7d5c251e11b13182aa78d4ebdfd33eedef
+[33mcommit 0603af7d5c251e11b13182aa78d4ebdfd33eedef[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Nov 3 14:03:00 2009 +0100
 
@@ -1145,7 +1242,7 @@ Date:   Tue Nov 3 14:03:00 2009 +0100
     - Added detection of netcard supported speeds (Jan Vcelak)
     - Fix ktune.sh script for stopping in regard to ALPM and CDROM polling (Phil Knirsch)
 
-commit 51c51d366f63ec5b4b4d509a2f23ec844646debf
+[33mcommit 51c51d366f63ec5b4b4d509a2f23ec844646debf[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Nov 2 18:58:00 2009 +0100
 
@@ -1154,7 +1251,7 @@ Date:   Mon Nov 2 18:58:00 2009 +0100
     Some tuned profiles require "messagebus" and "haldaemon" running.
     Changed startup priority from 5 to 27.
 
-commit fc39e3ff2bc0c84ececd8740f7f2be1e23b702e8
+[33mcommit fc39e3ff2bc0c84ececd8740f7f2be1e23b702e8[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Sun Oct 29 16:17:54 2045 +0100
 
@@ -1162,7 +1259,7 @@ Date:   Sun Oct 29 16:17:54 2045 +0100
     
     Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
-commit 62dcc5c12720622b2344bcfdd7be5d0cfff975c5
+[33mcommit 62dcc5c12720622b2344bcfdd7be5d0cfff975c5[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Sun Oct 29 16:17:06 2045 +0100
 
@@ -1170,43 +1267,43 @@ Date:   Sun Oct 29 16:17:06 2045 +0100
     
     Signed-off-by: Marcela Mašláňová <mmaslano@redhat.com>
 
-commit 56ba289b23d8759c7bde4e1d451ae3451388ef3d
+[33mcommit 56ba289b23d8759c7bde4e1d451ae3451388ef3d[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Sun Oct 29 16:15:54 2045 +0100
 
     This patch adds detection of netcard supported speeds.
 
-commit 784d0b3598c4ef4e06388c3f0e54aa715c4822b6
+[33mcommit 784d0b3598c4ef4e06388c3f0e54aa715c4822b6[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Oct 20 14:23:42 2009 +0200
 
     - Fix ktune.sh script for stopping in regard to ALPM and CDROM polling
 
-commit 4c01b1244d6bd9b106ccdc5d9c040485812716de
+[33mcommit 4c01b1244d6bd9b106ccdc5d9c040485812716de[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Mon Oct 19 17:06:21 2009 +0200
 
     New release.
 
-commit d838f1a15147cd70f22bba04bd4a33bb31cfd97d
+[33mcommit d838f1a15147cd70f22bba04bd4a33bb31cfd97d[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Mon Oct 19 17:01:25 2009 +0200
 
     Verbose mode for main part of for separate plugins.
 
-commit f87c1ede50c0808d7c99ed40f716ed160c3cebf5
+[33mcommit f87c1ede50c0808d7c99ed40f716ed160c3cebf5[m
 Author: Jan Hutar <jhutar@redhat.com>
 Date:   Fri Sep 25 15:00:00 2009 +0200
 
     Add statistic for cached reads/writes
 
-commit 19fd3596225d7ca15b88f53451b94f9ffafd5a73
+[33mcommit 19fd3596225d7ca15b88f53451b94f9ffafd5a73[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Oct 5 18:11:12 2009 +0200
 
     tuned.py: automatically add section "main" into configuration when it is missing in config-file
 
-commit 1afcd62f784c4b8eddbbc6bd5425f94fb243dce8
+[33mcommit 1afcd62f784c4b8eddbbc6bd5425f94fb243dce8[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Mon Oct 12 15:33:09 2009 +0200
 
@@ -1219,49 +1316,49 @@ Date:   Mon Oct 12 15:33:09 2009 +0200
     - Added README.
     - Added TODO.
 
-commit 07fef467c0114f332692cde36a4d5497ee5620f8
+[33mcommit 07fef467c0114f332692cde36a4d5497ee5620f8[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Oct 1 16:54:41 2009 +0200
 
     'make tests' now run tests/tuned-test.py
 
-commit 3e4988faef136607bf8b2ab5b267b6e15652ebc2
+[33mcommit 3e4988faef136607bf8b2ab5b267b6e15652ebc2[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Thu Oct 1 16:52:44 2009 +0200
 
     monitor plugins test rewritten and widen to support tuning plugins as well
 
-commit a276cd5a1521884bb7e02cddeb0c662d32b927d9
+[33mcommit a276cd5a1521884bb7e02cddeb0c662d32b927d9[m
 Author: Jan Vcelak <jvcelak@redhat.com>
 Date:   Wed Sep 30 14:52:29 2009 +0200
 
     added first unit tests
 
-commit c336e5ec7804dbc224c290d1e5b529695753f6ff
+[33mcommit c336e5ec7804dbc224c290d1e5b529695753f6ff[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Thu Oct 15 15:51:50 2009 +0200
 
     allow run tuned-adm as root for users at the physical console
 
-commit 2115f45002a21ef0e5aa8f1b55479e4dc1bd45c2
+[33mcommit 2115f45002a21ef0e5aa8f1b55479e4dc1bd45c2[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Mon Oct 12 09:01:46 2009 +0200
 
     Makefile: removed commands dir
 
-commit 6295acc0df7a7ed2281a08f7cd6dec62bdc719c8
+[33mcommit 6295acc0df7a7ed2281a08f7cd6dec62bdc719c8[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Mon Oct 12 08:55:58 2009 +0200
 
     tuned-0.2.5-0.1, removed kobo dependece
 
-commit 62077bc935cc2accd68c337f0f54b28396199fae
+[33mcommit 62077bc935cc2accd68c337f0f54b28396199fae[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Fri Oct 2 17:27:10 2009 +0200
 
     tuned-adm: remove dependence on kobo, arguments parsed with getopt, Tuned_adm class
 
-commit 689d3b705dcafa8dd04ee547eed513c86aa0cefa
+[33mcommit 689d3b705dcafa8dd04ee547eed513c86aa0cefa[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Thu Oct 8 16:45:50 2009 +0200
 
@@ -1269,67 +1366,67 @@ Date:   Thu Oct 8 16:45:50 2009 +0200
     
     This reverts commit aec313a8228048ed254bfc35e44e9bc91573b11a.
 
-commit aec313a8228048ed254bfc35e44e9bc91573b11a
+[33mcommit aec313a8228048ed254bfc35e44e9bc91573b11a[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Fri Oct 2 17:27:10 2009 +0200
 
     tuned-adm: remove dependence on kobo, arguments parsed with getopt, Tuned_adm class
 
-commit 393e7134ef07d689a72fc7865aa40ddc85726f69
+[33mcommit 393e7134ef07d689a72fc7865aa40ddc85726f69[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Wed Sep 23 12:50:23 2009 +0200
 
     tuned.spec: updated changelog
 
-commit 99625dd427161acbaee24b4848a965faa6ebe597
+[33mcommit 99625dd427161acbaee24b4848a965faa6ebe597[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Wed Sep 23 12:43:15 2009 +0200
 
     tuned.spec: fixed url to fedorahosted project page
 
-commit 1abd2f44ba360f397e2feb670dd76c0422108954
+[33mcommit 1abd2f44ba360f397e2feb670dd76c0422108954[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Tue Sep 22 14:56:02 2009 +0200
 
     ktune/ktune.init: bz519019 -  typos in init script
 
-commit 87d78ca1714bdd743efd20fc2ee473cef6ad5d26
+[33mcommit 87d78ca1714bdd743efd20fc2ee473cef6ad5d26[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Mon Sep 21 15:31:32 2009 +0200
 
     Updated changelog
 
-commit a5150eddfbbc57b2826cb0b4ceb8d69e0fc7c05f
+[33mcommit a5150eddfbbc57b2826cb0b4ceb8d69e0fc7c05f[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Mon Sep 21 15:24:35 2009 +0200
 
     bumb version to 0.2.4
 
-commit 32d00cb4be45df1899f1744ea915916ca740ca33
+[33mcommit 32d00cb4be45df1899f1744ea915916ca740ca33[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Mon Sep 21 14:37:47 2009 +0200
 
     tuned: move daemonize after init() before run()
 
-commit 47829cd5922c61f5add6895e85fd87b16f2017ad
+[33mcommit 47829cd5922c61f5add6895e85fd87b16f2017ad[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Mon Sep 21 14:23:45 2009 +0200
 
     tuned.initscript: "usage" follows common usage policy, fixed indentation
 
-commit b1f1e60c4db7b4287edc18370c043cff019ea018
+[33mcommit b1f1e60c4db7b4287edc18370c043cff019ea018[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Wed Sep 16 21:55:04 2009 +0200
 
     tuned.initscript: fixed usage and insuficient rights (#523385)
 
-commit 9490320b36d448f42a2ddde31281396853a53a87
+[33mcommit 9490320b36d448f42a2ddde31281396853a53a87[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Wed Sep 16 21:54:51 2009 +0200
 
     tuned creates and cleans pidfile from config file
 
-commit c2486397a9cbee7ff2bdffeadacd7cd13a78299a
+[33mcommit c2486397a9cbee7ff2bdffeadacd7cd13a78299a[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Wed Sep 9 13:20:26 2009 +0200
 
@@ -1337,7 +1434,7 @@ Date:   Wed Sep 9 13:20:26 2009 +0200
     Writen-by: Daniel Mach
     Rewrite-into-profile: Marcela Mašláňová
 
-commit 1b04250db925efa575235af75cbc6a43a314f577
+[33mcommit 1b04250db925efa575235af75cbc6a43a314f577[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Wed Sep 9 10:34:52 2009 +0200
 
@@ -1346,61 +1443,61 @@ Date:   Wed Sep 9 10:34:52 2009 +0200
     Reported-by: Marcela Mašláňová
     Fixed-by: Petr Lautrbach
 
-commit da4c316c8dc2fdc33327de4f579fd059ea16f382
+[33mcommit da4c316c8dc2fdc33327de4f579fd059ea16f382[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Tue Sep 8 16:59:29 2009 +0200
 
     Scripts in profiles didn't run because ktune runs
     only executable scripts.
 
-commit e5c73033aeb67ad9848721301e02628dea25c808
+[33mcommit e5c73033aeb67ad9848721301e02628dea25c808[m
 Author: Petr Lautrbach <plautrba@redhat.com>
 Date:   Thu Aug 27 13:19:40 2009 +0200
 
     jhutar@redhat.com: scomes now watches also forked sub-processes
     KNOWN BUG: Scomes ends when main process ends. So if there is some forked process in the background which lasts longer, some part of it will be missed.
 
-commit b596ac9f1f30fd81d687ba97b52cff3c21344cf0
+[33mcommit b596ac9f1f30fd81d687ba97b52cff3c21344cf0[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Aug 18 18:00:39 2009 +0200
 
     - Updated documentation
     - Few more fixes for tuned-adm
 
-commit d4e52c51ddcfaa9b1370b879a28f1354736d12b1
+[33mcommit d4e52c51ddcfaa9b1370b879a28f1354736d12b1[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Fri Aug 14 17:19:21 2009 +0200
 
     - Updated changelog
     - Fixed makefile to use git log instead of git-log
 
-commit ed3e6634f292110c0e79aa9e6441a56da91ab45a
+[33mcommit ed3e6634f292110c0e79aa9e6441a56da91ab45a[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Fri Aug 14 17:05:44 2009 +0200
 
     - Updates to the ktune scripts
     - Added support for start/stop of the ktune scripts and ktune initscript
 
-commit d4938a7800bfb589a2da0ed4195dadbed6cbfacb
+[33mcommit d4938a7800bfb589a2da0ed4195dadbed6cbfacb[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Aug 4 17:41:20 2009 +0200
 
     - Added fedora rel-eng changelog entry
 
-commit 05ee10191bc6ac46e763d9817033c73736834333
+[33mcommit 05ee10191bc6ac46e763d9817033c73736834333[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Aug 4 17:39:15 2009 +0200
 
     - Small update to specfile
 
-commit 37bb0358b7d884762103fd878b2f1bd26869120f
+[33mcommit 37bb0358b7d884762103fd878b2f1bd26869120f[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Aug 4 17:33:20 2009 +0200
 
     - Added a first set of profiles. Still need more work
     - Fixed several issues with the tuned-adm tool, should work now
 
-commit 733402af8bc6f751037273b1da00254b864d7f32
+[33mcommit 733402af8bc6f751037273b1da00254b864d7f32[m
 Merge: 87606bc 9d168d8
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Thu Jul 30 18:01:53 2009 +0200
@@ -1411,7 +1508,7 @@ Date:   Thu Jul 30 18:01:53 2009 +0200
     	Makefile
     	tuned.spec
 
-commit 9d168d837db6d165730f72e6b29f0d2e610a8983
+[33mcommit 9d168d837db6d165730f72e6b29f0d2e610a8983[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Thu Jul 30 16:30:52 2009 +0200
 
@@ -1422,90 +1519,90 @@ Date:   Thu Jul 30 16:30:52 2009 +0200
     and set by:
     tuned-adm modes YourFavourite
 
-commit 87606bc49f9543751f57529ee6306796ac325a1a
+[33mcommit 87606bc49f9543751f57529ee6306796ac325a1a[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Jul 28 16:22:37 2009 +0200
 
     - Fixed typo in Makefile
     - Fixed debug code still left in new cpu tuning plugin
 
-commit 27a8af70efd6f78838ec2f9ded11062fe6d287d4
+[33mcommit 27a8af70efd6f78838ec2f9ded11062fe6d287d4[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Tue Jul 28 13:10:55 2009 +0200
 
     Fix commands server and off.
 
-commit ab29d0e07a9c9049ee1c80583c86e1a0955890d4
+[33mcommit ab29d0e07a9c9049ee1c80583c86e1a0955890d4[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Mon Jul 27 18:16:23 2009 +0200
 
     - Improve disk tuning algorithm
 
-commit 2835008734f2ed5f4bacc9c0d6ad93826d151f41
+[33mcommit 2835008734f2ed5f4bacc9c0d6ad93826d151f41[m
 Author: Thomas Woerner <twoerner@redhat.com>
 Date:   Mon Jul 27 17:24:58 2009 +0200
 
     Integrated ktune-0.4
 
-commit 9490bc08b339e4b07601f60d10ce8e3c79d18a5c
+[33mcommit 9490bc08b339e4b07601f60d10ce8e3c79d18a5c[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Mon Jul 27 16:36:24 2009 +0200
 
     Specified commands for tuned-adm (default, server, off).
     Start to use gitignore.
 
-commit 4d051a3c6f848bf11e7bf037ba1ad277aac2c18d
+[33mcommit 4d051a3c6f848bf11e7bf037ba1ad277aac2c18d[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Tue Jul 21 15:01:21 2009 +0200
 
     - Added CPU monitoring and tuning plugins
     - Small fixes to tuned specfile, add varnetload properly
 
-commit 77d5ee012944785a929d53a5c4bd17c8268279d1
+[33mcommit 77d5ee012944785a929d53a5c4bd17c8268279d1[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Mon Jul 13 17:23:02 2009 +0200
 
     Makefile was missing varnetload file.
 
-commit 03276ef8f409ac67124252ca199aed608ea7c332
+[33mcommit 03276ef8f409ac67124252ca199aed608ea7c332[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Mon Jul 13 17:00:01 2009 +0200
 
     New release 0.1.6.
     Update ChangeLog.
 
-commit b7a092f3e7b598ee771ecbe881fe0c9db9e350a5
+[33mcommit b7a092f3e7b598ee771ecbe881fe0c9db9e350a5[m
 Author: Marcela Mašláňová <mmaslano@redhat.com>
 Date:   Thu Jul 9 13:23:10 2009 +0200
 
     Initial commit of commandline tool.
 
-commit b0faedccaa8c6ed144ec5ece82b672ca8bed9642
+[33mcommit b0faedccaa8c6ed144ec5ece82b672ca8bed9642[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Thu Jul 9 12:23:37 2009 +0200
 
     - Added some more utilities
     - Fixed typo in README.scomes
 
-commit 73a0ac72279c220582ceb51be087c29a2631c9a9
+[33mcommit 73a0ac72279c220582ceb51be087c29a2631c9a9[m
 Author: Philip Knirsch <pknirsch@hamburg.str.redhat.com>
 Date:   Thu Jul 9 12:20:45 2009 +0200
 
     - Added scomes from Petr Lauterbach
 
-commit 903eed6759fd680e481f5f5a4735e8d601d13d71
+[33mcommit 903eed6759fd680e481f5f5a4735e8d601d13d71[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Mar 25 17:52:00 2009 +0100
 
     - Updated specfile and ChangeLog, release 0.1.5
 
-commit fde8c26f215ea7a20a3da88a7f91d2156288dd3d
+[33mcommit fde8c26f215ea7a20a3da88a7f91d2156288dd3d[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Mar 25 17:49:48 2009 +0100
 
     - Updated documentation, thanks to Marcela Maslanova!
 
-commit 019e5d08cc04c5bbe5a16edb2fe8d2b3023a00a1
+[33mcommit 019e5d08cc04c5bbe5a16edb2fe8d2b3023a00a1[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Mar 25 17:42:43 2009 +0100
 
@@ -1513,19 +1610,19 @@ Date:   Wed Mar 25 17:42:43 2009 +0100
     - Added the possibility to output a histogram at the end of the
       run for detailed information about the collected data
 
-commit ccd7b1e2608520610e34feed95931f41c233f459
+[33mcommit ccd7b1e2608520610e34feed95931f41c233f459[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Fri Mar 6 10:42:52 2009 +0100
 
     - Dropped unecessary kernel-debuginfo requires from tuned-utils
 
-commit 6aa10a2b46d6d1f292fa8e55978dac352fd4a284
+[33mcommit 6aa10a2b46d6d1f292fa8e55978dac352fd4a284[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Mon Mar 2 12:33:09 2009 +0100
 
     - Fixed placement of doc entry at tuned-utils package
 
-commit 82e5d550f1f1da442f4844986477c4a7c0bafa55
+[33mcommit 82e5d550f1f1da442f4844986477c4a7c0bafa55[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Thu Feb 26 18:38:39 2009 +0100
 
@@ -1537,25 +1634,25 @@ Date:   Thu Feb 26 18:38:39 2009 +0100
     - Updated package descriptions (#487312)
     - Added documentation for utils scripts (#487312)
 
-commit 6b79fa915df800feeadbeab68e6a36a1a958bc2e
+[33mcommit 6b79fa915df800feeadbeab68e6a36a1a958bc2e[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Thu Feb 26 13:47:01 2009 +0100
 
     - Added comment in empty __init__.py files
 
-commit c52014cb40c78ddef6660b84551803cef8004256
+[33mcommit c52014cb40c78ddef6660b84551803cef8004256[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 19:32:31 2009 +0100
 
     - Fixed BuildRoot tag to use latest recommendation of FPG
 
-commit 85afc406d455c1dce5452519ee0d3795c62b8698
+[33mcommit 85afc406d455c1dce5452519ee0d3795c62b8698[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 19:25:10 2009 +0100
 
     - Updated changelog
 
-commit 62debaff1a107a2a8229f4a8a804762cec142071
+[33mcommit 62debaff1a107a2a8229f4a8a804762cec142071[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 19:22:54 2009 +0100
 
@@ -1563,7 +1660,7 @@ Date:   Wed Feb 25 19:22:54 2009 +0100
     - Bump release
     - Some minor README changes
 
-commit 2f9173b101917db44503436f213988248447409e
+[33mcommit 2f9173b101917db44503436f213988248447409e[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 18:23:15 2009 +0100
 
@@ -1571,32 +1668,32 @@ Date:   Wed Feb 25 18:23:15 2009 +0100
     - Added a explanation how to create the tarball via git in the specfile
     - Fixed the defattr() lines in the specfile to conform FRG
 
-commit fd0d01812c480c1a439041ba68265d04ec866bef
+[33mcommit fd0d01812c480c1a439041ba68265d04ec866bef[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 17:10:11 2009 +0100
 
     - Added explanation for Source entry in specfile
 
-commit efd15b9e707dc988265aa11ed14a82708cda71fa
+[33mcommit efd15b9e707dc988265aa11ed14a82708cda71fa[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 15:08:41 2009 +0100
 
     - Fixed summary
     - Added missing GPL notic to tuned.py
 
-commit c6e97c54cf38923f8c5cd515d53dc92af3c310b4
+[33mcommit c6e97c54cf38923f8c5cd515d53dc92af3c310b4[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 12:30:07 2009 +0100
 
     - Added a manpage and updated the readme with it (as a start).
 
-commit 60663d4e347ca6a114294b3dfd60d5f8539db1f6
+[33mcommit 60663d4e347ca6a114294b3dfd60d5f8539db1f6[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 11:47:42 2009 +0100
 
     - Updated changelog
 
-commit ca552606191920c1f6d02c28b80273d2e9d4349a
+[33mcommit ca552606191920c1f6d02c28b80273d2e9d4349a[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 11:45:48 2009 +0100
 
@@ -1605,7 +1702,7 @@ Date:   Wed Feb 25 11:45:48 2009 +0100
     - Made the disk tuning pluging less nosy if started as non-daemon
     - Fixed missing self. in the tuned.py config handling
 
-commit 1fa57228447abc46d58bcc377ab373c026ccd008
+[33mcommit 1fa57228447abc46d58bcc377ab373c026ccd008[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Wed Feb 25 11:28:06 2009 +0100
 
@@ -1617,13 +1714,13 @@ Date:   Wed Feb 25 11:28:06 2009 +0100
     - Readded the debug output in case tuned isn't started as as daemon
     - Fixed initialization of max transfer values for net tuning plugin
 
-commit e393e728bcffd730401780a8fb3d077d952fed78
+[33mcommit e393e728bcffd730401780a8fb3d077d952fed78[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Tue Feb 24 13:19:07 2009 +0100
 
     - Last few rpmlint fixes to specfile
 
-commit b47b4e70891d4283111f2fd03a739bd100d0c8b6
+[33mcommit b47b4e70891d4283111f2fd03a739bd100d0c8b6[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Tue Feb 24 12:14:04 2009 +0100
 
@@ -1631,58 +1728,58 @@ Date:   Tue Feb 24 12:14:04 2009 +0100
     - Started overall README
     - Fixed a few rpmlint error messages
 
-commit 80093be74fbed8d4459938e19ff00920a41a9712
+[33mcommit 80093be74fbed8d4459938e19ff00920a41a9712[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Mon Feb 23 18:03:35 2009 +0100
 
     - Real first complete version with initscript, config file and
       proper Makefile and packaging.
 
-commit c02f25afb09ff1f38484a8b69c4dcc85ed2378c7
+[33mcommit c02f25afb09ff1f38484a8b69c4dcc85ed2378c7[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Fri Feb 20 18:29:35 2009 +0100
 
     - Lots of updates to packaging and installation (specfile, makefile)
 
-commit 5818e327421ff22f41618c7b9fa74be8d23d4fd5
+[33mcommit 5818e327421ff22f41618c7b9fa74be8d23d4fd5[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Tue Feb 10 18:45:38 2009 +0100
 
     - Added full network support
     - Moved docs around a bit
 
-commit 28bd83e0d262ba1164d52fa1d9a551caab2e31e6
+[33mcommit 28bd83e0d262ba1164d52fa1d9a551caab2e31e6[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Mon Feb 2 14:55:24 2009 +0100
 
     - Added copyright notices to files
     - Added GPL COPYING license file
 
-commit dad7d76884d3558f14e4f61334b08cf0d1d7c81a
+[33mcommit dad7d76884d3558f14e4f61334b08cf0d1d7c81a[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Mon Feb 2 14:31:26 2009 +0100
 
     - Added a howto docu with some tips and tricks
 
-commit dcb6c2b4e8f85d87b2fdfd3aa2bb53d560ce9a1c
+[33mcommit dcb6c2b4e8f85d87b2fdfd3aa2bb53d560ce9a1c[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Mon Feb 2 13:01:22 2009 +0100
 
     - Fixed the aggressinvess idea. Rather use system/user settings than have yet another separate configurtion
 
-commit 5f27cb0c4fdb3442f5dc5e95dd6a1996df1da3de
+[33mcommit 5f27cb0c4fdb3442f5dc5e95dd6a1996df1da3de[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Mon Feb 2 12:59:41 2009 +0100
 
     - Added disk and net monitoring systemtap scripts
 
-commit 208a596438910fac0bd9064c80eef5a6b8329347
+[33mcommit 208a596438910fac0bd9064c80eef5a6b8329347[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Mon Feb 2 12:34:27 2009 +0100
 
     - Draft spec added
 
-commit 796739577264cd143b50dc7cd5302cd8ab49ca08
+[33mcommit 796739577264cd143b50dc7cd5302cd8ab49ca08[m
 Author: Philip Knirsch <pknirsch@hamburg.stuttgart.redhat.com>
 Date:   Mon Feb 2 12:33:41 2009 +0100
 

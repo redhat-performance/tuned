@@ -2,7 +2,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.22
+Version: 0.2.23
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -133,6 +133,10 @@ fi
 
 
 %changelog
+* Tue Jan 29 2013 Jan Vcelak <jvcelak@redhat.com> 0.2.23-1
+- restore readahead to the original value
+- restart ktune just once, if multiple devices were added into the system
+
 * Tue Mar 20 2012 Jan Vcelak <jvcelak@redhat.com> 0.2.22-1
 - fix: daemonization race with systemd
 - enhancement: add pmqos-static daemon (used by ktune to set kernel PM QoS parameters)
