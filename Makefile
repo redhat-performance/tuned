@@ -16,7 +16,7 @@ FILES_tuningplugins = tuningplugins/cpu.py tuningplugins/disk.py tuningplugins/n
 FILES_monitorplugins = monitorplugins/cpu.py monitorplugins/disk.py monitorplugins/net.py monitorplugins/__init__.py
 FILES_ktune = ktune/ktune.init ktune/ktune.sysconfig ktune/README.ktune
 FILES_udev_rules = udev/80-tuned-iosched.rules udev/80-tuned-mpath-iosched.rules udev/81-tuned-add-disk.rules
-FILES_udev_scripts = udev/tuned-mpath-iosched
+FILES_udev_scripts = udev/tuned-mpath-iosched udev/tuned-request-ktune-restart
 FILES_libexec = libexec/pmqos-static.py
 DOCS = AUTHORS ChangeLog COPYING INSTALL NEWS README
 

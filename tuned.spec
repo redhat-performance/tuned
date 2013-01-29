@@ -104,6 +104,7 @@ fi
 %dir %{_localstatedir}/log/tuned
 %dir %{_localstatedir}/run/tuned
 %attr(0755,root,root) /lib/udev/tuned-mpath-iosched
+%attr(0755,root,root) /lib/udev/tuned-request-ktune-restart
 /lib/udev/rules.d/*
 %{_libexecdir}/tuned/
 %if %uses_systemd

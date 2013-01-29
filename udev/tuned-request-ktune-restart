@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Inform tuned that ktune needs to be restarted eventually.
+#
+
+TUNED_PIDFILE=/var/run/tuned/tuned.pid
+
+[ -r "$TUNED_PIDFILE" ] && kill -USR2 $(<"$TUNED_PIDFILE") &>/dev/null
+exit 0
