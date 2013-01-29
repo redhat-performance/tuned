@@ -15,7 +15,7 @@ stop() {
 	restore_cpu_governor
 	restore_transparent_hugepages
 	enable_disk_barriers
-	multiply_disk_readahead 0.25
+	restore_disk_readahead
 
 	return 0
 }

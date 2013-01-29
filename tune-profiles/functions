@@ -43,9 +43,12 @@ set_disk_spindown() {
 	done
 }
 
+DISK_READAHEAD_SAVE="/var/run/tuned/disk_readahead.save"
+
 # usage: multiply_disk_readahead by
 multiply_disk_readahead() {
 	by=$1
+	rm -f "$DISK_READAHEAD_SAVE"
 
 	# float multiplication not supported in bash
 	# bc might not be installed, python is available for sure
@@ -54,9 +57,16 @@ multiply_disk_readahead() {
 		control="${disk}/queue/read_ahead_kb"
 		old=$(cat $control)
 		new=$(echo "print int($old*$by)" | python)
-
+		echo "echo $old > $control" >> "$DISK_READAHEAD_SAVE" 2>/dev/null
 		(echo $new > $control) &>/dev/null
 	done
+}
+
+restore_disk_readahead() {
+	if [ -r "$DISK_READAHEAD_SAVE" ]; then
+		/bin/sh "$DISK_READAHEAD_SAVE" &>/dev/null
+		rm -f "$DISK_READAHEAD_SAVE"
+	fi
 }
 
 DISK_QUANTUM_SAVE="/var/run/tuned/disk_quantum.save"

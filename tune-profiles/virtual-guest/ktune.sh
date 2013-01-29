@@ -13,7 +13,7 @@ start() {
 stop() {
 	restore_cpu_governor
 	restore_transparent_hugepages
-	multiply_disk_readahead 0.25
+	restore_disk_readahead
 
 	return 0
 }
