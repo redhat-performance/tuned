@@ -15,7 +15,7 @@ class DiskPlugin(hotplug.Plugin):
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
 
-		self._power_levels = [255, 225, 195, 165, 145, 125, 105, 85, 70, 55, 30, 20]
+		self._power_levels = [254, 225, 195, 165, 145, 125, 105, 85, 70, 55, 30, 20]
 		self._spindown_levels = [0, 250, 230, 210, 190, 170, 150, 130, 110, 90, 70, 60]
 		self._levels = len(self._power_levels)
 		self._level_steps = 6
