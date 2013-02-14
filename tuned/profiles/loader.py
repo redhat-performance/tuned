@@ -60,7 +60,7 @@ class Loader(object):
 		for name in profile_names:
 			filename = self._profile_locator.get_config(name, processed_files)
 			if filename is None:
-				raise InvalidProfileException("Cannot find profile '%s' in '%s'." % (name, list(reversed(self._load_directories))))
+				raise InvalidProfileException("Cannot find profile '%s' in '%s'." % (name, list(reversed(self._profile_locator._load_directories))))
 			processed_files.append(filename)
 
 			config = self._load_config_data(filename)
