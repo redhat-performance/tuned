@@ -44,7 +44,10 @@ def execute(args):
 		out, err = proc.communicate()
 
 		if proc.returncode:
-			log.error("Executing %s error: %s" % (args[0], err[:-1]))
+			err_out = err[:-1]
+			if len(err_out) == 0:
+				err_out = out[:-1]
+			log.error("Executing %s error: %s" % (args[0], err_out))
 	except (OSError,IOError) as e:
 		log.error("Executing %s error: %s" % (args[0], e))
 	return out
