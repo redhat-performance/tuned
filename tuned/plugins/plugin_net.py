@@ -1,10 +1,13 @@
 import base
+from decorators import *
 import tuned.logs
 from tuned.utils.nettool import ethcard
 import os
 import re
 
 log = tuned.logs.get()
+
+WOL_VALUES = "pumbagsd"
 
 class NetTuningPlugin(base.Plugin):
 	"""
@@ -29,7 +32,7 @@ class NetTuningPlugin(base.Plugin):
 		log.info("devices: %s" % str(self._devices));
 
 	def _instance_init(self, instance):
-		instance._has_static_tuning = False
+		instance._has_static_tuning = True
 		instance._has_dynamic_tuning = True
 
 		instance._load_monitor = self._monitors_repository.create("net", instance.devices)
@@ -68,6 +71,11 @@ class NetTuningPlugin(base.Plugin):
 
 		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
 		log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
+
+	def _get_config_options(cls):
+		return {
+			"wake_on_lan": None,
+		}
 
 	def _init_stats_and_idle(self, instance, device):
 		max_speed = self._calc_speed(ethcard(device).get_max_speed())
@@ -112,3 +120,27 @@ class NetTuningPlugin(base.Plugin):
 		# 1024 * 1024 as for MB -> B
 		# speed / 7  Mb -> MB
 		return (int) (0.6 * 1024 * 1024 * speed / 8)
+
+	@command_set("wake_on_lan", per_device=True)
+	def _set_wake_on_lan(self, value, device):
+		if value is None:
+			return
+
+		# see man ethtool for possible wol values, 0 added as an alias for 'd'
+		value = re.sub(r"0", "d", str(value));
+		if not re.match(r"^[" + WOL_VALUES + r"]+$", value):
+			log.warn("Incorrect 'wake_on_lan' value.")
+			return
+
+		tuned.utils.commands.execute(["ethtool", "-s", device, "wol", value])
+
+	@command_get("wake_on_lan")
+	def _get_wake_on_lan(self, device):
+		value = None
+		try:
+			m = re.match(r".*Wake-on:\s*([" + WOL_VALUES + "]+).*", tuned.utils.commands.execute(["ethtool", device]), re.S)
+			if m:
+				value = m.group(1)
+		except IOError:
+			pass
+		return value

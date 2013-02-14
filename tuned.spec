@@ -11,7 +11,7 @@ Requires(post): systemd, virt-what
 Requires(preun): systemd
 Requires(postun): systemd
 Requires: python-decorator, dbus-python, pygobject2, python-pyudev, /usr/bin/cpupower
-Requires: virt-what, python-configobj
+Requires: virt-what, python-configobj, ethtool
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
