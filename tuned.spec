@@ -6,10 +6,10 @@ License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
 BuildArch: noarch
-BuildRequires: python, systemd-units
-Requires(post): systemd-units, virt-what
-Requires(preun): systemd-units
-Requires(postun): systemd-units
+BuildRequires: python, systemd
+Requires(post): systemd, virt-what
+Requires(preun): systemd
+Requires(postun): systemd
 Requires: python-decorator, dbus-python, pygobject2, python-pyudev, /usr/bin/cpupower
 Requires: virt-what, python-configobj
 
@@ -60,10 +60,7 @@ make install DESTDIR=%{buildroot}
 
 
 %post
-# initial instalation
-if [ $1 -eq 1 ]; then
-	/usr/bin/systemctl daemon-reload &>/dev/null || :
-fi
+%systemd_post tuned.service
 
 # try to autodetect the best profile for the system in case there is none preset
 if [ ! -f /etc/tuned/active_profile -o -z "`cat /etc/tuned/active_profile 2>/dev/null`" ]
@@ -76,19 +73,13 @@ fi
 # convert active_profile from full path to name (if needed)
 sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 
+
 %preun
-# package removal, not upgrade
-if [ $1 -eq 0 ]; then
-	/usr/bin/systemctl --no-reload disable tuned.service &>/dev/null || :
-	/usr/bin/systemctl stop tuned.service &>/dev/null || :
-fi
+%systemd_preun tuned.service
 
 
 %postun
-# package upgrade, not uninstall
-if [ $1 -ge 1 ]; then
-	/usr/bin/systemctl try-restart tuned.service &>/dev/null || :
-fi
+%systemd_postun_with_restart tuned.service
 
 
 %triggerun -- tuned < 2.0-0
