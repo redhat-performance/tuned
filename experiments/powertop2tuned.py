@@ -185,10 +185,16 @@ class PowertopProfile:
 		print "Running PowerTOP, please wait..."
 		environment = os.environ.copy()
 		environment["LC_ALL"] = "C"
-		proc = Popen(["/usr/sbin/powertop", "--html=/tmp/powertop", "--time=1"], stdout=PIPE, stderr=PIPE, env=environment)
-		output = proc.communicate()[1]
+		try:
+			proc = Popen(["/usr/sbin/powertop", "--html=/tmp/powertop", "--time=1"], stdout=PIPE, stderr=PIPE, env=environment)
+			output = proc.communicate()[1]
+		except (OSError, IOError):
+			print >> sys.stderr, 'Unable to execute PowerTOP, is PowerTOP installed?'
+			return -2
+
 		if proc.returncode != 0:
-			return ret
+			print >> sys.stderr, 'PowerTOP returned error code: %d' % proc.returncode
+			return -2
 
 		prefix = "PowerTOP outputing using base filename "
 		if output.find(prefix) == -1:

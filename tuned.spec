@@ -23,6 +23,7 @@ network and ATA harddisk devices are implemented.
 %package utils
 Requires: %{name} = %{version}-%{release}
 Summary: Various tuned utilities
+Requires: powertop
 
 %description utils
 This package contains utilities that can help you to fine tune your
