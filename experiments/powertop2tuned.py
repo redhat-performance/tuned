@@ -163,7 +163,8 @@ class PowertopProfile:
 	PARSING_ERROR = 101
 	BAD_SCRIPTSH = 102
 
-	def __init__(self, output, name = ""):
+	def __init__(self, output, profile_name, name = ""):
+		self.profile_name = profile_name
 		self.name = name
 		self.output = output
 
@@ -225,7 +226,10 @@ class PowertopProfile:
 		f = codecs.open(os.path.join(self.output, "tuned.conf"), "w", "utf-8")
 		f.write(TUNED_CONF_PROLOG)
 		if not new_profile and profile is not None:
-			f.write(TUNED_CONF_INCLUDE % ("include=" + profile))
+			if self.profile_name == profile:
+				print >> sys.stderr, 'New profile has same name as active profile, not including active profile (avoiding circular deps).'
+			else:
+				f.write(TUNED_CONF_INCLUDE % ("include=" + profile))
 
 		for plugin in plugins.values():
 			f.write(plugin + "\n")
@@ -298,6 +302,5 @@ if __name__ == "__main__":
 		print >> sys.stderr, 'Output directory already exists, use --force to overwrite it.'
 		sys.exit(-1)
 
-	p = PowertopProfile(args['output'], args['input'])
+	p = PowertopProfile(args['output'], args['profile'], args['input'])
 	sys.exit(p.generate(args['new_profile'], args['enable']))
-
