@@ -7,3 +7,6 @@ LOG_FILENAME = "/var/log/tuned/tuned.log"
 LOG_FILE_MAXBYTES = 100*1000
 # number of backups
 LOG_FILE_COUNT = 2
+DBUS_BUS = "com.redhat.tuned"
+DBUS_OBJECT = "/Tuned"
+DBUS_INTERFACE = "com.redhat.tuned.control"

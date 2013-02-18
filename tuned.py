@@ -29,10 +29,6 @@ import tuned.exceptions
 import tuned.consts as consts
 import tuned.version as ver
 
-DBUS_BUS = "com.redhat.tuned"
-DBUS_OBJECT = "/Tuned"
-DBUS_INTERFACE = "com.redhat.tuned.control"
-
 def error(message):
 	print >>sys.stderr, message
 
@@ -66,7 +62,7 @@ if __name__ == "__main__":
 		app = tuned.daemon.Application(args.profile)
 
 		if not args.no_dbus:
-			app.attach_to_dbus(DBUS_BUS, DBUS_OBJECT, DBUS_INTERFACE)
+			app.attach_to_dbus(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
 
 		if args.daemon:
 			app.daemonize()

@@ -23,11 +23,8 @@ import argparse
 import sys
 import traceback
 import tuned.admin
+import tuned.consts as consts
 import tuned.version as ver
-
-DBUS_BUS = "com.redhat.tuned"
-DBUS_OBJECT = "/Tuned"
-DBUS_INTERFACE = "com.redhat.tuned.control"
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Manage tuned daemon.")
@@ -59,7 +56,7 @@ if __name__ == "__main__":
 	result = False
 
 	try:
-		controller = tuned.admin.DBusController(DBUS_BUS, DBUS_OBJECT, DBUS_INTERFACE)
+		controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
 		admin = tuned.admin.Admin(controller)
 
 		action = getattr(admin, action_name)
