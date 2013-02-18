@@ -9,9 +9,6 @@ import sys
 import select
 import tuned.consts as consts
 
-PID_FILE = "/run/tuned/tuned.pid"
-DAEMONIZE_PARENT_TIMEOUT = 5
-
 log = tuned.logs.get()
 
 __all__ = ["Application"]

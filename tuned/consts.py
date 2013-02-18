@@ -1,12 +1,14 @@
-LOAD_DIRECTORIES = ["/usr/lib/tuned", "/etc/tuned"]
-AUTODETECT_FILE = "autodetect.conf"
-DEFAULT_PROFILE = "balanced"
-SYSTEM_RELEASE_FILE = "/etc/system-release-cpe"
 ACTIVE_PROFILE_FILE = "/etc/tuned/active_profile"
-LOG_FILENAME = "/var/log/tuned/tuned.log"
-LOG_FILE_MAXBYTES = 100*1000
+AUTODETECT_FILE = "autodetect.conf"
+DAEMONIZE_PARENT_TIMEOUT = 5
+DBUS_BUS = "com.redhat.tuned"
+DBUS_INTERFACE = "com.redhat.tuned.control"
+DBUS_OBJECT = "/Tuned"
+DEFAULT_PROFILE = "balanced"
+LOAD_DIRECTORIES = ["/usr/lib/tuned", "/etc/tuned"]
 # number of backups
 LOG_FILE_COUNT = 2
-DBUS_BUS = "com.redhat.tuned"
-DBUS_OBJECT = "/Tuned"
-DBUS_INTERFACE = "com.redhat.tuned.control"
+LOG_FILE_MAXBYTES = 100*1000
+LOG_FILENAME = "/var/log/tuned/tuned.log"
+PID_FILE = "/run/tuned/tuned.pid"
+SYSTEM_RELEASE_FILE = "/etc/system-release-cpe"
