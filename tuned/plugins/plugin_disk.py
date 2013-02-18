@@ -157,7 +157,7 @@ class DiskPlugin(hotplug.Plugin):
 	def _instance_unapply_dynamic(self, instance, device):
 		if device in instance._idle and instance._idle[device]["level"] > 0:
 			log.debug("%s restoring power and spindown settings" % device)
-			tuned.utils.commands.execute(["hdparm", "-S0", "-B255", "/dev/%s" % device])
+			tuned.utils.commands.execute(["hdparm", "-S0", "-B254", "/dev/%s" % device])
 
 	def _elevator_file(self, device):
 		return os.path.join("/sys/block/", device, "queue/scheduler")
