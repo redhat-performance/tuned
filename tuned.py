@@ -27,6 +27,7 @@ import tuned.logs
 import tuned.daemon
 import tuned.exceptions
 import tuned.consts as consts
+import tuned.version as ver
 
 DBUS_BUS = "com.redhat.tuned"
 DBUS_OBJECT = "/Tuned"
@@ -42,7 +43,7 @@ if __name__ == "__main__":
 	parser.add_argument("--log", "-l", nargs = "?", const = consts.LOG_FILENAME, help = "log to file, default file: " + consts.LOG_FILENAME)
 	parser.add_argument("--no-dbus", action = "store_true", help = "do not attach to DBus")
 	parser.add_argument("--profile", "-p", action = "store", type=str, metavar = "name", help = "tuning profile to be activated")
-
+	parser.add_argument('--version', "-v", action = "version", version = "%%(prog)s %s.%s.%s" % (ver.TUNED_VERSION_MAJOR, ver.TUNED_VERSION_MINOR, ver.TUNED_VERSION_PATCH))
 	args = parser.parse_args(sys.argv[1:])
 
 	if os.geteuid() != 0:

@@ -23,6 +23,7 @@ import argparse
 import sys
 import traceback
 import tuned.admin
+import tuned.version as ver
 
 DBUS_BUS = "com.redhat.tuned"
 DBUS_OBJECT = "/Tuned"
@@ -30,6 +31,7 @@ DBUS_INTERFACE = "com.redhat.tuned.control"
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Manage tuned daemon.")
+	parser.add_argument('--version', "-v", action = "version", version = "%%(prog)s %s.%s.%s" % (ver.TUNED_VERSION_MAJOR, ver.TUNED_VERSION_MINOR, ver.TUNED_VERSION_PATCH))
 	parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
 	subparsers = parser.add_subparsers()
 
