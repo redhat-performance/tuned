@@ -51,7 +51,7 @@ class TunedLogger(logging.getLoggerClass()):
 		self.remove_all_handlers()
 		self.addHandler(self._console_handler)
 
-	def switch_to_file(self, filename = consts.LOG_FILENAME):
+	def switch_to_file(self, filename = consts.LOG_FILE):
 		self._setup_file_handler(filename)
 		self.remove_all_handlers()
 		self.addHandler(self._file_handler)

@@ -64,7 +64,7 @@ class Application(object):
 		some uninteresting data into the pipe.
 		"""
 		os.close(child_out_fd)
-		(read_ready, drop, drop) = select.select([parent_in_fd], [], [], DAEMONIZE_PARENT_TIMEOUT)
+		(read_ready, drop, drop) = select.select([parent_in_fd], [], [], consts.DAEMONIZE_PARENT_TIMEOUT)
 
 		if len(read_ready) != 1:
 			os.close(parent_in_fd)
@@ -79,8 +79,8 @@ class Application(object):
 		if response != ("%c" % True):
 			raise TunedException("Cannot daemonize, child process reports failure.")
 
-	def _write_pid_file(self):
-		self._pid_file = PID_FILE
+	def write_pid_file(self, pid_file = consts.PID_FILE):
+		self._pid_file = pid_file
 		self._delete_pid_file()
 		try:
 			dir_name = os.path.dirname(self._pid_file)
@@ -100,7 +100,7 @@ class Application(object):
 			except OSError as error:
 				log.warning("cannot remove existing PID file %s, %s" % (self._pid_file, str(error)))
 
-	def _daemonize_child(self, parent_in_fd, child_out_fd):
+	def _daemonize_child(self, pid_file, parent_in_fd, child_out_fd):
 		"""
 		Finishes daemonizing process, writes a PID file and signalizes to the parent
 		that the initialization is complete.
@@ -128,13 +128,13 @@ class Application(object):
 		os.dup2(so.fileno(), sys.stdout.fileno())
 		os.dup2(se.fileno(), sys.stderr.fileno())
 
-		self._write_pid_file()
+		self.write_pid_file(pid_file)
 
 		log.debug("successfully daemonized")
 		os.write(child_out_fd, "%c" % True)
 		os.close(child_out_fd)
 
-	def daemonize(self):
+	def daemonize(self, pid_file = consts.PID_FILE):
 		"""
 		Daemonizes the application. In case of failure, TunedException is raised
 		in the parent process. If the operation is successfull, the main process
@@ -153,7 +153,7 @@ class Application(object):
 				self._daemonize_parent(*parent_child_fds)
 				sys.exit(0)
 			else:
-				self._daemonize_child(*parent_child_fds)
+				self._daemonize_child(pid_file, *parent_child_fds)
 		except:
 			# pass exceptions only into parent process
 			if child_pid > 0:

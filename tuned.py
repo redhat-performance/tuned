@@ -36,7 +36,8 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description = "Daemon for monitoring and adaptive tuning of system devices.")
 	parser.add_argument("--daemon", "-d", action = "store_true", help = "run on background")
 	parser.add_argument("--debug", "-D", action = "store_true", help = "show/log debugging messages")
-	parser.add_argument("--log", "-l", nargs = "?", const = consts.LOG_FILENAME, help = "log to file, default file: " + consts.LOG_FILENAME)
+	parser.add_argument("--log", "-l", nargs = "?", const = consts.LOG_FILE, help = "log to file, default file: " + consts.LOG_FILE)
+	parser.add_argument("--pid", "-P", nargs = "?", const = consts.PID_FILE, help = "write PID file, default file: " + consts.PID_FILE)
 	parser.add_argument("--no-dbus", action = "store_true", help = "do not attach to DBus")
 	parser.add_argument("--profile", "-p", action = "store", type=str, metavar = "name", help = "tuning profile to be activated")
 	parser.add_argument('--version', "-v", action = "version", version = "%%(prog)s %s.%s.%s" % (ver.TUNED_VERSION_MAJOR, ver.TUNED_VERSION_MINOR, ver.TUNED_VERSION_PATCH))
@@ -53,7 +54,7 @@ if __name__ == "__main__":
 	try:
 		if args.daemon:
 			if args.log is None:
-				args.log = consts.LOG_FILENAME
+				args.log = consts.LOG_FILE
 			log.switch_to_file(args.log)
 		else:
 			if args.log is not None:
@@ -65,7 +66,12 @@ if __name__ == "__main__":
 			app.attach_to_dbus(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
 
 		if args.daemon:
-			app.daemonize()
+			if args.pid is None:
+				args.pid = consts.PID_FILE
+			app.daemonize(args.pid)
+		else:
+			if args.pid is not None:
+				app.write_pid_file(args.pid)
 		app.run()
 
 	except tuned.exceptions.TunedException as exception:
