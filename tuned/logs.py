@@ -4,12 +4,9 @@ import logging.handlers
 import os
 import os.path
 import inspect
+import tuned.consts as consts
 
 __all__ = ["get"]
-
-LOG_FILENAME = "/var/log/tuned/tuned.log"
-LOG_FILE_MAXBYTES = 100*1000
-LOG_FILE_COUNT = 2
 
 root_logger = None
 
@@ -54,8 +51,8 @@ class TunedLogger(logging.getLoggerClass()):
 		self.remove_all_handlers()
 		self.addHandler(self._console_handler)
 
-	def switch_to_file(self):
-		self._setup_file_handler()
+	def switch_to_file(self, filename = consts.LOG_FILENAME):
+		self._setup_file_handler(filename)
 		self.remove_all_handlers()
 		self.addHandler(self._file_handler)
 
@@ -72,16 +69,16 @@ class TunedLogger(logging.getLoggerClass()):
 		cls._console_handler.setFormatter(cls._formatter)
 
 	@classmethod
-	def _setup_file_handler(cls):
+	def _setup_file_handler(cls, filename):
 		if cls._file_handler is not None:
 			return
 
-		log_directory = os.path.dirname(LOG_FILENAME)
+		log_directory = os.path.dirname(filename)
 		if not os.path.exists(log_directory):
 			os.makedirs(log_directory)
 
 		cls._file_handler = logging.handlers.RotatingFileHandler(
-			LOG_FILENAME, maxBytes=LOG_FILE_MAXBYTES, backupCount=LOG_FILE_COUNT)
+			filename, maxBytes = consts.LOG_FILE_MAXBYTES, backupCount = consts.LOG_FILE_COUNT)
 		cls._file_handler.setFormatter(cls._formatter)
 
 logging.setLoggerClass(TunedLogger)

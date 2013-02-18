@@ -26,6 +26,7 @@ import traceback
 import tuned.logs
 import tuned.daemon
 import tuned.exceptions
+import tuned.consts as consts
 
 DBUS_BUS = "com.redhat.tuned"
 DBUS_OBJECT = "/Tuned"
@@ -35,11 +36,12 @@ def error(message):
 	print >>sys.stderr, message
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description="Daemon for monitoring and adaptive tuning of system devices.")
-	parser.add_argument("--daemon", "-d", action="store_true", help="run on background")
-	parser.add_argument("--debug", "-D", action="store_true", help="show/log debugging messages")
-	parser.add_argument("--no-dbus", action="store_true", help="do not attach to DBus")
-	parser.add_argument("--profile", "-p", action="store", type=str, metavar="name", help="tuning profile to be activated")
+	parser = argparse.ArgumentParser(description = "Daemon for monitoring and adaptive tuning of system devices.")
+	parser.add_argument("--daemon", "-d", action = "store_true", help = "run on background")
+	parser.add_argument("--debug", "-D", action = "store_true", help = "show/log debugging messages")
+	parser.add_argument("--log", "-l", nargs = "?", const = consts.LOG_FILENAME, help = "log to file, default file: " + consts.LOG_FILENAME)
+	parser.add_argument("--no-dbus", action = "store_true", help = "do not attach to DBus")
+	parser.add_argument("--profile", "-p", action = "store", type=str, metavar = "name", help = "tuning profile to be activated")
 
 	args = parser.parse_args(sys.argv[1:])
 
@@ -52,15 +54,21 @@ if __name__ == "__main__":
 		log.setLevel("DEBUG")
 
 	try:
+		if args.daemon:
+			if args.log is None:
+				args.log = consts.LOG_FILENAME
+			log.switch_to_file(args.log)
+		else:
+			if args.log is not None:
+				log.switch_to_file(args.log)
+
 		app = tuned.daemon.Application(args.profile)
 
 		if not args.no_dbus:
 			app.attach_to_dbus(DBUS_BUS, DBUS_OBJECT, DBUS_INTERFACE)
 
 		if args.daemon:
-				app.daemonize()
-				log.switch_to_file()
-
+			app.daemonize()
 		app.run()
 
 	except tuned.exceptions.TunedException as exception:
