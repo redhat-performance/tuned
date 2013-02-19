@@ -108,7 +108,7 @@ class CPULatencyPlugin(base.Plugin):
 		governor = None
 		try:
 			cpu_id = device.lstrip("cpu")
-			lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"]).splitlines()
+			lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"])[1].splitlines()
 			for line in lines:
 				if line.startswith("analyzing"):
 					continue
@@ -134,7 +134,7 @@ class CPULatencyPlugin(base.Plugin):
 	def _get_multicore_powersave(self):
 		scheduler = None
 		try:
-			line = tuned.utils.commands.execute(["cpupower", "info", "-m"])
+			line = tuned.utils.commands.execute(["cpupower", "info", "-m"])[1]
 			if line.find("not supported") != -1:
 				log.info("'multicore_powersave' is not supported by this system")
 			elif line.startswith("System's multi core scheduler setting"):

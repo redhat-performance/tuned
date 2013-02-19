@@ -213,7 +213,7 @@ class DiskPlugin(hotplug.Plugin):
 	def _get_apm(self, device):
 		value = None
 		try:
-			m = re.match(r".*=\s*(\d+).*", tuned.utils.commands.execute(["hdparm", "-B", "/dev/" + device]), re.S)
+			m = re.match(r".*=\s*(\d+).*", tuned.utils.commands.execute(["hdparm", "-B", "/dev/" + device])[1], re.S)
 			if m:
 				value = int(m.group(1))
 		except:

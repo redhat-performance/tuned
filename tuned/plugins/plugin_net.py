@@ -138,7 +138,7 @@ class NetTuningPlugin(base.Plugin):
 	def _get_wake_on_lan(self, device):
 		value = None
 		try:
-			m = re.match(r".*Wake-on:\s*([" + WOL_VALUES + "]+).*", tuned.utils.commands.execute(["ethtool", device]), re.S)
+			m = re.match(r".*Wake-on:\s*([" + WOL_VALUES + "]+).*", tuned.utils.commands.execute(["ethtool", device])[1], re.S)
 			if m:
 				value = m.group(1)
 		except IOError:

@@ -51,14 +51,10 @@ class SysctlPlugin(base.Plugin):
 	def _execute_sysctl(self, arguments):
 		execute = ["/sbin/sysctl"] + arguments
 		log.debug("executing %s" % execute)
-		proc = Popen(execute, stdout=PIPE, stderr=PIPE, close_fds=True)
-		out, err = proc.communicate()
-		if proc.returncode:
-			log.error("sysctl error: %s" % (err[:-1]))
-		return (proc.returncode, out, err)
+		return tuned.utils.commands.execute(execute)
 
 	def _read_sysctl(self, option):
-		retcode, stdout, stderr = self._execute_sysctl(["-e", option])
+		retcode, stdout = self._execute_sysctl(["-e", option])
 		if retcode == 0:
 			parts = map(lambda value: value.strip(), stdout.split("=", 1))
 			if len(parts) == 2:
@@ -67,5 +63,5 @@ class SysctlPlugin(base.Plugin):
 		return None
 
 	def _write_sysctl(self, option, value):
-		retcode, stdout, stderr = self._execute_sysctl(["-q", "-w", "%s=%s" % (option, value)])
+		retcode, stdout = self._execute_sysctl(["-q", "-w", "%s=%s" % (option, value)])
 		return retcode == 0

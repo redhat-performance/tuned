@@ -33,6 +33,7 @@ def read_file(f):
 	return old_value
 
 def execute(args):
+	retcode = None
 	if not hasattr(execute, "_environment"):
 		execute._environment = os.environ.copy()
 		execute._environment["LC_ALL"] = "C"
@@ -43,14 +44,16 @@ def execute(args):
 		proc = Popen(args, stdout=PIPE, stderr=PIPE, env=execute._environment, close_fds=True)
 		out, err = proc.communicate()
 
-		if proc.returncode:
+		retcode = proc.returncode
+		if retcode:
 			err_out = err[:-1]
 			if len(err_out) == 0:
 				err_out = out[:-1]
 			log.error("Executing %s error: %s" % (args[0], err_out))
 	except (OSError,IOError) as e:
+		retcode = -1
 		log.error("Executing %s error: %s" % (args[0], e))
-	return out
+	return retcode, out
 
 # Helper for parsing kernel options like:
 # [always] never
@@ -74,7 +77,8 @@ def recommend_profile():
 				if value == "":
 					value = r"^$"
 				if option == "virt":
-					if not re.match(value, execute("virt-what"), re.S):
+#					print "ddd" + execute("virt-what")[1]
+					if not re.match(value, execute("virt-what")[1], re.S):
 						match1 = False
 				elif option == "system":
 					if not re.match(value, read_file(consts.SYSTEM_RELEASE_FILE), re.S):
