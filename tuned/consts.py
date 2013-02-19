@@ -1,5 +1,5 @@
 ACTIVE_PROFILE_FILE = "/etc/tuned/active_profile"
-AUTODETECT_FILE = "autodetect.conf"
+AUTODETECT_FILE = "recommend.conf"
 DAEMONIZE_PARENT_TIMEOUT = 5
 DBUS_BUS = "com.redhat.tuned"
 DBUS_INTERFACE = "com.redhat.tuned.control"
