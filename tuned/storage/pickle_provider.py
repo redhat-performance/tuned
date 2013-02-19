@@ -2,17 +2,16 @@ import interfaces
 import tuned.logs
 import pickle
 import os
+import tuned.consts as consts
 
 log = tuned.logs.get()
-
-DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
 
 class PickleProvider(interfaces.Provider):
 	__slots__ = ["_path", "_data"]
 
 	def __init__(self, path=None):
 		if path is None:
-			path = DEFAULT_STORAGE_FILE
+			path = consts.DEFAULT_STORAGE_FILE
 		self._path = path
 		self._data = {}
 
