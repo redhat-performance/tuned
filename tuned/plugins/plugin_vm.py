@@ -25,8 +25,12 @@ class VMPlugin(base.Plugin):
 	def _instance_cleanup(self, instance):
 		pass
 
+	@classmethod
 	def _thp_file(self):
-		return "/sys/kernel/mm/redhat_transparent_hugepage/enabled"
+		path = "/sys/kernel/mm/transparent_hugepage/enabled"
+		if not os.path.exists(path):
+			path =  "/sys/kernel/mm/redhat_transparent_hugepage/enabled"
+		return path
 
 	@command_set("transparent_hugepages")
 	def _set_transparent_hugepages(self, value):
