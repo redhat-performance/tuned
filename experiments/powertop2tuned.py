@@ -284,7 +284,7 @@ if __name__ == "__main__":
 	parser.add_argument('-n', '--new-profile', action='store_true', help='Creates new profile, otherwise it merges (include) your current profile.')
 	parser.add_argument('-m', '--merge-profile', action = 'store', help = 'Merges (includes) the specified profile (can be suppressed by -n option).')
 	parser.add_argument('-f', '--force', action='store_true', help='Overwrites the output directory if it already exists.')
-	parser.add_argument('--enable', action='store_true', help='Enable all tunings (not recommended). Even with this enabled tunings known to be harmful (like USB_AUTOSUSPEND) won''t be enabled.')
+	parser.add_argument('-e', '--enable', action='store_true', help='Enable all tunings (not recommended). Even with this enabled tunings known to be harmful (like USB_AUTOSUSPEND) won''t be enabled.')
 	args = parser.parse_args()
 	args = vars(args)
 
