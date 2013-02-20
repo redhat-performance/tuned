@@ -28,6 +28,8 @@ class Plugin(object):
 
 		self._has_dynamic_options = False
 
+		self._options_used_by_dynamic = self._get_config_options_used_by_dynamic()
+
 	def cleanup(self):
 		self.destroy_instances()
 
@@ -42,6 +44,10 @@ class Plugin(object):
 	def _get_config_options(self):
 		"""Default configuration options for the plugin."""
 		return {}
+
+	def _get_config_options_used_by_dynamic(self):
+		"""List of config options used by dynamic tuning. Their previous values will be automatically saved and restored."""
+		return []
 
 	def _get_effective_options(self, options):
 		"""Merge provided options with plugin default options."""
@@ -203,6 +209,9 @@ class Plugin(object):
 		self._cleanup_all_non_device_commands(instance)
 
 	def _instance_apply_dynamic(self, instance, device):
+		for option in filter(lambda opt: self._storage_get(instance, self._commands[opt], device) is None, self._options_used_by_dynamic):
+			self._save_current_value(instance, self._commands[option], device)
+
 		self._instance_update_dynamic(instance, device)
 
 	def _instance_unapply_dynamic(self, instance, device):
@@ -306,33 +315,38 @@ class Plugin(object):
 			for device in devices:
 				self._execute_device_command(instance, command, device, new_value)
 
+	def _save_current_value(self, instance, command, device = None):
+		if device is not None:
+			current_value = command["get"](device)
+		else:
+			current_value = command["get"]()
+		if current_value is not None:
+			self._storage_set(instance, command, current_value, device)
+
 	def _execute_device_command(self, instance, command, device, new_value):
 		if command["custom"] is not None:
 			command["custom"](True, new_value, device)
 		else:
-			current_value = command["get"](device)
-			self._storage_set(instance, command, current_value, device)
+			self._save_current_value(instance, command, device)
 			command["set"](new_value, device)
 
 	def _execute_non_device_command(self, instance, command, new_value):
 		if command["custom"] is not None:
 			command["custom"](True, new_value)
 		else:
-			current_value = command["get"]()
-			self._storage_set(instance, command, current_value)
+			self._save_current_value(instance, command)
 			command["set"](new_value)
 
 	def _cleanup_all_non_device_commands(self, instance):
 		for command in filter(lambda command: not command["per_device"], self._commands.values()):
-			if instance.options.get(command["name"], None) is not None:
+			if (instance.options.get(command["name"], None) is not None) or (command["name"] in self._options_used_by_dynamic):
 				self._cleanup_non_device_command(instance, command)
 
 	def _cleanup_all_device_commands(self, instance, devices):
 		for command in filter(lambda command: command["per_device"], self._commands.values()):
-			if instance.options.get(command["name"], None) is None:
-				continue
-			for device in devices:
-				self._cleanup_device_command(instance, command, device)
+			if (instance.options.get(command["name"], None) is not None) or (command["name"] in self._options_used_by_dynamic):
+				for device in devices:
+					self._cleanup_device_command(instance, command, device)
 
 	def _cleanup_device_command(self, instance, command, device):
 		if command["custom"] is not None:

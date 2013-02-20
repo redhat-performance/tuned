@@ -68,6 +68,12 @@ class DiskPlugin(hotplug.Plugin):
 			"scheduler_quantum"  : None,
 		}
 
+	def _get_config_options_used_by_dynamic(cls):
+		return [
+			"apm",
+			"spindown",
+		]
+
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
 
@@ -85,9 +91,6 @@ class DiskPlugin(hotplug.Plugin):
 		if instance._load_monitor is not None:
 			self._monitors_repository.delete(instance._load_monitor)
 			instance._load_monitor = None
-
-	def _instance_apply_dynamic(self, instance, device):
-		self._instance_update_dynamic(instance, device)
 
 	def _instance_update_dynamic(self, instance, device):
 		load = instance._load_monitor.get_device_load(device)
@@ -155,9 +158,7 @@ class DiskPlugin(hotplug.Plugin):
 				instance._idle[device][operation] = 0
 
 	def _instance_unapply_dynamic(self, instance, device):
-		if device in instance._idle and instance._idle[device]["level"] > 0:
-			log.debug("%s restoring power and spindown settings" % device)
-			tuned.utils.commands.execute(["hdparm", "-S0", "-B254", "/dev/%s" % device])
+		pass
 
 	def _elevator_file(self, device):
 		return os.path.join("/sys/block/", device, "queue/scheduler")
