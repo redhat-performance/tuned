@@ -221,11 +221,11 @@ class PowertopProfile:
 		f.close()
 		return True
 
-	def generateTunedConf(self, profile, new_profile, plugins):
+	def generateTunedConf(self, profile, plugins):
 		print "Generating Tuned config file", os.path.join(self.output, "tuned.conf")
 		f = codecs.open(os.path.join(self.output, "tuned.conf"), "w", "utf-8")
 		f.write(TUNED_CONF_PROLOG)
-		if not new_profile and profile is not None:
+		if profile is not None:
 			if self.profile_name == profile:
 				print >> sys.stderr, 'New profile has same name as active profile, not including active profile (avoiding circular deps).'
 			else:
@@ -237,7 +237,7 @@ class PowertopProfile:
 		f.write(TUNED_CONF_EPILOG)
 		f.close()
 
-	def generate(self, new_profile, enable_tunings):
+	def generate(self, new_profile, merge_profile, enable_tunings):
 		generated_html = False
 		if len(self.name) == 0:
 			generated_html = True
@@ -258,8 +258,11 @@ class PowertopProfile:
 			print >> sys.stderr, 'Your Powertop version is incompatible (maybe too old) or the generated HTML output is malformed'
 			return self.PARSING_ERROR
 
-		if not new_profile:
-			profile = self.currentActiveProfile()
+		if new_profile is False:
+			if merge_profile is None:
+				profile = self.currentActiveProfile()
+			else:
+				profile = merge_profile
 		else:
 			profile = None
 
@@ -269,7 +272,7 @@ class PowertopProfile:
 		if not self.generateShellScript(data):
 			return self.BAD_SCRIPTSH
 
-		self.generateTunedConf(profile, new_profile, plugins)
+		self.generateTunedConf(profile, plugins)
 
 		return 0
 
@@ -279,6 +282,7 @@ if __name__ == "__main__":
 	parser.add_argument('-i', '--input', metavar='input_html', type=unicode, help='Path to Powertop HTML report. If not given, it is generated automatically.')
 	parser.add_argument('-o', '--output', metavar='output_directory', type=unicode, help='Directory where the profile will be written, default is /etc/tuned/profile_name directory.')
 	parser.add_argument('-n', '--new-profile', action='store_true', help='Creates new profile, otherwise it merges (include) your current profile.')
+	parser.add_argument('-m', '--merge-profile', action = 'store', help = 'Merges (includes) the specified profile (can be suppressed by -n option).')
 	parser.add_argument('-f', '--force', action='store_true', help='Overwrites the output directory if it already exists.')
 	parser.add_argument('--enable', action='store_true', help='Enable all tunings (not recommended). Even with this enabled tunings known to be harmful (like USB_AUTOSUSPEND) won''t be enabled.')
 	args = parser.parse_args()
@@ -303,4 +307,4 @@ if __name__ == "__main__":
 		sys.exit(-1)
 
 	p = PowertopProfile(args['output'], args['profile'], args['input'])
-	sys.exit(p.generate(args['new_profile'], args['enable']))
+	sys.exit(p.generate(args['new_profile'], args['merge_profile'], args['enable']))
