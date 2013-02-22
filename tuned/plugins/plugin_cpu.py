@@ -31,7 +31,6 @@ class CPULatencyPlugin(base.Plugin):
 			"latency_high"        : 1000,
 			"force_latency"       : None,
 			"governor"            : None,
-			"multicore_powersave" : None,
 		}
 
 	def _instance_init(self, instance):
@@ -119,28 +118,3 @@ class CPULatencyPlugin(base.Plugin):
 			governor = None
 
 		return governor
-
-	@command_set("multicore_powersave")
-	def _set_multicore_powersave(self, value):
-		value = int(value)
-		if value not in [0, 1, 2]:
-			log.error("invalid value of 'multicore_powersave' option")
-			return
-
-		log.info("setting CPU multicore scheduler to '%d'" % value)
-		tuned.utils.commands.execute(["cpupower", "set", "-m", str(value)])
-
-	@command_get("multicore_powersave")
-	def _get_multicore_powersave(self):
-		scheduler = None
-		try:
-			line = tuned.utils.commands.execute(["cpupower", "info", "-m"])[1]
-			if line.find("not supported") != -1:
-				log.info("'multicore_powersave' is not supported by this system")
-			elif line.startswith("System's multi core scheduler setting"):
-				(drop, scheduler) = line.split(": ")
-		except:
-			log.error("could not get current 'multicore_powersave' value")
-			scheduler = None
-
-		return scheduler
