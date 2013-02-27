@@ -206,11 +206,22 @@ class PowertopProfile:
 		return name
 
 	def parseHTML(self, enable_tunings):
-		f = codecs.open(self.name, "r", "utf-8")
+		f = None
+		data = None
 		parser = PowertopHTMLParser(enable_tunings)
-		parser.feed(f.read())
-		f.close()
+		try:
+			f = codecs.open(self.name, "r", "utf-8")
+			data = f.read()
+		except (OSError, IOError, UnicodeDecodeError):
+			data = None
 
+		if f is not None:
+			f.close()
+
+		if data is None:
+			return "", ""
+
+		parser.feed(data)
 		return parser.getParsedData(), parser.getPlugins()
 
 	def generateShellScript(self, data):
