@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.2.0
+Version: 2.2.1
 Release: 1%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -147,6 +147,33 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Fri Mar  1 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 2.2.1-1
+- new release:
+  - audio plugin: fixed error handling in _get_timeout
+  - removed cpupower dependency, added sysfs fallback
+  - powertop2tuned: fixed parser crash on binary garbage
+    resolves: rhbz#914933
+  - cpu plugin: dropped multicore_powersave as kernel upstream already did
+  - plugins: options manipulated by dynamic tuning are now correctly saved and restored
+  - powertop2tuned: added alias -e for --enable option
+  - powertop2tuned: new option -m, --merge-profile to select profile to merge
+  - prefer transparent_hugepage over redhat_transparent_hugepage
+  - recommend: use recommend.conf not autodetect.conf
+  - tuned.service: switched to dbus type service
+    resolves: rhbz#911445
+  - tuned: new option --pid, -P to write PID file
+  - tuned, tuned-adm: added new option --version, -v to show version
+  - disk plugin: use APM value 254 for cleanup / APM disable instead of 255
+    resolves: rhbz#905195
+  - tuned: new option --log, -l to select log file
+  - powertop2tuned: avoid circular deps in include (one level check only)
+  - powertop2tuned: do not crash if powertop is not installed
+  - net plugin: added support for wake_on_lan static tuning
+    resolves: rhbz#885504
+  - loader: fixed error handling
+  - spec: used systemd-rpm macros
+    resolves: rhbz#850347
+
 * Mon Jan 28 2013 Jan Vcelak <jvcelak@redhat.com> 2.2.0-1
 - new release:
   - remove nobarrier from virtual-guest (data loss prevention)
