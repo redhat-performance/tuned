@@ -15,6 +15,11 @@ class CPULatencyPlugin(base.Plugin):
 	Plugin for tuning CPU options. Powersaving, governor, required latency, etc.
 	"""
 
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+
+		self._has_cpupower = True
+
 	def _init_devices(self):
 		self._devices = set()
 		# current list of devices
@@ -33,6 +38,13 @@ class CPULatencyPlugin(base.Plugin):
 			"governor"            : None,
 		}
 
+	def _check_cpupower(self):
+		if tuned.utils.commands.execute(["cpupower", "frequency-info"])[0] == 0:
+			self._has_cpupower = True
+		else:
+			self._has_cpupower = False
+			log.warning("using sysfs fallback, is cpupower installed?")
+
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
 		instance._has_dynamic_tuning = False
@@ -49,6 +61,8 @@ class CPULatencyPlugin(base.Plugin):
 			else:
 				instance._load_monitor = None
 
+			# Check for cpupower, use workaround if not available
+			self._check_cpupower()
 		else:
 			instance._controls_latency = False
 			log.info("Latency settings from non-first CPU plugin instance '%s' will be ignored." % instance.name)
@@ -99,22 +113,33 @@ class CPULatencyPlugin(base.Plugin):
 	@command_set("governor", per_device=True)
 	def _set_governor(self, governor, device):
 		log.info("setting governor '%s' on cpu '%s'" % (governor, device))
-		cpu_id = device.lstrip("cpu")
-		tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-set", "-g", str(governor)])
+		if self._has_cpupower:
+			cpu_id = device.lstrip("cpu")
+			tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-set", "-g", str(governor)])
+		else:
+			tuned.utils.commands.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
 
 	@command_get("governor")
 	def _get_governor(self, device):
 		governor = None
-		try:
+		if self._has_cpupower:
 			cpu_id = device.lstrip("cpu")
-			lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"])[1].splitlines()
-			for line in lines:
-				if line.startswith("analyzing"):
-					continue
-				(drop, drop, governor) = line.split()
-				break
-		except:
+			retcode, lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"]).splitlines()
+			if retcode == 0:
+				for line in lines:
+					if line.startswith("analyzing"):
+						continue
+					l = line.split()
+					if len(l) == 3:
+						governor = l[2]
+						break
+		else:
+			data = tuned.utils.commands.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
+			if len(data) > 0:
+				governor = data
+
+
+		if governor is None:
 			log.error("could not get current governor on cpu '%s'" % device)
-			governor = None
 
 		return governor
