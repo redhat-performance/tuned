@@ -63,11 +63,10 @@ class AudioPlugin(base.Plugin):
 	@command_get("timeout")
 	def _get_timeout(self, device):
 		sys_file = self._timeout_path(device)
-		try:
-			value = tuned.utils.commands.read_file(sys_file)
+		value = tuned.utils.commands.read_file(sys_file)
+		if len(value) > 0:
 			return int(value)
-		except:
-			return None
+		return None
 
 	@command_custom("reset_controller", per_device=True, priority=10)
 	def _reset_controller(self, enabling, value, device):
