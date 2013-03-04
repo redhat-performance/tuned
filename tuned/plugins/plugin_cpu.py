@@ -124,9 +124,9 @@ class CPULatencyPlugin(base.Plugin):
 		governor = None
 		if self._has_cpupower:
 			cpu_id = device.lstrip("cpu")
-			retcode, lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"]).splitlines()
+			retcode, lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"])
 			if retcode == 0:
-				for line in lines:
+				for line in lines.splitlines():
 					if line.startswith("analyzing"):
 						continue
 					l = line.split()
