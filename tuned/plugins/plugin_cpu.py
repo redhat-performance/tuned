@@ -134,7 +134,7 @@ class CPULatencyPlugin(base.Plugin):
 						governor = l[2]
 						break
 		else:
-			data = tuned.utils.commands.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
+			data = tuned.utils.commands.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device)
 			if len(data) > 0:
 				governor = data
 
