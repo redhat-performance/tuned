@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.2.1
+Version: 2.2.2
 Release: 1%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -147,6 +147,11 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Tue Mar 19 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 2.2.2-1
+- new-release:
+  - cpu plugin: fixed cpupower workaround
+  - cpu plugin: fixed crash if cpupower is installed
+
 * Fri Mar  1 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 2.2.1-1
 - new release:
   - audio plugin: fixed error handling in _get_timeout
