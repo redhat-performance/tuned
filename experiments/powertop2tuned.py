@@ -109,9 +109,9 @@ class PowertopHTMLParser(HTMLParser):
 			splitted = command.split("'")
 			value = splitted[1]
 			path = splitted[3]
-			if path == "/sys/module/snd_hda_intel/parameters/power_save":
+			if path in ("/sys/module/snd_hda_intel/parameters/power_save", "/sys/module/snd_ac97_codec/parameters/power_save"):
 				self.plugins.setdefault("audio", "[audio]\n")
-				self.plugins["audio"] += "#%s\n%shda_intel_powersave=1\n" % (self.lastDesc, prefix)
+				self.plugins["audio"] += "#%s\n%stimeout=1\n" % (self.lastDesc, prefix)
 			else:
 				self.plugins.setdefault("sysfs", "[sysfs]\n")
 				self.plugins["sysfs"] += "#%s\n%s%s=%s\n\n" % (self.lastDesc, prefix, path, value)
