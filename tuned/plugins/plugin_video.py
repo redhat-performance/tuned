@@ -46,7 +46,7 @@ class VideoPlugin(base.Plugin):
 			log.warn("radeon_powersave is not supported on '%s'" % device)
 			return
 
-		if value in ["default", "auto", "low", "med", "high"]:
+		if value in ["default", "auto", "low", "mid", "high"]:
 			tuned.utils.commands.write_to_file(sys_files["method"], "profile")
 			tuned.utils.commands.write_to_file(sys_files["profile"], value)
 		elif value == "dynpm":
