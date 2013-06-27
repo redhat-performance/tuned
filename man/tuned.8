@@ -31,15 +31,34 @@ usage.
 
 .SH OPTIONS
 .TP 12
-.BI \-d "\fR, \fP" \--daemon
-This options starts tuned as a daemon as opposed to
+.BI \-c " CONFFILE" "\fR, \fP" \fB\-\-conffile= \fICONFFILE\fP
+Specify the name and path of the configuration file. By default the \fB/etc/tuned.conf\fP is used.
+.TP 12
+.BI \-d "\fR, \fP" \-\-daemon
+This options starts \fBtuned\fP as a daemon as opposed to
 in the foreground without forking at startup.
 .TP 12
-.BI \-c "\fR, \fP" \--conffile=" conffile"
-Specify the name and path of the configuration file, default is \fB/etc/tuned.conf\fR.
+.BI \-D "\fR, \fP" \-\-debug
+Sets the highest logging level. This could be very useful when having trouble with \fBtuned\fP.
 .TP 12
-.BI \-D "\fR, \fP" \--debug
-Sets the highest logging level. This could be very useful when having trouble with tuned.
+.BI \-h "\fR, \fP" \-\-help
+Show this help.
+.TP 12
+.BI \-l " \fR[" \fILOG "\fR], " \fB\-\-log \fR[ \fB=\fILOG\fR]\fP
+Log to the file \fILOG\fP. If no \fILOG\fP file is specified \fB/var/log/tuned/tuned.log\fP is used.
+.TP 12
+.BI \--no-dbus
+Do not attach to DBus.
+.TP 12
+.BI \-P " \fR[" \fIPID "\fR], " \fB\-\-pid \fR[ \fB=\fIPID\fR]\fP
+Write process ID to the \fBPID\fP file. If no \fIPID\fP file is specified \fB/run/tuned/tuned.pid\fP is used.
+.TP 12
+.BI  \-p "\fR, \fP" \-\-profile
+Tunning profile to be activated. It will override other settings (e.g. from \fBtuned-adm\fP).
+This is intended for debugging purposes.
+.TP 12
+.BI  \-v "\fR, \fP" \-\-version
+Show version information.
 .SH "FILES"
 .nf
 /etc/tuned
