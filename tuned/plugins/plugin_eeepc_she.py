@@ -14,6 +14,8 @@ class EeePCSHEPlugin(base.Plugin):
 	def __init__(self, *args, **kwargs):
 		self._control_file = "/sys/devices/platform/eeepc/cpufv"
 		if not os.path.isfile(self._control_file):
+			self._control_file = "/sys/devices/platform/eeepc-wmi/cpufv"
+		if not os.path.isfile(self._control_file):
 			raise exceptions.NotSupportedPluginException("Plugin is not supported on your hardware.")
 		super(self.__class__, self).__init__(*args, **kwargs)
 

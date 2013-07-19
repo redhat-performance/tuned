@@ -438,6 +438,8 @@ _eee_fsb_control() {
 		echo $value > /sys/devices/platform/eeepc/she
 	elif [ -e /sys/devices/platform/eeepc/cpufv ]; then
 		echo $value > /sys/devices/platform/eeepc/cpufv
+	elif [ -e /sys/devices/platform/eeepc-wmi/cpufv ]; then
+		echo $value > /sys/devices/platform/eeepc-wmi/cpufv
 	fi
 }
 
