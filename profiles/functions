@@ -335,13 +335,13 @@ disable_wifi_powersave() {
 #
 
 disable_bluetooth() {
-	hciconfig hci0 down
-	rmmod hci_usb
+	hciconfig hci0 down >/dev/null 2>&1
+	lsmod | grep -q btusb && rmmod btusb
 }
 
 enable_bluetooth() {
-	modprobe hci_usb
-	hciconfig hci0 up
+	modprobe btusb
+	hciconfig hci0 up >/dev/null 2>&1
 }
 
 #
@@ -353,7 +353,7 @@ _usb_autosuspend() {
 	for i in /sys/bus/usb/devices/*/power/autosuspend; do echo $value > $i; done &> /dev/null
 }
 
-enable_usb_autosupend() {
+enable_usb_autosuspend() {
 	_usb_autosuspend 1
 }
 
