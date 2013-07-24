@@ -4,7 +4,7 @@
 
 start() {
 	set_cpu_governor performance
-	/usr/libexec/tuned/pmqos-static.py cpu_dma_latency=0
+	/usr/libexec/tuned/pmqos-static.py cpu_dma_latency=1
 	set_transparent_hugepages never
 
 	return 0
