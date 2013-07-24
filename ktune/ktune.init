@@ -192,8 +192,6 @@ start() {
     [ "$EUID" != "0" ] && exit 4
     ret=0
 
-    load_sysctl
-
     # if no elevator on command line, apply the ktune elevator
     if [ -n "$ELEVATOR" -a -n "$SYS_BLOCK_SDX" -a $CMDLINE_ELEVATOR -ne 0 ]; then
 	ret_e=0
@@ -209,7 +207,9 @@ start() {
 	    failure; echo; ret=1
 	fi
     fi
-    
+
+    load_sysctl
+
     /bin/touch $VAR_SUBSYS_KTUNE
     return $ret
 }
