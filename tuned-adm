@@ -33,7 +33,7 @@ commands:
   help                           show this help message and exit
   list                           list all available and active profiles
   active                         show current active profile
-  off                            switch off all tunning
+  off                            switch off all tuning
   profile <profile-name>         switch to given profile
 """
 
