@@ -1,0 +1,42 @@
+# SAP ktune service configuration
+# based on the enterprise storage profile
+
+# This is the ktune sysctl file.  You can comment this out to prevent ktune
+# from applying its sysctl settings.
+SYSCTL="/etc/sysctl.ktune"
+
+# Use *.conf files in the ktune configuration directory /etc/ktune.d.
+#   Value: yes|no,  default: yes
+# It is useful if you want to load settings from additional files. Set this to
+# no if you to prevent ktune from using these additional files.
+USE_KTUNE_D="yes"
+
+# This is the custom sysctl configuration file. Any settings in this file will
+# be applied before the ktune settings, thus may be overridden by ktune.
+SYSCTL_PRE="/etc/sysctl.d/* /etc/sysctl.conf"
+
+# This is the custom sysctl configuration file. Any settings in this file will
+# be applied after the ktune settings, overriding them
+#SYSCTL_POST="/etc/sysctl.d/* /etc/sysctl.conf"
+
+# This is the I/O scheduler ktune will use. This will *not* override anything
+# explicitly set on the kernel command line, nor will it change the scheduler
+# for any block device that is using a non-default scheduler when ktune starts.
+# You should probably leave this on "deadline", but "as", "cfq", and "noop" are
+# also legal values.  Comment this out to prevent ktune from changing I/O
+# scheduler settings.
+ELEVATOR="deadline"
+
+# These are the devices, that should be tuned with the ELEVATOR
+ELEVATOR_TUNE_DEVS="/sys/block/{sd,cciss,dm-,vd}*/queue/scheduler"
+
+# The following lines are for autodetection of SAP settings
+SAP_MAIN_MEMORY_TOTAL=`awk '/MemTotal:/ {print $2}' /proc/meminfo`
+SAP_SWAP_SPACE_TOTAL=`awk '/SwapTotal:/ {print $2}' /proc/meminfo`
+# Rounding to full Gigabytes
+SAP_VIRT_MEMORY_TOTAL=$(( ( $SAP_MAIN_MEMORY_TOTAL + $SAP_SWAP_SPACE_TOTAL + 1048576 ) / 1048576 ))
+
+# kernel.shmall is in 4 KB pages; minimum 20 GB (SAP Note 941735)
+SAP_SHMALL=$(( $SAP_VIRT_MEMORY_TOTAL * 1024 * 1024 / 4 ))
+# kernel.shmmax is in Bytes; minimum 20 GB (SAP Note 941735)
+SAP_SHMMAX=$(( $SAP_VIRT_MEMORY_TOTAL * 1024 * 1024 * 1024 ))
