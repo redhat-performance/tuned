@@ -148,7 +148,7 @@ remount_partitions() {
 	shift
 
 	for partition in $@; do
-		mount -o remount,$options $partition
+		mount -o remount,$options $partition >/dev/null 2>&1
 	done
 }
 
