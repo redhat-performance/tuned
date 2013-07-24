@@ -119,7 +119,7 @@ _disk_barriers_remount() {
 	' | \
 	while read mountpoint devices; do
 		if _devices_no_write_back_cache $devices; then
-			mount -o remount,"$mount_options" "$mountpoint"
+			mount -o remount,"$mount_options" "$mountpoint" >/dev/null 2>&1
 		fi
 	done
 }
