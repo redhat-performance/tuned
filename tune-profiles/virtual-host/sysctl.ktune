@@ -13,6 +13,11 @@ kernel.sched_min_granularity_ns = 10000000
 # have immediate wakeup/sleep latencies.
 kernel.sched_wakeup_granularity_ns = 15000000
 
+# The total time the scheduler will consider a migrated process
+# "cache hot" and thus less likely to be re-migrated.
+# (default: 0.5 msec# units: nanoseconds)
+kernel.sched_migration_cost = 5000000
+
 # Filesystem I/O is usually much more efficient than swapping, so try to keep
 # swapping low.  It's usually safe to go even lower than this on systems with
 # server-grade storage.
