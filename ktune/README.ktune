@@ -48,6 +48,7 @@ service is enabled and started, it will use the configuration options from
 
     SYSCTL="/etc/sysctl.ktune"
     USE_KTUNE_D="yes"
+    SYSCTL_PRE="/etc/sysctl.d/* /etc/sysctl.conf"
     SYSCTL_POST="/etc/sysctl.d/* /etc/sysctl.conf"
     ELEVATOR="deadline"
     ELEVATOR_TUNE_DEVS="/sys/block/{sd,cciss}*/queue/scheduler"
@@ -60,7 +61,12 @@ profiles from the /etc/ktune.d directory. A profile has to have the extension
 .conf to be used. If there is an additional file with the same name, but the
 extension .sh it will be used as a profile script.
 
-SYSCTL_POST references the system wide sysctl file for customer settings.
+SYSCTL_PRE references the system wide sysctl file for customer settings that
+is loaded before the ktune tunings. The tunings from this file may be
+overridden by ktune settings. Most profile don't use this option.
+
+SYSCTL_POST references the system wide sysctl file for customer settings that
+is loaded after the ktune tunings. This may override the ktune settings.
 
 ELEVATOR is the I/O scheduler, ktune will set for ELEVATOR_TUNE_DEVS. If you
 want to disable the setting of the I/O scheduler, just comment out the ELEVATOR

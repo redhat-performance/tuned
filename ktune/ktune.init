@@ -67,9 +67,15 @@ $(LANG=C /bin/ls -1 /etc/ktune.d/*.conf 2>/dev/null)
 EOF
 fi
 
+function is_int
+{
+  [ ! -z "${1##*[^0-9]*}" ]
+}
+
 load_file() {
     local file=$1
     local save=$2
+    local curr_value
 
     ret_s=0
     errors=
@@ -81,19 +87,34 @@ load_file() {
 	key=$(echo $line | awk '{ match($0,"[ \t]*=[ \t]*") && $0=substr($0,1,RSTART-1); print $0}')
 	value=$(echo $line | awk '/=/ { match($0,"[ \t]*=[ \t]*"); $0=substr($0,RSTART+RLENGTH); print $0}')
 
+	curr_value=""
+	if [ "${value:0:1}" = '>' ]; then
+	    value=${value:1}
+	    curr_value=$($SYSCTL_GET -n "$key")
+	fi
+
+	if [ "${value:0:1}" = '$' ]; then
+	    value=${value:1}
+	    value=${!value}
+	fi
+
+	is_int "$curr_value" && is_int "$value" && [ "$value" -lt "$curr_value" ] && value="$curr_value"
+
 	[ $save -ne 0 ] && save_value=$($SYSCTL_GET "$key")
 
 	setting=$key
-	[ -n "$value" ] && setting+="=${value}"
+	if [ "$value" ]; then
+	    [ -n "$value" ] && setting+="=${value}"
 
-	error="$($SYSCTL_SET "${setting}" 2>&1)"
-	ret=$?
-	if [ $save -ne 0 -a $ret -eq 0 ] && ! grep -q "^${key} =" $SAVE_FILE 2>/dev/null; then
-	    echo "$save_value" >> "$SAVE_FILE"
+	    error="$($SYSCTL_SET "${setting}" 2>&1)"
+	    ret=$?
+	    if [ $save -ne 0 -a $ret -eq 0 ] && ! grep -q "^${key} =" $SAVE_FILE 2>/dev/null; then
+	        echo "$save_value" >> "$SAVE_FILE"
+	    fi
+	    [ -n "$error" ] && errors+="${error}\n"
+
+	    let ret_s+=$ret
 	fi
-	[ -n "$error" ] && errors+="${error}\n"
-
-	let ret_s+=$ret
     done < "$file"
 
     if [ $ret_s -eq 0 ]; then
@@ -126,6 +147,14 @@ load_sysctl() {
     /bin/rm -f "$SAVE_FILE"
 
     if [ ${#KTUNE_FILES[@]} -gt 0 ]; then
+        # Apply general sysctl settings beforehand
+	for f in $SYSCTL_PRE; do
+	    if [ -r "$f" ]; then
+		echo $"Applying sysctl settings from $f"
+		sysctl -e -p "$f" >/dev/null 2>&1
+	    fi
+	done
+
 	echo $"Applying ktune sysctl settings:"
 
 	# Apply ktune files.
