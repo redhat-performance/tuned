@@ -2,9 +2,9 @@ import interfaces
 import decorator
 import dbus.service
 import dbus.mainloop.glib
-import gobject
 import inspect
 import threading
+from gi.repository import GObject as gobject
 
 class DBusExporter(interfaces.ExporterInterface):
 	"""
