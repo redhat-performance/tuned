@@ -2,7 +2,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 0.2.23
+Version: 0.2.24
 Release: 1%{?dist}
 License: GPLv2+
 Group: System Environment/Daemons
@@ -87,7 +87,7 @@ fi
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING INSTALL NEWS README doc/DESIGN.txt doc/TIPS.txt ktune/README.ktune doc/examples
-%config(noreplace) %{_sysconfdir}/tuned.conf
+%config(noreplace) %verify(not link) %{_sysconfdir}/tuned.conf
 %config(noreplace) %{_sysconfdir}/pam.d/tuned-adm
 %config(noreplace) %{_sysconfdir}/security/console.apps/tuned-adm
 %{_sysconfdir}/bash_completion.d
@@ -95,14 +95,14 @@ fi
 %{_sbindir}/tuned-adm
 # consolehelper hard link
 %{_bindir}/tuned-adm
-%config(noreplace) %{_sysconfdir}/tune-profiles/active-profile
+%config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tune-profiles/active-profile
 %{_sysconfdir}/tune-profiles
 %{_datadir}/tuned
 %{_mandir}/man1/tuned-adm.*
 %{_mandir}/man5/tuned.conf.*
 %{_mandir}/man8/tuned.*
-%config(noreplace) %{_sysconfdir}/sysconfig/ktune
-%config(noreplace) %{_sysconfdir}/ktune.d/tunedadm.conf
+%config(noreplace) %verify(not link) %{_sysconfdir}/sysconfig/ktune
+%config(noreplace) %verify(not link) %{_sysconfdir}/ktune.d/tunedadm.conf
 %dir %{_sysconfdir}/ktune.d
 %dir %{_localstatedir}/log/tuned
 %dir %{_localstatedir}/run/tuned
@@ -136,6 +136,10 @@ fi
 
 
 %changelog
+* Thu Oct 10 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 0.2.24-1
+- dynamically changing symlinks excluded from the RPM verification
+  resolves: rhbz#1017366
+
 * Tue Jan 29 2013 Jan Vcelak <jvcelak@redhat.com> 0.2.23-1
 - restore readahead to the original value
 - restart ktune just once, if multiple devices were added into the system
