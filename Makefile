@@ -14,7 +14,7 @@ archive: clean
 	cp AUTHORS COPYING INSTALL README $(VERSIONED_NAME)
 
 	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
-		tuned.bash dbus.conf recommend.conf $(VERSIONED_NAME)
+		tuned.bash dbus.conf recommend.conf tuned-main.conf $(VERSIONED_NAME)
 	cp -a doc experiments man profiles systemtap tuned $(VERSIONED_NAME)
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
@@ -48,6 +48,7 @@ install:
 
 	# configuration files
 	mkdir -p $(DESTDIR)/etc/tuned
+	install -m 0644 tuned-main.conf $(DESTDIR)/etc/tuned/tuned-main.conf
 	# None profile in the moment, autodetection will be used
 	echo -n > $(DESTDIR)/etc/tuned/active_profile
 

@@ -1,3 +1,4 @@
+import tuned.consts as consts
 import tuned.logs
 import collections
 
@@ -13,7 +14,7 @@ class Plugin(object):
 	Intentionally a lot of logic is included in the plugin to increase plugin flexibility.
 	"""
 
-	def __init__(self, monitors_repository, storage_factory, hardware_inventory, device_matcher, instance_factory):
+	def __init__(self, monitors_repository, storage_factory, hardware_inventory, device_matcher, instance_factory, global_cfg):
 		"""Plugin constructor."""
 
 		self._storage = storage_factory.create(self.__class__.__name__)
@@ -26,6 +27,7 @@ class Plugin(object):
 		self._init_commands()
 		self._init_devices()
 
+		self._global_cfg = global_cfg
 		self._has_dynamic_options = False
 
 		self._options_used_by_dynamic = self._get_config_options_used_by_dynamic()
@@ -179,7 +181,7 @@ class Plugin(object):
 
 		if instance.has_static_tuning:
 			self._instance_apply_static(instance)
-		if instance.has_dynamic_tuning:
+		if instance.has_dynamic_tuning and self._global_cfg.get("dynamic_tuning", consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_apply_dynamic)
 
 	def instance_update_tuning(self, instance):
@@ -188,14 +190,14 @@ class Plugin(object):
 		"""
 		if not instance.active:
 			return
-		if instance.has_dynamic_tuning:
+		if instance.has_dynamic_tuning and self._global_cfg.get("dynamic_tuning", consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_update_dynamic)
 
 	def instance_unapply_tuning(self, instance):
 		"""
 		Remove all tunings applied by the plugin instance.
 		"""
-		if instance.has_dynamic_tuning:
+		if instance.has_dynamic_tuning and self._global_cfg.get("dynamic_tuning", consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_unapply_dynamic)
 		if instance.has_static_tuning:
 			self._instance_unapply_static(instance)

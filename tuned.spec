@@ -58,7 +58,9 @@ It can be also used to fine tune your system for specific scenarios.
 
 %install
 make install DESTDIR=%{buildroot}
-
+%if 0%{?rhel}
+sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
+%endif
 
 %post
 %systemd_post tuned.service
@@ -109,6 +111,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned/active_profile
+%config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
 %{_sysconfdir}/tmpfiles.d
 %{_sysconfdir}/dbus-1/system.d/com.redhat.tuned.conf
 %{_unitdir}/tuned.service

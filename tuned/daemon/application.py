@@ -1,5 +1,7 @@
 from tuned import storage, units, monitors, plugins, profiles, exports, hardware
 from tuned.exceptions import TunedException
+from configobj import ConfigObj
+from validate import Validator
 import tuned.logs
 import controller
 import daemon
@@ -23,13 +25,20 @@ class Application(object):
 		device_matcher = hardware.DeviceMatcher()
 		plugin_instance_factory = plugins.instance.Factory()
 
-		plugins_repository = plugins.Repository(monitors_repository, storage_factory, hardware_inventory, device_matcher, plugin_instance_factory)
+		self.config = self._load_global_config()
+		if self.config.get("dynamic_tuning"):
+			log.info("dynamic tuning is globally enabled")
+		else:
+			log.info("dynamic tuning is globally disabled")
+
+		plugins_repository = plugins.Repository(monitors_repository, storage_factory, hardware_inventory, device_matcher, plugin_instance_factory, self.config)
 		unit_manager = units.Manager(plugins_repository, monitors_repository)
 
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()
 		profile_locator = profiles.Locator(consts.LOAD_DIRECTORIES)
 		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger)
+
 
 		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name)
 		self._controller = controller.Controller(self._daemon)
@@ -160,6 +169,22 @@ class Application(object):
 				raise
 			else:
 				sys.exit(1)
+
+	def _load_global_config(self, file_name = consts.GLOBAL_CONFIG_FILE):
+		"""
+		Loads global configuration file.
+		"""
+		log.debug("reading and parsing global configuration file '%s'" % consts.GLOBAL_CONFIG_FILE)
+		try:
+			config = ConfigObj(file_name, configspec=["dynamic_tuning = boolean(default=%s)" % consts.CFG_DEF_DYNAMIC_TUNING], raise_errors = True, file_error = True)
+		except IOError as e:
+			raise TunedException("Global tuned configuration file '%s' not found." % file_name)
+		except ConfigObjError as e:
+			raise TunedException("Error parsing global tuned configuration file '%s'." % file_name)
+		vdt = Validator()
+		if (not config.validate(vdt, copy=True)):
+			raise TunedException("Global tuned configuration file '%s' is not valid." % file_name)
+		return config
 
 	@property
 	def daemon(self):

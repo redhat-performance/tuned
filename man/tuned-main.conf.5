@@ -1,0 +1,31 @@
+.TH "tuned-main.conf" "5" "15 Oct 2013" "Jaroslav Škarvada" "tuned-main.conf file format description"
+.SH NAME
+tuned-main.conf \- Tuned global configuratio file
+.SH SYNOPSIS
+.B /etc/tuned/tuned-main.conf
+.SH DESCRIPTION
+This man page documents format of the Tuned global configuration file.
+The \fItuned-main.conf\fR file uses the ini-file format.
+
+.TP
+.BI dynamic_tuning= BOOL
+This defines whether the dynamic tuning is enabled. It is boolean value.
+It can be \fBTrue\fR or \fB1\fR if the dynamic tuning is enabled and
+\fBFalse\fR or \fB0\fR if disabled. In such case only the static tuning
+will be used.
+
+.SH EXAMPLE
+.nf
+dynamic_tuning = 1
+.fi
+
+.SH FILES
+.I /etc/tuned/tuned-main.conf
+
+.SH "SEE ALSO"
+.LP
+tuned(8)
+.SH AUTHOR
+Written by Jaroslav Škarvada <jskarvad@redhat.com>.
+.SH REPORTING BUGS
+Report bugs to <power-management@lists.fedoraproject.org>.
