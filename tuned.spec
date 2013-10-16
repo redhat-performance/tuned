@@ -26,8 +26,8 @@ Summary: Various tuned utilities
 Requires: powertop
 
 %description utils
-This package contains utilities that can help you to fine tune your
-system and manage tuned profiles.
+This package contains utilities that can help you to fine tune and
+debug your system and manage tuned profiles.
 
 %package utils-systemtap
 Summary: Disk and net statistic monitoring systemtap scripts
@@ -124,6 +124,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %defattr(-,root,root,-)
 %doc COPYING
 %{_bindir}/powertop2tuned
+%{_libexecdir}/tuned/
 
 %files utils-systemtap
 %defattr(-,root,root,-)

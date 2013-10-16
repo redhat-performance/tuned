@@ -15,7 +15,7 @@ archive: clean
 
 	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
 		tuned.bash dbus.conf recommend.conf tuned-main.conf $(VERSIONED_NAME)
-	cp -a doc experiments man profiles systemtap tuned $(VERSIONED_NAME)
+	cp -a doc experiments libexec man profiles systemtap tuned $(VERSIONED_NAME)
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
 
@@ -93,6 +93,12 @@ install:
 	mkdir -p $(DESTDIR)/usr/share/doc/$(VERSIONED_NAME)
 	cp -a doc/* $(DESTDIR)/usr/share/doc/$(VERSIONED_NAME)
 	cp AUTHORS COPYING README $(DESTDIR)/usr/share/doc/$(VERSIONED_NAME)
+
+	# Install libexec scripts
+	install -m 0755 -Dd $(DESTDIR)/usr/libexec/tuned
+	for file in libexec/*; do \
+		install -m 0755 $$file $(DESTDIR)/usr/libexec/tuned; \
+	done
 
 clean:
 	find -name "*.pyc" | xargs rm -f
