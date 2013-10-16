@@ -1,4 +1,4 @@
-GLOBAL_CONFIG_FILE = "/etc/tuned/tuned.conf"
+GLOBAL_CONFIG_FILE = "/etc/tuned/tuned-main.conf"
 ACTIVE_PROFILE_FILE = "/etc/tuned/active_profile"
 AUTODETECT_FILE = "recommend.conf"
 DAEMONIZE_PARENT_TIMEOUT = 5
