@@ -36,6 +36,7 @@ class CPULatencyPlugin(base.Plugin):
 			"latency_high"        : 1000,
 			"force_latency"       : None,
 			"governor"            : None,
+			"intel_perf_bias"     : None,
 		}
 
 	def _check_cpupower(self):
@@ -138,6 +139,32 @@ class CPULatencyPlugin(base.Plugin):
 			if len(data) > 0:
 				governor = data
 
+
+		if governor is None:
+			log.error("could not get current governor on cpu '%s'" % device)
+
+		return governor
+
+	@command_set("intel_perf_bias", per_device=True)
+	def _set_intel_perf_bias(self, intel_perf_bias, device):
+		log.info("setting intel_perf_bias '%s' on cpu '%s'" % (intel_perf_bias, device))
+		cpu_id = device.lstrip("cpu")
+		tuned.utils.commands.execute(["x86_energy_perf_policy", "-c", cpu_id, str(intel_perf_bias)])
+
+	@command_get("intel_perf_bias")
+	def _get_intel_perf_bias(self, device):
+		intel_perf_bias = None
+		if self._has_cpupower:
+			cpu_id = device.lstrip("cpu")
+			retcode, lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"])
+			if retcode == 0:
+				for line in lines.splitlines():
+					if line.startswith("analyzing"):
+						continue
+					l = line.split()
+					if len(l) == 3:
+						governor = l[2]
+						break
 
 		if governor is None:
 			log.error("could not get current governor on cpu '%s'" % device)

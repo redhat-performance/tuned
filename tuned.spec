@@ -124,7 +124,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %defattr(-,root,root,-)
 %doc COPYING
 %{_bindir}/powertop2tuned
-%{_libexecdir}/tuned/
+%{_libexecdir}/tuned/pmqos-static*
 
 %files utils-systemtap
 %defattr(-,root,root,-)
