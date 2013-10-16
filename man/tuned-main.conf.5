@@ -1,6 +1,6 @@
 .TH "tuned-main.conf" "5" "15 Oct 2013" "Jaroslav Škarvada" "tuned-main.conf file format description"
 .SH NAME
-tuned-main.conf \- Tuned global configuratio file
+tuned-main.conf \- Tuned global configuration file
 .SH SYNOPSIS
 .B /etc/tuned/tuned-main.conf
 .SH DESCRIPTION
@@ -12,11 +12,22 @@ The \fItuned-main.conf\fR file uses the ini-file format.
 This defines whether the dynamic tuning is enabled. It is boolean value.
 It can be \fBTrue\fR or \fB1\fR if the dynamic tuning is enabled and
 \fBFalse\fR or \fB0\fR if disabled. In such case only the static tuning
-will be used.
+will be used. Please note if it is enabled here, it is still possible
+to individually disable it in plugins.
+
+.TP
+.BI update_interval= INT
+Update interval for dynamic tuning (in seconds). Tuned daemon is periodically
+waken after \fIINT\fR seconds, updates its monitors, calculates new tuning
+parameters for enabled plugins and applies the changes. Plugins that have
+disabled dynamic tuning are not processed. By default the \fIINT\fR is set
+to 10 seconds. Tuned daemon doesn't periodically wake if dynamic tuning is
+globally disabled (see \fBdynamic_tuning\fR).
 
 .SH EXAMPLE
 .nf
 dynamic_tuning = 1
+update_interval = 10
 .fi
 
 .SH FILES

@@ -15,6 +15,9 @@ log = tuned.logs.get()
 
 __all__ = ["Application"]
 
+global_config_spec = 	["dynamic_tuning = boolean(default=%s)" % consts.CFG_DEF_DYNAMIC_TUNING,
+			"update_interval = integer(default=%s)" % consts.CFG_DEF_UPDATE_INTERVAL]
+
 class Application(object):
 	def __init__(self, profile_name=None):
 		storage_provider = storage.PickleProvider()
@@ -27,7 +30,8 @@ class Application(object):
 
 		self.config = self._load_global_config()
 		if self.config.get("dynamic_tuning"):
-			log.info("dynamic tuning is globally enabled")
+			log.info("dynamic tuning is enabled (can be overriden in plugins)")
+			log.info("update interval is %d seconds" % self.config.get("update_interval"))
 		else:
 			log.info("dynamic tuning is globally disabled")
 
@@ -40,7 +44,7 @@ class Application(object):
 		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger)
 
 
-		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name)
+		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, int(self.config.get("update_interval", consts.CFG_DEF_UPDATE_INTERVAL)))
 		self._controller = controller.Controller(self._daemon)
 
 		self._dbus_exporter = None
@@ -176,7 +180,7 @@ class Application(object):
 		"""
 		log.debug("reading and parsing global configuration file '%s'" % consts.GLOBAL_CONFIG_FILE)
 		try:
-			config = ConfigObj(file_name, configspec=["dynamic_tuning = boolean(default=%s)" % consts.CFG_DEF_DYNAMIC_TUNING], raise_errors = True, file_error = True)
+			config = ConfigObj(file_name, configspec=global_config_spec, raise_errors = True, file_error = True)
 		except IOError as e:
 			raise TunedException("Global tuned configuration file '%s' not found." % file_name)
 		except ConfigObjError as e:
