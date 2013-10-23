@@ -19,6 +19,7 @@ class CPULatencyPlugin(base.Plugin):
 		super(self.__class__, self).__init__(*args, **kwargs)
 
 		self._has_cpupower = True
+		self._has_energy_perf_bias = True
 
 	def _init_devices(self):
 		self._devices = set()
@@ -36,7 +37,7 @@ class CPULatencyPlugin(base.Plugin):
 			"latency_high"        : 1000,
 			"force_latency"       : None,
 			"governor"            : None,
-			"intel_perf_bias"     : None,
+			"energy_perf_bias"    : None,
 		}
 
 	def _check_cpupower(self):
@@ -45,6 +46,16 @@ class CPULatencyPlugin(base.Plugin):
 		else:
 			self._has_cpupower = False
 			log.warning("using sysfs fallback, is cpupower installed?")
+
+	def _check_energy_perf_bias(self):
+		self._has_energy_perf_bias = False
+		retcode = tuned.utils.commands.execute(["x86_energy_perf_policy", "-r"])[0]
+		if retcode == 0:
+			self._has_energy_perf_bias = True
+		elif retcode == -1:
+			log.warning("ignoring CPU energy performance bias, please install x86_energy_perf_policy tool (from kernel-tools package) to enable this functionality")
+		else:
+			log.warning("ignoring CPU energy performance bias, your CPU doesn't support MSR_IA32_ENERGY_PERF_BIAS")
 
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
@@ -64,6 +75,8 @@ class CPULatencyPlugin(base.Plugin):
 
 			# Check for cpupower, use workaround if not available
 			self._check_cpupower()
+			# Check for x86_energy_perf_policy, ignore if not available / supported
+			self._check_energy_perf_bias()
 		else:
 			instance._controls_latency = False
 			log.info("Latency settings from non-first CPU plugin instance '%s' will be ignored." % instance.name)
@@ -145,28 +158,24 @@ class CPULatencyPlugin(base.Plugin):
 
 		return governor
 
-	@command_set("intel_perf_bias", per_device=True)
-	def _set_intel_perf_bias(self, intel_perf_bias, device):
-		log.info("setting intel_perf_bias '%s' on cpu '%s'" % (intel_perf_bias, device))
-		cpu_id = device.lstrip("cpu")
-		tuned.utils.commands.execute(["x86_energy_perf_policy", "-c", cpu_id, str(intel_perf_bias)])
-
-	@command_get("intel_perf_bias")
-	def _get_intel_perf_bias(self, device):
-		intel_perf_bias = None
-		if self._has_cpupower:
+	@command_set("energy_perf_bias", per_device=True)
+	def _set_energy_perf_bias(self, energy_perf_bias, device):
+		if self._has_energy_perf_bias:
+			log.info("setting energy_perf_bias '%s' on cpu '%s'" % (energy_perf_bias, device))
 			cpu_id = device.lstrip("cpu")
-			retcode, lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"])
+			tuned.utils.commands.execute(["x86_energy_perf_policy", "-c", cpu_id, str(energy_perf_bias)])
+
+	@command_get("energy_perf_bias")
+	def _get_energy_perf_bias(self, device):
+		energy_perf_bias = None
+		if self._has_energy_perf_bias:
+			cpu_id = device.lstrip("cpu")
+			retcode, lines = tuned.utils.commands.execute(["x86_energy_perf_policy", "-c", cpu_id, "-r"])
 			if retcode == 0:
 				for line in lines.splitlines():
-					if line.startswith("analyzing"):
-						continue
 					l = line.split()
-					if len(l) == 3:
-						governor = l[2]
+					if len(l) == 2:
+						energy_perf_bias = l[1]
 						break
 
-		if governor is None:
-			log.error("could not get current governor on cpu '%s'" % device)
-
-		return governor
+		return energy_perf_bias

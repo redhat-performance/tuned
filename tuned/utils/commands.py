@@ -77,7 +77,6 @@ def recommend_profile():
 				if value == "":
 					value = r"^$"
 				if option == "virt":
-#					print "ddd" + execute("virt-what")[1]
 					if not re.match(value, execute("virt-what")[1], re.S):
 						match1 = False
 				elif option == "system":
