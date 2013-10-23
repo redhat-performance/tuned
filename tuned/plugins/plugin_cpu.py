@@ -53,9 +53,9 @@ class CPULatencyPlugin(base.Plugin):
 		if retcode == 0:
 			self._has_energy_perf_bias = True
 		elif retcode == -1:
-			log.warning("ignoring CPU energy performance bias, please install x86_energy_perf_policy tool (from kernel-tools package) to enable this functionality")
+			log.warning("error executing x86_energy_perf_policy tool, ignoring CPU energy performance bias, is the tool installed?")
 		else:
-			log.warning("ignoring CPU energy performance bias, your CPU doesn't support MSR_IA32_ENERGY_PERF_BIAS")
+			log.warning("your CPU doesn't support MSR_IA32_ENERGY_PERF_BIAS, ignoring CPU energy performance bias")
 
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
