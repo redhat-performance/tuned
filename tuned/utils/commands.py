@@ -22,8 +22,8 @@ def write_to_file(f, data):
 		log.error("Writing to file %s error: %s" % (f, e))
 	return rc
 
-def read_file(f):
-	old_value = ""
+def read_file(f, err_ret = ""):
+	old_value = err_ret
 	try:
 		f = open(f, "r")
 		old_value = f.read()
