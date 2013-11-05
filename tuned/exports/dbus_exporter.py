@@ -4,6 +4,7 @@ import dbus.service
 import dbus.mainloop.glib
 import inspect
 import threading
+import signal
 from gi.repository import GObject as gobject
 
 class DBusExporter(interfaces.ExporterInterface):
@@ -26,9 +27,13 @@ class DBusExporter(interfaces.ExporterInterface):
 		self._bus_name = bus_name
 		self._interface_name = interface_name
 		self._object_name = object_name
-
 		self._thread = None
+
+		# dirty hack that fixes KeyboardInterrupt handling
+		# the hack is needed because PyGObject / GTK+-3 developers are morons
+		signal_handler = signal.getsignal(signal.SIGINT)
 		self._main_loop = gobject.MainLoop()
+		signal.signal(signal.SIGINT, signal_handler)
 
 	@property
 	def bus_name(self):
