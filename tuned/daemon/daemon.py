@@ -18,7 +18,6 @@ class Daemon(object):
 		try:
 			self._init_profile(profile_name)
 		except TunedException as e:
-			log.exception(e)
 			log.error("Cannot set initial profile. No tunings will be enabled!")
 
 	def _init_threads(self):
