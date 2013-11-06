@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.2.2
+Version: 2.3.0
 Release: 1%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -61,6 +61,7 @@ make install DESTDIR=%{buildroot}
 %if 0%{?rhel}
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
 %endif
+
 
 %post
 %systemd_post tuned.service
@@ -151,6 +152,38 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %{_prefix}/lib/tuned/spindown-disk
 
 %changelog
+* Wed Nov  6 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 2.3.0-1
+- new-release
+  resolves: rhbz#1020743
+  - audio plugin: fixed audio settings in standard profiles
+    resolves: rhbz#1019805
+  - video plugin: fixed tunings
+  - daemon: fixed crash if preset profile is not available
+    resolves: rhbz#953128
+  - man: various updates and corrections
+  - functions: fixed usb and bluetooth handling
+  - tuned: switched to lightweighted pygobject3-base
+  - daemon: added global config for dynamic_tuning
+    resolves: rhbz#1006427
+  - utils: added pmqos-static script for debug purposes
+    resolves: rhbz#1015676
+  - throughput-performance: various fixes
+    resolves: rhbz#987570
+  - tuned: added global option update_interval
+  - plugin_cpu: added support for x86_energy_perf_policy
+    resolves: rhbz#1015675
+  - dbus: fixed KeyboardInterrupt handling
+  - plugin_cpu: added support for intel_pstate
+    resolves: rhbz#996722
+  - profiles: various fixes
+    resolves: rhbz#922068
+  - profiles: added desktop profile
+    resolves: rhbz#996723
+  - tuned-adm: implemented non DBus fallback control
+  - profiles: added sap profile
+  - tuned: lowered CPU usage due to python bug
+    resolves: rhbz#917587
+
 * Tue Mar 19 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 2.2.2-1
 - new-release:
   - cpu plugin: fixed cpupower workaround
