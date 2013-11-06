@@ -14,6 +14,13 @@ STORAGE_SUFFIX=".save"
 # Helpers
 #
 
+# Save value
+# $0 STORAGE_NAME VALUE
+save_value() {
+	[ "$#" -ne 2 ] && return
+	[ "$2" -a -e "${STORAGE}" ] && echo "$2" > "${STORAGE}/${1}${STORAGE_SUFFIX}"
+}
+
 # Save sysfs value
 # $0 STORAGE_NAME SYSFS_NAME
 save_sys() {
@@ -41,6 +48,15 @@ save_set_sys() {
 get_stored_sys() {
 	[ "$#" -ne 1 ] && return
 	[ -r "${STORAGE}/${1}${STORAGE_SUFFIX}" ] && cat "${STORAGE}/${1}${STORAGE_SUFFIX}"
+}
+
+# Restore value from storage
+# $0 STORAGE_NAME
+restore_value() {
+	[ "$#" -ne 1 ] && return
+	_rs_value="`get_stored_sys \"$1\"`"
+	unlink "${STORAGE}/${1}${STORAGE_SUFFIX}" >/dev/null 2>&1
+	[ "$_rs_value" ] && echo "$_rs_value"
 }
 
 # Restore sysfs value from storage, if nothing is stored, use VALUE
