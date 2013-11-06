@@ -226,10 +226,17 @@ class PowertopProfile:
 
 	def generateShellScript(self, data):
 		print "Generating shell script", os.path.join(self.output, "script.sh")
-		f = codecs.open(os.path.join(self.output, "script.sh"), "w", "utf-8")
-		f.write(SCRIPT_SH % (data, ""))
-		os.fchmod(f.fileno(), 0755)
-		f.close()
+		f = None
+		try:
+			f = codecs.open(os.path.join(self.output, "script.sh"), "w", "utf-8")
+			f.write(SCRIPT_SH % (data, ""))
+			os.fchmod(f.fileno(), 0755)
+			f.close()
+		except (OSError, IOError) as e:
+			print >> sys.stderr, "Error writing shell script: %s" % e
+			if f is not None:
+				f.close()
+			return False
 		return True
 
 	def generateTunedConf(self, profile, plugins):
