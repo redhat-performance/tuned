@@ -90,9 +90,9 @@ install:
 	done
 
 	# documentation
-	mkdir -p $(DESTDIR)/usr/share/doc/$(VERSIONED_NAME)
-	cp -a doc/* $(DESTDIR)/usr/share/doc/$(VERSIONED_NAME)
-	cp AUTHORS COPYING README $(DESTDIR)/usr/share/doc/$(VERSIONED_NAME)
+	mkdir -p $(DESTDIR)/usr/share/doc/$(NAME)
+	cp -a doc/* $(DESTDIR)/usr/share/doc/$(NAME)
+	cp AUTHORS COPYING README $(DESTDIR)/usr/share/doc/$(NAME)
 
 	# Install libexec scripts
 	install -m 0755 -Dd $(DESTDIR)/usr/libexec/tuned
