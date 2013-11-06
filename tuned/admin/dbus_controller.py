@@ -1,7 +1,6 @@
 import dbus
 import dbus.exceptions
-import tuned.utils.commands
-from exceptions import TunedAdminException
+from exceptions import TunedAdminDBusException
 
 __all__ = ["DBusController"]
 
@@ -21,13 +20,13 @@ class DBusController(object):
 		try:
 			self._init_proxy()
 		except dbus.exceptions.DBusException:
-			raise TunedAdminException("Cannot talk to Tuned daemon via DBus.")
+			raise TunedAdminDBusException("Cannot talk to Tuned daemon via DBus.")
 
 		try:
 			method = self._proxy.get_dbus_method(method_name)
 			return method(*args, **kwargs)
 		except dbus.exceptions.DBusException as dbus_exception:
-			raise TunedAdminException("DBus call to Tuned daemon failed (%s)." % str(dbus_exception))
+			raise TunedAdminDBusException("DBus call to Tuned daemon failed (%s)." % str(dbus_exception))
 
 	def is_running(self):
 		return self._call("is_running")
@@ -42,24 +41,15 @@ class DBusController(object):
 		return self._call("profiles")
 
 	def active_profile(self):
-		profile_name = self._call("active_profile")
-		if profile_name != "":
-			return profile_name
-		else:
-			return None
+		return self._call("active_profile")
 
 	def switch_profile(self, new_profile):
-		if new_profile != "":
-			return self._call("switch_profile", new_profile)
-		else:
+		if new_profile == "":
 			return False
+		return self._call("switch_profile", new_profile)
 
 	def recommend_profile(self):
-		try:
-			profile = self._call("recommend_profile")
-		except TunedAdminException:
-			profile = tuned.utils.commands.recommend_profile()
-		return profile
+		return self._call("recommend_profile")
 
 	def off(self):
 		return self._call("disable")
