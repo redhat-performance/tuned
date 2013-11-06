@@ -3,6 +3,7 @@ import threading
 import tuned.logs
 from tuned.exceptions import TunedException
 import tuned.consts as consts
+import tuned.utils.commands
 
 log = tuned.logs.get()
 
@@ -65,7 +66,7 @@ class Daemon(object):
 		self._unit_manager.start_tuning()
 
 		self._terminate.clear()
-		while not self._terminate.wait(self._update_interval):
+		while not tuned.utils.commands.wait(self._terminate, self._update_interval):
 			log.debug("updating monitors")
 			self._unit_manager.update_monitors()
 			log.debug("performing tunings")

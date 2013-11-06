@@ -28,7 +28,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 		self._terminate.clear()
 		# we have to pass some timeout, otherwise signals will not work
-		while not self._terminate.wait(3600):
+		while not tuned.utils.commands.wait(self._terminate, 3600):
 			pass
 
 		log.info("terminating controller")

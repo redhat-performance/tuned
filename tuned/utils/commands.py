@@ -85,3 +85,9 @@ def recommend_profile():
 			if match1 and match2:
 				profile = section
 	return profile
+
+def wait(terminate, time):
+	try:
+		return terminate.wait(time, False)
+	except:
+		return terminate.wait(time)
