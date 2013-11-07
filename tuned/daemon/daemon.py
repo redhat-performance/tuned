@@ -64,7 +64,6 @@ class Daemon(object):
 		self._save_active_profile(self._profile.name)
 		self._unit_manager.start_tuning()
 
-		self._terminate.clear()
 		while not tuned.utils.commands.wait(self._terminate, self._update_interval):
 			log.debug("updating monitors")
 			self._unit_manager.update_monitors()
@@ -104,6 +103,7 @@ class Daemon(object):
 
 		log.info("starting tuning")
 		self._thread = threading.Thread(target=self._thread_code)
+		self._terminate.clear()
 		self._thread.start()
 		return True
 
