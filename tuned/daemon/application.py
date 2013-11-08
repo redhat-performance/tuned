@@ -16,6 +16,7 @@ log = tuned.logs.get()
 __all__ = ["Application"]
 
 global_config_spec = 	["dynamic_tuning = boolean(default=%s)" % consts.CFG_DEF_DYNAMIC_TUNING,
+			"sleep_interval = integer(default=%s)" % consts.CFG_DEF_SLEEP_INTERVAL,
 			"update_interval = integer(default=%s)" % consts.CFG_DEF_UPDATE_INTERVAL]
 
 class Application(object):
@@ -31,7 +32,6 @@ class Application(object):
 		self.config = self._load_global_config()
 		if self.config.get("dynamic_tuning"):
 			log.info("dynamic tuning is enabled (can be overriden in plugins)")
-			log.info("update interval is %d seconds" % self.config.get("update_interval"))
 		else:
 			log.info("dynamic tuning is globally disabled")
 
@@ -44,7 +44,7 @@ class Application(object):
 		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger)
 
 
-		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, int(self.config.get("update_interval", consts.CFG_DEF_UPDATE_INTERVAL)))
+		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, self.config)
 		self._controller = controller.Controller(self._daemon)
 
 		self._dbus_exporter = None

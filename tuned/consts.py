@@ -18,5 +18,7 @@ SYSTEM_RELEASE_FILE = "/etc/system-release-cpe"
 
 # default configuration
 CFG_DEF_DYNAMIC_TUNING = True
+# how long to sleep before checking for events (in seconds)
+CFG_DEF_SLEEP_INTERVAL = 1
 # update interval for dynamic tuning (in seconds)
 CFG_DEF_UPDATE_INTERVAL = 10
