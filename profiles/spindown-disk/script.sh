@@ -12,7 +12,6 @@ start() {
     disable_logs_syncing
 
     remount_partitions commit=600,noatime $EXT_PARTITIONS
-    find /etc/ &> /dev/null
     sync
 
     return 0
