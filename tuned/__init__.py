@@ -1,7 +1,7 @@
 #
 # tuned: daemon for monitoring and adaptive tuning of system devices
 #
-# Copyright (C) 2008-2012 Red Hat, Inc.
+# Copyright (C) 2008-2013 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,6 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-__copyright__ = "Copyright 2008-2012 Red Hat, Inc."
+__copyright__ = "Copyright 2008-2013 Red Hat, Inc."
 __license__ = "GPLv2+"
 __email__ = "power-management@lists.fedoraproject.org"

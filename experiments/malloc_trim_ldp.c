@@ -2,7 +2,7 @@
  * malloc_trim_ldp: A ld-preload library that can be used to potentially
  *                  save memory (especially for long running larger apps).
  *
- * Copyright (C) 2008-2012 Red Hat, Inc.
+ * Copyright (C) 2008-2013 Red Hat, Inc.
  * Authors: Phil Knirsch
  *
  * This program is free software; you can redistribute it and/or
