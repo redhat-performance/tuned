@@ -111,6 +111,12 @@ CPU governor is set to performance andlocked to the low C states (by PM QoS).
 CPU energy performance bias to performance.
 
 .TP
+.BI network-latency
+Profile for low latency network tuning. It is based on the latency-performance
+profile. It additionaly disables transparent hugepages, NUMA balancing and
+tunes several other network related sysctl parameters.
+
+.TP
 .BI "desktop"
 Profile optimized for desktops based on balanced profile. It additionaly
 enables scheduler autogroups for better response of interactive applications.
