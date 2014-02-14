@@ -111,6 +111,11 @@ CPU governor is set to performance andlocked to the low C states (by PM QoS).
 CPU energy performance bias to performance.
 
 .TP
+.BI network-throughput
+Profile for throughput network tuning. It is based on the throughput-performance
+profile. It additionaly increases kernel network buffers.
+
+.TP
 .BI network-latency
 Profile for low latency network tuning. It is based on the latency-performance
 profile. It additionaly disables transparent hugepages, NUMA balancing and
