@@ -1,6 +1,7 @@
 [Unit]
 Description=Dynamic System Tuning Daemon
 After=syslog.target
+Conflicts=cpupower.service
 
 [Service]
 Type=dbus
