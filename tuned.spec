@@ -98,7 +98,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %doc COPYING
 %doc README
 %doc doc/TIPS.txt
-%{_sysconfdir}/bash_completion.d
+%{_datadir}/bash-completion/completions/tuned
 %{python_sitelib}/tuned
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
@@ -113,8 +113,8 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %dir %{_sysconfdir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned/active_profile
 %config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
-%{_sysconfdir}/tmpfiles.d
 %{_sysconfdir}/dbus-1/system.d/com.redhat.tuned.conf
+%{_tmpfilesdir}/tuned.conf
 %{_unitdir}/tuned.service
 %dir %{_localstatedir}/log/tuned
 %dir /run/tuned

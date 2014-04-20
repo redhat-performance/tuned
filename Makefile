@@ -2,11 +2,13 @@ NAME = tuned
 VERSION = $(shell awk '/^Version:/ {print $$2}' tuned.spec)
 RELEASE = $(shell awk '/^Release:/ {print $$2}' tuned.spec)
 UNITDIR = $(shell rpm --eval '%{_unitdir}')
+TMPFILESDIR = $(shell rpm --eval '%{_tmpfilesdir}')
 VERSIONED_NAME = $(NAME)-$(VERSION)
 
 DESTDIR = /
 PYTHON_SITELIB = /usr/lib/python2.7/site-packages
 TUNED_PROFILESDIR = /usr/lib/tuned
+BASH_COMPLETIONS = /usr/share/bash-completion/completions/
 
 archive: clean
 	mkdir -p $(VERSIONED_NAME)
@@ -58,16 +60,16 @@ install:
 	install -m 0644 recommend.conf $(DESTDIR)$(TUNED_PROFILESDIR)/recommend.conf
 
 	# Install bash completion
-	mkdir -p $(DESTDIR)/etc/bash_completion.d
-	install -m 0644 tuned.bash $(DESTDIR)/etc/bash_completion.d/tuned.bash
+	mkdir -p $(DESTDIR)$(BASH_COMPLETIONS)
+	install -m 0644 tuned.bash $(DESTDIR)$(BASH_COMPLETIONS)/tuned
 
 	# log dir
 	mkdir -p $(DESTDIR)/var/log/tuned
 
 	# runtime directory
 	mkdir -p $(DESTDIR)/run/tuned
-	mkdir -p $(DESTDIR)/etc/tmpfiles.d
-	install -m 0644 tuned.tmpfiles $(DESTDIR)/etc/tmpfiles.d/tuned.conf
+	mkdir -p $(DESTDIR)$(TMPFILESDIR)
+	install -m 0644 tuned.tmpfiles $(DESTDIR)$(TMPFILESDIR)/tuned.conf
 
 	# systemd units
 	mkdir -p $(DESTDIR)$(UNITDIR)
