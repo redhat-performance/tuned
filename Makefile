@@ -1,8 +1,8 @@
 NAME = tuned
 VERSION = $(shell awk '/^Version:/ {print $$2}' tuned.spec)
 RELEASE = $(shell awk '/^Release:/ {print $$2}' tuned.spec)
-UNITDIR = $(shell rpm --eval '%{_unitdir}')
-TMPFILESDIR = $(shell rpm --eval '%{_tmpfilesdir}')
+UNITDIR = $(shell rpm --eval '%{_unitdir}' 2>/dev/null || echo /usr/lib/systemd/system)
+TMPFILESDIR = $(shell rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo /usr/lib/tmpfiles.d)
 VERSIONED_NAME = $(NAME)-$(VERSION)
 
 DESTDIR = /
