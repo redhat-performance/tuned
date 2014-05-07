@@ -340,7 +340,7 @@ class Plugin(object):
 						current_value = None
 						new_value = None
 			except ValueError:
-				log.warn("cannot compare new value '%s' with current value '%s' by operator '%s', using '%s' directly as new value" % (val, current_value, new_value))
+				log.warn("cannot compare new value '%s' with current value '%s' by operator '%s', using '%s' directly as new value" % (val, current_value, op, new_value))
 
 		if current_value is not None:
 			self._storage_set(instance, command, current_value, device)
