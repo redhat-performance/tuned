@@ -31,10 +31,10 @@ class DiskPlugin(hotplug.Plugin):
 		self._free_devices = self._devices.copy()
 
 	def _device_is_supported(cls, device):
-		return  device.device_type == "disk" \
-			and device.attributes.get("removable", None) == "0" \
-			and device.parent is not None \
-			and device.parent.subsystem in ["scsi", "virtio"]
+		return  device.device_type == "disk" and \
+			device.attributes.get("removable", None) == "0" and \
+			(device.parent is None or \
+					device.parent.subsystem in ["scsi", "virtio"])
 
 	def _hardware_events_init(self):
 		self._hardware_inventory.subscribe(self, "block", self._hardware_events_callback)
