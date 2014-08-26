@@ -41,6 +41,13 @@ minimal, maximal and average time between operations to be able to
 identify applications that behave power inefficient (many small operations
 instead of fewer large ones).
 
+%package profiles-sap
+Summary: Additional tuned profile(s) targeted to SAP loads
+Requires: %{name} = %{version}-%{release}
+
+%description profiles-sap
+Additional tuned profile(s) targeted to SAP loads.
+
 %package profiles-compat
 Summary: Additional tuned profiles mainly for backward compatibility with tuned 1.0
 Requires: %{name} = %{version}-%{release}
@@ -109,6 +116,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %exclude %{_prefix}/lib/tuned/laptop-battery-powersave
 %exclude %{_prefix}/lib/tuned/enterprise-storage
 %exclude %{_prefix}/lib/tuned/spindown-disk
+%exclude %{_prefix}/lib/tuned/sap
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned/active_profile
@@ -140,6 +148,10 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %{_mandir}/man8/netdevstat.*
 %{_mandir}/man8/diskdevstat.*
 %{_mandir}/man8/scomes.*
+
+%files profiles-sap
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/sap
 
 %files profiles-compat
 %defattr(-,root,root,-)
