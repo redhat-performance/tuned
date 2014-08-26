@@ -75,6 +75,7 @@ class NetTuningPlugin(base.Plugin):
 	def _get_config_options(cls):
 		return {
 			"wake_on_lan": None,
+			"nf_conntrack_hashsize": None,
 		}
 
 	def _init_stats_and_idle(self, instance, device):
@@ -121,6 +122,10 @@ class NetTuningPlugin(base.Plugin):
 		# speed / 7  Mb -> MB
 		return (int) (0.6 * 1024 * 1024 * speed / 8)
 
+	@classmethod
+	def _nf_conntrack_hashsize_path(self):
+		return "/sys/module/nf_conntrack/parameters/hashsize"
+
 	@command_set("wake_on_lan", per_device=True)
 	def _set_wake_on_lan(self, value, device):
 		if value is None:
@@ -144,3 +149,19 @@ class NetTuningPlugin(base.Plugin):
 		except IOError:
 			pass
 		return value
+
+	@command_set("nf_conntrack_hashsize")
+	def _set_nf_conntrack_hashsize(self, value):
+		if value is None:
+			return
+
+		hashsize = int(value)
+		if hashsize >= 0:
+			tuned.utils.commands.write_to_file(self._nf_conntrack_hashsize_path(), hashsize)
+
+	@command_get("nf_conntrack_hashsize")
+	def _get_nf_conntrack_hashsize(self):
+		value = tuned.utils.commands.read_file(self._nf_conntrack_hashsize_path())
+		if len(value) > 0:
+			return int(value)
+		return None
