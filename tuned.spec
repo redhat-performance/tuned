@@ -48,6 +48,13 @@ Requires: %{name} = %{version}-%{release}
 %description profiles-sap
 Additional tuned profile(s) targeted to SAP loads.
 
+%package profiles-atomic
+Summary: Additional tuned profiles targeted to Atomic
+Requires: %{name} = %{version}-%{release}
+
+%description profiles-atomic
+Additional tuned profiles targeted to Atomic host and guest.
+
 %package profiles-compat
 Summary: Additional tuned profiles mainly for backward compatibility with tuned 1.0
 Requires: %{name} = %{version}-%{release}
@@ -117,6 +124,8 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %exclude %{_prefix}/lib/tuned/enterprise-storage
 %exclude %{_prefix}/lib/tuned/spindown-disk
 %exclude %{_prefix}/lib/tuned/sap
+%exclude %{_prefix}/lib/tuned/atomic-host
+%exclude %{_prefix}/lib/tuned/atomic-guest
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %config(noreplace) %{_sysconfdir}/tuned/active_profile
@@ -152,6 +161,11 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %files profiles-sap
 %defattr(-,root,root,-)
 %{_prefix}/lib/tuned/sap
+
+%files profiles-atomic
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/atomic-host
+%{_prefix}/lib/tuned/atomic-guest
 
 %files profiles-compat
 %defattr(-,root,root,-)
