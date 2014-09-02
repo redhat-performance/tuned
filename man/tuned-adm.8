@@ -141,6 +141,18 @@ Profile optimized for virtual hosts based on throughput-performance profile.
 It additionally enables more aggresive writeback of dirty pages.
 
 .TP
+.BI "atomic-guest"
+Profile optimized for virtual Atomic guests. It is based on virtual-guest
+profile. It additionally increases SELinux AVC cache, PID limit and tunes
+netfilter connections tracking.
+
+.TP
+.BI "atomic-host"
+Profile optimized for Atomic hosts. It is based on throughput-performance
+profile. It additionally increases SELinux AVC cache, PID limit and tunes
+netfilter connections tracking.
+
+.TP
 .BI "sap"
 Profile optimized for the best performance of SAP software. It is based on
 throughput-performance profile. It additionally tunes sysctl settings
