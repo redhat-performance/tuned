@@ -61,8 +61,8 @@ the command gracefully exits without performing any operation.
 .TP
 .B recommend
 Recommend profile suitable for your system. Currently only static detection is
-implemented - it decides according to data in /etc/system-release-cpe and
-virt-what output. The rules for autodetection are defined in recommend.conf in
+implemented - it decides according to data in /etc/system\-release\-cpe and
+virt\-what output. The rules for autodetection are defined in recommend.conf in
 profile directory. They can be overriden by user by putting the recommend.conf
 into /etc/tuned. The default rules recommends profiles targeted to the best
 performance or balanced profile if unsure.
@@ -82,7 +82,7 @@ ondemand governor is active (if supported by the current cpufreq driver).
 It enables ALPM power saving for SATA host adapters and sets the link power
 management policy to medium_power. It also sets the CPU energy performance
 bias to normal. It also enables AC97 audio power saving or (it depends on
-your system) HDA-Intel power savings with 10 seconds timeout. In case your
+your system) HDA\-Intel power savings with 10 seconds timeout. In case your
 system contains supported Radeon graphics card (with enabled KMS) it
 configures it to automatic power saving.
 
@@ -95,32 +95,32 @@ It also enables WiFi power saving, enables multi core power savings scheduler
 for low wakeup systems and makes sure the ondemand governor is active (if
 supported by the current cpufreq driver). It sets the CPU energy performance
 bias to powersave. It also enables AC97 audio power saving or (it depends on
-your system) HDA-Intel power savings (with 10 seconds timeout). In case your
+your system) HDA\-Intel power savings (with 10 seconds timeout). In case your
 system contains supported Radeon graphics card (with enabled KMS) it
 configures it to automatic power saving. On Asus Eee PCs dynamic Super
 Hybrid Engine is enabled.
 
 .TP
-.BI throughput-performance
+.BI throughput\-performance
 Profile for typical throughput performance tuning. Disables power saving
 mechanisms and enables sysctl settings that improve the throughput performance
 of your disk and network IO. CPU governor is set to performance and CPU energy
 performance bias is set to performance. Disk readahead values are increased.
 
 .TP
-.BI latency-performance
+.BI latency\-performance
 Profile for low latency performance tuning. Disables power saving mechanisms.
 CPU governor is set to performance andlocked to the low C states (by PM QoS).
 CPU energy performance bias to performance.
 
 .TP
-.BI network-throughput
-Profile for throughput network tuning. It is based on the throughput-performance
+.BI network\-throughput
+Profile for throughput network tuning. It is based on the throughput\-performance
 profile. It additionaly increases kernel network buffers.
 
 .TP
-.BI network-latency
-Profile for low latency network tuning. It is based on the latency-performance
+.BI network\-latency
+Profile for low latency network tuning. It is based on the latency\-performance
 profile. It additionaly disables transparent hugepages, NUMA balancing and
 tunes several other network related sysctl parameters.
 
@@ -130,32 +130,32 @@ Profile optimized for desktops based on balanced profile. It additionaly
 enables scheduler autogroups for better response of interactive applications.
 
 .TP
-.BI "virtual-guest"
-Profile optimized for virtual guests based on throughput-performance profile.
+.BI "virtual\-guest"
+Profile optimized for virtual guests based on throughput\-performance profile.
 It additionally decreases virtual memory swappiness and increases dirty_ratio
 settings.
 
 .TP
-.BI "virtual-host"
-Profile optimized for virtual hosts based on throughput-performance profile.
+.BI "virtual\-host"
+Profile optimized for virtual hosts based on throughput\-performance profile.
 It additionally enables more aggresive writeback of dirty pages.
 
 .TP
-.BI "atomic-guest"
-Profile optimized for virtual Atomic guests. It is based on virtual-guest
+.BI "atomic\-guest"
+Profile optimized for virtual Atomic guests. It is based on virtual\-guest
 profile. It additionally increases SELinux AVC cache, PID limit and tunes
 netfilter connections tracking.
 
 .TP
-.BI "atomic-host"
-Profile optimized for Atomic hosts. It is based on throughput-performance
+.BI "atomic\-host"
+Profile optimized for Atomic hosts. It is based on throughput\-performance
 profile. It additionally increases SELinux AVC cache, PID limit and tunes
 netfilter connections tracking.
 
 .TP
 .BI "sap"
 Profile optimized for the best performance of SAP software. It is based on
-throughput-performance profile. It additionally tunes sysctl settings
+throughput\-performance profile. It additionally tunes sysctl settings
 regarding shared memory, semaphores and maximum number of memory map
 areas a process may have.
 
@@ -170,35 +170,35 @@ It is the lowest of the available profiles in regard to power saving and only
 enables CPU and disk plugins of tuned.
 
 .TP
-.BI "desktop-powersave"
+.BI "desktop\-powersave"
 A power saving profile directed at desktop systems. Enables ALPM power saving
 for SATA host adapters as well as the CPU, ethernet and disk plugins of tuned.
 
 .TP
-.BI server-powersave
+.BI server\-powersave
 A power saving profile directed at server systems. Enables ALPM power saving
 for SATA host adapters, and activates the CPU and disk plugins of tuned.
 
 .TP
-.BI laptop-ac-powersave
+.BI laptop\-ac\-powersave
 Medium power saving profile directed at laptops running on AC. Enables ALPM
 power saving for SATA host adapters,  WiFi power saving as well as CPU,
 ethernet and disk plugins of tuned.
 
 .TP
-.BI laptop-battery-powersave
+.BI laptop\-battery\-powersave
 Strong power saving profile directed at laptops running on battery. Currently
 an alias to powersave profile.
 
 .TP
-.BI "spindown-disk"
+.BI "spindown\-disk"
 Strong power saving profile directed at machines with classic HDDs. It enables
 aggressive disk spin-down. Disk writeback values are increased and disk
 swappiness is lowered. Log syncing is disabled. All partitions are remounted
 with 'noatime' option. All tuned plugins are disabled.
 
 .TP
-.BI "enterprise-storage"
+.BI "enterprise\-storage"
 Server profile for high disk throughput performace tuning. Disables power
 saving mechanisms and enables deadline IO scheduler. Enables hugepages and
 disables disk barriers. Disk readahead values are increased. CPU governor is
