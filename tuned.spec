@@ -123,7 +123,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %exclude %{_prefix}/lib/tuned/laptop-battery-powersave
 %exclude %{_prefix}/lib/tuned/enterprise-storage
 %exclude %{_prefix}/lib/tuned/spindown-disk
-%exclude %{_prefix}/lib/tuned/sap
+%exclude %{_prefix}/lib/tuned/sap-netweaver
 %exclude %{_prefix}/lib/tuned/atomic-host
 %exclude %{_prefix}/lib/tuned/atomic-guest
 %{_prefix}/lib/tuned
@@ -160,7 +160,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 
 %files profiles-sap
 %defattr(-,root,root,-)
-%{_prefix}/lib/tuned/sap
+%{_prefix}/lib/tuned/sap-netweaver
 
 %files profiles-atomic
 %defattr(-,root,root,-)
