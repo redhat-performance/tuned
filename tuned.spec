@@ -42,11 +42,18 @@ identify applications that behave power inefficient (many small operations
 instead of fewer large ones).
 
 %package profiles-sap
-Summary: Additional tuned profile(s) targeted to SAP loads
+Summary: Additional tuned profile(s) targeted to SAP NetWeaver loads
 Requires: %{name} = %{version}-%{release}
 
 %description profiles-sap
-Additional tuned profile(s) targeted to SAP loads.
+Additional tuned profile(s) targeted to SAP NetWeaver loads.
+
+%package profiles-sap-hana
+Summary: Additional tuned profile(s) targeted to SAP HANA loads
+Requires: %{name} = %{version}-%{release}
+
+%description profiles-sap-hana
+Additional tuned profile(s) targeted to SAP HANA loads.
 
 %package profiles-atomic
 Summary: Additional tuned profiles targeted to Atomic
@@ -116,6 +123,8 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %exclude %{_prefix}/lib/tuned/enterprise-storage
 %exclude %{_prefix}/lib/tuned/spindown-disk
 %exclude %{_prefix}/lib/tuned/sap-netweaver
+%exclude %{_prefix}/lib/tuned/sap-hana
+%exclude %{_prefix}/lib/tuned/sap-hana-vmware
 %exclude %{_prefix}/lib/tuned/atomic-host
 %exclude %{_prefix}/lib/tuned/atomic-guest
 %{_prefix}/lib/tuned
@@ -153,6 +162,11 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %files profiles-sap
 %defattr(-,root,root,-)
 %{_prefix}/lib/tuned/sap-netweaver
+
+%files profiles-sap-hana
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/sap-hana
+%{_prefix}/lib/tuned/sap-hana-vmware
 
 %files profiles-atomic
 %defattr(-,root,root,-)
