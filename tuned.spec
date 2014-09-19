@@ -45,6 +45,20 @@ minimal, maximal and average time between operations to be able to
 identify applications that behave power inefficient (many small operations
 instead of fewer large ones).
 
+%package profiles-sap
+Summary: Additional tuned profile(s) targeted to SAP NetWeaver loads
+Requires: %{name} = %{version}-%{release}
+
+%description profiles-sap
+Additional tuned profile(s) targeted to SAP NetWeaver loads.
+
+%package profiles-sap-hana
+Summary: Additional tuned profile(s) targeted to SAP HANA loads
+Requires: %{name} = %{version}-%{release}
+
+%description profiles-sap-hana
+Additional tuned profile(s) targeted to SAP HANA loads.
+
 %prep
 %setup -q
 
@@ -97,6 +111,9 @@ fi
 %{_bindir}/tuned-adm
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tune-profiles/active-profile
 %{_sysconfdir}/tune-profiles
+%exclude %{_sysconfdir}/tune-profiles/sap-netweaver
+%exclude %{_sysconfdir}/tune-profiles/sap-hana
+%exclude %{_sysconfdir}/tune-profiles/sap-hana-vmware
 %{_datadir}/tuned
 %{_mandir}/man1/tuned-adm.*
 %{_mandir}/man5/tuned.conf.*
@@ -134,6 +151,14 @@ fi
 %{_mandir}/man8/diskdevstat.*
 %{_mandir}/man8/scomes.*
 
+%files profiles-sap
+%defattr(-,root,root,-)
+%{_sysconfdir}/tune-profiles/sap-netweaver
+
+%files profiles-sap-hana
+%defattr(-,root,root,-)
+%{_sysconfdir}/tune-profiles/sap-hana
+%{_sysconfdir}/tune-profiles/sap-hana-vmware
 
 %changelog
 * Thu Oct 10 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 0.2.24-1
