@@ -1,4 +1,5 @@
 import os
+import errno
 import threading
 import tuned.logs
 from tuned.exceptions import TunedException
@@ -104,16 +105,34 @@ class Daemon(object):
 	def _save_active_profile(self, profile_name):
 		try:
 			with open(consts.ACTIVE_PROFILE_FILE, "w") as f:
-				f.write(profile_name)
+				f.write(profile_name + "\n")
 		except (OSError,IOError) as e:
 			log.error("Cannot write active profile into %s: %s" % (consts.ACTIVE_PROFILE_FILE, str(e)))
+
+	def _set_recommended_profile(self):
+		log.info("no profile preset, checking what is recommended for your configuration")
+		profile = tuned.utils.commands.recommend_profile()
+		log.info("using '%s' profile and setting it as active" % profile)
+		self._save_active_profile(profile)
+		return profile
 
 	def _get_active_profile(self):
 		try:
 			with open(consts.ACTIVE_PROFILE_FILE, "r") as f:
-				return f.read().strip()
-		except (OSError, IOError, EOFError) as e:
-			log.error("Cannot read active profile, setting default.")
+				profile = f.read().strip()
+				if profile == "":
+					profile = self._set_recommended_profile()
+				return profile
+		except IOError as e:
+			if e.errno == errno.ENOENT:
+				# No such file or directory
+				profile = self._set_recommended_profile()
+			else:
+				profile = consts.DEFAULT_PROFILE
+				log.error("error reading active profile from '%s', falling back to '%s' profile" % (consts.ACTIVE_PROFILE_FILE, profile))
+			return profile
+		except (OSError, EOFError) as e:
+			log.error("cannot read active profile, falling back to '%s' profile" % consts.DEFAULT_PROFILE)
 			return consts.DEFAULT_PROFILE
 
 	def is_enabled(self):
