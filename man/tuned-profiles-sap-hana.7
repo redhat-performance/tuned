@@ -1,0 +1,60 @@
+.\"/* 
+.\" * All rights reserved
+.\" * Copyright (C) 2009-2014 Red Hat, Inc.
+.\" * Authors: Jaroslav Škarvada
+.\" *
+.\" * This program is free software; you can redistribute it and/or
+.\" * modify it under the terms of the GNU General Public License
+.\" * as published by the Free Software Foundation; either version 2
+.\" * of the License, or (at your option) any later version.
+.\" *
+.\" * This program is distributed in the hope that it will be useful,
+.\" * but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" * GNU General Public License for more details.
+.\" *
+.\" * You should have received a copy of the GNU General Public License
+.\" * along with this program; if not, write to the Free Software
+.\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+.\" */
+.\" 
+.TH TUNED_PROFILES_SAP_HANA "7" "23 Sep 2014" "Fedora Power Management SIG" "tuned"
+.SH NAME
+tuned\-profiles\-sap\-hana - description of profiles provided for the SAP HANA
+
+.SH DESCRIPTION
+These profiles provides performance optimizations for the SAP HANA applications.
+
+.SH PROFILES
+The following profiles are provided:
+
+.TP
+.BI "sap\-hana"
+A performance optimized profile for the SAP HANA applications.
+It is based on throughput\-performance profile. It additionally disables
+transparent hugepages, locks CPU to the low C states (by PM QoS) and tunes sysctl
+regarding semaphores.
+
+.TP
+.BI "sap\-hana\-vmware"
+A performance optimized profile for the SAP HANA applications on VMware.
+It is based on throughput\-performance profile. It additionally disables
+transparent hugepages, locks CPU to the low C states (by PM QoS) and tunes sysctl
+regarding semaphores. It decreases virtual memory swappiness and disables large
+recieve offload for the network adapter.
+
+.SH "FILES"
+.nf
+.I /etc/tuned/*
+.I /usr/lib/tuned/*
+
+.SH "SEE ALSO"
+.BR tuned (8)
+.BR tuned\-adm (8)
+.BR tuned\-profiles (7)
+.BR tuned\-profiles\-atomic (7)
+.BR tuned\-profiles\-sap (7)
+.BR tuned\-profiles\-sap\-compat (7)
+.SH AUTHOR
+.NF
+Jaroslav Škarvada <jskarvad@redhat.com>

@@ -1,0 +1,132 @@
+.\"/* 
+.\" * All rights reserved
+.\" * Copyright (C) 2009-2014 Red Hat, Inc.
+.\" * Authors: Jaroslav Škarvada, Jan Kaluža, Jan Včelák,
+.\" *          Marcela Mašláňová, Phil Knirsch
+.\" *
+.\" * This program is free software; you can redistribute it and/or
+.\" * modify it under the terms of the GNU General Public License
+.\" * as published by the Free Software Foundation; either version 2
+.\" * of the License, or (at your option) any later version.
+.\" *
+.\" * This program is distributed in the hope that it will be useful,
+.\" * but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" * GNU General Public License for more details.
+.\" *
+.\" * You should have received a copy of the GNU General Public License
+.\" * along with this program; if not, write to the Free Software
+.\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+.\" */
+.\" 
+.TH TUNED_PROFILES "7" "23 Sep 2014" "Fedora Power Management SIG" "tuned"
+.SH NAME
+tuned\-profiles - description of basic tuned profiles
+
+.SH DESCRIPTION
+These are the base profiles which are mostly shipped in the base tuned
+package. They are targeted to various goals. Mostly they provide
+performance optimizations but there are also profiles targeted to
+low power consumption, low latency and others. You can mostly deduce the
+purpose of the profile by its name or you can see full description bellow.
+
+The profiles are stored in subdirectories below \fI/usr/lib/tuned\fP. If you
+need to customize the profiles, you can copy them to \fI/etc/tuned\fP and modify
+them as you need. When loading profiles with the same name, the /etc/tuned takes
+precedence. In such case you will not lose your customized profiles  between
+tuned updates.
+
+The power saving profiles contain settings that are typically not enabled by
+default as they will noticeably impact the latency/performance of your system
+as opposed to the power saving mechanisms that are enabled by default. On the
+other hand the performance profiles disable the additional power saving
+mechanisms of tuned as they would negatively impact throughput or latency.
+
+.SH PROFILES
+At the moment we're providing the following pre-defined profiles:
+
+.TP
+.BI "balanced"
+It is the default profile. It provides balanced power saving and performance.
+At the moment it enables CPU and disk plugins of tuned and it makes sure the
+ondemand governor is active (if supported by the current cpufreq driver).
+It enables ALPM power saving for SATA host adapters and sets the link power
+management policy to medium_power. It also sets the CPU energy performance
+bias to normal. It also enables AC97 audio power saving or (it depends on
+your system) HDA\-Intel power savings with 10 seconds timeout. In case your
+system contains supported Radeon graphics card (with enabled KMS) it
+configures it to automatic power saving.
+
+.TP
+.BI "powersave"
+Maximal power saving, at the moment it enables USB autosuspend (in case
+environment variable USB_AUTOSUSPEND is set to 1), enables ALPM power saving
+for SATA host adapters and sets the link power manamgent policy to min_power.
+It also enables WiFi power saving, enables multi core power savings scheduler
+for low wakeup systems and makes sure the ondemand governor is active (if
+supported by the current cpufreq driver). It sets the CPU energy performance
+bias to powersave. It also enables AC97 audio power saving or (it depends on
+your system) HDA\-Intel power savings (with 10 seconds timeout). In case your
+system contains supported Radeon graphics card (with enabled KMS) it
+configures it to automatic power saving. On Asus Eee PCs dynamic Super
+Hybrid Engine is enabled.
+
+.TP
+.BI throughput\-performance
+Profile for typical throughput performance tuning. Disables power saving
+mechanisms and enables sysctl settings that improve the throughput performance
+of your disk and network IO. CPU governor is set to performance and CPU energy
+performance bias is set to performance. Disk readahead values are increased.
+
+.TP
+.BI latency\-performance
+Profile for low latency performance tuning. Disables power saving mechanisms.
+CPU governor is set to performance andlocked to the low C states (by PM QoS).
+CPU energy performance bias to performance.
+
+.TP
+.BI network\-throughput
+Profile for throughput network tuning. It is based on the throughput\-performance
+profile. It additionaly increases kernel network buffers.
+
+.TP
+.BI network\-latency
+Profile for low latency network tuning. It is based on the latency\-performance
+profile. It additionaly disables transparent hugepages, NUMA balancing and
+tunes several other network related sysctl parameters.
+
+.TP
+.BI "desktop"
+Profile optimized for desktops based on balanced profile. It additionaly
+enables scheduler autogroups for better response of interactive applications.
+
+.TP
+.BI "virtual\-guest"
+Profile optimized for virtual guests based on throughput\-performance profile.
+It additionally decreases virtual memory swappiness and increases dirty_ratio
+settings.
+
+.TP
+.BI "virtual\-host"
+Profile optimized for virtual hosts based on throughput\-performance profile.
+It additionally enables more aggresive writeback of dirty pages.
+
+.SH "FILES"
+.nf
+.I /etc/tuned/*
+.I /usr/lib/tuned/*
+
+.SH "SEE ALSO"
+.BR tuned (8)
+.BR tuned\-adm (8)
+.BR tuned\-profiles\-atomic (7)
+.BR tuned\-profiles\-sap (7)
+.BR tuned\-profiles\-sap-hana (7)
+.BR tuned\-profiles\-compat (7)
+.SH AUTHOR
+.NF
+Jaroslav Škarvada <jskarvad@redhat.com>
+Jan Kaluža <jkaluza@redhat.com>
+Jan Včelák <jvcelak@redhat.com>
+Marcela Mašláňová <mmaslano@redhat.com>
+Phil Knirsch <pknirsch@redhat.com>

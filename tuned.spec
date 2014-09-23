@@ -137,6 +137,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %dir %{_localstatedir}/log/tuned
 %dir /run/tuned
 %{_mandir}/man5/tuned*
+%{_mandir}/man7/tuned-profiles.7*
 %{_mandir}/man8/tuned*
 
 %files utils
@@ -162,16 +163,19 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %files profiles-sap
 %defattr(-,root,root,-)
 %{_prefix}/lib/tuned/sap-netweaver
+%{_mandir}/man7/tuned-profiles-sap.7*
 
 %files profiles-sap-hana
 %defattr(-,root,root,-)
 %{_prefix}/lib/tuned/sap-hana
 %{_prefix}/lib/tuned/sap-hana-vmware
+%{_mandir}/man7/tuned-profiles-sap-hana.7*
 
 %files profiles-atomic
 %defattr(-,root,root,-)
 %{_prefix}/lib/tuned/atomic-host
 %{_prefix}/lib/tuned/atomic-guest
+%{_mandir}/man7/tuned-profiles-atomic.7*
 
 %files profiles-compat
 %defattr(-,root,root,-)
@@ -182,6 +186,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %{_prefix}/lib/tuned/laptop-battery-powersave
 %{_prefix}/lib/tuned/enterprise-storage
 %{_prefix}/lib/tuned/spindown-disk
+%{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
 * Wed Nov  6 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 2.3.0-1

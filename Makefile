@@ -79,16 +79,12 @@ install:
 	mkdir -p $(DESTDIR)/etc/dbus-1/system.d
 	install -m 0644 dbus.conf $(DESTDIR)/etc/dbus-1/system.d/com.redhat.tuned.conf
 
-	# manual pages *.8
-	mkdir -p $(DESTDIR)/usr/share/man/man8
-	for file in man/*.8; do \
-		install -m 0644 $$file $(DESTDIR)/usr/share/man/man8; \
-	done
-
-	# manual pages *.5
-	mkdir -p $(DESTDIR)/usr/share/man/man5
-	for file in man/*.5; do \
-		install -m 0644 $$file $(DESTDIR)/usr/share/man/man5; \
+	# manual pages
+	for man_section in 5 7 8; do \
+		mkdir -p $(DESTDIR)/usr/share/man/man$$man_section; \
+		for file in man/*.$$man_section; do \
+			install -m 0644 $$file $(DESTDIR)/usr/share/man/man$$man_section; \
+		done; \
 	done
 
 	# documentation
