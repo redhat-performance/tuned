@@ -129,7 +129,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %exclude %{_prefix}/lib/tuned/atomic-guest
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
-%config(noreplace) %{_sysconfdir}/tuned/active_profile
+%config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/active_profile
 %config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
 %{_sysconfdir}/dbus-1/system.d/com.redhat.tuned.conf
 %{_tmpfilesdir}/tuned.conf
