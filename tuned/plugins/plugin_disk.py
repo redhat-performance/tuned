@@ -234,10 +234,18 @@ class DiskPlugin(hotplug.Plugin):
 	def _readahead_file(self, device):
 		return os.path.join("/sys/block/", device, "queue/read_ahead_kb")
 
+	def _parse_ra(self, value):
+		val = str(value).split(None, 1)
+		v = int(val[0])
+		if len(val) > 1 and val[1][0] == "s":
+			# v *= 512 / 1024
+			v /= 2
+		return v
+
 	@command_set("readahead", per_device=True)
 	def _set_readahead(self, value, device):
 		sys_file = self._readahead_file(device)
-		self._cmd.write_to_file(sys_file, "%d" % int(value))
+		self._cmd.write_to_file(sys_file, "%d" % self._parse_ra(value))
 
 	@command_get("readahead")
 	def _get_readahead(self, device):
