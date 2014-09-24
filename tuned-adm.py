@@ -29,7 +29,7 @@ import tuned.version as ver
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Manage tuned daemon.")
 	parser.add_argument('--version', "-v", action = "version", version = "%%(prog)s %s.%s.%s" % (ver.TUNED_VERSION_MAJOR, ver.TUNED_VERSION_MINOR, ver.TUNED_VERSION_PATCH))
-	parser.add_argument("--debug", action="store_true", help=argparse.SUPPRESS)
+	parser.add_argument("--debug", "-d", action="store_true", help="show debug messages")
 	subparsers = parser.add_subparsers()
 
 	parser_list = subparsers.add_parser("list", help="list available profiles")
@@ -56,8 +56,8 @@ if __name__ == "__main__":
 	result = False
 
 	try:
-		controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
-		admin = tuned.admin.Admin(controller)
+		controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE, debug)
+		admin = tuned.admin.Admin(controller, debug)
 
 		action = getattr(admin, action_name)
 		result = action(**options)

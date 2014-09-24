@@ -1,7 +1,7 @@
 import base
 from decorators import *
 import tuned.logs
-from tuned.utils.commands import *
+from tuned.utils.commands import commands
 import os
 
 log = tuned.logs.get()
@@ -20,6 +20,7 @@ class VideoPlugin(base.Plugin):
 			self._devices.add(device.sys_name)
 
 		self._free_devices = self._devices.copy()
+		self._cmd = commands()
 
 	def _get_config_options(self):
 		return {
@@ -47,14 +48,14 @@ class VideoPlugin(base.Plugin):
 			return
 
 		if value in ["default", "auto", "low", "mid", "high"]:
-			tuned.utils.commands.write_to_file(sys_files["method"], "profile")
-			tuned.utils.commands.write_to_file(sys_files["profile"], value)
+			self._cmd.write_to_file(sys_files["method"], "profile")
+			self._cmd.write_to_file(sys_files["profile"], value)
 		elif value == "dynpm":
-			tuned.utils.commands.write_to_file(sys_files["method"], "dynpm")
+			self._cmd.write_to_file(sys_files["method"], "dynpm")
 		else:
 			log.warn("Invalid option for radeon_powersave.")
 
 	@command_get("radeon_powersave")
 	def _get_radeon_powersave(self, device):
 		sys_files = self._radeon_powersave_files(device)
-		return tuned.utils.commands.read_file(sys_files["profile"])
+		return self._cmd.read_file(sys_files["profile"])

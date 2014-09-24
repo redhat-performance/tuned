@@ -1,7 +1,7 @@
 import base
 from decorators import *
 import tuned.logs
-import tuned.utils.commands
+from tuned.utils.commands import commands
 import glob
 
 log = tuned.logs.get()
@@ -19,6 +19,7 @@ class USBPlugin(base.Plugin):
 			self._devices.add(device.sys_name)
 
 		self._free_devices = self._devices.copy()
+		self._cmd = commands()
 
 	def _get_config_options(self):
 		return {
@@ -42,9 +43,9 @@ class USBPlugin(base.Plugin):
 			return
 
 		sys_file = self._autosuspend_sysfile(device)
-		tuned.utils.commands.write_to_file(sys_file, "1" if enable else "0")
+		self._cmd.write_to_file(sys_file, "1" if enable else "0")
 
 	@command_get("autosuspend")
 	def _get_autosuspend(self, device):
 		sys_file = self._autosuspend_sysfile(device)
-		return tuned.utils.commands.read_file(sys_file)
+		return self._cmd.read_file(sys_file)

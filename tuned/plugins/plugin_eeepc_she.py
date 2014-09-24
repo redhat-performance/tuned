@@ -1,7 +1,7 @@
 import base
 import exceptions
 import tuned.logs
-import tuned.utils.commands
+from tuned.utils.commands import commands
 import os
 
 log = tuned.logs.get()
@@ -12,6 +12,7 @@ class EeePCSHEPlugin(base.Plugin):
 	"""
 
 	def __init__(self, *args, **kwargs):
+		self._cmd = commands()
 		self._control_file = "/sys/devices/platform/eeepc/cpufv"
 		if not os.path.isfile(self._control_file):
 			self._control_file = "/sys/devices/platform/eeepc-wmi/cpufv"
@@ -53,5 +54,5 @@ class EeePCSHEPlugin(base.Plugin):
 		new_mode_numeric = int(instance.options["she_%s" % new_mode])
 		if instance._she_mode != new_mode_numeric:
 			log.info("new eeepc_she mode %s (%d) " % (new_mode, new_mode_numeric))
-			tuned.utils.commands.write_to_file(self._control_file, "%s" % new_mode_numeric)
+			self._cmd.write_to_file(self._control_file, "%s" % new_mode_numeric)
 			self._she_mode = new_mode_numeric

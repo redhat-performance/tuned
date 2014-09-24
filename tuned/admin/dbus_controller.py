@@ -5,11 +5,12 @@ from exceptions import TunedAdminDBusException
 __all__ = ["DBusController"]
 
 class DBusController(object):
-	def __init__(self, bus_name, interface_name, object_name):
+	def __init__(self, bus_name, interface_name, object_name, debug = False):
 		self._bus_name = bus_name
 		self._interface_name = interface_name
 		self._object_name = object_name
 		self._proxy = None
+		self._debug = debug
 
 	def _init_proxy(self):
 		if self._proxy is None:
@@ -26,7 +27,10 @@ class DBusController(object):
 			method = self._proxy.get_dbus_method(method_name)
 			return method(*args, **kwargs)
 		except dbus.exceptions.DBusException as dbus_exception:
-			raise TunedAdminDBusException("DBus call to Tuned daemon failed (%s)." % str(dbus_exception))
+			err_str = "DBus call to Tuned daemon failed"
+			if self._debug:
+				err_str += " (%s)" % str(dbus_exception)
+			raise TunedAdminDBusException(err_str)
 
 	def is_running(self):
 		return self._call("is_running")

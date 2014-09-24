@@ -2,6 +2,7 @@ import base
 from decorators import *
 import tuned.logs
 from tuned.utils.nettool import ethcard
+from tuned utils.commands import commands
 import os
 import re
 
@@ -18,6 +19,7 @@ class NetTuningPlugin(base.Plugin):
 		super(self.__class__, self).__init__(*args, **kwargs)
 		self._load_smallest = 0.05
 		self._level_steps = 6
+		self._cmd = commands()
 
 	def _init_devices(self):
 		self._devices = set()
@@ -137,13 +139,13 @@ class NetTuningPlugin(base.Plugin):
 			log.warn("Incorrect 'wake_on_lan' value.")
 			return
 
-		tuned.utils.commands.execute(["ethtool", "-s", device, "wol", value])
+		self._cmd.execute(["ethtool", "-s", device, "wol", value])
 
 	@command_get("wake_on_lan")
 	def _get_wake_on_lan(self, device):
 		value = None
 		try:
-			m = re.match(r".*Wake-on:\s*([" + WOL_VALUES + "]+).*", tuned.utils.commands.execute(["ethtool", device])[1], re.S)
+			m = re.match(r".*Wake-on:\s*([" + WOL_VALUES + "]+).*", self._cmd.execute(["ethtool", device])[1], re.S)
 			if m:
 				value = m.group(1)
 		except IOError:
@@ -157,11 +159,11 @@ class NetTuningPlugin(base.Plugin):
 
 		hashsize = int(value)
 		if hashsize >= 0:
-			tuned.utils.commands.write_to_file(self._nf_conntrack_hashsize_path(), hashsize)
+			self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize)
 
 	@command_get("nf_conntrack_hashsize")
 	def _get_nf_conntrack_hashsize(self):
-		value = tuned.utils.commands.read_file(self._nf_conntrack_hashsize_path())
+		value = self._cmd.read_file(self._nf_conntrack_hashsize_path())
 		if len(value) > 0:
 			return int(value)
 		return None

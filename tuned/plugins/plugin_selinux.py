@@ -2,7 +2,7 @@ import os
 import base
 from decorators import *
 import tuned.logs
-import tuned.utils.commands
+from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
@@ -21,6 +21,7 @@ class SelinuxPlugin(base.Plugin):
 		return path
 
 	def __init__(self, *args, **kwargs):
+		self._cmd = commands()
 		self._selinux_path = self._get_selinux_path()
 		if self._selinux_path is None:
 			raise exceptions.NotSupportedPluginException("SELinux is not enabled on your system or incompatible version is used.")
@@ -45,11 +46,11 @@ class SelinuxPlugin(base.Plugin):
 			return
 		threshold = int(value)
 		if threshold >= 0:
-			tuned.utils.commands.write_to_file(self._cache_threshold_path, threshold)
+			self._cmd.write_to_file(self._cache_threshold_path, threshold)
 
 	@command_get("avc_cache_threshold")
 	def _get_avc_cache_threshold(self):
-		value = tuned.utils.commands.read_file(self._cache_threshold_path)
+		value = self._cmd.read_file(self._cache_threshold_path)
 		if len(value) > 0:
 			return int(value)
 		return None

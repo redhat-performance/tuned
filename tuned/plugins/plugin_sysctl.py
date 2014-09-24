@@ -2,6 +2,7 @@ import base
 from decorators import *
 import tuned.logs
 from subprocess import *
+from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
@@ -13,6 +14,7 @@ class SysctlPlugin(base.Plugin):
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
 		self._has_dynamic_options = True
+		self._cmd = commands()
 
 	def _sysctl_storage_key(self, instance):
 		return "%s/options" % instance.name
@@ -51,7 +53,7 @@ class SysctlPlugin(base.Plugin):
 	def _execute_sysctl(self, arguments):
 		execute = ["/sbin/sysctl"] + arguments
 		log.debug("executing %s" % execute)
-		return tuned.utils.commands.execute(execute)
+		return self._cmd.execute(execute)
 
 	def _read_sysctl(self, option):
 		retcode, stdout = self._execute_sysctl(["-e", option])

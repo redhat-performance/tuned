@@ -5,8 +5,10 @@ import tuned.logs
 import os
 import struct
 import glob
+from tuned.utils.commands import commands
 
 log = tuned.logs.get()
+cmd = commands()
 
 class VMPlugin(base.Plugin):
 	"""
@@ -40,7 +42,7 @@ class VMPlugin(base.Plugin):
 
 		sys_file = self._thp_file()
 		if os.path.exists(sys_file):
-			tuned.utils.commands.write_to_file(sys_file, value)
+			cmd.write_to_file(sys_file, value)
 		else:
 			log.warn("Option 'transparent_hugepages' is not supported on current hardware.")
 
@@ -48,6 +50,6 @@ class VMPlugin(base.Plugin):
 	def _get_transparent_hugepages(self):
 		sys_file = self._thp_file()
 		if os.path.exists(sys_file):
-			return tuned.utils.commands.get_active_option(tuned.utils.commands.read_file(sys_file))
+			return cmd.get_active_option(cmd.read_file(sys_file))
 		else:
 			return None

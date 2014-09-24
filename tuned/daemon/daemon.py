@@ -4,7 +4,7 @@ import threading
 import tuned.logs
 from tuned.exceptions import TunedException
 import tuned.consts as consts
-import tuned.utils.commands
+from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
@@ -34,6 +34,7 @@ class Daemon(object):
 		self._unit_manager = unit_manager
 		self._profile_loader = profile_loader
 		self._init_threads()
+		self._cmd = commands()
 		try:
 			self._init_profile(profile_name)
 		except TunedException as e:
@@ -89,7 +90,7 @@ class Daemon(object):
 		# the default) is still much better than 50 ms polling with unpatched interpreter.
 		# For more details see tuned rhbz#917587.
 		_sleep_cnt = self._sleep_cycles
-		while not tuned.utils.commands.wait(self._terminate, self._sleep_interval):
+		while not self._cmd.wait(self._terminate, self._sleep_interval):
 			if self._dynamic_tuning:
 				_sleep_cnt -= 1
 				if _sleep_cnt <= 0:
@@ -111,7 +112,7 @@ class Daemon(object):
 
 	def _set_recommended_profile(self):
 		log.info("no profile preset, checking what is recommended for your configuration")
-		profile = tuned.utils.commands.recommend_profile()
+		profile = self._cmd.recommend_profile()
 		log.info("using '%s' profile and setting it as active" % profile)
 		self._save_active_profile(profile)
 		return profile

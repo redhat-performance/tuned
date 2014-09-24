@@ -2,10 +2,11 @@ import base
 from decorators import *
 from subprocess import Popen,PIPE
 import tuned.logs
-import tuned.utils.commands
+from tuned.utils.commands import commands
 import glob
 
 log = tuned.logs.get()
+cmd = commands()
 
 class MountsPlugin(base.Plugin):
 	"""
@@ -67,7 +68,7 @@ class MountsPlugin(base.Plugin):
 		"""
 		source_filenames = glob.glob("/sys/block/%s/device/scsi_disk/*/cache_type" % device)
 		for source_filename in source_filenames:
-			return tuned.utils.commands.read_file(source_filename).strip()
+			return self._cmd.read_file(source_filename).strip()
 		return None
 
 	def _mountpoint_has_writeback_cache(self, mountpoint):
@@ -113,7 +114,7 @@ class MountsPlugin(base.Plugin):
 		Remounts partition.
 		"""
 		remount_command = ["/usr/bin/mount", partition, "-o", "remount,%s" % options]
-		tuned.utils.commands.execute(remount_command)
+		cmd.execute(remount_command)
 
 	@command_custom("disable_barriers", per_device=True)
 	def _disable_barriers(self, start, value, mountpoint):

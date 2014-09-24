@@ -1,7 +1,7 @@
 import base
 from decorators import *
 import tuned.logs
-import tuned.utils.commands
+from tuned.utils.commands import commands
 
 import os
 import struct
@@ -26,6 +26,7 @@ class CPULatencyPlugin(base.Plugin):
 		self._min_perf_pct_save = None
 		self._max_perf_pct_save = None
 		self._no_turbo_save = None
+		self._cmd = commands()
 
 	def _init_devices(self):
 		self._devices = set()
@@ -50,7 +51,7 @@ class CPULatencyPlugin(base.Plugin):
 		}
 
 	def _check_cpupower(self):
-		if tuned.utils.commands.execute(["cpupower", "frequency-info"])[0] == 0:
+		if self._cmd.execute(["cpupower", "frequency-info"])[0] == 0:
 			self._has_cpupower = True
 		else:
 			self._has_cpupower = False
@@ -58,7 +59,7 @@ class CPULatencyPlugin(base.Plugin):
 
 	def _check_energy_perf_bias(self):
 		self._has_energy_perf_bias = False
-		retcode = tuned.utils.commands.execute(["x86_energy_perf_policy", "-r"])[0]
+		retcode = self._cmd.execute(["x86_energy_perf_policy", "-r"])[0]
 		if retcode == 0:
 			self._has_energy_perf_bias = True
 		elif retcode == -1:
@@ -150,11 +151,11 @@ class CPULatencyPlugin(base.Plugin):
 		pass
 
 	def _get_intel_pstate_attr(self, attr):
-		return tuned.utils.commands.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None)
+		return self._cmd.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None)
 
 	def _set_intel_pstate_attr(self, attr, val):
 		if val is not None:
-			tuned.utils.commands.write_to_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, val)
+			self._cmd.write_to_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, val)
 
 	def _set_latency(self, latency):
 		latency = int(latency)
@@ -165,7 +166,7 @@ class CPULatencyPlugin(base.Plugin):
 			self._latency = latency
 
 	def _get_available_governors(self, device):
-		return tuned.utils.commands.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).split()
+		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).split()
 
 	@command_set("governor", per_device=True)
 	def _set_governor(self, governor, device):
@@ -175,16 +176,16 @@ class CPULatencyPlugin(base.Plugin):
 		log.info("setting governor '%s' on cpu '%s'" % (governor, device))
 		if self._has_cpupower:
 			cpu_id = device.lstrip("cpu")
-			tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-set", "-g", str(governor)])
+			self._cmd.execute(["cpupower", "-c", cpu_id, "frequency-set", "-g", str(governor)])
 		else:
-			tuned.utils.commands.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
+			self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
 
 	@command_get("governor")
 	def _get_governor(self, device):
 		governor = None
 		if self._has_cpupower:
 			cpu_id = device.lstrip("cpu")
-			retcode, lines = tuned.utils.commands.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"])
+			retcode, lines = self._cmd.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"])
 			if retcode == 0:
 				for line in lines.splitlines():
 					if line.startswith("analyzing"):
@@ -194,7 +195,7 @@ class CPULatencyPlugin(base.Plugin):
 						governor = l[2].strip()
 						break
 		else:
-			data = tuned.utils.commands.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device).strip()
+			data = self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device).strip()
 			if len(data) > 0:
 				governor = data
 
@@ -209,14 +210,14 @@ class CPULatencyPlugin(base.Plugin):
 		if self._has_energy_perf_bias:
 			log.info("setting energy_perf_bias '%s' on cpu '%s'" % (energy_perf_bias, device))
 			cpu_id = device.lstrip("cpu")
-			tuned.utils.commands.execute(["x86_energy_perf_policy", "-c", cpu_id, str(energy_perf_bias)])
+			self._cmd.execute(["x86_energy_perf_policy", "-c", cpu_id, str(energy_perf_bias)])
 
 	@command_get("energy_perf_bias")
 	def _get_energy_perf_bias(self, device):
 		energy_perf_bias = None
 		if self._has_energy_perf_bias:
 			cpu_id = device.lstrip("cpu")
-			retcode, lines = tuned.utils.commands.execute(["x86_energy_perf_policy", "-c", cpu_id, "-r"])
+			retcode, lines = self._cmd.execute(["x86_energy_perf_policy", "-c", cpu_id, "-r"])
 			if retcode == 0:
 				for line in lines.splitlines():
 					l = line.split()

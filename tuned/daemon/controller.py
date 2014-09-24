@@ -2,7 +2,7 @@ from tuned import exports
 import tuned.logs
 import tuned.exceptions
 import threading
-import tuned.utils.commands
+from tuned.utils.commands import commands
 
 __all__ = ["Controller"]
 
@@ -18,6 +18,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		super(self.__class__, self).__init__()
 		self._daemon = daemon
 		self._terminate = threading.Event()
+		self._cmd = commands()
 
 	def run(self):
 		"""
@@ -28,7 +29,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 		self._terminate.clear()
 		# we have to pass some timeout, otherwise signals will not work
-		while not tuned.utils.commands.wait(self._terminate, 3600):
+		while not self._cmd.wait(self._terminate, 3600):
 			pass
 
 		log.info("terminating controller")
@@ -101,4 +102,4 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 	@exports.export("", "s")
 	def recommend_profile(self):
-		return tuned.utils.commands.recommend_profile()
+		return self._cmd.recommend_profile()

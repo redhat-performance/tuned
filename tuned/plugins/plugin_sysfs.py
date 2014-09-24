@@ -4,7 +4,7 @@ import os.path
 from decorators import *
 import tuned.logs
 from subprocess import *
-import tuned.utils.commands
+from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
@@ -18,6 +18,7 @@ class SysfsPlugin(base.Plugin):
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
 		self._has_dynamic_options = True
+		self._cmd = commands()
 
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
@@ -45,11 +46,11 @@ class SysfsPlugin(base.Plugin):
 		return re.match(r"^/sys/.*", sysfs_file)
 
 	def _read_sysfs(self, sysfs_file):
-		data = tuned.utils.commands.read_file(sysfs_file)
+		data = self._cmd.read_file(sysfs_file)
 		if len(data) > 0:
-			return tuned.utils.commands.get_active_option(data, False)
+			return self._cmd.get_active_option(data, False)
 		else:
 			return None
 
 	def _write_sysfs(self, sysfs_file, value):
-		return tuned.utils.commands.write_to_file(sysfs_file, value)
+		return self._cmd.write_to_file(sysfs_file, value)

@@ -1,13 +1,14 @@
 import base
 from decorators import *
 import tuned.logs
-import tuned.utils.commands
+from tuned.utils.commands import commands
 
 import os
 import struct
 import glob
 
 log = tuned.logs.get()
+cmd = commands()
 
 class AudioPlugin(base.Plugin):
 	"""
@@ -58,12 +59,12 @@ class AudioPlugin(base.Plugin):
 		timeout = int(value)
 		if timeout >= 0:
 			sys_file = self._timeout_path(device)
-			tuned.utils.commands.write_to_file(sys_file, "%d" % timeout)
+			cmd.write_to_file(sys_file, "%d" % timeout)
 
 	@command_get("timeout")
 	def _get_timeout(self, device):
 		sys_file = self._timeout_path(device)
-		value = tuned.utils.commands.read_file(sys_file)
+		value = cmd.read_file(sys_file)
 		if len(value) > 0:
 			return int(value)
 		return None
@@ -72,4 +73,4 @@ class AudioPlugin(base.Plugin):
 	def _reset_controller(self, enabling, value, device):
 		sys_file = self._reset_controller_path(device)
 		if os.path.exists(sys_file):
-			tuned.utils.commands.write_to_file(sys_file, "1")
+			cmd.write_to_file(sys_file, "1")
