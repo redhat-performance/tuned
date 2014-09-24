@@ -174,7 +174,7 @@ class DiskPlugin(hotplug.Plugin):
 		sys_file = self._elevator_file(device)
 		# example of scheduler file content:
 		# noop deadline [cfq]
-		return self._cmd.get_active_option(self.cmd.read_file(sys_file))
+		return self._cmd.get_active_option(self._cmd.read_file(sys_file))
 
 	def _alpm_policy_files(self):
 		policy_files = []
