@@ -49,7 +49,7 @@ class DBusController(object):
 
 	def switch_profile(self, new_profile):
 		if new_profile == "":
-			return False
+			return (False, "No profile specified")
 		return self._call("switch_profile", new_profile)
 
 	def recommend_profile(self):

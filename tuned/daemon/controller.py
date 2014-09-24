@@ -61,21 +61,23 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		else:
 			return self.stop() and self.start()
 
-	@exports.export("s", "b")
+	@exports.export("s", "(bs)")
 	def switch_profile(self, profile_name):
 		was_running = self._daemon.is_running()
+		msg = "OK"
 		success = True
 		try:
 			if was_running:
 				self._daemon.stop()
 			self._daemon.set_profile(profile_name)
-		except tuned.exceptions.TunedException:
+		except tuned.exceptions.TunedException as e:
 			success = False
+			msg = str(e)
 		finally:
 			if was_running:
 				self._daemon.start()
 
-		return success
+		return (success, msg)
 
 	@exports.export("", "s")
 	def active_profile(self):

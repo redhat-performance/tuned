@@ -57,6 +57,8 @@ class Daemon(object):
 
 		if profile_name == "" or profile_name is None:
 			self._profile = None
+		elif profile_name not in self.profile_loader.profile_locator.get_known_names():
+			raise TunedException("Requested profile '%s' doesn't exist." % profile_name)
 		else:
 			try:
 				self._profile = self._profile_loader.load(profile_name)

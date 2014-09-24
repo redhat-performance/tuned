@@ -42,7 +42,7 @@ class Admin(object):
 		if profile_name == "":
 			return False
 		try:
-			ret = self._controller.switch_profile(profile_name)
+			(ret, msg) = self._controller.switch_profile(profile_name)
 		except TunedAdminDBusException as e:
 			self._error(e)
 			if profile_name in profiles_locator(consts.LOAD_DIRECTORIES).get_known_names():
@@ -60,7 +60,7 @@ class Admin(object):
 				self._error("Cannot enable the tuning.")
 				ret = False
 		else:
-			self._error("Cannot switch the profile.")
+			self._error(msg)
 
 		return ret
 
