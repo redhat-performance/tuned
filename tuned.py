@@ -65,13 +65,14 @@ if __name__ == "__main__":
 		if not args.no_dbus:
 			app.attach_to_dbus(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
 
+		# always write PID file
+		if args.pid is None:
+			args.pid = consts.PID_FILE
+
 		if args.daemon:
-			if args.pid is None:
-				args.pid = consts.PID_FILE
 			app.daemonize(args.pid)
 		else:
-			if args.pid is not None:
-				app.write_pid_file(args.pid)
+			app.write_pid_file(args.pid)
 		app.run()
 
 	except tuned.exceptions.TunedException as exception:
