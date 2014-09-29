@@ -2,7 +2,7 @@ import base
 from decorators import *
 import tuned.logs
 from tuned.utils.nettool import ethcard
-from tuned utils.commands import commands
+from tuned.utils.commands import commands
 import os
 import re
 
