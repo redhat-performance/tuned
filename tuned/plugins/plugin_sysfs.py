@@ -38,7 +38,7 @@ class SysfsPlugin(base.Plugin):
 			else:
 				log.error("rejecting write to '%s' (not inside /sys)" % key)
 
-	def _instance_unapply_static(self, instance):
+	def _instance_unapply_static(self, instance, profile_switch = False):
 		for key, value in instance._sysfs_original.iteritems():
 			self._write_sysfs(key, value)
 

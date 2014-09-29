@@ -68,7 +68,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		success = True
 		try:
 			if was_running:
-				self._daemon.stop()
+				# stop(switch_profile = True), due to profile switch
+				self._daemon.stop(True)
 			self._daemon.set_profile(profile_name)
 		except tuned.exceptions.TunedException as e:
 			success = False

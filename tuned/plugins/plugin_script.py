@@ -43,6 +43,6 @@ class ScriptPlugin(base.Plugin):
 		super(self.__class__, self)._instance_apply_static(instance)
 		self._call_scripts(instance._scripts, "start")
 
-	def _instance_unapply_static(self, instance):
+	def _instance_unapply_static(self, instance, profile_switch = False):
 		self._call_scripts(reversed(instance._scripts), "stop")
-		super(self.__class__, self)._instance_unapply_static(instance)
+		super(self.__class__, self)._instance_unapply_static(instance, profile_switch)

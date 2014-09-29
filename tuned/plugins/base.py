@@ -193,20 +193,21 @@ class Plugin(object):
 		if instance.has_dynamic_tuning and self._global_cfg.get("dynamic_tuning", consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_update_dynamic)
 
-	def instance_unapply_tuning(self, instance):
+	# profile_switch is true if unapplying tuning due to profile switch
+	def instance_unapply_tuning(self, instance, profile_switch = False):
 		"""
 		Remove all tunings applied by the plugin instance.
 		"""
 		if instance.has_dynamic_tuning and self._global_cfg.get("dynamic_tuning", consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_unapply_dynamic)
 		if instance.has_static_tuning:
-			self._instance_unapply_static(instance)
+			self._instance_unapply_static(instance, profile_switch)
 
 	def _instance_apply_static(self, instance):
 		self._execute_all_non_device_commands(instance)
 		self._execute_all_device_commands(instance, instance.devices)
 
-	def _instance_unapply_static(self, instance):
+	def _instance_unapply_static(self, instance, profile_switch = False):
 		self._cleanup_all_device_commands(instance, instance.devices)
 		self._cleanup_all_non_device_commands(instance)
 

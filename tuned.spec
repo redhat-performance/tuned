@@ -131,7 +131,9 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %dir %{_sysconfdir}/tuned
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/active_profile
 %config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
+%config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/bootcmdline
 %{_sysconfdir}/dbus-1/system.d/com.redhat.tuned.conf
+%{_sysconfdir}/grub.d/00_tuned
 %{_tmpfilesdir}/tuned.conf
 %{_unitdir}/tuned.service
 %dir %{_localstatedir}/log/tuned

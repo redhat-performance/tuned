@@ -46,7 +46,7 @@ class SysctlPlugin(base.Plugin):
 
 		self._storage.set("options", instance._sysctl_original)
 
-	def _instance_unapply_static(self, instance):
+	def _instance_unapply_static(self, instance, profile_switch = False):
 		for option, value in instance._sysctl_original.iteritems():
 			self._write_sysctl(option, value)
 

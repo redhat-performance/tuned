@@ -44,6 +44,12 @@ class commands:
 			self._error("Reading %s error: %s" % (f, e))
 		return old_value
 
+	def replace_in_file(self, f, pattern, repl):
+		data = self.read_file(f)
+		if len(data) <= 0:
+			return False;
+		return self.write_to_file(f, re.sub(pattern, repl, data, flags = re.MULTILINE))
+
 	def execute(self, args):
 		retcode = None
 		if self._environment is None:

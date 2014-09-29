@@ -53,6 +53,7 @@ install:
 	install -m 0644 tuned-main.conf $(DESTDIR)/etc/tuned/tuned-main.conf
 	# None profile in the moment, autodetection will be used
 	echo -n > $(DESTDIR)/etc/tuned/active_profile
+	install -m 0644 bootcmdline $(DESTDIR)/etc/tuned/bootcmdline
 
 	# profiles & system config
 	mkdir -p $(DESTDIR)$(TUNED_PROFILESDIR)
@@ -78,6 +79,10 @@ install:
 	# dbus configuration
 	mkdir -p $(DESTDIR)/etc/dbus-1/system.d
 	install -m 0644 dbus.conf $(DESTDIR)/etc/dbus-1/system.d/com.redhat.tuned.conf
+
+	# grub template
+	mkdir -p $(DESTDIR)/etc/grub.d
+	install -m 0755 00_tuned $(DESTDIR)/etc/grub.d/00_tuned
 
 	# manual pages
 	for man_section in 5 7 8; do \

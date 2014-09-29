@@ -84,6 +84,7 @@ class Manager(object):
 		for instance in self._instances:
 			instance.update_tuning()
 
-	def stop_tuning(self):
+	# profile_switch is helper telling plugins whether the stop is due to profile switch
+	def stop_tuning(self, profile_switch = False):
 		for instance in self._instances:
-			instance.unapply_tuning()
+			instance.unapply_tuning(profile_switch)

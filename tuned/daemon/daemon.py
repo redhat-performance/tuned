@@ -43,6 +43,8 @@ class Daemon(object):
 	def _init_threads(self):
 		self._thread = None
 		self._terminate = threading.Event()
+		# Flag which is set if terminating due to profile_switch
+		self._terminate_profile_switch = threading.Event()
 
 	def _init_profile(self, profile_name):
 		if profile_name is None:
@@ -102,7 +104,12 @@ class Daemon(object):
 					log.debug("performing tunings")
 					self._unit_manager.update_tuning()
 
-		self._unit_manager.stop_tuning()
+		# if terminating due to profile switch
+		if self._terminate_profile_switch.is_set():
+			profile_switch = True
+		else:
+			profile_switch = False
+		self._unit_manager.stop_tuning(profile_switch)
 		self._unit_manager.destroy_all()
 
 	def _save_active_profile(self, profile_name):
@@ -153,14 +160,18 @@ class Daemon(object):
 
 		log.info("starting tuning")
 		self._thread = threading.Thread(target=self._thread_code)
+		self._terminate_profile_switch.clear()
 		self._terminate.clear()
 		self._thread.start()
 		return True
 
-	def stop(self):
+	# profile_switch is helper telling plugins whether the stop is due to profile switch
+	def stop(self, profile_switch = False):
 		if not self.is_running():
 			return False
 		log.info("stopping tunning")
+		if profile_switch:
+			self._terminate_profile_switch.set()
 		self._terminate.set()
 		self._thread.join()
 		self._thread = None
