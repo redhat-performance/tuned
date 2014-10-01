@@ -6,6 +6,7 @@ TMPFILESDIR = $(shell rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo /usr/lib/
 VERSIONED_NAME = $(NAME)-$(VERSION)
 
 DESTDIR = /
+DOCDIR = /usr/share/doc/$(NAME)
 PYTHON_SITELIB = /usr/lib/python2.7/site-packages
 TUNED_PROFILESDIR = /usr/lib/tuned
 BASH_COMPLETIONS = /usr/share/bash-completion/completions/
@@ -88,9 +89,9 @@ install:
 		install -Dpm 0644 $(file) $(DESTDIR)/usr/share/man/man$(man_section)/$(notdir $(file));))
 
 	# documentation
-	mkdir -p $(DESTDIR)/usr/share/doc/$(NAME)
-	cp -a doc/* $(DESTDIR)/usr/share/doc/$(NAME)
-	cp AUTHORS COPYING README $(DESTDIR)/usr/share/doc/$(NAME)
+	mkdir -p $(DESTDIR)$(DOCDIR)
+	cp -a doc/* $(DESTDIR)$(DOCDIR)
+	cp AUTHORS COPYING README $(DESTDIR)$(DOCDIR)
 
 	# Install libexec scripts
 	$(foreach file, $(wildcard libexec/*), \
