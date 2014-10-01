@@ -24,6 +24,8 @@ class MountsPlugin(base.Plugin):
 
 		stdout, stderr = Popen(["/usr/bin/lsblk", "-rno", "TYPE,RM,KNAME,FSTYPE,MOUNTPOINT"], stdout=PIPE, stderr=PIPE, close_fds=True).communicate()
 		for columns in map(lambda line: line.split(), stdout.splitlines()):
+			if len(columns) < 3:
+				continue
 			device_type, device_removable, device_name = columns[:3]
 			filesystem = columns[3] if len(columns) > 3 else None
 			mountpoint = columns[4] if len(columns) > 4 else None

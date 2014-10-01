@@ -31,7 +31,7 @@ class NetTuningPlugin(base.Plugin):
 				self._devices.add(device.sys_name)
 
 		self._free_devices = self._devices.copy()
-		log.info("devices: %s" % str(self._devices));
+		log.debug("devices: %s" % str(self._devices));
 
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True

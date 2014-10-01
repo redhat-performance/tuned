@@ -21,10 +21,18 @@ Based on that information components will then be put into lower or higher
 power saving modes to adapt to the current usage. Currently only ethernet
 network and ATA harddisk devices are implemented.
 
+%package gtk
+Summary: GTK GUI for tuned
+Requires: %{name} = %{version}-%{release}
+Requires: powertop, pygobject3-base, polkit
+
+%description gtk
+GTK GUI that can control tuned and provide simple profile editor.
+
 %package utils
 Requires: %{name} = %{version}-%{release}
-Summary: Various tuned utilities
 Requires: powertop
+Summary: Various tuned utilities
 
 %description utils
 This package contains utilities that can help you to fine tune and
@@ -113,6 +121,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %doc README
 %doc doc/TIPS.txt
 %{_datadir}/bash-completion/completions/tuned
+%exclude %{python_sitelib}/tuned/gtk
 %{python_sitelib}/tuned
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
@@ -142,9 +151,16 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %{_mandir}/man5/tuned*
 %{_mandir}/man7/tuned-profiles.7*
 %{_mandir}/man8/tuned*
+%dir %{_datadir}/tuned
+
+%files gtk
+%defattr(-,root,root,-)
+%{_sbindir}/tuned-gui
+%{python_sitelib}/tuned/gtk
+%{_datadir}/tuned/ui
+%{_datadir}/polkit-1/actions/org.tuned.gui.policy
 
 %files utils
-%defattr(-,root,root,-)
 %doc COPYING
 %{_bindir}/powertop2tuned
 %{_libexecdir}/tuned/pmqos-static*

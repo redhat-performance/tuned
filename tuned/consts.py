@@ -29,6 +29,10 @@ LOG_FILE = "/var/log/tuned/tuned.log"
 PID_FILE = "/run/tuned/tuned.pid"
 SYSTEM_RELEASE_FILE = "/etc/system-release-cpe"
 
+# tuned-gui
+PREFIX_PROFILE_FACTORY = "Factory"
+PREFIX_PROFILE_USER = "User"
+
 # default configuration
 CFG_DEF_DYNAMIC_TUNING = True
 # how long to sleep before checking for events (in seconds)

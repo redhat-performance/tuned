@@ -17,7 +17,7 @@ archive: clean
 
 	cp tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
 		tuned.bash dbus.conf recommend.conf tuned-main.conf 00_tuned bootcmdline \
-		$(VERSIONED_NAME)
+		org.tuned.gui.policy tuned-gui.py tuned-gui.glade $(VERSIONED_NAME)
 	cp -a doc experiments libexec man profiles systemtap tuned $(VERSIONED_NAME)
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
@@ -40,8 +40,12 @@ install:
 	# binaries
 	install -Dpm 0755 tuned.py $(DESTDIR)/usr/sbin/tuned
 	install -Dpm 0755 tuned-adm.py $(DESTDIR)/usr/sbin/tuned-adm
+	install -Dpm 0755 tuned-gui.py $(DESTDIR)/usr/sbin/tuned-gui
 	$(foreach file, $(wildcard systemtap/*), \
 		install -Dpm 0755 $(file) $(DESTDIR)/usr/sbin/$(notdir $(file));)
+
+	# glade
+	install -Dpm 0755 tuned-gui.glade $(DESTDIR)/usr/share/tuned/ui/tuned-gui.glade
 
 	# tools
 	install -Dpm 0755 experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
@@ -75,6 +79,9 @@ install:
 
 	# grub template
 	install -Dpm 0755 00_tuned $(DESTDIR)/etc/grub.d/00_tuned
+
+	# polkit configuration
+	install -Dpm 0644 org.tuned.gui.policy $(DESTDIR)/usr/share/polkit-1/actions/org.tuned.gui.policy
 
 	# manual pages
 	$(foreach man_section, 5 7 8, $(foreach file, $(wildcard man/*.$(man_section)), \
