@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.3.0
+Version: 2.4.0
 Release: 1%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -208,6 +208,64 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Wed Oct  1 2014 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.0-1
+- new-release
+  resolves: rhbz#1093883
+  - fixed traceback if profile cannot be loaded
+    related: rhbz#953128
+  - powertop2tuned: fixed traceback if rewriting file instead of dir
+    resolves: rhbz#963441
+  - daemon: fixed race condition in start/stop
+  - improved timings, it can be fine tuned in /etc/tuned/tuned-main.conf
+    resolves: rhbz#1028122
+  - throughput-performance: altered dirty ratios for better performance
+    resolves: rhbz#1043533
+  - latency-performance: leaving THP on its default
+    resolves: rhbz#1064510
+  - used throughput-performance profile on server by default
+    resolves: rhbz#1063481
+  - network-latency: added new profile
+    resolves: rhbz#1052418
+  - network-throughput: added new profile
+    resolves: rhbz#1052421
+  - recommend.conf: fixed config file
+    resolves: rhbz#1069123
+  - spec: added kernel-tools requirement
+    resolves: rhbz#1073008
+  - systemd: added cpupower.service conflict
+    resolves: rhbz#1073392
+  - balanced: used medium_power ALPM policy
+  - added support for >, < assignment modifiers in tuned.conf
+  - handled root block devices
+  - balanced: used conservative CPU governor
+    resolves: rhbz#1124125
+  - plugins: added selinux plugin
+  - plugin_net: added nf_conntrack_hashsize parameter
+  - profiles: added atomic-host profile
+    resolves: rhbz#1091977
+  - profiles: added atomic-guest profile
+    resolves: rhbz#1091979
+  - moved profile autodetection from post install script to tuned daemon
+    resolves: rhbz#1144067
+  - profiles: included sap-hana and sap-hana-vmware profiles
+  - man: structured profiles manual pages according to sub-packages
+  - added missing hdparm dependency
+    resolves: rhbz#1144858
+  - improved error handling of switch_profile
+    resolves: rhbz#1068699
+  - tuned-adm: active: detect whether tuned deamon is running
+    related: rhbz#1068699
+  - removed active_profile from RPM verification
+    resolves: rhbz#1104126
+  - plugin_disk: readahead value can be now specified in sectors
+    resolves: rhbz#1127127
+  - plugins: added bootloader plugin
+    resolves: rhbz#1044111
+  - plugin_disk: added error counter to hdparm calls
+  - plugins: added scheduler plugin
+    resolves: rhbz#1100826
+  - added tuned-gui
+
 * Wed Nov  6 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 2.3.0-1
 - new-release
   resolves: rhbz#1020743
