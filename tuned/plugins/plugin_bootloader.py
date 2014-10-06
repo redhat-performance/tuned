@@ -47,7 +47,7 @@ class BootloaderPlugin(base.Plugin):
 
 	def _remove_grub2_tuning(self):
 		self._patch_bootcmdline("")
-		self._cmd.replace_in_file(self._grub2_cfg_file, r"\b(set " + consts.GRUB2_TUNED_VAR + r"\s*=).*$", r"\1")
+		self._cmd.replace_in_file(self._grub2_cfg_file, r"\b(set " + consts.GRUB2_TUNED_VAR + r"\s*=).*$", r"\1" + "\"\"")
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
 		if profile_switch:
