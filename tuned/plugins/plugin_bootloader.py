@@ -42,7 +42,8 @@ class BootloaderPlugin(base.Plugin):
 		return None
 
 	def _patch_bootcmdline(self, value):
-		return self._cmd.replace_in_file(consts.BOOT_CMDLINE_FILE, r"\b(" + consts.BOOT_CMDLINE_TUNED_VAR + r"\s*=).*$", r"\1" + str(value))
+		return self._cmd.replace_in_file(consts.BOOT_CMDLINE_FILE, r"\b(" + consts.BOOT_CMDLINE_TUNED_VAR + \
+			r"\s*=).*$", r"\1" + "\"" + str(value) + "\"")
 
 	def _remove_grub2_tuning(self):
 		self._patch_bootcmdline("")

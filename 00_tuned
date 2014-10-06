@@ -25,6 +25,4 @@ tuned_bootcmdline_file=$tunedcfgdir/bootcmdline
 
 . $tuned_bootcmdline_file
 
-if [ "$TUNED_BOOT_CMDLINE" ]; then
-  echo "set tuned_params=\"$TUNED_BOOT_CMDLINE\""
-fi
+echo "set tuned_params=\"$TUNED_BOOT_CMDLINE\""
