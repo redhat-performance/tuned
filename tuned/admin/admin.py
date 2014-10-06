@@ -33,7 +33,7 @@ class Admin(object):
 		print "Available profiles:"
 		for profile in profile_names:
 			print "- %s" % profile
-		self.active(False)
+		self.active()
 
 	def active(self):
 		try:
