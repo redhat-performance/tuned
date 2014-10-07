@@ -1,6 +1,7 @@
 import base
 from decorators import *
 import tuned.logs
+import exceptions
 from tuned.utils.commands import commands
 import tuned.consts as consts
 
@@ -18,6 +19,8 @@ class BootloaderPlugin(base.Plugin):
 	"""
 
 	def __init__(self, *args, **kwargs):
+		if not os.path.isfile(consts.GRUB2_TUNED_TEMPLATE_PATH):
+			raise exceptions.NotSupportedPluginException("Required GRUB2 template not found, disabling plugin.")
 		super(self.__class__, self).__init__(*args, **kwargs)
 		self._cmd = commands()
 

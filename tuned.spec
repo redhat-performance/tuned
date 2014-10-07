@@ -92,6 +92,11 @@ make install DESTDIR=%{buildroot}
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
 %endif
 
+# conditional support for grub2, grub2 is not available on all architectures
+# and tuned is noarch package, thus the following hack is needed
+mkdir -p %{buildroot}%{_datadir}/tuned/grub2
+mv %{buildroot}%{_sysconfdir}/grub.d/00_tuned %{buildroot}%{_datadir}/tuned/grub2/00_tuned
+rmdir %{buildroot}%{_sysconfdir}/grub.d
 
 %post
 %systemd_post tuned.service
@@ -107,11 +112,25 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %postun
 %systemd_postun_with_restart tuned.service
 
+# conditional support for grub2, grub2 is not available on all architectures
+# and tuned is noarch package, thus the following hack is needed
+if [ "$1" == 0 ]; then
+  rm -f %{_sysconfdir}/grub.d/00_tuned || :
+fi
+
 
 %triggerun -- tuned < 2.0-0
 # remove ktune from old tuned, now part of tuned
 /usr/sbin/service ktune stop &>/dev/null || :
 /usr/sbin/chkconfig --del ktune &>/dev/null || :
+
+
+%posttrans
+# conditional support for grub2, grub2 is not available on all architectures
+# and tuned is noarch package, thus the following hack is needed
+if [ -d %{_sysconfdir}/grub.d ]; then
+  cp -a %{_datadir}/tuned/grub2/00_tuned %{_sysconfdir}/grub.d/00_tuned
+fi
 
 
 %files
@@ -143,7 +162,6 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/bootcmdline
 %{_sysconfdir}/dbus-1/system.d/com.redhat.tuned.conf
-%{_sysconfdir}/grub.d/00_tuned
 %{_tmpfilesdir}/tuned.conf
 %{_unitdir}/tuned.service
 %dir %{_localstatedir}/log/tuned
@@ -152,6 +170,7 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 %{_mandir}/man7/tuned-profiles.7*
 %{_mandir}/man8/tuned*
 %dir %{_datadir}/tuned
+%{_datadir}/tuned/grub2
 
 %files gtk
 %defattr(-,root,root,-)
