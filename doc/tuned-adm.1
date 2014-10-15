@@ -1,7 +1,7 @@
 .\"/* 
 .\" * All rights reserved
-.\" * Copyright (C) 2009 Red Hat, Inc.
-.\" * Authors: Marcela Mašláňová, Phil Knirsch
+.\" * Copyright (C) 2009-2014 Red Hat, Inc.
+.\" * Authors: Marcela Mašláňová, Phil Knirsch, Jaroslav Škarvada
 .\" *
 .\" * This program is free software; you can redistribute it and/or
 .\" * modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
 .\" 
-.TH TUNED_ADM "1" "9 Jul 2009" "Linux Programmer's Manual"
+.TH TUNED_ADM "1" "15 Oct 2014" "Linux Programmer's Manual"
 .SH NAME
 tuned-adm \- commandline tool for switching between different tuning profiles
 .SH SYNOPSIS
@@ -28,8 +28,6 @@ tuned-adm \- commandline tool for switching between different tuning profiles
 .br
 .SH DESCRIPTION
 This command line utility allows user to switch between user definable tuning profiles. Several predefined profiles are already included for some of the more common cases. Although the profiles typically refer to a common use case you can of course switch to any profile on any system. So switching to the laptop-battery-powersave profile on a server will activate this profile on it. This way, depending on your requirements you can select any of the profiles that fits your needs. You can even create your own profile, either based on one of the existing ones by copying it or make a completely new one. The profiles are stored in subdirectories below /etc/tune-profiles.
-
-The power saving profiles contain settings that are typically not enabled by default as they will noticeably impact the latency/performance of your system as opposed to the power saving mechanisms we have enabled by default. On the other hand the performance profiles disable the additional power saving mechanisms of tuned and ktune as they would negatively impact the performance tuning, be it throughput or latency.
 
 .SH "OPTIONS"
 
@@ -54,64 +52,17 @@ Switches to the given profilename. If none is given or no valid one is given the
 .B off
 Switch off all ktune and tuned settings and remove them from services. The configuration file are set to previous settings.
 
-.SH PREDEFINED PROFILES
-At the moment we're providing the following pre defined profiles:
-
-.TP
-.BI "default"
-This is the default powersaving profile. It is the lowest of the available profiles in regard to powersaving and only enables CPU and disk plugins of tuned. This is not the same as 'tuned-adm off', where tuned and ktune services are disabled.
-
-.TP
-.BI "desktop-powersave"
-A powersaving profile directed at desktop systems. Enables ALPM powersaving for SATA host adapters as well as the CPU, ethernet and disk plugins of tuned.
-
-.TP
-.BI server-powersave
-A powersaving profile directed at server systems. Enables ALPM powersaving for SATA host adapters, and activates the CPU and disk plugins of tuned.
-
-.TP
-.BI laptop-ac-powersave
-Medium powersaving profile directed at laptops running on AC. Enables ALPM powersaving for SATA host adapters,  WiFi power saving as well as CPU, ethernet and disk plugins of tuned.
-
-.TP
-.BI laptop-battery-powersave
-Strong powersaving profile directed at laptops running on battery. It activates all power saving mechanisms from the previous profiles plus it enables multi core power savings scheduler for low wakeup systems and makes sure the ondemand governor is active and the AC97 audio power saving is enabled.  This profile can be used for any kind of system, not only laptops on battery power in order to save the maximum amount of power. The tradeoff for this profile is a noticeable impact on performance, specifically latency of disk and network IO. 
-
-.TP
-.BI "spindown-disk"
-Strong powersaving profile directed at machines with classic HDDs. It enables aggressive disk spin-down. Disk writeback values are increased and disk swappiness is lowered. Log syncing is disabled. All partitions are remounted with 'noatime' option. All tuned plugins are disabled.
-
-.TP
-.BI throughput-performance
-Server profile for typical throughput performance tuning. Disables tuned and ktune power saving mechanisms and enables sysctl settings that improve the throughput performance of your disk and network IO and switches to the deadline scheduler. CPU governor is set to performance.
-
-.TP
-.BI latency-performance
-Server profile for typical latency performance tuning. Disables tuned and ktune power saving mechanisms and enables deadline IO scheduler. CPU governor is set to performance.
-
-.TP
-.BI "enterprise-storage"
-Server profile for high disk throughput performace tuning. Disables tuned and ktune power saving mechanisms and enables deadline IO scheduler. Enables hugepages and disables disk barriers. Disk readahead values are increased. CPU governor is set to performance.
-
-.TP
-.BI "virtual-guest"
-Profile optimized for virtual guests based on enterprise-storage profile. It additionally decreases virtual memory swapiness.
-
-.TP
-.BI "virtual-host"
-Profile optimized for virtual hosts based on enterprise-storage profile. It additionally decreases virtual memory swapiness and enables more aggresive writeback of dirty pages.
-
-.TP
-.BI "sap-netweaver"
-Profile optimized for the best performance of SAP software. It is based on enterprise-storage profile. It additionally tunes sysctl settings regarding shared memory, semaphores and maximum number of memory map areas a process may have.
-
 .SH "FILES"
 .nf
 /etc/tune-profiles/*
 
 .SH "SEE ALSO"
 .BR tuned (8)
+.BR tuned-profiles (7)
+.BR tuned-profiles-sap (7)
+.BR tuned-profiles-sap-hana (7)
 .SH AUTHOR
-.nf
+.NF
 Marcela Mašláňová <mmaslano@redhat.com>
 Phil Knirsch <pknirsch@redhat.com>
+Jaroslav Škarvada <jskarvad@redhat.com>

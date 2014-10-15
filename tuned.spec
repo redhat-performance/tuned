@@ -117,6 +117,7 @@ fi
 %{_datadir}/tuned
 %{_mandir}/man1/tuned-adm.*
 %{_mandir}/man5/tuned.conf.*
+%{_mandir}/man7/tuned-profiles.7*
 %{_mandir}/man8/tuned.*
 %config(noreplace) %verify(not link) %{_sysconfdir}/sysconfig/ktune
 %config(noreplace) %verify(not link) %{_sysconfdir}/ktune.d/tunedadm.conf
@@ -154,11 +155,13 @@ fi
 %files profiles-sap
 %defattr(-,root,root,-)
 %{_sysconfdir}/tune-profiles/sap-netweaver
+%{_mandir}/man7/tuned-profiles-sap.7*
 
 %files profiles-sap-hana
 %defattr(-,root,root,-)
 %{_sysconfdir}/tune-profiles/sap-hana
 %{_sysconfdir}/tune-profiles/sap-hana-vmware
+%{_mandir}/man7/tuned-profiles-sap-hana.7*
 
 %changelog
 * Thu Oct 10 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 0.2.24-1
