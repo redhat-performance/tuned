@@ -1,6 +1,6 @@
 .TH "tuned.conf" "5" "13 Mar 2012" "Jan Kaluza" "tuned.conf file format description"
 .SH NAME
-tuned.conf \- Tuned profile definition
+tuned.conf - Tuned profile definition
 .SH DESCRIPTION
 This man page documents format of Tuned 2.0 profile definition files. Profile is
 stored in /etc/tuned/<profile_name>/tuned.conf or in 
@@ -43,7 +43,7 @@ last replaces all options defined by the previosly defined plugin.
 Plugins can also have plugin related options.
 
 .SH "EXAMPLE"
-.nf
+.NF
 [main]
 # Includes plugins defined in "included" profile.
 include=included
@@ -64,7 +64,7 @@ net.core.wmem_default = 262144
 [my_script]
 type=script
 script=profile.sh
-.fi
+.FI
 
 .SH "SEE ALSO"
 .LP

@@ -1,11 +1,11 @@
 .TH "tuned-main.conf" "5" "15 Oct 2013" "Jaroslav Škarvada" "tuned-main.conf file format description"
 .SH NAME
-tuned-main.conf \- Tuned global configuration file
+tuned\-main.conf - Tuned global configuration file
 .SH SYNOPSIS
-.B /etc/tuned/tuned-main.conf
+.B /etc/tuned/tuned\-main.conf
 .SH DESCRIPTION
 This man page documents format of the Tuned global configuration file.
-The \fItuned-main.conf\fR file uses the ini-file format.
+The \fItuned\-main.conf\fR file uses the ini\-file format.
 
 .TP
 .BI dynamic_tuning= BOOL
@@ -38,14 +38,14 @@ globally disabled (see \fBdynamic_tuning\fR) or this setting set to 0.
 This must be multiple of \fBsleep_interval\fR.
 
 .SH EXAMPLE
-.nf
+.NF
 dynamic_tuning = 1
 sleep_interval = 1
 update_interval = 10
-.fi
+.FI
 
 .SH FILES
-.I /etc/tuned/tuned-main.conf
+.I /etc/tuned/tuned\-main.conf
 
 .SH "SEE ALSO"
 .LP

@@ -43,7 +43,7 @@ other hand the performance profiles disable the additional power saving
 mechanisms of tuned as they would negatively impact throughput or latency.
 
 .SH PROFILES
-At the moment we're providing the following pre-defined profiles:
+At the moment we're providing the following pre\-defined profiles:
 
 .TP
 .BI "balanced"
@@ -72,25 +72,25 @@ configures it to automatic power saving. On Asus Eee PCs dynamic Super
 Hybrid Engine is enabled.
 
 .TP
-.BI throughput\-performance
+.BI "throughput\-performance"
 Profile for typical throughput performance tuning. Disables power saving
 mechanisms and enables sysctl settings that improve the throughput performance
 of your disk and network IO. CPU governor is set to performance and CPU energy
 performance bias is set to performance. Disk readahead values are increased.
 
 .TP
-.BI latency\-performance
+.BI "latency\-performance"
 Profile for low latency performance tuning. Disables power saving mechanisms.
 CPU governor is set to performance andlocked to the low C states (by PM QoS).
 CPU energy performance bias to performance.
 
 .TP
-.BI network\-throughput
+.BI "network\-throughput"
 Profile for throughput network tuning. It is based on the throughput\-performance
 profile. It additionaly increases kernel network buffers.
 
 .TP
-.BI network\-latency
+.BI "network\-latency"
 Profile for low latency network tuning. It is based on the latency\-performance
 profile. It additionaly disables transparent hugepages, NUMA balancing and
 tunes several other network related sysctl parameters.
@@ -112,7 +112,7 @@ Profile optimized for virtual hosts based on throughput\-performance profile.
 It additionally enables more aggresive writeback of dirty pages.
 
 .SH "FILES"
-.nf
+.NF
 .I /etc/tuned/*
 .I /usr/lib/tuned/*
 
