@@ -39,43 +39,43 @@ At the moment we're providing the following pre defined profiles:
 This is the default powersaving profile. It is the lowest of the available profiles in regard to powersaving and only enables CPU and disk plugins of tuned. This is not the same as 'tuned-adm off', where tuned and ktune services are disabled.
 
 .TP
-.BI "desktop-powersave"
+.BI "desktop\-powersave"
 A powersaving profile directed at desktop systems. Enables ALPM powersaving for SATA host adapters as well as the CPU, ethernet and disk plugins of tuned.
 
 .TP
-.BI server-powersave
+.BI server\-powersave
 A powersaving profile directed at server systems. Enables ALPM powersaving for SATA host adapters, and activates the CPU and disk plugins of tuned.
 
 .TP
-.BI laptop-ac-powersave
+.BI laptop\-ac\-powersave
 Medium powersaving profile directed at laptops running on AC. Enables ALPM powersaving for SATA host adapters,  WiFi power saving as well as CPU, ethernet and disk plugins of tuned.
 
 .TP
-.BI laptop-battery-powersave
+.BI laptop\-battery\-powersave
 Strong powersaving profile directed at laptops running on battery. It activates all power saving mechanisms from the previous profiles plus it enables multi core power savings scheduler for low wakeup systems and makes sure the ondemand governor is active and the AC97 audio power saving is enabled.  This profile can be used for any kind of system, not only laptops on battery power in order to save the maximum amount of power. The tradeoff for this profile is a noticeable impact on performance, specifically latency of disk and network IO. 
 
 .TP
-.BI "spindown-disk"
+.BI "spindown\-disk"
 Strong powersaving profile directed at machines with classic HDDs. It enables aggressive disk spin-down. Disk writeback values are increased and disk swappiness is lowered. Log syncing is disabled. All partitions are remounted with 'noatime' option. All tuned plugins are disabled.
 
 .TP
-.BI throughput-performance
+.BI throughput\-performance
 Server profile for typical throughput performance tuning. Disables tuned and ktune power saving mechanisms and enables sysctl settings that improve the throughput performance of your disk and network IO and switches to the deadline scheduler. CPU governor is set to performance.
 
 .TP
-.BI latency-performance
+.BI latency\-performance
 Server profile for typical latency performance tuning. Disables tuned and ktune power saving mechanisms and enables deadline IO scheduler. CPU governor is set to performance.
 
 .TP
-.BI "enterprise-storage"
+.BI "enterprise\-storage"
 Server profile for high disk throughput performace tuning. Disables tuned and ktune power saving mechanisms and enables deadline IO scheduler. Enables hugepages and disables disk barriers. Disk readahead values are increased. CPU governor is set to performance.
 
 .TP
-.BI "virtual-guest"
+.BI "virtual\-guest"
 Profile optimized for virtual guests based on enterprise-storage profile. It additionally decreases virtual memory swapiness.
 
 .TP
-.BI "virtual-host"
+.BI "virtual\-host"
 Profile optimized for virtual hosts based on enterprise-storage profile. It additionally decreases virtual memory swapiness and enables more aggresive writeback of dirty pages.
 
 .SH "FILES"
