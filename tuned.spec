@@ -1,6 +1,6 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.4.0
+Version: 2.4.1
 Release: 1%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -227,6 +227,19 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Thu Oct 16 2014 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.1-1
+- new-release
+  - fixed return code of tuned grub template
+    resolves: rhbz#1151768
+  - plugin_bootloader: fix for multiple parameters on command line
+    related: rhbz#1148711
+  - tuned-adm: fixed traceback on "tuned-adm list"
+    resolves: rhbz#1149162
+  - plugin_bootloader is automatically disabled if grub2 is not found
+    resolves: rhbz#1150047
+  - plugin_disk: set_spindown and set_APM made independent
+    resolves: rhbz#976725
+
 * Wed Oct  1 2014 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.0-1
 - new-release
   resolves: rhbz#1093883
