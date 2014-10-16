@@ -13,6 +13,9 @@ class SchedulerPlugin(base.Plugin):
 	priorities of system threads (it is substitution for the rtctl tool).
 	"""
 
+	_dict_sched2param = {"SCHED_FIFO":"f", "SCHED_BATCH":"b", "SCHED_RR":"r",
+		"SCHED_OTHER":"o", "SCHED_IDLE":"i"}
+
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
 		self._has_dynamic_options = True
@@ -38,7 +41,6 @@ class SchedulerPlugin(base.Plugin):
 
 	def _instance_cleanup(self, instance):
 		pass
-#	self._storage.unset(self._scheduler_storage_key(instance))
 
 	def get_processes(self):
 		(rc, out) = self._cmd.execute(["ps", "-eopid,cmd", "--no-headers"])
@@ -46,20 +48,6 @@ class SchedulerPlugin(base.Plugin):
 			return None
 		return dict(map(lambda (pid, cmd): (pid.lstrip(), cmd.lstrip()),
 			filter(lambda i: len(i) == 2, map(lambda s: s.split(None, 1), out.split("\n")))))
-
-	def _sched2abbrev(sched):
-		if (sched == "SCHED_OTHER"):
-			return
-		elif (sched == "SCHED_FIFO"):
-			return
-		elif (sched == "SCHED_RR"):
-			return
-		elif (sched == "SCHED_BATCH"):
-			return
-		elif (sched == "SCHED_IDLE"):
-			return
-		else:
-			return None
 
 	def _parse_val(self, val):
 		v = val.split(":", 1)
@@ -91,29 +79,15 @@ class SchedulerPlugin(base.Plugin):
 		return v
 
 	def _schedcfg2param(self, sched):
-		if sched == "f":
-			return "-f"
-		elif sched == "b":
-			return "-b"
-		elif sched == "r":
-			return "-r"
-		elif sched == "o":
-			return "-o"
+		if sched in ["f", "b", "r", "o"]:
+			return "-" + sched
 		else:
 			return ""
 
 	def _sched2param(self, sched):
-		if sched == "SCHED_FIFO":
-			return "-f"
-		elif sched == "SCHED_BATCH":
-			return "-b"
-		elif sched == "SCHED_RR":
-			return "-r"
-		elif sched == "SCHED_OTHER":
-			return "-o"
-		elif sched == "SCHED_IDLE":
-			return "-i"
-		else:
+		try:
+			return "-" + self._dict_sched2param[sched]
+		except KeyError:
 			return ""
 
 	def _set_rt(self, pid, sched, prio):
