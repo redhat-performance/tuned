@@ -79,8 +79,8 @@ class DiskPlugin(hotplug.Plugin):
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
 
-		self._set_apm_errcnt = 0
-		self._set_spindown_errcnt = 0
+		self._apm_errcnt = 0
+		self._spindown_errcnt = 0
 
 		if self._option_bool(instance.options["dynamic"]):
 			instance._has_dynamic_tuning = True
@@ -97,13 +97,25 @@ class DiskPlugin(hotplug.Plugin):
 			self._monitors_repository.delete(instance._load_monitor)
 			instance._load_monitor = None
 
-	def _check_set_apm_err_threshold(self):
-		if self._set_apm_errcnt >= consts.ERROR_THRESHOLD:
-			log.info("disabling set_apm command, too many consecutive errors")
+	def _update_spindown_errcnt(self, rc):
+		if rc == 0:
+			self._spindown_errcnt = 0
+		else:
+			if self._spindown_errcnt > consts.ERROR_THRESHOLD:
+				return
+			self._spindown_errcnt += 1
+			if self._spindown_errcnt == consts.ERROR_THRESHOLD:
+				log.info("disabling set_spindown command, too many consecutive errors")
 
-	def _check_set_spindown_err_threshold(self):
-		if self._set_spindown_errcnt >= consts.ERROR_THRESHOLD:
-			log.info("disabling set_spindown command, too many consecutive errors")
+	def _update_apm_errcnt(self, rc):
+		if rc == 0:
+			self._apm_errcnt = 0
+		else:
+			if self._apm_errcnt > consts.ERROR_THRESHOLD:
+				return
+			self._apm_errcnt += 1
+			if self._apm_errcnt == consts.ERROR_THRESHOLD:
+				log.info("disabling set_apm command, too many consecutive errors")
 
 	def _instance_update_dynamic(self, instance, device):
 		load = instance._load_monitor.get_device_load(device)
@@ -135,24 +147,16 @@ class DiskPlugin(hotplug.Plugin):
 			new_power_level = self._power_levels[idle["level"]]
 			new_spindown_level = self._spindown_levels[idle["level"]]
 
-			log.debug("tuning level changed to %d (power %d, spindown %d)" % (idle["level"], new_power_level, new_spindown_level))
-			if self._set_spindown_errcnt < consts.ERROR_THRESHOLD and self._set_apm_errcnt < consts.ERROR_THRESHOLD:
-				(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "-B%d" % new_power_level, "/dev/%s" % device])
-				if rc != 0:
-					self._set_spindown_errcnt += 1
-					self._set_apm_errcnt += 1
-					self._check_set_spindown_err_threshold()
-					self._check_set_apm_err_threshold()
-			elif self._set_spindown_errcnt < consts.ERROR_THRESHOLD:
+			log.debug("tuning level changed to %d" % idle["level"])
+			if self._spindown_errcnt < consts.ERROR_THRESHOLD:
+				log.debug("changing spindown to %d" % new_spindown_level)
 				(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "/dev/%s" % device])
-				if rc != 0:
-					self._set_spindown_errcnt += 1
-					self._check_set_spindown_err_threshold()
-			elif self._set_apm_errcnt < consts.ERROR_THRESHOLD:
+				self._update_spindown_errcnt(rc)
+			if self._apm_errcnt < consts.ERROR_THRESHOLD:
+				log.debug("changing APM_level to %d" % new_power_level)
 				(rc, out) = self._cmd.execute(["hdparm", "-B%d" % new_power_level, "/dev/%s" % device])
-				if rc != 0:
-					self._set_apm_errcnt += 1
-					self._check_set_apm_err_threshold()
+				self._update_apm_errcnt(rc)
+
 		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
 		log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
 
@@ -236,13 +240,9 @@ class DiskPlugin(hotplug.Plugin):
 
 	@command_set("apm", per_device=True)
 	def _set_apm(self, value, device):
-		if self._set_apm_errcnt < consts.ERROR_THRESHOLD:
+		if self._apm_errcnt < consts.ERROR_THRESHOLD:
 			(rc, out) = self._cmd.execute(["hdparm", "-B", str(value), "/dev/" + device])
-			if rc:
-				self._set_apm_errcnt += 1
-				self._check_set_apm_err_threshold()
-			else:
-				self._set_apm_errcnt = 0
+			self._update_apm_errcnt(rc)
 
 	@command_get("apm")
 	def _get_apm(self, device):
@@ -257,13 +257,9 @@ class DiskPlugin(hotplug.Plugin):
 
 	@command_set("spindown", per_device=True)
 	def _set_spindown(self, value, device):
-		if self._set_spindown_errcnt < consts.ERROR_THRESHOLD:
+		if self._spindown_errcnt < consts.ERROR_THRESHOLD:
 			(rc, out) = self._cmd.execute(["hdparm", "-S", str(value), "/dev/" + device])
-			if rc:
-				self._set_spindown_errcnt += 1
-				self._check_set_spindown_err_threshold()
-			else:
-				self._set_spindown_errcnt = 0
+			self._update_spindown_errcnt(rc)
 
 	@command_get("spindown")
 	def _get_spindown(self, device):

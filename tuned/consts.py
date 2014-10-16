@@ -10,7 +10,7 @@ DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
 LOAD_DIRECTORIES = ["/usr/lib/tuned", "/etc/tuned"]
 
 # max. number of consecutive errors to give up
-ERROR_THRESHOLD = 5
+ERROR_THRESHOLD = 3
 
 # bootloader plugin configuration
 GRUB2_CFG_FILES = ["/boot/grub2/grub.cfg", "/boot/efi/EFI/redhat/grub.cfg", "/boot/efi/EFI/fedora/grub.cfg"]
