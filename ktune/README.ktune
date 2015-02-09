@@ -48,8 +48,8 @@ service is enabled and started, it will use the configuration options from
 
     SYSCTL="/etc/sysctl.ktune"
     USE_KTUNE_D="yes"
-    SYSCTL_PRE="/etc/sysctl.d/* /etc/sysctl.conf"
-    SYSCTL_POST="/etc/sysctl.d/* /etc/sysctl.conf"
+    SYSCTL_PRE="/etc/sysctl.conf /etc/sysctl.d/*"
+    SYSCTL_POST="/etc/sysctl.conf /etc/sysctl.d/*"
     ELEVATOR="deadline"
     ELEVATOR_TUNE_DEVS="/sys/block/{sd,cciss}*/queue/scheduler"
 

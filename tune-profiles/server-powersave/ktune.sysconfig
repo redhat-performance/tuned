@@ -13,7 +13,7 @@ USE_KTUNE_D="yes"
 # This is the custom sysctl configuration file.  Any settings in this file will
 # be applied after the ktune settings, overriding them.  Comment this out to
 # use only the ktune settings.
-SYSCTL_POST="/etc/sysctl.d/* /etc/sysctl.conf"
+SYSCTL_POST="/etc/sysctl.conf /etc/sysctl.d/*"
 
 # This is the I/O scheduler ktune will use.  This will *not* override anything
 # explicitly set on the kernel command line, nor will it change the scheduler
