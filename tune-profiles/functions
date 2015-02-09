@@ -8,7 +8,7 @@
 #
 
 DISKS_DEV="$(command ls -d1 /dev/[shv]d*[a-z] 2>/dev/null)"
-DISKS_SYS="$(command ls -d1 /sys/block/{sd,cciss,dm-,vd}* 2>/dev/null)"
+DISKS_SYS="$(command ls -d1 /sys/block/{sd,cciss,dm-,vd,dasd}* 2>/dev/null)"
 
 # SATA Aggressive Link Power Management
 # usage: set_disk_alpm policy

@@ -24,4 +24,4 @@ SYSCTL_POST="/etc/sysctl.conf /etc/sysctl.d/*"
 ELEVATOR="deadline"
 
 # These are the devices, that should be tuned with the ELEVATOR
-ELEVATOR_TUNE_DEVS="/sys/block/{sd,cciss}*/queue/scheduler"
+ELEVATOR_TUNE_DEVS="/sys/block/{sd,cciss,dm-,vd,dasd}*/queue/scheduler"
