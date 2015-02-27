@@ -75,7 +75,7 @@ restore_sys() {
 #
 
 DISKS_DEV="$(command ls -d1 /dev/[shv]d*[a-z] 2>/dev/null)"
-DISKS_SYS="$(command ls -d1 /sys/block/{sd,cciss,dm-,vd,dasd}* 2>/dev/null)"
+DISKS_SYS="$(command ls -d1 /sys/block/{sd,cciss,dm-,vd,dasd,xvd}* 2>/dev/null)"
 
 _check_elevator_override()
 {
