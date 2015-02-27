@@ -29,4 +29,4 @@ vm.dirty_ratio = 40
 kernel.shmall = >$SAP_SHMALL
 kernel.shmmax = >$SAP_SHMMAX
 kernel.sem = 1250 256000 100 8192
-vm.max_map_count = 1000000
+vm.max_map_count = 2000000
