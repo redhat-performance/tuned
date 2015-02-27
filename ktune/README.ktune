@@ -51,7 +51,7 @@ service is enabled and started, it will use the configuration options from
     SYSCTL_PRE="/etc/sysctl.conf /etc/sysctl.d/*"
     SYSCTL_POST="/etc/sysctl.conf /etc/sysctl.d/*"
     ELEVATOR="deadline"
-    ELEVATOR_TUNE_DEVS="/sys/block/{sd,cciss,dm-,vd,dasd}*/queue/scheduler"
+    ELEVATOR_TUNE_DEVS="/sys/block/{sd,cciss,dm-,vd,dasd,xvd}*/queue/scheduler"
 
 SYSCTL is the primary ktune sysctl profile. If you comment it out, it will not
 get applied.
