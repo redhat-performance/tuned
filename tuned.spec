@@ -139,7 +139,7 @@ fi
 %doc COPYING
 %doc README
 %doc doc/TIPS.txt
-%{_datadir}/bash-completion/completions/tuned
+%{_datadir}/bash-completion/completions/tuned-adm
 %exclude %{python_sitelib}/tuned/gtk
 %{python_sitelib}/tuned
 %{_sbindir}/tuned
