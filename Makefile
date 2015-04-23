@@ -6,7 +6,7 @@ TMPFILESDIR = $(shell rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo /usr/lib/
 VERSIONED_NAME = $(NAME)-$(VERSION)
 
 DOCDIR = /usr/share/doc/$(NAME)
-PYTHON_SITELIB = /usr/lib/python2.7/site-packages
+PYTHON_SITELIB = $(shell python -c 'from distutils.sysconfig import get_python_lib; print get_python_lib();' || echo /usr/lib/python2.7/site-packages)
 TUNED_PROFILESDIR = /usr/lib/tuned
 BASH_COMPLETIONS = /usr/share/bash-completion/completions
 
