@@ -19,7 +19,7 @@ archive: clean
 		tuned-adm.bash dbus.conf recommend.conf tuned-main.conf 00_tuned \
 		bootcmdline org.tuned.gui.policy tuned-gui.py tuned-gui.glade \
 		$(VERSIONED_NAME)
-	cp -a doc experiments libexec man profiles systemtap tuned $(VERSIONED_NAME)
+	cp -a doc experiments libexec man profiles systemtap tuned contrib $(VERSIONED_NAME)
 
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
 
