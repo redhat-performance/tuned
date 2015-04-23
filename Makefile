@@ -5,7 +5,6 @@ UNITDIR = $(shell rpm --eval '%{_unitdir}' 2>/dev/null || echo /usr/lib/systemd/
 TMPFILESDIR = $(shell rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo /usr/lib/tmpfiles.d)
 VERSIONED_NAME = $(NAME)-$(VERSION)
 
-DESTDIR = /
 DOCDIR = /usr/share/doc/$(NAME)
 PYTHON_SITELIB = /usr/lib/python2.7/site-packages
 TUNED_PROFILESDIR = /usr/lib/tuned
@@ -33,8 +32,6 @@ build:
 	# nothing to build
 
 install:
-	mkdir -p $(DESTDIR)
-
 	# library
 	mkdir -p $(DESTDIR)$(PYTHON_SITELIB)
 	cp -a tuned $(DESTDIR)$(PYTHON_SITELIB)
