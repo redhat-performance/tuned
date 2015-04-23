@@ -1,0 +1,102 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          tuned
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $portmap
+# Should-Stop:       $portmap
+# X-Start-Before:    nis
+# X-Stop-After:      nis
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# X-Interactive:     false
+# Short-Description: Tuned daemon
+# Description:       Dynamic System Tuning Daemon
+### END INIT INFO
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="System tuning daemon"
+NAME=tuned
+
+DAEMON=/usr/sbin/tuned
+PIDFILE=/var/run/tuned.pid
+TUNED_OPT1=--log
+TUNED_OPT2=--pid
+TUNED_OPT3=--daemon
+
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
+
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Define LSB log_* functions.
+. /lib/lsb/init-functions
+
+do_start()
+{
+	# Return
+	#   0 if daemon has been started
+	#   1 if daemon was already running
+	#   other if daemon could not be started or a failure occured
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- $TUNED_OPT1 $TUNED_OPT2 $TUNED_OPT3
+}
+
+do_stop()
+{
+	# Return
+	#   0 if daemon has been stopped
+	#   1 if daemon was already stopped
+	#   other if daemon could not be stopped or a failure occurred
+	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --exec $DAEMON
+}
+
+
+case "$1" in
+  start)
+	if init_is_upstart; then
+		exit 1
+	fi
+	log_daemon_msg "Starting $DESC" "$TUNED"
+	do_start
+	case "$?" in
+		0) log_end_msg 0 ;;
+		1) log_progress_msg "already started"
+		   log_end_msg 0 ;;
+		*) log_end_msg 1 ;;
+	esac
+
+	;;
+  stop)
+	if init_is_upstart; then
+		exit 0
+	fi
+	log_daemon_msg "Stopping $DESC" "$TUNED"
+	do_stop
+	case "$?" in
+		0) log_end_msg 0 ;;
+		1) log_progress_msg "already stopped"
+		   log_end_msg 0 ;;
+		*) log_end_msg 1 ;;
+	esac
+
+	;;
+  restart)
+	if init_is_upstart; then
+		exit 1
+	fi
+	$0 stop
+	$0 start
+	;;
+  status)
+	status_of_proc -p $PIDFILE $DAEMON $TUNED && exit 0 || exit $?
+	;;
+  *)
+	echo "Usage: $SCRIPTNAME {start|stop|restart|status}" >&2
+	exit 3
+	;;
+esac
+
+:
