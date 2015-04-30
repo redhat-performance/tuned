@@ -136,7 +136,7 @@ class GuiPluginLoader(PluginLoader):
         """
 
         try:
-            config = ConfigObj(file_name,
+            config = ConfigObj.ConfigObj(file_name,
                                configspec=global_config_spec,
                                raise_errors=True, file_error=True)
         except IOError, e:

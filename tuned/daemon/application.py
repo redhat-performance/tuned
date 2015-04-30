@@ -1,6 +1,6 @@
 from tuned import storage, units, monitors, plugins, profiles, exports, hardware
 from tuned.exceptions import TunedException
-from configobj import ConfigObj
+from configobj import ConfigObj, ConfigObjError
 from validate import Validator
 import tuned.logs
 import controller

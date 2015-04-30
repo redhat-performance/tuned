@@ -1,5 +1,5 @@
 import tuned.profiles.profile
-from configobj import ConfigObj
+from configobj import ConfigObj, ConfigObjError
 import os.path
 import collections
 import tuned.logs
