@@ -106,3 +106,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	@exports.export("", "s")
 	def recommend_profile(self):
 		return self._cmd.recommend_profile()
+
+	@exports.export("", "b")
+	def verify_profile(self):
+		return self._daemon.verify_profile()

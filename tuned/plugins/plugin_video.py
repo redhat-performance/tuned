@@ -41,21 +41,35 @@ class VideoPlugin(base.Plugin):
 		}
 
 	@command_set("radeon_powersave", per_device=True)
-	def _set_radeon_powersave(self, value, device):
+	def _set_radeon_powersave(self, value, device, sim):
 		sys_files = self._radeon_powersave_files(device)
 		if not os.path.exists(sys_files["method"]):
-			log.warn("radeon_powersave is not supported on '%s'" % device)
-			return
+			if not sim:
+				log.warn("radeon_powersave is not supported on '%s'" % device)
+			return None
 
 		if value in ["default", "auto", "low", "mid", "high"]:
-			self._cmd.write_to_file(sys_files["method"], "profile")
-			self._cmd.write_to_file(sys_files["profile"], value)
+			if not sim:
+				self._cmd.write_to_file(sys_files["method"], "profile")
+				self._cmd.write_to_file(sys_files["profile"], value)
+			return value
 		elif value == "dynpm":
-			self._cmd.write_to_file(sys_files["method"], "dynpm")
+			if not sim:
+				self._cmd.write_to_file(sys_files["method"], "dynpm")
+			return "dynpm"
 		else:
-			log.warn("Invalid option for radeon_powersave.")
+			if not sim:
+				log.warn("Invalid option for radeon_powersave.")
+			return None
+
 
 	@command_get("radeon_powersave")
 	def _get_radeon_powersave(self, device):
 		sys_files = self._radeon_powersave_files(device)
-		return self._cmd.read_file(sys_files["profile"])
+		method = self._cmd.read_file(sys_files["method"]).strip()
+		if method == "profile":
+			return self._cmd.read_file(sys_files["profile"]).strip()
+		elif method == "dynpm":
+			return "dynpm"
+		else:
+			 return None

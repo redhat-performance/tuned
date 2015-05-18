@@ -37,15 +37,18 @@ class USBPlugin(base.Plugin):
 		return "/sys/bus/usb/devices/%s/power/autosuspend" % device
 
 	@command_set("autosuspend", per_device=True)
-	def _set_autosuspend(self, value, device):
+	def _set_autosuspend(self, value, device, sim):
 		enable = self._option_bool(value)
 		if enable is None:
-			return
+			return None
 
-		sys_file = self._autosuspend_sysfile(device)
-		self._cmd.write_to_file(sys_file, "1" if enable else "0")
+		val = "1" if enable else "0"
+		if not sim:
+			sys_file = self._autosuspend_sysfile(device)
+			self._cmd.write_to_file(sys_file, val)
+		return val
 
 	@command_get("autosuspend")
 	def _get_autosuspend(self, device):
 		sys_file = self._autosuspend_sysfile(device)
-		return self._cmd.read_file(sys_file)
+		return self._cmd.read_file(sys_file).strip()

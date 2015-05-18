@@ -35,16 +35,21 @@ class VMPlugin(base.Plugin):
 		return path
 
 	@command_set("transparent_hugepages")
-	def _set_transparent_hugepages(self, value):
+	def _set_transparent_hugepages(self, value, sim):
 		if value not in ["always", "never"]:
-			log.warn("Incorrect 'transparent_hugepages' value.")
-			return
+			if not sim:
+				log.warn("Incorrect 'transparent_hugepages' value.")
+			return None
 
 		sys_file = self._thp_file()
 		if os.path.exists(sys_file):
-			cmd.write_to_file(sys_file, value)
+			if not sim:
+				cmd.write_to_file(sys_file, value)
+			return value
 		else:
-			log.warn("Option 'transparent_hugepages' is not supported on current hardware.")
+			if not sim:
+				log.warn("Option 'transparent_hugepages' is not supported on current hardware.")
+			return None
 
 	@command_get("transparent_hugepages")
 	def _get_transparent_hugepages(self):

@@ -87,6 +87,23 @@ class Admin(object):
 			profile = self._cmd.recommend_profile()
 		print profile
 
+	def verify_profile(self):
+		ret = False
+		try:
+			ret = self._controller.verify_profile()
+		except TunedAdminDBusException as e:
+			self._error(e)
+			self._error("Cannot verify profile if there is no connection to daemon")
+			return False
+
+		if ret:
+			print "Verfication succeeded, current system settings match the preset profile."
+		else:
+			print "Verification failed, current system settings differ from the preset profile."
+			print "See tuned.log for details. You can mostly fix this by Tuned restart:"
+			print "  systemctl restart tuned"
+		return ret
+
 	def off(self):
 		result = self._controller.off()
 		if not result:

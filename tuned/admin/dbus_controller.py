@@ -55,5 +55,8 @@ class DBusController(object):
 	def recommend_profile(self):
 		return self._call("recommend_profile")
 
+	def verify_profile(self):
+		return self._call("verify_profile")
+
 	def off(self):
 		return self._call("disable")

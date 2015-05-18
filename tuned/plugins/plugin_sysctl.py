@@ -46,6 +46,17 @@ class SysctlPlugin(base.Plugin):
 
 		self._storage.set("options", instance._sysctl_original)
 
+	def _instance_verify_static(self, instance):
+		ret = True
+		for option, value in instance._sysctl.iteritems():
+			curr_val = self._read_sysctl(option)
+			if curr_val == value:
+				log.info("verify: %s = %s" % (option, curr_val))
+			else:
+				ret = False
+				log.info("verify: %s = %s, expected %s" % (option, curr_val, value))
+		return ret
+
 	def _instance_unapply_static(self, instance, profile_switch = False):
 		for option, value in instance._sysctl_original.iteritems():
 			self._write_sysctl(option, value)

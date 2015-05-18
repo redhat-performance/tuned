@@ -45,6 +45,10 @@ class Daemon(object):
 		self._terminate = threading.Event()
 		# Flag which is set if terminating due to profile_switch
 		self._terminate_profile_switch = threading.Event()
+		# Flag which is set if there is no operation in progress
+		self._not_used = threading.Event()
+		self._not_used.set()
+		self._profile_applied = threading.Event()
 
 	def _init_profile(self, profile_name):
 		if profile_name is None:
@@ -87,6 +91,7 @@ class Daemon(object):
 		self._unit_manager.create(self._profile.units)
 		self._save_active_profile(self._profile.name)
 		self._unit_manager.start_tuning()
+		self._profile_applied.set()
 
 		# In python 2 interpreter with applied patch for rhbz#917709 we need to periodically
 		# poll, otherwise the python will not have chance to update events / locks (due to GIL)
@@ -103,6 +108,14 @@ class Daemon(object):
 					self._unit_manager.update_monitors()
 					log.debug("performing tunings")
 					self._unit_manager.update_tuning()
+
+		self._profile_applied.clear()
+
+		# wait for others to complete their tasks, use timeout 3 x sleep_interval to prevent
+		# deadlocks
+		i = 0
+		while not self._cmd.wait(self._not_used, self._sleep_interval) and i < 3:
+			i += 1
 
 		# if terminating due to profile switch
 		if self._terminate_profile_switch.is_set():
@@ -159,11 +172,33 @@ class Daemon(object):
 			return False
 
 		log.info("starting tuning")
+		self._not_used.set()
 		self._thread = threading.Thread(target=self._thread_code)
 		self._terminate_profile_switch.clear()
 		self._terminate.clear()
 		self._thread.start()
 		return True
+
+	def verify_profile(self):
+		if not self.is_running():
+			log.error("tuned is not running")
+			return False
+
+		if self._profile is None:
+			log.error("no profile is set")
+			return False
+
+		if not self._profile_applied.is_set():
+			log.error("profile is not applied")
+			return False
+
+		# using deamon, the main loop mustn't exit before our completion
+		self._not_used.clear()
+		log.info("verifying profile(s): %s" % self._profile.name)
+		ret = self._unit_manager.verify_tuning()
+		# main loop is allowed to exit
+		self._not_used.set()
+		return ret
 
 	# profile_switch is helper telling plugins whether the stop is due to profile switch
 	def stop(self, profile_switch = False):

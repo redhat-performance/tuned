@@ -104,6 +104,9 @@ class commands:
 					profile = section
 		return profile
 
+	# Do not make balancing on patched Python 2 interpreter (rhbz#1028122).
+	# It means less CPU usage on patchet interpreter. On non-patched interpreter
+	# it is not allowed to sleep longer than 50 ms.
 	def wait(self, terminate, time):
 		try:
 			return terminate.wait(time, False)

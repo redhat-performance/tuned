@@ -196,9 +196,11 @@ class DiskPlugin(hotplug.Plugin):
 		return os.path.join("/sys/block/", device, "queue/scheduler")
 
 	@command_set("elevator", per_device=True)
-	def _set_elevator(self, value, device):
+	def _set_elevator(self, value, device, sim):
 		sys_file = self._elevator_file(device)
-		self._cmd.write_to_file(sys_file, value)
+		if not sim:
+			self._cmd.write_to_file(sys_file, value)
+		return value
 
 	@command_get("elevator")
 	def _get_elevator(self, device):
@@ -228,21 +230,27 @@ class DiskPlugin(hotplug.Plugin):
 		return policy_files
 
 	@command_set("alpm")
-	def _set_alpm(self, policy):
-		for policy_file in self._alpm_policy_files():
-			self._cmd.write_to_file(policy_file, policy)
+	def _set_alpm(self, policy, sim):
+		if not sim:
+			for policy_file in self._alpm_policy_files():
+				self._cmd.write_to_file(policy_file, policy)
+		return policy
 
 	@command_get("alpm")
 	def _get_alpm(self):
 		for policy_file in self._alpm_policy_files():
-			return self._cmd.read_file(policy_file)
+			return self._cmd.read_file(policy_file).strip()
 		return None
 
 	@command_set("apm", per_device=True)
-	def _set_apm(self, value, device):
+	def _set_apm(self, value, device, sim):
 		if self._apm_errcnt < consts.ERROR_THRESHOLD:
-			(rc, out) = self._cmd.execute(["hdparm", "-B", str(value), "/dev/" + device])
-			self._update_apm_errcnt(rc)
+			if not sim:
+				(rc, out) = self._cmd.execute(["hdparm", "-B", str(value), "/dev/" + device])
+				self._update_apm_errcnt(rc)
+			return str(value)
+		else:
+			return None
 
 	@command_get("apm")
 	def _get_apm(self, device):
@@ -256,10 +264,14 @@ class DiskPlugin(hotplug.Plugin):
 		return value
 
 	@command_set("spindown", per_device=True)
-	def _set_spindown(self, value, device):
+	def _set_spindown(self, value, device, sim):
 		if self._spindown_errcnt < consts.ERROR_THRESHOLD:
-			(rc, out) = self._cmd.execute(["hdparm", "-S", str(value), "/dev/" + device])
-			self._update_spindown_errcnt(rc)
+			if not sim:
+				(rc, out) = self._cmd.execute(["hdparm", "-S", str(value), "/dev/" + device])
+				self._update_spindown_errcnt(rc)
+			return str(value)
+		else:
+			return None
 
 	@command_get("spindown")
 	def _get_spindown(self, device):
@@ -278,9 +290,12 @@ class DiskPlugin(hotplug.Plugin):
 		return v
 
 	@command_set("readahead", per_device=True)
-	def _set_readahead(self, value, device):
+	def _set_readahead(self, value, device, sim):
 		sys_file = self._readahead_file(device)
-		self._cmd.write_to_file(sys_file, "%d" % self._parse_ra(value))
+		val = self._parse_ra(value)
+		if not sim:
+			self._cmd.write_to_file(sys_file, "%d" % val)
+		return val
 
 	@command_get("readahead")
 	def _get_readahead(self, device):
@@ -311,9 +326,11 @@ class DiskPlugin(hotplug.Plugin):
 		return os.path.join("/sys/block/", device, "queue/iosched/quantum")
 
 	@command_set("scheduler_quantum", per_device=True)
-	def _set_scheduler_quantum(self, value, device):
+	def _set_scheduler_quantum(self, value, device, sim):
 		sys_file = self._scheduler_quantum_file(device)
-		self._cmd.write_to_file(sys_file, "%d" % int(value))
+		if not sim:
+			self._cmd.write_to_file(sys_file, "%d" % int(value))
+		return value
 
 	@command_get("scheduler_quantum")
 	def _get_scheduler_quantum(self, device):

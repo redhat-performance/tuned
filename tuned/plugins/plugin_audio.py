@@ -55,11 +55,15 @@ class AudioPlugin(base.Plugin):
 		return "/sys/module/%s/parameters/power_save_controller" % device
 
 	@command_set("timeout", per_device=True)
-	def _set_timeout(self, value, device):
+	def _set_timeout(self, value, device, sim):
 		timeout = int(value)
 		if timeout >= 0:
 			sys_file = self._timeout_path(device)
-			cmd.write_to_file(sys_file, "%d" % timeout)
+			if not sim:
+				cmd.write_to_file(sys_file, "%d" % timeout)
+			return timeout
+		else:
+			return None
 
 	@command_get("timeout")
 	def _get_timeout(self, device):

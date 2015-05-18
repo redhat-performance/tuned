@@ -151,7 +151,7 @@ class CPULatencyPlugin(base.Plugin):
 		pass
 
 	def _get_intel_pstate_attr(self, attr):
-		return self._cmd.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None)
+		return self._cmd.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None).strip()
 
 	def _set_intel_pstate_attr(self, attr, val):
 		if val is not None:
@@ -166,19 +166,22 @@ class CPULatencyPlugin(base.Plugin):
 			self._latency = latency
 
 	def _get_available_governors(self, device):
-		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).split()
+		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).strip().split()
 
 	@command_set("governor", per_device=True)
-	def _set_governor(self, governor, device):
+	def _set_governor(self, governor, device, sim):
 		if governor not in self._get_available_governors(device):
-			log.info("ignoring governor '%s' on cpu '%s', it is not supported" % (governor, device))
-			return
-		log.info("setting governor '%s' on cpu '%s'" % (governor, device))
-		if self._has_cpupower:
-			cpu_id = device.lstrip("cpu")
-			self._cmd.execute(["cpupower", "-c", cpu_id, "frequency-set", "-g", str(governor)])
-		else:
-			self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
+			if not sim:
+				log.info("ignoring governor '%s' on cpu '%s', it is not supported" % (governor, device))
+			return None
+		if not sim:
+			log.info("setting governor '%s' on cpu '%s'" % (governor, device))
+			if self._has_cpupower:
+				cpu_id = device.lstrip("cpu")
+				self._cmd.execute(["cpupower", "-c", cpu_id, "frequency-set", "-g", str(governor)])
+			else:
+				self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
+		return str(governor)
 
 	@command_get("governor")
 	def _get_governor(self, device):
@@ -206,11 +209,15 @@ class CPULatencyPlugin(base.Plugin):
 		return governor
 
 	@command_set("energy_perf_bias", per_device=True)
-	def _set_energy_perf_bias(self, energy_perf_bias, device):
+	def _set_energy_perf_bias(self, energy_perf_bias, device, sim):
 		if self._has_energy_perf_bias:
-			log.info("setting energy_perf_bias '%s' on cpu '%s'" % (energy_perf_bias, device))
 			cpu_id = device.lstrip("cpu")
-			self._cmd.execute(["x86_energy_perf_policy", "-c", cpu_id, str(energy_perf_bias)])
+			if not sim:
+				log.info("setting energy_perf_bias '%s' on cpu '%s'" % (energy_perf_bias, device))
+				self._cmd.execute(["x86_energy_perf_policy", "-c", cpu_id, str(energy_perf_bias)])
+			return str(energy_perf_bias)
+		else:
+			return None
 
 	def _try_parse_num(self, s):
 		try:

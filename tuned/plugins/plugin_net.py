@@ -129,17 +129,19 @@ class NetTuningPlugin(base.Plugin):
 		return "/sys/module/nf_conntrack/parameters/hashsize"
 
 	@command_set("wake_on_lan", per_device=True)
-	def _set_wake_on_lan(self, value, device):
+	def _set_wake_on_lan(self, value, device, sim):
 		if value is None:
-			return
+			return None
 
 		# see man ethtool for possible wol values, 0 added as an alias for 'd'
 		value = re.sub(r"0", "d", str(value));
 		if not re.match(r"^[" + WOL_VALUES + r"]+$", value):
 			log.warn("Incorrect 'wake_on_lan' value.")
-			return
+			return None
 
-		self._cmd.execute(["ethtool", "-s", device, "wol", value])
+		if not sim:
+			self._cmd.execute(["ethtool", "-s", device, "wol", value])
+		return value
 
 	@command_get("wake_on_lan")
 	def _get_wake_on_lan(self, device):
@@ -153,13 +155,17 @@ class NetTuningPlugin(base.Plugin):
 		return value
 
 	@command_set("nf_conntrack_hashsize")
-	def _set_nf_conntrack_hashsize(self, value):
+	def _set_nf_conntrack_hashsize(self, value, sim):
 		if value is None:
-			return
+			return None
 
 		hashsize = int(value)
 		if hashsize >= 0:
-			self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize)
+			if not sim:
+				self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize)
+			return hashsize
+		else:
+			return None
 
 	@command_get("nf_conntrack_hashsize")
 	def _get_nf_conntrack_hashsize(self):

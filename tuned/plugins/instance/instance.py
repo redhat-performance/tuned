@@ -53,6 +53,9 @@ class Instance(object):
 	def apply_tuning(self):
 		self._plugin.instance_apply_tuning(self)
 
+	def verify_tuning(self):
+		return self._plugin.instance_verify_tuning(self)
+
 	def update_tuning(self):
 		self._plugin.instance_update_tuning(self)
 
