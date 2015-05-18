@@ -21,6 +21,12 @@ Based on that information components will then be put into lower or higher
 power saving modes to adapt to the current usage. Currently only ethernet
 network and ATA harddisk devices are implemented.
 
+%if 0%{?rhel} <= 7
+%global docdir %{_docdir}/%{name}-%{version}
+%else
+%global docdir %{_docdir}/%{name}
+%endif
+
 %package gtk
 Summary: GTK GUI for tuned
 Requires: %{name} = %{version}-%{release}
@@ -87,7 +93,7 @@ It can be also used to fine tune your system for specific scenarios.
 
 
 %install
-make install DESTDIR=%{buildroot}
+make install DESTDIR=%{buildroot} DOCDIR=%{docdir}
 %if 0%{?rhel}
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
 %endif
