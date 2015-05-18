@@ -212,6 +212,19 @@ class CPULatencyPlugin(base.Plugin):
 			cpu_id = device.lstrip("cpu")
 			self._cmd.execute(["x86_energy_perf_policy", "-c", cpu_id, str(energy_perf_bias)])
 
+	def _try_parse_num(self, s):
+		try:
+			v = int(s)
+		except ValueError as e:
+			try:
+				v = int(s, 16)
+			except ValueError as e:
+				v = s
+		return v
+
+	def _energy_perf_policy_to_human(self, s):
+		return {0:"performance", 6:"normal", 15:"powersave"}.get(self._try_parse_num(s), s)
+
 	@command_get("energy_perf_bias")
 	def _get_energy_perf_bias(self, device):
 		energy_perf_bias = None
@@ -222,7 +235,7 @@ class CPULatencyPlugin(base.Plugin):
 				for line in lines.splitlines():
 					l = line.split()
 					if len(l) == 2:
-						energy_perf_bias = l[1]
+						energy_perf_bias = self._energy_perf_policy_to_human(l[1])
 						break
 
 		return energy_perf_bias
