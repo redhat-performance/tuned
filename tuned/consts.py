@@ -42,7 +42,9 @@ CFG_DEF_SLEEP_INTERVAL = 1
 # update interval for dynamic tuning (in seconds)
 CFG_DEF_UPDATE_INTERVAL = 10
 
-STR_VERIFY_PROFILE_DEVICE_VALUE_OK = "verify: device %s: %s = %s"
-STR_VERIFY_PROFILE_VALUE_OK = "verify: %s = %s"
-STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL = "verify: fail: device %s: %s = %s, expected %s"
-STR_VERIFY_PROFILE_VALUE_FAIL = "verify: fail: %s = %s, expected %s"
+STR_VERIFY_PROFILE_DEVICE_VALUE_OK = "verify: passed: device %s: %s = %s"
+STR_VERIFY_PROFILE_VALUE_OK = "verify: passed: %s = %s"
+STR_VERIFY_PROFILE_OK = "verify: passed: %s"
+STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL = "verify: failed: device %s: %s = %s, expected %s"
+STR_VERIFY_PROFILE_VALUE_FAIL = "verify: failed: %s = %s, expected %s"
+STR_VERIFY_PROFILE_FAIL = "verify: failed: %s"

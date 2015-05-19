@@ -504,8 +504,17 @@ process() {
 		stop
 		RETVAL=$?
 		;;
+	verify)
+		if declare -f verify &> /dev/null;
+		then
+			verify
+		else
+			:
+		fi
+		RETVAL=$?
+		;;
 	*)
-		echo $"Usage: $0 {start|stop}"
+		echo $"Usage: $0 {start|stop|verify}"
 		RETVAL=2
 		;;
 	esac
