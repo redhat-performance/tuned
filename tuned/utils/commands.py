@@ -22,6 +22,10 @@ class commands:
 		if self._logging:
 			log.debug(msg)
 
+	def get_bool(self, value):
+		v = str(value).upper().strip()
+		return {"Y":"1", "YES":"1", "T":"1", "TRUE":"1", "N":"0", "NO":"0", "F":"0", "FALSE":"0"}.get(v, value)
+
 	def write_to_file(self, f, data):
 		self._debug("Writing to file: %s < %s" % (f, data))
 		try:

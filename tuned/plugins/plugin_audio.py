@@ -54,7 +54,7 @@ class AudioPlugin(base.Plugin):
 	def _reset_controller_path(self, device):
 		return "/sys/module/%s/parameters/power_save_controller" % device
 
-	@command_set("timeout", per_device=True)
+	@command_set("timeout", per_device = True)
 	def _set_timeout(self, value, device, sim):
 		timeout = int(value)
 		if timeout >= 0:
@@ -73,10 +73,22 @@ class AudioPlugin(base.Plugin):
 			return int(value)
 		return None
 
-	@command_custom("reset_controller", per_device=True, priority=10)
-	def _reset_controller(self, enabling, value, device, verify):
-		if verify:
-			return None
+	@command_set("reset_controller", per_device = True)
+	def _set_reset_controller(self, value, device, sim):
+		v = cmd.get_bool(value)
 		sys_file = self._reset_controller_path(device)
 		if os.path.exists(sys_file):
-			cmd.write_to_file(sys_file, "1")
+			if not sim:
+				cmd.write_to_file(sys_file, v)
+			return v
+		return None
+
+	@command_get("reset_controller")
+	def _get_reset_controller(self, device):
+		sys_file = self._reset_controller_path(device)
+		if os.path.exists(sys_file):
+			value = cmd.read_file(sys_file)
+			if len(value) > 0:
+				return cmd.get_bool(value)
+		print "bad\n"
+		return None
