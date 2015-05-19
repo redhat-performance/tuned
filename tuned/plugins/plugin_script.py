@@ -52,9 +52,9 @@ class ScriptPlugin(base.Plugin):
 		if super(self.__class__, self)._instance_verify_static(instance) == False:
 			ret = False
 		if self._call_scripts(instance._scripts, "verify") == True:
-			log.info(consts.STR_VERIFY_PROFILE_OK % (instance._scripts))
+			log.info(consts.STR_VERIFY_PROFILE_OK % instance._scripts)
 		else:
-			log.error(consts.STR_VERIFY_PROFILE_FAIL % (instance._scripts))
+			log.error(consts.STR_VERIFY_PROFILE_FAIL % instance._scripts)
 			ret = False
 		return ret
 
