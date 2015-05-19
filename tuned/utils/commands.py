@@ -26,6 +26,9 @@ class commands:
 		v = str(value).upper().strip()
 		return {"Y":"1", "YES":"1", "T":"1", "TRUE":"1", "N":"0", "NO":"0", "F":"0", "FALSE":"0"}.get(v, value)
 
+	def remove_ws(self, s):
+		return re.sub('\s+', ' ', s).strip()
+
 	def write_to_file(self, f, data):
 		self._debug("Writing to file: %s < %s" % (f, data))
 		try:

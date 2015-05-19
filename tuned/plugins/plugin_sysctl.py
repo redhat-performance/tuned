@@ -51,7 +51,7 @@ class SysctlPlugin(base.Plugin):
 		ret = True
 		for option, value in instance._sysctl.iteritems():
 			curr_val = self._read_sysctl(option)
-			if self._verify_value(option, value, curr_val) == False:
+			if self._verify_value(option, self._cmd.remove_ws(value), curr_val) == False:
 				ret = False
 		return ret
 
@@ -67,7 +67,7 @@ class SysctlPlugin(base.Plugin):
 	def _read_sysctl(self, option):
 		retcode, stdout = self._execute_sysctl(["-e", option])
 		if retcode == 0:
-			parts = map(lambda value: re.sub('\s+', ' ', value).strip(), stdout.split("=", 1))
+			parts = map(lambda value: self._cmd.remove_ws(value), stdout.split("=", 1))
 			if len(parts) == 2:
 				option, value = parts
 				return value
