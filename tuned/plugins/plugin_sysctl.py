@@ -1,3 +1,4 @@
+import re
 import base
 from decorators import *
 import tuned.logs
@@ -69,7 +70,7 @@ class SysctlPlugin(base.Plugin):
 	def _read_sysctl(self, option):
 		retcode, stdout = self._execute_sysctl(["-e", option])
 		if retcode == 0:
-			parts = map(lambda value: value.strip(), stdout.split("=", 1))
+			parts = map(lambda value: re.sub('\s+', ' ', value).strip(), stdout.split("=", 1))
 			if len(parts) == 2:
 				option, value = parts
 				return value
