@@ -100,12 +100,16 @@ class BootloaderPlugin(base.Plugin):
 		return True
 
 	@command_custom("grub2_cfg_file")
-	def _grub2_cfg_file(self, enabling, value):
+	def _grub2_cfg_file(self, enabling, value, verify):
+		if verify:
+			return None
 		if enabling and value is not None:
 			self._grub2_cfg_file = value
 
 	@command_custom("cmdline", per_device = False, priority = 10)
-	def _cmdline(self, enabling, value):
+	def _cmdline(self, enabling, value, verify):
+		if verify:
+			return None
 		if enabling:
 			log.info("installing additional boot command line parameters to grub2")
 			self._grub2_cfg_patch(value)

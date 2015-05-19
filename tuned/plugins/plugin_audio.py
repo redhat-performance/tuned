@@ -74,7 +74,9 @@ class AudioPlugin(base.Plugin):
 		return None
 
 	@command_custom("reset_controller", per_device=True, priority=10)
-	def _reset_controller(self, enabling, value, device):
+	def _reset_controller(self, enabling, value, device, verify):
+		if verify:
+			return None
 		sys_file = self._reset_controller_path(device)
 		if os.path.exists(sys_file):
 			cmd.write_to_file(sys_file, "1")
