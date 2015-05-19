@@ -409,6 +409,22 @@ class Plugin(object):
 			if new_value is not None:
 				command["set"](new_value, sim = False)
 
+	def _verify_value(self, name, new_value, current_value, device = None):
+		if new_value is None:
+			return None
+		if new_value == current_value:
+			if device is None:
+				log.info(consts.STR_VERIFY_PROFILE_VALUE_OK % (name, current_value))
+			else:
+				log.info(consts.STR_VERIFY_PROFILE_DEVICE_VALUE_OK % (device, name, current_value))
+			return True
+		else:
+			if device is None:
+				log.error(consts.STR_VERIFY_PROFILE_VALUE_FAIL % (name, current_value, new_value))
+			else:
+				log.error(consts.STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL % (device, name, current_value, new_value))
+			return False
+
 	def _verify_device_command(self, instance, command, device, new_value):
 		# custom commands not supported for verification
 		if command["custom"] is not None:
@@ -418,14 +434,7 @@ class Plugin(object):
 		if new_value is None:
 			return None
 		new_value = command["set"](new_value, device, sim = True)
-		if new_value is None:
-			return None
-		if new_value == current_value:
-			log.info("verify: device %s: %s = %s" % (device, command["name"], current_value))
-			return True
-		else:
-			log.info("verify: device %s: %s = %s, expected %s" % (device, command["name"], current_value, new_value))
-			return False
+		return self._verify_value(command["name"], new_value, current_value, device)
 
 	def _verify_non_device_command(self, instance, command, new_value):
 		# custom commands not supported for verification
@@ -436,14 +445,7 @@ class Plugin(object):
 		if new_value is None:
 			return None
 		new_value = command["set"](new_value, sim = True)
-		if new_value is None:
-			return None
-		if new_value == current_value:
-			log.info("verify: %s = %s" % (command["name"], current_value))
-			return True
-		else:
-			log.info("verify: %s = %s, expected %s" % (command["name"], current_value, new_value))
-			return False
+		return self._verify_value(command["name"], new_value, current_value)
 
 	def _cleanup_all_non_device_commands(self, instance):
 		for command in filter(lambda command: not command["per_device"], self._commands.values()):

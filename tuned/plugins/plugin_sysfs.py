@@ -43,11 +43,8 @@ class SysfsPlugin(base.Plugin):
 		for key, value in instance._sysfs.iteritems():
 			if self._check_sysfs(key):
 				curr_val = self._read_sysfs(key)
-				if curr_val == value:
-					log.info("verify: %s = %s" % (key, curr_val))
-				else:
+				if self._verify_value(key, value, curr_val) == False:
 					ret = False
-					log.info("verify: %s = %s, expectede %s" % (key, curr_val, value))
 		return ret
 
 	def _instance_unapply_static(self, instance, profile_switch = False):

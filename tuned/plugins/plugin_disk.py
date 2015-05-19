@@ -1,3 +1,4 @@
+import tuned.consts as consts
 import hotplug
 from decorators import *
 import tuned.logs

@@ -41,3 +41,8 @@ CFG_DEF_DYNAMIC_TUNING = True
 CFG_DEF_SLEEP_INTERVAL = 1
 # update interval for dynamic tuning (in seconds)
 CFG_DEF_UPDATE_INTERVAL = 10
+
+STR_VERIFY_PROFILE_DEVICE_VALUE_OK = "verify: device %s: %s = %s"
+STR_VERIFY_PROFILE_VALUE_OK = "verify: %s = %s"
+STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL = "verify: fail: device %s: %s = %s, expected %s"
+STR_VERIFY_PROFILE_VALUE_FAIL = "verify: fail: %s = %s, expected %s"
