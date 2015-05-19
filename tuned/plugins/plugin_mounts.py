@@ -1,3 +1,4 @@
+import tuned.consts as consts
 import base
 from decorators import *
 from subprocess import Popen,PIPE
@@ -70,7 +71,7 @@ class MountsPlugin(base.Plugin):
 		"""
 		source_filenames = glob.glob("/sys/block/%s/device/scsi_disk/*/cache_type" % device)
 		for source_filename in source_filenames:
-			return self._cmd.read_file(source_filename).strip()
+			return cmd.read_file(source_filename).strip()
 		return None
 
 	def _mountpoint_has_writeback_cache(self, mountpoint):
@@ -120,9 +121,6 @@ class MountsPlugin(base.Plugin):
 
 	@command_custom("disable_barriers", per_device=True)
 	def _disable_barriers(self, start, value, mountpoint, verify):
-		if verify:
-			return None
-
 		storage_key = self._storage_key("disable_barriers", mountpoint)
 		force = str(value).lower() == "force"
 		value = force or self._option_bool(value)
@@ -142,7 +140,14 @@ class MountsPlugin(base.Plugin):
 				if original_value is None:
 					reject_reason = "unknown current setting"
 				elif original_value == False:
-					reject_reason = "barriers already disabled"
+					if verify:
+						log.info(consts.STR_VERIFY_PROFILE_OK % mountpoint)
+						return True
+					else:
+						reject_reason = "barriers already disabled"
+				elif verify:
+					log.error(consts.STR_VERIFY_PROFILE_FAIL % mountpoint)
+					return False
 
 			if reject_reason is not None:
 				log.info("not disabling barriers on '%s' (%s)" % (mountpoint, reject_reason))
@@ -153,6 +158,8 @@ class MountsPlugin(base.Plugin):
 			self._remount_partition(mountpoint, "barrier=0")
 
 		else:
+			if verify:
+				return None
 			original_value = self._storage.get(storage_key)
 			if original_value is None:
 				return
