@@ -1,4 +1,5 @@
 import base
+import glob
 import re
 import os.path
 from decorators import *
@@ -32,11 +33,12 @@ class SysfsPlugin(base.Plugin):
 
 	def _instance_apply_static(self, instance):
 		for key, value in instance._sysfs.iteritems():
-			if self._check_sysfs(key):
-				instance._sysfs_original[key] = self._read_sysfs(key)
-				self._write_sysfs(key, value)
-			else:
-				log.error("rejecting write to '%s' (not inside /sys)" % key)
+			for f in glob.iglob(key):
+				if self._check_sysfs(f):
+					instance._sysfs_original[f] = self._read_sysfs(f)
+					self._write_sysfs(f, value)
+				else:
+					log.error("rejecting write to '%s' (not inside /sys)" % f)
 
 	def _instance_verify_static(self, instance):
 		ret = True
