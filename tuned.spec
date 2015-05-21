@@ -110,6 +110,10 @@ rmdir %{buildroot}%{_sysconfdir}/grub.d
 # convert active_profile from full path to name (if needed)
 sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 
+# convert GRUB_CMDLINE_LINUX to GRUB_CMDLINE_LINUX_DEFAULT
+sed -i 's/GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX \\$tuned_params"/GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT \\$tuned_params"/' \
+  %{_sysconfdir}/default/grub
+
 
 %preun
 %systemd_preun tuned.service
@@ -122,6 +126,8 @@ sed -i 's|.*/\([^/]\+\)/[^\.]\+\.conf|\1|' /etc/tuned/active_profile
 # and tuned is noarch package, thus the following hack is needed
 if [ "$1" == 0 ]; then
   rm -f %{_sysconfdir}/grub.d/00_tuned || :
+# unpatch /etc/default/grub
+  sed -i '/GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT \\$tuned_params"/d' %{_sysconfdir}/default/grub
 fi
 
 

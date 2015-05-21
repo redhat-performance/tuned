@@ -76,10 +76,10 @@ class BootloaderPlugin(base.Plugin):
 			log.error("error reading '%s'" % consts.GRUB2_DEFAULT_ENV_FILE)
 			return False
 
-		if re.search(r"^[^#]*\bGRUB_CMDLINE_LINUX\s*=.*\\\$" + consts.GRUB2_TUNED_VAR + r"\b.*$", grub2_default_env, flags = re.MULTILINE) is None:
+		if re.search(r"^[^#]*\bGRUB_CMDLINE_LINUX_DEFAULT\s*=.*\\\$" + consts.GRUB2_TUNED_VAR + r"\b.*$", grub2_default_env, flags = re.MULTILINE) is None:
 			log.debug("patching '%s'" % consts.GRUB2_DEFAULT_ENV_FILE)
 			self._cmd.write_to_file(consts.GRUB2_DEFAULT_ENV_FILE,
-				grub2_default_env + "GRUB_CMDLINE_LINUX=\"$GRUB_CMDLINE_LINUX " + r"\$" + consts.GRUB2_TUNED_VAR + "\"\n")
+				grub2_default_env + "GRUB_CMDLINE_LINUX_DEFAULT=\"$GRUB_CMDLINE_LINUX_DEFAULT " + r"\$" + consts.GRUB2_TUNED_VAR + "\"\n")
 		return True
 
 	def _grub2_cfg_patch(self, value):
