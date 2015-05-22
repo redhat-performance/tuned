@@ -412,7 +412,16 @@ class Plugin(object):
 	def _verify_value(self, name, new_value, current_value, device = None):
 		if new_value is None:
 			return None
-		if current_value is not None and str(new_value) == str(current_value):
+		ret = False
+		if current_value is not None:
+			try:
+				ret = int(new_value) == int(current_value)
+			except ValueError:
+				try:
+					ret = int(new_value, 16) == int(current_value, 16)
+				except ValueError:
+					ret = str(new_value) == str(current_value)
+		if ret:
 			if device is None:
 				log.info(consts.STR_VERIFY_PROFILE_VALUE_OK % (name, current_value))
 			else:
