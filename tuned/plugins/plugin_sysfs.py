@@ -43,10 +43,11 @@ class SysfsPlugin(base.Plugin):
 	def _instance_verify_static(self, instance):
 		ret = True
 		for key, value in instance._sysfs.iteritems():
-			if self._check_sysfs(key):
-				curr_val = self._read_sysfs(key)
-				if self._verify_value(key, value, curr_val) == False:
-					ret = False
+			for f in glob.iglob(key):
+				if self._check_sysfs(f):
+					curr_val = self._read_sysfs(f)
+					if self._verify_value(f, value, curr_val) == False:
+						ret = False
 		return ret
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
