@@ -366,7 +366,7 @@ class Plugin(object):
 			op = nws[:1]
 			val = nws[1:]
 			if current_value is None:
-				return val
+				return new_value
 			try:
 				if op == ">":
 					if int(val) > int(current_value):
