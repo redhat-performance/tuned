@@ -42,6 +42,7 @@ class AudioPlugin(base.Plugin):
 		except:
 			return None
 
+	@classmethod
 	def _get_config_options(cls):
 		return {
 			"timeout":          0,

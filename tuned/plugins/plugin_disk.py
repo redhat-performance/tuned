@@ -59,6 +59,7 @@ class DiskPlugin(hotplug.Plugin):
 			instance._load_monitor.remove_device(device_name)
 		super(self.__class__, self)._removed_device_unapply_tuning(instance, device_name)
 
+	@classmethod
 	def _get_config_options(cls):
 		return {
 			"dynamic"            : True, # FIXME: do we want this default?
@@ -71,6 +72,7 @@ class DiskPlugin(hotplug.Plugin):
 			"scheduler_quantum"  : None,
 		}
 
+	@classmethod
 	def _get_config_options_used_by_dynamic(cls):
 		return [
 			"apm",

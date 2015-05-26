@@ -11,6 +11,7 @@ class ScriptPlugin(base.Plugin):
 	Plugin for running custom scripts with profile activation and deactivation.
 	"""
 
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"script" : None,

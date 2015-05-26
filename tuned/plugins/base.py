@@ -43,10 +43,12 @@ class Plugin(object):
 	# Plugin configuration manipulation and helpers.
 	#
 
+	@classmethod
 	def _get_config_options(self):
 		"""Default configuration options for the plugin."""
 		return {}
 
+	@classmethod
 	def _get_config_options_used_by_dynamic(self):
 		"""List of config options used by dynamic tuning. Their previous values will be automatically saved and restored."""
 		return []

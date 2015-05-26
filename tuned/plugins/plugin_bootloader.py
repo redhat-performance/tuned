@@ -32,6 +32,7 @@ class BootloaderPlugin(base.Plugin):
 	def _instance_cleanup(self, instance):
 		pass
 
+	@classmethod
 	def _get_config_options(cls):
 		return {
 			"grub2_cfg_file": None,

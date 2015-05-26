@@ -53,6 +53,7 @@ class MountsPlugin(base.Plugin):
 		self._assigned_devices = set()
 		self._free_devices = self._devices.copy()
 
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"disable_barriers": None,

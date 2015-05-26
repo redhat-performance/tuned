@@ -21,6 +21,7 @@ class USBPlugin(base.Plugin):
 		self._free_devices = self._devices.copy()
 		self._cmd = commands()
 
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"autosuspend" : None,

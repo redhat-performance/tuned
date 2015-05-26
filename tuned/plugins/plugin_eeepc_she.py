@@ -20,6 +20,7 @@ class EeePCSHEPlugin(base.Plugin):
 			raise exceptions.NotSupportedPluginException("Plugin is not supported on your hardware.")
 		super(self.__class__, self).__init__(*args, **kwargs)
 
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"load_threshold_normal"    : 0.6,

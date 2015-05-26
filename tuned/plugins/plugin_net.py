@@ -74,6 +74,7 @@ class NetTuningPlugin(base.Plugin):
 		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
 		log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
 
+	@classmethod
 	def _get_config_options(cls):
 		return {
 			"wake_on_lan": None,

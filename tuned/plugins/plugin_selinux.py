@@ -28,6 +28,7 @@ class SelinuxPlugin(base.Plugin):
 		self._cache_threshold_path = os.path.join(self._selinux_path, "avc", "cache_threshold")
 		super(self.__class__, self).__init__(*args, **kwargs)
 
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"avc_cache_threshold" : None,

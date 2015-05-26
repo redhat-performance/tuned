@@ -37,6 +37,7 @@ class CPULatencyPlugin(base.Plugin):
 		self._assigned_devices = set()
 		self._free_devices = self._devices.copy()
 
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"load_threshold"      : 0.2,

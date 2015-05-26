@@ -15,6 +15,7 @@ class VMPlugin(base.Plugin):
 	Plugin for tuning memory management.
 	"""
 
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"transparent_hugepages" : None,
