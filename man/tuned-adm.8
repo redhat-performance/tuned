@@ -24,9 +24,8 @@
 tuned\-adm - commandline tool for switching between different tuning profiles
 .SH SYNOPSIS
 .B tuned\-adm 
-.B 
-.BR [ " list ", " active ", " profile <profile> ", " off " ]
-.BR
+.RB [ list " | " active " | " "profile \fI<profile>\fP" " | " off " | " verify " | " recommend ]
+
 .SH DESCRIPTION
 This command line utility allows you to switch between user definable tuning
 profiles. Several predefined profiles are already included. You can even
@@ -48,9 +47,16 @@ List all available profiles.
 Show current active profile.
 
 .TP
-.B profile <profile>
+.BI "profile " PROFILE
 Switches to the given profilename. If none is given or no valid one is given
 the command gracefully exits without performing any operation.
+
+.TP
+.B verify
+Verifies current profile against system settings. Outputs information whether
+system settings matches current profile or not (e.g. somebody modified
+sysfs/sysctl value by hand). Detailed information what is checked, what
+value is set and what value is expected can be found in the log.
 
 .TP
 .B recommend
