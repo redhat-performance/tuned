@@ -425,15 +425,15 @@ class Plugin(object):
 					ret = str(new_value) == str(current_value)
 		if ret:
 			if device is None:
-				log.info(consts.STR_VERIFY_PROFILE_VALUE_OK % (name, current_value))
+				log.info(consts.STR_VERIFY_PROFILE_VALUE_OK % (name, str(current_value).strip()))
 			else:
-				log.info(consts.STR_VERIFY_PROFILE_DEVICE_VALUE_OK % (device, name, current_value))
+				log.info(consts.STR_VERIFY_PROFILE_DEVICE_VALUE_OK % (device, name, str(current_value).strip()))
 			return True
 		else:
 			if device is None:
-				log.error(consts.STR_VERIFY_PROFILE_VALUE_FAIL % (name, current_value, new_value))
+				log.error(consts.STR_VERIFY_PROFILE_VALUE_FAIL % (name, str(current_value).strip(), str(new_value).strip()))
 			else:
-				log.error(consts.STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL % (device, name, current_value, new_value))
+				log.error(consts.STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL % (device, name, str(current_value).strip(), str(new_value).strip()))
 			return False
 
 	def _verify_device_command(self, instance, command, device, new_value):
