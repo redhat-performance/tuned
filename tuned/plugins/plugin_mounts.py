@@ -128,7 +128,7 @@ class MountsPlugin(base.Plugin):
 
 		if start:
 			if not value:
-				return
+				return None
 
 			reject_reason = None
 
@@ -152,7 +152,7 @@ class MountsPlugin(base.Plugin):
 
 			if reject_reason is not None:
 				log.info("not disabling barriers on '%s' (%s)" % (mountpoint, reject_reason))
-				return
+				return None
 
 			self._storage.set(storage_key, original_value)
 			log.info("disabling barriers on '%s'" % mountpoint)
@@ -163,8 +163,9 @@ class MountsPlugin(base.Plugin):
 				return None
 			original_value = self._storage.get(storage_key)
 			if original_value is None:
-				return
+				return None
 
 			log.info("enabling barriers on '%s'" % mountpoint)
 			self._remount_partition(mountpoint, "barrier=1")
 			self._storage.unset(storage_key)
+		return None
