@@ -1,7 +1,16 @@
+%bcond_with release
+
+%if %{without release}
+%global git_commit %(git rev-parse --verify HEAD)
+%global git_date %(date +'%Y%m%d')
+%global git_short_commit %(echo %{git_commit} | cut -c -8)
+%global git_suffix %{git_date}git%{git_short_commit}
+%endif
+
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.4.1
-Release: 1%{?dist}
+Release: 1%{!?with_release:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
