@@ -73,6 +73,11 @@ class CPULatencyPlugin(base.Plugin):
 		if self._has_intel_pstate:
 			log.info("intel_pstate detected")
 
+	def _is_cpu_online(self, device):
+		sd = str(device)
+		# CPU0 is always online
+		return sd == "cpu0" or self._cmd.read_file("/sys/devices/system/cpu/%s/online" % sd).strip() == "1"
+
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
 		instance._has_dynamic_tuning = False
@@ -171,6 +176,9 @@ class CPULatencyPlugin(base.Plugin):
 
 	@command_set("governor", per_device=True)
 	def _set_governor(self, governor, device, sim):
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
 		if governor not in self._get_available_governors(device):
 			if not sim:
 				log.info("ignoring governor '%s' on cpu '%s', it is not supported" % (governor, device))
@@ -187,6 +195,9 @@ class CPULatencyPlugin(base.Plugin):
 	@command_get("governor")
 	def _get_governor(self, device):
 		governor = None
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
 		if self._has_cpupower:
 			cpu_id = device.lstrip("cpu")
 			retcode, lines = self._cmd.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"])
@@ -211,9 +222,12 @@ class CPULatencyPlugin(base.Plugin):
 
 	@command_set("energy_perf_bias", per_device=True)
 	def _set_energy_perf_bias(self, energy_perf_bias, device, sim):
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
 		if self._has_energy_perf_bias:
-			cpu_id = device.lstrip("cpu")
 			if not sim:
+				cpu_id = device.lstrip("cpu")
 				log.info("setting energy_perf_bias '%s' on cpu '%s'" % (energy_perf_bias, device))
 				self._cmd.execute(["x86_energy_perf_policy", "-c", cpu_id, str(energy_perf_bias)])
 			return str(energy_perf_bias)
@@ -236,6 +250,9 @@ class CPULatencyPlugin(base.Plugin):
 	@command_get("energy_perf_bias")
 	def _get_energy_perf_bias(self, device):
 		energy_perf_bias = None
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
 		if self._has_energy_perf_bias:
 			cpu_id = device.lstrip("cpu")
 			retcode, lines = self._cmd.execute(["x86_energy_perf_policy", "-c", cpu_id, "-r"])
