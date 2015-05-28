@@ -29,6 +29,22 @@ class commands:
 	def remove_ws(self, s):
 		return re.sub('\s+', ' ', s).strip()
 
+	# convert dictionary 'd' to flat list and return it
+	# it uses sort on the dictionary items to return consistent results
+	# for directories with different inserte/delete history
+	def dict2list(self, d):
+		l = []
+		if d is not None:
+			for i in sorted(d.items()):
+				l += list(i)
+		return l
+
+	# Do multiple regex replaces in 's' according to lookup table described by
+	# dictionary 'd', e.g.: d = {"re1": "replace1", "re2": "replace2"}
+	def multiple_re_replace(self, d, s):
+		r = re.compile("(%s)" % ")|(".join(d.keys()))
+		return r.sub(lambda mo: d.values()[mo.lastindex - 1], s)
+
 	def write_to_file(self, f, data):
 		self._debug("Writing to file: %s < %s" % (f, data))
 		try:
@@ -57,7 +73,8 @@ class commands:
 			return False;
 		return self.write_to_file(f, re.sub(pattern, repl, data, flags = re.MULTILINE))
 
-	def execute(self, args):
+	# "no_errors" can be list of return codes not treated as errors
+	def execute(self, args, no_errors = []):
 		retcode = None
 		if self._environment is None:
 			self._environment = os.environ.copy()
@@ -70,7 +87,7 @@ class commands:
 			out, err = proc.communicate()
 
 			retcode = proc.returncode
-			if retcode:
+			if retcode and not retcode in no_errors:
 				err_out = err[:-1]
 				if len(err_out) == 0:
 					err_out = out[:-1]

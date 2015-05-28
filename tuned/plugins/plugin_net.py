@@ -75,10 +75,39 @@ class NetTuningPlugin(base.Plugin):
 		log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
 
 	@classmethod
+	def _get_config_options_coalesce(cls):
+		return {
+			"adaptive-rx": None,
+			"adaptive-tx": None,
+			"rx-usecs": None,
+			"rx-frames": None,
+			"rx-usecs-irq": None,
+			"rx-frames-irq": None,
+			"tx-usecs": None,
+			"tx-frames": None,
+			"tx-usecs-irq": None,
+			"tx-frames-irq": None,
+			"stats-block-usecs": None,
+			"pkt-rate-low": None,
+			"rx-usecs-low": None,
+			"rx-frames-low": None,
+			"tx-usecs-low": None,
+			"tx-frames-low": None,
+			"pkt-rate-high": None,
+			"rx-usecs-high": None,
+			"rx-frames-high": None,
+			"tx-usecs-high": None,
+			"tx-frames-high": None,
+			"sample-interval": None
+			}
+
+	@classmethod
 	def _get_config_options(cls):
 		return {
 			"wake_on_lan": None,
 			"nf_conntrack_hashsize": None,
+			"features": None,
+			"coalesce": None
 		}
 
 	def _init_stats_and_idle(self, instance, device):
@@ -124,6 +153,41 @@ class NetTuningPlugin(base.Plugin):
 		# 1024 * 1024 as for MB -> B
 		# speed / 7  Mb -> MB
 		return (int) (0.6 * 1024 * 1024 * speed / 8)
+
+	# parse features/coalesce config parameters (those defined in profile configuration)
+	# context is for error message
+	def _parse_config_parameters(self, value, context):
+		# split supporting various dellimeters
+		v = str(re.sub(r"(:\s*)|(\s+)|(\s*;\s*)|(\s*,\s*)", " ", value)).split()
+		lv = len(v)
+		if lv % 2 != 0:
+			log.error("invalid %s parameter: '%s'" % (context, str(value)))
+			return None
+		if lv == 0:
+			return dict()
+		# convert flat list to dict
+		return dict(zip(v[::2], v[1::2]))
+
+	# parse features/coalesce device parameters (those returned by ethtool)
+	def _parse_device_parameters(self, value):
+		# substitute "Adaptive RX: val1  TX: val2" to 'adaptive-rx: val1' and
+		# 'adaptive-tx: val2' and workaround for ethtool inconsistencies
+		# (rhbz#1225375)
+		value = self._cmd.multiple_re_replace(\
+		{"Adaptive RX:": "adaptive-rx:", \
+		"\s+TX:": "\nadaptive-tx:", \
+		"rx-frame-low:": "rx-frames-low:", \
+		"rx-frame-high:": "rx-frames-high:", \
+		"tx-frame-low:": "tx-frames-low:", \
+		"tx-frame-high:": "tx-frames-high:"}, value)
+		# remove empty lines, remove fixed parameters (those with "[fixed]")
+		vl = filter(lambda v: len(str(v)) > 0 and not re.search("\[fixed\]$", str(v)), value.split('\n'))
+		if len(vl) < 2:
+			return None
+		# skip first line (device name), split to key/value,
+		# remove pairs which are not key/value
+		return dict(filter(lambda u: len(u) == 2, \
+		map(lambda v: re.split(r":\s*", str(v)), vl[1:])))
 
 	@classmethod
 	def _nf_conntrack_hashsize_path(self):
@@ -174,3 +238,61 @@ class NetTuningPlugin(base.Plugin):
 		if len(value) > 0:
 			return int(value)
 		return None
+
+	# d is dict: {parameter: value}
+	def _check_coalesce_parameters(self, d):
+		sck = set(d.keys())
+		sck_supported = set(self._get_config_options_coalesce().keys())
+		if not sck.issubset(sck_supported):
+			log.error("unknown coalesce parameter(s): %s" % str(sck - sck_supported))
+			return False
+		return True
+
+	def _get_device_parameters(self, coalesce, device):
+		ret, value = self._cmd.execute(["ethtool", "-c" if coalesce else "-k", device])
+		if ret != 0 or len(value) == 0:
+			return None
+		d = self._parse_device_parameters(value)
+		if coalesce and not self._check_coalesce_parameters(d):
+			return None
+		return d
+
+	def _set_device_parameters(self, coalesce, value, device, sim):
+		if value is None or len(value) == 0:
+			return None
+		d = self._parse_config_parameters(value, "coalesce" if coalesce else "features")
+		if d is None or (coalesce and not self._check_coalesce_parameters(d)):
+			return None
+		if not sim:
+			log.debug("setting %s: %s" % ("coalesce" if coalesce else "features", str(d)))
+			# ignore ethtool return code 80, it means parameter is already set
+			self._cmd.execute(["ethtool", "-C" if coalesce else "-K", device] + self._cmd.dict2list(d), [80])
+		return d
+
+	def _custom_parameters(self, coalesce, start, value, device, verify):
+		storage_key = self._storage_key("coalesce" if coalesce else "features", device)
+		if start:
+			cd = self._get_device_parameters(coalesce, device)
+			d = self._set_device_parameters(coalesce, value, device, verify)
+			# backup only parameters which are changed
+			sd = dict(filter(lambda (k, v): k in d, cd.items()))
+			if len(d) != len(sd):
+				log.error("unable to save previous %s, wanted to save: '%s', but read: '%s'" % \
+				("coalesce" if coalesce else "features", str(d.keys()), str(cd.items())))
+				return False
+			if verify:
+				return self._cmd.dict2list(d) == self._cmd.dict2list(sd)
+			self._storage.set(storage_key," ".join(self._cmd.dict2list(sd)))
+		else:
+			if not verify:
+				original_value = self._storage.get(storage_key)
+				self._set_device_parameters(coalesce, original_value, device, False)
+		return None
+
+	@command_custom("features", per_device = True)
+	def _features(self, start, value, device, verify):
+		return self._custom_parameters(False, start, value, device, verify)
+
+	@command_custom("coalesce", per_device = True)
+	def _coalesce(self, start, value, device, verify):
+		return self._custom_parameters(True, start, value, device, verify)
