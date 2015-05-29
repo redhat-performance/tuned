@@ -55,7 +55,7 @@ rpm: archive rpm-build-dir
 clean-mock-result-dir:
 	rm -f mock-result-dir/*
 
-mock-result-dir: clean-mock-result-dir
+mock-result-dir:
 	mkdir mock-result-dir
 
 mock-build: srpm
