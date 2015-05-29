@@ -70,7 +70,7 @@ createrepo: mock-devel-build
 	createrepo mock-result-dir
 
 nightly: createrepo
-	scp `mock-result-dir/*` jskarvad@fedorapeople.org:/home/fedora/jskarvad/public_html/tuned/devel/repo/
+	scp -rpv mock-result-dir/* jskarvad@fedorapeople.org:/home/fedora/jskarvad/public_html/tuned/devel/repo/
 
 install-dirs:
 	mkdir -p $(DESTDIR)$(PYTHON_SITELIB)
