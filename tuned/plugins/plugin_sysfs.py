@@ -33,20 +33,22 @@ class SysfsPlugin(base.Plugin):
 
 	def _instance_apply_static(self, instance):
 		for key, value in instance._sysfs.iteritems():
+			v = self._variables.expand(value)
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
 					instance._sysfs_original[f] = self._read_sysfs(f)
-					self._write_sysfs(f, value)
+					self._write_sysfs(f, v)
 				else:
 					log.error("rejecting write to '%s' (not inside /sys)" % f)
 
 	def _instance_verify_static(self, instance):
 		ret = True
 		for key, value in instance._sysfs.iteritems():
+			v = self._variables.expand(value)
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
 					curr_val = self._read_sysfs(f)
-					if self._verify_value(f, value, curr_val) == False:
+					if self._verify_value(f, v, curr_val) == False:
 						ret = False
 		return ret
 

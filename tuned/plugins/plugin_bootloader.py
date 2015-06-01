@@ -110,12 +110,13 @@ class BootloaderPlugin(base.Plugin):
 
 	@command_custom("cmdline", per_device = False, priority = 10)
 	def _cmdline(self, enabling, value, verify):
+		v = self._variables.expand(value)
 		if verify:
 			cmdline = self._cmd.read_file("/proc/cmdline")
 			if len(cmdline) == 0:
 				return None
 			cmdline_set = set(cmdline.split())
-			value_set = set(value.split())
+			value_set = set(v.split())
 			cmdline_intersect = cmdline_set.intersection(value_set)
 			if cmdline_intersect == value_set:
 				log.info(consts.STR_VERIFY_PROFILE_VALUE_OK % ("cmdline", str(value_set)))
@@ -125,5 +126,5 @@ class BootloaderPlugin(base.Plugin):
 				return False
 		if enabling:
 			log.info("installing additional boot command line parameters to grub2")
-			self._grub2_cfg_patch(value)
-			self._patch_bootcmdline(value)
+			self._grub2_cfg_patch(v)
+			self._patch_bootcmdline(v)

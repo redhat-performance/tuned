@@ -42,6 +42,8 @@ class commands:
 	# Do multiple regex replaces in 's' according to lookup table described by
 	# dictionary 'd', e.g.: d = {"re1": "replace1", "re2": "replace2"}
 	def multiple_re_replace(self, d, s):
+		if len(d) == 0 or s is None:
+			return s
 		r = re.compile("(%s)" % ")|(".join(d.keys()))
 		return r.sub(lambda mo: d.values()[mo.lastindex - 1], s)
 

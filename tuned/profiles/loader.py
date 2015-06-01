@@ -1,4 +1,5 @@
 import tuned.profiles.profile
+import tuned.profiles.variables
 from configobj import ConfigObj, ConfigObjError
 import os.path
 import collections
@@ -14,12 +15,13 @@ class Loader(object):
 	Profiles loader.
 	"""
 
-	__slots__ = ["_profile_locator", "_profile_merger", "_profile_factory"]
+	__slots__ = ["_profile_locator", "_profile_merger", "_profile_factory", "_variables"]
 
-	def __init__(self, profile_locator, profile_factory, profile_merger):
+	def __init__(self, profile_locator, profile_factory, profile_merger, variables):
 		self._profile_locator = profile_locator
 		self._profile_factory = profile_factory
 		self._profile_merger = profile_merger
+		self._variables = variables
 
 	def _create_profile(self, profile_name, config):
 		return tuned.profiles.profile.Profile(profile_name, config)
@@ -79,9 +81,12 @@ class Loader(object):
 
 		config = collections.OrderedDict()
 		for section in config_obj.keys():
-			config[section] = collections.OrderedDict()
-			for option in config_obj[section].keys():
-				config[section][option] = config_obj[section][option]
+			if section == "variables":
+				self._variables.add_from_cfg(config_obj[section], os.path.dirname(file_name))
+			else:
+				config[section] = collections.OrderedDict()
+				for option in config_obj[section].keys():
+					config[section][option] = config_obj[section][option]
 
 		# TODO: HACK, this needs to be solved in a better way (better config parser)
 		for unit_name in config:

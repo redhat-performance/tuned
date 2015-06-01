@@ -32,9 +32,12 @@ class ScriptPlugin(base.Plugin):
 
 	def _call_scripts(self, scripts, argument):
 		for script in scripts:
+			environ = os.environ
+			environ.update(self._variables.get_env())
 			log.info("calling script '%s' with argument '%s'" % (script, argument))
+			log.debug("using environment '%s'" % str(environ.items()))
 			try:
-				proc = Popen([script, argument], stdout=PIPE, stderr=PIPE, close_fds=True)
+				proc = Popen([script, argument], stdout=PIPE, stderr=PIPE, close_fds=True, env=environ)
 				out, err = proc.communicate()
 				if proc.returncode:
 					log.error("script '%s' error: %d, '%s'" % (script, proc.returncode, err[:-1]))

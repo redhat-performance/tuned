@@ -1,4 +1,5 @@
 import tuned.consts as consts
+import tuned.profiles.variables
 import tuned.logs
 import collections
 
@@ -14,7 +15,7 @@ class Plugin(object):
 	Intentionally a lot of logic is included in the plugin to increase plugin flexibility.
 	"""
 
-	def __init__(self, monitors_repository, storage_factory, hardware_inventory, device_matcher, instance_factory, global_cfg):
+	def __init__(self, monitors_repository, storage_factory, hardware_inventory, device_matcher, instance_factory, global_cfg, variables):
 		"""Plugin constructor."""
 
 		self._storage = storage_factory.create(self.__class__.__name__)
@@ -28,6 +29,7 @@ class Plugin(object):
 		self._init_devices()
 
 		self._global_cfg = global_cfg
+		self._variables = variables
 		self._has_dynamic_options = False
 
 		self._options_used_by_dynamic = self._get_config_options_used_by_dynamic()
@@ -328,13 +330,13 @@ class Plugin(object):
 
 	def _execute_all_non_device_commands(self, instance):
 		for command in filter(lambda command: not command["per_device"], self._commands.values()):
-			new_value = instance.options.get(command["name"], None)
+			new_value = self._variables.expand(instance.options.get(command["name"], None))
 			if new_value is not None:
 				self._execute_non_device_command(instance, command, new_value)
 
 	def _execute_all_device_commands(self, instance, devices):
 		for command in filter(lambda command: command["per_device"], self._commands.values()):
-			new_value = instance.options.get(command["name"], None)
+			new_value = self._variables.expand(instance.options.get(command["name"], None))
 			if new_value is None:
 				continue
 			for device in devices:
@@ -343,7 +345,7 @@ class Plugin(object):
 	def _verify_all_non_device_commands(self, instance):
 		ret = True
 		for command in filter(lambda command: not command["per_device"], self._commands.values()):
-			new_value = instance.options.get(command["name"], None)
+			new_value = self._variables.expand(instance.options.get(command["name"], None))
 			if new_value is not None:
 				if self._verify_non_device_command(instance, command, new_value) == False:
 					ret = False

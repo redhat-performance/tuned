@@ -91,5 +91,4 @@ class AudioPlugin(base.Plugin):
 			value = cmd.read_file(sys_file)
 			if len(value) > 0:
 				return cmd.get_bool(value)
-		print "bad\n"
 		return None
