@@ -57,7 +57,11 @@ class AudioPlugin(base.Plugin):
 
 	@command_set("timeout", per_device = True)
 	def _set_timeout(self, value, device, sim):
-		timeout = int(value)
+		try:
+			timeout = int(value)
+		except ValueError:
+			log.error("timeout value '%s' is not integer" % value)
+			return None
 		if timeout >= 0:
 			sys_file = self._timeout_path(device)
 			if not sim:
@@ -71,7 +75,7 @@ class AudioPlugin(base.Plugin):
 		sys_file = self._timeout_path(device)
 		value = cmd.read_file(sys_file)
 		if len(value) > 0:
-			return int(value)
+			return value
 		return None
 
 	@command_set("reset_controller", per_device = True)
