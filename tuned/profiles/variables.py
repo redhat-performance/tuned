@@ -27,7 +27,7 @@ class Variables():
 			return
 		s = str(variable)
 		v = self.expand(value)
-		self._lookup_re[r'\$' + re.escape(s) + r'\b'] = v
+		self._lookup_re[r'\${' + re.escape(s) + r'}'] = v
 		self._lookup_env[self._add_env_prefix(s, consts.ENV_PREFIX)] = v
 
 	def add_dict(self, d):
