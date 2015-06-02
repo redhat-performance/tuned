@@ -22,12 +22,20 @@ class Variables():
 			return s
 		return prefix + s
 
+	def _check_var(self, variable):
+		return re.match(r'\w+$',variable)
+
 	def add_variable(self, variable, value):
 		if value is None:
 			return
 		s = str(variable)
+		if not self._check_var(variable):
+			log.error("variable definition '%s' contains unallowed characters" % variable)
+			return
 		v = self.expand(value)
-		self._lookup_re[r'\${' + re.escape(s) + r'}'] = v
+		# variables referenced by ${VAR}, $ can be escaped by two $,
+		# i.e. the following will not expand: $${VAR}
+		self._lookup_re[r'(?<!\$)\${' + re.escape(s) + r'}'] = v
 		self._lookup_env[self._add_env_prefix(s, consts.ENV_PREFIX)] = v
 
 	def add_dict(self, d):
@@ -59,7 +67,8 @@ class Variables():
 	def expand(self, value):
 		if value is None:
 			return None
-		return self._cmd.multiple_re_replace(self._lookup_re, str(value))
+		# expand variables and finally convert all $${VAR} to ${VAR} (unescape)
+		return re.sub(r'\$(\${\w+})', r'\1', self._cmd.multiple_re_replace(self._lookup_re, str(value)))
 
 	def get_env(self):
 		return self._lookup_env
