@@ -92,6 +92,7 @@ class Daemon(object):
 		self._save_active_profile(self._profile.name)
 		self._unit_manager.start_tuning()
 		self._profile_applied.set()
+		log.info("static tuning from profile '%s' applied" % self._profile.name)
 
 		# In python 2 interpreter with applied patch for rhbz#917709 we need to periodically
 		# poll, otherwise the python will not have chance to update events / locks (due to GIL)
