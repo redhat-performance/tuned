@@ -181,7 +181,7 @@ class Application(object):
 		"""
 		log.debug("reading and parsing global configuration file '%s'" % consts.GLOBAL_CONFIG_FILE)
 		try:
-			config = ConfigObj(file_name, configspec=global_config_spec, raise_errors = True, file_error = True)
+			config = ConfigObj(file_name, configspec=global_config_spec, raise_errors = True, file_error = True, list_values = False, interpolation = False)
 		except IOError as e:
 			raise TunedException("Global tuned configuration file '%s' not found." % file_name)
 		except ConfigObjError as e:

@@ -138,7 +138,7 @@ class GuiPluginLoader(PluginLoader):
         try:
             config = ConfigObj.ConfigObj(file_name,
                                configspec=global_config_spec,
-                               raise_errors=True, file_error=True)
+                               raise_errors = True, file_error = True, list_values = False, interpolation = False)
         except IOError, e:
             raise TunedException("Global tuned configuration file '%s' not found."
                                   % file_name)

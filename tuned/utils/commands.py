@@ -113,7 +113,7 @@ class commands:
 	def recommend_profile(self):
 		profile = consts.DEFAULT_PROFILE
 		for f in consts.LOAD_DIRECTORIES:
-			config = ConfigObj(os.path.join(f, consts.AUTODETECT_FILE))
+			config = ConfigObj(os.path.join(f, consts.AUTODETECT_FILE), list_values = False, interpolation = False)
 			for section in reversed(config.keys()):
 				match1 = match2 = True
 				for option in config[section].keys():

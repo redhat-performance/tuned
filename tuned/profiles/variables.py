@@ -47,7 +47,7 @@ class Variables():
 			log.error("unable to find variables_file: '%s'" % filename)
 			return
 		try:
-			config = ConfigObj(filename, raise_errors = True)
+			config = ConfigObj(filename, raise_errors = True, file_error = True, list_values = False, interpolation = False)
 		except ConfigObjError:
 			log.error("error parsing variables_file: '%s'" % filename)
 			return

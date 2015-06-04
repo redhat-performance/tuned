@@ -75,7 +75,7 @@ class Loader(object):
 
 	def _load_config_data(self, file_name):
 		try:
-			config_obj = ConfigObj(file_name, raise_errors=True)
+			config_obj = ConfigObj(file_name, raise_errors = True, list_values = False, interpolation = False)
 		except ConfigObjError as e:
 			raise InvalidProfileException("Cannot parse '%s'." % file_name, e)
 
