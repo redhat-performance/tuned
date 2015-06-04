@@ -105,7 +105,11 @@ class Admin(object):
 		return ret
 
 	def off(self):
-		result = self._controller.off()
+		try:
+			result = self._controller.off()
+		except TunedAdminDBusException as e:
+			self._error(e)
+			return False
 		if not result:
 			self._error("Cannot disable active profile.")
 		return result
