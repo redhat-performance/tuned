@@ -8,7 +8,7 @@ class s2kb(base.Function):
 	Conversion function: sectors to kbytes
 	"""
 	def __init__(self):
-		# 1 argument
+		# one argument
 		super(self.__class__, self).__init__("s2kb", 1)
 
 	def execute(self, args):

@@ -43,6 +43,6 @@ class Functions():
 	def expand(self, s):
 		if s is None:
 			return s
-		r = re.compile(r'(?<!\\)\${f:([\w:\\]+)}')
+		r = re.compile(r'(?<!\\)\${f:([^}]+)}')
 		# expand functions and convert all \${f:*} to ${f:*} (unescape)
-		return re.sub(r'\\(\${f:[\w:\\]+})', r'\1', r.sub(self.sub_func, s))
+		return re.sub(r'\\(\${f:[^}]+})', r'\1', r.sub(self.sub_func, s))

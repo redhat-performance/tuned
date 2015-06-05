@@ -75,8 +75,7 @@ class CPULatencyPlugin(base.Plugin):
 
 	def _is_cpu_online(self, device):
 		sd = str(device)
-		# CPU0 is always online
-		return sd == "cpu0" or self._cmd.read_file("/sys/devices/system/cpu/%s/online" % sd).strip() == "1"
+		return self._cmd.is_cpu_online(str(device).replace("cpu", ""))
 
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True

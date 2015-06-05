@@ -59,14 +59,15 @@ class commands:
 			self._error("Writing to file %s error: %s" % (f, e))
 		return rc
 
-	def read_file(self, f, err_ret = ""):
+	def read_file(self, f, err_ret = "", no_error = False):
 		old_value = err_ret
 		try:
 			f = open(f, "r")
 			old_value = f.read()
 			f.close()
 		except (OSError,IOError) as e:
-			self._error("Reading %s error: %s" % (f, e))
+			if not no_error:
+				self._error("Reading %s error: %s" % (f, e))
 		return old_value
 
 	def replace_in_file(self, f, pattern, repl):
@@ -109,6 +110,59 @@ class commands:
 		if dosplit:
 			return options.split()[0]
 		return options
+
+	# Checks whether CPU is online
+	def is_cpu_online(self, cpu):
+		scpu = str(cpu)
+		# CPU0 is always online
+		return cpu == "0" or self.read_file("/sys/devices/system/cpu/cpu%s/online" % scpu, no_error = True).strip() == "1"
+
+	# Converts hexadecimal CPU mask to CPU list
+	def hex2cpulist(self, mask):
+		if mask is None:
+			return None
+		cpu = 0
+		cpus = []
+		try:
+			m = int(mask, 16)
+		except ValueError:
+			log.error("invalid hexadecimal mask '%s'" % str(mask))
+			return []
+		while m > 0:
+			if m & 1:
+				cpus.append(str(cpu))
+			m >>= 1
+			cpu += 1
+		return cpus
+
+	# Unpacks CPU list, i.e. 1-3 will be converted to 1, 2, 3
+	def unpack_cpulist(self, l):
+		rl = []
+		if l is None:
+			return l
+		ll = str(l).split(",")
+		for v in ll:
+			vl = v.split("-")
+			try:
+				if len(vl) > 1:
+					rl += range(int(vl[0]), int(vl[1]) + 1)
+				else:
+					rl.append(int(vl[0]))
+			except ValueError:
+				return None
+		return sorted(list(set(rl)))
+
+	# Converts CPU list to hexadecimal CPU mask
+	def cpulist2hex(self, l):
+		if l is None:
+			return None
+		m = 0
+		ul = self.unpack_cpulist(l)
+		if ul is None:
+			return None
+		for v in self.unpack_cpulist(l):
+			m |= pow(2, v)
+		return "0x%08x" % m
 
 	def recommend_profile(self):
 		profile = consts.DEFAULT_PROFILE
