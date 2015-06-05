@@ -3,6 +3,7 @@ import errno
 import threading
 import tuned.logs
 from tuned.exceptions import TunedException
+from tuned.profiles.exceptions import InvalidProfileException
 import tuned.consts as consts
 from tuned.utils.commands import commands
 
@@ -68,7 +69,7 @@ class Daemon(object):
 		else:
 			try:
 				self._profile = self._profile_loader.load(profile_name)
-			except:
+			except InvalidProfileException:
 				raise TunedException("Cannot load profile '%s'." % profile_name)
 
 		if save_instantly:

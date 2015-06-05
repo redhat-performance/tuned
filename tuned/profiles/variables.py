@@ -1,6 +1,7 @@
 import os
 import re
 import tuned.logs
+import functions.functions as functions
 import tuned.consts as consts
 from tuned.utils.commands import commands
 from configobj import ConfigObj
@@ -16,6 +17,7 @@ class Variables():
 		self._cmd = commands()
 		self._lookup_re = {}
 		self._lookup_env = {}
+		self._functions = functions.Functions()
 
 	def _add_env_prefix(self, s, prefix):
 		if s.find(prefix) == 0:
@@ -35,7 +37,7 @@ class Variables():
 		v = self.expand(value)
 		# variables referenced by ${VAR}, $ can be escaped by two $,
 		# i.e. the following will not expand: $${VAR}
-		self._lookup_re[r'(?<!\$)\${' + re.escape(s) + r'}'] = v
+		self._lookup_re[r'(?<!\\)\${' + re.escape(s) + r'}'] = v
 		self._lookup_env[self._add_env_prefix(s, consts.ENV_PREFIX)] = v
 
 	def add_dict(self, d):
@@ -64,11 +66,17 @@ class Variables():
 			else:
 				self.add_variable(item, cfg[item])
 
+	# expand static variables (no functions)
+	def expand_static(self, value):
+		return re.sub(r'\\(\${\w+})', r'\1', self._cmd.multiple_re_replace(self._lookup_re, value))
+
 	def expand(self, value):
 		if value is None:
 			return None
-		# expand variables and finally convert all $${VAR} to ${VAR} (unescape)
-		return re.sub(r'\$(\${\w+})', r'\1', self._cmd.multiple_re_replace(self._lookup_re, str(value)))
+		# expand variables and convert all \${VAR} to ${VAR} (unescape)
+		s = self.expand_static(str(value))
+		# expand built-in functions
+		return self._functions.expand(s)
 
 	def get_env(self):
 		return self._lookup_env

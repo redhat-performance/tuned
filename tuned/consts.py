@@ -30,6 +30,8 @@ LOG_FILE_MAXBYTES = 100*1000
 LOG_FILE = "/var/log/tuned/tuned.log"
 PID_FILE = "/run/tuned/tuned.pid"
 SYSTEM_RELEASE_FILE = "/etc/system-release-cpe"
+# prefix for functions plugins
+FUNCTION_PREFIX = "function_"
 # prefix for exported environment variables when calling scripts
 ENV_PREFIX = "TUNED_"
 

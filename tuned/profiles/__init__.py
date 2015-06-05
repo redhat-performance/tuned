@@ -5,3 +5,4 @@ from tuned.profiles.unit import *
 from tuned.profiles.exceptions import *
 from tuned.profiles.factory import *
 from tuned.profiles.merger import *
+import functions

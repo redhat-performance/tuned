@@ -5,7 +5,6 @@ import os.path
 import collections
 import tuned.logs
 import re
-
 from tuned.profiles.exceptions import InvalidProfileException
 
 log = tuned.logs.get()
