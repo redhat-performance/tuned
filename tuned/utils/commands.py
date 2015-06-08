@@ -136,7 +136,7 @@ class commands:
 		return cpus
 
 	# Unpacks CPU list, i.e. 1-3 will be converted to 1, 2, 3
-	def unpack_cpulist(self, l):
+	def cpulist_unpack(self, l):
 		rl = []
 		if l is None:
 			return l
@@ -157,10 +157,10 @@ class commands:
 		if l is None:
 			return None
 		m = 0
-		ul = self.unpack_cpulist(l)
+		ul = self.cpulist_unpack(l)
 		if ul is None:
 			return None
-		for v in self.unpack_cpulist(l):
+		for v in ul:
 			m |= pow(2, v)
 		return "0x%08x" % m
 
