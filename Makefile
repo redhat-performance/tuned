@@ -63,7 +63,9 @@ mock-build: srpm
 	rm -f mock-result-dir/*.log
 
 mock-devel-build: srpm
-	mock -r $(MOCK_CONFIG) --with=snapshot --resultdir=`pwd`/mock-result-dir `ls rpm-build-dir/*$(RPM_VERSION).*.src.rpm | head -n 1`&& \
+	mock -r $(MOCK_CONFIG) --with=snapshot \
+		--define "git_short_commit `if [ -n \"$(GIT_SHORT_COMMIT)\" ]; then echo $(GIT_SHORT_COMMIT); else git rev-parse --short=8 --verify HEAD; fi`" \
+		--resultdir=`pwd`/mock-result-dir `ls rpm-build-dir/*$(RPM_VERSION).*.src.rpm | head -n 1` && \
 	rm -f mock-result-dir/*.log
 
 createrepo: mock-devel-build

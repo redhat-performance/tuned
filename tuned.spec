@@ -1,7 +1,9 @@
 %bcond_with snapshot
 
 %if %{with snapshot}
+%if 0%{!?git_short_commit:1}
 %global git_short_commit %(git rev-parse --short=8 --verify HEAD)
+%endif
 %global git_date %(date +'%Y%m%d')
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
