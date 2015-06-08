@@ -17,5 +17,6 @@ class cpus_online(base.Function):
 	def execute(self, args):
 		if not super(self.__class__, self).execute(args):
 			return None
-		cpus = ",".join(args)
-		return ",".join(filter(lambda cpu: self._cmd.is_cpu_online(cpu), cpus.split(",")))
+		cpus = self._cmd.cpulist_unpack(",".join(args))
+		online = self._cmd.cpulist_unpack(self._cmd.read_file("/sys/devices/system/cpu/online"))
+		return ",".join(str(v) for v in set(cpus).intersection(set(online)))
