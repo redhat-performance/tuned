@@ -5,14 +5,14 @@ from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
-class cpus_online(base.Function):
+class cpulist_online(base.Function):
 	"""
 	Checks whether CPUs from list are online, returns list containing
 	only online CPUs
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(self.__class__, self).__init__("cpus_online", 0)
+		super(self.__class__, self).__init__("cpulist_online", 0)
 
 	def execute(self, args):
 		if not super(self.__class__, self).execute(args):
