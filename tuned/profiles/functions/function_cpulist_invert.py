@@ -19,6 +19,4 @@ class cpulist_invert(base.Function):
 	def execute(self, args):
 		if not super(self.__class__, self).execute(args):
 			return None
-		cpus = self._cmd.cpulist_unpack(",".join(args))
-		present = self._cmd.cpulist_unpack(self._cmd.read_file("/sys/devices/system/cpu/present"))
-		return ",".join(str(v) for v in set(present) - set(cpus))
+		return ",".join(str(v) for v in self._cmd.cpulist_invert(",".join(args)))

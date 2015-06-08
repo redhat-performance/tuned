@@ -155,6 +155,12 @@ class commands:
 					return []
 		return sorted(list(set(rl)))
 
+	# Inverts CPU list (i.e. makes its complement)
+	def cpulist_invert(self, l):
+		cpus = self.cpulist_unpack(l)
+		present = self.cpulist_unpack(self.read_file("/sys/devices/system/cpu/present"))
+		return list(set(present) - set(cpus))
+
 	# Converts CPU list to hexadecimal CPU mask
 	def cpulist2hex(self, l):
 		if l is None:
