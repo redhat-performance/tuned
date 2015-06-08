@@ -130,7 +130,7 @@ class commands:
 			return []
 		while m > 0:
 			if m & 1:
-				cpus.append(str(cpu))
+				cpus.append(cpu)
 			m >>= 1
 			cpu += 1
 		return cpus
@@ -143,13 +143,16 @@ class commands:
 		ll = str(l).split(",")
 		for v in ll:
 			vl = v.split("-")
-			try:
-				if len(vl) > 1:
-					rl += range(int(vl[0]), int(vl[1]) + 1)
-				else:
-					rl.append(int(vl[0]))
-			except ValueError:
-				return None
+			if v[0:2].lower() == "0x":
+				rl += self.hex2cpulist(v)
+			else:
+				try:
+					if len(vl) > 1:
+						rl += range(int(vl[0]), int(vl[1]) + 1)
+					else:
+						rl.append(int(vl[0]))
+				except ValueError:
+					return []
 		return sorted(list(set(rl)))
 
 	# Converts CPU list to hexadecimal CPU mask
