@@ -77,6 +77,18 @@ class CPULatencyPlugin(base.Plugin):
 		sd = str(device)
 		return self._cmd.is_cpu_online(str(device).replace("cpu", ""))
 
+	def _cpu_has_scaling_governor(self, device):
+		return os.path.exists("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device)
+
+	def _check_cpu_can_change_governor(self, device):
+		if not self._is_cpu_online(device):
+			log.debug("'%s' is not online, skipping" % device)
+			return False
+		if not self._cpu_has_scaling_governor(device):
+			log.debug("there is no scaling governor fo '%s', skipping" % device)
+			return False
+		return True
+
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
 		instance._has_dynamic_tuning = False
@@ -175,8 +187,7 @@ class CPULatencyPlugin(base.Plugin):
 
 	@command_set("governor", per_device=True)
 	def _set_governor(self, governor, device, sim):
-		if not self._is_cpu_online(device):
-			log.debug("%s is not online, skipping" % device)
+		if not self._check_cpu_can_change_governor(device):
 			return None
 		if governor not in self._get_available_governors(device):
 			if not sim:
@@ -194,8 +205,7 @@ class CPULatencyPlugin(base.Plugin):
 	@command_get("governor")
 	def _get_governor(self, device):
 		governor = None
-		if not self._is_cpu_online(device):
-			log.debug("%s is not online, skipping" % device)
+		if not self._check_cpu_can_change_governor(device):
 			return None
 		if self._has_cpupower:
 			cpu_id = device.lstrip("cpu")
