@@ -210,18 +210,21 @@ class commands:
 		for f in consts.LOAD_DIRECTORIES:
 			config = ConfigObj(os.path.join(f, consts.AUTODETECT_FILE), list_values = False, interpolation = False)
 			for section in reversed(config.keys()):
-				match1 = match2 = True
+				match = True
 				for option in config[section].keys():
 					value = config[section][option]
 					if value == "":
 						value = r"^$"
 					if option == "virt":
 						if not re.match(value, self.execute("virt-what")[1], re.S):
-							match1 = False
+							match = False
 					elif option == "system":
 						if not re.match(value, self.read_file(consts.SYSTEM_RELEASE_FILE), re.S):
-							match2 = False
-				if match1 and match2:
+							match = False
+					elif option[0] == "/":
+						if not os.path.exists(option) or not re.match(value, self.read_file(option), re.S):
+							match = False
+				if match:
 					profile = section
 		return profile
 
