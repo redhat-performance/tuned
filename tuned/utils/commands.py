@@ -121,6 +121,7 @@ class commands:
 	def hex2cpulist(self, mask):
 		if mask is None:
 			return None
+		mask = str(mask).replace(",", "")
 		cpu = 0
 		cpus = []
 		try:
@@ -135,13 +136,37 @@ class commands:
 			cpu += 1
 		return cpus
 
-	# Unpacks CPU list, i.e. 1-3 will be converted to 1, 2, 3
+	# Unpacks CPU list, i.e. 1-3 will be converted to 1, 2, 3, supports
+	# hexmasks that needs to be prefixed by "0x". Hexmasks can have commas,
+	# which will be removed. If combining hexmasks with CPU list they need
+	# to be separated by ",,", e.g.: 0-3, 0xf,, 6
 	def cpulist_unpack(self, l):
 		rl = []
 		if l is None:
 			return l
 		ll = str(l).split(",")
+		ll2 = []
+		hexmask = False
+		hv = ""
+		# Remove commas from hexmasks
 		for v in ll:
+			if hexmask:
+				if len(v) == 0:
+					hexmask = False
+					ll2.append(hv)
+					hv = ""
+				else:
+					hv += v
+			else:
+				if v[0:2].lower() == "0x":
+					hexmask = True
+					hv = v
+				else:
+					if len(v) > 0:
+						ll2.append(v)
+		if len(hv) > 0:
+			ll2.append(hv)
+		for v in ll2:
 			vl = v.split("-")
 			if v[0:2].lower() == "0x":
 				rl += self.hex2cpulist(v)
@@ -171,7 +196,12 @@ class commands:
 			return None
 		for v in ul:
 			m |= pow(2, v)
-		return "0x%08x" % m
+		s = "%x" % m
+		ls = len(s)
+		if ls % 8 != 0:
+			ls += 8 - ls % 8
+		s = s.zfill(ls)
+		return ",".join(s[i:i + 8] for i in range(0, len(s), 8))
 
 	def recommend_profile(self):
 		profile = consts.DEFAULT_PROFILE

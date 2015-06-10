@@ -16,4 +16,4 @@ class cpulist2hex(base.Function):
 	def execute(self, args):
 		if not super(self.__class__, self).execute(args):
 			return None
-		return self._cmd.cpulist2hex(",".join(args))
+		return self._cmd.cpulist2hex(",,".join(args))
