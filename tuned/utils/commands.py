@@ -203,8 +203,10 @@ class commands:
 		s = s.zfill(ls)
 		return ",".join(s[i:i + 8] for i in range(0, len(s), 8))
 
-	def recommend_profile(self):
+	def recommend_profile(self, hardcoded = False):
 		profile = consts.DEFAULT_PROFILE
+		if hardcoded:
+			return profile
 		for f in consts.LOAD_DIRECTORIES:
 			config = ConfigObj(os.path.join(f, consts.AUTODETECT_FILE), list_values = False, interpolation = False)
 			for section in reversed(config.keys()):

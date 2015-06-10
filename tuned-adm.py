@@ -25,8 +25,10 @@ import traceback
 import tuned.admin
 import tuned.consts as consts
 import tuned.version as ver
+from tuned.utils.global_config import GlobalConfig
 
 if __name__ == "__main__":
+	config = GlobalConfig()
 	parser = argparse.ArgumentParser(description="Manage tuned daemon.")
 	parser.add_argument('--version', "-v", action = "version", version = "%%(prog)s %s.%s.%s" % (ver.TUNED_VERSION_MAJOR, ver.TUNED_VERSION_MINOR, ver.TUNED_VERSION_PATCH))
 	parser.add_argument("--debug", "-d", action="store_true", help="show debug messages")
@@ -45,8 +47,9 @@ if __name__ == "__main__":
 	parser_profile.set_defaults(action="profile")
 	parser_profile.add_argument("profiles", metavar="profile", type=str, nargs="+", help="profile name")
 
-	parser_off = subparsers.add_parser("recommend", help="recommend profile")
-	parser_off.set_defaults(action="recommend_profile")
+	if config.get(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND):
+		parser_off = subparsers.add_parser("recommend", help="recommend profile")
+		parser_off.set_defaults(action="recommend_profile")
 
 	parser_off = subparsers.add_parser("verify", help="verify profile")
 	parser_off.set_defaults(action="verify_profile")

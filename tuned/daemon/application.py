@@ -1,7 +1,5 @@
 from tuned import storage, units, monitors, plugins, profiles, exports, hardware
 from tuned.exceptions import TunedException
-from configobj import ConfigObj, ConfigObjError
-from validate import Validator
 import tuned.logs
 import controller
 import daemon
@@ -10,14 +8,11 @@ import os
 import sys
 import select
 import tuned.consts as consts
+from tuned.utils.global_config import GlobalConfig
 
 log = tuned.logs.get()
 
 __all__ = ["Application"]
-
-global_config_spec = 	["dynamic_tuning = boolean(default=%s)" % consts.CFG_DEF_DYNAMIC_TUNING,
-			"sleep_interval = integer(default=%s)" % consts.CFG_DEF_SLEEP_INTERVAL,
-			"update_interval = integer(default=%s)" % consts.CFG_DEF_UPDATE_INTERVAL]
 
 class Application(object):
 	def __init__(self, profile_name=None):
@@ -30,8 +25,8 @@ class Application(object):
 		plugin_instance_factory = plugins.instance.Factory()
 		self.variables = profiles.variables.Variables()
 
-		self.config = self._load_global_config()
-		if self.config.get("dynamic_tuning"):
+		self.config = GlobalConfig()
+		if self.config.get(consts.CFG_DYNAMIC_TUNING):
 			log.info("dynamic tuning is enabled (can be overriden in plugins)")
 		else:
 			log.info("dynamic tuning is globally disabled")
@@ -44,9 +39,8 @@ class Application(object):
 		profile_locator = profiles.Locator(consts.LOAD_DIRECTORIES)
 		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger, self.variables)
 
-
 		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, self.config)
-		self._controller = controller.Controller(self._daemon)
+		self._controller = controller.Controller(self._daemon, self.config)
 
 		self._dbus_exporter = None
 		self._init_signals()
@@ -174,22 +168,6 @@ class Application(object):
 				raise
 			else:
 				sys.exit(1)
-
-	def _load_global_config(self, file_name = consts.GLOBAL_CONFIG_FILE):
-		"""
-		Loads global configuration file.
-		"""
-		log.debug("reading and parsing global configuration file '%s'" % consts.GLOBAL_CONFIG_FILE)
-		try:
-			config = ConfigObj(file_name, configspec=global_config_spec, raise_errors = True, file_error = True, list_values = False, interpolation = False)
-		except IOError as e:
-			raise TunedException("Global tuned configuration file '%s' not found." % file_name)
-		except ConfigObjError as e:
-			raise TunedException("Error parsing global tuned configuration file '%s'." % file_name)
-		vdt = Validator()
-		if (not config.validate(vdt, copy=True)):
-			raise TunedException("Global tuned configuration file '%s' is not valid." % file_name)
-		return config
 
 	@property
 	def daemon(self):

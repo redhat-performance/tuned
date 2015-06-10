@@ -16,10 +16,12 @@ class Daemon(object):
 		self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
 		self._update_interval = int(consts.CFG_DEF_UPDATE_INTERVAL)
 		self._dynamic_tuning = consts.CFG_DEF_DYNAMIC_TUNING
+		self._recommend_command = True
 		if config is not None:
-			self._sleep_interval = int(config.get("sleep_interval", consts.CFG_DEF_SLEEP_INTERVAL))
-			self._update_interval = int(config.get("update_interval", consts.CFG_DEF_UPDATE_INTERVAL))
-			self._dynamic_tuning = config.get("dynamic_tuning", consts.CFG_DEF_DYNAMIC_TUNING)
+			self._sleep_interval = int(config.get(consts.CFG_SLEEP_INTERVAL, consts.CFG_DEF_SLEEP_INTERVAL))
+			self._update_interval = int(config.get(consts.CFG_UPDATE_INTERVAL, consts.CFG_DEF_UPDATE_INTERVAL))
+			self._dynamic_tuning = config.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING)
+			self._recommend_command = config.get(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND)
 		if self._sleep_interval <= 0:
 			self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
 		if self._update_interval == 0:
@@ -136,7 +138,7 @@ class Daemon(object):
 
 	def _set_recommended_profile(self):
 		log.info("no profile preset, checking what is recommended for your configuration")
-		profile = self._cmd.recommend_profile()
+		profile = self._cmd.recommend_profile(hardcoded = not self._recommend_command)
 		log.info("using '%s' profile and setting it as active" % profile)
 		self._save_active_profile(profile)
 		return profile

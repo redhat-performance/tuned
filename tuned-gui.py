@@ -97,6 +97,7 @@ class Base(object):
 
 		self._cmd = commands(debug)
 
+		self.config = GlobalConfig()
 		self.builder = Gtk.Builder()
 		try:
 			self.builder.add_from_file(GLADEUI)
@@ -298,7 +299,8 @@ class Base(object):
 			self.builder.get_object('buttonDeleteSelectedProfile')
 
 		self.label_actual_profile.set_text(self.controller.active_profile())
-		self.label_recommended_profile.set_text(self.controller.recommend_profile())
+		if self.config.get(consts.CFG_RECOMMEND_COMMAND):
+			self.label_recommended_profile.set_text(self.controller.recommend_profile())
 		self.listbox_summary_of_active_profile = \
 			self.builder.get_object('listboxSummaryOfActiveProfile')
 

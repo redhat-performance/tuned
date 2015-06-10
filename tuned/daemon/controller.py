@@ -2,6 +2,7 @@ from tuned import exports
 import tuned.logs
 import tuned.exceptions
 import threading
+import tuned.consts as consts
 from tuned.utils.commands import commands
 
 __all__ = ["Controller"]
@@ -14,9 +15,10 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	and export the controller interface (currently only over D-Bus).
 	"""
 
-	def __init__(self, daemon):
+	def __init__(self, daemon, global_config):
 		super(self.__class__, self).__init__()
 		self._daemon = daemon
+		self._global_config = global_config
 		self._terminate = threading.Event()
 		self._cmd = commands()
 
@@ -105,7 +107,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 	@exports.export("", "s")
 	def recommend_profile(self):
-		return self._cmd.recommend_profile()
+		return self._cmd.recommend_profile(hardcoded = not self._global_config.get(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND))
 
 	@exports.export("", "b")
 	def verify_profile(self):
