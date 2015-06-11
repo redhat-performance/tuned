@@ -3,7 +3,10 @@ NAME = tuned
 BUILD = release
 # which config to use in mock-build target
 MOCK_CONFIG = rhel-7-x86_64
+# scratch-build for triggering Jenkins
+SCRATCH_BUILD_TARGET = rhel-7.2-candidate
 VERSION = $(shell awk '/^Version:/ {print $$2}' tuned.spec)
+GIT_DATE = $(shell date +'%Y%m%d')
 ifeq ($(BUILD), release)
 	RPM_ARGS += --without snapshot
 	MOCK_ARGS += --without=snapshot
@@ -12,7 +15,6 @@ else
 	RPM_ARGS += --with snapshot
 	MOCK_ARGS += --with=snapshot
 	GIT_SHORT_COMMIT = $(shell git rev-parse --short=8 --verify HEAD)
-	GIT_DATE = $(shell date +'%Y%m%d')
 	GIT_SUFFIX = $(GIT_DATE)git$(GIT_SHORT_COMMIT)
 	GIT_PSUFFIX = .$(GIT_SUFFIX)
 	RPM_VERSION = $(NAME)-$(VERSION)-1$(GIT_PSUFFIX)
@@ -71,7 +73,11 @@ mock-devel-build: srpm
 createrepo: mock-devel-build
 	createrepo mock-result-dir
 
-nightly: createrepo
+# scratch build to triggering Jenkins
+scratch-build: mock-devel-build
+	brew build --scratch --nowait rhel-7.2-candidate `ls mock-result-dir/*$(GIT_DATE)git*.*.src.rpm | head -n 1`
+
+nightly: createrepo scratch-build
 	rsync -ave ssh --delete --progress mock-result-dir/* jskarvad@fedorapeople.org:/home/fedora/jskarvad/public_html/tuned/devel/repo/
 
 install-dirs:
