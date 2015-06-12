@@ -112,6 +112,8 @@ class SchedulerPlugin(base.Plugin):
 		if ps is None:
 			log.error("error applying tuning, cannot get information about running processes")
 			return
+		for k in instance._scheduler:
+			instance._scheduler[k] = self._variables.expand(instance._scheduler[k])
 		sched_cfg = map(lambda (option, value): (option, value.split(":", 4)), instance._scheduler.items())
 		buf = filter(lambda (option, vals): re.match(r"group\.", option) and len(vals) == 5, sched_cfg)
 		sched_cfg = sorted(buf, key=lambda (option, vals): vals[0])
