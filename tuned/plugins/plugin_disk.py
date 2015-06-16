@@ -113,8 +113,9 @@ class DiskPlugin(hotplug.Plugin):
 		if rc == 0:
 			cnt = 0
 		elif rc == errno.ENOENT:
-			cnt = consts.ERROR_THRESHOLD + 1
-			log.info("hdparm command not found, ignoring future set_%s commands" % s)
+			self._spindown_errcnt = self._apm_errcnt = consts.ERROR_THRESHOLD + 1
+			log.info("hdparm command not found, ignoring future set_apm / set_spindown commands")
+			return
 		else:
 			cnt += 1
 			if cnt == consts.ERROR_THRESHOLD:
