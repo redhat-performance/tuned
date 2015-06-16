@@ -1,3 +1,4 @@
+import errno
 import tuned.logs
 import copy
 import os
@@ -78,7 +79,7 @@ class commands:
 
 	# "no_errors" can be list of return codes not treated as errors
 	def execute(self, args, no_errors = []):
-		retcode = None
+		retcode = 0
 		if self._environment is None:
 			self._environment = os.environ.copy()
 			self._environment["LC_ALL"] = "C"
@@ -95,8 +96,8 @@ class commands:
 				if len(err_out) == 0:
 					err_out = out[:-1]
 				self._error("Executing %s error: %s" % (args[0], err_out))
-		except (OSError,IOError) as e:
-			retcode = -1
+		except (OSError, IOError) as e:
+			retcode = e.errno if e.errno is not None else -1
 			self._error("Executing %s error: %s" % (args[0], e))
 		return retcode, out
 

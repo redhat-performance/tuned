@@ -1,3 +1,4 @@
+import errno
 import tuned.consts as consts
 import hotplug
 from decorators import *
@@ -100,25 +101,28 @@ class DiskPlugin(hotplug.Plugin):
 			self._monitors_repository.delete(instance._load_monitor)
 			instance._load_monitor = None
 
-	def _update_spindown_errcnt(self, rc):
-		if rc == 0:
-			self._spindown_errcnt = 0
+	def _update_errcnt(self, rc, spindown):
+		if spindown:
+			s = "spindown"
+			cnt = self._spindown_errcnt
 		else:
-			if self._spindown_errcnt > consts.ERROR_THRESHOLD:
-				return
-			self._spindown_errcnt += 1
-			if self._spindown_errcnt == consts.ERROR_THRESHOLD:
-				log.info("disabling set_spindown command, too many consecutive errors")
-
-	def _update_apm_errcnt(self, rc):
+			s = "apm"
+			cnt = self._apm_errcnt
+		if cnt >= consts.ERROR_THRESHOLD:
+			return
 		if rc == 0:
-			self._apm_errcnt = 0
+			cnt = 0
+		elif rc == errno.ENOENT:
+			cnt = consts.ERROR_THRESHOLD + 1
+			log.info("hdparm command not found, ignoring future set_%s commands" % s)
 		else:
-			if self._apm_errcnt > consts.ERROR_THRESHOLD:
-				return
-			self._apm_errcnt += 1
-			if self._apm_errcnt == consts.ERROR_THRESHOLD:
-				log.info("disabling set_apm command, too many consecutive errors")
+			cnt += 1
+			if cnt == consts.ERROR_THRESHOLD:
+				log.info("disabling set_%s command: too many consecutive errors" % s)
+		if spindown:
+			self._spindown_errcnt = cnt
+		else:
+			self._apm_errcnt = cnt
 
 	def _instance_update_dynamic(self, instance, device):
 		load = instance._load_monitor.get_device_load(device)
@@ -154,11 +158,11 @@ class DiskPlugin(hotplug.Plugin):
 			if self._spindown_errcnt < consts.ERROR_THRESHOLD:
 				log.debug("changing spindown to %d" % new_spindown_level)
 				(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "/dev/%s" % device])
-				self._update_spindown_errcnt(rc)
+				self._update_errcnt(rc, True)
 			if self._apm_errcnt < consts.ERROR_THRESHOLD:
 				log.debug("changing APM_level to %d" % new_power_level)
 				(rc, out) = self._cmd.execute(["hdparm", "-B%d" % new_power_level, "/dev/%s" % device])
-				self._update_apm_errcnt(rc)
+				self._update_errcnt(rc, False)
 
 		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
 		log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
@@ -250,7 +254,7 @@ class DiskPlugin(hotplug.Plugin):
 		if self._apm_errcnt < consts.ERROR_THRESHOLD:
 			if not sim:
 				(rc, out) = self._cmd.execute(["hdparm", "-B", str(value), "/dev/" + device])
-				self._update_apm_errcnt(rc)
+				self._update_errcnt(rc, False)
 			return str(value)
 		else:
 			return None
@@ -271,7 +275,7 @@ class DiskPlugin(hotplug.Plugin):
 		if self._spindown_errcnt < consts.ERROR_THRESHOLD:
 			if not sim:
 				(rc, out) = self._cmd.execute(["hdparm", "-S", str(value), "/dev/" + device])
-				self._update_spindown_errcnt(rc)
+				self._update_errcnt(rc, True)
 			return str(value)
 		else:
 			return None
