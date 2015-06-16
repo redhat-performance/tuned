@@ -111,6 +111,12 @@ settings.
 Profile optimized for virtual hosts based on throughput\-performance profile.
 It additionally enables more aggresive writeback of dirty pages.
 
+.TP
+.BI "oracle"
+Profile optimized for Oracle databases based on throughput\-performance profile.
+It additionaly disables transparent huge pages and modifies some other
+performance related kernel parameters.
+
 .SH "FILES"
 .NF
 .I /etc/tuned/*
