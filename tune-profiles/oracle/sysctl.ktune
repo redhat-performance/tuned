@@ -1,0 +1,41 @@
+# Oracle ktune sysctl settings
+# based on the throughput-performance profile
+
+# ktune sysctl settings for rhel6 servers, maximizing i/o throughput
+#
+# Minimal preemption granularity for CPU-bound tasks:
+# (default: 1 msec#  (1 + ilog(ncpus)), units: nanoseconds)
+kernel.sched_min_granularity_ns = 10000000
+
+# SCHED_OTHER wake-up granularity.
+# (default: 1 msec#  (1 + ilog(ncpus)), units: nanoseconds)
+#
+# This option delays the preemption effects of decoupled workloads
+# and reduces their over-scheduling. Synchronous workloads will still
+# have immediate wakeup/sleep latencies.
+kernel.sched_wakeup_granularity_ns = 15000000
+
+# If a workload mostly uses anonymous memory and it hits this limit, the entire
+# working set is buffered for I/O, and any more write buffering would require
+# swapping, so it's time to throttle writes until I/O can catch up.  Workloads
+# that mostly use file mappings may be able to use even higher values.
+#
+# Oracle specific tunings
+vm.swappiness = 1
+vm.dirty_background_ratio = 3
+vm.dirty_ratio = 80
+vm.dirty_expire_centisecs = 500
+vm.dirty_writeback_centisecs = 100
+kernel.shmmax = 4398046511104
+kernel.shmall = 1073741824
+kernel.shmmni = 4096
+kernel.sem = 250 32000 100 128
+fs.file-max = 6815744
+fs.aio-max-nr = 1048576
+net.ipv4.ip_local_port_range = 9000 65500
+net.core.rmem_default = 262144
+net.core.rmem_max = 4194304
+net.core.wmem_default = 262144
+net.core.wmem_max = 1048576
+kernel.panic_on_oops = 1
+
