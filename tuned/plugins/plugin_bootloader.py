@@ -51,7 +51,7 @@ class BootloaderPlugin(base.Plugin):
 
 	def _remove_grub2_tuning(self):
 		self._patch_bootcmdline("")
-		self._cmd.replace_in_file(self._grub2_cfg_file, r"\b(set " + consts.GRUB2_TUNED_VAR + r"\s*=).*$", r"\1" + "\"\"")
+		self._cmd.replace_in_file(self._grub2_cfg_file, r"\b(set\s+" + consts.GRUB2_TUNED_VAR + r"\s*=).*$", r"\1" + "\"\"")
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
 		if profile_switch:
@@ -60,7 +60,7 @@ class BootloaderPlugin(base.Plugin):
 
 	def _grub2_cfg_unpatch(self, grub2_cfg):
 		log.debug("unpatching grub.cfg")
-		cfg = re.sub(r"\bset " + consts.GRUB2_TUNED_VAR + "\s*=.*$", "", grub2_cfg, flags = re.MULTILINE)
+		cfg = re.sub(r"\bset\s+" + consts.GRUB2_TUNED_VAR + "\s*=.*$", "", grub2_cfg, flags = re.MULTILINE)
 		grub2_cfg = re.sub(r"\$" + consts.GRUB2_TUNED_VAR, "", cfg, flags = re.MULTILINE)
 		cfg = re.sub(consts.GRUB2_TEMPLATE_HEADER_BEGIN, "", grub2_cfg, flags = re.MULTILINE)
 		return re.sub(consts.GRUB2_TEMPLATE_HEADER_END, "", cfg, flags = re.MULTILINE)
@@ -93,7 +93,7 @@ class BootloaderPlugin(base.Plugin):
 			log.error("error patching %s, you need to regenerate it by hand by grub2-mkconfig" % self._grub2_cfg_file)
 			return False
 		log.debug("adding boot command line parameters to '%s'" % self._grub2_cfg_file)
-		(grub2_cfg_new, nsubs) = re.subn(r"\b(set " + consts.GRUB2_TUNED_VAR + "\s*=).*$", r"\1" + "\"" + str(value) + "\"", grub2_cfg, flags = re.MULTILINE)
+		(grub2_cfg_new, nsubs) = re.subn(r"\b(set\s+" + consts.GRUB2_TUNED_VAR + "\s*=).*$", r"\1" + "\"" + str(value) + "\"", grub2_cfg, flags = re.MULTILINE)
 		if nsubs < 1:
 			grub2_cfg_new = self._grub2_cfg_patch_initial(self._grub2_cfg_unpatch(grub2_cfg), value)
 		self._cmd.write_to_file(self._grub2_cfg_file, grub2_cfg_new)
