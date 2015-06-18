@@ -87,6 +87,13 @@ Requires: %{name} = %{version}-%{release}
 %description profiles-atomic
 Additional tuned profiles targeted to Atomic host and guest.
 
+%package profiles-realtime
+Summary: Additional tuned profiles targeted to realtime
+Requires: %{name} = %{version}-%{release}
+
+%description profiles-realtime
+Additional tuned profiles targeted to realtime.
+
 %package profiles-compat
 Summary: Additional tuned profiles mainly for backward compatibility with tuned 1.0
 Requires: %{name} = %{version}-%{release}
@@ -178,6 +185,7 @@ fi
 %exclude %{_prefix}/lib/tuned/sap-hana-vmware
 %exclude %{_prefix}/lib/tuned/atomic-host
 %exclude %{_prefix}/lib/tuned/atomic-guest
+%exclude %{_prefix}/lib/tuned/realtime
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/active_profile
@@ -236,6 +244,11 @@ fi
 %{_prefix}/lib/tuned/atomic-host
 %{_prefix}/lib/tuned/atomic-guest
 %{_mandir}/man7/tuned-profiles-atomic.7*
+
+%files profiles-realtime
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/realtime
+%{_mandir}/man7/tuned-profiles-realtime.7*
 
 %files profiles-compat
 %defattr(-,root,root,-)

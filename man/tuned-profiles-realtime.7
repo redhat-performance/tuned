@@ -1,6 +1,6 @@
 .\"/* 
 .\" * All rights reserved
-.\" * Copyright (C) 2014 Red Hat, Inc.
+.\" * Copyright (C) 2015 Red Hat, Inc.
 .\" * Authors: Jaroslav Škarvada
 .\" *
 .\" * This program is free software; you can redistribute it and/or
@@ -18,28 +18,19 @@
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
 .\" 
-.TH TUNED_PROFILES_ATOMIC "7" "23 Sep 2014" "Fedora Power Management SIG" "tuned"
+.TH TUNED_PROFILES_REALTIME "7" "18 Jun 2015" "Fedora Power Management SIG" "tuned"
 .SH NAME
-tuned\-profiles\-atomic - description of profiles provided for the Project Atomic
+tuned\-profiles\-realtime - description of profiles provided for the realtime
 
 .SH DESCRIPTION
-These profiles are provided for the Project Atomic. They provides performance
-optimizations for the Atomic hosts (bare metal) and virtual guests.
+These profiles are provided for the realtime.
 
 .SH PROFILES
 The following profiles are provided:
 
 .TP
-.BI "atomic\-host"
-Profile optimized for Atomic hosts (bare metal). It is based on throughput\-performance
-profile. It additionally increases SELinux AVC cache, PID limit and tunes
-netfilter connections tracking.
-
-.TP
-.BI "atomic\-guest"
-Profile optimized for virtual Atomic guests. It is based on virtual\-guest
-profile. It additionally increases SELinux AVC cache, PID limit and tunes
-netfilter connections tracking.
+.BI "realtime"
+Profile optimized for realtime.
 
 .SH "FILES"
 .NF
@@ -52,7 +43,7 @@ netfilter connections tracking.
 .BR tuned\-profiles (7)
 .BR tuned\-profiles\-sap (7)
 .BR tuned\-profiles\-sap\-hana (7)
-.BR tuned\-profiles\-realtime (7)
+.BR tuned\-profiles\-atomic (7)
 .BR tuned\-profiles\-compat (7)
 .SH AUTHOR
 .NF
