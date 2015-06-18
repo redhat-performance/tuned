@@ -14,7 +14,7 @@ class cpulist_invert(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(self.__class__, self).__init__("cpulist_online", 0)
+		super(self.__class__, self).__init__("cpulist_invert", 0)
 
 	def execute(self, args):
 		if not super(self.__class__, self).execute(args):
