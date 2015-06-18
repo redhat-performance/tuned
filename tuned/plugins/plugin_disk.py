@@ -114,7 +114,7 @@ class DiskPlugin(hotplug.Plugin):
 			cnt = 0
 		elif rc == errno.ENOENT:
 			self._spindown_errcnt = self._apm_errcnt = consts.ERROR_THRESHOLD + 1
-			log.info("hdparm command not found, ignoring future set_apm / set_spindown commands")
+			log.warn("hdparm command not found, ignoring future set_apm / set_spindown commands")
 			return
 		else:
 			cnt += 1
@@ -158,11 +158,11 @@ class DiskPlugin(hotplug.Plugin):
 			log.debug("tuning level changed to %d" % idle["level"])
 			if self._spindown_errcnt < consts.ERROR_THRESHOLD:
 				log.debug("changing spindown to %d" % new_spindown_level)
-				(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "/dev/%s" % device])
+				(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
 				self._update_errcnt(rc, True)
 			if self._apm_errcnt < consts.ERROR_THRESHOLD:
 				log.debug("changing APM_level to %d" % new_power_level)
-				(rc, out) = self._cmd.execute(["hdparm", "-B%d" % new_power_level, "/dev/%s" % device])
+				(rc, out) = self._cmd.execute(["hdparm", "-B%d" % new_power_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
 				self._update_errcnt(rc, False)
 
 		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
@@ -254,7 +254,7 @@ class DiskPlugin(hotplug.Plugin):
 	def _set_apm(self, value, device, sim):
 		if self._apm_errcnt < consts.ERROR_THRESHOLD:
 			if not sim:
-				(rc, out) = self._cmd.execute(["hdparm", "-B", str(value), "/dev/" + device])
+				(rc, out) = self._cmd.execute(["hdparm", "-B", str(value), "/dev/" + device], no_errors = [errno.ENOENT])
 				self._update_errcnt(rc, False)
 			return str(value)
 		else:
@@ -263,11 +263,20 @@ class DiskPlugin(hotplug.Plugin):
 	@command_get("apm")
 	def _get_apm(self, device):
 		value = None
-		try:
-			m = re.match(r".*=\s*(\d+).*", self._cmd.execute(["hdparm", "-B", "/dev/" + device])[1], re.S)
+		err = False
+		(rc, out) = self._cmd.execute(["hdparm", "-B", "/dev/" + device], no_errors = [errno.ENOENT])
+		if rc == errno.ENOENT:
+			return None
+		elif rc != 0:
+			err = True
+		else:
+			m = re.match(r".*=\s*(\d+).*", out, re.S)
 			if m:
-				value = int(m.group(1))
-		except:
+				try:
+					value = int(m.group(1))
+				except ValueError:
+					err = True
+		if err:
 			log.error("could not get current APM settings for device '%s'" % device)
 		return value
 
@@ -275,7 +284,7 @@ class DiskPlugin(hotplug.Plugin):
 	def _set_spindown(self, value, device, sim):
 		if self._spindown_errcnt < consts.ERROR_THRESHOLD:
 			if not sim:
-				(rc, out) = self._cmd.execute(["hdparm", "-S", str(value), "/dev/" + device])
+				(rc, out) = self._cmd.execute(["hdparm", "-S", str(value), "/dev/" + device], no_errors = [errno.ENOENT])
 				self._update_errcnt(rc, True)
 			return str(value)
 		else:

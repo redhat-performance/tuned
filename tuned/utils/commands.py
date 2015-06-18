@@ -98,7 +98,8 @@ class commands:
 				self._error("Executing %s error: %s" % (args[0], err_out))
 		except (OSError, IOError) as e:
 			retcode = e.errno if e.errno is not None else -1
-			self._error("Executing %s error: %s" % (args[0], e))
+			if not retcode in no_errors:
+				self._error("Executing %s error: %s" % (args[0], e))
 		return retcode, out
 
 	# Helper for parsing kernel options like:
