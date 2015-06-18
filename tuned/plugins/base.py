@@ -1,3 +1,4 @@
+import re
 import tuned.consts as consts
 import tuned.profiles.variables
 import tuned.logs
@@ -413,11 +414,19 @@ class Plugin(object):
 			if new_value is not None:
 				command["set"](new_value, sim = False)
 
+	def _norm_value(self, value):
+		v = str(value)
+		if re.match(r'\s*(0+,)+[\da-fA-F]*\s*$', v):
+			return re.sub(r'^\s*(0+,)+', "", v)
+		return value
+
 	def _verify_value(self, name, new_value, current_value, device = None):
 		if new_value is None:
 			return None
 		ret = False
 		if current_value is not None:
+			current_value = self._norm_value(current_value)
+			new_value = self._norm_value(new_value)
 			try:
 				ret = int(new_value) == int(current_value)
 			except ValueError:
