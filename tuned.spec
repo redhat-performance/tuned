@@ -173,6 +173,7 @@ fi
 %{python_sitelib}/tuned
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
+%exclude %{_sysconfdir}/tuned/realtime-variables.conf
 %exclude %{_prefix}/lib/tuned/default
 %exclude %{_prefix}/lib/tuned/desktop-powersave
 %exclude %{_prefix}/lib/tuned/laptop-ac-powersave
@@ -247,6 +248,7 @@ fi
 
 %files profiles-realtime
 %defattr(-,root,root,-)
+%config(noreplace) %{_sysconfdir}/tuned/realtime-variables.conf
 %{_prefix}/lib/tuned/realtime
 %{_mandir}/man7/tuned-profiles-realtime.7*
 

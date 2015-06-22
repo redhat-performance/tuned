@@ -112,6 +112,8 @@ install: install-dirs
 
 	# profiles & system config
 	cp -a profiles/* $(DESTDIR)$(TUNED_PROFILESDIR)/
+	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime/realtime-variables.conf \
+		$(DESTDIR)/etc/tuned/realtime-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_PROFILESDIR)/recommend.conf
 
 	# bash completion
