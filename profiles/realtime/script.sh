@@ -9,10 +9,8 @@ start() {
     fi
 
     # move threads off the selected cpu cores
-    tuna -c "$TUNED_isolated_cores"
+    tuna -c "$TUNED_isolated_cores" -i
 
-    # move the interrupts to non-isolated cores
-    tuna -c "$TUNED_isolated_cores_complement" -q '*' -x -m
     return "$?"
 }
 
