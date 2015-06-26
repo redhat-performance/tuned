@@ -1,6 +1,6 @@
 [Unit]
 Description=Dynamic System Tuning Daemon
-After=syslog.target
+After=syslog.target systemd-sysctl.service
 Conflicts=cpupower.service
 
 [Service]
