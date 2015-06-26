@@ -60,6 +60,12 @@ clean-mock-result-dir:
 mock-result-dir:
 	mkdir mock-result-dir
 
+# delete RPM files older than cca. one week if total space occupied is more than 5 MB
+tidy-mock-result-dir: mock-result-dir
+	if [ `du -bs mock-result-dir | tail -n 1 | cut -f1` -gt 5000000 ]; then \
+		rm -f `find mock-result-dir -name '*.rpm' -mtime +7`; \
+	fi
+
 mock-build: srpm
 	mock -r $(MOCK_CONFIG) $(MOCK_ARGS) --resultdir=`pwd`/mock-result-dir `ls rpm-build-dir/*$(RPM_VERSION).*.src.rpm | head -n 1`&& \
 	rm -f mock-result-dir/*.log
@@ -77,7 +83,7 @@ createrepo: mock-devel-build
 scratch-build: mock-devel-build
 	brew build --scratch --nowait rhel-7.2-candidate `ls mock-result-dir/*$(GIT_DATE)git*.*.src.rpm | head -n 1`
 
-nightly: createrepo scratch-build
+nightly: tidy-mock-result-dir createrepo scratch-build
 	rsync -ave ssh --delete --progress mock-result-dir/* jskarvad@fedorapeople.org:/home/fedora/jskarvad/public_html/tuned/devel/repo/
 
 install-dirs:
