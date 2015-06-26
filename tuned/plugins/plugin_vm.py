@@ -37,9 +37,15 @@ class VMPlugin(base.Plugin):
 
 	@command_set("transparent_hugepages")
 	def _set_transparent_hugepages(self, value, sim):
-		if value not in ["always", "never"]:
+		if value not in ["always", "never", "madvise"]:
 			if not sim:
-				log.warn("Incorrect 'transparent_hugepages' value.")
+				log.warn("Incorrect 'transparent_hugepages' value '%s'." % str(value))
+			return None
+
+		cmdline = cmd.read_file("/proc/cmdline", no_error = True)
+		if cmdline.find("transparent_hugepage=") > 0:
+			if not sim:
+				log.info("transparent_hugepage overriden in kernel boot cmdline, ingoring value from profile")
 			return None
 
 		sys_file = self._thp_file()
