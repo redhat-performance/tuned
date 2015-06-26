@@ -73,6 +73,13 @@ Requires: %{name} = %{version}-%{release}
 %description profiles-sap
 Additional tuned profile(s) targeted to SAP NetWeaver loads.
 
+%package profiles-oracle
+Summary: Additional tuned profile(s) targeted to Oracle loads
+Requires: %{name} = %{version}-%{release}
+
+%description profiles-oracle
+Additional tuned profile(s) targeted to Oracle loads.
+
 %package profiles-sap-hana
 Summary: Additional tuned profile(s) targeted to SAP HANA loads
 Requires: %{name} = %{version}-%{release}
@@ -81,18 +88,18 @@ Requires: %{name} = %{version}-%{release}
 Additional tuned profile(s) targeted to SAP HANA loads.
 
 %package profiles-atomic
-Summary: Additional tuned profiles targeted to Atomic
+Summary: Additional tuned profile(s) targeted to Atomic
 Requires: %{name} = %{version}-%{release}
 
 %description profiles-atomic
-Additional tuned profiles targeted to Atomic host and guest.
+Additional tuned profile(s) targeted to Atomic host and guest.
 
 %package profiles-realtime
-Summary: Additional tuned profiles targeted to realtime
+Summary: Additional tuned profile(s) targeted to realtime
 Requires: %{name} = %{version}-%{release}
 
 %description profiles-realtime
-Additional tuned profiles targeted to realtime.
+Additional tuned profile(s) targeted to realtime.
 
 %package profiles-compat
 Summary: Additional tuned profiles mainly for backward compatibility with tuned 1.0
@@ -184,6 +191,7 @@ fi
 %exclude %{_prefix}/lib/tuned/sap-netweaver
 %exclude %{_prefix}/lib/tuned/sap-hana
 %exclude %{_prefix}/lib/tuned/sap-hana-vmware
+%exclude %{_prefix}/lib/tuned/oracle
 %exclude %{_prefix}/lib/tuned/atomic-host
 %exclude %{_prefix}/lib/tuned/atomic-guest
 %exclude %{_prefix}/lib/tuned/realtime
@@ -239,6 +247,11 @@ fi
 %{_prefix}/lib/tuned/sap-hana
 %{_prefix}/lib/tuned/sap-hana-vmware
 %{_mandir}/man7/tuned-profiles-sap-hana.7*
+
+%files profiles-oracle
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/oracle
+%{_mandir}/man7/tuned-profiles-oracle.7*
 
 %files profiles-atomic
 %defattr(-,root,root,-)
