@@ -18,19 +18,23 @@
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
 .\" 
-.TH TUNED_PROFILES_REALTIME "7" "18 Jun 2015" "Fedora Power Management SIG" "tuned"
+.TH TUNED_PROFILES_NFV "7" "1 Jul 2015" "Fedora Power Management SIG" "tuned"
 .SH NAME
-tuned\-profiles\-realtime - description of profiles provided for the realtime
+tuned\-profiles\-nfv - description of profiles provided for the NFV
 
 .SH DESCRIPTION
-These profiles are provided for the realtime.
+These profiles are provided for the Network Function Virtualization (NFV).
 
 .SH PROFILES
 The following profiles are provided:
 
 .TP
-.BI "realtime"
-Profile optimized for realtime.
+.BI "realtime-virtual-guest"
+Profile optimized for virtual guests based on realtime profile.
+
+.TP
+.BI "realtime-virtual-host"
+Profile optimized for virtual hosts based on realtime profile.
 
 .SH "FILES"
 .NF
@@ -45,7 +49,7 @@ Profile optimized for realtime.
 .BR tuned\-profiles\-sap (7)
 .BR tuned\-profiles\-sap\-hana (7)
 .BR tuned\-profiles\-oracle (7)
-.BR tuned\-profiles\-nfv (7)
+.BR tuned\-profiles\-realtime (7)
 .BR tuned\-profiles\-compat (7)
 .SH AUTHOR
 .NF

@@ -120,6 +120,10 @@ install: install-dirs
 	cp -a profiles/* $(DESTDIR)$(TUNED_PROFILESDIR)/
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime/realtime-variables.conf \
 		$(DESTDIR)/etc/tuned/realtime-variables.conf
+	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime-virtual-guest/realtime-virtual-guest-variables.conf \
+		$(DESTDIR)/etc/tuned/realtime-virtual-guest-variables.conf
+	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime-virtual-host/realtime-virtual-host-variables.conf \
+		$(DESTDIR)/etc/tuned/realtime-virtual-host-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_PROFILESDIR)/recommend.conf
 
 	# bash completion

@@ -101,6 +101,13 @@ Requires: %{name} = %{version}-%{release}
 %description profiles-realtime
 Additional tuned profile(s) targeted to realtime.
 
+%package profiles-nfv
+Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV)
+Requires: %{name} = %{version}-%{release}, %{name}-profiles-realtime = %{version}-%{release}
+
+%description profiles-nfv
+Additional tuned profile(s) targeted to Network Function Virtualization (NFV).
+
 %package profiles-compat
 Summary: Additional tuned profiles mainly for backward compatibility with tuned 1.0
 Requires: %{name} = %{version}-%{release}
@@ -197,6 +204,7 @@ fi
 %exclude %{_prefix}/lib/tuned/realtime
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
+%dir %{_libexecdir}/tuned
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/active_profile
 %config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/bootcmdline
@@ -264,6 +272,15 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/realtime-variables.conf
 %{_prefix}/lib/tuned/realtime
 %{_mandir}/man7/tuned-profiles-realtime.7*
+
+%files profiles-nfv
+%defattr(-,root,root,-)
+%config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-guest-variables.conf
+%config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
+%{_prefix}/lib/tuned/realtime-virtual-guest
+%{_prefix}/lib/tuned/realtime-virtual-host
+%{_libexecdir}/tuned/defirqaffinity*
+%{_mandir}/man7/tuned-profiles-nfv.7*
 
 %files profiles-compat
 %defattr(-,root,root,-)
