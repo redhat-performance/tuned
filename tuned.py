@@ -73,7 +73,7 @@ if __name__ == "__main__":
 			app.daemonize(args.pid)
 		else:
 			app.write_pid_file(args.pid)
-		app.run()
+		app.run(args.daemon)
 
 	except tuned.exceptions.TunedException as exception:
 		if (args.debug):

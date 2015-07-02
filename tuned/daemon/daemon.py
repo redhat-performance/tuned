@@ -13,15 +13,17 @@ log = tuned.logs.get()
 class Daemon(object):
 	def __init__(self, unit_manager, profile_loader, profile_name=None, config=None):
 		log.debug("initializing daemon")
+		self._daemon = consts.CFG_DEF_DAEMON
 		self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
 		self._update_interval = int(consts.CFG_DEF_UPDATE_INTERVAL)
 		self._dynamic_tuning = consts.CFG_DEF_DYNAMIC_TUNING
 		self._recommend_command = True
 		if config is not None:
+			self._daemon = config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
 			self._sleep_interval = int(config.get(consts.CFG_SLEEP_INTERVAL, consts.CFG_DEF_SLEEP_INTERVAL))
 			self._update_interval = int(config.get(consts.CFG_UPDATE_INTERVAL, consts.CFG_DEF_UPDATE_INTERVAL))
-			self._dynamic_tuning = config.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING)
-			self._recommend_command = config.get(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND)
+			self._dynamic_tuning = config.get_bool(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING)
+			self._recommend_command = config.get_bool(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND)
 		if self._sleep_interval <= 0:
 			self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
 		if self._update_interval == 0:
@@ -97,21 +99,22 @@ class Daemon(object):
 		self._profile_applied.set()
 		log.info("static tuning from profile '%s' applied" % self._profile.name)
 
-		# In python 2 interpreter with applied patch for rhbz#917709 we need to periodically
-		# poll, otherwise the python will not have chance to update events / locks (due to GIL)
-		# and e.g. DBus control will not work. The polling interval of 1 seconds (which is
-		# the default) is still much better than 50 ms polling with unpatched interpreter.
-		# For more details see tuned rhbz#917587.
-		_sleep_cnt = self._sleep_cycles
-		while not self._cmd.wait(self._terminate, self._sleep_interval):
-			if self._dynamic_tuning:
-				_sleep_cnt -= 1
-				if _sleep_cnt <= 0:
-					_sleep_cnt = self._sleep_cycles
-					log.debug("updating monitors")
-					self._unit_manager.update_monitors()
-					log.debug("performing tunings")
-					self._unit_manager.update_tuning()
+		if self._daemon:
+			# In python 2 interpreter with applied patch for rhbz#917709 we need to periodically
+			# poll, otherwise the python will not have chance to update events / locks (due to GIL)
+			# and e.g. DBus control will not work. The polling interval of 1 seconds (which is
+			# the default) is still much better than 50 ms polling with unpatched interpreter.
+			# For more details see tuned rhbz#917587.
+			_sleep_cnt = self._sleep_cycles
+			while not self._cmd.wait(self._terminate, self._sleep_interval):
+				if self._dynamic_tuning:
+					_sleep_cnt -= 1
+					if _sleep_cnt <= 0:
+						_sleep_cnt = self._sleep_cycles
+						log.debug("updating monitors")
+						self._unit_manager.update_monitors()
+						log.debug("performing tunings")
+						self._unit_manager.update_tuning()
 
 		self._profile_applied.clear()
 
@@ -126,7 +129,8 @@ class Daemon(object):
 			profile_switch = True
 		else:
 			profile_switch = False
-		self._unit_manager.stop_tuning(profile_switch)
+		if self._daemon:
+			self._unit_manager.stop_tuning(profile_switch)
 		self._unit_manager.destroy_all()
 
 	def _save_active_profile(self, profile_name):

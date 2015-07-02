@@ -25,10 +25,14 @@ class Admin(object):
 		return True
 
 	def list(self):
-		try:
-			profile_names = self._controller.profiles()
-		except TunedAdminDBusException as e:
-			self._error(e)
+		no_dbus = self._controller is None
+		if not no_dbus:
+			try:
+				profile_names = self._controller.profiles()
+			except TunedAdminDBusException as e:
+				self._error(e)
+				no_dbus = True
+		if no_dbus:
 			profile_names = profiles_locator(consts.LOAD_DIRECTORIES).get_known_names()
 		print "Available profiles:"
 		for profile in profile_names:
@@ -36,16 +40,21 @@ class Admin(object):
 		self.active()
 
 	def active(self):
-		try:
-			profile_name = self._controller.active_profile()
-		except TunedAdminDBusException as e:
-			self._error(e)
+		no_dbus = self._controller is None
+		if not no_dbus:
+			try:
+				profile_name = self._controller.active_profile()
+			except TunedAdminDBusException as e:
+				self._error(e)
+				no_dbus = True
+		if no_dbus:
 			profile_name = str.strip(self._cmd.read_file(consts.ACTIVE_PROFILE_FILE, None))
 		if profile_name is not None and profile_name != "":
-			if self._tuned_is_running():
+			if self._controller is not None and self._tuned_is_running():
 				print "Current active profile: %s" % profile_name
 			else:
-				print "It seems that tuned daemon is not running, preset profile is not activated."
+				if self._controller is not None:
+					print "It seems that tuned daemon is not running, preset profile is not activated."
 				print "Preset profile: %s" % profile_name
 			return True
 		else:
@@ -53,16 +62,25 @@ class Admin(object):
 			return False
 
 	def profile(self, profiles):
+		no_dbus = self._controller is None
 		profile_name = " ".join(profiles)
 		if profile_name == "":
 			return False
-		try:
-			(ret, msg) = self._controller.switch_profile(profile_name)
-		except TunedAdminDBusException as e:
-			self._error(e)
+		if not no_dbus:
+			try:
+				(ret, msg) = self._controller.switch_profile(profile_name)
+			except TunedAdminDBusException as e:
+				self._error(e)
+				no_dbus = True
+		if no_dbus:
 			if profile_name in profiles_locator(consts.LOAD_DIRECTORIES).get_known_names():
 				if self._cmd.write_to_file(consts.ACTIVE_PROFILE_FILE, profile_name):
-					print "You need to (re)start the tuned daemon by hand for changes to apply."
+					print "Trying to (re)start tuned..."
+					(ret, out) = commands.execute(["service", "tuned", "restart"])
+					if retcode == 0:
+						print "Tuned (re)started, changes applied."
+					else:
+						print "Tuned (re)start failed, you need to (re)start tuned by hand for changes to apply."
 					return True
 				else:
 					self._error("Unable to switch profile, do you have enough permissions?")
@@ -80,15 +98,22 @@ class Admin(object):
 		return ret
 
 	def recommend_profile(self):
-		try:
-			profile = self._controller.recommend_profile()
-		except TunedAdminDBusException as e:
-			self._error(e)
+		no_dbus = self._controller is None
+		if not no_dbus:
+			try:
+				profile = self._controller.recommend_profile()
+			except TunedAdminDBusException as e:
+				self._error(e)
+				no_dbus = True
+		if no_dbus:
 			profile = self._cmd.recommend_profile()
 		print profile
 
 	def verify_profile(self):
 		ret = False
+		if self._controller is None:
+			print "Not supported in no_daemon mode."
+			return False
 		try:
 			ret = self._controller.verify_profile()
 		except TunedAdminDBusException as e:
@@ -100,11 +125,14 @@ class Admin(object):
 			print "Verfication succeeded, current system settings match the preset profile."
 		else:
 			print "Verification failed, current system settings differ from the preset profile."
-			print "See tuned.log for details. You can mostly fix this by Tuned restart:"
-			print "  systemctl restart tuned"
+			print "See tuned.log for details. You can mostly fix this by Tuned restart, e.g.:"
+			print "  service tuned restart"
 		return ret
 
 	def off(self):
+		if self._controller is None:
+			print "Not supported in no_daemon mode."
+			return False
 		try:
 			result = self._controller.off()
 		except TunedAdminDBusException as e:

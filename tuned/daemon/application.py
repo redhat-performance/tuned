@@ -26,7 +26,7 @@ class Application(object):
 		self.variables = profiles.variables.Variables()
 
 		self.config = GlobalConfig()
-		if self.config.get(consts.CFG_DYNAMIC_TUNING):
+		if self.config.get_bool(consts.CFG_DYNAMIC_TUNING):
 			log.info("dynamic tuning is enabled (can be overriden in plugins)")
 		else:
 			log.info("dynamic tuning is globally disabled")
@@ -177,10 +177,17 @@ class Application(object):
 	def controller(self):
 		return self._controller
 
-	def run(self):
-		exports.start()
+	def run(self, daemon):
+		# override global config if ran from command line with daemon option (-d)
+		if daemon:
+			self.config.set(consts.CFG_DAEMON, True)
+		if self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+			exports.start()
+		else:
+			log.warn("Using one shot no deamon mode, most of the functionality will be not available, it can be changed in global config")
 		result = self._controller.run()
-		exports.stop()
+		if self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+			exports.stop()
 
 		if self._pid_file is not None:
 			self._delete_pid_file()

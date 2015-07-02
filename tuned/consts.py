@@ -39,11 +39,14 @@ ENV_PREFIX = "TUNED_"
 PREFIX_PROFILE_FACTORY = "Factory"
 PREFIX_PROFILE_USER = "User"
 
+CFG_DAEMON = "daemon"
 CFG_DYNAMIC_TUNING = "dynamic_tuning"
 CFG_SLEEP_INTERVAL = "sleep_interval"
 CFG_UPDATE_INTERVAL = "update_interval"
 CFG_RECOMMEND_COMMAND = "recommend_command"
 
+# no_daemon mode
+CFG_DEF_DAEMON = True
 # default configuration
 CFG_DEF_DYNAMIC_TUNING = True
 # how long to sleep before checking for events (in seconds)
@@ -51,7 +54,7 @@ CFG_DEF_SLEEP_INTERVAL = 1
 # update interval for dynamic tuning (in seconds)
 CFG_DEF_UPDATE_INTERVAL = 10
 # recommend command availability
-CFG_DEF_RECOMMEND_COMMAND = 1
+CFG_DEF_RECOMMEND_COMMAND = True
 
 STR_VERIFY_PROFILE_DEVICE_VALUE_OK = "verify: passed: device %s: %s = %s"
 STR_VERIFY_PROFILE_VALUE_OK = "verify: passed: %s = %s"

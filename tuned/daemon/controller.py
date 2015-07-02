@@ -29,10 +29,11 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		log.info("starting controller")
 		self.start()
 
-		self._terminate.clear()
-		# we have to pass some timeout, otherwise signals will not work
-		while not self._cmd.wait(self._terminate, 3600):
-			pass
+		if self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+			self._terminate.clear()
+			# we have to pass some timeout, otherwise signals will not work
+			while not self._cmd.wait(self._terminate, 3600):
+				pass
 
 		log.info("terminating controller")
 		self.stop()
@@ -42,12 +43,12 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 	@exports.export("", "b")
 	def start(self):
-		if self._daemon.is_running():
-			return True
-		elif not self._daemon.is_enabled():
-			return False
-		else:
-			return self._daemon.start()
+		if self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+			if self._daemon.is_running():
+				return True
+			elif not self._daemon.is_enabled():
+				return False
+		return self._daemon.start()
 
 	@exports.export("", "b")
 	def stop(self):
@@ -107,7 +108,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 	@exports.export("", "s")
 	def recommend_profile(self):
-		return self._cmd.recommend_profile(hardcoded = not self._global_config.get(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND))
+		return self._cmd.recommend_profile(hardcoded = not self._global_config.get_bool(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND))
 
 	@exports.export("", "b")
 	def verify_profile(self):

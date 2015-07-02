@@ -7,13 +7,24 @@ tuned\-main.conf - Tuned global configuration file
 This man page documents format of the Tuned global configuration file.
 The \fItuned\-main.conf\fR file uses the ini\-file format.
 
+
+.TP
+.BI daemon= BOOL
+This defines whether Tuned will use daemon or not. It is boolean value.
+It can be \fBTrue\fR or \fB1\fR if the daemon is enabled and
+\fBFalse\fR or \fB0\fR if disabled. It is not recommended to disable
+daemon, because many functions will not work without daemon, e.g.
+there will be no D-Bus, no settings rollback, no hotplug support,
+no dynamic tuning, ...
+
 .TP
 .BI dynamic_tuning= BOOL
 This defines whether the dynamic tuning is enabled. It is boolean value.
 It can be \fBTrue\fR or \fB1\fR if the dynamic tuning is enabled and
 \fBFalse\fR or \fB0\fR if disabled. In such case only the static tuning
 will be used. Please note if it is enabled here, it is still possible
-to individually disable it in plugins.
+to individually disable it in plugins. It is only applicable if
+\fBdaemon\fR is enabled.
 
 .TP
 .BI sleep_interval= INT
@@ -25,7 +36,8 @@ request profile switch, it may take up to 1 second until Tuned reacts).
 Increase this number for higher responsiveness times and more power
 savings (due to lower number of wakeups). In case you have unpatched
 Python 2 interpreter, this settings will have no visible effect,
-because the intepreter will poll 20 times per second.
+because the intepreter will poll 20 times per second. It is only
+applicable if \fBdaemon\fR is enabled.
 
 .TP
 .BI update_interval= INT
@@ -35,13 +47,25 @@ parameters for enabled plugins and applies the changes. Plugins that have
 disabled dynamic tuning are not processed. By default the \fIINT\fR is set
 to 10 seconds. Tuned daemon doesn't periodically wake if dynamic tuning is
 globally disabled (see \fBdynamic_tuning\fR) or this setting set to 0.
-This must be multiple of \fBsleep_interval\fR.
+This must be multiple of \fBsleep_interval\fR. It is only applicable if
+\fBdaemon\fR is enabled.
+
+.TP
+.BI recommend_command= BOOL
+This controls whether recommend functionality will be enabled or not. It is
+boolean value. It can be \fBTrue\fR or \fB1\fR if the recommend command is
+enabled and \fBFalse\fR or \fB0\fR if disabled. If disabled \fBrecommend\fR
+command will be not available in CLI, tuned will not parse \fIrecommend.conf\fR
+and will return one hardcoded profile (by default \fBbalanced\fR). It is only
+applicable if \fBdaemon\fR is enabled.
 
 .SH EXAMPLE
 .NF
+no_daemon = 0
 dynamic_tuning = 1
 sleep_interval = 1
 update_interval = 10
+recommend_command = 0
 .FI
 
 .SH FILES

@@ -3,6 +3,7 @@ from configobj import ConfigObj, ConfigObjError
 from validate import Validator
 from tuned.exceptions import TunedException
 import tuned.consts as consts
+from tuned.utils.commands import commands
 
 __all__ = ["GlobalConfig"]
 
@@ -18,6 +19,7 @@ class GlobalConfig():
 	def __init__(self):
 		self._cfg = {}
 		self.load_config()
+		self._cmd = commands()
 
 	def load_config(self, file_name = consts.GLOBAL_CONFIG_FILE):
 		"""
@@ -37,3 +39,11 @@ class GlobalConfig():
 
 	def get(self, key, default = None):
 		return self._cfg.get(key, default)
+
+	def get_bool(self, key, default = None):
+		if self._cmd.get_bool(self.get(key, default)) == "1":
+			return True
+		return False
+
+	def set(self, key, value):
+		self._cfg[key] = value

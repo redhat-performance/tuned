@@ -62,7 +62,10 @@ if __name__ == "__main__":
 	result = False
 
 	try:
-		controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE, debug)
+		if config.get(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+			controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE, debug)
+		else:
+			controller = None
 		admin = tuned.admin.Admin(controller, debug)
 
 		action = getattr(admin, action_name)
