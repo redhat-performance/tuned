@@ -41,12 +41,24 @@ class commands:
 		return l
 
 	# Do multiple regex replaces in 's' according to lookup table described by
-	# dictionary 'd', e.g.: d = {"re1": "replace1", "re2": "replace2"}
+	# dictionary 'd', e.g.: d = {"re1": "replace1", "re2": "replace2", ...}
 	def multiple_re_replace(self, d, s):
 		if len(d) == 0 or s is None:
 			return s
 		r = re.compile("(%s)" % ")|(".join(d.keys()))
 		return r.sub(lambda mo: d.values()[mo.lastindex - 1], s)
+
+	# Do regex lookup on 's' according to lookup table described by
+	# dictionary 'd' and return corresponding value from the dictionary,
+	# e.g.: d = {"re1": val1, "re2": val2, ...}
+	def re_lookup(self, d, s):
+		if len(d) == 0 or s is None:
+			return None
+		r = re.compile("(%s)" % ")|(".join(d.keys()))
+		mo = r.search(s)
+		if mo:
+			return d.values()[mo.lastindex - 1]
+		return None
 
 	def write_to_file(self, f, data):
 		self._debug("Writing to file: %s < %s" % (f, data))

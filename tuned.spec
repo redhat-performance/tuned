@@ -22,7 +22,7 @@ Requires(preun): systemd
 Requires(postun): systemd
 Requires: python-decorator, dbus-python, pygobject3-base, python-pyudev
 Requires: virt-what, python-configobj, ethtool, gawk, kernel-tools, hdparm
-Requires: util-linux
+Requires: util-linux, python-perf
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
