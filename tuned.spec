@@ -31,9 +31,11 @@ Based on that information components will then be put into lower or higher
 power saving modes to adapt to the current usage. Currently only ethernet
 network and ATA harddisk devices are implemented.
 
-%if 0%{?rhel} <= 7
+%if 0%{?rhel} <= 7 && 0%{!?fedora:1}
+# RHEL <= 7
 %global docdir %{_docdir}/%{name}-%{version}
 %else
+# RHEL > 7 || fedora
 %global docdir %{_docdir}/%{name}
 %endif
 
