@@ -40,21 +40,31 @@ class commands:
 				l += list(i)
 		return l
 
+	# Compile regex to speedup multiple_re_replace or re_lookup
+	def re_lookup_compile(self, d):
+		if d is None:
+			return None
+		return re.compile("(%s)" % ")|(".join(d.keys()))
+
 	# Do multiple regex replaces in 's' according to lookup table described by
 	# dictionary 'd', e.g.: d = {"re1": "replace1", "re2": "replace2", ...}
-	def multiple_re_replace(self, d, s):
+	# r can be regex precompiled by re_lookup_compile for speedup
+	def multiple_re_replace(self, d, s, r = None):
 		if len(d) == 0 or s is None:
 			return s
-		r = re.compile("(%s)" % ")|(".join(d.keys()))
+		if r is None:
+			r = self.re_lookup_compile(d)
 		return r.sub(lambda mo: d.values()[mo.lastindex - 1], s)
 
 	# Do regex lookup on 's' according to lookup table described by
 	# dictionary 'd' and return corresponding value from the dictionary,
 	# e.g.: d = {"re1": val1, "re2": val2, ...}
-	def re_lookup(self, d, s):
+	# r can be regex precompiled by re_lookup_compile for speedup
+	def re_lookup(self, d, s, r = None):
 		if len(d) == 0 or s is None:
 			return None
-		r = re.compile("(%s)" % ")|(".join(d.keys()))
+		if r is None:
+			r = self.re_lookup_compile(d)
 		mo = r.search(s)
 		if mo:
 			return d.values()[mo.lastindex - 1]

@@ -113,8 +113,8 @@ class SchedulerPlugin(base.Plugin):
 		log.debug("read scheduler policy '%s' and priority '%s' for pid '%s'" % (sched, prio, pid))
 		return (sched, prio)
 
-	def _get_affinity(self, pid):
-		(rc, out) = self._cmd.execute(["taskset", "-p", str(pid)])
+	def _get_affinity(self, pid, no_error = False):
+		(rc, out) = self._cmd.execute(["taskset", "-p", str(pid)], no_errors = [1] if no_error else [])
 		if rc != 0:
 			return None
 		v = self._parse_val(out.split("\n", 1)[0])
@@ -134,7 +134,7 @@ class SchedulerPlugin(base.Plugin):
 		except KeyError:
 			return ""
 
-	def _set_rt(self, pid, sched, prio):
+	def _set_rt(self, pid, sched, prio, no_error = False):
 		if pid is None or prio is None:
 			return
 		if sched is not None and len(sched) > 0:
@@ -143,24 +143,24 @@ class SchedulerPlugin(base.Plugin):
 		else:
 			schedl = []
 		log.debug("setting scheduler priority to '%s' for PID '%s'" % (prio, pid))
-		self._cmd.execute(["chrt"] + schedl + ["-p", str(prio), str(pid)])
+		self._cmd.execute(["chrt"] + schedl + ["-p", str(prio), str(pid)], no_errors = [1] if no_error else [])
 
-	def _set_affinity(self, pid, affinity):
+	def _set_affinity(self, pid, affinity, no_error = False):
 		if pid is None or affinity is None:
 			return
 		log.debug("setting affinity to '%s' for PID '%s'" % (affinity, pid))
-		self._cmd.execute(["taskset", "-p", str(affinity), str(pid)])
+		self._cmd.execute(["taskset", "-p", str(affinity), str(pid)], no_errors = [1] if no_error else [])
 
 	#tune process and store previous values
-	def _tune_process(self, instance, pid, cmd, sched, prio, affinity):
+	def _tune_process(self, instance, pid, cmd, sched, prio, affinity, no_error = False):
 		#rt[0] - prev_sched, rt[1] - prev_prio
 		rt = self._get_rt(pid)
-		prev_affinity = self._get_affinity(pid)
+		prev_affinity = self._get_affinity(pid, no_error)
 		if prev_affinity is not None and rt is not None and len(rt) == 2 and rt[0] is not None and rt[1] is not None:
 			instance._scheduler_original[pid] = (cmd, rt[0], rt[1], prev_affinity)
-		self._set_rt(pid, self._schedcfg2param(sched), prio)
+		self._set_rt(pid, self._schedcfg2param(sched), prio, no_error)
 		if affinity != "*":
-			self._set_affinity(pid, affinity)
+			self._set_affinity(pid, affinity, no_error)
 
 	def _instance_apply_static(self, instance):
 		ps = self.get_processes()
@@ -211,16 +211,16 @@ class SchedulerPlugin(base.Plugin):
 			except KeyError as e:
 				pass
 
-	def _add_pid(self, instance, pid):
+	def _add_pid(self, instance, pid, r):
 		cmd = self.get_process(pid)
 		# check to filter short living process
 		if cmd == "":
 			return
-		v = self._cmd.re_lookup(instance._sched_lookup, cmd)
+		v = self._cmd.re_lookup(instance._sched_lookup, cmd, r)
 		if v is not None and not pid in instance._scheduler_original:
 			log.debug("tuning new process '%s' with pid '%s' by '%s'" % (cmd, pid, str(v)))
 			#v[0] - sched, v[1] - prio, v[2] - affinity
-			self._tune_process(instance, pid, cmd, v[0], v[1], v[2])
+			self._tune_process(instance, pid, cmd, v[0], v[1], v[2], no_error = True)
 			self._storage.set("options", instance._scheduler_original)
 
 	def _remove_pid(self, instance, pid):
@@ -230,6 +230,7 @@ class SchedulerPlugin(base.Plugin):
 			self._storage.set("options", instance._scheduler_original)
 
 	def _thread_code(self, instance):
+		r = self._cmd.re_lookup_compile(instance._sched_lookup)
 		poll = select.poll()
 		for fd in instance._evlist.get_pollfd():
 			poll.register(fd)
@@ -244,6 +245,6 @@ class SchedulerPlugin(base.Plugin):
 						if event:
 							read_events = True
 							if event.type == perf.RECORD_COMM:
-								self._add_pid(instance, str(event.pid))
+								self._add_pid(instance, str(event.pid), r)
 							elif event.type == perf.RECORD_EXIT:
 								self._remove_pid(instance, str(event.pid))
