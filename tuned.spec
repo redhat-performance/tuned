@@ -10,7 +10,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.4.1
+Version: 2.5.0
 Release: 1%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -294,6 +294,50 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Sun Jul  5 2015 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.0-1
+- new-release
+  resolves: rhbz#1155052
+  - add support for ethtool -C to tuned network plugin
+    resolves: rhbz#1152539
+  - add support for ethtool -K to tuned network plugin
+    resolves: rhbz#1152541
+  - add support for calculation of values for the kernel command line
+    resolves: rhbz#1191595
+  - no error output if there is no hdparm installed
+    resolves: rhbz#1191775
+  - do not run hdparm on hotplug events if there is no hdparm tuning
+    resolves: rhbz#1193682
+  - add oracle tuned profile
+    resolves: rhbz#1196298
+  - fix bash completions for tuned-adm
+    resolves: rhbz#1207668
+  - add glob support to tuned sysfs plugin
+    resolves: rhbz#1212831
+  - add tuned-adm verify subcommand
+    resolves: rhbz#1212836
+  - do not install tuned kernel command line to rescue kernels
+    resolves: rhbz#1223864
+  - add variables support
+    resolves: rhbz#1225124
+  - add built-in support for unit conversion into tuned
+    resolves: rhbz#1225135
+  - fix vm.max_map_count setting in sap-netweaver profile
+    resolves: rhbz#1228562
+  - add tuned profile for RHEL-RT
+    resolves: rhbz#1228801
+  - plugin_scheduler: added support for runtime tuning of processes
+    resolves: rhbz#1148546
+  - add support for changing elevators on xvd* devices (Amazon EC2)
+    resolves: rhbz#1170152
+  - add workaround to be run after systemd-sysctl
+    resolves: rhbz#1189263
+  - do not change settings of transparent hugepages if set in kernel cmdline
+    resolves: rhbz#1189868
+  - add tuned profiles for RHEL-NFV
+    resolves: rhbz#1228803
+  - plugin_bootloader: apply $tuned_params to existing kernels
+    resolves: rhbz#1233004
+
 * Thu Oct 16 2014 Jaroslav Škarvada <jskarvad@redhat.com> - 2.4.1-1
 - new-release
   - fixed return code of tuned grub template
