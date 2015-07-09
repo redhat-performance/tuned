@@ -40,6 +40,7 @@ import tuned.admin.dbus_controller
 import tuned.gtk.gui_profile_loader
 import tuned.gtk.gui_plugin_loader
 import tuned.profiles.profile as profile
+import tuned.utils.global_config
 from tuned.utils.commands import commands
 
 from tuned.gtk.managerException import ManagerException
@@ -97,7 +98,7 @@ class Base(object):
 
 		self._cmd = commands(debug)
 
-		self.config = GlobalConfig()
+		self.config = tuned.utils.global_config.GlobalConfig()
 		self.builder = Gtk.Builder()
 		try:
 			self.builder.add_from_file(GLADEUI)

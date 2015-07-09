@@ -79,8 +79,10 @@ class GuiPluginLoader(PluginLoader):
             hardware_inventory,
             device_matcher,
             plugin_instance_factory,
-            self._set_loader_parameters(),
+            None,
+            None
             )
+        self._set_loader_parameters(),
         self.create_all(self._import_plugin_names())
 
     @property
