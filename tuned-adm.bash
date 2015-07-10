@@ -2,7 +2,7 @@
 
 _tuned_adm()
 {
-	local commands="active list off profile recommend"
+	local commands="active list off profile recommend verify"
 	local cur prev words cword
 	_init_completion || return
 
