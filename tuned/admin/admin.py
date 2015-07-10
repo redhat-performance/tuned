@@ -76,7 +76,7 @@ class Admin(object):
 			if profile_name in profiles_locator(consts.LOAD_DIRECTORIES).get_known_names():
 				if self._cmd.write_to_file(consts.ACTIVE_PROFILE_FILE, profile_name):
 					print "Trying to (re)start tuned..."
-					(ret, out) = commands.execute(["service", "tuned", "restart"])
+					(ret, out) = self._cmd.execute(["service", "tuned", "restart"])
 					if retcode == 0:
 						print "Tuned (re)started, changes applied."
 					else:
