@@ -3,13 +3,13 @@ import tuned.logs
 import base
 from tuned.utils.commands import commands
 
-class s2kb(base.Function):
+class execute(base.Function):
 	"""
 	Conversion function: sectors to kbytes
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument (the name of executable)
-		super(self.__class__, self).__init__("s2kb", 0, 1)
+		super(self.__class__, self).__init__("exec", 0, 1)
 
 	def execute(self, args):
 		if not super(self.__class__, self).execute(args):
