@@ -35,7 +35,7 @@ start() {
 
 
     if [ -f $ltanfile -a ! -f ./lapic_timer_adv_ns ]; then
-        if [ -f ./tscdeadline_latency.flat ]; then
+        if [ -f /usr/share/qemu-kvm/tscdeadline_latency.flat ]; then
              tempdir=`mktemp -d`
              isolatedcpu=`echo "$TUNED_isolated_cores_expanded" | cut -f 1 -d ","`
              sh ./run-tscdeadline-latency.sh $isolatedcpu > $tempdir/lat.out

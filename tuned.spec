@@ -106,6 +106,7 @@ Additional tuned profile(s) targeted to realtime.
 %package profiles-nfv
 Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV)
 Requires: %{name} = %{version}-%{release}, %{name}-profiles-realtime = %{version}-%{release}
+Requires: qemu-kvm-tools-rhev
 
 %description profiles-nfv
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV).
