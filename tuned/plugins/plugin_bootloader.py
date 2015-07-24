@@ -61,20 +61,20 @@ class BootloaderPlugin(base.Plugin):
 	def _grub2_cfg_unpatch(self, grub2_cfg):
 		log.debug("unpatching grub.cfg")
 		cfg = re.sub(r"^\s*set\s+" + consts.GRUB2_TUNED_VAR + "\s*=.*\n", "", grub2_cfg, flags = re.MULTILINE)
-		grub2_cfg = re.sub(r"\$" + consts.GRUB2_TUNED_VAR, "", cfg, flags = re.MULTILINE)
+		grub2_cfg = re.sub(r" *\$" + consts.GRUB2_TUNED_VAR, "", cfg, flags = re.MULTILINE)
 		cfg = re.sub(consts.GRUB2_TEMPLATE_HEADER_BEGIN + r"\n", "", grub2_cfg, flags = re.MULTILINE)
-		return re.sub(consts.GRUB2_TEMPLATE_HEADER_END + r"\n", "", cfg, flags = re.MULTILINE)
+		return re.sub(consts.GRUB2_TEMPLATE_HEADER_END + r"\n+", "", cfg, flags = re.MULTILINE)
 
 	def _grub2_cfg_patch_initial(self, grub2_cfg, value):
 		log.debug("initial patching of grub.cfg")
 		cfg = re.sub(r"^(\s*###\s+END\s+[^#]+/00_header\s+### *)\n", r"\1\n\n" + consts.GRUB2_TEMPLATE_HEADER_BEGIN + "\nset " +
-			consts.GRUB2_TUNED_VAR + "=\"" + str(value) + "\"\n" + consts.GRUB2_TEMPLATE_HEADER_END, grub2_cfg, flags = re.MULTILINE)
+			consts.GRUB2_TUNED_VAR + "=\"" + str(value) + "\"\n" + consts.GRUB2_TEMPLATE_HEADER_END + r"\n", grub2_cfg, flags = re.MULTILINE)
 		# add tuned parameters to all kernels
-		grub2_cfg = re.sub(r"^(\s*linux(16|efi)\s+.*)$", r"\1 $" + consts.GRUB2_TUNED_VAR, cfg, flags = re.MULTILINE)
+		grub2_cfg = re.sub(r"^(\s*linux(16|efi)?\s+.*)$", r"\1 $" + consts.GRUB2_TUNED_VAR, cfg, flags = re.MULTILINE)
 		# remove tuned parameters from rescue kernels
-		cfg = re.sub(r"^(\s*linux(?:16|efi)\s+\S+rescue.*)\$" + consts.GRUB2_TUNED_VAR + r" *(.*)$", r"\1\2", grub2_cfg, flags = re.MULTILINE)
+		cfg = re.sub(r"^(\s*linux(?:16|efi)?\s+\S+rescue.*)\$" + consts.GRUB2_TUNED_VAR + r" *(.*)$", r"\1\2", grub2_cfg, flags = re.MULTILINE)
 		# fix whitespaces in rescue kernels
-		return re.sub(r"^(\s*linux(?:16|efi)\s+\S+rescue.*) +$", r"\1", cfg, flags = re.MULTILINE)
+		return re.sub(r"^(\s*linux(?:16|efi)?\s+\S+rescue.*) +$", r"\1", cfg, flags = re.MULTILINE)
 
 	def _grub2_default_env_patch(self):
 		grub2_default_env = self._cmd.read_file(consts.GRUB2_DEFAULT_ENV_FILE)
@@ -85,7 +85,7 @@ class BootloaderPlugin(base.Plugin):
 		if re.search(r"^[^#]*\bGRUB_CMDLINE_LINUX_DEFAULT\s*=.*\\\$" + consts.GRUB2_TUNED_VAR + r"\b.*$", grub2_default_env, flags = re.MULTILINE) is None:
 			log.debug("patching '%s'" % consts.GRUB2_DEFAULT_ENV_FILE)
 			self._cmd.write_to_file(consts.GRUB2_DEFAULT_ENV_FILE,
-				grub2_default_env + "GRUB_CMDLINE_LINUX_DEFAULT=\"$GRUB_CMDLINE_LINUX_DEFAULT " + r"\$" + consts.GRUB2_TUNED_VAR + "\"\n")
+				grub2_default_env + "GRUB_CMDLINE_LINUX_DEFAULT=\"${GRUB_CMDLINE_LINUX_DEFAULT:+$GRUB_CMDLINE_LINUX_DEFAULT }" + r"\$" + consts.GRUB2_TUNED_VAR + "\"\n")
 		return True
 
 	def _grub2_cfg_patch(self, value):
@@ -105,6 +105,9 @@ class BootloaderPlugin(base.Plugin):
 		self._grub2_default_env_patch()
 		return True
 
+	def _unquote(self, v):
+		return re.sub("^\"(.*)\"$", r"\1", v)
+
 	@command_custom("grub2_cfg_file")
 	def _grub2_cfg_file(self, enabling, value, verify):
 		# nothing to verify
@@ -115,7 +118,7 @@ class BootloaderPlugin(base.Plugin):
 
 	@command_custom("cmdline", per_device = False, priority = 10)
 	def _cmdline(self, enabling, value, verify):
-		v = self._variables.expand(value)
+		v = self._variables.expand(self._unquote(value))
 		if verify:
 			cmdline = self._cmd.read_file("/proc/cmdline")
 			if len(cmdline) == 0:
