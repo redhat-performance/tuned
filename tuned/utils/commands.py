@@ -3,7 +3,7 @@ import tuned.logs
 import copy
 import os
 import tuned.consts as consts
-from configobj import ConfigObj
+from configobj import ConfigObj, ConfigObjError
 import re
 from subprocess import *
 
@@ -231,25 +231,31 @@ class commands:
 		profile = consts.DEFAULT_PROFILE
 		if hardcoded:
 			return profile
+		r = re.compile(r",[^,]*$")
 		for f in consts.LOAD_DIRECTORIES:
-			config = ConfigObj(os.path.join(f, consts.AUTODETECT_FILE), list_values = False, interpolation = False)
-			for section in reversed(config.keys()):
-				match = True
-				for option in config[section].keys():
-					value = config[section][option]
-					if value == "":
-						value = r"^$"
-					if option == "virt":
-						if not re.match(value, self.execute("virt-what")[1], re.S):
-							match = False
-					elif option == "system":
-						if not re.match(value, self.read_file(consts.SYSTEM_RELEASE_FILE), re.S):
-							match = False
-					elif option[0] == "/":
-						if not os.path.exists(option) or not re.match(value, self.read_file(option), re.S):
-							match = False
-				if match:
-					profile = section
+			try:
+				fname = os.path.join(f, consts.AUTODETECT_FILE)
+				config = ConfigObj(fname, list_values = False, interpolation = False)
+				for section in reversed(config.keys()):
+					match = True
+					for option in config[section].keys():
+						value = config[section][option]
+						if value == "":
+							value = r"^$"
+						if option == "virt":
+							if not re.match(value, self.execute("virt-what")[1], re.S):
+								match = False
+						elif option == "system":
+							if not re.match(value, self.read_file(consts.SYSTEM_RELEASE_FILE), re.S):
+								match = False
+						elif option[0] == "/":
+							if not os.path.exists(option) or not re.match(value, self.read_file(option), re.S):
+								match = False
+					if match:
+						# remove the ",.*" suffix
+						profile = r.sub("", section)
+			except (IOError, OSError, ConfigObjError) as e:
+				log.error("error parsing '%s', %s" % (fname, e))
 		return profile
 
 	# Do not make balancing on patched Python 2 interpreter (rhbz#1028122).
