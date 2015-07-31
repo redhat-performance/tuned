@@ -99,6 +99,7 @@ Additional tuned profile(s) targeted to Atomic host and guest.
 %package profiles-realtime
 Summary: Additional tuned profile(s) targeted to realtime
 Requires: %{name} = %{version}-%{release}
+Requires: tuna
 
 %description profiles-realtime
 Additional tuned profile(s) targeted to realtime.
@@ -106,7 +107,7 @@ Additional tuned profile(s) targeted to realtime.
 %package profiles-nfv
 Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV)
 Requires: %{name} = %{version}-%{release}, %{name}-profiles-realtime = %{version}-%{release}
-Requires: qemu-kvm-tools-rhev
+Requires: tuna, qemu-kvm-tools-rhev
 
 %description profiles-nfv
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV).
