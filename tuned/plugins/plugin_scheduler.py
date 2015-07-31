@@ -1,3 +1,6 @@
+# perf code borrowed from kernel/tools/perf/python/twatch.py
+# thanks to Arnaldo Carvalho de Melo <acme@redhat.com>
+
 import base
 from decorators import *
 import tuned.logs
@@ -60,7 +63,9 @@ class SchedulerPlugin(base.Plugin):
 			try:
 				instance._cpus = perf.cpu_map()
 				instance._threads = perf.thread_map()
-				evsel = perf.evsel(task = 1, comm = 1, mmap = 0,
+				evsel = perf.evsel(type = perf.TYPE_SOFTWARE,
+					config = perf.COUNT_SW_DUMMY,
+					task = 1, comm = 1, mmap = 0, freq = 0,
 					wakeup_events = 1, watermark = 1,
 					sample_type = perf.SAMPLE_TID | perf.SAMPLE_CPU)
 				evsel.open(cpus = instance._cpus, threads = instance._threads)

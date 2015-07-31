@@ -1,14 +1,17 @@
+Maintaners:
+- Jaroslav Škarvada <jskarvad@redhat.com>
+
 Based on old tuned/ktune code by:
 - Philip Knirsch
 - Thomas Woerner
 
 Significant contributors:
-- Jan Vcelak
-- Jan Kaluza
-- Jaroslav Skarvada
+- Jan Včelák
+- Jan Kaluža
 
 Other contributors:
 - Petr Lautrbach
-- Marcela Maslanova
+- Marcela Mašláňová
 - Jarod Wilson
-- Jan Hutar
+- Jan Hutař
+- Arnaldo Carvalho de Melo <acme@redhat.com> - perf code for plugin_scheduler
