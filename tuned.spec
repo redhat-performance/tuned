@@ -206,6 +206,8 @@ fi
 %exclude %{_prefix}/lib/tuned/atomic-host
 %exclude %{_prefix}/lib/tuned/atomic-guest
 %exclude %{_prefix}/lib/tuned/realtime
+%exclude %{_prefix}/lib/tuned/realtime-virtual-guest
+%exclude %{_prefix}/lib/tuned/realtime-virtual-host
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %dir %{_libexecdir}/tuned
