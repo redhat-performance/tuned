@@ -10,7 +10,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.5.0
+Version: 2.5.1
 Release: 1%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -300,6 +300,17 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Tue Aug  4 2015 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.1-1
+- new-release
+  related: rhbz#1155052
+  - plugin_scheduler: work with nohz_full
+    resolves: rhbz#1247184
+  - fixed realtime-virtual-guest/host profiles packaged twice
+    resolves: rhbz#1249028
+  - fixed requirements of realtime and nfv profiles
+  - fixed tuned-gui not starting
+  - various other minor fixes
+
 * Sun Jul  5 2015 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.0-1
 - new-release
   resolves: rhbz#1155052
