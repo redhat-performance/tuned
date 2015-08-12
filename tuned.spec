@@ -106,7 +106,8 @@ Additional tuned profile(s) targeted to realtime.
 
 %package profiles-nfv
 Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV)
-Requires: %{name} = %{version}-%{release}, %{name}-profiles-realtime = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-profiles-realtime = %{version}-%{release}
 Requires: tuna, qemu-kvm-tools-rhev
 
 %description profiles-nfv
@@ -182,10 +183,9 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS
-%doc COPYING
-%doc README
-%doc doc/TIPS.txt
+%exclude %{docdir}/README.utils
+%exclude %{docdir}/README.scomes
+%doc %{docdir}
 %{_datadir}/bash-completion/completions/tuned-adm
 %exclude %{python_sitelib}/tuned/gtk
 %{python_sitelib}/tuned
