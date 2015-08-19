@@ -43,7 +43,7 @@ class SysctlPlugin(base.Plugin):
 			original_value = self._read_sysctl(option)
 			if original_value != None:
 				instance._sysctl_original[option] = original_value
-			self._write_sysctl(option, self._variables.expand(value))
+			self._write_sysctl(option, self._variables.expand(self._cmd.unquote(value)))
 
 		self._storage.set("options", instance._sysctl_original)
 

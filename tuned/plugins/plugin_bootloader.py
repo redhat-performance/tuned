@@ -105,9 +105,6 @@ class BootloaderPlugin(base.Plugin):
 		self._grub2_default_env_patch()
 		return True
 
-	def _unquote(self, v):
-		return re.sub("^\"(.*)\"$", r"\1", v)
-
 	@command_custom("grub2_cfg_file")
 	def _grub2_cfg_file(self, enabling, value, verify):
 		# nothing to verify
@@ -118,7 +115,7 @@ class BootloaderPlugin(base.Plugin):
 
 	@command_custom("cmdline", per_device = False, priority = 10)
 	def _cmdline(self, enabling, value, verify):
-		v = self._variables.expand(self._unquote(value))
+		v = self._variables.expand(self._cmd.unquote(value))
 		if verify:
 			cmdline = self._cmd.read_file("/proc/cmdline")
 			if len(cmdline) == 0:

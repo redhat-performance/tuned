@@ -3,6 +3,7 @@ import tuned.consts as consts
 import tuned.profiles.variables
 import tuned.logs
 import collections
+from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
@@ -34,6 +35,8 @@ class Plugin(object):
 		self._has_dynamic_options = False
 
 		self._options_used_by_dynamic = self._get_config_options_used_by_dynamic()
+
+		self._cmd = commands()
 
 	def cleanup(self):
 		self.destroy_instances()
@@ -415,10 +418,10 @@ class Plugin(object):
 				command["set"](new_value, sim = False)
 
 	def _norm_value(self, value):
-		v = str(value)
+		v = self._cmd.unquote(str(value))
 		if re.match(r'\s*(0+,)+[\da-fA-F]*\s*$', v):
 			return re.sub(r'^\s*(0+,)+', "", v)
-		return value
+		return v
 
 	def _verify_value(self, name, new_value, current_value, device = None):
 		if new_value is None:

@@ -30,6 +30,9 @@ class commands:
 	def remove_ws(self, s):
 		return re.sub('\s+', ' ', s).strip()
 
+	def unquote(self, v):
+		return re.sub("^\"(.*)\"$", r"\1", v)
+
 	# convert dictionary 'd' to flat list and return it
 	# it uses sort on the dictionary items to return consistent results
 	# for directories with different inserte/delete history
