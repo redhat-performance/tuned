@@ -125,8 +125,9 @@ class Admin(object):
 			print "Verfication succeeded, current system settings match the preset profile."
 		else:
 			print "Verification failed, current system settings differ from the preset profile."
-			print "See tuned.log for details. You can mostly fix this by Tuned restart, e.g.:"
+			print "You can mostly fix this by Tuned restart, e.g.:"
 			print "  service tuned restart"
+		print "See tuned log file ('%s') for details." % consts.LOG_FILE
 		return ret
 
 	def off(self):
