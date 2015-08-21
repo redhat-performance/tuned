@@ -21,11 +21,22 @@ save_value() {
 	[ "$2" -a -e "${STORAGE}" ] && echo "$2" > "${STORAGE}/${1}${STORAGE_SUFFIX}"
 }
 
+# Parse sysfs value, i.e. for "val1 [val2] val3" return "val2"
+# $0 SYSFS_NAME
+parse_sys() {
+	local V1 V2
+	[ -r "$1" ] || return
+	V1=`cat "$1"`
+	V2="${V1##*[}"
+	V2="${V2%%]*}"
+	echo "${V2:-$V1}"
+}
+
 # Save sysfs value
 # $0 STORAGE_NAME SYSFS_NAME
 save_sys() {
 	[ "$#" -ne 2 ] && return
-	[ -r "$2" -a ! -e "${STORAGE}/${1}${STORAGE_SUFFIX}" ] && cat "$2" > "${STORAGE}/${1}${STORAGE_SUFFIX}"
+	[ -r "$2" -a ! -e "${STORAGE}/${1}${STORAGE_SUFFIX}" ] && parse_sys "$2" > "${STORAGE}/${1}${STORAGE_SUFFIX}"
 }
 
 # Set sysfs value
@@ -105,7 +116,7 @@ set_elevator() {
 # $0 DEVICES [ELEVATOR]
 restore_elevator() {
 	re_elevator="$2"
-	[ "$re_elevator" ] || re_elevator = cfq
+	[ "$re_elevator" ] || re_elevator=cfq
 	_set_elevator_helper restore_sys "$1" "$re_elevator"
 }
 
