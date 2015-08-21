@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # Helper script for realtime profiles provided by RT
 
 import os
