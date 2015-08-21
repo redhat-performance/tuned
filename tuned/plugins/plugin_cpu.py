@@ -124,12 +124,21 @@ class CPULatencyPlugin(base.Plugin):
 			if instance._load_monitor is not None:
 				self._monitors_repository.delete(instance._load_monitor)
 
-	def _instance_apply_static(self, instance):
-		if instance._first_instance and self._has_intel_pstate:
-			self._min_perf_pct_save = self._get_intel_pstate_attr("min_perf_pct")
-			self._max_perf_pct_save = self._get_intel_pstate_attr("max_perf_pct")
-			self._no_turbo_save = self._get_intel_pstate_attr("no_turbo")
+	def _get_intel_pstate_attr(self, attr):
+		return self._cmd.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None).strip()
 
+	def _set_intel_pstate_attr(self, attr, val):
+		if val is not None:
+			self._cmd.write_to_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, val)
+
+	def _getset_intel_pstate_attr(self, attr, value):
+		if value is None:
+			return None
+		v = self._get_intel_pstate_attr(attr)
+		self._set_intel_pstate_attr(attr, value)
+		return v
+
+	def _instance_apply_static(self, instance):
 		super(self.__class__, self)._instance_apply_static(instance)
 
 		if not instance._first_instance:
@@ -139,9 +148,9 @@ class CPULatencyPlugin(base.Plugin):
 		if force_latency_value is not None:
 			self._set_latency(force_latency_value)
 		if self._has_intel_pstate:
-			self._set_intel_pstate_attr("min_perf_pct", instance.options["min_perf_pct"])
-			self._set_intel_pstate_attr("max_perf_pct", instance.options["max_perf_pct"])
-			self._set_intel_pstate_attr("no_turbo", instance.options["no_turbo"])
+			self._min_perf_pct_save = self._getset_intel_pstate_attr("min_perf_pct", instance.options["min_perf_pct"])
+			self._max_perf_pct_save = self._getset_intel_pstate_attr("max_perf_pct", instance.options["max_perf_pct"])
+			self._no_turbo_save = self._getset_intel_pstate_attr("no_turbo", instance.options["no_turbo"])
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
 		super(self.__class__, self)._instance_unapply_static(instance, profile_switch)
@@ -167,13 +176,6 @@ class CPULatencyPlugin(base.Plugin):
 
 	def _instance_unapply_dynamic(self, instance, device):
 		pass
-
-	def _get_intel_pstate_attr(self, attr):
-		return self._cmd.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None).strip()
-
-	def _set_intel_pstate_attr(self, attr, val):
-		if val is not None:
-			self._cmd.write_to_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, val)
 
 	def _set_latency(self, latency):
 		latency = int(latency)
