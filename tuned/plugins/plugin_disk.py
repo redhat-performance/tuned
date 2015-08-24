@@ -1,5 +1,4 @@
 import errno
-import tuned.consts as consts
 import hotplug
 from decorators import *
 import tuned.logs
@@ -65,7 +64,6 @@ class DiskPlugin(hotplug.Plugin):
 		return {
 			"dynamic"            : True, # FIXME: do we want this default?
 			"elevator"           : None,
-			"alpm"               : None,
 			"apm"                : None,
 			"spindown"           : None,
 			"readahead"          : None,
@@ -216,39 +214,6 @@ class DiskPlugin(hotplug.Plugin):
 		# example of scheduler file content:
 		# noop deadline [cfq]
 		return self._cmd.get_active_option(self._cmd.read_file(sys_file))
-
-	def _alpm_policy_files(self):
-		policy_files = []
-		for host in os.listdir("/sys/class/scsi_host/"):
-			port_cmd_path = os.path.join("/sys/class/scsi_host/", host, "ahci_port_cmd")
-			try:
-				port_cmd = open(port_cmd_path).read().strip()
-			except (OSError,IOError) as e:
-				log.error("Reading %s error: %s" % (port_cmd_path, e))
-				continue
-			try:
-				port_cmd_int = int("0x" + port_cmd, 16)
-			except ValueError:
-				log.error("Unexpected value in %s" % (port_cmd_path))
-				continue
-
-			policy_file = os.path.join("/sys/class/scsi_host/", host, "link_power_management_policy")
-			policy_files.append(policy_file)
-
-		return policy_files
-
-	@command_set("alpm")
-	def _set_alpm(self, policy, sim):
-		if not sim:
-			for policy_file in self._alpm_policy_files():
-				self._cmd.write_to_file(policy_file, policy)
-		return policy
-
-	@command_get("alpm")
-	def _get_alpm(self):
-		for policy_file in self._alpm_policy_files():
-			return self._cmd.read_file(policy_file).strip()
-		return None
 
 	@command_set("apm", per_device=True)
 	def _set_apm(self, value, device, sim):
