@@ -20,5 +20,11 @@ for i in `seq 1 $lines`; do
 	fi
 	prev_value=$a
 done
+# if still decreasing, then use highest ns value
+if [ $value -le 99 ]; then
+	echo -n "optimal value for lapic_timer_advance_ns is: "
+	awk "NR==$(($i - 1))" $1 | cut -f 1 -d ":"
+	exit 0
+fi
 echo optimal not found
 exit 1
