@@ -166,7 +166,7 @@ if [ "$1" == 0 ]; then
   rm -f %{_sysconfdir}/grub.d/00_tuned || :
 # unpatch /etc/default/grub
   if [ -r "%{_sysconfdir}/default/grub" ]; then
-    sed -i '/GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT \\$tuned_params"/d' %{_sysconfdir}/default/grub
+    sed -i '/GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT:+$GRUB_CMDLINE_LINUX_DEFAULT }\\$tuned_params"/d' %{_sysconfdir}/default/grub
   fi
 fi
 
