@@ -451,7 +451,7 @@ disable_logs_syncing() {
 }
 
 restore_logs_syncing() {
-	mv $RSYSLOG_SAVE $RSYSLOG_CFG
+	mv -Z $RSYSLOG_SAVE $RSYSLOG_CFG || mv $RSYSLOG_SAVE $RSYSLOG_CFG
 }
 
 #
