@@ -47,7 +47,7 @@ class GuiProfileLoader(object):
 
     def get_raw_profile(self, profile_name):
         file = self._locate_profile_path(profile_name) + '/' \
-            + profile_name + '/' + 'tuned.conf'
+            + profile_name + '/' + tuned.consts.PROFILE_FILE
         with open(file, 'r') as f:
             return f.read()
 
@@ -56,7 +56,7 @@ class GuiProfileLoader(object):
         profilePath = self._locate_profile_path(profile_name)
 
         if profilePath == tuned.consts.LOAD_DIRECTORIES[1]:
-            file = profilePath + '/' + profile_name + '/' + 'tuned.conf'
+            file = profilePath + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
             with open(file, 'w') as f:
                 f.write(config)
         else:
@@ -65,7 +65,7 @@ class GuiProfileLoader(object):
                     + ' and can not be storet do this location')
 
     def load_profile_config(self, profile_name, path):
-        conf_path = path + '/' + profile_name + '/tuned.conf'
+        conf_path = path + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
         profile_config = configobj.ConfigObj(conf_path)
         return profile_config
 
@@ -99,7 +99,7 @@ class GuiProfileLoader(object):
     def save_profile(self, profile):
         path = tuned.consts.LOAD_DIRECTORIES[1] + '/' + profile.name
         config = configobj.ConfigObj()
-        config.filename = path + tuned.consts.CONF_PROFILE_FILE
+        config.filename = path + '/' + tuned.consts.PROFILE_FILE
         config.initial_comment = ('#', 'tuned configuration', '#')
 
         try:
@@ -146,7 +146,7 @@ class GuiProfileLoader(object):
             self.remove_profile(old_profile_name, is_admin=is_admin)
 
         config = configobj.ConfigObj()
-        config.filename = path + '/tuned.conf'
+        config.filename = path + '/' + tuned.consts.PROFILE_FILE
         config.initial_comment = ('#', 'tuned configuration', '#')
         try:
             config['main'] = profile.options
