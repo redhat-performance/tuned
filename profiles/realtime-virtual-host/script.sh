@@ -27,7 +27,7 @@ start() {
         curmodel=`cat /proc/cpuinfo | grep "model name" | cut -f 2 -d ":" | uniq`
         genmodel=`cat lapic_timer_adv_ns.cpumodel`
 
-        if [ "$cpumodel" != "$genmodel" ]; then
+        if [ "$curmodel" != "$genmodel" ]; then
             rm -f lapic_timer_adv_ns
             rm -f lapic_timer_adv_ns.cpumodel
         fi
@@ -43,7 +43,7 @@ start() {
              if [ $? -eq 0 ]; then
                   echo `cat $tempdir/opt.out | cut -f 2 -d ":"` > ./lapic_timer_adv_ns
                   curmodel=`cat /proc/cpuinfo | grep "model name" | cut -f 2 -d ":" | uniq`
-                  echo $curmodel > lapic_timer_adv_ns.cpumodel
+                  echo "$curmodel" > lapic_timer_adv_ns.cpumodel
              fi
         fi
     fi
