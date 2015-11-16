@@ -51,8 +51,12 @@ class SysctlPlugin(base.Plugin):
 		ret = True
 		for option, value in instance._sysctl.iteritems():
 			curr_val = self._read_sysctl(option)
-			if self._verify_value(option, self._cmd.remove_ws(self._variables.expand(value)), curr_val) == False:
-				ret = False
+			if curr_val is None:
+				log.warn("verify: option '%s' is None, option is probably unavailable/unsupported on your system, skipping it",
+				         str(option))
+			else:
+				if self._verify_value(option, self._cmd.remove_ws(self._variables.expand(value)), curr_val) == False:
+					ret = False
 		return ret
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
