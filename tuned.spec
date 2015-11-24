@@ -182,6 +182,7 @@ fi
 %files profiles-oracle
 %defattr(-,root,root,-)
 %{_sysconfdir}/tune-profiles/oracle
+%{_mandir}/man7/tuned-profiles-oracle.7*
 
 %changelog
 * Thu Oct 10 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 0.2.24-1

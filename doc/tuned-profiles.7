@@ -78,10 +78,6 @@ Profile optimized for virtual guests based on enterprise-storage profile. It add
 .BI "virtual\-host"
 Profile optimized for virtual hosts based on enterprise-storage profile. It additionally decreases virtual memory swapiness and enables more aggresive writeback of dirty pages.
 
-.TP
-.BI "oracle"
-Profile optimized for Oracle databases based on throughput\-performance profile. It additionaly disables transparent huge pages and modifies some other performance related kernel parameters.
-
 .SH "FILES"
 .NF
 /etc/tune-profiles/*
@@ -91,6 +87,7 @@ Profile optimized for Oracle databases based on throughput\-performance profile.
 .BR tuned\-adm (1)
 .BR tuned\-profiles\-sap (7)
 .BR tuned\-profiles\-sap\-hana (7)
+.BR tuned\-profiles\-oracle (7)
 .SH AUTHOR
 .NF
 Marcela Mašláňová <mmaslano@redhat.com>
