@@ -176,8 +176,10 @@ load_sysctl() {
 
 revert_sysctl() {
     if [ -r "$SAVE_FILE" ]; then
-	echo -n $"Reverting to saved sysctl settings: "
-	load_file "$SAVE_FILE" 0
+	if [ "$KTUNE_REVERT_SYSCTL" = 1 ]; then
+	    echo -n $"Reverting to saved sysctl settings: "
+	    load_file "$SAVE_FILE" 0
+	fi
 	/bin/rm -f "$SAVE_FILE"
     fi
 
