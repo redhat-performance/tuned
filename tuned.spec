@@ -59,6 +59,13 @@ Requires: %{name} = %{version}-%{release}
 %description profiles-sap-hana
 Additional tuned profile(s) targeted to SAP HANA loads.
 
+%package profiles-oracle
+Summary: Additional tuned profile(s) targeted to Oracle loads
+Requires: %{name} = %{version}-%{release}
+
+%description profiles-oracle
+Additional tuned profile(s) targeted to Oracle loads.
+
 %prep
 %setup -q
 
@@ -109,11 +116,20 @@ fi
 %{_sbindir}/tuned-adm
 # consolehelper hard link
 %{_bindir}/tuned-adm
+%dir %{_sysconfdir}/tune-profiles
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tune-profiles/active-profile
-%{_sysconfdir}/tune-profiles
-%exclude %{_sysconfdir}/tune-profiles/sap-netweaver
-%exclude %{_sysconfdir}/tune-profiles/sap-hana
-%exclude %{_sysconfdir}/tune-profiles/sap-hana-vmware
+%{_sysconfdir}/tune-profiles/functions
+%{_sysconfdir}/tune-profiles/default
+%{_sysconfdir}/tune-profiles/desktop-powersave
+%{_sysconfdir}/tune-profiles/enterprise-storage
+%{_sysconfdir}/tune-profiles/laptop-ac-powersave
+%{_sysconfdir}/tune-profiles/laptop-battery-powersave
+%{_sysconfdir}/tune-profiles/latency-performance
+%{_sysconfdir}/tune-profiles/server-powersave
+%{_sysconfdir}/tune-profiles/spindown-disk
+%{_sysconfdir}/tune-profiles/throughput-performance
+%{_sysconfdir}/tune-profiles/virtual-guest
+%{_sysconfdir}/tune-profiles/virtual-host
 %{_datadir}/tuned
 %{_mandir}/man1/tuned-adm.*
 %{_mandir}/man5/tuned.conf.*
@@ -162,6 +178,10 @@ fi
 %{_sysconfdir}/tune-profiles/sap-hana
 %{_sysconfdir}/tune-profiles/sap-hana-vmware
 %{_mandir}/man7/tuned-profiles-sap-hana.7*
+
+%files profiles-oracle
+%defattr(-,root,root,-)
+%{_sysconfdir}/tune-profiles/oracle
 
 %changelog
 * Thu Oct 10 2013 Jaroslav Škarvada <jskarvad@redhat.com> - 0.2.24-1
