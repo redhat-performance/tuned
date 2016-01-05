@@ -57,6 +57,10 @@ CFG_DEF_UPDATE_INTERVAL = 10
 # recommend command availability
 CFG_DEF_RECOMMEND_COMMAND = True
 
+# profile attributes which can be specified in the main section
+PROFILE_ATTR_SUMMARY = "summary"
+PROFILE_ATTR_DESCRIPTION = "description"
+
 STR_VERIFY_PROFILE_DEVICE_VALUE_OK = "verify: passed: device %s: %s = %s"
 STR_VERIFY_PROFILE_VALUE_OK = "verify: passed: %s = %s"
 STR_VERIFY_PROFILE_OK = "verify: passed: %s"

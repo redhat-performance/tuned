@@ -33,6 +33,10 @@ class commands:
 	def unquote(self, v):
 		return re.sub("^\"(.*)\"$", r"\1", v)
 
+	# add spaces to align s2 to pos, returns resulting string: s1 + spaces + s2
+	def align_str(self, s1, pos, s2):
+		return s1 + " " * (pos - len(s1)) + s2
+
 	# convert dictionary 'd' to flat list and return it
 	# it uses sort on the dictionary items to return consistent results
 	# for directories with different inserte/delete history

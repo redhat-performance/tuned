@@ -11,6 +11,7 @@ class Admin(object):
 		self._controller = controller
 		self._debug = debug
 		self._cmd = commands(debug)
+		self._profiles_locator = profiles_locator(consts.LOAD_DIRECTORIES)
 
 	def _error(self, message):
 		print >>sys.stderr, message
@@ -28,18 +29,27 @@ class Admin(object):
 		no_dbus = self._controller is None
 		if not no_dbus:
 			try:
-				profile_names = self._controller.profiles()
+				profile_names = self._controller.profiles2()
 			except TunedAdminDBusException as e:
-				self._error(e)
-				no_dbus = True
+				# fallback to older API
+				try:
+					profile_names = self._controller.profiles()
+				except TunedAdminDBusException as e:
+					self._error(e)
+					no_dbus = True
+				profile_names = map(lambda profile:(profile, ""), profile_names)
 		if no_dbus:
-			profile_names = profiles_locator(consts.LOAD_DIRECTORIES).get_known_names()
+			profile_names = self._profiles_locator.get_known_names_summary()
 		print "Available profiles:"
 		for profile in profile_names:
-			print "- %s" % profile
+			if profile[1] is not None and profile[1] != "":
+				print self._cmd.align_str("- %s" % profile[0], 30, "- %s" % profile[1])
+			else:
+				print "- %s" % profile[0]
 		self.active()
 
-	def active(self):
+	def _get_active_profile(self):
+		profile_name = None
 		no_dbus = self._controller is None
 		if not no_dbus:
 			try:
@@ -49,7 +59,39 @@ class Admin(object):
 				no_dbus = True
 		if no_dbus:
 			profile_name = str.strip(self._cmd.read_file(consts.ACTIVE_PROFILE_FILE, None))
-		if profile_name is not None and profile_name != "":
+		if profile_name == "":
+			profile_name = None
+		return profile_name
+
+	def profile_info(self, profile = ""):
+		no_dbus = self._controller is None
+		if profile == "":
+			profile = self._get_active_profile()
+		if not no_dbus:
+			try:
+				ret = self._controller.profile_info(profile)
+			except TunedAdminDBusException as e:
+				self._error(e)
+				no_dbus = True
+		if no_dbus:
+			ret = self._profiles_locator.get_profile_attrs(profile, [consts.PROFILE_ATTR_SUMMARY, consts.PROFILE_ATTR_DESCRIPTION], ["", ""])
+		if ret[0] == True:
+			print "Profile name:"
+			print ret[1]
+			print
+			print "Profile summary:"
+			print ret[2]
+			print
+			print "Profile description:"
+			print ret[3]
+			return True
+		else:
+			print "Unable to get information about profile '%s'" % profile
+			return False
+
+	def active(self):
+		profile_name = self._get_active_profile()
+		if profile_name is not None:
 			if self._controller is not None and self._tuned_is_running():
 				print "Current active profile: %s" % profile_name
 			else:
@@ -73,7 +115,7 @@ class Admin(object):
 				self._error(e)
 				no_dbus = True
 		if no_dbus:
-			if profile_name in profiles_locator(consts.LOAD_DIRECTORIES).get_known_names():
+			if profile_name in self._profiles_locator.get_known_names():
 				if self._cmd.write_to_file(consts.ACTIVE_PROFILE_FILE, profile_name):
 					print "Trying to (re)start tuned..."
 					(ret, out) = self._cmd.execute(["service", "tuned", "restart"])

@@ -44,6 +44,12 @@ class DBusController(object):
 	def profiles(self):
 		return self._call("profiles")
 
+	def profiles2(self):
+		return self._call("profiles2")
+
+	def profile_info(self, profile_name):
+		return self._call("profile_info", profile_name)
+
 	def active_profile(self):
 		return self._call("active_profile")
 

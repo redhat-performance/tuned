@@ -106,6 +106,16 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def profiles(self):
 		return self._daemon.profile_loader.profile_locator.get_known_names()
 
+	@exports.export("", "a(ss)")
+	def profiles2(self):
+		return self._daemon.profile_loader.profile_locator.get_known_names_summary()
+
+	@exports.export("s", "(bsss)")
+	def profile_info(self, profile_name):
+		if profile_name is None or profile_name == "":
+			profile_name = self.active_profile()
+		return tuple(self._daemon.profile_loader.profile_locator.get_profile_attrs(profile_name, [consts.PROFILE_ATTR_SUMMARY, consts.PROFILE_ATTR_DESCRIPTION], [""]))
+
 	@exports.export("", "s")
 	def recommend_profile(self):
 		return self._cmd.recommend_profile(hardcoded = not self._global_config.get_bool(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND))
