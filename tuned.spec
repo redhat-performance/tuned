@@ -10,7 +10,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.5.1
+Version: 2.6.0
 Release: 1%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -304,6 +304,44 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Tue Jan  5 2016 Jaroslav Škarvada <jskarvad@redhat.com> - 2.6.0-1
+- new-release
+  - plugin_cpu: do not show error if cpupower or x86_energy_perf_policy are missing
+  - plugin_sysctl: fixed quoting of sysctl values
+    resolves: rhbz#1254538
+  - tuned-adm: added log file location hint to verify command output
+  - libexec: fixed listdir and isdir in defirqaffinity.py
+    resolves: rhbz#1252160
+  - plugin_cpu: save and restore only intel pstate attributes that were changed
+    resolves: rhbz#1252156
+  - functions: fixed sysfs save to work with options
+    resolves: rhbz#1251507
+  - plugins: added scsi_host plugin
+  - tuned-adm: fixed restart attempt if tuned is not running
+  - spec: fixed post scriptlet to work without grub
+    resolves: rhbz#1265654
+  - tuned-profiles-nfv: fix find-lapictscdeadline-optimal.sh for CPUS where ns > 6500
+    resolves: rhbz#1267284
+  - functions: fixed restore_logs_syncing to preserve SELinux context on rsyslog.conf
+    resolves: rhbz#1268901
+  - realtime: set unboud workqueues cpumask
+    resolves: rhbz#1259043
+  - spec: correctly remove tuned footprint from /etc/default/grub
+    resolves: rhbz#1268845
+  - gui: fixed creation of new profile
+    resolves: rhbz#1274609
+  - profiles: removed nohz_full from the realtime profile
+    resolves: rhbz#1274486
+  - profiles: Added nohz_full and nohz=on to realtime guest/host profiles
+    resolves: rhbz#1274445
+  - profiles: fixed lapic_timer_adv_ns cache
+    resolves: rhbz#1259452
+  - plugin_sysctl: pass verification even if the option doesn't exist
+    related: rhbz#1252153
+  - added support for 'summary' and 'description' of profiles,
+    extended D-Bus API for Cockpit
+    related: rhbz#1228356
+
 * Tue Aug  4 2015 Jaroslav Škarvada <jskarvad@redhat.com> - 2.5.1-1
 - new-release
   related: rhbz#1155052
