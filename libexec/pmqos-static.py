@@ -62,7 +62,11 @@ def daemonize():
 def set_pmqos(name, value):
 	filename = "/dev/%s" % name
 	bin_value = struct.pack("i", int(value))
-	fd = os.open(filename, os.O_WRONLY)
+	try:
+		fd = os.open(filename, os.O_WRONLY)
+	except OSError:
+		print >>sys.stderr, "Cannot open (%s)." % filename
+		return None
 	os.write(fd, bin_value)
 	return fd
 
@@ -92,7 +96,8 @@ def run_daemon(options):
 	for (name, value) in options.items():
 		try:
 			new_fd = set_pmqos(name, value)
-			pmqos_fds.append(new_fd)
+			if new_fd is not None:
+				pmqos_fds.append(new_fd)
 		except:
 			# we are daemonized
 			pass

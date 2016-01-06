@@ -57,6 +57,8 @@ CFG_DEF_UPDATE_INTERVAL = 10
 # recommend command availability
 CFG_DEF_RECOMMEND_COMMAND = True
 
+PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
+
 # profile attributes which can be specified in the main section
 PROFILE_ATTR_SUMMARY = "summary"
 PROFILE_ATTR_DESCRIPTION = "description"

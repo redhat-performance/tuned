@@ -2,6 +2,7 @@ import base
 from decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
+import tuned.consts as consts
 
 import os
 import struct
@@ -20,6 +21,7 @@ class CPULatencyPlugin(base.Plugin):
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
 
+		self._has_pm_qos = True
 		self._has_cpupower = True
 		self._has_energy_perf_bias = True
 		self._has_intel_pstate = False
@@ -97,7 +99,11 @@ class CPULatencyPlugin(base.Plugin):
 		# only the first instance of the plugin can control the latency
 		if self._instances.values()[0] == instance:
 			instance._first_instance = True
-			self._cpu_latency_fd = os.open("/dev/cpu_dma_latency", os.O_WRONLY)
+			try:
+				self._cpu_latency_fd = os.open(consts.PATH_CPU_DMA_LATENCY, os.O_WRONLY)
+			except OSError:
+				log.error("Unable to open '%s', disabling PM_QoS control" % consts.PATH_CPU_DMA_LATENCY)
+				self._has_pm_qos = False
 			self._latency = None
 
 			if instance.options["force_latency"] is None:
@@ -120,7 +126,8 @@ class CPULatencyPlugin(base.Plugin):
 
 	def _instance_cleanup(self, instance):
 		if instance._first_instance:
-			os.close(self._cpu_latency_fd)
+			if self._has_pm_qos:
+				os.close(self._cpu_latency_fd)
 			if instance._load_monitor is not None:
 				self._monitors_repository.delete(instance._load_monitor)
 
@@ -179,7 +186,7 @@ class CPULatencyPlugin(base.Plugin):
 
 	def _set_latency(self, latency):
 		latency = int(latency)
-		if self._latency != latency:
+		if self._has_pm_qos and self._latency != latency:
 			log.info("setting new cpu latency %d" % latency)
 			latency_bin = struct.pack("i", latency)
 			os.write(self._cpu_latency_fd, latency_bin)
