@@ -506,19 +506,21 @@ stop() {
 #
 
 process() {
-	case "$1" in
+	ARG="$1"
+	shift
+	case "$ARG" in
 	start)
-		start
+		start "$@"
 		RETVAL=$?
 		;;
 	stop)
-		stop
+		stop "$@"
 		RETVAL=$?
 		;;
 	verify)
 		if declare -f verify &> /dev/null;
 		then
-			verify
+			verify "$@"
 		else
 			:
 		fi
