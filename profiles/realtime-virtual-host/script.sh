@@ -2,7 +2,21 @@
 
 . /usr/lib/tuned/functions
 
+modfile=/etc/modprobe.d/kvm.rt.tuned.conf
 ltanfile=/sys/module/kvm/parameters/lapic_timer_advance_ns
+
+create_modfile()
+{
+    modinfo -p kvm | grep -q kvmclock_periodic_sync
+    if [ "$?" -eq 0 ]; then
+        echo "options kvm kvmclock_periodic_sync=0" > $modfile
+    fi
+
+    modinfo -p kvm_intel | grep -q ple_gap
+    if [ "$?" -eq 0 ]; then
+        echo "options kvm_intel ple_gap=0" >> $modfile
+    fi
+}
 
 start() {
     python /usr/libexec/tuned/defirqaffinity.py "remove" "$TUNED_isolated_cores_expanded" &&
@@ -13,14 +27,8 @@ start() {
         return $retval
     fi
 
-    modinfo -p kvm | grep -q kvmclock_periodic_sync
-    if [ "$?" -eq 0 ]; then
-        echo "options kvm kvmclock_periodic_sync=0" > /etc/modprobe.d/kvm.rt.tuned.conf
-    fi
-
-    modinfo -p kvm_intel | grep -q ple_gap
-    if [ "$?" -eq 0 ]; then
-        echo "options kvm_intel ple_gap=0" >> /etc/modprobe.d/kvm.rt.tuned.conf
+    if [ ! -f $modfile ]; then
+        create_modfile
     fi
 
     if [ -f lapic_timer_adv_ns.cpumodel ]; then
@@ -55,7 +63,7 @@ start() {
 }
 
 stop() {
-    rm -f /etc/modprobe.d/kvm.rt.tuned.conf
+    [ "$1" = "profile_switch" ] && rm -f $modfile
     tuna -c "$TUNED_isolated_cores_expanded" -I &&
     python /usr/libexec/tuned/defirqaffinity.py "add" "$TUNED_isolated_cores_expanded"
     return "$?"
