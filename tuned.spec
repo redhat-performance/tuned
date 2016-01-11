@@ -140,6 +140,10 @@ mkdir -p %{buildroot}%{_datadir}/tuned/grub2
 mv %{buildroot}%{_sysconfdir}/grub.d/00_tuned %{buildroot}%{_datadir}/tuned/grub2/00_tuned
 rmdir %{buildroot}%{_sysconfdir}/grub.d
 
+# ghosts for NFV
+mkdir -p %{buildroot}%{_sysconfdir}/modprobe.d
+touch %{buildroot}%{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
+
 %post
 %systemd_post tuned.service
 
@@ -287,6 +291,7 @@ fi
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-guest-variables.conf
 %config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
+%ghost %{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 %{_prefix}/lib/tuned/realtime-virtual-guest
 %{_prefix}/lib/tuned/realtime-virtual-host
 %{_libexecdir}/tuned/defirqaffinity*
