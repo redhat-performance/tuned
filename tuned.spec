@@ -140,7 +140,7 @@ mkdir -p %{buildroot}%{_datadir}/tuned/grub2
 mv %{buildroot}%{_sysconfdir}/grub.d/00_tuned %{buildroot}%{_datadir}/tuned/grub2/00_tuned
 rmdir %{buildroot}%{_sysconfdir}/grub.d
 
-# ghosts for NFV
+# ghost for NFV
 mkdir -p %{buildroot}%{_sysconfdir}/modprobe.d
 touch %{buildroot}%{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 
