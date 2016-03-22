@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=tuned-gui
+GenericName=tuned-gui
+Comment=GTK GUI that can control Tuned daemon and provides simple profile editor
+Exec=pkexec /usr/sbin/tuned-gui
+Icon=tuned
+Terminal=false
+Type=Application
+Categories=System;
+Version=1.0

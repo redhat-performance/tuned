@@ -23,10 +23,11 @@ UNITDIR = $(shell rpm --eval '%{_unitdir}' 2>/dev/null || echo /usr/lib/systemd/
 TMPFILESDIR = $(shell rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo /usr/lib/tmpfiles.d)
 VERSIONED_NAME = $(NAME)-$(VERSION)$(GIT_PSUFFIX)
 
-DOCDIR = /usr/share/doc/$(NAME)
+DATADIR = /usr/share
+DOCDIR = $(DATADIR)/doc/$(NAME)
 PYTHON_SITELIB = $(shell python -c 'from distutils.sysconfig import get_python_lib; print get_python_lib();' || echo /usr/lib/python2.7/site-packages)
 TUNED_PROFILESDIR = /usr/lib/tuned
-BASH_COMPLETIONS = /usr/share/bash-completion/completions
+BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
 
 release-dir:
 	mkdir -p $(VERSIONED_NAME)
@@ -37,8 +38,9 @@ release-cp: release-dir
 	cp -a tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
 		tuned-adm.bash dbus.conf recommend.conf tuned-main.conf 00_tuned \
 		bootcmdline org.tuned.gui.policy tuned-gui.py tuned-gui.glade \
+		tuned-gui.desktop $(VERSIONED_NAME)
+	cp -a doc experiments libexec man profiles systemtap tuned contrib icons \
 		$(VERSIONED_NAME)
-	cp -a doc experiments libexec man profiles systemtap tuned contrib $(VERSIONED_NAME)
 
 archive: clean release-cp
 	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
@@ -105,7 +107,7 @@ install: install-dirs
 		install -Dpm 0755 $(file) $(DESTDIR)/usr/sbin/$(notdir $(file));)
 
 	# glade
-	install -Dpm 0755 tuned-gui.glade $(DESTDIR)/usr/share/tuned/ui/tuned-gui.glade
+	install -Dpm 0755 tuned-gui.glade $(DESTDIR)$(DATADIR)/tuned/ui/tuned-gui.glade
 
 	# tools
 	install -Dpm 0755 experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
@@ -142,19 +144,26 @@ install: install-dirs
 	install -Dpm 0755 00_tuned $(DESTDIR)/etc/grub.d/00_tuned
 
 	# polkit configuration
-	install -Dpm 0644 org.tuned.gui.policy $(DESTDIR)/usr/share/polkit-1/actions/org.tuned.gui.policy
+	install -Dpm 0644 org.tuned.gui.policy $(DESTDIR)$(DATADIR)/polkit-1/actions/org.tuned.gui.policy
 
 	# manual pages
 	$(foreach man_section, 5 7 8, $(foreach file, $(wildcard man/*.$(man_section)), \
-		install -Dpm 0644 $(file) $(DESTDIR)/usr/share/man/man$(man_section)/$(notdir $(file));))
+		install -Dpm 0644 $(file) $(DESTDIR)$(DATADIR)/man/man$(man_section)/$(notdir $(file));))
 
 	# documentation
 	cp -a doc/* $(DESTDIR)$(DOCDIR)
 	cp AUTHORS COPYING README $(DESTDIR)$(DOCDIR)
 
-	# Install libexec scripts
+	# libexec scripts
 	$(foreach file, $(wildcard libexec/*), \
 		install -Dpm 0755 $(file) $(DESTDIR)/usr/libexec/tuned/$(notdir $(file));)
+
+	# icon
+	install -Dpm 0644 icons/tuned.svg $(DESTDIR)$(DATADIR)/icons/hicolor/scalable/apps/tuned.svg
+
+	# desktop file
+	install -dD $(DESTDIR)$(DATADIR)/applications
+	desktop-file-install --dir=$(DESTDIR)$(DATADIR)/applications tuned-gui.desktop
 
 clean:
 	find -name "*.pyc" | xargs rm -f

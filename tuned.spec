@@ -16,7 +16,7 @@ License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
 URL: https://fedorahosted.org/tuned/
 BuildArch: noarch
-BuildRequires: python, systemd
+BuildRequires: python, systemd, desktop-file-utils
 Requires(post): systemd, virt-what
 Requires(preun): systemd
 Requires(postun): systemd
@@ -45,7 +45,7 @@ Requires: %{name} = %{version}-%{release}
 Requires: powertop, pygobject3-base, polkit
 
 %description gtk
-GTK GUI that can control tuned and provide simple profile editor.
+GTK GUI that can control tuned and provides simple profile editor.
 
 %package utils
 Requires: %{name} = %{version}-%{release}
@@ -144,6 +144,9 @@ rmdir %{buildroot}%{_sysconfdir}/grub.d
 mkdir -p %{buildroot}%{_sysconfdir}/modprobe.d
 touch %{buildroot}%{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 
+# validate desktop file
+desktop-file-validate %{buildroot}%{_datadir}/applications/tuned-gui.desktop
+
 %post
 %systemd_post tuned.service
 
@@ -187,6 +190,21 @@ fi
 if [ -d %{_sysconfdir}/grub.d ]; then
   cp -a %{_datadir}/tuned/grub2/00_tuned %{_sysconfdir}/grub.d/00_tuned
 fi
+
+
+%post gtk
+/bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
+
+
+%postun gtk
+if [ $1 -eq 0 ] ; then
+    /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
+    /usr/bin/gtk-update-icon-cache -f %{_datadir}/icons/hicolor &>/dev/null || :
+fi
+
+
+%posttrans gtk
+/usr/bin/gtk-update-icon-cache -f %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %files
@@ -239,6 +257,8 @@ fi
 %{python_sitelib}/tuned/gtk
 %{_datadir}/tuned/ui
 %{_datadir}/polkit-1/actions/org.tuned.gui.policy
+%{_datadir}/icons/hicolor/scalable/apps/tuned.svg
+%{_datadir}/applications/tuned-gui.desktop
 
 %files utils
 %doc COPYING
