@@ -45,7 +45,7 @@ class NetMonitor:
 		return tunable
 
 	def _device_is_tunable(self, name):
-		if self._device_type(name) in "virtual":
+		if self._device_type(name) in ["virtual", "unknown"]:
 			return False
 
 		card = ethcard(name)
@@ -59,7 +59,7 @@ class NetMonitor:
 			devtype = re.match(r"/sys/devices/([^/]+)/", path).group(1)
 		except (IOError, AttributeError, OSError):
 			devtype = "unknown"
-			log.warn("Cannot determine type of '%s'." % name)
+			log.info("Cannot determine type of '%s'." % name)
 
 		log.debug("Found network device: %s (%s)" % (name, devtype))
 		return devtype
