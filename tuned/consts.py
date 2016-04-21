@@ -63,9 +63,14 @@ PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
 PROFILE_ATTR_SUMMARY = "summary"
 PROFILE_ATTR_DESCRIPTION = "description"
 
+DBUS_SIGNAL_PROFILE_CHANGED = "profile_changed"
+
 STR_VERIFY_PROFILE_DEVICE_VALUE_OK = "verify: passed: device %s: %s = %s"
 STR_VERIFY_PROFILE_VALUE_OK = "verify: passed: %s = %s"
 STR_VERIFY_PROFILE_OK = "verify: passed: %s"
 STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL = "verify: failed: device %s: %s = %s, expected %s"
 STR_VERIFY_PROFILE_VALUE_FAIL = "verify: failed: %s = %s, expected %s"
 STR_VERIFY_PROFILE_FAIL = "verify: failed: %s"
+
+# timout for tuned-adm operations in seconds
+ADMIN_TIMEOUT = 60

@@ -11,7 +11,7 @@ log = tuned.logs.get()
 
 
 class Daemon(object):
-	def __init__(self, unit_manager, profile_loader, profile_name=None, config=None):
+	def __init__(self, unit_manager, profile_loader, profile_name=None, config=None, application=None):
 		log.debug("initializing daemon")
 		self._daemon = consts.CFG_DEF_DAEMON
 		self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
@@ -24,6 +24,7 @@ class Daemon(object):
 			self._update_interval = int(config.get(consts.CFG_UPDATE_INTERVAL, consts.CFG_DEF_UPDATE_INTERVAL))
 			self._dynamic_tuning = config.get_bool(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING)
 			self._recommend_command = config.get_bool(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND)
+		self._application = application
 		if self._sleep_interval <= 0:
 			self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
 		if self._update_interval == 0:
@@ -64,17 +65,18 @@ class Daemon(object):
 
 	def set_profile(self, profile_name, save_instantly=False):
 		if self.is_running():
-			raise TunedException("Cannot set profile while the daemon is running.")
+			raise TunedException(self._notify_profile_changed(profile_name, False, "Cannot set profile while the daemon is running."))
 
 		if profile_name == "" or profile_name is None:
 			self._profile = None
 		elif profile_name not in self.profile_loader.profile_locator.get_known_names():
-			raise TunedException("Requested profile '%s' doesn't exist." % profile_name)
+
+			raise TunedException(self._notify_profile_changed(profile_name, False, "Requested profile '%s' doesn't exist." % profile_name))
 		else:
 			try:
 				self._profile = self._profile_loader.load(profile_name)
 			except InvalidProfileException:
-				raise TunedException("Cannot load profile '%s'." % profile_name)
+				raise TunedException(self._notify_profile_changed(profile_name, False, "Cannot load profile '%s'." % profile_name))
 
 		if save_instantly:
 			if profile_name is None:
@@ -89,6 +91,13 @@ class Daemon(object):
 	def profile_loader(self):
 		return self._profile_loader
 
+	# send notification when profile is changed (everything is setup) or if error occured
+	# result: True - OK, False - error occured
+	def _notify_profile_changed(self, profile_name, result, errstr):
+		if self._application is not None and self._application._dbus_exporter is not None:
+			self._application._dbus_exporter.send_signal(consts.DBUS_SIGNAL_PROFILE_CHANGED, profile_name, result, errstr)
+		return errstr
+
 	def _thread_code(self):
 		if self._profile is None:
 			raise TunedException("Cannot start the daemon without setting a profile.")
@@ -98,6 +107,7 @@ class Daemon(object):
 		self._unit_manager.start_tuning()
 		self._profile_applied.set()
 		log.info("static tuning from profile '%s' applied" % self._profile.name)
+		self._notify_profile_changed(self._profile.name, True, "OK")
 
 		if self._daemon:
 			# In python 2 interpreter with applied patch for rhbz#917709 we need to periodically

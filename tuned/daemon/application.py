@@ -39,7 +39,7 @@ class Application(object):
 		profile_locator = profiles.Locator(consts.LOAD_DIRECTORIES)
 		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger, self.variables)
 
-		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, self.config)
+		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, self.config, self)
 		self._controller = controller.Controller(self._daemon, self.config)
 
 		self._dbus_exporter = None

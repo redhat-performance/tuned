@@ -41,6 +41,10 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def terminate(self):
 		self._terminate.set()
 
+	@exports.signal("sbs")
+	def profile_changed(self, profile_name, result, errstr):
+		pass
+
 	@exports.export("", "b")
 	def start(self):
 		if self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):

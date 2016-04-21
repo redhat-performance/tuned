@@ -9,6 +9,13 @@ def export(*args, **kwargs):
 		return method
 	return wrapper
 
+def signal(*args, **kwargs):
+	"""Decorator, use to mark exportable signals."""
+	def wrapper(method):
+		method.signal_params = [ args, kwargs ]
+		return method
+	return wrapper
+
 def register_exporter(instance):
 	if not isinstance(instance, interfaces.ExporterInterface):
 		raise Exception()

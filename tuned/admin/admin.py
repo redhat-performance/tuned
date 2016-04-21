@@ -5,16 +5,33 @@ import tuned.consts as consts
 import os
 import sys
 import errno
+import threading
 
 class Admin(object):
-	def __init__(self, controller, debug = False):
+	def __init__(self, controller, debug = False, async = False):
 		self._controller = controller
 		self._debug = debug
+		self._async = async
 		self._cmd = commands(debug)
 		self._profiles_locator = profiles_locator(consts.LOAD_DIRECTORIES)
+		self._daemon_action_finished = threading.Event()
+		self._daemon_action_profile = ""
+		self._daemon_action_result = True
+		self._daemon_action_errstr = ""
+		if self._controller is not None:
+			self._dbus = True
+			self._controller.set_signal_handler(consts.DBUS_SIGNAL_PROFILE_CHANGED, self._signal_profile_changed_cb)
+		else:
+			self._dbus = False
 
 	def _error(self, message):
 		print >>sys.stderr, message
+
+	def _signal_profile_changed_cb(self, profile_name, result, errstr):
+		self._daemon_action_profile = profile_name
+		self._daemon_action_result = result
+		self._daemon_action_errstr = errstr
+		self._daemon_action_finished.set()
 
 	def _tuned_is_running(self):
 		try:
@@ -26,8 +43,7 @@ class Admin(object):
 		return True
 
 	def list(self):
-		no_dbus = self._controller is None
-		if not no_dbus:
+		if self._dbus:
 			try:
 				profile_names = self._controller.profiles2()
 			except TunedAdminDBusException as e:
@@ -36,9 +52,9 @@ class Admin(object):
 					profile_names = self._controller.profiles()
 				except TunedAdminDBusException as e:
 					self._error(e)
-					no_dbus = True
+					self._dbus = False
 				profile_names = map(lambda profile:(profile, ""), profile_names)
-		if no_dbus:
+		if not self._dbus:
 			profile_names = self._profiles_locator.get_known_names_summary()
 		print "Available profiles:"
 		for profile in profile_names:
@@ -50,30 +66,28 @@ class Admin(object):
 
 	def _get_active_profile(self):
 		profile_name = None
-		no_dbus = self._controller is None
-		if not no_dbus:
+		if self._dbus:
 			try:
 				profile_name = self._controller.active_profile()
 			except TunedAdminDBusException as e:
 				self._error(e)
-				no_dbus = True
-		if no_dbus:
+				self._dbus = False
+		if not self._dbus:
 			profile_name = str.strip(self._cmd.read_file(consts.ACTIVE_PROFILE_FILE, None))
 		if profile_name == "":
 			profile_name = None
 		return profile_name
 
 	def profile_info(self, profile = ""):
-		no_dbus = self._controller is None
 		if profile == "":
 			profile = self._get_active_profile()
-		if not no_dbus:
+		if self._dbus:
 			try:
 				ret = self._controller.profile_info(profile)
 			except TunedAdminDBusException as e:
 				self._error(e)
-				no_dbus = True
-		if no_dbus:
+				self._dbus = False
+		if not self._dbus:
 			ret = self._profiles_locator.get_profile_attrs(profile, [consts.PROFILE_ATTR_SUMMARY, consts.PROFILE_ATTR_DESCRIPTION], ["", ""])
 		if ret[0] == True:
 			print "Profile name:"
@@ -104,17 +118,29 @@ class Admin(object):
 			return False
 
 	def profile(self, profiles):
-		no_dbus = self._controller is None
 		profile_name = " ".join(profiles)
 		if profile_name == "":
 			return False
-		if not no_dbus:
+		if self._dbus:
+			self._daemon_action_finished.clear()
 			try:
 				(ret, msg) = self._controller.switch_profile(profile_name)
 			except TunedAdminDBusException as e:
 				self._error(e)
-				no_dbus = True
-		if no_dbus:
+				self._dbus = False
+			if not self._async:
+				waiting = True
+				while waiting:
+					if self._daemon_action_finished.wait(consts.ADMIN_TIMEOUT):
+						if self._daemon_action_profile == profile_name:
+							waiting = False
+							if not self._daemon_action_result:
+								print "Error changing profile: %s" % self._daemon_action_errstr
+								return False
+					else:
+						print "Operation timed out"
+						return False
+		if not self._dbus:
 			if profile_name in self._profiles_locator.get_known_names():
 				if self._cmd.write_to_file(consts.ACTIVE_PROFILE_FILE, profile_name):
 					print "Trying to (re)start tuned..."
@@ -140,14 +166,13 @@ class Admin(object):
 		return ret
 
 	def recommend_profile(self):
-		no_dbus = self._controller is None
-		if not no_dbus:
+		if self._dbus:
 			try:
 				profile = self._controller.recommend_profile()
 			except TunedAdminDBusException as e:
 				self._error(e)
-				no_dbus = True
-		if no_dbus:
+				self._dbus = False
+		if not self._dbus:
 			profile = self._cmd.recommend_profile()
 		print profile
 

@@ -25,6 +25,10 @@ class ExportsController(tuned.patterns.Singleton):
 		"""Check if method was marked with @exports.export wrapper."""
 		return inspect.ismethod(method) and hasattr(method, "export_params")
 
+	def _is_exportable_signal(self, method):
+		"""Check if method was marked with @exports.signal wrapper."""
+		return inspect.ismethod(method) and hasattr(method, "signal_params")
+
 	def _export_method(self, method):
 		"""Register method to all exporters."""
 		for exporter in self._exporters:
@@ -32,14 +36,22 @@ class ExportsController(tuned.patterns.Singleton):
 			kwargs = method.export_params[1]
 			exporter.export(method, *args, **kwargs)
 
+	def _export_signal(self, method):
+		"""Register signal to all exporters."""
+		for exporter in self._exporters:
+			args = method.signal_params[0]
+			kwargs = method.signal_params[1]
+			exporter.signal(method, *args, **kwargs)
+
 	def _initialize_exports(self):
 		if self._exports_initialized:
 			return
 
 		for instance in self._objects:
-			exportable = inspect.getmembers(instance, self._is_exportable_method)
-			for name, method in exportable:
+			for name, method in inspect.getmembers(instance, self._is_exportable_method):
 				self._export_method(method)
+			for name, method in inspect.getmembers(instance, self._is_exportable_signal):
+				self._export_signal(method)
 
 		self._exports_initialized = True
 

@@ -23,11 +23,13 @@ class DBusExporter(interfaces.ExporterInterface):
 		self._dbus_object_cls = None
 		self._dbus_object = None
 		self._dbus_methods = {}
+		self._signals = set()
 
 		self._bus_name = bus_name
 		self._interface_name = interface_name
 		self._object_name = object_name
 		self._thread = None
+		self._bus_object = None
 
 		# dirty hack that fixes KeyboardInterrupt handling
 		# the hack is needed because PyGObject / GTK+-3 developers are morons
@@ -63,6 +65,36 @@ class DBusExporter(interfaces.ExporterInterface):
 
 		self._dbus_methods[method_name] = wrapper
 
+	def signal(self, method, out_signature):
+		if not inspect.ismethod(method):
+			raise Exception("Only bound methods can be exported.")
+
+		method_name = method.__name__
+		if method_name in self._dbus_methods:
+			raise Exception("Method with this name is already exported.")
+
+		def wrapper(wrapped, owner, *args, **kwargs):
+			return method(*args, **kwargs)
+
+		wrapper = decorator.decorator(wrapper, method.im_func)
+		wrapper = dbus.service.signal(self._interface_name, out_signature)(wrapper)
+
+		self._dbus_methods[method_name] = wrapper
+		self._signals.add(method_name)
+
+	def send_signal(self, signal, *args, **kwargs):
+		err = False
+		if not signal in self._signals or self._bus_object is None:
+			err = True
+		try:
+			method = getattr(self._bus_object, signal)
+		except AttributeError:
+			err = True
+		if err:
+			raise Exception("Signal '%s' doesn't exist." % signal)
+		else:
+			method(*args, **kwargs)
+
 	def _construct_dbus_object_class(self):
 		if self._dbus_object_cls is not None:
 			raise Exception("The exporter class was already build.")
@@ -91,7 +123,9 @@ class DBusExporter(interfaces.ExporterInterface):
 
 		bus = dbus.SystemBus()
 		bus_name = dbus.service.BusName(self._bus_name, bus)
-		bus_object = self._dbus_object_cls(bus, self._object_name, bus_name)
+		self._bus_object = self._dbus_object_cls(bus, self._object_name, bus_name)
 
 		self._main_loop.run()
-		del bus_object
+		del self._bus_object
+		self._bus_object = None
+
