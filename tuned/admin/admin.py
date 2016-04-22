@@ -18,11 +18,15 @@ class Admin(object):
 		self._daemon_action_profile = ""
 		self._daemon_action_result = True
 		self._daemon_action_errstr = ""
-		if self._controller is not None:
-			self._dbus = True
-			self._controller.set_signal_handler(consts.DBUS_SIGNAL_PROFILE_CHANGED, self._signal_profile_changed_cb)
-		else:
+		if self._controller is None:
 			self._dbus = False
+		else:
+			self._dbus = True
+			try:
+				self._controller.set_signal_handler(consts.DBUS_SIGNAL_PROFILE_CHANGED, self._signal_profile_changed_cb)
+			except TunedAdminDBusException as e:
+				self._error(e)
+				self._dbus = False
 
 	def _error(self, message):
 		print >>sys.stderr, message
@@ -128,7 +132,7 @@ class Admin(object):
 			except TunedAdminDBusException as e:
 				self._error(e)
 				self._dbus = False
-			if not self._async:
+			if self._dbus and not self._async:
 				waiting = True
 				while waiting:
 					if self._daemon_action_finished.wait(consts.ADMIN_TIMEOUT):
