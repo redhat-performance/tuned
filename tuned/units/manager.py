@@ -80,10 +80,10 @@ class Manager(object):
 		for instance in self._instances:
 			instance.apply_tuning()
 
-	def verify_tuning(self):
+	def verify_tuning(self, ignore_missing):
 		ret = True
 		for instance in self._instances:
-			if instance.verify_tuning() == False:
+			if instance.verify_tuning(ignore_missing) == False:
 				ret = False
 		return ret
 

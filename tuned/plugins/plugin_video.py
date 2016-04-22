@@ -47,7 +47,7 @@ class VideoPlugin(base.Plugin):
 		if not os.path.exists(sys_files["method"]):
 			if not sim:
 				log.warn("radeon_powersave is not supported on '%s'" % device)
-			return None
+				return None
 
 		if value in ["default", "auto", "low", "mid", "high"]:
 			if not sim:
@@ -73,4 +73,4 @@ class VideoPlugin(base.Plugin):
 		elif method == "dynpm":
 			return "dynpm"
 		else:
-			 return None
+			return None

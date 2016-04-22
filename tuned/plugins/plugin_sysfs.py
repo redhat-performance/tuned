@@ -41,14 +41,14 @@ class SysfsPlugin(base.Plugin):
 				else:
 					log.error("rejecting write to '%s' (not inside /sys)" % f)
 
-	def _instance_verify_static(self, instance):
+	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
 		for key, value in instance._sysfs.iteritems():
 			v = self._variables.expand(value)
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
 					curr_val = self._read_sysfs(f)
-					if self._verify_value(f, v, curr_val) == False:
+					if self._verify_value(f, v, curr_val, ignore_missing) == False:
 						ret = False
 		return ret
 

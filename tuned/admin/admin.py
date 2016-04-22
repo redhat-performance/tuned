@@ -180,17 +180,21 @@ class Admin(object):
 			profile = self._cmd.recommend_profile()
 		print profile
 
-	def verify_profile(self):
+	def verify_profile(self, ignore_missing):
 		ret = False
 		if self._controller is None:
 			print "Not supported in no_daemon mode."
 			return False
-		try:
-			ret = self._controller.verify_profile()
-		except TunedAdminDBusException as e:
-			self._error(e)
-			self._error("Cannot verify profile if there is no connection to daemon")
-			return False
+		else:
+			try:
+				if ignore_missing:
+					ret = self._controller.verify_profile_ignore_missing()
+				else:
+					ret = self._controller.verify_profile()
+			except TunedAdminDBusException as e:
+				self._error(e)
+				self._error("Cannot verify profile if there is no compatible running Tuned daemon (or Tuned daemon is too old).")
+				return False
 
 		if ret:
 			print "Verfication succeeded, current system settings match the preset profile."

@@ -197,7 +197,7 @@ class Daemon(object):
 		self._thread.start()
 		return True
 
-	def verify_profile(self):
+	def verify_profile(self, ignore_missing):
 		if not self.is_running():
 			log.error("tuned is not running")
 			return False
@@ -213,7 +213,7 @@ class Daemon(object):
 		# using deamon, the main loop mustn't exit before our completion
 		self._not_used.clear()
 		log.info("verifying profile(s): %s" % self._profile.name)
-		ret = self._unit_manager.verify_tuning()
+		ret = self._unit_manager.verify_tuning(ignore_missing)
 		# main loop is allowed to exit
 		self._not_used.set()
 		return ret

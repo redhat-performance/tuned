@@ -56,8 +56,9 @@ if __name__ == "__main__":
 		parser_off = subparsers.add_parser("recommend", help="recommend profile")
 		parser_off.set_defaults(action="recommend_profile")
 
-	parser_off = subparsers.add_parser("verify", help="verify profile")
-	parser_off.set_defaults(action="verify_profile")
+	parser_verify = subparsers.add_parser("verify", help="verify profile")
+	parser_verify.set_defaults(action="verify_profile")
+	parser_verify.add_argument("--ignore-missing", "-i", action="store_true", help="do not treat missing/non-supported tunings as errors")
 
 	args = parser.parse_args(sys.argv[1:])
 

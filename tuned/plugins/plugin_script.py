@@ -52,11 +52,14 @@ class ScriptPlugin(base.Plugin):
 		super(self.__class__, self)._instance_apply_static(instance)
 		self._call_scripts(instance._scripts, ["start"])
 
-	def _instance_verify_static(self, instance):
+	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
-		if super(self.__class__, self)._instance_verify_static(instance) == False:
+		if super(self.__class__, self)._instance_verify_static(instance, ignore_missing) == False:
 			ret = False
-		if self._call_scripts(instance._scripts, ["verify"]) == True:
+		args = ["verify"]
+		if ignore_missing:
+			args += ["ignore_missing"]
+		if self._call_scripts(instance._scripts, args) == True:
 			log.info(consts.STR_VERIFY_PROFILE_OK % instance._scripts)
 		else:
 			log.error(consts.STR_VERIFY_PROFILE_FAIL % instance._scripts)

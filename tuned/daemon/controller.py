@@ -126,4 +126,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 	@exports.export("", "b")
 	def verify_profile(self):
-		return self._daemon.verify_profile()
+		return self._daemon.verify_profile(ignore_missing = False)
+
+	@exports.export("", "b")
+	def verify_profile_ignore_missing(self):
+		return self._daemon.verify_profile(ignore_missing = True)

@@ -192,7 +192,7 @@ class Plugin(object):
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_apply_dynamic)
 
-	def instance_verify_tuning(self, instance):
+	def instance_verify_tuning(self, instance, ignore_missing):
 		"""
 		Verify static tuning if the plugin instance is active.
 		"""
@@ -200,7 +200,7 @@ class Plugin(object):
 			return None
 
 		if instance.has_static_tuning:
-			return self._instance_verify_static(instance)
+			return self._instance_verify_static(instance, ignore_missing)
 		else:
 			return None
 
@@ -227,11 +227,11 @@ class Plugin(object):
 		self._execute_all_non_device_commands(instance)
 		self._execute_all_device_commands(instance, instance.devices)
 
-	def _instance_verify_static(self, instance):
+	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
-		if self._verify_all_non_device_commands(instance) == False:
+		if self._verify_all_non_device_commands(instance, ignore_missing) == False:
 			ret = False
-		if self._verify_all_device_commands(instance, instance.devices) == False:
+		if self._verify_all_device_commands(instance, instance.devices, ignore_missing) == False:
 			ret = False
 		return ret
 
@@ -346,23 +346,23 @@ class Plugin(object):
 			for device in devices:
 				self._execute_device_command(instance, command, device, new_value)
 
-	def _verify_all_non_device_commands(self, instance):
+	def _verify_all_non_device_commands(self, instance, ignore_missing):
 		ret = True
 		for command in filter(lambda command: not command["per_device"], self._commands.values()):
 			new_value = self._variables.expand(instance.options.get(command["name"], None))
 			if new_value is not None:
-				if self._verify_non_device_command(instance, command, new_value) == False:
+				if self._verify_non_device_command(instance, command, new_value, ignore_missing) == False:
 					ret = False
 		return ret
 
-	def _verify_all_device_commands(self, instance, devices):
+	def _verify_all_device_commands(self, instance, devices, ignore_missing):
 		ret = True
 		for command in filter(lambda command: command["per_device"], self._commands.values()):
 			new_value = instance.options.get(command["name"], None)
 			if new_value is None:
 				continue
 			for device in devices:
-				if self._verify_device_command(instance, command, device, new_value) == False:
+				if self._verify_device_command(instance, command, device, new_value, ignore_missing) == False:
 					ret = False
 		return ret
 
@@ -423,10 +423,17 @@ class Plugin(object):
 			return re.sub(r'^\s*(0+,)+', "", v)
 		return v
 
-	def _verify_value(self, name, new_value, current_value, device = None):
+	def _verify_value(self, name, new_value, current_value, ignore_missing, device = None):
 		if new_value is None:
 			return None
 		ret = False
+		if current_value is None and ignore_missing:
+			if device is None:
+				log.info(consts.STR_VERIFY_PROFILE_VALUE_MISSING % name)
+			else:
+				log.info(consts.STR_VERIFY_PROFILE_DEVICE_VALUE_MISSING % (device, name))
+			return True
+
 		if current_value is not None:
 			current_value = self._norm_value(current_value)
 			new_value = self._norm_value(new_value)
@@ -450,7 +457,7 @@ class Plugin(object):
 				log.error(consts.STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL % (device, name, str(current_value).strip(), str(new_value).strip()))
 			return False
 
-	def _verify_device_command(self, instance, command, device, new_value):
+	def _verify_device_command(self, instance, command, device, new_value, ignore_missing):
 		if command["custom"] is not None:
 			return command["custom"](True, new_value, device, True)
 		current_value = self._get_current_value(command, device)
@@ -458,9 +465,9 @@ class Plugin(object):
 		if new_value is None:
 			return None
 		new_value = command["set"](new_value, device, True)
-		return self._verify_value(command["name"], new_value, current_value, device)
+		return self._verify_value(command["name"], new_value, current_value, ignore_missing, device)
 
-	def _verify_non_device_command(self, instance, command, new_value):
+	def _verify_non_device_command(self, instance, command, new_value, ignore_missing):
 		if command["custom"] is not None:
 			return command["custom"](True, new_value, True)
 		current_value = self._get_current_value(command)
@@ -468,7 +475,7 @@ class Plugin(object):
 		if new_value is None:
 			return None
 		new_value = command["set"](new_value, True)
-		return self._verify_value(command["name"], new_value, current_value)
+		return self._verify_value(command["name"], new_value, current_value, ignore_missing)
 
 	def _cleanup_all_non_device_commands(self, instance):
 		for command in filter(lambda command: not command["per_device"], self._commands.values()):

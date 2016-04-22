@@ -80,6 +80,9 @@ class DBusController(object):
 	def verify_profile(self):
 		return self._call("verify_profile")
 
+	def verify_profile_ignore_missing(self):
+		return self._call("verify_profile_ignore_missing")
+
 	def off(self):
 		return self._call("disable")
 

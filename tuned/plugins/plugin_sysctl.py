@@ -4,6 +4,7 @@ from decorators import *
 import tuned.logs
 from subprocess import *
 from tuned.utils.commands import commands
+import tuned.consts as consts
 
 log = tuned.logs.get()
 
@@ -47,16 +48,14 @@ class SysctlPlugin(base.Plugin):
 
 		self._storage.set("options", instance._sysctl_original)
 
-	def _instance_verify_static(self, instance):
+	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
+		# override, so always skip missing
+		ignore_missing = True
 		for option, value in instance._sysctl.iteritems():
 			curr_val = self._read_sysctl(option)
-			if curr_val is None:
-				log.warn("verify: option '%s' is None, option is probably unavailable/unsupported on your system, skipping it",
-				         str(option))
-			else:
-				if self._verify_value(option, self._cmd.remove_ws(self._variables.expand(value)), curr_val) == False:
-					ret = False
+			if self._verify_value(option, self._cmd.remove_ws(self._variables.expand(value)), curr_val, ignore_missing) == False:
+				ret = False
 		return ret
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
