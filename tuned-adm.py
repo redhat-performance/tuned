@@ -27,12 +27,23 @@ import tuned.consts as consts
 import tuned.version as ver
 from tuned.utils.global_config import GlobalConfig
 
+def check_positive(value):
+	try:
+		val = int(value)
+	except ValueError:
+		val = -1
+	if val <= 0:
+		raise argparse.ArgumentTypeError("%s has to be >= 0" % value)
+	return val
+
 if __name__ == "__main__":
 	config = GlobalConfig()
 	parser = argparse.ArgumentParser(description="Manage tuned daemon.")
 	parser.add_argument('--version', "-v", action = "version", version = "%%(prog)s %s.%s.%s" % (ver.TUNED_VERSION_MAJOR, ver.TUNED_VERSION_MINOR, ver.TUNED_VERSION_PATCH))
 	parser.add_argument("--debug", "-d", action="store_true", help="show debug messages")
 	parser.add_argument("--async", "-a", action="store_true", help="with dbus do not wait on commands completion and return immediately")
+	parser.add_argument("--timeout", "-t", default = consts.ADMIN_TIMEOUT, type = check_positive, help="with sync operation use specific timeout instead of the default %d second(s)" % consts.ADMIN_TIMEOUT)
+
 	subparsers = parser.add_subparsers()
 
 	parser_list = subparsers.add_parser("list", help="list available profiles")
@@ -65,20 +76,18 @@ if __name__ == "__main__":
 	options = vars(args)
 	debug = options.pop("debug")
 	async = options.pop("async")
+	timeout = options.pop("timeout")
 	action_name = options.pop("action")
 	result = False
 
+	if config.get(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+		dbus = True
+	else:
+		dbus = False
 	try:
-		if config.get(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
-			controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE, debug)
-		else:
-			controller = None
-		admin = tuned.admin.Admin(controller, debug, async)
+		admin = tuned.admin.Admin(dbus, debug, async, timeout)
 
-		action = getattr(admin, action_name)
-		result = action(**options)
-		if controller is not None:
-			controller.exit()
+		result = admin.action(action_name, **options)
 	except tuned.admin.TunedAdminException as e:
 		if not debug:
 			print >>sys.stderr, e

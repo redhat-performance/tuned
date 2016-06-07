@@ -1,8 +1,8 @@
-import threading
 import dbus
 import dbus.exceptions
+import time
 from dbus.mainloop.glib import DBusGMainLoop
-from gi.repository import GLib
+from gi.repository import GLib, GObject
 from exceptions import TunedAdminDBusException
 
 __all__ = ["DBusController"]
@@ -15,22 +15,53 @@ class DBusController(object):
 		self._proxy = None
 		self._debug = debug
 		self._main_loop = None
-		self._thread = None
+		self._action = None
+		self._ret = True
+		self._exit = False
+		self._exception = None
 
 	def _init_proxy(self):
 		try:
 			if self._proxy is None:
+				# Probably not needed for PyGObject 3.10.2+
+				GObject.threads_init()
+
 				DBusGMainLoop(set_as_default=True)
 				self._main_loop = GLib.MainLoop()
-				self._thread = threading.Thread(target=self._thread_code)
-				self._thread.start()
 				bus = dbus.SystemBus()
 				self._proxy = bus.get_object(self._bus_name, self._interface_name, self._object_name)
 		except dbus.exceptions.DBusException:
 			raise TunedAdminDBusException("Cannot talk to Tuned daemon via DBus. Is Tuned daemon running?")
 
-	def _thread_code(self):
+	def _idle(self):
+		if self._action is not None:
+			# This may (and very probably will) run in child thread, so catch and pass exceptions to the main thread
+			try:
+				self._action_exit_code = self._action(*self._action_args, **self._action_kwargs)
+			except TunedAdminDBusException as e:
+				self._exception = e
+				self._exit = True
+
+		if self._exit:
+			self._main_loop.quit()
+			return False
+		else:
+			time.sleep(1)
+		return True
+
+	def set_action(self, action, *args, **kwargs):
+		self._action = action
+		self._action_args = args
+		self._action_kwargs = kwargs
+
+	def run(self):
+		self._exception = None
+		GLib.idle_add(self._idle)
 		self._main_loop.run()
+		# Pass exception happened in child thread to the caller
+		if self._exception is not None:
+			raise self._exception
+		return self._ret
 
 	def _call(self, method_name, *args, **kwargs):
 		self._init_proxy()
@@ -86,8 +117,8 @@ class DBusController(object):
 	def off(self):
 		return self._call("disable")
 
-	def exit(self):
-		if self._thread is not None and self._thread.is_alive():
-			self._main_loop.quit()
-			self._thread.join()
-			self._thread = None
+	def exit(self, ret):
+		self.set_action(None)
+		self._ret = ret
+		self._exit = True
+		return ret
