@@ -1,8 +1,8 @@
+from __future__ import print_function
 import tuned.admin
 from tuned.utils.commands import commands
 from tuned.profiles import Locator as profiles_locator
 from exceptions import TunedAdminDBusException
-from __future__ import print_function
 import tuned.consts as consts
 import os
 import sys
