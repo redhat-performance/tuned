@@ -73,7 +73,7 @@ class Locator(object):
 		config = self.parse_config(profile_name)
 		if config is None:
 			return [False, "", "", ""]
-		if config.has_key("main"):
+		if "main" in config:
 			d = config["main"]
 		else:
 			d = dict()

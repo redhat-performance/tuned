@@ -32,7 +32,7 @@ class SysfsPlugin(base.Plugin):
 		pass
 
 	def _instance_apply_static(self, instance):
-		for key, value in instance._sysfs.iteritems():
+		for key, value in instance._sysfs.items():
 			v = self._variables.expand(value)
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
@@ -43,7 +43,7 @@ class SysfsPlugin(base.Plugin):
 
 	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
-		for key, value in instance._sysfs.iteritems():
+		for key, value in instance._sysfs.items():
 			v = self._variables.expand(value)
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
@@ -53,7 +53,7 @@ class SysfsPlugin(base.Plugin):
 		return ret
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
-		for key, value in instance._sysfs_original.iteritems():
+		for key, value in instance._sysfs_original.items():
 			self._write_sysfs(key, value)
 
 	def _check_sysfs(self, sysfs_file):

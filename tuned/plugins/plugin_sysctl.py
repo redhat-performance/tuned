@@ -40,7 +40,7 @@ class SysctlPlugin(base.Plugin):
 		self._storage.unset(self._sysctl_storage_key(instance))
 
 	def _instance_apply_static(self, instance):
-		for option, value in instance._sysctl.iteritems():
+		for option, value in instance._sysctl.items():
 			original_value = self._read_sysctl(option)
 			if original_value != None:
 				instance._sysctl_original[option] = original_value
@@ -52,14 +52,14 @@ class SysctlPlugin(base.Plugin):
 		ret = True
 		# override, so always skip missing
 		ignore_missing = True
-		for option, value in instance._sysctl.iteritems():
+		for option, value in instance._sysctl.items():
 			curr_val = self._read_sysctl(option)
 			if self._verify_value(option, self._cmd.remove_ws(self._variables.expand(value)), curr_val, ignore_missing) == False:
 				ret = False
 		return ret
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
-		for option, value in instance._sysctl_original.iteritems():
+		for option, value in instance._sysctl_original.items():
 			self._write_sysctl(option, value)
 
 	def _execute_sysctl(self, arguments):

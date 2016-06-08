@@ -207,7 +207,7 @@ class SchedulerPlugin(base.Plugin):
 			instance._terminate.set()
 			instance._thread.join()
 
-		for pid, vals in instance._scheduler_original.iteritems():
+		for pid, vals in instance._scheduler_original.items():
 			# if command line for the pid didn't change, it's very probably the same process
 			try:
 				if ps[pid] == vals[0]:

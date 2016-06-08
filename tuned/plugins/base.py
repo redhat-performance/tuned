@@ -298,7 +298,7 @@ class Plugin(object):
 		"""
 		Check if all commands are defined correctly.
 		"""
-		for command_name, command in self._commands.iteritems():
+		for command_name, command in self._commands.items():
 			# do not check custom commands
 			if command.get("custom", False):
 				continue

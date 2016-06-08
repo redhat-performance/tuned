@@ -121,11 +121,11 @@ class GuiPluginLoader(PluginLoader):
             except tuned.plugins.exceptions.NotSupportedPluginException:
 
 #                 problem with importing of plugin
-#                 print str(ImportError) + plugin_name
+#                 print(str(ImportError) + plugin_name)
 
                 pass
 
-#                 print plugin_name + " is not supported!"
+#                 print(plugin_name + " is not supported!")
 
     def get_plugin(self, plugin_name):
         for plugin in self.plugins:
@@ -141,10 +141,10 @@ class GuiPluginLoader(PluginLoader):
             config = ConfigObj.ConfigObj(file_name,
                                configspec=global_config_spec,
                                raise_errors = True, file_error = True, list_values = False, interpolation = False)
-        except IOError, e:
+        except IOError as e:
             raise TunedException("Global tuned configuration file '%s' not found."
                                   % file_name)
-        except ConfigObj.ConfigObjError, e:
+        except ConfigObj.ConfigObjError as e:
             raise TunedException("Error parsing global tuned configuration file '%s'."
                                   % file_name)
         vdt = Validator()

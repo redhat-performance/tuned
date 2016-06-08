@@ -95,7 +95,7 @@ class Application(object):
 			if not os.path.exists(dir_name):
 				os.makedirs(dir_name)
 
-			fd = os.open(self._pid_file, os.O_CREAT|os.O_TRUNC|os.O_WRONLY , 0644)
+			fd = os.open(self._pid_file, os.O_CREAT|os.O_TRUNC|os.O_WRONLY , 0o644)
 			os.write(fd, "%d" % os.getpid())
 			os.close(fd)
 		except (OSError,IOError) as error:

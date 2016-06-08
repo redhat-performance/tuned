@@ -2,6 +2,7 @@ import tuned.admin
 from tuned.utils.commands import commands
 from tuned.profiles import Locator as profiles_locator
 from exceptions import TunedAdminDBusException
+from __future__ import print_function
 import tuned.consts as consts
 import os
 import sys
@@ -31,7 +32,7 @@ class Admin(object):
 				self._dbus = False
 
 	def _error(self, message):
-		print >>sys.stderr, message
+		print(message, file=sys.stderr)
 
 	def _signal_profile_changed_cb(self, profile_name, result, errstr):
 		self._daemon_action_profile = profile_name
@@ -78,12 +79,12 @@ class Admin(object):
 		return res
 
 	def _print_profiles(self, profile_names):
-		print "Available profiles:"
+		print("Available profiles:")
 		for profile in profile_names:
 			if profile[1] is not None and profile[1] != "":
-				print self._cmd.align_str("- %s" % profile[0], 30, "- %s" % profile[1])
+				print(self._cmd.align_str("- %s" % profile[0], 30, "- %s" % profile[1]))
 			else:
-				print "- %s" % profile[0]
+				print("- %s" % profile[0])
 
 	def _action_dbus_list(self):
 		try:
@@ -116,17 +117,17 @@ class Admin(object):
 
 	def _print_profile_info(self, profile_info):
 		if profile_info[0] == True:
-			print "Profile name:"
-			print ret[1]
-			print
-			print "Profile summary:"
-			print ret[2]
-			print
-			print "Profile description:"
-			print ret[3]
+			print("Profile name:")
+			print(ret[1])
+			print()
+			print("Profile summary:")
+			print(ret[2])
+			print()
+			print("Profile description:"
+			print(ret[3])
 			return True
 		else:
-			print "Unable to get information about profile '%s'" % profile
+			print("Unable to get information about profile '%s'" % profile)
 			return False
 
 	def _action_dbus_profile_info(self, profile = ""):
@@ -141,10 +142,10 @@ class Admin(object):
 
 	def _print_profile_name(self, profile_name):
 		if profile_name is None:
-			print "No current active profile."
+			print("No current active profile.")
 			return False
 		else:
-			print "Current active profile: %s" % profile_name
+			print("Current active profile: %s" % profile_name)
 		return True
 
 	def _action_dbus_active(self):
@@ -153,8 +154,8 @@ class Admin(object):
 	def _action_active(self):
 		profile_name = self._get_active_profile()
 		if profile_name is not None and not self._tuned_is_running():
-			print "It seems that tuned daemon is not running, preset profile is not activated."
-			print "Preset profile: %s" % profile_name
+			print("It seems that tuned daemon is not running, preset profile is not activated.")
+			print("Preset profile: %s" % profile_name)
 			return True
 		return self._print_profile_name(profile_name)
 
@@ -169,12 +170,12 @@ class Admin(object):
 
 	def _action_dbus_wait_profile(self, profile_name):
 		if time.time() >= self._timestamp + self._timeout:
-			print "Operation timed out after waiting %d seconds(s), you may try to increase timeout by using --timeout command line option or using --async." % self._timeout
+			print("Operation timed out after waiting %d seconds(s), you may try to increase timeout by using --timeout command line option or using --async." % self._timeout)
 			return self._controller.exit(False)
 		if self._daemon_action_finished.isSet():
 			if self._daemon_action_profile == profile_name:
 				if not self._daemon_action_result:
-					print "Error changing profile: %s" % self._daemon_action_errstr
+					print("Error changing profile: %s" % self._daemon_action_errstr)
 					return self._controller.exit(False)
 				return self._controller.exit(True)
 		return False
@@ -198,12 +199,12 @@ class Admin(object):
 			return False
 		if profile_name in self._profiles_locator.get_known_names():
 			if self._cmd.write_to_file(consts.ACTIVE_PROFILE_FILE, profile_name):
-				print "Trying to (re)start tuned..."
+				print("Trying to (re)start tuned...")
 				(ret, msg) = self._cmd.execute(["service", "tuned", "restart"])
 				if ret == 0:
-					print "Tuned (re)started, changes applied."
+					print("Tuned (re)started, changes applied.")
 				else:
-					print "Tuned (re)start failed, you need to (re)start tuned by hand for changes to apply."
+					print("Tuned (re)start failed, you need to (re)start tuned by hand for changes to apply.")
 				return True
 			else:
 				self._error("Unable to switch profile, do you have enough permissions?")
@@ -214,11 +215,11 @@ class Admin(object):
 		return self._profile_print_status(self, ret, msg)
 
 	def _action_dbus_recommend_profile(self):
-		print self._controller.recommend_profile()
+		print(self._controller.recommend_profile())
 		return self._controller.exit(True)
 
 	def _action_recommend_profile(self):
-		print self._cmd.recommend_profile()
+		print(self._cmd.recommend_profile())
 		return True
 
 	def _action_dbus_verify_profile(self, ignore_missing):
@@ -227,16 +228,16 @@ class Admin(object):
 		else:
 			ret = self._controller.verify_profile()
 		if ret:
-			print "Verfication succeeded, current system settings match the preset profile."
+			print("Verfication succeeded, current system settings match the preset profile.")
 		else:
-			print "Verification failed, current system settings differ from the preset profile."
-			print "You can mostly fix this by Tuned restart, e.g.:"
-			print "  service tuned restart"
-		print "See tuned log file ('%s') for details." % consts.LOG_FILE
+			print("Verification failed, current system settings differ from the preset profile.")
+			print("You can mostly fix this by Tuned restart, e.g.:")
+			print("  service tuned restart")
+		print("See tuned log file ('%s') for details." % consts.LOG_FILE)
 		return self._controller.exit(ret)
 
 	def _action_verify_profile(self, ignore_missing):
-		print "Not supported in no_daemon mode."
+		print("Not supported in no_daemon mode.")
 		return False
 
 	def _action_dbus_off(self):
@@ -246,5 +247,5 @@ class Admin(object):
 		return self._controller.exit(ret)
 
 	def _action_off(self):
-		print "Not supported in no_daemon mode."
+		print("Not supported in no_daemon mode.")
 		return False
