@@ -123,7 +123,7 @@ class Admin(object):
 			print("Profile summary:")
 			print(ret[2])
 			print()
-			print("Profile description:"
+			print("Profile description:")
 			print(ret[3])
 			return True
 		else:
