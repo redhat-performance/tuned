@@ -37,7 +37,7 @@ release-cp: release-dir
 
 	cp -a tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
 		tuned-adm.bash dbus.conf recommend.conf tuned-main.conf 00_tuned \
-		bootcmdline org.tuned.gui.policy tuned-gui.py tuned-gui.glade \
+		bootcmdline com.redhat.tuned.gui.policy tuned-gui.py tuned-gui.glade \
 		tuned-gui.desktop $(VERSIONED_NAME)
 	cp -a doc experiments libexec man profiles systemtap tuned contrib icons \
 		$(VERSIONED_NAME)
@@ -144,7 +144,7 @@ install: install-dirs
 	install -Dpm 0755 00_tuned $(DESTDIR)/etc/grub.d/00_tuned
 
 	# polkit configuration
-	install -Dpm 0644 org.tuned.gui.policy $(DESTDIR)$(DATADIR)/polkit-1/actions/org.tuned.gui.policy
+	install -Dpm 0644 com.redhat.tuned.gui.policy $(DESTDIR)$(DATADIR)/polkit-1/actions/com.redhat.tuned.gui.policy
 
 	# manual pages
 	$(foreach man_section, 5 7 8, $(foreach file, $(wildcard man/*.$(man_section)), \

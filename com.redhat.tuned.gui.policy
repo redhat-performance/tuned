@@ -2,7 +2,7 @@
 <!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD polkit Policy Configuration 1.0//EN"
 "http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
 <policyconfig>
-  <action id="org.tuned.gui.run">
+  <action id="com.redhat.tuned.gui.run">
     <description>Run tuned-gui as root</description>
     <message>Authentication is required to run tuned-gui</message>
     <defaults>
