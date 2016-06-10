@@ -69,14 +69,19 @@ class DBusExporter(interfaces.ExporterInterface):
 			action_id = consts.NAMESPACE + "." + method.__name__
 			caller = args[-1]
 			log.debug("checking authorization for for action '%s' requested by caller '%s'" % (action_id, caller))
-			try:
-				if self._polkit.check_authorization(caller, action_id):
+			ret = self._polkit.check_authorization(caller, action_id)
+			if ret == 1:
 					log.debug("action '%s' requested by caller '%s' was successfully authorized by polkit" % (action_id, caller))
-				else:
-					log.info("action '%s' requested by caller '%s' wasn't authorized by polkit, ignoring the request" % (action_id, caller))
+			elif ret == 2:
+					log.warn("polkit error, but action '%s' requested by caller '%s' was successfully authorized by fallback method" (action_id, caller))
+			elif ret == 0:
+					log.info("action '%s' requested by caller '%s' wasn't authorized, ignoring the request" % (action_id, caller))
 					args[-1] = ""
-			except (dbus.exceptions.DBusException, ValueError) as e:
-				log.error("unable to query polkit to authorize action '%s' requested by caller '%s': %s, ignoring the request" % (action_id, caller, e))
+			elif ret == -1:
+				log.warn("polkit error and action '%s' requested by caller '%s' wasn't authorized by fallback method, ignoring the request" (action_id, caller))
+				args[-1] = ""
+			else:
+				log.error("polkit error and unable to use fallback method to authorize action '%s' requested by caller '%s', ignoring the request" (action_id, caller))
 				args[-1] = ""
 			return method(*args, **kwargs)
 

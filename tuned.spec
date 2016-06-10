@@ -250,13 +250,13 @@ fi
 %{_mandir}/man8/tuned*
 %dir %{_datadir}/tuned
 %{_datadir}/tuned/grub2
+%{_datadir}/polkit-1/actions/com.redhat.tuned.policy
 
 %files gtk
 %defattr(-,root,root,-)
 %{_sbindir}/tuned-gui
 %{python_sitelib}/tuned/gtk
 %{_datadir}/tuned/ui
-%{_datadir}/polkit-1/actions/com.redhat.tuned.policy
 %{_datadir}/polkit-1/actions/com.redhat.tuned.gui.policy
 %{_datadir}/icons/hicolor/scalable/apps/tuned.svg
 %{_datadir}/applications/tuned-gui.desktop
