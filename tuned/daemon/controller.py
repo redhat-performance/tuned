@@ -45,8 +45,15 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def profile_changed(self, profile_name, result, errstr):
 		pass
 
+	# exports decorator checks the authorization (currently through polkit), caller is None if
+	# no authorization was performed (i.e. the call should process as authorized), string
+	# identifying caller (with DBus it's the caller bus name) if authorized and empty
+	# string if not authorized, caller must be the last argument
+
 	@exports.export("", "b")
-	def start(self):
+	def start(self, caller = None):
+		if caller == "":
+			return False
 		if self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
 			if self._daemon.is_running():
 				return True
@@ -55,21 +62,27 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		return self._daemon.start()
 
 	@exports.export("", "b")
-	def stop(self):
+	def stop(self, caller = None):
+		if caller == "":
+			return False
 		if not self._daemon.is_running():
 			return True
 		else:
 			return self._daemon.stop()
 
 	@exports.export("", "b")
-	def reload(self):
+	def reload(self, caller = None):
+		if caller == "":
+			return False
 		if not self._daemon.is_running():
 			return False
 		else:
 			return self.stop() and self.start()
 
 	@exports.export("s", "(bs)")
-	def switch_profile(self, profile_name):
+	def switch_profile(self, profile_name, caller = None):
+		if caller == "":
+			return (False, "Unauthorized")
 		was_running = self._daemon.is_running()
 		msg = "OK"
 		success = True
@@ -88,14 +101,18 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		return (success, msg)
 
 	@exports.export("", "s")
-	def active_profile(self):
+	def active_profile(self, caller = None):
+		if caller == "":
+			return ""
 		if self._daemon.profile is not None:
 			return self._daemon.profile.name
 		else:
 			return ""
 
 	@exports.export("", "b")
-	def disable(self):
+	def disable(self, caller = None):
+		if caller == "":
+			return False
 		if self._daemon.is_running():
 			self._daemon.stop()
 		if self._daemon.is_enabled():
@@ -103,31 +120,45 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		return True
 
 	@exports.export("", "b")
-	def is_running(self):
+	def is_running(self, caller = None):
+		if caller == "":
+			return False
 		return self._daemon.is_running()
 
 	@exports.export("", "as")
-	def profiles(self):
+	def profiles(self, caller = None):
+		if caller == "":
+			return []
 		return self._daemon.profile_loader.profile_locator.get_known_names()
 
 	@exports.export("", "a(ss)")
-	def profiles2(self):
+	def profiles2(self, caller = None):
+		if caller == "":
+			return []
 		return self._daemon.profile_loader.profile_locator.get_known_names_summary()
 
 	@exports.export("s", "(bsss)")
-	def profile_info(self, profile_name):
+	def profile_info(self, profile_name, caller = None):
+		if caller == "":
+			return tuple(False, "", "", "")
 		if profile_name is None or profile_name == "":
 			profile_name = self.active_profile()
 		return tuple(self._daemon.profile_loader.profile_locator.get_profile_attrs(profile_name, [consts.PROFILE_ATTR_SUMMARY, consts.PROFILE_ATTR_DESCRIPTION], [""]))
 
 	@exports.export("", "s")
-	def recommend_profile(self):
+	def recommend_profile(self, caller = None):
+		if caller == "":
+			return ""
 		return self._cmd.recommend_profile(hardcoded = not self._global_config.get_bool(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND))
 
 	@exports.export("", "b")
-	def verify_profile(self):
+	def verify_profile(self, caller = None):
+		if caller == "":
+			return False
 		return self._daemon.verify_profile(ignore_missing = False)
 
 	@exports.export("", "b")
-	def verify_profile_ignore_missing(self):
+	def verify_profile_ignore_missing(self, caller = None):
+		if caller == "":
+			return False
 		return self._daemon.verify_profile(ignore_missing = True)

@@ -2,10 +2,16 @@ import interfaces
 import decorator
 import dbus.service
 import dbus.mainloop.glib
+import dbus.exceptions
 import inspect
 import threading
 import signal
+import tuned.logs
+import tuned.consts as consts
+from tuned.utils.polkit import polkit
 from gi.repository import GObject as gobject
+
+log = tuned.logs.get()
 
 class DBusExporter(interfaces.ExporterInterface):
 	"""
@@ -19,6 +25,7 @@ class DBusExporter(interfaces.ExporterInterface):
 
 	def __init__(self, bus_name, interface_name, object_name):
 		gobject.threads_init()
+		dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 		self._dbus_object_cls = None
 		self._dbus_object = None
@@ -30,6 +37,7 @@ class DBusExporter(interfaces.ExporterInterface):
 		self._object_name = object_name
 		self._thread = None
 		self._bus_object = None
+		self._polkit = polkit()
 
 		# dirty hack that fixes KeyboardInterrupt handling
 		# the hack is needed because PyGObject / GTK+-3 developers are morons
@@ -58,10 +66,22 @@ class DBusExporter(interfaces.ExporterInterface):
 			raise Exception("Method with this name is already exported.")
 
 		def wrapper(wrapped, owner, *args, **kwargs):
+			action_id = consts.NAMESPACE + "." + method.__name__
+			caller = args[-1]
+			log.debug("checking authorization for for action '%s' requested by caller '%s'" % (action_id, caller))
+			try:
+				if self._polkit.check_authorization(caller, action_id):
+					log.debug("action '%s' requested by caller '%s' was successfully authorized by polkit" % (action_id, caller))
+				else:
+					log.info("action '%s' requested by caller '%s' wasn't authorized by polkit, ignoring the request" % (action_id, caller))
+					args[-1] = ""
+			except (dbus.exceptions.DBusException, ValueError) as e:
+				log.error("unable to query polkit to authorize action '%s' requested by caller '%s': %s, ignoring the request" % (action_id, caller, e))
+				args[-1] = ""
 			return method(*args, **kwargs)
 
 		wrapper = decorator.decorator(wrapper, method.im_func)
-		wrapper = dbus.service.method(self._interface_name, in_signature, out_signature)(wrapper)
+		wrapper = dbus.service.method(self._interface_name, in_signature, out_signature, sender_keyword = "caller")(wrapper)
 
 		self._dbus_methods[method_name] = wrapper
 
@@ -119,8 +139,6 @@ class DBusExporter(interfaces.ExporterInterface):
 			self._thread = None
 
 	def _thread_code(self):
-		dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-
 		bus = dbus.SystemBus()
 		bus_name = dbus.service.BusName(self._bus_name, bus)
 		self._bus_object = self._dbus_object_cls(bus, self._object_name, bus_name)
@@ -128,4 +146,3 @@ class DBusExporter(interfaces.ExporterInterface):
 		self._main_loop.run()
 		del self._bus_object
 		self._bus_object = None
-

@@ -13,6 +13,7 @@ class DBusController(object):
 		self._interface_name = interface_name
 		self._object_name = object_name
 		self._proxy = None
+		self._interface = None
 		self._debug = debug
 		self._main_loop = None
 		self._action = None
@@ -29,7 +30,8 @@ class DBusController(object):
 				DBusGMainLoop(set_as_default=True)
 				self._main_loop = GLib.MainLoop()
 				bus = dbus.SystemBus()
-				self._proxy = bus.get_object(self._bus_name, self._interface_name, self._object_name)
+				self._proxy = bus.get_object(self._bus_name, self._object_name)
+				self._interface = dbus.Interface(self._proxy, dbus_interface = self._interface_name)
 		except dbus.exceptions.DBusException:
 			raise TunedAdminDBusException("Cannot talk to Tuned daemon via DBus. Is Tuned daemon running?")
 
@@ -67,7 +69,7 @@ class DBusController(object):
 		self._init_proxy()
 
 		try:
-			method = self._proxy.get_dbus_method(method_name)
+			method = self._interface.get_dbus_method(method_name)
 			return method(*args, **kwargs)
 		except dbus.exceptions.DBusException as dbus_exception:
 			err_str = "DBus call to Tuned daemon failed"

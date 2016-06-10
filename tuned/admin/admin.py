@@ -24,7 +24,7 @@ class Admin(object):
 		self._daemon_action_errstr = ""
 		self._controller = None
 		if self._dbus:
-			self._controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE, debug)
+			self._controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_INTERFACE, consts.DBUS_OBJECT, debug)
 			try:
 				self._controller.set_signal_handler(consts.DBUS_SIGNAL_PROFILE_CHANGED, self._signal_profile_changed_cb)
 			except TunedAdminDBusException as e:
