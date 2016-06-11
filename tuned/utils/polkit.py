@@ -26,12 +26,12 @@ class polkit():
 		subject = ('system-bus-name', {'name' : sender})
 		try:
 			ret = self._authority.CheckAuthorization(subject, action_id, details, flags, cancellation_id)[0]
-		except (dbus.exceptions.DBusExceptions, ValueError) as e:
+		except (dbus.exceptions.DBusException, ValueError) as e:
 			log.error("error querying polkit: %s" % e)
 			# No polkit or polkit error, fallback to always allow root
 			try:
 				uid = self._bus.get_unix_user(sender)
-			except dbus.exceptions.DBusExceptions as e:
+			except dbus.exceptions.DBusException as e:
 				log.error("error using falback authorization method: %s" % e)
 				return -2
 			if uid == 0:
