@@ -73,15 +73,15 @@ class DBusExporter(interfaces.ExporterInterface):
 			if ret == 1:
 					log.debug("action '%s' requested by caller '%s' was successfully authorized by polkit" % (action_id, caller))
 			elif ret == 2:
-					log.warn("polkit error, but action '%s' requested by caller '%s' was successfully authorized by fallback method" (action_id, caller))
+					log.warn("polkit error, but action '%s' requested by caller '%s' was successfully authorized by fallback method" % (action_id, caller))
 			elif ret == 0:
 					log.info("action '%s' requested by caller '%s' wasn't authorized, ignoring the request" % (action_id, caller))
 					args[-1] = ""
 			elif ret == -1:
-				log.warn("polkit error and action '%s' requested by caller '%s' wasn't authorized by fallback method, ignoring the request" (action_id, caller))
+				log.warn("polkit error and action '%s' requested by caller '%s' wasn't authorized by fallback method, ignoring the request" % (action_id, caller))
 				args[-1] = ""
 			else:
-				log.error("polkit error and unable to use fallback method to authorize action '%s' requested by caller '%s', ignoring the request" (action_id, caller))
+				log.error("polkit error and unable to use fallback method to authorize action '%s' requested by caller '%s', ignoring the request" % (action_id, caller))
 				args[-1] = ""
 			return method(*args, **kwargs)
 
