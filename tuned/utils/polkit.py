@@ -22,8 +22,8 @@ class polkit():
 			return False
 		details = {}
 		flags = 1            # AllowUserInteraction flag
-		cancellation_id = '' # No cancellation id
-		subject = ('system-bus-name', {'name' : sender})
+		cancellation_id = "" # No cancellation id
+		subject = ("system-bus-name", {"name" : sender})
 		try:
 			ret = self._authority.CheckAuthorization(subject, action_id, details, flags, cancellation_id)[0]
 		except (dbus.exceptions.DBusException, ValueError) as e:
