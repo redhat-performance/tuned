@@ -76,4 +76,4 @@ STR_VERIFY_PROFILE_VALUE_FAIL = "verify: failed: %s = %s, expected %s"
 STR_VERIFY_PROFILE_FAIL = "verify: failed: %s"
 
 # timout for tuned-adm operations in seconds
-ADMIN_TIMEOUT = 90
+ADMIN_TIMEOUT = 600
