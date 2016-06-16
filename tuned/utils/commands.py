@@ -215,9 +215,9 @@ class commands:
 	# CPU list through cpulist_unpack first, so see its description about the
 	# details of the input syntax
 	def cpulist_pack(self, l):
+		l = self.cpulist_unpack(l)
 		if l is None or len(l) == 0:
 			return l
-		l = self.cpulist_unpack(l)
 		i = 0
 		j = i
 		rl = []
