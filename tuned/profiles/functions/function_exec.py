@@ -5,7 +5,7 @@ from tuned.utils.commands import commands
 
 class execute(base.Function):
 	"""
-	Conversion function: sectors to kbytes
+	Executes process and substitutes its output.
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument (the name of executable)
