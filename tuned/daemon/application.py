@@ -16,6 +16,8 @@ __all__ = ["Application"]
 
 class Application(object):
 	def __init__(self, profile_name=None):
+		self._dbus_exporter = None
+
 		storage_provider = storage.PickleProvider()
 		storage_factory = storage.Factory(storage_provider)
 
@@ -42,7 +44,6 @@ class Application(object):
 		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, self.config, self)
 		self._controller = controller.Controller(self._daemon, self.config)
 
-		self._dbus_exporter = None
 		self._init_signals()
 
 		self._pid_file = None
