@@ -211,6 +211,30 @@ class commands:
 					return []
 		return sorted(list(set(rl)))
 
+	# Packs CPU list, i.e. 1, 2, 3  will be converted to 1-3. It unpacks the
+	# CPU list through cpulist_unpack first, so see its description about the
+	# details of the input syntax
+	def cpulist_pack(self, l):
+		if l is None or len(l) == 0:
+			return l
+		l = self.cpulist_unpack(l)
+		i = 0
+		j = i
+		rl = []
+		while i + 1 < len(l):
+			if l[i + 1] - l[i] != 1:
+				if j != i:
+					rl.append(str(l[j]) + "-" + str(l[i]))
+				else:
+					rl.append(str(l[i]))
+				j = i + 1
+			i += 1
+		if j + 1 < len(l):
+			rl.append(str(l[j]) + "-" + str(l[-1]))
+		else:
+			rl.append(str(l[-1]))
+		return rl
+
 	# Inverts CPU list (i.e. makes its complement)
 	def cpulist_invert(self, l):
 		cpus = self.cpulist_unpack(l)
