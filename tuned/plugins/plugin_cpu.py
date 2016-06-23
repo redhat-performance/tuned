@@ -22,13 +22,13 @@ class CPULatencyPlugin(base.Plugin):
 		super(self.__class__, self).__init__(*args, **kwargs)
 
 		self._has_pm_qos = True
-		self._has_cpupower = True
 		self._has_energy_perf_bias = True
 		self._has_intel_pstate = False
 
 		self._min_perf_pct_save = None
 		self._max_perf_pct_save = None
 		self._no_turbo_save = None
+		self._governors_map = {}
 		self._cmd = commands()
 
 	def _init_devices(self):
@@ -43,23 +43,17 @@ class CPULatencyPlugin(base.Plugin):
 	@classmethod
 	def _get_config_options(self):
 		return {
-			"load_threshold"      : 0.2,
-			"latency_low"         : 100,
-			"latency_high"        : 1000,
-			"force_latency"       : None,
-			"governor"            : None,
-			"energy_perf_bias"    : None,
-			"min_perf_pct"        : None,
-			"max_perf_pct"        : None,
-			"no_turbo"            : None,
+			"load_threshold"       : 0.2,
+			"latency_low"          : 100,
+			"latency_high"         : 1000,
+			"force_latency"        : None,
+			"governor"             : None,
+			"sampling_down_factor" : None,
+			"energy_perf_bias"     : None,
+			"min_perf_pct"         : None,
+			"max_perf_pct"         : None,
+			"no_turbo"             : None,
 		}
-
-	def _check_cpupower(self):
-		if self._cmd.execute(["cpupower", "frequency-info"], no_errors = [errno.ENOENT])[0] == 0:
-			self._has_cpupower = True
-		else:
-			self._has_cpupower = False
-			log.warning("unable to run cpupower tool, using sysfs fallback, is cpupower installed?")
 
 	def _check_energy_perf_bias(self):
 		self._has_energy_perf_bias = False
@@ -112,8 +106,6 @@ class CPULatencyPlugin(base.Plugin):
 			else:
 				instance._load_monitor = None
 
-			# Check for cpupower, use workaround if not available
-			self._check_cpupower()
 			# Check for x86_energy_perf_policy, ignore if not available / supported
 			self._check_energy_perf_bias()
 			# Check for intel_pstate
@@ -205,11 +197,7 @@ class CPULatencyPlugin(base.Plugin):
 			return None
 		if not sim:
 			log.info("setting governor '%s' on cpu '%s'" % (governor, device))
-			if self._has_cpupower:
-				cpu_id = device.lstrip("cpu")
-				self._cmd.execute(["cpupower", "-c", cpu_id, "frequency-set", "-g", str(governor)])
-			else:
-				self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
+			self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
 		return str(governor)
 
 	@command_get("governor")
@@ -217,27 +205,54 @@ class CPULatencyPlugin(base.Plugin):
 		governor = None
 		if not self._check_cpu_can_change_governor(device):
 			return None
-		if self._has_cpupower:
-			cpu_id = device.lstrip("cpu")
-			retcode, lines = self._cmd.execute(["cpupower", "-c", cpu_id, "frequency-info", "-p"])
-			if retcode == 0:
-				for line in lines.splitlines():
-					if line.startswith("analyzing"):
-						continue
-					l = line.split()
-					if len(l) == 3:
-						governor = l[2].strip()
-						break
-		else:
-			data = self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device).strip()
-			if len(data) > 0:
-				governor = data
-
+		data = self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device).strip()
+		if len(data) > 0:
+			governor = data
 
 		if governor is None:
 			log.error("could not get current governor on cpu '%s'" % device)
 
 		return governor
+
+	def _sampling_down_factor_path(self, governor = "ondemand"):
+		return "/sys/devices/system/cpu/cpufreq/%s/sampling_down_factor" % governor
+
+	@command_set("sampling_down_factor", per_device = True, priority = 10)
+	def _set_sampling_down_factor(self, sampling_down_factor, device, sim):
+		val = None
+
+		# hack to clear governors map when the profile starts unloading
+		# TODO: this should be handled better way, by e.g. currently non-implemented
+		# Plugin.profile_load_finished() method
+		if device in self._governors_map:
+			self._governors_map.clear()
+
+		self._governors_map[device] = None
+		governor = self._get_governor(device)
+		if governor is None:
+			log.debug("ignoring sampling_down_factor setting for CPU '%s', cannot match governor" % device)
+			return None
+		if governor not in self._governors_map.values():
+			self._governors_map[device] = governor
+			path = self._sampling_down_factor_path(governor)
+			if not os.path.exists(path):
+				log.debug("ignoring sampling_down_factor setting for CPU '%s', governor '%s' doesn't support it" % (device, governor))
+				return None
+			val = str(sampling_down_factor)
+			if not sim:
+				log.info("setting sampling_down_factor to '%s' for governor '%s'" % (val, governor))
+				self._cmd.write_to_file(path, val)
+		return val
+
+	@command_get("sampling_down_factor")
+	def _get_sampling_down_factor(self, device):
+		governor = self._get_governor(device)
+		if governor is None:
+			return None
+		path = self._sampling_down_factor_path(governor)
+		if not os.path.exists(path):
+			return None
+		return self._cmd.read_file(path).strip()
 
 	@command_set("energy_perf_bias", per_device=True)
 	def _set_energy_perf_bias(self, energy_perf_bias, device, sim):
