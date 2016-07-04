@@ -37,8 +37,9 @@ release-cp: release-dir
 
 	cp -a tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
 		tuned-adm.bash dbus.conf recommend.conf tuned-main.conf 00_tuned \
-		bootcmdline com.redhat.tuned.policy com.redhat.tuned.gui.policy \
-		tuned-gui.py tuned-gui.glade tuned-gui.desktop $(VERSIONED_NAME)
+		bootcmdline modules.conf com.redhat.tuned.policy \
+		com.redhat.tuned.gui.policy tuned-gui.py tuned-gui.glade \
+		tuned-gui.desktop $(VERSIONED_NAME)
 	cp -a doc experiments libexec man profiles systemtap tuned contrib icons \
 		$(VERSIONED_NAME)
 
@@ -117,6 +118,7 @@ install: install-dirs
 	# None profile in the moment, autodetection will be used
 	echo -n > $(DESTDIR)/etc/tuned/active_profile
 	install -Dpm 0644 bootcmdline $(DESTDIR)/etc/tuned/bootcmdline
+	install -Dpm 0644 modules.conf $(DESTDIR)/etc/modprobe.d/tuned.conf
 
 	# profiles & system config
 	cp -a profiles/* $(DESTDIR)$(TUNED_PROFILESDIR)/

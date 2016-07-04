@@ -44,7 +44,7 @@ class Daemon(object):
 		try:
 			self._init_profile(profile_name)
 		except TunedException as e:
-			log.error("Cannot set initial profile. No tunings will be enabled!")
+			log.error("Cannot set initial profile. No tunings will be enabled: %s" % e)
 
 	def _init_threads(self):
 		self._thread = None
@@ -75,8 +75,8 @@ class Daemon(object):
 		else:
 			try:
 				self._profile = self._profile_loader.load(profile_name)
-			except InvalidProfileException:
-				raise TunedException(self._notify_profile_changed(profile_name, False, "Cannot load profile '%s'." % profile_name))
+			except InvalidProfileException as e:
+				raise TunedException(self._notify_profile_changed(profile_name, False, "Cannot load profile '%s': %s" % (profile_name, e)))
 
 		if save_instantly:
 			if profile_name is None:

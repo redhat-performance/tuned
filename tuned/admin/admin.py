@@ -233,6 +233,7 @@ class Admin(object):
 			print("Verification failed, current system settings differ from the preset profile.")
 			print("You can mostly fix this by Tuned restart, e.g.:")
 			print("  service tuned restart")
+			print("Sometimes (if some plugins like bootloader are used) also reboot is required.")
 		print("See tuned log file ('%s') for details." % consts.LOG_FILE)
 		return self._controller.exit(ret)
 

@@ -26,6 +26,9 @@ GRUB2_DEFAULT_ENV_FILE = "/etc/default/grub"
 BOOT_CMDLINE_TUNED_VAR = "TUNED_BOOT_CMDLINE"
 BOOT_CMDLINE_FILE = "/etc/tuned/bootcmdline"
 
+# modules plugin configuration
+MODULES_FILE = "/etc/modprobe.d/tuned.conf"
+
 # number of backups
 LOG_FILE_COUNT = 2
 LOG_FILE_MAXBYTES = 100*1000
@@ -66,14 +69,16 @@ PROFILE_ATTR_DESCRIPTION = "description"
 
 DBUS_SIGNAL_PROFILE_CHANGED = "profile_changed"
 
-STR_VERIFY_PROFILE_DEVICE_VALUE_OK = "verify: passed: device %s: %s = %s"
-STR_VERIFY_PROFILE_VALUE_OK = "verify: passed: %s = %s"
-STR_VERIFY_PROFILE_OK = "verify: passed: %s"
-STR_VERIFY_PROFILE_DEVICE_VALUE_MISSING = "verify: skipped, missing: device %s: %s"
-STR_VERIFY_PROFILE_VALUE_MISSING = "verify: skipped, missing: %s"
-STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL = "verify: failed: device %s: %s = %s, expected %s"
-STR_VERIFY_PROFILE_VALUE_FAIL = "verify: failed: %s = %s, expected %s"
-STR_VERIFY_PROFILE_FAIL = "verify: failed: %s"
+STR_HINT_REBOOT = "you need to reboot for changes to take effect"
+
+STR_VERIFY_PROFILE_DEVICE_VALUE_OK = "verify: passed: device %s: '%s' = '%s'"
+STR_VERIFY_PROFILE_VALUE_OK = "verify: passed: '%s' = '%s'"
+STR_VERIFY_PROFILE_OK = "verify: passed: '%s'"
+STR_VERIFY_PROFILE_DEVICE_VALUE_MISSING = "verify: skipped, missing: device %s: '%s'"
+STR_VERIFY_PROFILE_VALUE_MISSING = "verify: skipped, missing: '%s'"
+STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL = "verify: failed: device %s: '%s' = '%s', expected '%s'"
+STR_VERIFY_PROFILE_VALUE_FAIL = "verify: failed: '%s' = '%s', expected '%s'"
+STR_VERIFY_PROFILE_FAIL = "verify: failed: '%s'"
 
 # timout for tuned-adm operations in seconds
 ADMIN_TIMEOUT = 600
