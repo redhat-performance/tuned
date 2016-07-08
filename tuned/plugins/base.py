@@ -369,10 +369,12 @@ class Plugin(object):
 	def _process_assignment_modifiers(self, new_value, current_value):
 		if new_value is not None:
 			nws = str(new_value)
+			if len(nws) <= 1:
+				return new_value
 			op = nws[:1]
 			val = nws[1:]
 			if current_value is None:
-				return new_value
+				return val if op in ["<", ">"] else new_value
 			try:
 				if op == ">":
 					if int(val) > int(current_value):
