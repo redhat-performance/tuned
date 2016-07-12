@@ -198,8 +198,15 @@ class DiskPlugin(hotplug.Plugin):
 	def _instance_unapply_dynamic(self, instance, device):
 		pass
 
+	def _sysfs_path(self, device, suffix, prefix = "/sys/block/"):
+		if "/" in device:
+			dev = os.path.join(prefix, device.replace("/", "!"), suffix)
+			if os.path.exists(dev):
+				return dev
+		return os.path.join(prefix, device, suffix)
+
 	def _elevator_file(self, device):
-		return os.path.join("/sys/block/", device, "queue/scheduler")
+		return self._sysfs_path(device, "queue/scheduler")
 
 	@command_set("elevator", per_device=True)
 	def _set_elevator(self, value, device, sim):
@@ -261,7 +268,7 @@ class DiskPlugin(hotplug.Plugin):
 		return 253
 
 	def _readahead_file(self, device):
-		return os.path.join("/sys/block/", device, "queue/read_ahead_kb")
+		return self._sysfs_path(device, "queue/read_ahead_kb")
 
 	def _parse_ra(self, value):
 		val = str(value).split(None, 1)
@@ -307,7 +314,7 @@ class DiskPlugin(hotplug.Plugin):
 			self._storage.unset(storage_key)
 
 	def _scheduler_quantum_file(self, device):
-		return os.path.join("/sys/block/", device, "queue/iosched/quantum")
+		return self._sysfs_path(device, "queue/iosched/quantum")
 
 	@command_set("scheduler_quantum", per_device=True)
 	def _set_scheduler_quantum(self, value, device, sim):
