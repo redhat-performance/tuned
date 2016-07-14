@@ -80,10 +80,8 @@ if __name__ == "__main__":
 	action_name = options.pop("action")
 	result = False
 
-	if config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
-		dbus = True
-	else:
-		dbus = False
+	dbus = config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
+
 	try:
 		admin = tuned.admin.Admin(dbus, debug, async, timeout)
 
