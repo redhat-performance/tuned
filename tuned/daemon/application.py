@@ -15,7 +15,7 @@ log = tuned.logs.get()
 __all__ = ["Application"]
 
 class Application(object):
-	def __init__(self, profile_name=None):
+	def __init__(self, profile_name = None, config = None):
 		self._dbus_exporter = None
 
 		storage_provider = storage.PickleProvider()
@@ -27,7 +27,7 @@ class Application(object):
 		plugin_instance_factory = plugins.instance.Factory()
 		self.variables = profiles.variables.Variables()
 
-		self.config = GlobalConfig()
+		self.config = GlobalConfig() if config is None else config
 		if self.config.get_bool(consts.CFG_DYNAMIC_TUNING):
 			log.info("dynamic tuning is enabled (can be overriden in plugins)")
 		else:

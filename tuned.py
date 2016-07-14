@@ -28,6 +28,7 @@ import tuned.daemon
 import tuned.exceptions
 import tuned.consts as consts
 import tuned.version as ver
+from tuned.utils.global_config import GlobalConfig
 
 def error(message):
 	print >>sys.stderr, message
@@ -47,6 +48,7 @@ if __name__ == "__main__":
 		error("Superuser permissions are required to run the daemon.")
 		sys.exit(1)
 
+	config = GlobalConfig()
 	log = tuned.logs.get()
 	if args.debug:
 		log.setLevel("DEBUG")
@@ -60,7 +62,11 @@ if __name__ == "__main__":
 			if args.log is not None:
 				log.switch_to_file(args.log)
 
-		app = tuned.daemon.Application(args.profile)
+		app = tuned.daemon.Application(args.profile, config)
+
+		# no daemon mode doesn't need DBus
+		if not config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+			args.no_dbus = True
 
 		if not args.no_dbus:
 			app.attach_to_dbus(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
