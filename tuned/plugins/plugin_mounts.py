@@ -23,7 +23,7 @@ class MountsPlugin(base.Plugin):
 		mountpoint_topology = {}
 		current_disk = None
 
-		stdout, stderr = Popen(["/usr/bin/lsblk", "-rno", "TYPE,RM,KNAME,FSTYPE,MOUNTPOINT"], stdout=PIPE, stderr=PIPE, close_fds=True).communicate()
+		stdout, stderr = Popen(["lsblk", "-rno", "TYPE,RM,KNAME,FSTYPE,MOUNTPOINT"], stdout=PIPE, stderr=PIPE, close_fds=True).communicate()
 		for columns in map(lambda line: line.split(), stdout.splitlines()):
 			if len(columns) < 3:
 				continue
