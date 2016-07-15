@@ -24,9 +24,25 @@ Created on Oct 15, 2013
 
 @author: mstana
 '''
+try:
+    import gi
+except ImportError:
+    raise ImportError("Gtk3 backend requires pygobject to be installed.")
 
-import gi.repository.GObject as GObject
-import gi.repository.Gtk as Gtk
+try:
+    gi.require_version("Gtk", "3.0")
+except AttributeError:
+    raise ImportError(
+        "pygobject version too old -- it must have require_version")
+except ValueError:
+    raise ImportError(
+        "Gtk3 backend requires the GObject introspection bindings for Gtk 3 "
+        "to be installed.")
+
+try:
+    from gi.repository import Gtk, GObject
+except ImportError:
+    raise ImportError("Gtk3 backend requires pygobject to be installed.")
 
 import sys
 import os
