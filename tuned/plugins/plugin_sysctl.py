@@ -48,6 +48,10 @@ class SysctlPlugin(base.Plugin):
 
 		self._storage.set("options", instance._sysctl_original)
 
+		if self._global_cfg.get_bool(consts.CFG_REAPPLY_SYSCTL, consts.CFG_DEF_REAPPLY_SYSCTL):
+			log.info("reapplying system sysctl")
+			self._cmd.execute(["sysctl", "--system"])
+
 	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
 		# override, so always skip missing

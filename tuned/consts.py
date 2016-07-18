@@ -49,6 +49,7 @@ CFG_DYNAMIC_TUNING = "dynamic_tuning"
 CFG_SLEEP_INTERVAL = "sleep_interval"
 CFG_UPDATE_INTERVAL = "update_interval"
 CFG_RECOMMEND_COMMAND = "recommend_command"
+CFG_REAPPLY_SYSCTL = "reapply_sysctl"
 
 # no_daemon mode
 CFG_DEF_DAEMON = True
@@ -60,6 +61,8 @@ CFG_DEF_SLEEP_INTERVAL = 1
 CFG_DEF_UPDATE_INTERVAL = 10
 # recommend command availability
 CFG_DEF_RECOMMEND_COMMAND = True
+# reapply system sysctl
+CFG_DEF_REAPPLY_SYSCTL = True
 
 PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
 
