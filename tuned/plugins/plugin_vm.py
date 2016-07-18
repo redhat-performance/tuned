@@ -19,6 +19,7 @@ class VMPlugin(base.Plugin):
 	def _get_config_options(self):
 		return {
 			"transparent_hugepages" : None,
+			"transparent_hugepage" : None,
 		}
 
 	def _instance_init(self, instance):
@@ -58,6 +59,11 @@ class VMPlugin(base.Plugin):
 				log.warn("Option 'transparent_hugepages' is not supported on current hardware.")
 			return None
 
+        # just an alias to transparent_hugepages
+	@command_set("transparent_hugepage")
+	def _set_transparent_hugepage(self, value, sim):
+		self._set_transparent_hugepages(value, sim)
+
 	@command_get("transparent_hugepages")
 	def _get_transparent_hugepages(self):
 		sys_file = self._thp_file()
@@ -65,3 +71,8 @@ class VMPlugin(base.Plugin):
 			return cmd.get_active_option(cmd.read_file(sys_file))
 		else:
 			return None
+
+        # just an alias to transparent_hugepages
+	@command_get("transparent_hugepage")
+	def _get_transparent_hugepage(self):
+		return self._get_transparent_hugepages()
