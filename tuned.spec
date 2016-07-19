@@ -334,8 +334,6 @@ fi
 %changelog
 * Tue Jul 19 2016 Jaroslav Škarvada <jskarvad@redhat.com> - 2.7.0-1
 - new-release
-  - rebase tuned to latest upstream
-    resolves: rhbz#1289048
   - gui: fixed save profile
     resolves: rhbz#1242491
   - tuned-adm: added --ignore-missing parameter
