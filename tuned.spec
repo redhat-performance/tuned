@@ -10,7 +10,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.6.0
+Version: 2.7.0
 Release: 1%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -332,6 +332,54 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Tue Jul 19 2016 Jaroslav Škarvada <jskarvad@redhat.com> - 2.7.0-1
+- new-release
+  - rebase tuned to latest upstream
+    resolves: rhbz#1289048
+  - gui: fixed save profile
+    resolves: rhbz#1242491
+  - tuned-adm: added --ignore-missing parameter
+    resolves: rhbz#1243807
+  - plugin_vm: added transparent_hugepage alias
+    resolves: rhbz#1249610
+  - plugins: added modules plugin
+    resolves: rhbz#1249618
+  - plugin_cpu: do not show error if cpupower or x86_energy_perf_policy are
+    missing
+    resolves: rhbz#1254417
+  - tuned-adm: fixed restart attempt if tuned is not running
+    resolves: rhbz#1258755
+  - nfv: avoided race condition by using synchronous mode
+    resolves: rhbz#1259039
+  - realtime: added check for isolcpus sanity
+    resolves: rhbz#1264128
+  - pm_qos: fixed exception if PM_QoS is not available
+    resolves: rhbz#1296137
+  - plugin_sysctl: reapply system sysctl after Tuned sysctl are applied
+    resolves: rhbz#1302953
+  - atomic: increase number of inotify watches
+    resolves: rhbz#1322001
+  - realtime-virtual-host/guest: added rcu_nocbs kernel boot parameter
+    resolves: rhbz#1334479
+  - realtime: fixed kernel.sched_rt_runtime_us to be -1
+    resolves: rhbz#1346715
+  - tuned-adm: fixed detection of no_daemon mode
+    resolves: rhbz#1351536
+  - plugin_base: correctly strip assignment modifiers even if not used
+    resolves: rhbz#1353142
+  - plugin_disk: try to workaround embedded '/' in device names
+    related: rhbz#1353142
+  - sap-hana: explicitly setting kernel.numa_balancing = 0 for better performance
+    resolves: rhbz#1355768
+  - switched to polkit authorization
+    resolves: rhbz#1095142
+  - plugins: added scsi_host plugin
+    resolves: rhbz#1246992
+  - spec: fixed conditional support for grub2 to work with selinux
+    resolves: rhbz#1351937
+  - gui: added tuned icon and desktop file
+    resolves: rhbz#1356369
+
 * Tue Jan  5 2016 Jaroslav Škarvada <jskarvad@redhat.com> - 2.6.0-1
 - new-release
   - plugin_cpu: do not show error if cpupower or x86_energy_perf_policy are missing
