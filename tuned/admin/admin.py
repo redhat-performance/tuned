@@ -98,7 +98,7 @@ class Admin(object):
 
 	def _action_list(self):
 		self._print_profiles(self._profiles_locator.get_known_names_summary())
-		self._action_dbus_active()
+		self._action_active()
 		return True
 
 	def _dbus_get_active_profile(self):
