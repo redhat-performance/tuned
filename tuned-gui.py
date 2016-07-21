@@ -89,7 +89,7 @@ class Base(object):
 		try:
 			self.controller = \
 				tuned.admin.DBusController(consts.DBUS_BUS,
-					consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
+					consts.DBUS_INTERFACE, consts.DBUS_OBJECT)
 			self.controller.is_running()
 		except tuned.admin.exceptions.TunedAdminDBusException, ex:
 			response = self.tuned_daemon_exception_dialog.run()
