@@ -118,13 +118,13 @@ class Admin(object):
 	def _print_profile_info(self, profile_info):
 		if profile_info[0] == True:
 			print("Profile name:")
-			print(ret[1])
+			print(profile_info[1])
 			print()
 			print("Profile summary:")
-			print(ret[2])
+			print(profile_info[2])
 			print()
 			print("Profile description:")
-			print(ret[3])
+			print(profile_info[3])
 			return True
 		else:
 			print("Unable to get information about profile '%s'" % profile)
