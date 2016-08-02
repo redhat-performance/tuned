@@ -10,7 +10,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.7.0
+Version: 2.7.1
 Release: 1%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
@@ -332,6 +332,15 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Tue Aug  2 2016 Jaroslav Škarvada <jskarvad@redhat.com> - 2.7.1-1
+- new-release
+  - gui: fixed traceback caused by DBus paths copy&paste error
+    related: rhbz#1356369
+  - tuned-adm: fixed traceback of 'tuned-adm list' if daemon is not running
+    resolves: rhbz#1358857
+  - tuned-adm: fixed profile_info traceback
+    resolves: rhbz#1362481
+
 * Tue Jul 19 2016 Jaroslav Škarvada <jskarvad@redhat.com> - 2.7.0-1
 - new-release
   - gui: fixed save profile
