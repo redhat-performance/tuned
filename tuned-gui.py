@@ -1010,7 +1010,7 @@ class Base(object):
 		self._cmd.execute(['service', 'tuned', 'start'])
 		time.sleep(10)
 		self.controller = tuned.admin.DBusController(consts.DBUS_BUS,
-				consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
+				consts.DBUS_INTERFACE, consts.DBUS_OBJECT)
 
 
 if __name__ == '__main__':
