@@ -24,9 +24,6 @@ class DBusController(object):
 	def _init_proxy(self):
 		try:
 			if self._proxy is None:
-				# Probably not needed for PyGObject 3.10.2+
-				GObject.threads_init()
-
 				DBusGMainLoop(set_as_default=True)
 				self._main_loop = GLib.MainLoop()
 				bus = dbus.SystemBus()

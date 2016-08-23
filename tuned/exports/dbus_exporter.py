@@ -9,7 +9,7 @@ import signal
 import tuned.logs
 import tuned.consts as consts
 from tuned.utils.polkit import polkit
-from gi.repository import GObject as gobject
+from gi.repository import GLib
 
 log = tuned.logs.get()
 
@@ -24,7 +24,6 @@ class DBusExporter(interfaces.ExporterInterface):
 	"""
 
 	def __init__(self, bus_name, interface_name, object_name):
-		gobject.threads_init()
 		dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 		self._dbus_object_cls = None
@@ -42,7 +41,7 @@ class DBusExporter(interfaces.ExporterInterface):
 		# dirty hack that fixes KeyboardInterrupt handling
 		# the hack is needed because PyGObject / GTK+-3 developers are morons
 		signal_handler = signal.getsignal(signal.SIGINT)
-		self._main_loop = gobject.MainLoop()
+		self._main_loop = GLib.MainLoop()
 		signal.signal(signal.SIGINT, signal_handler)
 
 	@property
