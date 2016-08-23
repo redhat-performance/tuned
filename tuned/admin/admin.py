@@ -186,7 +186,7 @@ class Admin(object):
 			return False
 		self._daemon_action_finished.clear()
 		(ret, msg) = self._controller.switch_profile(profile_name)
-		if self._async:
+		if self._async or not ret:
 			return self._controller.exit(self._profile_print_status(ret, msg))
 		else:
 			self._timestamp = time.time()
