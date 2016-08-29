@@ -35,10 +35,12 @@ class Admin(object):
 		print(message, file=sys.stderr)
 
 	def _signal_profile_changed_cb(self, profile_name, result, errstr):
-		self._daemon_action_profile = profile_name
-		self._daemon_action_result = result
-		self._daemon_action_errstr = errstr
-		self._daemon_action_finished.set()
+		# ignore successive signals if the signal is not yet processed
+		if not self._daemon_action_finished.is_set():
+			self._daemon_action_profile = profile_name
+			self._daemon_action_result = result
+			self._daemon_action_errstr = errstr
+			self._daemon_action_finished.set()
 
 	def _tuned_is_running(self):
 		try:
