@@ -59,7 +59,7 @@ def verify(shouldbemask):
 		sys.exit(1)
 
 	# now verify each /proc/irq/$num/smp_affinity
-	interruptdirs = [ f for f in os.listdir(irqpath) if os.path.isdir(join(irqpath,f)) ]
+	interruptdirs = [ f for f in os.listdir(irqpath) if os.path.isdir(os.path.join(irqpath,f)) ]
 	# IRQ 2 - cascaded signals from IRQs 8-15 (any devices configured to use IRQ 2 will actually be using IRQ 9)
 	interruptdirs.remove("2")
 	# IRQ 0 - system timer (cannot be changed)
@@ -105,7 +105,7 @@ fo.close()
 
 # now adjust each /proc/irq/$num/smp_affinity
 
-interruptdirs = [ f for f in os.listdir(irqpath) if os.path.isdir(join(irqpath,f)) ]
+interruptdirs = [ f for f in os.listdir(irqpath) if os.path.isdir(os.path.join(irqpath,f)) ]
 
 # IRQ 2 - cascaded signals from IRQs 8-15 (any devices configured to use IRQ 2 will actually be using IRQ 9)
 interruptdirs.remove("2")
