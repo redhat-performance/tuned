@@ -73,7 +73,7 @@ def verify(shouldbemask):
 			inplacemask = inplacemask | 1 << i;
 		if (inplacemask & ~shouldbemask):
 			sys.stderr.write("verify: failed: irqaffinity (%s) inplacemask=%x shouldbemask=%x\n" % (fname, inplacemask, shouldbemask))
-		sys.exit(1)
+			sys.exit(1)
 
 	sys.exit(0)
 
