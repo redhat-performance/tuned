@@ -67,7 +67,7 @@ class SysctlPlugin(base.Plugin):
 			self._write_sysctl(option, value)
 
 	def _execute_sysctl(self, arguments):
-		execute = ["/sbin/sysctl"] + arguments
+		execute = ["sysctl"] + arguments
 		log.debug("executing %s" % execute)
 		return self._cmd.execute(execute)
 
