@@ -49,6 +49,7 @@ import os
 import time
 import configobj
 
+import subprocess
 import tuned.logs
 import tuned.consts as consts
 import tuned.version as version
@@ -1017,9 +1018,14 @@ if __name__ == '__main__':
 
 	if os.geteuid() != 0:
 		try:
-			os.execvp('pkexec', ['pkexec ' + EXECNAME, EXECNAME] + sys.argv[1:])
-		except (IOError, OSError) as e:
-			pass
+			# Explicitly disabling shell to be safe
+			ec = subprocess.call(['pkexec', EXECNAME] + sys.argv[1:], shell = False)
+		except (subprocess.CalledProcessError) as e:
+			print >> sys.stderr, 'Error elevating privileges: %s' % e
+		else:
+			# If not pkexec error
+			if ec not in [126, 127]:
+				sys.exit(0)
 		# In case of error elevating privileges
 		print >> sys.stderr, 'Superuser permissions are required to run the daemon.'
 		sys.exit(1)
