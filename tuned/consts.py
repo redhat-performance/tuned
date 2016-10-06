@@ -10,7 +10,9 @@ DBUS_OBJECT = "/Tuned"
 DEFAULT_PROFILE = "balanced"
 DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
 LOAD_DIRECTORIES = ["/usr/lib/tuned", "/etc/tuned"]
+PERSISTENT_STORAGE_DIR = "/var/lib/tuned"
 
+TMP_FILE_SUFFIX = ".tmp"
 # max. number of consecutive errors to give up
 ERROR_THRESHOLD = 3
 
@@ -28,6 +30,10 @@ BOOT_CMDLINE_FILE = "/etc/tuned/bootcmdline"
 
 # modules plugin configuration
 MODULES_FILE = "/etc/modprobe.d/tuned.conf"
+
+# systemd plugin configuration
+SYSTEMD_SYSTEM_CONF_FILE = "/etc/systemd/system.conf"
+SYSTEMD_CPUAFFINITY_VAR = "CPUAffinity"
 
 # number of backups
 LOG_FILE_COUNT = 2

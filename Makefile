@@ -92,6 +92,7 @@ nightly: tidy-mock-result-dir createrepo scratch-build
 install-dirs:
 	mkdir -p $(DESTDIR)$(PYTHON_SITELIB)
 	mkdir -p $(DESTDIR)$(TUNED_PROFILESDIR)
+	mkdir -p $(DESTDIR)/var/lib/tuned
 	mkdir -p $(DESTDIR)/var/log/tuned
 	mkdir -p $(DESTDIR)/run/tuned
 	mkdir -p $(DESTDIR)$(DOCDIR)

@@ -140,6 +140,9 @@ mkdir -p %{buildroot}%{_datadir}/tuned/grub2
 mv %{buildroot}%{_sysconfdir}/grub.d/00_tuned %{buildroot}%{_datadir}/tuned/grub2/00_tuned
 rmdir %{buildroot}%{_sysconfdir}/grub.d
 
+# ghost for persistent storage
+mkdir -p %{buildroot}%{_var}/lib/tuned
+
 # ghost for NFV
 mkdir -p %{buildroot}%{_sysconfdir}/modprobe.d
 touch %{buildroot}%{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
@@ -162,6 +165,10 @@ fi
 
 %preun
 %systemd_preun tuned.service
+if [ "$1" == 0 ]; then
+# clear persistent storage
+  rm -f %{_var}/lib/tuned/*
+fi
 
 
 %postun
@@ -247,6 +254,7 @@ fi
 %{_unitdir}/tuned.service
 %dir %{_localstatedir}/log/tuned
 %dir /run/tuned
+%dir %{_var}/lib/tuned
 %{_mandir}/man5/tuned*
 %{_mandir}/man7/tuned-profiles.7*
 %{_mandir}/man8/tuned*

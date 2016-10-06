@@ -33,6 +33,10 @@ class commands:
 	def unquote(self, v):
 		return re.sub("^\"(.*)\"$", r"\1", v)
 
+	# clear escape characters (by default '\')
+	def unescape(self, s, escape_char = "\\"):
+		return s.replace(escape_char, "")
+
 	# add spaces to align s2 to pos, returns resulting string: s1 + spaces + s2
 	def align_str(self, s1, pos, s2):
 		return s1 + " " * (pos - len(s1)) + s2
@@ -77,16 +81,23 @@ class commands:
 			return d.values()[mo.lastindex - 1]
 		return None
 
-	def write_to_file(self, f, data):
-		self._debug("Writing to file: %s < %s" % (f, data))
+	def write_to_file(self, f, data, makedir = False, no_error = False):
+		self._debug("Writing to file: '%s' < '%s'" % (f, data))
+		if makedir:
+			d = os.path.dirname(f)
+			if os.path.isdir(d):
+				makedir = False
 		try:
+			if makedir:
+				os.makedirs(d)
 			fd = open(f, "w")
 			fd.write(str(data))
 			fd.close()
 			rc = True
 		except (OSError,IOError) as e:
 			rc = False
-			self._error("Writing to file %s error: %s" % (f, e))
+			if not no_error:
+				self._error("Writing to file '%s' error: '%s'" % (f, e))
 		return rc
 
 	def read_file(self, f, err_ret = "", no_error = False):
@@ -97,8 +108,30 @@ class commands:
 			f.close()
 		except (OSError,IOError) as e:
 			if not no_error:
-				self._error("Reading %s error: %s" % (f, e))
+				self._error("Error when reading file '%s': '%s'" % (f, e))
+		self._debug("Read data from file: '%s' > '%s'" % (f, old_value))
 		return old_value
+
+	def unlink(self, f, no_error = False):
+		self._debug("Removing file: '%s'" % f)
+		if os.path.exists(f):
+			try:
+				os.unlink(f)
+			except OSError as error:
+				if not no_error:
+					log.error("cannot remove file '%s': '%s'" % (f, str(error)))
+				return False
+		return True
+
+	def rename(self, src, dst, no_error = False):
+		self._debug("Renaming file '%s' to '%s'" % (src, dst))
+		try:
+			os.rename(src, dst)
+		except OSError as error:
+			if not no_error:
+				log.error("cannot rename file '%s' to '%s': '%s'" % (f, str(error)))
+			return False
+		return True
 
 	def replace_in_file(self, f, pattern, repl):
 		data = self.read_file(f)

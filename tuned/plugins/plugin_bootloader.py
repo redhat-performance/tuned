@@ -106,7 +106,7 @@ class BootloaderPlugin(base.Plugin):
 		return True
 
 	@command_custom("grub2_cfg_file")
-	def _grub2_cfg_file(self, enabling, value, verify):
+	def _grub2_cfg_file(self, enabling, value, verify, ignore_missing):
 		# nothing to verify
 		if verify:
 			return None
@@ -114,7 +114,7 @@ class BootloaderPlugin(base.Plugin):
 			self._grub2_cfg_file = value
 
 	@command_custom("cmdline", per_device = False, priority = 10)
-	def _cmdline(self, enabling, value, verify):
+	def _cmdline(self, enabling, value, verify, ignore_missing):
 		v = self._variables.expand(self._cmd.unquote(value))
 		if verify:
 			cmdline = self._cmd.read_file("/proc/cmdline")

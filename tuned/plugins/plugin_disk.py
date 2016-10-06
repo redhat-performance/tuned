@@ -295,7 +295,7 @@ class DiskPlugin(hotplug.Plugin):
 		return int(value)
 
 	@command_custom("readahead_multiply", per_device=True)
-	def _multiply_readahead(self, enabling, multiplier, device, verify):
+	def _multiply_readahead(self, enabling, multiplier, device, verify, ignore_missing):
 		if verify:
 			return None
 		storage_key = self._storage_key("readahead_multiply", device)

@@ -290,9 +290,9 @@ class NetTuningPlugin(base.Plugin):
 		return None
 
 	@command_custom("features", per_device = True)
-	def _features(self, start, value, device, verify):
+	def _features(self, start, value, device, verify, ignore_missing):
 		return self._custom_parameters(False, start, value, device, verify)
 
 	@command_custom("coalesce", per_device = True)
-	def _coalesce(self, start, value, device, verify):
+	def _coalesce(self, start, value, device, verify, ignore_missing):
 		return self._custom_parameters(True, start, value, device, verify)
