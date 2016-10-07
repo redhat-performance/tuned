@@ -113,6 +113,14 @@ Requires: tuna, qemu-kvm-tools-rhev
 %description profiles-nfv
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV).
 
+%package profiles-cpu-partitioning
+Summary: Additional tuned profile(s) optimized for CPU partitioning
+Requires: %{name} = %{version}-%{release}
+Requires: tuna
+
+%description profiles-cpu-partitioning
+Additional tuned profile(s) optimized for CPU partitioning.
+
 %package profiles-compat
 Summary: Additional tuned profiles mainly for backward compatibility with tuned 1.0
 Requires: %{name} = %{version}-%{release}
@@ -226,6 +234,9 @@ fi
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
 %exclude %{_sysconfdir}/tuned/realtime-variables.conf
+%exclude %{_sysconfdir}/tuned/realtime-virtual-guest-variables.conf
+%exclude %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
+%exclude %{_sysconfdir}/tuned/cpu-partitioning-variables.conf
 %exclude %{_prefix}/lib/tuned/default
 %exclude %{_prefix}/lib/tuned/desktop-powersave
 %exclude %{_prefix}/lib/tuned/laptop-ac-powersave
@@ -242,9 +253,11 @@ fi
 %exclude %{_prefix}/lib/tuned/realtime
 %exclude %{_prefix}/lib/tuned/realtime-virtual-guest
 %exclude %{_prefix}/lib/tuned/realtime-virtual-host
+%exclude %{_prefix}/lib/tuned/cpu-partitioning
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %dir %{_libexecdir}/tuned
+%{_libexecdir}/tuned/defirqaffinity*
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/active_profile
 %config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/bootcmdline
@@ -325,8 +338,13 @@ fi
 %ghost %{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 %{_prefix}/lib/tuned/realtime-virtual-guest
 %{_prefix}/lib/tuned/realtime-virtual-host
-%{_libexecdir}/tuned/defirqaffinity*
 %{_mandir}/man7/tuned-profiles-nfv.7*
+
+%files profiles-cpu-partitioning
+%defattr(-,root,root,-)
+%config(noreplace) %{_sysconfdir}/tuned/cpu-partitioning-variables.conf
+%{_prefix}/lib/tuned/cpu-partitioning
+%{_mandir}/man7/tuned-profiles-cpu-partitioning.7*
 
 %files profiles-compat
 %defattr(-,root,root,-)

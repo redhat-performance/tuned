@@ -129,6 +129,8 @@ install: install-dirs
 		$(DESTDIR)/etc/tuned/realtime-virtual-guest-variables.conf
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime-virtual-host/realtime-virtual-host-variables.conf \
 		$(DESTDIR)/etc/tuned/realtime-virtual-host-variables.conf
+	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning/cpu-partitioning-variables.conf \
+		$(DESTDIR)/etc/tuned/cpu-partitioning-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_PROFILESDIR)/recommend.conf
 
 	# bash completion

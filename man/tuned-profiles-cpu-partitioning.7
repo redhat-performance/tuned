@@ -1,6 +1,6 @@
 .\"/* 
 .\" * All rights reserved
-.\" * Copyright (C) 2009-2014 Red Hat, Inc.
+.\" * Copyright (C) 2015 Red Hat, Inc.
 .\" * Authors: Jaroslav Škarvada
 .\" *
 .\" * This program is free software; you can redistribute it and/or
@@ -18,30 +18,19 @@
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
 .\" 
-.TH TUNED_PROFILES_SAP_HANA "7" "23 Sep 2014" "Fedora Power Management SIG" "tuned"
+.TH TUNED_PROFILES_CPU_PARTITIONING "7" "7 Oct 2016" "tuned"
 .SH NAME
-tuned\-profiles\-sap\-hana - description of profiles provided for the SAP HANA
+tuned\-profiles\-cpu\-partitioning - description of profile provided for for CPU partitioning
 
 .SH DESCRIPTION
-These profiles provides performance optimizations for the SAP HANA applications.
+The profile is provided for CPU partitioning.
 
 .SH PROFILES
-The following profiles are provided:
+The following profiles is provided:
 
 .TP
-.BI "sap\-hana"
-A performance optimized profile for the SAP HANA applications.
-It is based on throughput\-performance profile. It additionally disables
-transparent hugepages, locks CPU to the low C states (by PM QoS) and tunes sysctl
-regarding semaphores.
-
-.TP
-.BI "sap\-hana\-vmware"
-A performance optimized profile for the SAP HANA applications on VMware.
-It is based on throughput\-performance profile. It additionally disables
-transparent hugepages, locks CPU to the low C states (by PM QoS) and tunes sysctl
-regarding semaphores. It decreases virtual memory swappiness and disables large
-recieve offload for the network adapter.
+.BI "cpu\-partitioning"
+Profile optimized for CPU partitioning.
 
 .SH "FILES"
 .NF
@@ -54,10 +43,10 @@ recieve offload for the network adapter.
 .BR tuned\-profiles (7)
 .BR tuned\-profiles\-atomic (7)
 .BR tuned\-profiles\-sap (7)
+.BR tuned\-profiles\-sap\-hana (7)
 .BR tuned\-profiles\-oracle (7)
 .BR tuned\-profiles\-realtime (7)
 .BR tuned\-profiles\-nfv (7)
-.BR tuned\-profiles\-cpu-partitioning (7)
 .BR tuned\-profiles\-compat (7)
 .SH AUTHOR
 .NF
