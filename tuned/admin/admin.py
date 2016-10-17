@@ -117,7 +117,7 @@ class Admin(object):
 			profile_name = None
 		return profile_name
 
-	def _print_profile_info(self, profile_info):
+	def _print_profile_info(self, profile, profile_info):
 		if profile_info[0] == True:
 			print("Profile name:")
 			print(profile_info[1])
@@ -135,12 +135,12 @@ class Admin(object):
 	def _action_dbus_profile_info(self, profile = ""):
 		if profile == "":
 			profile = self._dbus_get_active_profile()
-		return self._controller.exit(self._print_profile_info(self._controller.profile_info(profile)))
+		return self._controller.exit(self._print_profile_info(profile, self._controller.profile_info(profile)))
 
 	def _action_profile_info(self, profile = ""):
 		if profile == "":
 			profile = self._get_active_profile()
-		return self._print_profile_info(self._profiles_locator.get_profile_attrs(profile, [consts.PROFILE_ATTR_SUMMARY, consts.PROFILE_ATTR_DESCRIPTION], ["", ""]))
+		return self._print_profile_info(profile, self._profiles_locator.get_profile_attrs(profile, [consts.PROFILE_ATTR_SUMMARY, consts.PROFILE_ATTR_DESCRIPTION], ["", ""]))
 
 	def _print_profile_name(self, profile_name):
 		if profile_name is None:
