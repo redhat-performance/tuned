@@ -7,6 +7,7 @@ start() {
     tuna -c "$TUNED_isolated_cores_expanded" -i
     sed -i '/^IRQBALANCE_BANNED_CPUS=/d' /etc/sysconfig/irqbalance
     echo "IRQBALANCE_BANNED_CPUS=$TUNED_isolated_cpumask" >>/etc/sysconfig/irqbalance
+    setup_kvm_mod_low_latency
     return "$?"
 }
 
@@ -16,6 +17,7 @@ stop() {
     if [ "$1" = "profile_switch" ]
     then
         sed -i '/^IRQBALANCE_BANNED_CPUS=/d' /etc/sysconfig/irqbalance
+        teardown_kvm_mod_low_latency
     fi
     return "$?"
 }
