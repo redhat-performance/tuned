@@ -497,6 +497,34 @@ eee_set_normal_fsb() {
 }
 
 #
+# modprobe configuration handling
+#
+
+kvm_modprobe_file=/etc/modprobe.d/kvm.rt.tuned.conf
+
+setup_kvm_mod_low_latency()
+{
+	if [ -f $kvm_modprobe_file ]; then
+		return
+	fi
+
+	modinfo -p kvm | grep -q kvmclock_periodic_sync
+	if [ "$?" -eq 0 ]; then
+		echo "options kvm kvmclock_periodic_sync=0" > $kvm_modprobe_file
+	fi
+
+	modinfo -p kvm_intel | grep -q ple_gap
+	if [ "$?" -eq 0 ]; then
+		echo "options kvm_intel ple_gap=0" >> $kvm_modprobe_file
+	fi
+}
+
+teardown_kvm_mod_low_latency()
+{
+	rm -f $kvm_modprobe_file
+}
+
+#
 # ACTION PROCESSING
 #
 
