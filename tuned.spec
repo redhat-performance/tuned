@@ -204,7 +204,8 @@ fi
 # and tuned is noarch package, thus the following hack is needed
 if [ -d %{_sysconfdir}/grub.d ]; then
   cp -a %{_datadir}/tuned/grub2/00_tuned %{_sysconfdir}/grub.d/00_tuned
-  selinuxenabled && restorecon %{_sysconfdir}/grub.d/00_tuned || :
+  selinuxenabled &>/dev/null && \
+    restorecon %{_sysconfdir}/grub.d/00_tuned &>/dev/null || :
 fi
 
 
