@@ -39,6 +39,37 @@ class BootloaderPlugin(base.Plugin):
 			"cmdline": "",
 		}
 
+	def _get_effective_options(self, options):
+		"""Merge provided options with plugin default options and merge all cmdline.* options."""
+		effective = self._get_config_options().copy()
+		cmdline_keys = []
+		for key in options:
+			if str(key).startswith("cmdline"):
+				cmdline_keys.append(key)
+			elif key in effective:
+				effective[key] = options[key]
+			else:
+				log.warn("Unknown option '%s' for plugin '%s'." % (key, self.__class__.__name__))
+		cmdline_keys.sort()
+		cmdline = ""
+		for key in cmdline_keys:
+			val = options[key]
+			if val is None or val == "":
+				continue
+			op = val[0]
+			vals = val[1:].strip()
+			if op == "+" and vals != "":
+				cmdline += " " + vals
+			elif op == "-" and vals != "":
+				regex = re.escape(vals)
+				cmdline = re.sub(r"(\A|\s)" + regex + r"(?=\Z|\s)", r"", cmdline)
+			else:
+				cmdline += " " + val
+		cmdline = cmdline.strip()
+		if cmdline != "":
+			effective["cmdline"] = cmdline
+		return effective
+
 	def _get_grub2_cfg_file(self):
 		for f in consts.GRUB2_CFG_FILES:
 			if os.path.exists(f):
