@@ -33,6 +33,7 @@ class DiskPlugin(hotplug.Plugin):
 		self._assigned_devices = set()
 		self._free_devices = self._devices.copy()
 
+	@classmethod
 	def _device_is_supported(cls, device):
 		return  device.device_type == "disk" and \
 			device.attributes.get("removable", None) == "0" and \
