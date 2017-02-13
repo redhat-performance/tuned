@@ -214,7 +214,6 @@ class Admin(object):
 		else:
 			self._error("Requested profile '%s' doesn't exist." % profile_name)
 			return False
-		return self._profile_print_status(self, ret, msg)
 
 	def _action_dbus_recommend_profile(self):
 		print(self._controller.recommend_profile())
