@@ -844,7 +844,7 @@ class Base(object):
 			else:
 				self._cmd.execute(['systemctl', 'disable', 'tuned'])
 		else:
-			raise NotImplemented
+			raise NotImplementedError()
 
 	def execute_switch_tuned_admin_functions(self, switch, data):
 		self.is_admin = self.switch_tuned_admin_functions.get_active()
