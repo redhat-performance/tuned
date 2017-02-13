@@ -2,6 +2,7 @@ import os
 import base
 from decorators import *
 import tuned.logs
+from tuned.plugins import exceptions
 from tuned.utils.commands import commands
 
 log = tuned.logs.get()
