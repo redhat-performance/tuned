@@ -27,7 +27,7 @@ class BootloaderPlugin(base.Plugin):
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
 		instance._has_static_tuning = True
-		self._grub2_cfg_file = self._get_grub2_cfg_file()
+		self._grub2_cfg_file_name = self._get_grub2_cfg_file()
 
 	def _instance_cleanup(self, instance):
 		pass
@@ -82,7 +82,7 @@ class BootloaderPlugin(base.Plugin):
 
 	def _remove_grub2_tuning(self):
 		self._patch_bootcmdline("")
-		self._cmd.replace_in_file(self._grub2_cfg_file, r"\b(set\s+" + consts.GRUB2_TUNED_VAR + r"\s*=).*$", r"\1" + "\"\"")
+		self._cmd.replace_in_file(self._grub2_cfg_file_name, r"\b(set\s+" + consts.GRUB2_TUNED_VAR + r"\s*=).*$", r"\1" + "\"\"")
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
 		if profile_switch:
@@ -121,18 +121,18 @@ class BootloaderPlugin(base.Plugin):
 
 	def _grub2_cfg_patch(self, value):
 		log.debug("patching grub.cfg")
-		if self._grub2_cfg_file is None:
+		if self._grub2_cfg_file_name is None:
 			log.error("cannot find grub.cfg to patch, you need to regenerate it by hand by grub2-mkconfig")
 			return False
-		grub2_cfg = self._cmd.read_file(self._grub2_cfg_file)
+		grub2_cfg = self._cmd.read_file(self._grub2_cfg_file_name)
 		if len(grub2_cfg) <= 0:
-			log.error("error patching %s, you need to regenerate it by hand by grub2-mkconfig" % self._grub2_cfg_file)
+			log.error("error patching %s, you need to regenerate it by hand by grub2-mkconfig" % self._grub2_cfg_file_name)
 			return False
-		log.debug("adding boot command line parameters to '%s'" % self._grub2_cfg_file)
+		log.debug("adding boot command line parameters to '%s'" % self._grub2_cfg_file_name)
 		(grub2_cfg_new, nsubs) = re.subn(r"\b(set\s+" + consts.GRUB2_TUNED_VAR + "\s*=).*$", r"\1" + "\"" + str(value) + "\"", grub2_cfg, flags = re.MULTILINE)
 		if nsubs < 1 or re.search(r"\$" + consts.GRUB2_TUNED_VAR, grub2_cfg, flags = re.MULTILINE) is None:
 			grub2_cfg_new = self._grub2_cfg_patch_initial(self._grub2_cfg_unpatch(grub2_cfg), value)
-		self._cmd.write_to_file(self._grub2_cfg_file, grub2_cfg_new)
+		self._cmd.write_to_file(self._grub2_cfg_file_name, grub2_cfg_new)
 		self._grub2_default_env_patch()
 		return True
 
@@ -142,7 +142,7 @@ class BootloaderPlugin(base.Plugin):
 		if verify:
 			return None
 		if enabling and value is not None:
-			self._grub2_cfg_file = value
+			self._grub2_cfg_file_name = value
 
 	@command_custom("cmdline", per_device = False, priority = 10)
 	def _cmdline(self, enabling, value, verify, ignore_missing):
