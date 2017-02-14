@@ -38,10 +38,8 @@ class ManagerException(Exception):
 
         return repr(self.code)
 
-    def profile_already_exists(self, text):
-        return repr(text)
-
-    def profile_already_exists(self):
-        return repr(self.code)
-
-
+    def profile_already_exists(self, text=None):
+        if text is None:
+            return repr(self.code)
+        else:
+            return repr(text)
