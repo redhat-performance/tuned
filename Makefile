@@ -182,4 +182,12 @@ clean:
 test:
 	python -m unittest discover tests
 
-.PHONY: clean archive srpm tag test
+lint:
+	$(eval tmpfile := $(shell mktemp))
+	find . \( -path ./experiments -o -path ./tests \) -prune \
+		-or -name '*.py' \
+		\( -exec bash -c "pylint -E {} > $(tmpfile) 2> /dev/null" \; \
+		-or \( -print -exec cat $(tmpfile) \; \) \)
+	rm -f $(tmpfile)
+
+.PHONY: clean archive srpm tag test lint
