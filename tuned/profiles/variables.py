@@ -4,7 +4,7 @@ import tuned.logs
 import functions.functions as functions
 import tuned.consts as consts
 from tuned.utils.commands import commands
-from configobj import ConfigObj
+from configobj import ConfigObj, ConfigObjError
 
 log = tuned.logs.get()
 

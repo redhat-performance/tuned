@@ -129,7 +129,7 @@ class commands:
 			os.rename(src, dst)
 		except OSError as error:
 			if not no_error:
-				log.error("cannot rename file '%s' to '%s': '%s'" % (f, str(error)))
+				log.error("cannot rename file '%s' to '%s': '%s'" % (src, dst, str(error)))
 			return False
 		return True
 

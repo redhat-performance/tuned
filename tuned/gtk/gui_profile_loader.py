@@ -123,10 +123,6 @@ class GuiProfileLoader(object):
         config.write()
         self._refresh_profiles()
 
-    def _refresh_profiles(self):
-        self.profiles = {}
-        self._load_all_profiles()
-
     def update_profile(
         self,
         old_profile_name,
