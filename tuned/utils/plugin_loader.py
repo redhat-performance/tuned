@@ -17,6 +17,9 @@ class PluginLoader(object):
 	def __init__(self):
 		super(PluginLoader, self).__init__()
 
+		self._namespace = None
+		self._prefix = None
+		self._interface = None
 		self._set_loader_parameters()
 		assert type(self._namespace) is str
 		assert type(self._prefix) is str
