@@ -4,18 +4,18 @@ class ExportableInterface(object):
 class ExporterInterface(object):
 	def export(self, method, in_signature, out_signature):
 		# to be overriden by concrete implementation
-		raise NotImplemented()
+		raise NotImplementedError()
 
 	def signal(self, method, out_signature):
 		# to be overriden by concrete implementation
-		raise NotImplemented()
+		raise NotImplementedError()
 
 	def send_signal(self, signal, *args, **kwargs):
 		# to be overriden by concrete implementation
-		raise NotImplemented()
+		raise NotImplementedError()
 
 	def start(self):
-		raise NotImplemented()
+		raise NotImplementedError()
 
 	def stop(self):
-		raise NotImplemented()
+		raise NotImplementedError()
