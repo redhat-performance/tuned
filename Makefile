@@ -182,4 +182,7 @@ clean:
 test:
 	python -m unittest discover tests
 
-.PHONY: clean archive srpm tag test
+lint:
+	pylint -E tuned *.py
+
+.PHONY: clean archive srpm tag test lint
