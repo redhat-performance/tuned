@@ -74,6 +74,8 @@ class TunedLogger(logging.getLoggerClass()):
 			return
 
 		log_directory = os.path.dirname(filename)
+		if log_directory == '':
+			log_directory = '.'
 		if not os.path.exists(log_directory):
 			os.makedirs(log_directory)
 
