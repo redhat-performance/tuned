@@ -183,6 +183,6 @@ test:
 	python -m unittest discover tests
 
 lint:
-	pylint -E tuned *.py
+	pylint -E -f parseable tuned *.py
 
 .PHONY: clean archive srpm tag test lint
