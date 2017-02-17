@@ -102,11 +102,10 @@ class Plugin(object):
 		self._destroy_instance(instance)
 		del self._instances[instance.name]
 
-	def initialize_instances(self):
-		"""Initialize all created instances."""
-		for (instance_name, instance) in self._instances.items():
-			log.debug("initializing instance %s (%s)" % (instance_name, self.name))
-			self._instance_init(instance)
+	def initialize_instance(self, instance):
+		"""Initialize an instance."""
+		log.debug("initializing instance %s (%s)" % (instance.name, self.name))
+		self._instance_init(instance)
 
 	def destroy_instances(self):
 		"""Destroy all instances."""
@@ -140,21 +139,20 @@ class Plugin(object):
 	def _get_matching_devices(self, instance, devices):
 		return set(self._device_matcher.match_list(instance.devices_expression, devices))
 
-	def assign_free_devices(self):
+	def assign_free_devices(self, instance):
 		if not self._devices_supported():
 			return
 
-		log.debug("assigning devices to all instances")
-		for instance_name, instance in reversed(self._instances.items()):
-			to_assign = self._get_matching_devices(instance, self._free_devices)
-			instance.active = len(to_assign) > 0
-			if not instance.active:
-				log.warn("instance %s: no matching devices available" % instance_name)
-			else:
-				log.info("instance %s: assigning devices %s" % (instance_name, ", ".join(to_assign)))
-				instance.devices.update(to_assign) # cannot use |=
-				self._assigned_devices |= to_assign
-				self._free_devices -= to_assign
+		log.debug("assigning devices to instance %s" % instance.name)
+		to_assign = self._get_matching_devices(instance, self._free_devices)
+		instance.active = len(to_assign) > 0
+		if not instance.active:
+			log.warn("instance %s: no matching devices available" % instance.name)
+		else:
+			log.info("instance %s: assigning devices %s" % (instance.name, ", ".join(to_assign)))
+			instance.devices.update(to_assign) # cannot use |=
+			self._assigned_devices |= to_assign
+			self._free_devices -= to_assign
 
 	def release_devices(self, instance):
 		if not self._devices_supported():
