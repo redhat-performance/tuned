@@ -149,7 +149,10 @@ class Plugin(object):
 		if not instance.active:
 			log.warn("instance %s: no matching devices available" % instance.name)
 		else:
-			log.info("instance %s: assigning devices %s" % (instance.name, ", ".join(to_assign)))
+			name = instance.name
+			if instance.name != self.name:
+				name += " (%s)" % self.name
+			log.info("instance %s: assigning devices %s" % (name, ", ".join(to_assign)))
 			instance.devices.update(to_assign) # cannot use |=
 			self._assigned_devices |= to_assign
 			self._free_devices -= to_assign
