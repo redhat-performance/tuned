@@ -56,6 +56,7 @@ CFG_SLEEP_INTERVAL = "sleep_interval"
 CFG_UPDATE_INTERVAL = "update_interval"
 CFG_RECOMMEND_COMMAND = "recommend_command"
 CFG_REAPPLY_SYSCTL = "reapply_sysctl"
+CFG_DEFAULT_INSTANCE_PRIORITY = "default_instance_priority"
 
 # no_daemon mode
 CFG_DEF_DAEMON = True
@@ -69,6 +70,8 @@ CFG_DEF_UPDATE_INTERVAL = 10
 CFG_DEF_RECOMMEND_COMMAND = True
 # reapply system sysctl
 CFG_DEF_REAPPLY_SYSCTL = True
+# default instance priority
+CFG_DEF_DEFAULT_INSTANCE_PRIORITY = 0
 
 PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
 

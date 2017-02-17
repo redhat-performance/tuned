@@ -16,6 +16,10 @@ class Instance(object):
 	# properties
 
 	@property
+	def plugin(self):
+		return self._plugin
+
+	@property
 	def name(self):
 		return self._name
 
