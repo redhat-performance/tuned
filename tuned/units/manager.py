@@ -34,14 +34,14 @@ class Manager(object):
 			if not instance_info.enabled:
 				log.debug("skipping disabled instance '%s'" % instance_name)
 				continue
-			instance_info.options.setdefault("instance_priority", self._def_instance_priority)
-			instance_info.options["instance_priority"] = int(instance_info.options["instance_priority"])
+			instance_info.options.setdefault("priority", self._def_instance_priority)
+			instance_info.options["priority"] = int(instance_info.options["priority"])
 			instance_info_list.append(instance_info)
 
-		instance_info_list.sort(key=lambda x: x.options["instance_priority"])
+		instance_info_list.sort(key=lambda x: x.options["priority"])
 		plugins_by_name = collections.OrderedDict()
 		for instance_info in instance_info_list:
-			instance_info.options.pop("instance_priority")
+			instance_info.options.pop("priority")
 			plugins_by_name[instance_info.type] = None
 
 		for plugin_name, none in plugins_by_name.items():
