@@ -19,15 +19,14 @@ class AudioPlugin(base.Plugin):
 	"""
 
 	def _init_devices(self):
-		self._devices = set()
+		self._devices_supported = True
 		self._assigned_devices = set()
+		self._free_devices = set()
 
 		for device in self._hardware_inventory.get_devices("sound").match_sys_name("card*"):
 			module_name = self._device_module_name(device)
 			if module_name in ["snd_hda_intel", "snd_ac97_codec"]:
-				self._devices.add(module_name)
-
-		self._free_devices = self._devices.copy()
+				self._free_devices.add(module_name)
 
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True

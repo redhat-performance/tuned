@@ -32,13 +32,13 @@ class CPULatencyPlugin(base.Plugin):
 		self._cmd = commands()
 
 	def _init_devices(self):
-		self._devices = set()
+		self._devices_supported = True
+		self._free_devices = set()
 		# current list of devices
 		for device in self._hardware_inventory.get_devices("cpu"):
-			self._devices.add(device.sys_name)
+			self._free_devices.add(device.sys_name)
 
 		self._assigned_devices = set()
-		self._free_devices = self._devices.copy()
 
 	@classmethod
 	def _get_config_options(self):
