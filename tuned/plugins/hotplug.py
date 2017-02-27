@@ -38,7 +38,7 @@ class Plugin(base.Plugin):
 
 		self._devices.add(device_name)
 
-		for instance_name, instance in reversed(self._instances.items()):
+		for instance_name, instance in self._instances.items():
 			if self._device_matcher.match(instance.devices_expression, device_name):
 				log.info("instance %s: adding new device %s" % (instance_name, device_name))
 				self._assigned_devices.add(device_name)
