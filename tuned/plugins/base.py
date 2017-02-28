@@ -129,18 +129,15 @@ class Plugin(object):
 	#
 
 	def _init_devices(self):
-		self._devices = None
+		self._devices_supported = False
 		self._assigned_devices = set()
 		self._free_devices = set()
-
-	def _devices_supported(self):
-		return self._devices is not None
 
 	def _get_matching_devices(self, instance, devices):
 		return set(self._device_matcher.match_list(instance.devices_expression, devices))
 
 	def assign_free_devices(self, instance):
-		if not self._devices_supported():
+		if not self._devices_supported:
 			return
 
 		log.debug("assigning devices to instance %s" % instance.name)
@@ -158,10 +155,10 @@ class Plugin(object):
 			self._free_devices -= to_assign
 
 	def release_devices(self, instance):
-		if not self._devices_supported():
+		if not self._devices_supported:
 			return
 
-		to_release = instance.devices & self._devices
+		to_release = instance.devices & self._assigned_devices
 
 		instance.active = False
 		instance.devices.clear()
@@ -173,7 +170,7 @@ class Plugin(object):
 	#
 
 	def _run_for_each_device(self, instance, callback):
-		if self._devices_supported():
+		if self._devices_supported:
 			devices = instance.devices
 		else:
 			devices = [None, ]

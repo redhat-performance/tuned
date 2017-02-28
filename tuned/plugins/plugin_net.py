@@ -22,16 +22,16 @@ class NetTuningPlugin(base.Plugin):
 		self._cmd = commands()
 
 	def _init_devices(self):
-		self._devices = set()
+		self._devices_supported = True
+		self._free_devices = set()
 		self._assigned_devices = set()
 
 		re_not_virtual = re.compile('(?!.*/virtual/.*)')
 		for device in self._hardware_inventory.get_devices("net"):
 			if re_not_virtual.match(device.device_path):
-				self._devices.add(device.sys_name)
+				self._free_devices.add(device.sys_name)
 
-		self._free_devices = self._devices.copy()
-		log.debug("devices: %s" % str(self._devices));
+		log.debug("devices: %s" % str(self._free_devices));
 
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True

@@ -12,13 +12,13 @@ class USBPlugin(base.Plugin):
 	"""
 
 	def _init_devices(self):
-		self._devices = set()
+		self._devices_supported = True
+		self._free_devices = set()
 		self._assigned_devices = set()
 
 		for device in self._hardware_inventory.get_devices("usb").match_property("DEVTYPE", "usb_device"):
-			self._devices.add(device.sys_name)
+			self._free_devices.add(device.sys_name)
 
-		self._free_devices = self._devices.copy()
 		self._cmd = commands()
 
 	@classmethod
