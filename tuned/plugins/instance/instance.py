@@ -2,10 +2,11 @@ class Instance(object):
 	"""
 	"""
 
-	def __init__(self, plugin, name, devices_expression, options):
+	def __init__(self, plugin, name, devices_expression, devices_udev_regex, options):
 		self._plugin = plugin
 		self._name = name
 		self._devices_expression = devices_expression
+		self._devices_udev_regex = devices_udev_regex
 		self._options = options
 
 		self._active = True
@@ -39,6 +40,10 @@ class Instance(object):
 	@property
 	def devices(self):
 		return self._devices
+
+	@property
+	def devices_udev_regex(self):
+		return self._devices_udev_regex
 
 	@property
 	def options(self):

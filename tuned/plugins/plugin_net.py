@@ -33,6 +33,9 @@ class NetTuningPlugin(base.Plugin):
 
 		log.debug("devices: %s" % str(self._free_devices));
 
+	def _get_device_objects(self, devices):
+		return map(lambda x: self._hardware_inventory.get_device("net", x), devices)
+
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
 		instance._has_dynamic_tuning = True

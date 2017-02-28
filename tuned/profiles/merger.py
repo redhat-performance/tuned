@@ -32,6 +32,8 @@ class Merger(object):
 				profile_a.units[unit_name].type = unit.type
 				profile_a.units[unit_name].enabled = unit.enabled
 				profile_a.units[unit_name].devices = unit.devices
+				if unit.devices_udev_regex != None:
+					profile_a.units[unit_name].devices_udev_regex = unit.devices_udev_regex
 				if unit_name == "script" and profile_a.units[unit_name].options.get("script", None) is not None:
 					script = profile_a.units[unit_name].options.get("script", None)
 					profile_a.units[unit_name].options.update(unit.options)

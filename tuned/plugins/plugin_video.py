@@ -22,6 +22,9 @@ class VideoPlugin(base.Plugin):
 
 		self._cmd = commands()
 
+	def _get_device_objects(self, devices):
+		return map(lambda x: self._hardware_inventory.get_device("drm", x), devices)
+
 	@classmethod
 	def _get_config_options(self):
 		return {
