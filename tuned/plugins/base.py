@@ -178,6 +178,12 @@ class Plugin(object):
 		for device in devices:
 			callback(instance, device)
 
+	def _instance_pre_static(self, instance, enabling):
+		pass
+
+	def _instance_post_static(self, instance, enabling):
+		pass
+
 	def instance_apply_tuning(self, instance):
 		"""
 		Apply static and dynamic tuning if the plugin instance is active.
@@ -186,7 +192,9 @@ class Plugin(object):
 			return
 
 		if instance.has_static_tuning:
+			self._instance_pre_static(instance, True)
 			self._instance_apply_static(instance)
+			self._instance_post_static(instance, True)
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_apply_dynamic)
 
@@ -219,7 +227,9 @@ class Plugin(object):
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_unapply_dynamic)
 		if instance.has_static_tuning:
+			self._instance_pre_static(instance, False)
 			self._instance_unapply_static(instance, profile_switch)
+			self._instance_post_static(instance, False)
 
 	def _instance_apply_static(self, instance):
 		self._execute_all_non_device_commands(instance)

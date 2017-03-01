@@ -2,6 +2,7 @@ import errno
 import tuned.logs
 import copy
 import os
+import shutil
 import tuned.consts as consts
 from configobj import ConfigObj, ConfigObjError
 import re
@@ -33,6 +34,10 @@ class commands:
 	def unquote(self, v):
 		return re.sub("^\"(.*)\"$", r"\1", v)
 
+	# escape escape character (by default '\')
+	def escape(self, s, what_escape = "\\", escape_by = "\\"):
+		return s.replace(what_escape, "%s%s" % (escape_by, what_escape))
+
 	# clear escape characters (by default '\')
 	def unescape(self, s, escape_char = "\\"):
 		return s.replace(escape_char, "")
@@ -60,12 +65,16 @@ class commands:
 	# Do multiple regex replaces in 's' according to lookup table described by
 	# dictionary 'd', e.g.: d = {"re1": "replace1", "re2": "replace2", ...}
 	# r can be regex precompiled by re_lookup_compile for speedup
-	def multiple_re_replace(self, d, s, r = None):
-		if len(d) == 0 or s is None:
-			return s
+	def multiple_re_replace(self, d, s, r = None, flags = 0):
+		if d is None:
+			if r is None:
+				return s
+		else:
+			if len(d) == 0 or s is None:
+				return s
 		if r is None:
 			r = self.re_lookup_compile(d)
-		return r.sub(lambda mo: d.values()[mo.lastindex - 1], s)
+		return r.sub(lambda mo: d.values()[mo.lastindex - 1], s, flags)
 
 	# Do regex lookup on 's' according to lookup table described by
 	# dictionary 'd' and return corresponding value from the dictionary,
@@ -133,14 +142,49 @@ class commands:
 			return False
 		return True
 
+	def copy(self, src, dst, no_error = False):
+		try:
+			log.debug("copying file '%s' to '%s'" % (src, dst))
+			shutil.copy(src, dst)
+		except IOError as e:
+			if not no_error:
+				log.error("cannot copy file '%s' to '%s': %s" % (src, dst, e))
+
 	def replace_in_file(self, f, pattern, repl):
 		data = self.read_file(f)
 		if len(data) <= 0:
 			return False;
 		return self.write_to_file(f, re.sub(pattern, repl, data, flags = re.MULTILINE))
 
+	# do multiple replaces in file 'f' by using dictionary 'd',
+	# e.g.: d = {"re1": val1, "re2": val2, ...}
+	def multiple_replace_in_file(self, f, d):
+		data = self.read_file(f)
+		if len(data) <= 0:
+			return False;
+		return self.write_to_file(f, self.multiple_re_replace(d, data, flags = re.MULTILINE))
+
+	# makes sure that options from 'd' are set to values from 'd' in file 'f',
+	# when needed it edits options or add new options if they don't
+	# exist and 'add' is set to True, 'd' has the following form:
+	# d = {"option_1": value_1, "option_2": value_2, ...}
+	def add_modify_option_in_file(self, f, d, add = True):
+		data = self.read_file(f)
+		for opt in d:
+			o = str(opt)
+			v = str(d[opt])
+			if re.search(r"\b" + o + r"\s*=.*$", data, flags = re.MULTILINE) is None:
+				if add:
+					if len(data) > 0 and data[-1] != "\n":
+						data += "\n"
+					data += "%s=\"%s\"\n" % (o, v)
+			else:
+				data = re.sub(r"\b(" + o + r"\s*=).*$", r"\1" + "\"" + v + "\"", data, flags = re.MULTILINE)
+
+		return self.write_to_file(f, data)
+
 	# "no_errors" can be list of return codes not treated as errors
-	def execute(self, args, no_errors = []):
+	def execute(self, args, shell = False, cwd = None, no_errors = []):
 		retcode = 0
 		if self._environment is None:
 			self._environment = os.environ.copy()
@@ -149,7 +193,7 @@ class commands:
 		self._debug("Executing %s." % str(args))
 		out = ""
 		try:
-			proc = Popen(args, stdout=PIPE, stderr=PIPE, env=self._environment, close_fds=True)
+			proc = Popen(args, stdout = PIPE, stderr = PIPE, env = self._environment, shell = shell, cwd = cwd, close_fds = True)
 			out, err = proc.communicate()
 
 			retcode = proc.returncode

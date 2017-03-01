@@ -1,6 +1,7 @@
 import tuned.profiles.profile
 import tuned.profiles.variables
 from configobj import ConfigObj, ConfigObjError
+import tuned.consts as consts
 import os.path
 import collections
 import tuned.logs
@@ -14,12 +15,13 @@ class Loader(object):
 	Profiles loader.
 	"""
 
-	__slots__ = ["_profile_locator", "_profile_merger", "_profile_factory", "_variables"]
+	__slots__ = ["_profile_locator", "_profile_merger", "_profile_factory", "_global_config", "_variables"]
 
-	def __init__(self, profile_locator, profile_factory, profile_merger, variables):
+	def __init__(self, profile_locator, profile_factory, profile_merger, global_config, variables):
 		self._profile_locator = profile_locator
 		self._profile_factory = profile_factory
 		self._profile_merger = profile_merger
+		self._global_config = global_config
 		self._variables = variables
 
 	def _create_profile(self, profile_name, config):
@@ -87,10 +89,13 @@ class Loader(object):
 				for option in config_obj[section].keys():
 					config[section][option] = config_obj[section][option]
 
+		# hack to notify plugins about profile location
+		self._global_config.set("profile_location", file_name)
+
 		# TODO: HACK, this needs to be solved in a better way (better config parser)
+		dir_name = os.path.dirname(file_name)
 		for unit_name in config:
 			if "script" in config[unit_name] and config[unit_name].get("script", None) is not None:
-				dir_name = os.path.dirname(file_name)
 				script_path = os.path.join(dir_name, config[unit_name]["script"])
 				config[unit_name]["script"] = [os.path.normpath(script_path)]
 

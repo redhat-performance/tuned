@@ -73,8 +73,8 @@ class Locator(object):
 		config = self.parse_config(profile_name)
 		if config is None:
 			return [False, "", "", ""]
-		if "main" in config:
-			d = config["main"]
+		if consts.PLUGIN_MAIN_UNIT_NAME in config:
+			d = config[consts.PLUGIN_MAIN_UNIT_NAME]
 		else:
 			d = dict()
 		vals = [True, profile_name]

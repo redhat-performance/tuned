@@ -11,6 +11,8 @@ DEFAULT_PROFILE = "balanced"
 DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
 LOAD_DIRECTORIES = ["/usr/lib/tuned", "/etc/tuned"]
 PERSISTENT_STORAGE_DIR = "/var/lib/tuned"
+PLUGIN_MAIN_UNIT_NAME = "main"
+BOOT_DIR = "/boot"
 
 TMP_FILE_SUFFIX = ".tmp"
 # max. number of consecutive errors to give up
@@ -24,8 +26,11 @@ GRUB2_TUNED_TEMPLATE_PATH = GRUB2_CFG_DIR + "/" + GRUB2_TUNED_TEMPLATE_NAME
 GRUB2_TEMPLATE_HEADER_BEGIN = "### BEGIN /etc/grub.d/" + GRUB2_TUNED_TEMPLATE_NAME +  " ###"
 GRUB2_TEMPLATE_HEADER_END = "### END /etc/grub.d/" + GRUB2_TUNED_TEMPLATE_NAME +  " ###"
 GRUB2_TUNED_VAR = "tuned_params"
+GRUB2_TUNED_INITRD_VAR = "tuned_initrd"
 GRUB2_DEFAULT_ENV_FILE = "/etc/default/grub"
+INITRD_IMAGE_DIR = "/boot"
 BOOT_CMDLINE_TUNED_VAR = "TUNED_BOOT_CMDLINE"
+BOOT_CMDLINE_INITRD_ADD_VAR = "TUNED_BOOT_INITRD_ADD"
 BOOT_CMDLINE_FILE = "/etc/tuned/bootcmdline"
 
 # modules plugin configuration

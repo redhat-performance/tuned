@@ -1,4 +1,5 @@
 import tuned.profiles.unit
+import tuned.consts as consts
 import collections
 
 class Profile(object):
@@ -15,13 +16,13 @@ class Profile(object):
 
 	def _init_options(self, config):
 		self._options = {}
-		if "main" in config:
-			self._options = dict(config["main"])
+		if consts.PLUGIN_MAIN_UNIT_NAME in config:
+			self._options = dict(config[consts.PLUGIN_MAIN_UNIT_NAME])
 
 	def _init_units(self, config):
 		self._units = collections.OrderedDict()
 		for unit_name in config:
-			if unit_name != "main":
+			if unit_name != consts.PLUGIN_MAIN_UNIT_NAME:
 				new_unit = self._create_unit(unit_name, config[unit_name])
 				self._units[unit_name] = new_unit
 
