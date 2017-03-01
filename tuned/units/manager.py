@@ -62,7 +62,7 @@ class Manager(object):
 			if plugin is None:
 				continue
 			log.debug("creating '%s' (%s)" % (instance_info.name, instance_info.type))
-			new_instance = plugin.create_instance(instance_info.name, instance_info.devices, instance_info.options)
+			new_instance = plugin.create_instance(instance_info.name, instance_info.devices, instance_info.devices_udev_regex, instance_info.options)
 			plugin.assign_free_devices(new_instance)
 			plugin.initialize_instance(new_instance)
 			self._instances.append(new_instance)
@@ -71,6 +71,9 @@ class Manager(object):
 		for instance in self._instances:
 			log.debug("destroying instance %s" % instance.name)
 			instance.plugin.destroy_instance(instance)
+		for plugin in self._plugins:
+			log.debug("cleaning plugin '%s'" % plugin.name)
+			plugin.cleanup()
 
 		del self._plugins[:]
 		del self._instances[:]

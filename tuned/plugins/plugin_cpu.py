@@ -40,6 +40,9 @@ class CPULatencyPlugin(base.Plugin):
 
 		self._assigned_devices = set()
 
+	def _get_device_objects(self, devices):
+		return map(lambda x: self._hardware_inventory.get_device("cpu", x), devices)
+
 	@classmethod
 	def _get_config_options(self):
 		return {

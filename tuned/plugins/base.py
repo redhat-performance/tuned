@@ -17,13 +17,14 @@ class Plugin(object):
 	Intentionally a lot of logic is included in the plugin to increase plugin flexibility.
 	"""
 
-	def __init__(self, monitors_repository, storage_factory, hardware_inventory, device_matcher, instance_factory, global_cfg, variables):
+	def __init__(self, monitors_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, instance_factory, global_cfg, variables):
 		"""Plugin constructor."""
 
 		self._storage = storage_factory.create(self.__class__.__name__)
 		self._monitors_repository = monitors_repository
 		self._hardware_inventory = hardware_inventory
 		self._device_matcher = device_matcher
+		self._device_matcher_udev = device_matcher_udev
 		self._instance_factory = instance_factory
 
 		self._instances = collections.OrderedDict()
@@ -80,13 +81,13 @@ class Plugin(object):
 	# Interface for manipulation with instances of the plugin.
 	#
 
-	def create_instance(self, name, devices_expression, options):
+	def create_instance(self, name, devices_expression, devices_udev_regex, options):
 		"""Create new instance of the plugin and seize the devices."""
 		if name in self._instances:
 			raise Exception("Plugin instance with name '%s' already exists." % name)
 
 		effective_options = self._get_effective_options(options)
-		instance = self._instance_factory.create(self, name, devices_expression, effective_options)
+		instance = self._instance_factory.create(self, name, devices_expression, devices_udev_regex, effective_options)
 		self._instances[name] = instance
 
 		return instance
@@ -133,8 +134,21 @@ class Plugin(object):
 		self._assigned_devices = set()
 		self._free_devices = set()
 
+	def _get_device_objects(self, devices):
+		"""Override this in a subclass to transform a list of device names (e.g. ['sda'])
+		   to a list of pyudev.Device objects, if your plugin supports it"""
+		return None
+
 	def _get_matching_devices(self, instance, devices):
-		return set(self._device_matcher.match_list(instance.devices_expression, devices))
+		if instance.devices_udev_regex is None:
+			return set(self._device_matcher.match_list(instance.devices_expression, devices))
+		else:
+			udev_devices = self._get_device_objects(devices)
+			if udev_devices is None:
+				log.error("Plugin '%s' does not support the 'devices_udev_regex' option", self.name)
+				return set()
+			udev_devices = self._device_matcher_udev.match_list(instance.devices_udev_regex, udev_devices)
+			return set(map(lambda x: x.sys_name, udev_devices))
 
 	def assign_free_devices(self, instance):
 		if not self._devices_supported:
