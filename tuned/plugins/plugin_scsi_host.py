@@ -28,6 +28,9 @@ class DiskPlugin(hotplug.Plugin):
 
 		self._assigned_devices = set()
 
+	def _get_device_objects(self, devices):
+		return map(lambda x: self._hardware_inventory.get_device("scsi", x), devices)
+
 	@classmethod
 	def _device_is_supported(cls, device):
 		return  device.device_type == "scsi_host"

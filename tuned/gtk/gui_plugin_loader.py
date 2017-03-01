@@ -71,6 +71,7 @@ class GuiPluginLoader(PluginLoader):
         monitors_repository = monitors.Repository()
         hardware_inventory = hardware.Inventory()
         device_matcher = hardware.DeviceMatcher()
+        device_matcher_udev = hardware.DeviceMatcherUdev()
         plugin_instance_factory = plugins.instance.Factory()
 
         self.repo = repository.Repository(
@@ -78,6 +79,7 @@ class GuiPluginLoader(PluginLoader):
             storage_factory,
             hardware_inventory,
             device_matcher,
+            device_matcher_udev,
             plugin_instance_factory,
             None,
             None

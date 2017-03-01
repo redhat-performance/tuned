@@ -28,6 +28,10 @@ class Inventory(object):
 
 		self._subscriptions = {}
 
+	def get_device(self, subsystem, sys_name):
+		"""Get a pyudev.Device object for the sys_name (e.g. 'sda')."""
+		return pyudev.Devices.from_name(self._udev_context, subsystem, sys_name)
+
 	def get_devices(self, subsystem):
 		"""Get list of devices on a given subsystem."""
 		return self._udev_context.list_devices(subsystem=subsystem)

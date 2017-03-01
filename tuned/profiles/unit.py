@@ -3,7 +3,7 @@ class Unit(object):
 	Unit description.
 	"""
 
-	__slots__ = [ "_name", "_type", "_enabled", "_replace", "_devices", "_options" ]
+	__slots__ = [ "_name", "_type", "_enabled", "_replace", "_devices", "_devices_udev_regex", "_options" ]
 
 	def __init__(self, name, config):
 		self._name = name
@@ -11,6 +11,7 @@ class Unit(object):
 		self._enabled = config.pop("enabled", True) in [True, "true", 1]
 		self._replace = config.pop("replace", False) in [True, "true", 1]
 		self._devices = config.pop("devices", "*")
+		self._devices_udev_regex = config.pop("devices_udev_regex", None)
 		self._options = dict(config)
 
 	@property
@@ -44,6 +45,14 @@ class Unit(object):
 	@devices.setter
 	def devices(self, value):
 		self._devices = value
+
+	@property
+	def devices_udev_regex(self):
+		return self._devices_udev_regex
+
+	@devices_udev_regex.setter
+	def devices_udev_regex(self, value):
+		self._devices_udev_regex = value
 
 	@property
 	def options(self):
