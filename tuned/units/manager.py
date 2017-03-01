@@ -71,6 +71,9 @@ class Manager(object):
 		for instance in self._instances:
 			log.debug("destroying instance %s" % instance.name)
 			instance.plugin.destroy_instance(instance)
+		for plugin in self._plugins:
+			log.debug("cleaning plugin '%s'" % plugin.name)
+			plugin.cleanup()
 
 		del self._plugins[:]
 		del self._instances[:]
