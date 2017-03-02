@@ -86,7 +86,11 @@ class Loader(object):
 				self._variables.add_from_cfg(config_obj[section], os.path.dirname(file_name))
 			else:
 				config[section] = collections.OrderedDict()
-				for option in config_obj[section].keys():
+				try:
+					keys = config_obj[section].keys()
+				except AttributeError:
+					raise InvalidProfileException("Error parsing section '%s' in file '%s'." % (section, file_name))
+				for option in keys:
 					config[section][option] = config_obj[section][option]
 
 		# hack to notify plugins about profile location
