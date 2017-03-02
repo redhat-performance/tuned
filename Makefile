@@ -91,7 +91,7 @@ scratch-build: mock-devel-build
 	brew build --scratch --nowait rhel-7.2-candidate `ls mock-result-dir/*$(GIT_DATE)git*.*.src.rpm | head -n 1`
 
 nightly: tidy-mock-result-dir createrepo scratch-build
-	rsync -ave ssh --delete --progress mock-result-dir/* jskarvad@fedorapeople.org:/home/fedora/jskarvad/public_html/tuned/devel/repo/
+	rsync -ave ssh --delete --progress mock-result-dir/ jskarvad@fedorapeople.org:/home/fedora/jskarvad/public_html/tuned/devel/repo/
 
 install-dirs:
 	mkdir -p $(DESTDIR)$(PYTHON_SITELIB)
