@@ -12,13 +12,14 @@ DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
 LOAD_DIRECTORIES = ["/usr/lib/tuned", "/etc/tuned"]
 PERSISTENT_STORAGE_DIR = "/var/lib/tuned"
 PLUGIN_MAIN_UNIT_NAME = "main"
-BOOT_DIR = "/boot"
+PLUGIN_WORKDIR_OPTION_NAME = "workdir"
 
 TMP_FILE_SUFFIX = ".tmp"
 # max. number of consecutive errors to give up
 ERROR_THRESHOLD = 3
 
 # bootloader plugin configuration
+BOOT_DIR = "/boot"
 GRUB2_CFG_FILES = ["/boot/grub2/grub.cfg", "/boot/efi/EFI/redhat/grub.cfg", "/boot/efi/EFI/fedora/grub.cfg"]
 GRUB2_CFG_DIR = "/etc/grub.d"
 GRUB2_TUNED_TEMPLATE_NAME = "00_tuned"

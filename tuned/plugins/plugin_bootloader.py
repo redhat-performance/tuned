@@ -30,9 +30,10 @@ class BootloaderPlugin(base.Plugin):
 		instance._has_static_tuning = True
 		# controls grub2_cfg rewrites in _instance_post_static
 		self.update_grub2_cfg = False
-		self._initrd_dst_img = None
-		self._cmdline = ""
-		self._initrd = ""
+		self._initrd_dst_img_val = None
+		self._cmdline_val = ""
+		self._initrd_val = ""
+		self._workdir = instance.workdir
 		self._grub2_cfg_file_name = self._get_grub2_cfg_file()
 
 	def _instance_cleanup(self, instance):
@@ -166,19 +167,24 @@ class BootloaderPlugin(base.Plugin):
 		return True
 
 	def _grub2_update(self):
-		self._grub2_cfg_patch({consts.GRUB2_TUNED_VAR : self._cmdline, consts.GRUB2_TUNED_INITRD_VAR : self._initrd})
-		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : self._cmdline, consts.BOOT_CMDLINE_INITRD_ADD_VAR : self._initrd})
+		self._grub2_cfg_patch({consts.GRUB2_TUNED_VAR : self._cmdline_val, consts.GRUB2_TUNED_INITRD_VAR : self._initrd_val})
+		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : self._cmdline_val, consts.BOOT_CMDLINE_INITRD_ADD_VAR : self._initrd_val})
 
 	def _init_initrd_dst_img(self, name):
-		if self._initrd_dst_img is None:
-			self._initrd_dst_img = os.path.join(consts.BOOT_DIR, os.path.basename(name))
+		if self._initrd_dst_img_val is None:
+			self._initrd_dst_img_val = os.path.join(consts.BOOT_DIR, os.path.basename(name))
 
 	def _install_initrd(self, img):
-		log.info("installing initrd image as '%s'" % self._initrd_dst_img)
-		img_name = os.path.basename(self._initrd_dst_img)
-		self._cmd.copy(img, self._initrd_dst_img)
+		log.info("installing initrd image as '%s'" % self._initrd_dst_img_val)
+		img_name = os.path.basename(self._initrd_dst_img_val)
+		self._cmd.copy(img, self._initrd_dst_img_val)
 		self.update_grub2_cfg = True
-		self._initrd = "/" + img_name
+		self._initrd_val = "/" + img_name
+
+	def _build_abs_path(self, path):
+		if path is None or len(path) == 0 or path[0] == "/":
+			return path
+		return os.path.normpath(os.path.join(self._workdir, path))
 
 	@command_custom("grub2_cfg_file")
 	def _grub2_cfg_file(self, enabling, value, verify, ignore_missing):
@@ -194,11 +200,11 @@ class BootloaderPlugin(base.Plugin):
 		if verify:
 			return None
 		if enabling and value is not None:
-			self._initrd_dst_img = str(value)
-			if self._initrd_dst_img == "":
+			self._initrd_dst_img_val = str(value)
+			if self._initrd_dst_img_val == "":
 				return False
-			if self._initrd_dst_img[0] != "/":
-				self._initrd_dst_img = os.path.join(consts.BOOT_DIR, self._initrd_dst_img)
+			if self._initrd_dst_img_val[0] != "/":
+				self._initrd_dst_img_val = os.path.join(consts.BOOT_DIR, self._initrd_dst_img_val)
 
 	@command_custom("initrd_add_img", per_device = False, priority = 10)
 	def _initrd_add_img(self, enabling, value, verify, ignore_missing):
@@ -210,9 +216,7 @@ class BootloaderPlugin(base.Plugin):
 			self._init_initrd_dst_img(src_img)
 			if src_img == "":
 				return False
-			if src_img[0] != "/":
-				src_img = os.path.join(os.path.dirname(self._global_cfg.get("profile_location", "")), src_img)
-
+			src_img = self._build_abs_path(src_img)
 			self._install_initrd(src_img)
 
 	@command_custom("initrd_add_dir", per_device = False, priority = 10)
@@ -225,8 +229,7 @@ class BootloaderPlugin(base.Plugin):
 			self._init_initrd_dst_img(src_dir)
 			if src_dir == "":
 				return False
-			if src_dir[0] != "/":
-				src_dir = os.path.join(os.path.dirname(self._global_cfg.get("profile_location", "./")), src_dir)
+			src_dir = self._build_abs_path(src_dir)
 			if not os.path.isdir(src_dir):
 				log.error("error: cannot create initrd image, source directory '%s' doesn't exist" % src_dir)
 				return False
@@ -263,7 +266,7 @@ class BootloaderPlugin(base.Plugin):
 		if enabling and value is not None:
 			log.info("installing additional boot command line parameters to grub2")
 			self.update_grub2_cfg = True
-			self._cmdline = v
+			self._cmdline_val = v
 
 	def _instance_post_static(self, instance, enabling):
 		if enabling and self.update_grub2_cfg:

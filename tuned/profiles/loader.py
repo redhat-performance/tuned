@@ -93,14 +93,13 @@ class Loader(object):
 				for option in keys:
 					config[section][option] = config_obj[section][option]
 
-		# hack to notify plugins about profile location
-		self._global_config.set("profile_location", file_name)
-
 		# TODO: HACK, this needs to be solved in a better way (better config parser)
 		dir_name = os.path.dirname(file_name)
 		for unit_name in config:
 			if "script" in config[unit_name] and config[unit_name].get("script", None) is not None:
 				script_path = os.path.join(dir_name, config[unit_name]["script"])
 				config[unit_name]["script"] = [os.path.normpath(script_path)]
+			if config[unit_name].get(consts.PLUGIN_WORKDIR_OPTION_NAME, None) is None:
+				config[unit_name][consts.PLUGIN_WORKDIR_OPTION_NAME] = dir_name
 
 		return config
