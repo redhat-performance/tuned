@@ -92,10 +92,12 @@ class BootloaderPlugin(base.Plugin):
 	def _remove_grub2_tuning(self):
 		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : "", consts.BOOT_CMDLINE_INITRD_ADD_VAR : ""})
 		self._cmd.add_modify_option_in_file(self._grub2_cfg_file_name, {"set\s+" + consts.GRUB2_TUNED_VAR : "", "set\s+" + consts.GRUB2_TUNED_INITRD_VAR : ""}, add = False)
+		log.info("removing initrd image '%s'" % self._initrd_dst_img_val)
+		self._cmd.unlink(self._initrd_dst_img_val)
 
 	def _instance_unapply_static(self, instance, profile_switch = False):
 		if profile_switch:
-			log.info("removing grub2 command line previously added by tuned")
+			log.info("removing grub2 tuning previously added by Tuned")
 			self._remove_grub2_tuning()
 
 	def _grub2_cfg_unpatch(self, grub2_cfg):
