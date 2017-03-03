@@ -121,6 +121,17 @@ class commands:
 		self._debug("Read data from file: '%s' > '%s'" % (f, old_value))
 		return old_value
 
+	def rmtree(self, f, no_error = False):
+		self._debug("Removing tree: '%s'" % f)
+		if os.path.exists(f):
+			try:
+				shutil.rmtree(f, no_error)
+			except OSError as error:
+				if not no_error:
+					log.error("cannot remove tree '%s': '%s'" % (f, str(error)))
+				return False
+		return True
+
 	def unlink(self, f, no_error = False):
 		self._debug("Removing file: '%s'" % f)
 		if os.path.exists(f):

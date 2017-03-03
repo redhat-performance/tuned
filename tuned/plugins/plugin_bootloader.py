@@ -30,6 +30,7 @@ class BootloaderPlugin(base.Plugin):
 		instance._has_static_tuning = True
 		# controls grub2_cfg rewrites in _instance_post_static
 		self.update_grub2_cfg = False
+		self._initrd_remove_dir = False
 		self._initrd_dst_img_val = None
 		self._cmdline_val = ""
 		self._initrd_val = ""
@@ -46,6 +47,7 @@ class BootloaderPlugin(base.Plugin):
 			"initrd_dst_img": None,
 			"initrd_add_img": None,
 			"initrd_add_dir": None,
+			"initrd_remove_dir": None,
 			"cmdline": None,
 		}
 
@@ -208,6 +210,14 @@ class BootloaderPlugin(base.Plugin):
 			if self._initrd_dst_img_val[0] != "/":
 				self._initrd_dst_img_val = os.path.join(consts.BOOT_DIR, self._initrd_dst_img_val)
 
+	@command_custom("initrd_remove_dir")
+	def _initrd_remove_dir(self, enabling, value, verify, ignore_missing):
+		# nothing to verify
+		if verify:
+			return None
+		if enabling and value is not None:
+			self._initrd_remove_dir = value
+
 	@command_custom("initrd_add_img", per_device = False, priority = 10)
 	def _initrd_add_img(self, enabling, value, verify, ignore_missing):
 		# nothing to verify
@@ -248,6 +258,9 @@ class BootloaderPlugin(base.Plugin):
 				return False
 			self._install_initrd(tmpfile)
 			self._cmd.unlink(tmpfile)
+			if self._initrd_remove_dir:
+				log.info("removing directory '%s'" % src_dir)
+				self._cmd.rmtree(src_dir)
 
 	@command_custom("cmdline", per_device = False, priority = 10)
 	def _cmdline(self, enabling, value, verify, ignore_missing):
