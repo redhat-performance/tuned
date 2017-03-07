@@ -2,7 +2,7 @@
 
 type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
 
-cpumask="$(getargs tuned.cpumask)"
+cpumask="$(getargs tuned.non_isolcpus)"
 
 file=/sys/devices/virtual/workqueue/cpumask
 
