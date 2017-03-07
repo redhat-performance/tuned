@@ -8,7 +8,7 @@ file=/sys/devices/virtual/workqueue/cpumask
 
 log()
 {
-        echo "tuned: $@" >> /dev/kmsg
+  echo "tuned: $@" >> /dev/kmsg
 }
 
 if [ -n "$cpumask" ]; then
