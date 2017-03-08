@@ -502,12 +502,12 @@ class Plugin(object):
 		return self._verify_value(command["name"], new_value, current_value, ignore_missing)
 
 	def _cleanup_all_non_device_commands(self, instance):
-		for command in filter(lambda command: not command["per_device"], self._commands.values()):
+		for command in reversed(filter(lambda command: not command["per_device"], self._commands.values())):
 			if (instance.options.get(command["name"], None) is not None) or (command["name"] in self._options_used_by_dynamic):
 				self._cleanup_non_device_command(instance, command)
 
 	def _cleanup_all_device_commands(self, instance, devices):
-		for command in filter(lambda command: command["per_device"], self._commands.values()):
+		for command in reversed(filter(lambda command: command["per_device"], self._commands.values())):
 			if (instance.options.get(command["name"], None) is not None) or (command["name"] in self._options_used_by_dynamic):
 				for device in devices:
 					self._cleanup_device_command(instance, command, device)
