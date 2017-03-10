@@ -12,7 +12,6 @@ DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
 LOAD_DIRECTORIES = ["/usr/lib/tuned", "/etc/tuned"]
 PERSISTENT_STORAGE_DIR = "/var/lib/tuned"
 PLUGIN_MAIN_UNIT_NAME = "main"
-PLUGIN_WORKDIR_OPTION_NAME = "workdir"
 
 TMP_FILE_SUFFIX = ".tmp"
 # max. number of consecutive errors to give up
