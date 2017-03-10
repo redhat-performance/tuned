@@ -64,7 +64,7 @@ class Manager(object):
 				continue
 			log.debug("creating '%s' (%s)" % (instance_info.name, instance_info.type))
 			new_instance = plugin.create_instance(instance_info.name, instance_info.devices, instance_info.devices_udev_regex, \
-				instance_info.options.pop(consts.PLUGIN_WORKDIR_OPTION_NAME, "."), instance_info.options)
+				instance_info.options)
 			plugin.assign_free_devices(new_instance)
 			plugin.initialize_instance(new_instance)
 			self._instances.append(new_instance)
