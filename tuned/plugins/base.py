@@ -81,13 +81,13 @@ class Plugin(object):
 	# Interface for manipulation with instances of the plugin.
 	#
 
-	def create_instance(self, name, devices_expression, devices_udev_regex, workdir, options):
+	def create_instance(self, name, devices_expression, devices_udev_regex, options):
 		"""Create new instance of the plugin and seize the devices."""
 		if name in self._instances:
 			raise Exception("Plugin instance with name '%s' already exists." % name)
 
 		effective_options = self._get_effective_options(options)
-		instance = self._instance_factory.create(self, name, devices_expression, devices_udev_regex, workdir, effective_options)
+		instance = self._instance_factory.create(self, name, devices_expression, devices_udev_regex, effective_options)
 		self._instances[name] = instance
 
 		return instance

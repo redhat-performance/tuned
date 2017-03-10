@@ -74,6 +74,9 @@ class Loader(object):
 
 			profiles.append(profile)
 
+	def _expand_profile_dir(self, profile_dir, string):
+		return re.sub(r'(?<!\\)\$\{' + re.escape(consts.CONST_PROFILE_DIR) + r'\}', profile_dir, string)
+
 	def _load_config_data(self, file_name):
 		try:
 			config_obj = ConfigObj(file_name, raise_errors = True, list_values = False, interpolation = False)
@@ -93,13 +96,16 @@ class Loader(object):
 				for option in keys:
 					config[section][option] = config_obj[section][option]
 
-		# TODO: HACK, this needs to be solved in a better way (better config parser)
 		dir_name = os.path.dirname(file_name)
+		# TODO: Try to do this in the same place as the expansion of other variables
+		for section in config:
+			for option in config[section]:
+				config[section][option] = self._expand_profile_dir(dir_name, config[section][option])
+
+		# TODO: HACK, this needs to be solved in a better way (better config parser)
 		for unit_name in config:
 			if "script" in config[unit_name] and config[unit_name].get("script", None) is not None:
 				script_path = os.path.join(dir_name, config[unit_name]["script"])
 				config[unit_name]["script"] = [os.path.normpath(script_path)]
-			if config[unit_name].get(consts.PLUGIN_WORKDIR_OPTION_NAME, None) is None:
-				config[unit_name][consts.PLUGIN_WORKDIR_OPTION_NAME] = dir_name
 
 		return config

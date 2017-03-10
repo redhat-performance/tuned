@@ -34,7 +34,6 @@ class BootloaderPlugin(base.Plugin):
 		self._initrd_dst_img_val = None
 		self._cmdline_val = ""
 		self._initrd_val = ""
-		self._workdir = instance.workdir
 		self._grub2_cfg_file_name = self._get_grub2_cfg_file()
 
 	def _instance_cleanup(self, instance):
@@ -185,11 +184,6 @@ class BootloaderPlugin(base.Plugin):
 		self.update_grub2_cfg = True
 		self._initrd_val = "/" + img_name
 
-	def _build_abs_path(self, path):
-		if path is None or len(path) == 0 or path[0] == "/":
-			return path
-		return os.path.normpath(os.path.join(self._workdir, path))
-
 	@command_custom("grub2_cfg_file")
 	def _grub2_cfg_file(self, enabling, value, verify, ignore_missing):
 		# nothing to verify
@@ -228,7 +222,6 @@ class BootloaderPlugin(base.Plugin):
 			self._init_initrd_dst_img(src_img)
 			if src_img == "":
 				return False
-			src_img = self._build_abs_path(src_img)
 			self._install_initrd(src_img)
 
 	@command_custom("initrd_add_dir", per_device = False, priority = 10)
@@ -241,7 +234,6 @@ class BootloaderPlugin(base.Plugin):
 			self._init_initrd_dst_img(src_dir)
 			if src_dir == "":
 				return False
-			src_dir = self._build_abs_path(src_dir)
 			if not os.path.isdir(src_dir):
 				log.error("error: cannot create initrd image, source directory '%s' doesn't exist" % src_dir)
 				return False

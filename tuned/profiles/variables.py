@@ -27,12 +27,18 @@ class Variables():
 	def _check_var(self, variable):
 		return re.match(r'\w+$',variable)
 
+	def _check_var_reserved(self, variable):
+		return variable not in consts.TUNED_RESERVED_CONSTANTS
+
 	def add_variable(self, variable, value):
 		if value is None:
 			return
 		s = str(variable)
 		if not self._check_var(variable):
 			log.error("variable definition '%s' contains unallowed characters" % variable)
+			return
+		if not self._check_var_reserved(s):
+			log.error("Variable '%s' cannot be defined, it is a reserved constant" % s)
 			return
 		v = self.expand(value)
 		# variables referenced by ${VAR}, $ can be escaped by two $,
