@@ -75,7 +75,7 @@ class Loader(object):
 			profiles.append(profile)
 
 	def _expand_profile_dir(self, profile_dir, string):
-		return re.sub(r'(?<!\\)\$\{PROFILE_DIR\}', profile_dir, string)
+		return re.sub(r'(?<!\\)\$\{' + re.escape(consts.CONST_PROFILE_DIR) + r'\}', profile_dir, string)
 
 	def _load_config_data(self, file_name):
 		try:

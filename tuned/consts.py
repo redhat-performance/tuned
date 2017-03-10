@@ -99,3 +99,12 @@ STR_VERIFY_PROFILE_FAIL = "verify: failed: '%s'"
 
 # timout for tuned-adm operations in seconds
 ADMIN_TIMEOUT = 600
+
+# Constants which can be used in profiles just like regular variables (i.e. ${var_name}).
+# The constant names are reserved, they cannot be redefined in profiles. When adding a new
+# constant, add it to TUNED_RESERVED_CONSTANTS.
+#
+# expands to the directory where the current profile configuration resides
+CONST_PROFILE_DIR = "PROFILE_DIR"
+
+TUNED_RESERVED_CONSTANTS = [CONST_PROFILE_DIR]
