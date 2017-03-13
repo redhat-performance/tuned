@@ -4,6 +4,8 @@ import tuned.profiles.variables
 import tuned.logs
 import collections
 from tuned.utils.commands import commands
+import os
+from subprocess import Popen, PIPE
 
 log = tuned.logs.get()
 
@@ -81,13 +83,14 @@ class Plugin(object):
 	# Interface for manipulation with instances of the plugin.
 	#
 
-	def create_instance(self, name, devices_expression, devices_udev_regex, options):
+	def create_instance(self, name, devices_expression, devices_udev_regex, script_pre, script_post, options):
 		"""Create new instance of the plugin and seize the devices."""
 		if name in self._instances:
 			raise Exception("Plugin instance with name '%s' already exists." % name)
 
 		effective_options = self._get_effective_options(options)
-		instance = self._instance_factory.create(self, name, devices_expression, devices_udev_regex, effective_options)
+		instance = self._instance_factory.create(self, name, devices_expression, devices_udev_regex, \
+			script_pre, script_post, effective_options)
 		self._instances[name] = instance
 
 		return instance
@@ -198,6 +201,39 @@ class Plugin(object):
 	def _instance_post_static(self, instance, enabling):
 		pass
 
+	def _call_device_script(self, instance, script, op, devices, profile_switch = False):
+		if script is None:
+			return None
+		if len(devices) == 0:
+			log.warn("Instance '%s': no device to call script '%s' for." % (instance.name, script))
+			return None
+		if not script.startswith("/"):
+			log.error("Relative paths cannot be used in script_pre or script_post. " \
+				+ "Use ${i:PROFILE_DIR}.")
+			return False
+		dir_name = os.path.dirname(script)
+		ret = True
+		for dev in devices:
+			environ = os.environ
+			environ.update(self._variables.get_env())
+			arguments = [op]
+			if profile_switch:
+				arguments.append("profile_switch")
+			arguments.append(dev)
+			log.info("calling script '%s' with arguments '%s'" % (script, str(arguments)))
+			log.debug("using environment '%s'" % str(environ.items()))
+			try:
+				proc = Popen([script] +  arguments, stdout=PIPE, stderr=PIPE, close_fds=True, env=environ, \
+					cwd = dir_name)
+				out, err = proc.communicate()
+				if proc.returncode:
+					log.error("script '%s' error: %d, '%s'" % (script, proc.returncode, err[:-1]))
+					ret = False
+			except (OSError,IOError) as e:
+				log.error("script '%s' error: %s" % (script, e))
+				ret = False
+		return ret
+
 	def instance_apply_tuning(self, instance):
 		"""
 		Apply static and dynamic tuning if the plugin instance is active.
@@ -206,9 +242,11 @@ class Plugin(object):
 			return
 
 		if instance.has_static_tuning:
+			self._call_device_script(instance, instance.script_pre, "apply", instance.devices)
 			self._instance_pre_static(instance, True)
 			self._instance_apply_static(instance)
 			self._instance_post_static(instance, True)
+			self._call_device_script(instance, instance.script_post, "apply", instance.devices)
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_apply_dynamic)
 
@@ -220,7 +258,13 @@ class Plugin(object):
 			return None
 
 		if instance.has_static_tuning:
-			return self._instance_verify_static(instance, ignore_missing)
+			if self._call_device_script(instance, instance.script_pre, "verify", instance.devices) == False:
+				return False
+			if self._instance_verify_static(instance, ignore_missing) == False:
+				return False
+			if self._call_device_script(instance, instance.script_post, "verify", instance.devices) == False:
+				return False
+			return True
 		else:
 			return None
 
@@ -241,9 +285,11 @@ class Plugin(object):
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_unapply_dynamic)
 		if instance.has_static_tuning:
+			self._call_device_script(instance, instance.script_post, "unapply", instance.devices, profile_switch = profile_switch)
 			self._instance_pre_static(instance, False)
 			self._instance_unapply_static(instance, profile_switch)
 			self._instance_post_static(instance, False)
+			self._call_device_script(instance, instance.script_pre, "unapply", instance.devices, profile_switch = profile_switch)
 
 	def _instance_apply_static(self, instance):
 		self._execute_all_non_device_commands(instance)
