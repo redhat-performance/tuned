@@ -41,7 +41,9 @@ class Plugin(base.Plugin):
 				log.info("instance %s: adding new device %s" % (instance_name, device_name))
 				self._assigned_devices.add(device_name)
 				instance.devices.add(device_name)
+				self._call_device_script(instance, instance.script_pre, "apply", [device_name])
 				self._added_device_apply_tuning(instance, device_name)
+				self._call_device_script(instance, instance.script_post, "apply", [device_name])
 				break
 		else:
 			log.debug("no instance wants %s" % device_name)
@@ -54,7 +56,9 @@ class Plugin(base.Plugin):
 
 		for instance in self._instances.values():
 			if device_name in instance.devices:
+				self._call_device_script(instance, instance.script_post, "unapply", [device_name])
 				self._removed_device_unapply_tuning(instance, device_name)
+				self._call_device_script(instance, instance.script_pre, "unapply", [device_name])
 				instance.devices.remove(device_name)
 				instance.active = len(instance.devices) > 0
 				self._assigned_devices.remove(device_name)
