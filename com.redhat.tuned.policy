@@ -126,4 +126,14 @@
       <allow_active>yes</allow_active>
     </defaults>
   </action>
+
+  <action id="com.redhat.tuned.verify_profile_ignore_missing">
+    <description>Verify Tuned profile, ignore missing values</description>
+    <message>Authentication is required to verify Tuned profile</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
 </policyconfig>
