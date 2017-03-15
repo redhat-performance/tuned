@@ -1,4 +1,5 @@
 #!/usr/bin/python -Es
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2008-2013 Red Hat, Inc.
 # Authors: Jan Kaluža <jkaluza@redhat.com>
