@@ -23,8 +23,8 @@ class SchedulerPlugin(base.Plugin):
 	_dict_sched2param = {"SCHED_FIFO":"f", "SCHED_BATCH":"b", "SCHED_RR":"r",
 		"SCHED_OTHER":"o", "SCHED_IDLE":"i"}
 
-	def __init__(self, monitors_repository, storage_factory, hardware_inventory, device_matcher, instance_factory, global_cfg, variables):
-		super(self.__class__, self).__init__(monitors_repository, storage_factory, hardware_inventory, device_matcher, instance_factory, global_cfg, variables)
+	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
+		super(self.__class__, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
 		self._has_dynamic_options = True
 		self._daemon = consts.CFG_DEF_DAEMON
 		self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
