@@ -14,7 +14,7 @@ class assertion(base.Function):
 	"""
 	def __init__(self):
 		# 2 arguments
-		super(self.__class__, self).__init__("exec", 3)
+		super(self.__class__, self).__init__("assertion", 3)
 
 	def execute(self, args):
 		if not super(self.__class__, self).execute(args):
