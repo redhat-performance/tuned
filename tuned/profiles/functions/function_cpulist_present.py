@@ -5,7 +5,7 @@ from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
-class cpulist_online(base.Function):
+class cpulist_present(base.Function):
 	"""
 	Checks whether CPUs from list are present, returns list containing
 	only present CPUs
@@ -19,4 +19,4 @@ class cpulist_online(base.Function):
 			return None
 		cpus = self._cmd.cpulist_unpack(",,".join(args))
 		present = self._cmd.cpulist_unpack(self._cmd.read_file("/sys/devices/system/cpu/present"))
-		return ",".join(str(v) for v in set(cpus).intersection(set(present)))
+		return ",".join(str(v) for v in sorted(list(set(cpus).intersection(set(present)))))
