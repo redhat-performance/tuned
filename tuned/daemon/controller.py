@@ -86,6 +86,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		was_running = self._daemon.is_running()
 		msg = "OK"
 		success = True
+		reapply = False
 		try:
 			if was_running:
 				# stop(switch_profile = True), due to profile switch
@@ -94,8 +95,17 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		except tuned.exceptions.TunedException as e:
 			success = False
 			msg = str(e)
+			if was_running and self._daemon.profile.name == profile_name:
+				log.error("Failed to reapply profile '%s'. Did it change on disk and break?" % profile_name)
+				reapply = True
+			else:
+				log.error("Failed to apply profile '%s'" % profile_name)
 		finally:
 			if was_running:
+				if reapply:
+					log.warn("Applying previously applied (possibly out-dated) profile '%s'." % profile_name)
+				elif not success:
+					log.info("Applying previously applied profile.")
 				self._daemon.start()
 
 		return (success, msg)
