@@ -159,9 +159,13 @@ class DiskPlugin(hotplug.Plugin):
 
 			log.debug("tuning level changed to %d" % idle["level"])
 			if self._spindown_errcnt < consts.ERROR_THRESHOLD:
-				log.debug("changing spindown to %d" % new_spindown_level)
-				(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
-				self._update_errcnt(rc, True)
+				(rc, out) = self._cmd.execute(["hdparm", "-C", "/dev/%s" % device], no_errors = [errno.ENOENT])
+				if ("standby" in out or "sleeping" in out) and level_change > 0:
+					log.debug("suppressing spindown change to %d, drive has already spun down" % new_spindown_level)
+				else:
+					log.debug("changing spindown to %d" % new_spindown_level)
+					(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
+					self._update_errcnt(rc, True)
 			if self._apm_errcnt < consts.ERROR_THRESHOLD:
 				log.debug("changing APM_level to %d" % new_power_level)
 				(rc, out) = self._cmd.execute(["hdparm", "-B%d" % new_power_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
