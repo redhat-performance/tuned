@@ -94,6 +94,7 @@ class DiskPlugin(hotplug.Plugin):
 			instance._device_idle = {}
 			instance._stats = {}
 			instance._idle = {}
+			instance._spindown_change_delayed = {}
 		else:
 			instance._has_dynamic_tuning = False
 			instance._load_monitor = None
@@ -127,6 +128,16 @@ class DiskPlugin(hotplug.Plugin):
 		else:
 			self._apm_errcnt = cnt
 
+	def _change_spindown(self, instance, device, new_spindown_level):
+		log.debug("changing spindown to %d" % new_spindown_level)
+		(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
+		self._update_errcnt(rc, True)
+		instance._spindown_change_delayed[device] = False
+
+	def _drive_spinning(self, device):
+		(rc, out) = self._cmd.execute(["hdparm", "-C", "/dev/%s" % device], no_errors = [errno.ENOENT])
+		return not "standby" in out and not "sleeping" in out
+
 	def _instance_update_dynamic(self, instance, device):
 		load = instance._load_monitor.get_device_load(device)
 		if load is None:
@@ -159,17 +170,17 @@ class DiskPlugin(hotplug.Plugin):
 
 			log.debug("tuning level changed to %d" % idle["level"])
 			if self._spindown_errcnt < consts.ERROR_THRESHOLD:
-				(rc, out) = self._cmd.execute(["hdparm", "-C", "/dev/%s" % device], no_errors = [errno.ENOENT])
-				if ("standby" in out or "sleeping" in out) and level_change > 0:
-					log.debug("suppressing spindown change to %d, drive has already spun down" % new_spindown_level)
+				if not self._drive_spinning(device) and level_change > 0:
+					log.debug("delaying spindown change to %d, drive has already spun down" % new_spindown_level)
+					instance._spindown_change_delayed[device] = True
 				else:
-					log.debug("changing spindown to %d" % new_spindown_level)
-					(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
-					self._update_errcnt(rc, True)
+					self._change_spindown(instance, device, new_spindown_level)
 			if self._apm_errcnt < consts.ERROR_THRESHOLD:
 				log.debug("changing APM_level to %d" % new_power_level)
 				(rc, out) = self._cmd.execute(["hdparm", "-B%d" % new_power_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
 				self._update_errcnt(rc, False)
+		elif instance._spindown_change_delayed[device] and self._drive_spinning(device):
+			self._change_spindown(instance, device, new_spindown_level)
 
 		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
 		log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
@@ -177,6 +188,7 @@ class DiskPlugin(hotplug.Plugin):
 	def _init_stats_and_idle(self, instance, device):
 		instance._stats[device] = { "new": 11 * [0], "old": 11 * [0], "max": 11 * [1] }
 		instance._idle[device] = { "level": 0, "read": 0, "write": 0 }
+		instance._spindown_change_delayed[device] = False
 
 	def _update_stats(self, instance, device, new_load):
 		instance._stats[device]["old"] = old_load = instance._stats[device]["new"]
