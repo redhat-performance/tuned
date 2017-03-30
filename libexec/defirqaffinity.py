@@ -85,6 +85,10 @@ mask = 0
 for i in cpulist:
 	mask = mask | 1 << i;
 
+if len(sys.argv) < 3 or len(str(sys.argv[2])) == 0:
+	sys.stderr.write("%s: invalid arguments\n" % os.path.basename(sys.argv[0]))
+	sys.exit(1)
+
 line = sys.argv[2]
 fields = line.strip().split(",")
 
