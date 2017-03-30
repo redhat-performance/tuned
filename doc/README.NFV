@@ -1,0 +1,4 @@
+This package is kept for backward compatibility and could be dropped in the
+future. It has no useful content, it only brings in tuned-profiles-nfv-guest
+and tuned-profiles-nfv-host dependencies. You can install them by hand and
+remove tuned-profiles-nfv package.

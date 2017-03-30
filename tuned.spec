@@ -247,6 +247,7 @@ fi
 %defattr(-,root,root,-)
 %exclude %{docdir}/README.utils
 %exclude %{docdir}/README.scomes
+%exclude %{docdir}/README.NFV
 %doc %{docdir}
 %{_datadir}/bash-completion/completions/tuned-adm
 %exclude %{python_sitelib}/tuned/gtk
@@ -363,6 +364,10 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
 %{_prefix}/lib/tuned/realtime-virtual-host
 %{_mandir}/man7/tuned-profiles-nfv-host.7*
+
+%files profiles-nfv
+%defattr(-,root,root,-)
+%doc %{docdir}/README.NFV
 
 %files profiles-cpu-partitioning
 %defattr(-,root,root,-)
