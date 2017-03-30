@@ -70,35 +70,35 @@ instead of fewer large ones).
 
 %package profiles-sap
 Summary: Additional tuned profile(s) targeted to SAP NetWeaver loads
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = %{version}
 
 %description profiles-sap
 Additional tuned profile(s) targeted to SAP NetWeaver loads.
 
 %package profiles-oracle
 Summary: Additional tuned profile(s) targeted to Oracle loads
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = %{version}
 
 %description profiles-oracle
 Additional tuned profile(s) targeted to Oracle loads.
 
 %package profiles-sap-hana
 Summary: Additional tuned profile(s) targeted to SAP HANA loads
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = %{version}
 
 %description profiles-sap-hana
 Additional tuned profile(s) targeted to SAP HANA loads.
 
 %package profiles-atomic
 Summary: Additional tuned profile(s) targeted to Atomic
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = %{version}
 
 %description profiles-atomic
 Additional tuned profile(s) targeted to Atomic host and guest.
 
 %package profiles-realtime
 Summary: Additional tuned profile(s) targeted to realtime
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = %{version}
 Requires: tuna
 
 %description profiles-realtime
@@ -106,8 +106,8 @@ Additional tuned profile(s) targeted to realtime.
 
 %package profiles-nfv-guest
 Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV) guest
-Requires: %{name} = %{version}-%{release}
-Requires: %{name}-profiles-realtime = %{version}-%{release}
+Requires: %{name} = %{version}
+Requires: %{name}-profiles-realtime = %{version}
 Requires: tuna
 
 %description profiles-nfv-guest
@@ -115,8 +115,8 @@ Additional tuned profile(s) targeted to Network Function Virtualization (NFV) gu
 
 %package profiles-nfv-host
 Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host
-Requires: %{name} = %{version}-%{release}
-Requires: %{name}-profiles-realtime = %{version}-%{release}
+Requires: %{name} = %{version}
+Requires: %{name}-profiles-realtime = %{version}
 Requires: tuna, qemu-kvm-tools-rhev
 
 %description profiles-nfv-host
@@ -125,16 +125,16 @@ Additional tuned profile(s) targeted to Network Function Virtualization (NFV) ho
 # this is kept for backward compatibility, it should be dropped for RHEL-8
 %package profiles-nfv
 Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV)
-Requires: %{name} = %{version}-%{release}
-Requires: %{name}-profiles-nfv-guest = %{version}-%{release}
-Requires: %{name}-profiles-nfv-host = %{version}-%{release}
+Requires: %{name} = %{version}
+Requires: %{name}-profiles-nfv-guest = %{version}
+Requires: %{name}-profiles-nfv-host = %{version}
 
 %description profiles-nfv
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV).
 
 %package profiles-cpu-partitioning
 Summary: Additional tuned profile(s) optimized for CPU partitioning
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = %{version}
 Requires: tuna
 
 %description profiles-cpu-partitioning
@@ -142,7 +142,7 @@ Additional tuned profile(s) optimized for CPU partitioning.
 
 %package profiles-compat
 Summary: Additional tuned profiles mainly for backward compatibility with tuned 1.0
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = %{version}
 
 %description profiles-compat
 Additional tuned profiles mainly for backward compatibility with tuned 1.0.
