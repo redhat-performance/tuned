@@ -19,7 +19,7 @@ class assertion_non_equal(base.Function):
 	def execute(self, args):
 		if not super(self.__class__, self).execute(args):
 			return None
-		if args[1] != args[2]:
+		if args[1] == args[2]:
 			log.error("assertion '%s' failed: '%s' == '%s'" % (args[0], args[1], args[2]))
 			raise InvalidProfileException("Assertion '%s' failed." % args[0])
 		return None
