@@ -104,11 +104,30 @@ Requires: tuna
 %description profiles-realtime
 Additional tuned profile(s) targeted to realtime.
 
-%package profiles-nfv
-Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV)
+%package profiles-nfv-guest
+Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV) guest
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-profiles-realtime = %{version}-%{release}
+Requires: tuna
+
+%description profiles-nfv-guest
+Additional tuned profile(s) targeted to Network Function Virtualization (NFV) guest.
+
+%package profiles-nfv-host
+Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-profiles-realtime = %{version}-%{release}
 Requires: tuna, qemu-kvm-tools-rhev
+
+%description profiles-nfv-host
+Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host.
+
+# this is kept for backward compatibility, it should be dropped for RHEL-8
+%package profiles-nfv
+Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV)
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-profiles-nfv-guest = %{version}-%{release}
+Requires: %{name}-profiles-nfv-host = %{version}-%{release}
 
 %description profiles-nfv
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV).
@@ -275,6 +294,7 @@ fi
 %dir %{_datadir}/tuned
 %{_datadir}/tuned/grub2
 %{_datadir}/polkit-1/actions/com.redhat.tuned.policy
+%ghost %{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 
 %files gtk
 %defattr(-,root,root,-)
@@ -332,14 +352,17 @@ fi
 %{_prefix}/lib/tuned/realtime
 %{_mandir}/man7/tuned-profiles-realtime.7*
 
-%files profiles-nfv
+%files profiles-nfv-guest
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-guest-variables.conf
-%config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
-%ghost %{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 %{_prefix}/lib/tuned/realtime-virtual-guest
+%{_mandir}/man7/tuned-profiles-nfv-guest.7*
+
+%files profiles-nfv-host
+%defattr(-,root,root,-)
+%config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
 %{_prefix}/lib/tuned/realtime-virtual-host
-%{_mandir}/man7/tuned-profiles-nfv.7*
+%{_mandir}/man7/tuned-profiles-nfv-host.7*
 
 %files profiles-cpu-partitioning
 %defattr(-,root,root,-)

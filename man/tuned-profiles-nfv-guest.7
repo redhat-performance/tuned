@@ -1,6 +1,6 @@
 .\"/* 
 .\" * All rights reserved
-.\" * Copyright (C) 2015 Red Hat, Inc.
+.\" * Copyright (C) 2015-2017 Red Hat, Inc.
 .\" * Authors: Jaroslav Škarvada
 .\" *
 .\" * This program is free software; you can redistribute it and/or
@@ -18,23 +18,19 @@
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
 .\" 
-.TH TUNED_PROFILES_NFV "7" "1 Jul 2015" "Fedora Power Management SIG" "tuned"
+.TH TUNED_PROFILES_NFV_GUEST "7" "30 Mar 2017" "Fedora Power Management SIG" "tuned"
 .SH NAME
-tuned\-profiles\-nfv - description of profiles provided for the NFV
+tuned\-profiles\-nfv\-guest - description of profile provided for the NFV guest
 
 .SH DESCRIPTION
-These profiles are provided for the Network Function Virtualization (NFV).
+The profile is provided for the Network Function Virtualization (NFV) guest.
 
 .SH PROFILES
-The following profiles are provided:
+The following profile is provided:
 
 .TP
 .BI "realtime\-virtual\-guest"
 Profile optimized for virtual guests based on realtime profile.
-
-.TP
-.BI "realtime\-virtual\-host"
-Profile optimized for virtual hosts based on realtime profile.
 
 .SH "FILES"
 .NF
@@ -50,6 +46,7 @@ Profile optimized for virtual hosts based on realtime profile.
 .BR tuned\-profiles\-sap\-hana (7)
 .BR tuned\-profiles\-oracle (7)
 .BR tuned\-profiles\-realtime (7)
+.BR tuned\-profiles\-nfv\-host (7)
 .BR tuned\-profiles\-cpu\-partitioning (7)
 .BR tuned\-profiles\-compat (7)
 .SH AUTHOR
