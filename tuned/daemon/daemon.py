@@ -136,11 +136,22 @@ class Daemon(object):
 
 		# if terminating due to profile switch
 		if self._terminate_profile_switch.is_set():
-			profile_switch = True
+			full_rollback = True
 		else:
-			profile_switch = False
+			# with systemd it detects system shutdown and in such case it doesn't perform
+			# full cleanup, if not shutting down it means that Tuned was explicitly
+			# stopped by user and in such case do full cleanup, without systemd never
+			# do full cleanup
+			full_rollback = False
+			retcode, out = self._cmd.execute(["systemctl", "is-system-running"], no_errors = [0])
+			if retcode >= 0:
+				if out[:8] == "stopping":
+					log.info("terminating Tuned due to system shutdown / reboot")
+				else:
+					log.info("terminating Tuned, rolling back all changes")
+					full_rollback = True
 		if self._daemon:
-			self._unit_manager.stop_tuning(profile_switch)
+			self._unit_manager.stop_tuning(full_rollback)
 		self._unit_manager.destroy_all()
 
 	def _save_active_profile(self, profile_name):

@@ -63,7 +63,7 @@ class CPULatencyPlugin(base.Plugin):
 		retcode = self._cmd.execute(["x86_energy_perf_policy", "-r"], no_errors = [errno.ENOENT])[0]
 		if retcode == 0:
 			self._has_energy_perf_bias = True
-		elif retcode == -1:
+		elif retcode < 0:
 			log.warning("unable to run x86_energy_perf_policy tool, ignoring CPU energy performance bias, is the tool installed?")
 		else:
 			log.warning("your CPU doesn't support MSR_IA32_ENERGY_PERF_BIAS, ignoring CPU energy performance bias")
@@ -154,8 +154,8 @@ class CPULatencyPlugin(base.Plugin):
 			self._max_perf_pct_save = self._getset_intel_pstate_attr("max_perf_pct", instance.options["max_perf_pct"])
 			self._no_turbo_save = self._getset_intel_pstate_attr("no_turbo", instance.options["no_turbo"])
 
-	def _instance_unapply_static(self, instance, profile_switch = False):
-		super(self.__class__, self)._instance_unapply_static(instance, profile_switch)
+	def _instance_unapply_static(self, instance, full_rollback = False):
+		super(self.__class__, self)._instance_unapply_static(instance, full_rollback)
 
 		if instance._first_instance and self._has_intel_pstate:
 			self._set_intel_pstate_attr("min_perf_pct", self._min_perf_pct_save)

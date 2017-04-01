@@ -115,7 +115,7 @@ class DiskPlugin(hotplug.Plugin):
 			return
 		if rc == 0:
 			cnt = 0
-		elif rc == errno.ENOENT:
+		elif rc == -errno.ENOENT:
 			self._spindown_errcnt = self._apm_errcnt = consts.ERROR_THRESHOLD + 1
 			log.warn("hdparm command not found, ignoring future set_apm / set_spindown commands")
 			return
@@ -257,7 +257,7 @@ class DiskPlugin(hotplug.Plugin):
 		value = None
 		err = False
 		(rc, out) = self._cmd.execute(["hdparm", "-B", "/dev/" + device], no_errors = [errno.ENOENT])
-		if rc == errno.ENOENT:
+		if rc == -errno.ENOENT:
 			return None
 		elif rc != 0:
 			err = True

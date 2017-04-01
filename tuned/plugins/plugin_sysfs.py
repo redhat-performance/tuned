@@ -52,7 +52,7 @@ class SysfsPlugin(base.Plugin):
 						ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, profile_switch = False):
+	def _instance_unapply_static(self, instance, full_rollback = False):
 		for key, value in instance._sysfs_original.items():
 			self._write_sysfs(key, value)
 

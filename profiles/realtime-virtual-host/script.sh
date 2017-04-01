@@ -47,7 +47,7 @@ start() {
 }
 
 stop() {
-    [ "$1" = "profile_switch" ] && teardown_kvm_mod_low_latency
+    [ "$1" = "full_rollback" ] && teardown_kvm_mod_low_latency
     tuna -c "$TUNED_isolated_cores_expanded" -I &&
     python /usr/libexec/tuned/defirqaffinity.py "add" "$TUNED_isolated_cores_expanded"
     return "$?"

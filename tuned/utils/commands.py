@@ -194,7 +194,9 @@ class commands:
 
 		return self.write_to_file(f, data)
 
-	# "no_errors" can be list of return codes not treated as errors
+	# "no_errors" can be list of return codes not treated as errors, if 0 is in no_errors, it means any error
+	# returns (retcode, out), where retcode is exit code of the executed process or -errno if
+	# OSError or IOError exception happened
 	def execute(self, args, shell = False, cwd = None, no_errors = []):
 		retcode = 0
 		if self._environment is None:
@@ -208,14 +210,14 @@ class commands:
 			out, err = proc.communicate()
 
 			retcode = proc.returncode
-			if retcode and not retcode in no_errors:
+			if retcode and not retcode in no_errors and not 0 in no_errors:
 				err_out = err[:-1]
 				if len(err_out) == 0:
 					err_out = out[:-1]
 				self._error("Executing %s error: %s" % (args[0], err_out))
 		except (OSError, IOError) as e:
-			retcode = e.errno if e.errno is not None else -1
-			if not retcode in no_errors:
+			retcode = -e.errno if e.errno is not None else -1
+			if not abs(retcode) in no_errors and not 0 in no_errors:
 				self._error("Executing %s error: %s" % (args[0], e))
 		return retcode, out
 

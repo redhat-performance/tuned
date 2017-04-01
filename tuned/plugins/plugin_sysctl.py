@@ -62,7 +62,7 @@ class SysctlPlugin(base.Plugin):
 				ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, profile_switch = False):
+	def _instance_unapply_static(self, instance, full_rollback = False):
 		for option, value in instance._sysctl_original.items():
 			self._write_sysctl(option, value)
 

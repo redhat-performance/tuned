@@ -30,10 +30,10 @@ class ModulesPlugin(base.Plugin):
 	def _reload_modules(self, modules):
 		for module in modules:
 			retcode, out = self._cmd.execute(["modprobe", "-r", module])
-			if retcode == 127:
+			if retcode < 0:
 				log.warn("'modprobe' command not found, cannot reload kernel modules, reboot is required")
 				return
-			elif retcode != 0:
+			elif retcode > 0:
 				log.debug("cannot remove kernel module '%s': %s" % (module, out.strip()))
 			retcode, out = self._cmd.execute(["modprobe", module])
 			if retcode != 0:
@@ -50,10 +50,10 @@ class ModulesPlugin(base.Plugin):
 			v = self._variables.expand(value)
 			if not skip_check:
 				retcode, out = self._cmd.execute(["modinfo", module])
-				if retcode == 127:
+				if retcode < 0:
 					skip_check = True
 					log.warn("'modinfo' command not found, not checking kernel modules")
-				elif retcode != 0:
+				elif retcode > 0:
 					log.error("kernel module '%s' not found, skipping it" % module)
 			if skip_check or retcode == 0:
 				if len(v) > 1 and v[0:2] == "+r":
@@ -100,8 +100,8 @@ class ModulesPlugin(base.Plugin):
 								ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, profile_switch = False):
-		if profile_switch:
+	def _instance_unapply_static(self, instance, full_rollback = False):
+		if full_rollback:
 			self._clear_modprobe_file()
 
 	def _clear_modprobe_file(self):

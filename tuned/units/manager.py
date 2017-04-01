@@ -100,7 +100,14 @@ class Manager(object):
 		for instance in self._instances:
 			instance.update_tuning()
 
-	# profile_switch is helper telling plugins whether the stop is due to profile switch
-	def stop_tuning(self, profile_switch = False):
+	# full_rollback is a helper telling plugins whether soft or full roll
+	# back is needed, e.g. for bootloader plugin we need e.g grub.cfg
+	# tuning to persist across reboots and restarts of the daemon, so in
+	# this case the full_rollback is usually set to False,  but we also
+	# need to clean it all up when Tuned is disabled or the profile is
+	# changed. In this case the full_rollback is set to True. In practice
+	# it means to remove all temporal or helper files, unpatch third
+	# party config files, etc.
+	def stop_tuning(self, full_rollback = False):
 		for instance in reversed(self._instances):
-			instance.unapply_tuning(profile_switch)
+			instance.unapply_tuning(full_rollback)

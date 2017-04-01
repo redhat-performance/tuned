@@ -201,7 +201,7 @@ class SchedulerPlugin(base.Plugin):
 			instance._thread = threading.Thread(target = self._thread_code, args = [instance])
 			instance._thread.start()
 
-	def _instance_unapply_static(self, instance, profile_switch = False):
+	def _instance_unapply_static(self, instance, full_rollback = False):
 		ps = self.get_processes()
 		if self._daemon and instance._runtime_tuning:
 			instance._terminate.set()

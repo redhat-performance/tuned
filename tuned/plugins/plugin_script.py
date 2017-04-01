@@ -66,9 +66,9 @@ class ScriptPlugin(base.Plugin):
 			ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, profile_switch = False):
+	def _instance_unapply_static(self, instance, full_rollback = False):
 		args = ["stop"]
-		if profile_switch:
-			args = args + ["profile_switch"]
+		if full_rollback:
+			args = args + ["full_rollback"]
 		self._call_scripts(reversed(instance._scripts), args)
-		super(self.__class__, self)._instance_unapply_static(instance, profile_switch)
+		super(self.__class__, self)._instance_unapply_static(instance, full_rollback)

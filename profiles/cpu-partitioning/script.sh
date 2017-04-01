@@ -18,7 +18,7 @@ start() {
 stop() {
     tuna -c "$TUNED_isolated_cores_expanded" -I &&
     python /usr/libexec/tuned/defirqaffinity.py "add" "$TUNED_isolated_cores_expanded"
-    if [ "$1" = "profile_switch" ]
+    if [ "$1" = "full_rollback" ]
     then
         sed -i '/^IRQBALANCE_BANNED_CPUS=/d' /etc/sysconfig/irqbalance
         teardown_kvm_mod_low_latency
