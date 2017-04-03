@@ -57,15 +57,36 @@ boolean value. It can be \fBTrue\fR or \fB1\fR if the recommend command is
 enabled and \fBFalse\fR or \fB0\fR if disabled. If disabled \fBrecommend\fR
 command will be not available in CLI, tuned will not parse \fIrecommend.conf\fR
 and will return one hardcoded profile (by default \fBbalanced\fR). It is only
-applicable if \fBdaemon\fR is enabled.
+applicable if \fBdaemon\fR is enabled. By default it's set to \fBTrue\fR.
+
+.TP
+.BI reapply_sysctl= BOOL
+This controls whether to reapply sysctl settings from the \fI/etc/sysctl.conf\fR,
+\fI/etc/sysctl.d/*.conf\fR, \fI/usr/lib/sysctl.d/*.conf\fR,
+\fI/usr/local/lib/sysctl.d/*.conf\fR, \fI/lib/sysctl.d/*.conf\fR,
+\fI/run/sysctl.d/*.conf\fR, i.e. all locations supported by
+\fBsysctl --system\fR after Tuned sysctl settings are applied, i.e. if
+set to \fBTrue\fR or \fB1\fR Tuned sysctl settings will not override system
+sysctl settings. If set to \fBFalse\fR or \fB0\fR Tuned sysctl settings will
+override system sysctl settings. By defualt it's set to \fBTrue\fR.
+
+.TP
+.BI default_instance_priority= INT
+Default instance (unit) priority. By default it's \fB0\fR. Each unit has a
+priority which is by default preset to the \fIINT\fR. It can be overridden
+in the Tuned profile by the \fBpriority\fR option. Tuned units are processed
+in order defined by their priorities, i.e. unit with the lowest number is
+processed as the first.
 
 .SH EXAMPLE
 .NF
-no_daemon = 0
-dynamic_tuning = 1
-sleep_interval = 1
-update_interval = 10
-recommend_command = 0
+  no_daemon = 0
+  dynamic_tuning = 1
+  sleep_interval = 1
+  update_interval = 10
+  recommend_command = 0
+  reapply_sysctl = 1
+  default_instance_priority = 0
 .FI
 
 .SH FILES
