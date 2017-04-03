@@ -57,6 +57,9 @@ class Loader(object):
 			final_profile = profiles[0]
 
 		final_profile.name = " ".join(profile_names)
+		if "variables" in final_profile.units:
+			self._variables.add_from_cfg(final_profile.units["variables"].options)
+			del(final_profile.units["variables"])
 		return final_profile
 
 	def _load_profile(self, profile_names, profiles, processed_files):
@@ -85,16 +88,13 @@ class Loader(object):
 
 		config = collections.OrderedDict()
 		for section in config_obj.keys():
-			if section == "variables":
-				self._variables.add_from_cfg(config_obj[section], os.path.dirname(file_name))
-			else:
-				config[section] = collections.OrderedDict()
-				try:
-					keys = config_obj[section].keys()
-				except AttributeError:
-					raise InvalidProfileException("Error parsing section '%s' in file '%s'." % (section, file_name))
-				for option in keys:
-					config[section][option] = config_obj[section][option]
+			config[section] = collections.OrderedDict()
+			try:
+				keys = config_obj[section].keys()
+			except AttributeError:
+				raise InvalidProfileException("Error parsing section '%s' in file '%s'." % (section, file_name))
+			for option in keys:
+				config[section][option] = config_obj[section][option]
 
 		dir_name = os.path.dirname(file_name)
 		# TODO: Could we do this in the same place as the expansion of other functions?
