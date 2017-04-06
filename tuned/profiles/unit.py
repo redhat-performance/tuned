@@ -1,3 +1,5 @@
+import collections
+
 class Unit(object):
 	"""
 	Unit description.
@@ -15,7 +17,7 @@ class Unit(object):
 		self._devices_udev_regex = config.pop("devices_udev_regex", None)
 		self._script_pre = config.pop("script_pre", None)
 		self._script_post = config.pop("script_post", None)
-		self._options = dict(config)
+		self._options = collections.OrderedDict(config)
 
 	@property
 	def name(self):
