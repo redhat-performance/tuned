@@ -1,4 +1,5 @@
-# perf code borrowed from kernel/tools/perf/python/twatch.py
+# code for cores isolation was inspired by Tuna implementation
+# perf code was borrowed from kernel/tools/perf/python/twatch.py
 # thanks to Arnaldo Carvalho de Melo <acme@redhat.com>
 
 import base
@@ -10,10 +11,13 @@ import threading
 import perf
 import select
 import tuned.consts as consts
+import procfs
+import schedutils
 from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
+# TODO move from cmdline tools to schedutils and consolidate the code
 class SchedulerPlugin(base.Plugin):
 	"""
 	Plugin for tuning of scheduler. Currently it can control scheduling
@@ -22,6 +26,8 @@ class SchedulerPlugin(base.Plugin):
 
 	_dict_sched2param = {"SCHED_FIFO":"f", "SCHED_BATCH":"b", "SCHED_RR":"r",
 		"SCHED_OTHER":"o", "SCHED_IDLE":"i"}
+
+	PF_NO_SETAFFINITY = 0x04000000
 
 	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
 		super(self.__class__, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
@@ -32,6 +38,9 @@ class SchedulerPlugin(base.Plugin):
 			self._daemon = global_cfg.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
 			self._sleep_interval = int(global_cfg.get(consts.CFG_SLEEP_INTERVAL, consts.CFG_DEF_SLEEP_INTERVAL))
 		self._cmd = commands()
+		# default is to whitelist all and blacklist none
+		self._ps_whitelist = ".*"
+		self._ps_blacklist = ""
 
 	def _scheduler_storage_key(self, instance):
 		return "%s/options" % instance.name
@@ -78,6 +87,14 @@ class SchedulerPlugin(base.Plugin):
 
 	def _instance_cleanup(self, instance):
 		pass
+
+	@classmethod
+	def _get_config_options(cls):
+		return {
+			"isolated_cores":       None,
+			"ps_whitelist": None,
+			"ps_blacklist": None,
+		}
 
 	def get_process(self, pid):
 		cmd = self._cmd.read_file("/proc/" + pid + "/comm", no_error = True)
@@ -168,11 +185,12 @@ class SchedulerPlugin(base.Plugin):
 			self._set_affinity(pid, affinity, no_error)
 
 	def _instance_apply_static(self, instance):
+		super(self.__class__, self)._instance_apply_static(instance)
 		ps = self.get_processes()
 		if ps is None:
 			log.error("error applying tuning, cannot get information about running processes")
 			return
-		instance._sched_cfg = map(lambda (option, value): (option, value.split(":", 4)), instance._scheduler.items())
+		instance._sched_cfg = map(lambda (option, value): (option, str(value).split(":", 4)), instance._scheduler.items())
 		buf = filter(lambda (option, vals): re.match(r"group\.", option) and len(vals) == 5, instance._sched_cfg)
 		instance._sched_cfg = sorted(buf, key=lambda (option, vals): vals[0])
 		sched_all = dict()
@@ -202,6 +220,7 @@ class SchedulerPlugin(base.Plugin):
 			instance._thread.start()
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
+		super(self.__class__, self)._instance_unapply_static(instance, full_rollback)
 		ps = self.get_processes()
 		if self._daemon and instance._runtime_tuning:
 			instance._terminate.set()
@@ -253,3 +272,123 @@ class SchedulerPlugin(base.Plugin):
 								self._add_pid(instance, str(event.pid), r)
 							elif event.type == perf.RECORD_EXIT:
 								self._remove_pid(instance, str(event.pid))
+
+	@command_custom("ps_whitelist", per_device = False)
+	def _ps_whitelist(self, enabling, value, verify, ignore_missing):
+		# currently unsupported
+		if verify:
+			return None
+		if enabling and value is not None:
+			self._ps_whitelist = "|".join(map(lambda v: "(%s)" % v, re.split(r"(?<!\\);", str(value))))
+
+	@command_custom("ps_blacklist", per_device = False)
+	def _ps_blacklist(self, enabling, value, verify, ignore_missing):
+		# currently unsupported
+		if verify:
+			return None
+		if enabling and value is not None:
+			self._ps_blacklist = "|".join(map(lambda v: "(%s)" % v, re.split(r"(?<!\\);", str(value))))
+
+	def _affinity_changeable(self, p):
+		try:
+			flags = p["stat"]["flags"]
+		except (AttributeError, KeyError):
+			return False
+		return not bool(int(flags) & self.PF_NO_SETAFFINITY)
+
+	# TODO: merge with _get_affinity
+	def _get_affinity2(self, pid):
+		try:
+			return schedutils.get_affinity(pid)
+		# Workaround for old python-schedutils which incorrectly raised error
+		except (SystemError, OSError) as e:
+			if e[0] == 3:
+				return None
+			log.error("unable to get affinity for PID '%s': %s" % (str(pid), e))
+			return None
+
+	# TODO: merge with _set_affinity
+	def _set_affinity2(self, pid, affinity):
+		try:
+			schedutils.set_affinity(pid, affinity)
+		# Workaround for old python-schedutils which incorrectly raised error
+		except (SystemError, OSError) as e:
+			if e[0] == 3:
+				return False
+			log.error("unable to set affinity '%s' for PID '%s': %s" % (str(affinity), str(pid), e))
+			return False
+		return True
+
+	# returns intersection of affinity1 with affinity2, if intersection is empty it returns affinity3
+	def _get_intersect_affinity(self, affinity1, affinity2, affinity3):
+		aff = set(affinity1).intersection(set(affinity2))
+		if aff:
+			return list(aff)
+		return affinity3
+
+	def _set_all_obj_affinity(self, objs, affinity, threads = False, intersect = False):
+		_affinity = affinity
+		for obj in objs:
+			if not self._affinity_changeable(objs[obj]):
+				continue
+			prev_affinity = self._get_affinity2(obj)
+			if prev_affinity is None:
+				continue
+			if intersect:
+				_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
+			if set(_affinity) != set(prev_affinity):
+				if not self._set_affinity2(obj, _affinity):
+					continue
+			# process threads
+			if not threads and objs[obj].has_key("threads"):
+				self._set_all_obj_affinity(dict(objs[obj]["threads"].items()), affinity, True, intersect)
+
+
+	def _set_ps_affinity(self, affinity, intersect = False):
+		_affinity = affinity
+		affinity_hex = self._cmd.cpulist2hex(_affinity)
+		ps = procfs.pidstats()
+		ps.reload_threads()
+		psl = filter(lambda v: re.search(self._ps_whitelist, v["stat"]["comm"]) is not None, ps.values())
+		if self._ps_blacklist != "":
+			psl = filter(lambda v: re.search(self._ps_blacklist, v["stat"]["comm"]) is None, psl)
+		psd = dict(map(lambda v: (v.pid, v), psl))
+		self._set_all_obj_affinity(psd, affinity, False, intersect)
+
+		# process IRQs
+		irqs = procfs.interrupts()
+		for irq in irqs.keys():
+			try:
+				prev_affinity = irqs[irq]["affinity"]
+			except KeyError:
+				continue
+			if intersect:
+				_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
+				affinity_hex = self._cmd.cpulist2hex(_affinity)
+			self._cmd.write_to_file("/proc/irq/%s/smp_affinity" % irq, affinity_hex, no_error = True)
+
+		# default affinity
+		prev_affinity_hex = self._cmd.read_file("/proc/irq/default_smp_affinity")
+		prev_affinity = self._cmd.hex2cpulist(prev_affinity_hex)
+		if intersect:
+			_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
+			affinity_hex = self._cmd.cpulist2hex(_affinity)
+		self._cmd.write_to_file("/proc/irq/default_smp_affinity", affinity_hex)
+
+	@command_custom("isolated_cores", per_device = False, priority = 10)
+	def _isolated_cores(self, enabling, value, verify, ignore_missing):
+		# currently unsupported
+		if verify:
+			return None
+		# TODO merge with instance._cpus
+		cpus = list(perf.cpu_map())
+		if enabling:
+			if value is not None:
+				affinity = self._cmd.cpulist_invert(value)
+				sa = set(affinity)
+				if set(cpus).intersection(sa) != sa:
+					log.error("invalid isolated_cores specified, '%s' don't match available cores '%s'" % (value, ",".cpus))
+					return None
+				self._set_ps_affinity(affinity, True)
+		else:
+			self._set_ps_affinity(cpus, False)

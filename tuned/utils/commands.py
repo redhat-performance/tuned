@@ -265,26 +265,30 @@ class commands:
 		rl = []
 		if l is None:
 			return l
-		ll = str(l).split(",")
+		if type(l) is list:
+			ll = l
+		else:
+			ll = str(l).split(",")
 		ll2 = []
 		hexmask = False
 		hv = ""
 		# Remove commas from hexmasks
 		for v in ll:
+			sv = str(v)
 			if hexmask:
-				if len(v) == 0:
+				if len(sv) == 0:
 					hexmask = False
 					ll2.append(hv)
 					hv = ""
 				else:
-					hv += v
+					hv += sv
 			else:
-				if v[0:2].lower() == "0x":
+				if sv[0:2].lower() == "0x":
 					hexmask = True
-					hv = v
+					hv = sv
 				else:
-					if len(v) > 0:
-						ll2.append(v)
+					if len(sv) > 0:
+						ll2.append(sv)
 		if len(hv) > 0:
 			ll2.append(hv)
 		for v in ll2:
