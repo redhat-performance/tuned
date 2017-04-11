@@ -183,7 +183,14 @@ class BootloaderPlugin(base.Plugin):
 		img_name = os.path.basename(self._initrd_dst_img_val)
 		self._cmd.copy(img, self._initrd_dst_img_val)
 		self.update_grub2_cfg = True
-		self._initrd_val = "/" + img_name
+		curr_cmdline = self._cmd.read_file("/proc/cmdline").rstrip()
+		initrd_grubpath = "/"
+		lc = len(curr_cmdline)
+		if lc:
+			path = re.sub(r"^.*[= \t]+([^= \t]*/)vmlinuz-.*$", "\\1", curr_cmdline)
+			if len(path) < lc:
+				initrd_grubpath = path
+		self._initrd_val = os.path.join(initrd_grubpath, img_name)
 
 	@command_custom("grub2_cfg_file")
 	def _grub2_cfg_file(self, enabling, value, verify, ignore_missing):
