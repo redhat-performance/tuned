@@ -47,8 +47,11 @@ class SystemdPlugin(base.Plugin):
 	def _add_keyval(self, conf, key, val):
 		(conf_new, nsubs) = re.subn(r"^(\s*" + key + r"\s*=).*$", r"\g<1>" + str(val), conf, flags = re.MULTILINE)
 		if nsubs < 1:
-			if conf[-1] != "\n":
-				conf += "\n"
+			try:
+				if conf[-1] != "\n":
+					conf += "\n"
+			except IndexError:
+				pass
 			conf += key + "=" + str(val) + "\n"
 			return conf
 		return conf_new
@@ -101,14 +104,14 @@ class SystemdPlugin(base.Plugin):
 	def _cpulist_convert_unpack(self, cpulist):
 		if cpulist is None:
 			return ""
-		return ",".join(str(v) for v in self._cmd.cpulist_unpack(re.sub(r"\s+", r",", re.sub(r",\s+", r",", cpulist))))
+		return " ".join(str(v) for v in self._cmd.cpulist_unpack(re.sub(r"\s+", r",", re.sub(r",\s+", r",", cpulist))))
 
 	@command_custom("cpu_affinity", per_device = False)
 	def _cmdline(self, enabling, value, verify, ignore_missing):
 		conf_affinity = None
 		conf_affinity_unpacked = None
 		v = self._cmd.unescape(self._variables.expand(self._cmd.unquote(value)))
-		v_unpacked = ",".join(str(v) for v in self._cmd.cpulist_unpack(v))
+		v_unpacked = " ".join(str(v) for v in self._cmd.cpulist_unpack(v))
 		conf = self._read_systemd_system_conf()
 		if conf is not None:
 			conf_affinity = self._get_keyval(conf, consts.SYSTEMD_CPUAFFINITY_VAR)
@@ -121,5 +124,5 @@ class SystemdPlugin(base.Plugin):
 			if conf_affinity is not None and cpu_affinity_saved is None and v_unpacked != conf_affinity_unpacked:
 				self._cmd.write_to_file(fname, conf_affinity, makedir = True)
 
-			log.info("setting '%s' to '%s' in the '%s'" % (consts.SYSTEMD_CPUAFFINITY_VAR, v, consts.SYSTEMD_SYSTEM_CONF_FILE))
-			self._write_systemd_system_conf(self._add_keyval(conf, consts.SYSTEMD_CPUAFFINITY_VAR, v))
+			log.info("setting '%s' to '%s' in the '%s'" % (consts.SYSTEMD_CPUAFFINITY_VAR, v_unpacked, consts.SYSTEMD_SYSTEM_CONF_FILE))
+			self._write_systemd_system_conf(self._add_keyval(conf, consts.SYSTEMD_CPUAFFINITY_VAR, v_unpacked))
