@@ -187,7 +187,7 @@ class BootloaderPlugin(base.Plugin):
 		initrd_grubpath = "/"
 		lc = len(curr_cmdline)
 		if lc:
-			path = re.sub(r"^.*[= \t]+([^= \t]*/)vmlinuz-.*$", "\\1", curr_cmdline)
+			path = re.sub(r"^\s*BOOT_IMAGE=\s*(\S*/).*$", "\\1", curr_cmdline)
 			if len(path) < lc:
 				initrd_grubpath = path
 		self._initrd_val = os.path.join(initrd_grubpath, img_name)
