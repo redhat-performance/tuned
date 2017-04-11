@@ -27,7 +27,7 @@ class Functions():
 		self._esc = False
 
 	def _curr_char(self):
-		return self._str[self._cnt]
+		return self._str[self._cnt] if self._cnt < self._len else ""
 
 	def _curr_substr(self, _len):
 		return self._str[self._cnt:self._cnt + _len]
