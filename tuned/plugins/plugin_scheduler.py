@@ -292,7 +292,7 @@ class SchedulerPlugin(base.Plugin):
 	def _affinity_changeable(self, p):
 		try:
 			flags = p["stat"]["flags"]
-		except (AttributeError, KeyError):
+		except (IOError, OSError, AttributeError, KeyError):
 			return False
 		return not bool(int(flags) & self.PF_NO_SETAFFINITY)
 
