@@ -343,15 +343,20 @@ class SchedulerPlugin(base.Plugin):
 			if not threads and objs[obj].has_key("threads"):
 				self._set_all_obj_affinity(dict(objs[obj]["threads"].items()), affinity, True, intersect)
 
+	def _get_stat_comm(self, o):
+		try:
+			return o["stat"]["comm"]
+		except (OSError, IOError, KeyError):
+			return ""
 
 	def _set_ps_affinity(self, affinity, intersect = False):
 		_affinity = affinity
 		affinity_hex = self._cmd.cpulist2hex(_affinity)
 		ps = procfs.pidstats()
 		ps.reload_threads()
-		psl = filter(lambda v: re.search(self._ps_whitelist, v["stat"]["comm"]) is not None, ps.values())
+		psl = filter(lambda v: re.search(self._ps_whitelist, self._get_stat_comm(v)) is not None, ps.values())
 		if self._ps_blacklist != "":
-			psl = filter(lambda v: re.search(self._ps_blacklist, v["stat"]["comm"]) is None, psl)
+			psl = filter(lambda v: re.search(self._ps_blacklist, self._get_stat_comm(v)) is None, psl)
 		psd = dict(map(lambda v: (v.pid, v), psl))
 		self._set_all_obj_affinity(psd, affinity, False, intersect)
 
