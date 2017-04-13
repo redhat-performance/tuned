@@ -269,7 +269,7 @@ class NetTuningPlugin(base.Plugin):
 		if not sim:
 			log.debug("setting %s: %s" % ("coalesce" if coalesce else "features", str(d)))
 			# ignore ethtool return code 80, it means parameter is already set
-			self._cmd.execute(["ethtool", "-C" if coalesce else "-K", device] + self._cmd.dict2list(d), [80])
+			self._cmd.execute(["ethtool", "-C" if coalesce else "-K", device] + self._cmd.dict2list(d), no_errors = [80])
 		return d
 
 	def _custom_parameters(self, coalesce, start, value, device, verify):
