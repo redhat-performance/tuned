@@ -27,7 +27,24 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		Controller main loop. The call is blocking.
 		"""
 		log.info("starting controller")
-		self.start()
+		if self.start():
+			log.info("Waiting for a profile to be applied.")
+			i = 0
+			res = False
+			while not res and i < 120:
+				res = self._daemon.wait_for_profile_applied(0.5)
+				i += 1
+			if res:
+				log.info("Profile applied.")
+			else:
+				log.critical("Timed out waiting for a profile to be applied, exiting.")
+				# There's no point calling self.stop() here, it could deadlock
+				return
+
+		if self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+			exports.start()
+		else:
+			log.warn("Using one shot no deamon mode, most of the functionality will be not available, it can be changed in global config")
 
 		if self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
 			self._terminate.clear()
@@ -36,6 +53,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 				pass
 
 		log.info("terminating controller")
+		if self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+			exports.stop()
 		self.stop()
 
 	def terminate(self):

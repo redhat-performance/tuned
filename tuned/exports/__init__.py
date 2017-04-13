@@ -35,3 +35,7 @@ def start():
 def stop():
 	ctl = controller.ExportsController.get_instance()
 	return ctl.stop()
+
+def wait_for_exports_running(timeout):
+	ctl = controller.ExportsController.get_instance()
+	return ctl.wait_for_exports_running(timeout)

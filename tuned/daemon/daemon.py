@@ -6,6 +6,7 @@ from tuned.exceptions import TunedException
 from tuned.profiles.exceptions import InvalidProfileException
 import tuned.consts as consts
 from tuned.utils.commands import commands
+from tuned import exports
 
 log = tuned.logs.get()
 
@@ -107,7 +108,21 @@ class Daemon(object):
 		self._unit_manager.start_tuning()
 		self._profile_applied.set()
 		log.info("static tuning from profile '%s' applied" % self._profile.name)
-		self._notify_profile_changed(self._profile.name, True, "OK")
+		if not exports.wait_for_exports_running(0):
+			log.info("Waiting for exports to start.")
+			i = 0
+			res = False
+			while not res and i < 120:
+				res = exports.wait_for_exports_running(0.5)
+				i += 1
+			if res:
+				log.info("Exports started")
+				self._notify_profile_changed(self._profile.name, True, "OK")
+			else:
+				log.critical("Timed out waiting for exports, stopping daemon.")
+				self._terminate.set()
+		else:
+			self._notify_profile_changed(self._profile.name, True, "OK")
 
 		if self._daemon:
 			# In python 2 interpreter with applied patch for rhbz#917709 we need to periodically
@@ -241,3 +256,6 @@ class Daemon(object):
 		self._thread = None
 
 		return True
+
+	def wait_for_profile_applied(self, timeout):
+		return self._cmd.wait(self._profile_applied, timeout)
