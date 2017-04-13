@@ -164,6 +164,12 @@ class BootloaderPlugin(base.Plugin):
 			(grub2_cfg_new, nsubs) = re.subn(r"\b(set\s+" + opt + "\s*=).*$", r"\1" + "\"" + d[opt] + "\"", grub2_cfg_new, flags = re.MULTILINE)
 			if nsubs < 1 or re.search(r"\$" + opt, grub2_cfg, flags = re.MULTILINE) is None:
 				patch_initial = True
+
+		# workaround for rhbz#1442117
+		if len(re.findall(r"\$" + consts.GRUB2_TUNED_VAR, grub2_cfg, flags = re.MULTILINE)) != \
+			len(re.findall(r"\$" + consts.GRUB2_TUNED_INITRD_VAR, grub2_cfg, flags = re.MULTILINE)):
+				patch_initial = True
+
 		if patch_initial:
 			grub2_cfg_new = self._grub2_cfg_patch_initial(self._grub2_cfg_unpatch(grub2_cfg), d)
 		self._cmd.write_to_file(self._grub2_cfg_file_name, grub2_cfg_new)
