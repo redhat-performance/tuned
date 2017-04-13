@@ -105,12 +105,19 @@ class NetTuningPlugin(base.Plugin):
 			}
 
 	@classmethod
+	def _get_config_options_pause(cls):
+		return { "autoneg": None,
+			"rx": None,
+			"tx": None }
+
+	@classmethod
 	def _get_config_options(cls):
 		return {
 			"wake_on_lan": None,
 			"nf_conntrack_hashsize": None,
 			"features": None,
-			"coalesce": None
+			"coalesce": None,
+			"pause": None,
 		}
 
 	def _init_stats_and_idle(self, instance, device):
@@ -247,21 +254,33 @@ class NetTuningPlugin(base.Plugin):
 		if context == "features":
 			return True
 		params = set(d.keys())
-		supported_getter = { "coalesce": self._get_config_options_coalesce }
+		supported_getter = { "coalesce": self._get_config_options_coalesce, \
+				"pause": self._get_config_options_pause }
 		supported = set(supported_getter[context]().keys())
 		if not params.issubset(supported):
 			log.error("unknown %s parameter(s): %s" % (context, str(params - supported)))
 			return False
 		return True
 
+	# parse output of ethtool -a
+	def _parse_pause_parameters(self, s):
+		s = self._cmd.multiple_re_replace(\
+				{"Autonegotiate": "autoneg",
+				"RX": "rx",
+				"TX": "tx"}, s)
+		l = s.split("\n")[1:]
+		l = filter(lambda x: x != '' and not re.search(r"\[fixed\]", x), l)
+		return dict(filter(lambda x: len(x) == 2, map(lambda x: re.split(r":\s*", x), l)))
+
 	def _get_device_parameters(self, context, device):
-		context2opt = { "coalesce": "-c", "features": "-k" }
+		context2opt = { "coalesce": "-c", "features": "-k", "pause": "-a" }
 		opt = context2opt[context]
 		ret, value = self._cmd.execute(["ethtool", opt, device])
 		if ret != 0 or len(value) == 0:
 			return None
 		context2parser = { "coalesce": self._parse_device_parameters, \
-				"features": self._parse_device_parameters }
+				"features": self._parse_device_parameters, \
+				"pause": self._parse_pause_parameters }
 		parser = context2parser[context]
 		d = parser(value)
 		if context == "coalesce" and not self._check_parameters(context, d):
@@ -277,7 +296,7 @@ class NetTuningPlugin(base.Plugin):
 		if not sim:
 			log.debug("setting %s: %s" % (context, str(d)))
 			# ignore ethtool return code 80, it means parameter is already set
-			context2opt = { "coalesce": "-C", "features": "-K" }
+			context2opt = { "coalesce": "-C", "features": "-K", "pause": "-A" }
 			opt = context2opt[context]
 			self._cmd.execute(["ethtool", opt, device] + self._cmd.dict2list(d), no_errors = [80])
 		return d
@@ -309,3 +328,7 @@ class NetTuningPlugin(base.Plugin):
 	@command_custom("coalesce", per_device = True)
 	def _coalesce(self, start, value, device, verify, ignore_missing):
 		return self._custom_parameters("coalesce", start, value, device, verify)
+
+	@command_custom("pause", per_device = True)
+	def _pause(self, start, value, device, verify, ignore_missing):
+		return self._custom_parameters("pause", start, value, device, verify)
