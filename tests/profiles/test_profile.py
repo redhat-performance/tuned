@@ -1,5 +1,6 @@
 import unittest
 import tuned.profiles
+import collections
 
 class MockProfile(tuned.profiles.profile.Profile):
 	def _create_unit(self, name, config):
@@ -17,14 +18,14 @@ class ProfileTestCase(unittest.TestCase):
 			"storage" : { "type": "disk" },
 		})
 
-		self.assertIs(type(profile.units), list)
+		self.assertIs(type(profile.units), collections.OrderedDict)
 		self.assertEqual(len(profile.units), 2)
 		self.assertListEqual(sorted(map(lambda (name, config): name, profile.units)), sorted(["network", "storage"]))
 
 	def test_create_units_empty(self):
 		profile = MockProfile("test", {"main":{}})
 
-		self.assertIs(type(profile.units), list)
+		self.assertIs(type(profile.units), collections.OrderedDict)
 		self.assertEqual(len(profile.units), 0)
 
 	def test_sets_name(self):
