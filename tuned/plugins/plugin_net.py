@@ -111,6 +111,13 @@ class NetTuningPlugin(base.Plugin):
 			"tx": None }
 
 	@classmethod
+	def _get_config_options_ring(cls):
+		return { "rx": None,
+			"rx-mini": None,
+			"rx-jumbo": None,
+			"tx": None }
+
+	@classmethod
 	def _get_config_options(cls):
 		return {
 			"wake_on_lan": None,
@@ -118,6 +125,7 @@ class NetTuningPlugin(base.Plugin):
 			"features": None,
 			"coalesce": None,
 			"pause": None,
+			"ring": None,
 		}
 
 	def _init_stats_and_idle(self, instance, device):
@@ -255,7 +263,8 @@ class NetTuningPlugin(base.Plugin):
 			return True
 		params = set(d.keys())
 		supported_getter = { "coalesce": self._get_config_options_coalesce, \
-				"pause": self._get_config_options_pause }
+				"pause": self._get_config_options_pause, \
+				"ring": self._get_config_options_ring }
 		supported = set(supported_getter[context]().keys())
 		if not params.issubset(supported):
 			log.error("unknown %s parameter(s): %s" % (context, str(params - supported)))
@@ -272,15 +281,30 @@ class NetTuningPlugin(base.Plugin):
 		l = filter(lambda x: x != '' and not re.search(r"\[fixed\]", x), l)
 		return dict(filter(lambda x: len(x) == 2, map(lambda x: re.split(r":\s*", x), l)))
 
+	# parse output of ethtool -g
+	def _parse_ring_parameters(self, s):
+		a = re.split(r"^Current hardware settings:$", s, flags=re.MULTILINE)
+		s = a[1]
+		s = self._cmd.multiple_re_replace(\
+				{"RX": "rx",
+				"RX Mini": "rx-mini",
+				"RX Jumbo": "rx-jumbo",
+				"TX": "tx"}, s)
+		l = s.split("\n")
+		l = filter(lambda x: x != '', l)
+		l = filter(lambda x: len(x) == 2, map(lambda x: re.split(r":\s*", x), l))
+		return dict(l)
+
 	def _get_device_parameters(self, context, device):
-		context2opt = { "coalesce": "-c", "features": "-k", "pause": "-a" }
+		context2opt = { "coalesce": "-c", "features": "-k", "pause": "-a", "ring": "-g" }
 		opt = context2opt[context]
 		ret, value = self._cmd.execute(["ethtool", opt, device])
 		if ret != 0 or len(value) == 0:
 			return None
 		context2parser = { "coalesce": self._parse_device_parameters, \
 				"features": self._parse_device_parameters, \
-				"pause": self._parse_pause_parameters }
+				"pause": self._parse_pause_parameters, \
+				"ring": self._parse_ring_parameters }
 		parser = context2parser[context]
 		d = parser(value)
 		if context == "coalesce" and not self._check_parameters(context, d):
@@ -296,7 +320,7 @@ class NetTuningPlugin(base.Plugin):
 		if not sim:
 			log.debug("setting %s: %s" % (context, str(d)))
 			# ignore ethtool return code 80, it means parameter is already set
-			context2opt = { "coalesce": "-C", "features": "-K", "pause": "-A" }
+			context2opt = { "coalesce": "-C", "features": "-K", "pause": "-A", "ring": "-G" }
 			opt = context2opt[context]
 			self._cmd.execute(["ethtool", opt, device] + self._cmd.dict2list(d), no_errors = [80])
 		return d
@@ -332,3 +356,7 @@ class NetTuningPlugin(base.Plugin):
 	@command_custom("pause", per_device = True)
 	def _pause(self, start, value, device, verify, ignore_missing):
 		return self._custom_parameters("pause", start, value, device, verify)
+
+	@command_custom("ring", per_device = True)
+	def _ring(self, start, value, device, verify, ignore_missing):
+		return self._custom_parameters("ring", start, value, device, verify)
