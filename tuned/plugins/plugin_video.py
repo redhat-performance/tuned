@@ -29,6 +29,7 @@ class VideoPlugin(base.Plugin):
 	def _get_config_options(self):
 		return {
 			"radeon_powersave" : None,
+			"radeon_dpm_state" : None,
 		}
 
 	def _instance_init(self, instance):
@@ -43,6 +44,9 @@ class VideoPlugin(base.Plugin):
 			"method" : "/sys/class/drm/%s/device/power_method" % device,
 			"profile": "/sys/class/drm/%s/device/power_profile" % device,
 		}
+
+	def _radeon_dpm_state_file(self, device):
+		return "/sys/class/drm/%s/device/power_dpm_state" % device
 
 	@command_set("radeon_powersave", per_device=True)
 	def _set_radeon_powersave(self, value, device, sim):
@@ -61,6 +65,12 @@ class VideoPlugin(base.Plugin):
 			if not sim:
 				self._cmd.write_to_file(sys_files["method"], "dynpm")
 			return "dynpm"
+		elif value == "dpm":
+			if not sim and self._get_radeon_powersave(device) != "dpm":
+				log.error("Cannot set dpm power method through the video plugin." \
+						+ "Use the bootloader plugin with the 'cmdline = radeon.dpm=1' option")
+				return None
+			return "dpm"
 		else:
 			if not sim:
 				log.warn("Invalid option for radeon_powersave.")
@@ -73,7 +83,28 @@ class VideoPlugin(base.Plugin):
 		method = self._cmd.read_file(sys_files["method"]).strip()
 		if method == "profile":
 			return self._cmd.read_file(sys_files["profile"]).strip()
-		elif method == "dynpm":
-			return "dynpm"
+		elif method == "dynpm" or method == "dpm":
+			return method
 		else:
 			return None
+
+	@command_set("radeon_dpm_state", per_device=True, priority=10)
+	def _set_radeon_dpm_state(self, value, device, sim):
+		if self._get_radeon_powersave(device) != "dpm":
+			log.error("dpm power method is not enabled.")
+			return None
+		if not value in ["battery", "balanced", "performance"]:
+			if not sim:
+				log.warn("Invalid option for radeon_dpm_state.")
+			return None
+		path = self._radeon_dpm_state_file(device)
+		self._cmd.write_to_file(path, value)
+		return value
+
+	@command_get("radeon_dpm_state")
+	def _get_radeon_dpm_state(self, device):
+		if self._get_radeon_powersave(device) != "dpm":
+			log.error("dpm power method is not enabled.")
+			return None
+		path = self._radeon_dpm_state_file(device)
+		return self._cmd.read_file(path).strip()
