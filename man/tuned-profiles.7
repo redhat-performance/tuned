@@ -28,7 +28,7 @@ These are the base profiles which are mostly shipped in the base tuned
 package. They are targeted to various goals. Mostly they provide
 performance optimizations but there are also profiles targeted to
 low power consumption, low latency and others. You can mostly deduce the
-purpose of the profile by its name or you can see full description bellow.
+purpose of the profile by its name or you can see full description below.
 
 The profiles are stored in subdirectories below \fI/usr/lib/tuned\fP. If you
 need to customize the profiles, you can copy them to \fI/etc/tuned\fP and modify
@@ -87,17 +87,17 @@ CPU energy performance bias to performance.
 .TP
 .BI "network\-throughput"
 Profile for throughput network tuning. It is based on the throughput\-performance
-profile. It additionaly increases kernel network buffers.
+profile. It additionally increases kernel network buffers.
 
 .TP
 .BI "network\-latency"
 Profile for low latency network tuning. It is based on the latency\-performance
-profile. It additionaly disables transparent hugepages, NUMA balancing and
+profile. It additionally disables transparent hugepages, NUMA balancing and
 tunes several other network related sysctl parameters.
 
 .TP
 .BI "desktop"
-Profile optimized for desktops based on balanced profile. It additionaly
+Profile optimized for desktops based on balanced profile. It additionally
 enables scheduler autogroups for better response of interactive applications.
 
 .TP
