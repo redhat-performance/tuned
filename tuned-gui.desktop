@@ -1,5 +1,4 @@
 [Desktop Entry]
-Encoding=UTF-8
 Name=tuned-gui
 GenericName=tuned-gui
 Comment=GTK GUI that can control Tuned daemon and provides simple profile editor
