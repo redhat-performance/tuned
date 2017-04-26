@@ -10,11 +10,11 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.7.1
+Version: 2.8.0
 Release: 1%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
-Source: https://fedorahosted.org/releases/t/u/tuned/tuned-%{version}.tar.bz2
-URL: https://fedorahosted.org/tuned/
+Source: https://jskarvad.fedorapeople.org/tuned/download/tuned-%{version}.tar.bz2
+URL: http://www.tuned-project.org/
 BuildArch: noarch
 BuildRequires: python, systemd, desktop-file-utils
 Requires(post): systemd, virt-what
@@ -388,6 +388,64 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Fri Apr  7 2017 Jaroslav Škarvada <jskarvad@redhat.com> - 2.8.0-1
+- new release
+  - rebase tuned to latest upstream
+    resolves: rhbz#1388454
+  - cpu-partitioning: enabled timer migration
+    resolves: rhbz#1408308
+  - cpu-partitioning: disabled kvmclock sync and ple
+    resolves: rhbz#1395855
+  - spec: muted error if there is no selinux support
+    resolves: rhbz#1404214
+  - units: implemented instance priority
+    resolves: rhbz#1246172
+  - bootloader: added support for initrd overlays
+    resolves: rhbz#1414098
+  - cpu-partitioning: set CPUAffinity early in initrd image
+    resolves: rhbz#1394965
+  - cpu-partitioning: set workqueue affinity early
+    resolves: rhbz#1395899
+  - scsi_host: fixed probing of ALPM, missing ALPM logged as info
+    resolves: rhbz#1416712
+  - added new profile cpu-partitioning
+    resolves: rhbz#1359956
+  - bootloader: improved inheritance
+    resolves: rhbz#1274464
+  - units: mplemented udev-based regexp device matching
+    resolves: rhbz#1251240
+  - units: introduced pre_script, post_script
+    resolves: rhbz#1246176
+  - realtime-virtual-host: accommodate new ktimersoftd thread
+    resolves: rhbz#1332563
+  - defirqaffinity: fixed traceback due to syntax error
+    resolves: rhbz#1369791
+  - variables: support inheritance of variables
+    resolves: rhbz#1433496
+  - scheduler: added support for cores isolation
+    resolves: rhbz#1403309
+  - tuned-profiles-nfv splitted to host/guest and dropped unneeded dependency
+    resolves: rhbz#1413111
+  - desktop: fixed typo in profile summary
+    resolves: rhbz#1421238
+  - with systemd don't do full rollback on shutdown / reboot
+    resolves: rhbz#1421286
+  - builtin functions: added virt_check function and support to include
+    resolves: rhbz#1426654
+  - cpulist_present: explicitly sorted present CPUs
+    resolves: rhbz#1432240
+  - plugin_scheduler: fixed initialization
+    resolves: rhbz#1433496
+  - log errors when applying a profile fails
+    resolves: rhbz#1434360
+  - systemd: added support for older systemd CPUAffinity syntax
+    resolves: rhbz#1441791
+  - scheduler: added workarounds for low level exceptions from
+    python-linux-procfs
+    resolves: rhbz#1441792
+  - bootloader: workaround for adding tuned_initrd to new kernels on restart
+    resolves: rhbz#1441797
+
 * Tue Aug  2 2016 Jaroslav Škarvada <jskarvad@redhat.com> - 2.7.1-1
 - new-release
   - gui: fixed traceback caused by DBus paths copy&paste error
