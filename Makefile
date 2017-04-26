@@ -20,10 +20,10 @@ else
 	RPM_VERSION = $(NAME)-$(VERSION)-1$(GIT_PSUFFIX)
 endif
 UNITDIR_FALLBACK = /usr/lib/systemd/system
-UNITDIR_DETECT = $(shell rpm --eval '%{_unitdir}' 2>/dev/null || echo $(UNITDIR_FALLBACK))
+UNITDIR_DETECT = $(shell pkg-config systemd --variable systemdsystemunitdir || rpm --eval '%{_unitdir}' 2>/dev/null || echo $(UNITDIR_FALLBACK))
 UNITDIR = $(UNITDIR_DETECT:%{_unitdir}=$(UNITDIR_FALLBACK))
 TMPFILESDIR_FALLBACK = /usr/lib/tmpfiles.d
-TMPFILESDIR_DETECT = $(shell rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo $(TMPFILESDIR_FALLBACK))
+TMPFILESDIR_DETECT = $(shell pkg-config systemd --variable tmpfilesdir || rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo $(TMPFILESDIR_FALLBACK))
 TMPFILESDIR = $(TMPFILESDIR_DETECT:%{_tmpfilesdir}=$(TMPFILESDIR_FALLBACK))
 VERSIONED_NAME = $(NAME)-$(VERSION)$(GIT_PSUFFIX)
 
