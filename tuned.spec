@@ -13,7 +13,7 @@ Name: tuned
 Version: 2.8.0
 Release: 1%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
-Source: https://jskarvad.fedorapeople.org/tuned/download/tuned-%{version}.tar.bz2
+Source: https://codeload.github.com/redhat-performance/%{name}/tar.gz/v%{version}#/%{name}-%{version}.tar.gz
 URL: http://www.tuned-project.org/
 BuildArch: noarch
 BuildRequires: python, systemd, desktop-file-utils
