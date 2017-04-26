@@ -183,6 +183,8 @@ class Admin(object):
 		return False
 
 	def _action_dbus_profile(self, profiles):
+		if len(profiles) == 0:
+			return self._action_dbus_list()
 		profile_name = " ".join(profiles)
 		if profile_name == "":
 			return False
@@ -196,6 +198,8 @@ class Admin(object):
 		return self._profile_print_status(ret, msg)
 
 	def _action_profile(self, profiles):
+		if len(profiles) == 0:
+			return self._action_list()
 		profile_name = " ".join(profiles)
 		if profile_name == "":
 			return False

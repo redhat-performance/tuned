@@ -55,9 +55,9 @@ if __name__ == "__main__":
 	parser_off = subparsers.add_parser("off", help="switch off all tunings")
 	parser_off.set_defaults(action="off")
 
-	parser_profile = subparsers.add_parser("profile", help="switch to a given profile")
+	parser_profile = subparsers.add_parser("profile", help="switch to a given profile, or list available profiles if no profile is given")
 	parser_profile.set_defaults(action="profile")
-	parser_profile.add_argument("profiles", metavar="profile", type=str, nargs="+", help="profile name")
+	parser_profile.add_argument("profiles", metavar="profile", type=str, nargs="*", help="profile name")
 
 	parser_profile_info = subparsers.add_parser("profile_info", help="show information/description of given profile or current profile if no profile is specified")
 	parser_profile_info.set_defaults(action="profile_info")
