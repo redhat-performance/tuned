@@ -22,7 +22,7 @@ class DeviceMatcher(object):
 		if isinstance(rules, basestring):
 			rules = re.split(r"\s|,\s*", rules)
 
-		positive_rules = filter(lambda rule: not rule.startswith("!"), rules)
+		positive_rules = filter(lambda rule: not rule.startswith("!") and not rule.strip() == '', rules)
 		negative_rules = [rule[1:] for rule in rules if rule not in positive_rules]
 
 		if len(positive_rules) == 0:

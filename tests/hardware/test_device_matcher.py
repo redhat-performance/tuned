@@ -1,5 +1,5 @@
 import unittest
-from tuned.units.device_matcher import DeviceMatcher
+from tuned.hardware.device_matcher import DeviceMatcher
 
 class DeviceMatcherTestCase(unittest.TestCase):
 	@classmethod
