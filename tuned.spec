@@ -136,7 +136,6 @@ Additional tuned profile(s) targeted to Network Function Virtualization (NFV).
 %package profiles-cpu-partitioning
 Summary: Additional tuned profile(s) optimized for CPU partitioning
 Requires: %{name} = %{version}
-Requires: tuna
 
 %description profiles-cpu-partitioning
 Additional tuned profile(s) optimized for CPU partitioning.
