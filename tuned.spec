@@ -118,7 +118,8 @@ Additional tuned profile(s) targeted to Network Function Virtualization (NFV) gu
 Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host
 Requires: %{name} = %{version}
 Requires: %{name}-profiles-realtime = %{version}
-Requires: tuna, qemu-kvm-tools-rhev
+Requires: tuna
+Recommends: qemu-kvm-tools-rhev
 
 %description profiles-nfv-host
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host.
