@@ -30,7 +30,7 @@ class Application(object):
 
 		self.config = GlobalConfig() if config is None else config
 		if self.config.get_bool(consts.CFG_DYNAMIC_TUNING):
-			log.info("dynamic tuning is enabled (can be overriden in plugins)")
+			log.info("dynamic tuning is enabled (can be overridden in plugins)")
 		else:
 			log.info("dynamic tuning is globally disabled")
 

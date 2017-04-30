@@ -34,7 +34,7 @@ class Daemon(object):
 		self._sleep_cycles = self._update_interval // self._sleep_interval
 		log.info("using sleep interval of %d second(s)" % self._sleep_interval)
 		if self._dynamic_tuning:
-			log.info("dynamic tuning is enabled (can be overriden by plugins)")
+			log.info("dynamic tuning is enabled (can be overridden by plugins)")
 			log.info("using update interval of %d second(s) (%d times of the sleep interval)" % (self._sleep_cycles * self._sleep_interval, self._sleep_cycles))
 
 		self._unit_manager = unit_manager
