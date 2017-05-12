@@ -236,9 +236,11 @@ class Admin(object):
 			print("Verfication succeeded, current system settings match the preset profile.")
 		else:
 			print("Verification failed, current system settings differ from the preset profile.")
-			print("You can mostly fix this by Tuned restart, e.g.:")
+			print("You can mostly fix this by restarting the Tuned daemon, e.g.:")
+			print("  systemctl restart tuned")
+			print("or")
 			print("  service tuned restart")
-			print("Sometimes (if some plugins like bootloader are used) also reboot is required.")
+			print("Sometimes (if some plugins like bootloader are used) a reboot may be required.")
 		print("See tuned log file ('%s') for details." % consts.LOG_FILE)
 		return self._controller.exit(ret)
 
