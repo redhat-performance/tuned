@@ -1,9 +1,9 @@
 [Unit]
 Description=Dynamic System Tuning Daemon
-After=syslog.target systemd-sysctl.service network.target
+After=systemd-sysctl.service network.target
 Requires=dbus.service polkit.service
 Conflicts=cpupower.service
-Documentation=man:tuned(8)
+Documentation=man:tuned(8) man:tuned.conf(5) man:tuned-adm(8)
 
 [Service]
 Type=dbus
