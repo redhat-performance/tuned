@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=tuned-gui
-GenericName=tuned-gui
+GenericName=tuned
 Comment=GTK GUI that can control Tuned daemon and provides simple profile editor
-Exec=tuned-gui
+Exec=/usr/sbin/tuned-gui
 Icon=tuned
 Terminal=false
 Type=Application

@@ -113,7 +113,7 @@ install: install-dirs
 		install -Dpm 0755 $(file) $(DESTDIR)/usr/sbin/$(notdir $(file));)
 
 	# glade
-	install -Dpm 0755 tuned-gui.glade $(DESTDIR)$(DATADIR)/tuned/ui/tuned-gui.glade
+	install -Dpm 0644 tuned-gui.glade $(DESTDIR)$(DATADIR)/tuned/ui/tuned-gui.glade
 
 	# tools
 	install -Dpm 0755 experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
