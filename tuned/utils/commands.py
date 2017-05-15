@@ -260,7 +260,9 @@ class commands:
 	# Unpacks CPU list, i.e. 1-3 will be converted to 1, 2, 3, supports
 	# hexmasks that needs to be prefixed by "0x". Hexmasks can have commas,
 	# which will be removed. If combining hexmasks with CPU list they need
-	# to be separated by ",,", e.g.: 0-3, 0xf,, 6
+	# to be separated by ",,", e.g.: 0-3, 0xf,, 6. It also supports negation
+	# cpus by specifying "^" or "!", e.g.: 0-5, ^3, will output the list as
+	# "0,1,2,4,5" (excluding 3). Note: negation supports only cpu numbers.
 	def cpulist_unpack(self, l):
 		rl = []
 		if l is None:
@@ -270,6 +272,7 @@ class commands:
 		else:
 			ll = str(l).split(",")
 		ll2 = []
+		negation_list = []
 		hexmask = False
 		hv = ""
 		# Remove commas from hexmasks
@@ -286,6 +289,8 @@ class commands:
 				if sv[0:2].lower() == "0x":
 					hexmask = True
 					hv = sv
+				elif sv and (sv[0] == "^" or sv[0] == "!"):
+					negation_list.append(int(sv[1:]))
 				else:
 					if len(sv) > 0:
 						ll2.append(sv)
@@ -303,7 +308,13 @@ class commands:
 						rl.append(int(vl[0]))
 				except ValueError:
 					return []
-		return sorted(list(set(rl)))
+		cpu_list = sorted(list(set(rl)))
+
+		# Remove negated cpus after expanding
+		for cpu in negation_list:
+			if cpu in cpu_list:
+				cpu_list.remove(cpu)
+		return cpu_list
 
 	# Packs CPU list, i.e. 1, 2, 3  will be converted to 1-3. It unpacks the
 	# CPU list through cpulist_unpack first, so see its description about the
