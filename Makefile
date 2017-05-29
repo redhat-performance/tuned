@@ -48,18 +48,18 @@ release-cp: release-dir
 		$(VERSIONED_NAME)
 
 archive: clean release-cp
-	tar cjf $(VERSIONED_NAME).tar.bz2 $(VERSIONED_NAME)
+	tar czf $(VERSIONED_NAME).tar.gz $(VERSIONED_NAME)
 
 rpm-build-dir:
 	mkdir rpm-build-dir
 
 srpm: archive rpm-build-dir
 	rpmbuild --define "_sourcedir `pwd`/rpm-build-dir" --define "_srcrpmdir `pwd`/rpm-build-dir" \
-		--define "_specdir `pwd`/rpm-build-dir" --nodeps $(RPM_ARGS) -ts $(VERSIONED_NAME).tar.bz2
+		--define "_specdir `pwd`/rpm-build-dir" --nodeps $(RPM_ARGS) -ts $(VERSIONED_NAME).tar.gz
 
 rpm: archive rpm-build-dir
 	rpmbuild --define "_sourcedir `pwd`/rpm-build-dir" --define "_srcrpmdir `pwd`/rpm-build-dir" \
-		--define "_specdir `pwd`/rpm-build-dir" --nodeps $(RPM_ARGS) -tb $(VERSIONED_NAME).tar.bz2
+		--define "_specdir `pwd`/rpm-build-dir" --nodeps $(RPM_ARGS) -tb $(VERSIONED_NAME).tar.gz
 
 clean-mock-result-dir:
 	rm -f mock-result-dir/*
