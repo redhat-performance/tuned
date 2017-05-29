@@ -119,7 +119,12 @@ Summary: Additional tuned profile(s) targeted to Network Function Virtualization
 Requires: %{name} = %{version}
 Requires: %{name}-profiles-realtime = %{version}
 Requires: tuna
+%if 0%{?fedora} > 22
 Recommends: qemu-kvm-tools-rhev
+%endif
+%if 0%{?rhel} == 7
+Requires: qemu-kvm-tools-rhev
+%endif
 
 %description profiles-nfv-host
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host.
