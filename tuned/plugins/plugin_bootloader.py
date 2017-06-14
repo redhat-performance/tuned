@@ -72,8 +72,9 @@ class BootloaderPlugin(base.Plugin):
 			if op == "+" and vals != "":
 				cmdline += " " + vals
 			elif op == "-" and vals != "":
-				regex = re.escape(vals)
-				cmdline = re.sub(r"(\A|\s)" + regex + r"(?=\Z|\s)", r"", cmdline)
+				for p in vals.split():
+					regex = re.escape(p)
+					cmdline = re.sub(r"(\A|\s)" + regex + r"(?=\Z|\s)", r"", cmdline)
 			else:
 				cmdline += " " + val
 		cmdline = cmdline.strip()
