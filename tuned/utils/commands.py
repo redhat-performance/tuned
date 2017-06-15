@@ -6,6 +6,7 @@ import shutil
 import tuned.consts as consts
 from configobj import ConfigObj, ConfigObjError
 import re
+import procfs
 from subprocess import *
 
 log = tuned.logs.get()
@@ -386,6 +387,11 @@ class commands:
 								match = False
 						elif option[0] == "/":
 							if not os.path.exists(option) or not re.match(value, self.read_file(option), re.S):
+								match = False
+						elif option[0:7] == "process":
+							ps = procfs.pidstats()
+							ps.reload_threads()
+							if len(ps.find_by_regex(re.compile(value))) == 0:
 								match = False
 					if match:
 						# remove the ",.*" suffix
