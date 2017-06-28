@@ -61,10 +61,15 @@ def verify(shouldbemask):
 	# now verify each /proc/irq/$num/smp_affinity
 	interruptdirs = [ f for f in os.listdir(irqpath) if os.path.isdir(os.path.join(irqpath,f)) ]
 	# IRQ 2 - cascaded signals from IRQs 8-15 (any devices configured to use IRQ 2 will actually be using IRQ 9)
-	interruptdirs.remove("2")
+	try:
+           interruptdirs.remove("2")
+        except ValueError:
+           pass
 	# IRQ 0 - system timer (cannot be changed)
-	interruptdirs.remove("0")
-
+	try:
+           interruptdirs.remove("0")
+        except ValueError:
+           pass
 	for i in interruptdirs:
 		inplacemask = 0
 		fname = irqpath + i + "/smp_affinity"
