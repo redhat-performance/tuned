@@ -57,7 +57,7 @@ class TunedLogger(logging.getLoggerClass()):
 		self.addHandler(self._file_handler)
 
 	def remove_all_handlers(self):
-		_handlers = self.handlers:
+		_handlers = self.handlers
 		for handler in _handlers:
 			self.removeHandler(handler)
 
