@@ -6,5 +6,5 @@ Exec=/usr/sbin/tuned-gui
 Icon=tuned
 Terminal=false
 Type=Application
-Categories=System;
+Categories=Settings;HardwareSettings;
 Version=1.0
