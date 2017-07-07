@@ -25,7 +25,7 @@ class GlobalConfig():
 		"""
 		Loads global configuration file.
 		"""
-		log.debug("reading and parsing global configuration file '%s'" % consts.GLOBAL_CONFIG_FILE)
+		log.debug("reading and parsing global configuration file '%s'" % file_name)
 		try:
 			self._cfg = ConfigObj(file_name, configspec = self.global_config_spec, raise_errors = True, \
 				file_error = True, list_values = False, interpolation = False)
