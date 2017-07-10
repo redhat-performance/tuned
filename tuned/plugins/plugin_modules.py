@@ -62,7 +62,7 @@ class ModulesPlugin(base.Plugin):
 				if len(v) > 0:
 					s += "options " + module + " " + v + "\n"
 				else:
-					log.debug("module '%s' doesn't have any option specified, don't writing it to modprobe.d" % module)
+					log.debug("module '%s' doesn't have any option specified, not writing it to modprobe.d" % module)
 		self._cmd.write_to_file(consts.MODULES_FILE, s)
 		l = len(reload_list)
 		if l > 0:
