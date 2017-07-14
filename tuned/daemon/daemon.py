@@ -233,7 +233,7 @@ class Daemon(object):
 	def stop(self, profile_switch = False):
 		if not self.is_running():
 			return False
-		log.info("stopping tunning")
+		log.info("stopping tuning")
 		if profile_switch:
 			self._terminate_profile_switch.set()
 		self._terminate.set()
