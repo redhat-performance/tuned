@@ -6,14 +6,13 @@ ltanfile=/sys/module/kvm/parameters/lapic_timer_advance_ns
 
 start() {
     python /usr/libexec/tuned/defirqaffinity.py "remove" "$TUNED_isolated_cores_expanded" &&
-    tuna -c "$TUNED_isolated_cores_expanded" -i
     retval = "$?"
 
     if [ ! $retval -eq 0 ]; then
         return $retval
     fi
 
-	setup_kvm_mod_low_latency
+    setup_kvm_mod_low_latency
 
     if [ -f lapic_timer_adv_ns.cpumodel ]; then
         curmodel=`cat /proc/cpuinfo | grep "model name" | cut -f 2 -d ":" | uniq`
@@ -48,7 +47,6 @@ start() {
 
 stop() {
     [ "$1" = "full_rollback" ] && teardown_kvm_mod_low_latency
-    tuna -c "$TUNED_isolated_cores_expanded" -I &&
     python /usr/libexec/tuned/defirqaffinity.py "add" "$TUNED_isolated_cores_expanded"
     return "$?"
 }
