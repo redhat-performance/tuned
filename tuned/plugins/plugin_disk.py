@@ -180,6 +180,7 @@ class DiskPlugin(hotplug.Plugin):
 				(rc, out) = self._cmd.execute(["hdparm", "-B%d" % new_power_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
 				self._update_errcnt(rc, False)
 		elif instance._spindown_change_delayed[device] and self._drive_spinning(device):
+			new_spindown_level = self._spindown_levels[idle["level"]]
 			self._change_spindown(instance, device, new_spindown_level)
 
 		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
