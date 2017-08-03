@@ -91,6 +91,11 @@ class Daemon(object):
 		return self._profile
 
 	@property
+	def manual(self):
+		# manual == None means /etc/tuned/active_profile is empty -> automatic mode
+		return self._manual == True or self._manual is None
+
+	@property
 	def profile_loader(self):
 		return self._profile_loader
 

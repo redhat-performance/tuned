@@ -74,6 +74,9 @@ if __name__ == "__main__":
 	parser_auto_profile = subparsers.add_parser("auto_profile", help="enable automatic profile selection mode, switch to the recommended profile")
 	parser_auto_profile.set_defaults(action="auto_profile")
 
+	parser_profile_mode = subparsers.add_parser("profile_mode", help="show current profile selection mode")
+	parser_profile_mode.set_defaults(action="profile_mode")
+
 	args = parser.parse_args(sys.argv[1:])
 
 	options = vars(args)

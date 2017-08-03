@@ -128,6 +128,15 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		else:
 			return ""
 
+	@exports.export("", "s")
+	def profile_mode(self, caller = None):
+		if caller == "":
+			return ""
+		if self._daemon.manual:
+			return consts.ACTIVE_PROFILE_MANUAL
+		else:
+			return consts.ACTIVE_PROFILE_AUTO
+
 	@exports.export("", "b")
 	def disable(self, caller = None):
 		if caller == "":
@@ -135,7 +144,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if self._daemon.is_running():
 			self._daemon.stop()
 		if self._daemon.is_enabled():
-			self._daemon.set_profile(None, True, save_instantly=True)
+			self._daemon.set_profile(None, None, save_instantly=True)
 		return True
 
 	@exports.export("", "b")

@@ -17,6 +17,16 @@
     </defaults>
   </action>
 
+  <action id="com.redhat.tuned.profile_mode">
+    <description>Show current profile selection mode</description>
+    <message>Authentication is required to show current profile selection mode</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
   <action id="com.redhat.tuned.disable">
     <description>Disable Tuned</description>
     <message>Authentication is required to disable Tuned</message>
