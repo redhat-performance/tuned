@@ -104,6 +104,9 @@ class DBusController(object):
 			return (False, "No profile specified")
 		return self._call("switch_profile", new_profile)
 
+	def auto_profile(self):
+		return self._call("auto_profile")
+
 	def recommend_profile(self):
 		return self._call("recommend_profile")
 

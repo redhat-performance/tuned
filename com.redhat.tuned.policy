@@ -117,6 +117,16 @@
     </defaults>
   </action>
 
+  <action id="com.redhat.tuned.auto_profile">
+    <description>Enable automatic profile selection mode</description>
+    <message>Authentication is required to change profile selection mode</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
   <action id="com.redhat.tuned.verify_profile">
     <description>Verify Tuned profile</description>
     <message>Authentication is required to verify Tuned profile</message>

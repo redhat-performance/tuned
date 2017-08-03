@@ -112,7 +112,12 @@ class Admin(object):
 
 	def _get_active_profile(self):
 		profile_name = None
-		profile_name = str.strip(self._cmd.read_file(consts.ACTIVE_PROFILE_FILE, None))
+		contents = str.strip(self._cmd.read_file(consts.ACTIVE_PROFILE_FILE))
+		if contents == '':
+			profile_name = ''
+		else:
+			arr = contents.split('\n')
+			profile_name = arr[0]
 		if profile_name == "":
 			profile_name = None
 		return profile_name
@@ -161,6 +166,8 @@ class Admin(object):
 			return True
 		return self._print_profile_name(profile_name)
 
+	# TODO action profile mode - auto/manual
+
 	def _profile_print_status(self, ret, msg):
 		if ret:
 			if not self._controller.is_running() and not self._controller.start():
@@ -197,20 +204,23 @@ class Admin(object):
 			self._controller.set_action(self._action_dbus_wait_profile, profile_name)
 		return self._profile_print_status(ret, msg)
 
-	def _action_profile(self, profiles):
-		if len(profiles) == 0:
-			return self._action_list()
-		profile_name = " ".join(profiles)
-		if profile_name == "":
-			return False
+	def _restart_tuned(self):
+		print("Trying to (re)start tuned...")
+		(ret, msg) = self._cmd.execute(["service", "tuned", "restart"])
+		if ret == 0:
+			print("Tuned (re)started, changes applied.")
+		else:
+			print("Tuned (re)start failed, you need to (re)start tuned by hand for changes to apply.")
+
+	def _set_profile(self, profile_name, manual):
 		if profile_name in self._profiles_locator.get_known_names():
-			if self._cmd.write_to_file(consts.ACTIVE_PROFILE_FILE, profile_name):
-				print("Trying to (re)start tuned...")
-				(ret, msg) = self._cmd.execute(["service", "tuned", "restart"])
-				if ret == 0:
-					print("Tuned (re)started, changes applied.")
-				else:
-					print("Tuned (re)start failed, you need to (re)start tuned by hand for changes to apply.")
+			s = profile_name + '\n'
+			if manual:
+				s += consts.ACTIVE_PROFILE_MANUAL + '\n'
+			else:
+				s += consts.ACTIVE_PROFILE_AUTO + '\n'
+			if self._cmd.write_to_file(consts.ACTIVE_PROFILE_FILE, s):
+				self._restart_tuned()
 				return True
 			else:
 				self._error("Unable to switch profile, do you have enough permissions?")
@@ -218,6 +228,29 @@ class Admin(object):
 		else:
 			self._error("Requested profile '%s' doesn't exist." % profile_name)
 			return False
+
+	def _action_profile(self, profiles):
+		if len(profiles) == 0:
+			return self._action_list()
+		profile_name = " ".join(profiles)
+		if profile_name == "":
+			return False
+		return self._set_profile(profile_name, True)
+
+	def _action_dbus_auto_profile(self):
+		profile_name = self._controller.recommend_profile()
+		self._daemon_action_finished.clear()
+		(ret, msg) = self._controller.auto_profile()
+		if self._async or not ret:
+			return self._controller.exit(self._profile_print_status(ret, msg))
+		else:
+			self._timestamp = time.time()
+			self._controller.set_action(self._action_dbus_wait_profile, profile_name)
+		return self._profile_print_status(ret, msg)
+
+	def _action_auto_profile(self):
+		profile_name = self._cmd.recommend_profile()
+		return self._set_profile(profile_name, False)
 
 	def _action_dbus_recommend_profile(self):
 		print(self._controller.recommend_profile())

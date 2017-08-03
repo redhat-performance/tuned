@@ -71,6 +71,9 @@ if __name__ == "__main__":
 	parser_verify.set_defaults(action="verify_profile")
 	parser_verify.add_argument("--ignore-missing", "-i", action="store_true", help="do not treat missing/non-supported tunings as errors")
 
+	parser_auto_profile = subparsers.add_parser("auto_profile", help="enable automatic profile selection mode, switch to the recommended profile")
+	parser_auto_profile.set_defaults(action="auto_profile")
+
 	args = parser.parse_args(sys.argv[1:])
 
 	options = vars(args)

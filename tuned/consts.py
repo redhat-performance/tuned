@@ -99,3 +99,8 @@ STR_VERIFY_PROFILE_FAIL = "verify: failed: '%s'"
 
 # timout for tuned-adm operations in seconds
 ADMIN_TIMEOUT = 600
+
+# Strings for /etc/tuned/active_profile specifying if the active profile
+# was set automatically or manually
+ACTIVE_PROFILE_AUTO = "auto"
+ACTIVE_PROFILE_MANUAL = "manual"
