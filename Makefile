@@ -31,6 +31,7 @@ DATADIR = /usr/share
 DOCDIR = $(DATADIR)/doc/$(NAME)
 PYTHON_SITELIB = $(shell python -c 'from distutils.sysconfig import get_python_lib; print get_python_lib();' || echo /usr/lib/python2.7/site-packages)
 TUNED_PROFILESDIR = /usr/lib/tuned
+TUNED_RECOMMEND_DIR = $(TUNED_PROFILESDIR)/recommend.d
 BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
 
 release-dir:
@@ -100,6 +101,7 @@ install-dirs:
 	mkdir -p $(DESTDIR)/var/log/tuned
 	mkdir -p $(DESTDIR)/run/tuned
 	mkdir -p $(DESTDIR)$(DOCDIR)
+	mkdir -p $(DESTDIR)$(TUNED_RECOMMEND_DIR)
 
 install: install-dirs
 	# library
@@ -135,7 +137,7 @@ install: install-dirs
 		$(DESTDIR)/etc/tuned/realtime-virtual-host-variables.conf
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning/cpu-partitioning-variables.conf \
 		$(DESTDIR)/etc/tuned/cpu-partitioning-variables.conf
-	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_PROFILESDIR)/recommend.conf
+	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_RECOMMEND_DIR)/50-tuned-recommend.conf
 
 	# bash completion
 	install -Dpm 0644 tuned-adm.bash $(DESTDIR)$(BASH_COMPLETIONS)/tuned-adm

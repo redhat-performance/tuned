@@ -364,40 +364,64 @@ class commands:
 		s = s.zfill(ls)
 		return ",".join(s[i:i + 8] for i in range(0, len(s), 8))
 
+	def process_recommend_file(self, fname):
+		matching_profile = None
+		try:
+			if not os.path.isfile(fname):
+				return None
+			config = ConfigObj(fname, list_values = False, interpolation = False)
+			for section in config.keys():
+				match = True
+				for option in config[section].keys():
+					value = config[section][option]
+					if value == "":
+						value = r"^$"
+					if option == "virt":
+						if not re.match(value, self.execute("virt-what")[1], re.S):
+							match = False
+					elif option == "system":
+						if not re.match(value, self.read_file(consts.SYSTEM_RELEASE_FILE), re.S):
+							match = False
+					elif option[0] == "/":
+						if not os.path.exists(option) or not re.match(value, self.read_file(option), re.S):
+							match = False
+					elif option[0:7] == "process":
+						ps = procfs.pidstats()
+						ps.reload_threads()
+						if len(ps.find_by_regex(re.compile(value))) == 0:
+							match = False
+				if match:
+					# remove the ",.*" suffix
+					r = re.compile(r",[^,]*$")
+					matching_profile = r.sub("", section)
+					break
+		except (IOError, OSError, ConfigObjError) as e:
+			log.error("error processing '%s', %s" % (fname, e))
+		return matching_profile
+
 	def recommend_profile(self, hardcoded = False):
 		profile = consts.DEFAULT_PROFILE
 		if hardcoded:
 			return profile
-		r = re.compile(r",[^,]*$")
-		for f in consts.LOAD_DIRECTORIES:
+		matching = self.process_recommend_file(consts.RECOMMEND_CONF_FILE)
+		if matching is not None:
+			return matching
+		files = {}
+		for directory in consts.RECOMMEND_DIRECTORIES:
+			contents = []
 			try:
-				fname = os.path.join(f, consts.AUTODETECT_FILE)
-				config = ConfigObj(fname, list_values = False, interpolation = False)
-				for section in reversed(config.keys()):
-					match = True
-					for option in config[section].keys():
-						value = config[section][option]
-						if value == "":
-							value = r"^$"
-						if option == "virt":
-							if not re.match(value, self.execute("virt-what")[1], re.S):
-								match = False
-						elif option == "system":
-							if not re.match(value, self.read_file(consts.SYSTEM_RELEASE_FILE), re.S):
-								match = False
-						elif option[0] == "/":
-							if not os.path.exists(option) or not re.match(value, self.read_file(option), re.S):
-								match = False
-						elif option[0:7] == "process":
-							ps = procfs.pidstats()
-							ps.reload_threads()
-							if len(ps.find_by_regex(re.compile(value))) == 0:
-								match = False
-					if match:
-						# remove the ",.*" suffix
-						profile = r.sub("", section)
-			except (IOError, OSError, ConfigObjError) as e:
-				log.error("error parsing '%s', %s" % (fname, e))
+				contents = os.listdir(directory)
+			except OSError as e:
+				if e.errno != errno.ENOENT:
+					log.error("error accessing %s: %s" % (directory, e))
+			for name in contents:
+				path = os.path.join(directory, name)
+				files[name] = path
+		for name in sorted(files.keys()):
+			path = files[name]
+			matching = self.process_recommend_file(path)
+			if matching is not None:
+				return matching
 		return profile
 
 	# Do not make balancing on patched Python 2 interpreter (rhbz#1028122).
