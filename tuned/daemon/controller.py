@@ -79,19 +79,15 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		else:
 			return self.stop() and self.start()
 
-	@exports.export("s", "(bs)")
-	def switch_profile(self, profile_name, caller = None):
-		if caller == "":
-			return (False, "Unauthorized")
+	def _switch_profile(self, profile_name, manual):
 		was_running = self._daemon.is_running()
 		msg = "OK"
 		success = True
 		reapply = False
 		try:
 			if was_running:
-				# stop(switch_profile = True), due to profile switch
-				self._daemon.stop(True)
-			self._daemon.set_profile(profile_name)
+				self._daemon.stop(profile_switch = True)
+			self._daemon.set_profile(profile_name, manual)
 		except tuned.exceptions.TunedException as e:
 			success = False
 			msg = str(e)
@@ -110,6 +106,19 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 		return (success, msg)
 
+	@exports.export("s", "(bs)")
+	def switch_profile(self, profile_name, caller = None):
+		if caller == "":
+			return (False, "Unauthorized")
+		return self._switch_profile(profile_name, True)
+
+	@exports.export("", "(bs)")
+	def auto_profile(self, caller = None):
+		if caller == "":
+			return (False, "Unauthorized")
+		profile_name = self.recommend_profile()
+		return self._switch_profile(profile_name, False)
+
 	@exports.export("", "s")
 	def active_profile(self, caller = None):
 		if caller == "":
@@ -119,6 +128,15 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		else:
 			return ""
 
+	@exports.export("", "s")
+	def profile_mode(self, caller = None):
+		if caller == "":
+			return ""
+		if self._daemon.manual:
+			return consts.ACTIVE_PROFILE_MANUAL
+		else:
+			return consts.ACTIVE_PROFILE_AUTO
+
 	@exports.export("", "b")
 	def disable(self, caller = None):
 		if caller == "":
@@ -126,7 +144,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if self._daemon.is_running():
 			self._daemon.stop()
 		if self._daemon.is_enabled():
-			self._daemon.set_profile(None, save_instantly=True)
+			self._daemon.set_profile(None, None, save_instantly=True)
 		return True
 
 	@exports.export("", "b")
