@@ -22,7 +22,8 @@ class Application(object):
 		storage_factory = storage.Factory(storage_provider)
 
 		monitors_repository = monitors.Repository()
-		hardware_inventory = hardware.Inventory()
+		udev_buffer_size = config.get_size("udev_buffer_size", consts.CFG_DEF_UDEV_BUFFER_SIZE)
+		hardware_inventory = hardware.Inventory(buffer_size=udev_buffer_size)
 		device_matcher = hardware.DeviceMatcher()
 		device_matcher_udev = hardware.DeviceMatcherUdev()
 		plugin_instance_factory = plugins.instance.Factory()

@@ -47,3 +47,14 @@ class GlobalConfig():
 
 	def set(self, key, value):
 		self._cfg[key] = value
+
+	def get_size(self, key, default = None):
+		val = self.get(key)
+		if val is None:
+			return default
+		ret = self._cmd.get_size(val)
+		if ret is None:
+			log.error("Error parsing value '%s', using '%s'." %(val, default))
+			return default
+		else:
+			return ret
