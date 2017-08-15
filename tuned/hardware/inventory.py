@@ -1,5 +1,6 @@
 import pyudev
 import tuned.logs
+from tuned import consts
 
 __all__ = ["Inventory"]
 
@@ -11,7 +12,7 @@ class Inventory(object):
 	about related hardware events.
 	"""
 
-	def __init__(self, udev_context=None, udev_monitor_cls=None, monitor_observer_factory=None):
+	def __init__(self, udev_context=None, udev_monitor_cls=None, monitor_observer_factory=None, buffer_size=None):
 		if udev_context is not None:
 			self._udev_context = udev_context
 		else:
@@ -20,6 +21,9 @@ class Inventory(object):
 		if udev_monitor_cls is None:
 			udev_monitor_cls = pyudev.Monitor
 		self._udev_monitor = udev_monitor_cls.from_netlink(self._udev_context)
+		if buffer_size is None:
+			buffer_size = consts.CFG_DEF_UDEV_BUFFER_SIZE
+		self._udev_monitor.set_receive_buffer_size(buffer_size)
 
 		if monitor_observer_factory is None:
 			monitor_observer_factory = _MonitorObserverFactory()

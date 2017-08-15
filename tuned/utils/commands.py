@@ -432,3 +432,24 @@ class commands:
 			return terminate.wait(time, False)
 		except:
 			return terminate.wait(time)
+
+	def get_size(self, s):
+		s = str(s).strip().upper()
+		for unit in ["KB", "MB", "GB", ""]:
+			unit_ix = s.rfind(unit)
+			if unit_ix == -1:
+				continue
+			try:
+				val = int(s[:unit_ix])
+				u = s[unit_ix:]
+				if u == "KB":
+					val *= 1024
+				elif u == "MB":
+					val *= 1024 * 1024
+				elif u == "GB":
+					val *= 1024 * 1024 * 1024
+				elif u != "":
+					val = None
+				return val
+			except ValueError:
+				return None
