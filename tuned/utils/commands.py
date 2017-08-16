@@ -158,9 +158,11 @@ class commands:
 		try:
 			log.debug("copying file '%s' to '%s'" % (src, dst))
 			shutil.copy(src, dst)
+			return True
 		except IOError as e:
 			if not no_error:
 				log.error("cannot copy file '%s' to '%s': %s" % (src, dst, e))
+			return False
 
 	def replace_in_file(self, f, pattern, repl):
 		data = self.read_file(f)
