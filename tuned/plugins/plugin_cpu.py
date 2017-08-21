@@ -60,7 +60,8 @@ class CPULatencyPlugin(base.Plugin):
 
 	def _check_energy_perf_bias(self):
 		self._has_energy_perf_bias = False
-		retcode = self._cmd.execute(["x86_energy_perf_policy", "-r"], no_errors = [errno.ENOENT])[0]
+		retcode_unsupported = 1
+		retcode = self._cmd.execute(["x86_energy_perf_policy", "-r"], no_errors = [errno.ENOENT, retcode_unsupported])[0]
 		if retcode == 0:
 			self._has_energy_perf_bias = True
 		elif retcode < 0:
