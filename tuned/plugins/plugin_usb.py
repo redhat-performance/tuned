@@ -53,6 +53,6 @@ class USBPlugin(base.Plugin):
 		return val
 
 	@command_get("autosuspend")
-	def _get_autosuspend(self, device):
+	def _get_autosuspend(self, device, ignore_missing=False):
 		sys_file = self._autosuspend_sysfile(device)
-		return self._cmd.read_file(sys_file).strip()
+		return self._cmd.read_file(sys_file, no_error=ignore_missing).strip()

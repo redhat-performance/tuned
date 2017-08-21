@@ -205,11 +205,11 @@ class CPULatencyPlugin(base.Plugin):
 		return str(governor)
 
 	@command_get("governor")
-	def _get_governor(self, device):
+	def _get_governor(self, device, ignore_missing=False):
 		governor = None
 		if not self._check_cpu_can_change_governor(device):
 			return None
-		data = self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device).strip()
+		data = self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, no_error=ignore_missing).strip()
 		if len(data) > 0:
 			governor = data
 
@@ -249,8 +249,8 @@ class CPULatencyPlugin(base.Plugin):
 		return val
 
 	@command_get("sampling_down_factor")
-	def _get_sampling_down_factor(self, device):
-		governor = self._get_governor(device)
+	def _get_sampling_down_factor(self, device, ignore_missing=False):
+		governor = self._get_governor(device, ignore_missing=ignore_missing)
 		if governor is None:
 			return None
 		path = self._sampling_down_factor_path(governor)
@@ -286,7 +286,7 @@ class CPULatencyPlugin(base.Plugin):
 		return {0:"performance", 6:"normal", 15:"powersave"}.get(self._try_parse_num(s), s)
 
 	@command_get("energy_perf_bias")
-	def _get_energy_perf_bias(self, device):
+	def _get_energy_perf_bias(self, device, ignore_missing=False):
 		energy_perf_bias = None
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)

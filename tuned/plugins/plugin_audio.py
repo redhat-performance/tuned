@@ -70,9 +70,9 @@ class AudioPlugin(base.Plugin):
 			return None
 
 	@command_get("timeout")
-	def _get_timeout(self, device):
+	def _get_timeout(self, device, ignore_missing=False):
 		sys_file = self._timeout_path(device)
-		value = cmd.read_file(sys_file)
+		value = cmd.read_file(sys_file, no_error=ignore_missing)
 		if len(value) > 0:
 			return value
 		return None
@@ -88,7 +88,7 @@ class AudioPlugin(base.Plugin):
 		return None
 
 	@command_get("reset_controller")
-	def _get_reset_controller(self, device):
+	def _get_reset_controller(self, device, ignore_missing=False):
 		sys_file = self._reset_controller_path(device)
 		if os.path.exists(sys_file):
 			value = cmd.read_file(sys_file)
