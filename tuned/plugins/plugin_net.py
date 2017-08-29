@@ -227,7 +227,7 @@ class NetTuningPlugin(base.Plugin):
 		return value
 
 	@command_get("wake_on_lan")
-	def _get_wake_on_lan(self, device):
+	def _get_wake_on_lan(self, device, ignore_missing=False):
 		value = None
 		try:
 			m = re.match(r".*Wake-on:\s*([" + WOL_VALUES + "]+).*", self._cmd.execute(["ethtool", device])[1], re.S)

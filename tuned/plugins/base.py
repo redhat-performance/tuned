@@ -457,9 +457,9 @@ class Plugin(object):
 				log.warn("cannot compare new value '%s' with current value '%s' by operator '%s', using '%s' directly as new value" % (val, current_value, op, new_value))
 		return new_value
 
-	def _get_current_value(self, command, device = None):
+	def _get_current_value(self, command, device = None, ignore_missing=False):
 		if device is not None:
-			return command["get"](device)
+			return command["get"](device, ignore_missing=ignore_missing)
 		else:
 			return command["get"]()
 
@@ -529,7 +529,7 @@ class Plugin(object):
 	def _verify_device_command(self, instance, command, device, new_value, ignore_missing):
 		if command["custom"] is not None:
 			return command["custom"](True, new_value, device, True, ignore_missing)
-		current_value = self._get_current_value(command, device)
+		current_value = self._get_current_value(command, device, ignore_missing=ignore_missing)
 		new_value = self._process_assignment_modifiers(new_value, current_value)
 		if new_value is None:
 			return None

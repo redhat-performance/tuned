@@ -81,7 +81,7 @@ class SCSIHostPlugin(hotplug.Plugin):
 		return policy
 
 	@command_get("alpm")
-	def _get_alpm(self, device):
+	def _get_alpm(self, device, ignore_missing=False):
 		policy_file = self._get_alpm_policy_file(device)
 		policy = self._cmd.read_file(policy_file, no_error = True).strip()
 		return policy if policy != "" else None

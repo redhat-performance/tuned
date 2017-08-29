@@ -14,6 +14,7 @@ import tuned.consts as consts
 import procfs
 import schedutils
 from tuned.utils.commands import commands
+import errno
 
 log = tuned.logs.get()
 
@@ -26,8 +27,6 @@ class SchedulerPlugin(base.Plugin):
 
 	_dict_sched2param = {"SCHED_FIFO":"f", "SCHED_BATCH":"b", "SCHED_RR":"r",
 		"SCHED_OTHER":"o", "SCHED_IDLE":"i"}
-
-	PF_NO_SETAFFINITY = 0x04000000
 
 	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
 		super(self.__class__, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
@@ -121,9 +120,20 @@ class SchedulerPlugin(base.Plugin):
 		else:
 			return None
 
+	def _pid_exists(self, pid):
+		try:
+			p = procfs.pidstat(pid)
+			return True
+		except:
+			return False
+
 	def _get_rt(self, pid):
-		(rc, out) = self._cmd.execute(["chrt", "-p", str(pid)])
+		(rc, out, err_msg) = self._cmd.execute(["chrt", "-p", str(pid)], return_err = True)
 		if rc != 0:
+			if self._pid_exists(pid):
+				log.error(err_msg)
+			else:
+				log.debug("Unable to read scheduling parameters for PID %s, the task vanished." % pid)
 			return None
 		vals = out.split("\n", 1)
 		if len(vals) > 1:
@@ -136,8 +146,13 @@ class SchedulerPlugin(base.Plugin):
 		return (sched, prio)
 
 	def _get_affinity(self, pid, no_error = False):
-		(rc, out) = self._cmd.execute(["taskset", "-p", str(pid)], no_errors = [1] if no_error else [])
+		(rc, out, err_msg) = self._cmd.execute(["taskset", "-p", str(pid)], no_errors = [1] if no_error else [], return_err = True)
 		if rc != 0:
+			if rc != 1 or not no_error:
+				if self._pid_exists(pid):
+					log.error(err_msg)
+				else:
+					log.debug("Unable to read affinity for PID %s, the task vanished." % pid)
 			return None
 		v = self._parse_val(out.split("\n", 1)[0])
 		log.debug("read affinity '%s' for pid '%s'" % (v, pid))
@@ -165,13 +180,54 @@ class SchedulerPlugin(base.Plugin):
 		else:
 			schedl = []
 		log.debug("setting scheduler priority to '%s' for PID '%s'" % (prio, pid))
-		self._cmd.execute(["chrt"] + schedl + ["-p", str(prio), str(pid)], no_errors = [1] if no_error else [])
+		(ret, out, err_msg) = self._cmd.execute(["chrt"] + schedl + ["-p", str(prio), str(pid)], no_errors = [1] if no_error else [], return_err = True)
+		if ret == 0 or (ret == 1 and no_error):
+			return
+		if self._pid_exists(pid):
+			log.error(err_msg)
+		else:
+			log.debug("Unable to set scheduling parameters for PID %s, the task vanished." % pid)
+
+	# Return codes:
+	# 0 - Affinity is fixed
+	# 1 - Affinity is changeable
+	# -1 - Task vanished
+	# -2 - Error
+	def _affinity_changeable(self, pid, process = None):
+		try:
+			if process is None:
+				process = procfs.process(pid)
+			if process["stat"].is_bound_to_cpu():
+				if process["stat"]["state"] == "Z":
+					log.debug("Affinity of zombie task with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
+				elif len(process["cmdline"]) == 0:
+					log.debug("Affinity of kernel thread with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
+				else:
+					log.warn("Affinity of task with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
+				return 0
+			else:
+				return 1
+		except IOError as e:
+			if e[0] == errno.ENOENT or e[0] == errno.ESRCH:
+				log.debug("Unable to set affinity for PID %s, the task vanished." % pid)
+				return -1
+			else:
+				log.error("Failed to get task info for PID %s: %s" % (pid, str(e)))
+				return -2
+		except (OSError, AttributeError, KeyError) as e:
+			log.error("Failed to get task info for PID %s: %s" % (pid, str(e)))
+			return -2
 
 	def _set_affinity(self, pid, affinity, no_error = False):
 		if pid is None or affinity is None:
 			return
 		log.debug("setting affinity to '%s' for PID '%s'" % (affinity, pid))
-		self._cmd.execute(["taskset", "-p", str(affinity), str(pid)], no_errors = [1] if no_error else [])
+		(ret, out, err_msg) = self._cmd.execute(["taskset", "-p", str(affinity), str(pid)], no_errors = [1] if no_error else [], return_err = True)
+		if ret == 0 or (ret == 1 and no_error):
+			return
+		res = self._affinity_changeable(pid)
+		if res == 1 or res == -2:
+			log.error(err_msg)
 
 	#tune process and store previous values
 	def _tune_process(self, instance, pid, cmd, sched, prio, affinity, no_error = False):
@@ -289,13 +345,6 @@ class SchedulerPlugin(base.Plugin):
 		if enabling and value is not None:
 			self._ps_blacklist = "|".join(map(lambda v: "(%s)" % v, re.split(r"(?<!\\);", str(value))))
 
-	def _affinity_changeable(self, p):
-		try:
-			flags = p["stat"]["flags"]
-		except (IOError, OSError, AttributeError, KeyError):
-			return False
-		return not bool(int(flags) & self.PF_NO_SETAFFINITY)
-
 	# TODO: merge with _get_affinity
 	def _get_affinity2(self, pid):
 		try:
@@ -303,6 +352,7 @@ class SchedulerPlugin(base.Plugin):
 		# Workaround for old python-schedutils which incorrectly raised error
 		except (SystemError, OSError) as e:
 			if e[0] == 3:
+				log.debug("Unable to read affinity for PID %s, the task vanished." % pid)
 				return None
 			log.error("unable to get affinity for PID '%s': %s" % (str(pid), e))
 			return None
@@ -314,6 +364,7 @@ class SchedulerPlugin(base.Plugin):
 		# Workaround for old python-schedutils which incorrectly raised error
 		except (SystemError, OSError) as e:
 			if e[0] == 3:
+				log.debug("Unable to set affinity for PID %s, the task vanished." % pid)
 				return False
 			log.error("unable to set affinity '%s' for PID '%s': %s" % (str(affinity), str(pid), e))
 			return False
@@ -329,7 +380,7 @@ class SchedulerPlugin(base.Plugin):
 	def _set_all_obj_affinity(self, objs, affinity, threads = False, intersect = False):
 		_affinity = affinity
 		for obj in objs:
-			if not self._affinity_changeable(objs[obj]):
+			if self._affinity_changeable(obj, process = objs[obj]) != 1:
 				continue
 			prev_affinity = self._get_affinity2(obj)
 			if prev_affinity is None:
