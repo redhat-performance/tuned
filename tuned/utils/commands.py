@@ -200,7 +200,7 @@ class commands:
 	# "no_errors" can be list of return codes not treated as errors, if 0 is in no_errors, it means any error
 	# returns (retcode, out), where retcode is exit code of the executed process or -errno if
 	# OSError or IOError exception happened
-	def execute(self, args, shell = False, cwd = None, no_errors = []):
+	def execute(self, args, shell = False, cwd = None, no_errors = [], return_err = False):
 		retcode = 0
 		if self._environment is None:
 			self._environment = os.environ.copy()
@@ -208,6 +208,7 @@ class commands:
 
 		self._debug("Executing %s." % str(args))
 		out = ""
+		err_msg = None
 		try:
 			proc = Popen(args, stdout = PIPE, stderr = PIPE, env = self._environment, shell = shell, cwd = cwd, close_fds = True)
 			out, err = proc.communicate()
@@ -217,12 +218,19 @@ class commands:
 				err_out = err[:-1]
 				if len(err_out) == 0:
 					err_out = out[:-1]
-				self._error("Executing %s error: %s" % (args[0], err_out))
+				err_msg = "Executing %s error: %s" % (args[0], err_out)
+				if not return_err:
+					self._error(err_msg)
 		except (OSError, IOError) as e:
 			retcode = -e.errno if e.errno is not None else -1
 			if not abs(retcode) in no_errors and not 0 in no_errors:
-				self._error("Executing %s error: %s" % (args[0], e))
-		return retcode, out
+				err_msg = "Executing %s error: %s" % (args[0], e)
+				if not return_err:
+					self._error(err_msg)
+		if return_err:
+			return retcode, out, err_msg
+		else:
+			return retcode, out
 
 	# Helper for parsing kernel options like:
 	# [always] never
