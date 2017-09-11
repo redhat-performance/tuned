@@ -49,7 +49,7 @@ At the moment we're providing the following pre\-defined profiles:
 .BI "balanced"
 It is the default profile. It provides balanced power saving and performance.
 At the moment it enables CPU and disk plugins of tuned and it makes sure the
-ondemand governor is active (if supported by the current cpufreq driver).
+conservative governor is active (if supported by the current cpufreq driver).
 It enables ALPM power saving for SATA host adapters and sets the link power
 management policy to medium_power. It also sets the CPU energy performance
 bias to normal. It also enables AC97 audio power saving or (it depends on
@@ -62,9 +62,8 @@ configures it to automatic power saving.
 Maximal power saving, at the moment it enables USB autosuspend (in case
 environment variable USB_AUTOSUSPEND is set to 1), enables ALPM power saving
 for SATA host adapters and sets the link power management policy to min_power.
-It also enables WiFi power saving, enables multi core power savings scheduler
-for low wakeup systems and makes sure the ondemand governor is active (if
-supported by the current cpufreq driver). It sets the CPU energy performance
+It also enables WiFi power saving and makes sure the ondemand governor is active
+(if supported by the current cpufreq driver). It sets the CPU energy performance
 bias to powersave. It also enables AC97 audio power saving or (it depends on
 your system) HDA\-Intel power savings (with 10 seconds timeout). In case your
 system contains supported Radeon graphics card (with enabled KMS) it
@@ -81,7 +80,7 @@ performance bias is set to performance. Disk readahead values are increased.
 .TP
 .BI "latency\-performance"
 Profile for low latency performance tuning. Disables power saving mechanisms.
-CPU governor is set to performance andlocked to the low C states (by PM QoS).
+CPU governor is set to performance and locked to the low C states (by PM QoS).
 CPU energy performance bias to performance.
 
 .TP
