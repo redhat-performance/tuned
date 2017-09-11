@@ -133,6 +133,9 @@ class DBusExporter(interfaces.ExporterInterface):
 			self._construct_dbus_object_class()
 
 		self.stop()
+		bus = dbus.SystemBus()
+		bus_name = dbus.service.BusName(self._bus_name, bus)
+		self._bus_object = self._dbus_object_cls(bus, self._object_name, bus_name)
 		self._thread = threading.Thread(target=self._thread_code)
 		self._thread.start()
 
@@ -143,10 +146,6 @@ class DBusExporter(interfaces.ExporterInterface):
 			self._thread = None
 
 	def _thread_code(self):
-		bus = dbus.SystemBus()
-		bus_name = dbus.service.BusName(self._bus_name, bus)
-		self._bus_object = self._dbus_object_cls(bus, self._object_name, bus_name)
-
 		self._main_loop.run()
 		del self._bus_object
 		self._bus_object = None
