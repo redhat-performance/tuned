@@ -197,7 +197,8 @@ class NetTuningPlugin(base.Plugin):
 		"rx-frame-low:": "rx-frames-low:", \
 		"rx-frame-high:": "rx-frames-high:", \
 		"tx-frame-low:": "tx-frames-low:", \
-		"tx-frame-high:": "tx-frames-high:"}, value)
+		"tx-frame-high:": "tx-frames-high:",
+		"large-receive-offload:": "lro:"}, value)
 		# remove empty lines, remove fixed parameters (those with "[fixed]")
 		vl = filter(lambda v: len(str(v)) > 0 and not re.search("\[fixed\]$", str(v)), value.split('\n'))
 		if len(vl) < 2:
