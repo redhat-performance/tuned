@@ -319,9 +319,9 @@ class NetTuningPlugin(base.Plugin):
 			return None
 		if not sim:
 			log.debug("setting %s: %s" % (context, str(d)))
-			# ignore ethtool return code 80, it means parameter is already set
 			context2opt = { "coalesce": "-C", "features": "-K", "pause": "-A", "ring": "-G" }
 			opt = context2opt[context]
+			# ignore ethtool return code 80, it means parameter is already set
 			self._cmd.execute(["ethtool", opt, device] + self._cmd.dict2list(d), no_errors = [80])
 		return d
 
