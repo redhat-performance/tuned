@@ -1,5 +1,6 @@
 GLOBAL_CONFIG_FILE = "/etc/tuned/tuned-main.conf"
 ACTIVE_PROFILE_FILE = "/etc/tuned/active_profile"
+PROFILE_MODE_FILE = "/etc/tuned/profile_mode"
 PROFILE_FILE = "tuned.conf"
 RECOMMEND_CONF_FILE = "/etc/tuned/recommend.conf"
 DAEMONIZE_PARENT_TIMEOUT = 5
@@ -104,7 +105,7 @@ STR_VERIFY_PROFILE_FAIL = "verify: failed: '%s'"
 # timout for tuned-adm operations in seconds
 ADMIN_TIMEOUT = 600
 
-# Strings for /etc/tuned/active_profile specifying if the active profile
+# Strings for /etc/tuned/profile_mode specifying if the active profile
 # was set automatically or manually
 ACTIVE_PROFILE_AUTO = "auto"
 ACTIVE_PROFILE_MANUAL = "manual"

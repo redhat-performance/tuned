@@ -1,6 +1,7 @@
 from tuned import exports
 import tuned.logs
 import tuned.exceptions
+from tuned.exceptions import TunedException
 import threading
 import tuned.consts as consts
 from tuned.utils.commands import commands
@@ -128,14 +129,23 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		else:
 			return ""
 
-	@exports.export("", "s")
+	@exports.export("", "(ss)")
 	def profile_mode(self, caller = None):
 		if caller == "":
-			return ""
-		if self._daemon.manual:
-			return consts.ACTIVE_PROFILE_MANUAL
-		else:
-			return consts.ACTIVE_PROFILE_AUTO
+			return "unknown", "Unauthorized"
+		manual = self._daemon.manual
+		if manual is None:
+			# This means no profile is applied. Check the preset value.
+			try:
+				profile, manual = self._cmd.get_active_profile()
+				if manual is None:
+					manual = profile is not None
+			except TunedException as e:
+				mode = "unknown"
+				error = str(e)
+				return mode, error
+		mode = consts.ACTIVE_PROFILE_MANUAL if manual else consts.ACTIVE_PROFILE_AUTO
+		return mode, ""
 
 	@exports.export("", "b")
 	def disable(self, caller = None):
