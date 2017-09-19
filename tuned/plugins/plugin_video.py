@@ -3,6 +3,7 @@ from decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
 import os
+import re
 
 log = tuned.logs.get()
 
@@ -29,7 +30,6 @@ class VideoPlugin(base.Plugin):
 	def _get_config_options(self):
 		return {
 			"radeon_powersave" : None,
-			"radeon_dpm_state" : None,
 		}
 
 	def _instance_init(self, instance):
@@ -43,68 +43,48 @@ class VideoPlugin(base.Plugin):
 		return {
 			"method" : "/sys/class/drm/%s/device/power_method" % device,
 			"profile": "/sys/class/drm/%s/device/power_profile" % device,
+			"dpm_state": "/sys/class/drm/%s/device/power_dpm_state" % device
 		}
-
-	def _radeon_dpm_state_file(self, device):
-		return "/sys/class/drm/%s/device/power_dpm_state" % device
 
 	@command_set("radeon_powersave", per_device=True)
 	def _set_radeon_powersave(self, value, device, sim):
 		sys_files = self._radeon_powersave_files(device)
+		va = str(re.sub(r"(\s*:\s*)|(\s+)|(\s*;\s*)|(\s*,\s*)", " ", value)).split()
 		if not os.path.exists(sys_files["method"]):
 			if not sim:
 				log.warn("radeon_powersave is not supported on '%s'" % device)
 				return None
-
-		if value in ["default", "auto", "low", "mid", "high"]:
-			if not sim:
-				self._cmd.write_to_file(sys_files["method"], "profile")
-				self._cmd.write_to_file(sys_files["profile"], value)
-			return value
-		elif value == "dynpm":
-			if not sim:
-				self._cmd.write_to_file(sys_files["method"], "dynpm")
-			return "dynpm"
-		elif value == "dpm":
-			if not sim and self._get_radeon_powersave(device) != "dpm":
-				log.error("Cannot set dpm power method through the video plugin." \
-						+ "Use the bootloader plugin with the 'cmdline = radeon.dpm=1' option")
+		for v in va:
+			if v in ["default", "auto", "low", "mid", "high"]:
+				if not sim:
+					if (self._cmd.write_to_file(sys_files["method"], "profile") and
+						self._cmd.write_to_file(sys_files["profile"], v)):
+						return v
+			elif v == "dynpm":
+				if not sim:
+					if (self._cmd.write_to_file(sys_files["method"], "dynpm")):
+						return "dynpm"
+			# new DPM profiles, recommended to use if supported
+			elif v in ["battery", "balanced", "performance"]:
+				if not sim:
+					if (self._cmd.write_to_file(sys_files["method"], "dpm") and
+						self._cmd.write_to_file(sys_files["dpm_state"], v)):
+						return v
+			else:
+				if not sim:
+					log.warn("Invalid option for radeon_powersave.")
 				return None
-			return "dpm"
-		else:
-			if not sim:
-				log.warn("Invalid option for radeon_powersave.")
-			return None
-
+		return None
 
 	@command_get("radeon_powersave")
-	def _get_radeon_powersave(self, device, ignore_missing=False):
+	def _get_radeon_powersave(self, device, ignore_missing = False):
 		sys_files = self._radeon_powersave_files(device)
 		method = self._cmd.read_file(sys_files["method"], no_error=ignore_missing).strip()
 		if method == "profile":
 			return self._cmd.read_file(sys_files["profile"]).strip()
-		elif method == "dynpm" or method == "dpm":
+		elif method == "dynpm":
 			return method
+		elif method == "dpm":
+			return self._cmd.read_file(sys_files["dpm_state"]).strip()
 		else:
 			return None
-
-	@command_set("radeon_dpm_state", per_device=True, priority=10)
-	def _set_radeon_dpm_state(self, value, device, sim):
-		if self._get_radeon_powersave(device) != "dpm":
-			log.error("dpm power method is not enabled.")
-			return None
-		if not value in ["battery", "balanced", "performance"]:
-			if not sim:
-				log.warn("Invalid option for radeon_dpm_state.")
-			return None
-		path = self._radeon_dpm_state_file(device)
-		self._cmd.write_to_file(path, value)
-		return value
-
-	@command_get("radeon_dpm_state")
-	def _get_radeon_dpm_state(self, device):
-		if self._get_radeon_powersave(device) != "dpm":
-			log.error("dpm power method is not enabled.")
-			return None
-		path = self._radeon_dpm_state_file(device)
-		return self._cmd.read_file(path).strip()
