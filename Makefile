@@ -124,6 +124,7 @@ install: install-dirs
 	install -Dpm 0644 tuned-main.conf $(DESTDIR)/etc/tuned/tuned-main.conf
 	# None profile in the moment, autodetection will be used
 	echo -n > $(DESTDIR)/etc/tuned/active_profile
+	echo -n > $(DESTDIR)/etc/tuned/profile_mode
 	install -Dpm 0644 bootcmdline $(DESTDIR)/etc/tuned/bootcmdline
 	install -Dpm 0644 modules.conf $(DESTDIR)/etc/modprobe.d/tuned.conf
 
