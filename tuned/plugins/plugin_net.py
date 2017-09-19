@@ -197,7 +197,8 @@ class NetTuningPlugin(base.Plugin):
 		"rx-frame-low:": "rx-frames-low:", \
 		"rx-frame-high:": "rx-frames-high:", \
 		"tx-frame-low:": "tx-frames-low:", \
-		"tx-frame-high:": "tx-frames-high:"}, value)
+		"tx-frame-high:": "tx-frames-high:",
+		"large-receive-offload:": "lro:"}, value)
 		# remove empty lines, remove fixed parameters (those with "[fixed]")
 		vl = filter(lambda v: len(str(v)) > 0 and not re.search("\[fixed\]$", str(v)), value.split('\n'))
 		if len(vl) < 2:
@@ -319,9 +320,9 @@ class NetTuningPlugin(base.Plugin):
 			return None
 		if not sim:
 			log.debug("setting %s: %s" % (context, str(d)))
-			# ignore ethtool return code 80, it means parameter is already set
 			context2opt = { "coalesce": "-C", "features": "-K", "pause": "-A", "ring": "-G" }
 			opt = context2opt[context]
+			# ignore ethtool return code 80, it means parameter is already set
 			self._cmd.execute(["ethtool", opt, device] + self._cmd.dict2list(d), no_errors = [80])
 		return d
 
