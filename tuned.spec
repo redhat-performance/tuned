@@ -267,6 +267,7 @@ fi
 %exclude %{_sysconfdir}/tuned/realtime-virtual-guest-variables.conf
 %exclude %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
 %exclude %{_sysconfdir}/tuned/cpu-partitioning-variables.conf
+%exclude %{_sysconfdir}/tuned/sap-hana-vmware-variables.conf
 %exclude %{_prefix}/lib/tuned/default
 %exclude %{_prefix}/lib/tuned/desktop-powersave
 %exclude %{_prefix}/lib/tuned/laptop-ac-powersave
@@ -341,6 +342,7 @@ fi
 
 %files profiles-sap-hana
 %defattr(-,root,root,-)
+%config(noreplace) %{_sysconfdir}/tuned/sap-hana-vmware-variables.conf
 %{_prefix}/lib/tuned/sap-hana
 %{_prefix}/lib/tuned/sap-hana-vmware
 %{_mandir}/man7/tuned-profiles-sap-hana.7*

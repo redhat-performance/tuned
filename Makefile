@@ -137,6 +137,8 @@ install: install-dirs
 		$(DESTDIR)/etc/tuned/realtime-virtual-host-variables.conf
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning/cpu-partitioning-variables.conf \
 		$(DESTDIR)/etc/tuned/cpu-partitioning-variables.conf
+	mv $(DESTDIR)$(TUNED_PROFILESDIR)/sap-hana-vmware/sap-hana-vmware-variables.conf \
+		$(DESTDIR)/etc/tuned/sap-hana-vmware-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_RECOMMEND_DIR)/50-tuned.conf
 
 	# bash completion
