@@ -1,6 +1,8 @@
 import interfaces
 import inspect
 import tuned.patterns
+import threading
+from tuned.utils.commands import commands
 
 class ExportsController(tuned.patterns.Singleton):
 	"""
@@ -12,6 +14,8 @@ class ExportsController(tuned.patterns.Singleton):
 		self._exporters = []
 		self._objects = []
 		self._exports_initialized = False
+		self._exports_running = threading.Event()
+		self._cmd = commands()
 
 	def register_exporter(self, instance):
 		"""Register objects exporter."""
@@ -60,8 +64,13 @@ class ExportsController(tuned.patterns.Singleton):
 		self._initialize_exports()
 		for exporter in self._exporters:
 			exporter.start()
+		self._exports_running.set()
 
 	def stop(self):
 		"""Stop the exports."""
+		self._exports_running.clear()
 		for exporter in self._exporters:
 			exporter.stop()
+
+	def wait_for_exports_running(self, timeout):
+		return self._cmd.wait(self._exports_running, timeout)
