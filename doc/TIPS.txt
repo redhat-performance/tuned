@@ -2,12 +2,12 @@
 * Use a properly dimensioned system for the job (no need for overpowered systems for simple Desktop use e.g.).
 * For servers consolidate services on fewer systems to maximize efficiency of each system.
 * For a server farm consolidating all physical machines on one bigger server and then using Virtualization.
-* Enforce turning of machines that are not used (e.g. company policy).
+* Enforce turning off machines that are not used (e.g. company policy).
 * Try to establish a company culture that is Green "aware", including but not limited to the above point.
-* Unplug and/or turn of peripherals that aren't used (e.g. external USB devices, monitors, printers, scanners).
-* Turn of unused hardware already in BIOS.
+* Unplug and/or turn off peripherals that aren't used (e.g. external USB devices, monitors, printers, scanners).
+* Turn off unused hardware already in BIOS.
 * Disable power hungry features.
-* Enable CPU scaling if supported for ondemand CPU governor. DONT use powersave governor, typically uses more power than ondemand
+* Enable CPU scaling if supported for ondemand CPU governor. DO NOT use powersave governor, typically uses more power than ondemand
 (race to idle).
 * Put network card to 100 mbit/10 mbit:
 ** 10 mbit: ethtool -s eth0 advertise 0x002
@@ -25,7 +25,7 @@
 ** mount -o remount,relatime / 
 * Enable USB autosuspend by adding the following to the kernel boot commandline:
 ** usbcore.autosuspend=5 
-* Screensaver needs to dpms off the screen, not just make colors black.  To turn of monitor after 120s when X is running:
+* Screensaver needs to dpms off the screen, not just make colors black.  To turn off monitor after 120s when X is running:
 ** xset dpms 0 0 120
 
 === Simple programmer tips for improving power usage ===

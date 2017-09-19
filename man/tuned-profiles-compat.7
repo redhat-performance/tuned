@@ -65,14 +65,13 @@ an alias to powersave profile.
 Strong power saving profile directed at machines with classic HDDs. It enables
 aggressive disk spin-down. Disk writeback values are increased and disk
 swappiness is lowered. Log syncing is disabled. All partitions are remounted
-with 'noatime' option. All tuned plugins are disabled.
+with 'noatime' option.
 
 .TP
 .BI "enterprise\-storage"
 Server profile for high disk throughput performance tuning. Disables power
-saving mechanisms and enables deadline IO scheduler. Enables hugepages and
-disables disk barriers. Disk readahead values are increased. CPU governor is
-set to performance.
+saving mechanisms and enables hugepages. Disk readahead values are increased.
+CPU governor is set to performance.
 
 .SH "FILES"
 .nf

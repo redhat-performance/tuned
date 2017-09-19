@@ -37,21 +37,20 @@ To switch to a different profile, run:
 
 # tuned-adm profile <profile-name>
 
-And to disable all tunings, run:
+Your profile choice is also written into /etc/tuned/active_profile and this
+choice is used when the daemon is restarted (e.g. with the machine reboot).
+
+To disable all tunings, run:
+# tuned-adm off
 
 # tuned-adm recommend
 Recommend profile suitable for your system. Currently only static detection is
 implemented - it decides according to data in /etc/system-release-cpe and
-virt-what output. The rules for autodetection are defined in recommend.conf
-in profile directory. They can be overridden by user by putting the
-recommend.conf into /etc/tuned. The default rules recommends profiles targeted
-to the best performance or balanced profile if unsure.
-
-# tuned-adm off
-
-Your profile choice is also written into /etc/tuned/active_profile and this
-choice is used when the daemon is restarted (e.g. with the machine reboot).
-
+virt-what output. The rules for autodetection are defined in the file
+/usr/lib/tuned/recommend.d/50-tuned.conf. They can be overridden by the user by
+putting a file to /etc/tuned/recommend.d or a file named recommend.conf into
+/etc/tuned (see tuned-adm(8) for more details). The default rules recommend
+profiles targeted to the best performance or the balanced profile if unsure.
 
 Available tunings
 -----------------

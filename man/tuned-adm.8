@@ -21,7 +21,7 @@
 .\" 
 .TH TUNED_ADM "8" "30 Mar 2017" "Fedora Power Management SIG" "tuned"
 .SH NAME
-tuned\-adm - commandline tool for switching between different tuning profiles
+tuned\-adm - command line tool for switching between different tuning profiles
 .SH SYNOPSIS
 .B tuned\-adm 
 .RB [ list " | " active " | " "profile \fI[profile]\fP" " | " off " | " verify " | " recommend ]
@@ -32,8 +32,8 @@ profiles. Several predefined profiles are already included. You can even
 create your own profile, either based on one of the existing ones by copying
 it or make a completely new one. The distribution provided profiles are stored
 in subdirectories below \fI/usr/lib/tuned\fP and the user defined profiles in
-subdirectories below \fI/etc/tuned\fP. If there are same profiles on both places,
-user defined profiles have precedence.
+subdirectories below \fI/etc/tuned\fP. If there are profiles with the same name
+in both places, user defined profiles have precedence.
 
 .SH "OPTIONS"
 
@@ -47,26 +47,35 @@ List all available profiles.
 Show current active profile.
 
 .TP
-.BI "profile " [PROFILE]
-Switches to the given profilename. If none is given then all available profiles
+.BI "profile " [PROFILE_NAME]
+Switches to the given profile. If none is given then all available profiles
 are listed. If the profile given is not valid the command gracefully exits without
 performing any operation.
 
 .TP
 .B verify
 Verifies current profile against system settings. Outputs information whether
-system settings matches current profile or not (e.g. somebody modified
-sysfs/sysctl value by hand). Detailed information what is checked, what
+system settings match current profile or not (e.g. somebody modified
+a sysfs/sysctl value by hand). Detailed information about what is checked, what
 value is set and what value is expected can be found in the log.
 
 .TP
 .B recommend
-Recommend profile suitable for your system. Currently only static detection is
-implemented - it decides according to data in /etc/system\-release\-cpe and
-virt\-what output. The rules for autodetection are defined in recommend.conf in
-profile directory. They can be overridden by user by putting the recommend.conf
-into /etc/tuned. The default rules recommend profiles targeted to the best
-performance or balanced profile if unsure.
+Recommend a profile suitable for your system. Currently only static detection is
+implemented - it decides according to data in \fI/etc/system\-release\-cpe\fP
+and virt\-what output. The rules for autodetection are defined in the file
+\fI/usr/lib/tuned/recommend.d/50-tuned.conf\fP. The default rules recommend profiles
+targeted to the best performance, or the balanced profile if unsure.
+
+The default rules can be overridden by the user by putting a file named
+\fIrecommend.conf\fP into /etc/tuned, or by creating a file in the
+\fI/etc/tuned/recommend.d\fP directory. The file \fI/etc/tuned/recommend.conf\fP
+is evaluated first. If no match is found, the files in the
+\fI/etc/tuned/recommend.d\fP directory are merged with the files in the
+\fI/usr/lib/tuned/recommend.d\fP directory (if there is a file with the same
+name in both directories, the one from \fI/etc/tuned/recommend.d\fP is used)
+and the files are evaluated in alphabetical order. The first matching
+entry is used.
 
 .TP
 .B off
