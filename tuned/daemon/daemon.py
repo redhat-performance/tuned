@@ -6,6 +6,7 @@ from tuned.exceptions import TunedException
 from tuned.profiles.exceptions import InvalidProfileException
 import tuned.consts as consts
 from tuned.utils.commands import commands
+import re
 
 log = tuned.logs.get()
 
@@ -106,6 +107,13 @@ class Daemon(object):
 			self._application._dbus_exporter.send_signal(consts.DBUS_SIGNAL_PROFILE_CHANGED, profile_name, result, errstr)
 		return errstr
 
+	def _system_shutting_down(self):
+		retcode, out = self._cmd.execute(["systemctl", "is-system-running"], no_errors = [0])
+		if out[:8] == "stopping":
+			return True
+		retcode, out = self._cmd.execute(["systemctl", "list-jobs"], no_errors = [0])
+		return re.search(r"\b(shutdown|reboot|halt|poweroff)\.target.*start", out) is not None
+
 	def _thread_code(self):
 		if self._profile is None:
 			raise TunedException("Cannot start the daemon without setting a profile.")
@@ -151,13 +159,11 @@ class Daemon(object):
 			# stopped by user and in such case do full cleanup, without systemd never
 			# do full cleanup
 			full_rollback = False
-			retcode, out = self._cmd.execute(["systemctl", "is-system-running"], no_errors = [0])
-			if retcode >= 0:
-				if out[:8] == "stopping":
-					log.info("terminating Tuned due to system shutdown / reboot")
-				else:
-					log.info("terminating Tuned, rolling back all changes")
-					full_rollback = True
+			if self._system_shutting_down():
+				log.info("terminating Tuned due to system shutdown / reboot")
+			else:
+				log.info("terminating Tuned, rolling back all changes")
+				full_rollback = True
 		if self._daemon:
 			self._unit_manager.stop_tuning(full_rollback)
 		self._unit_manager.destroy_all()

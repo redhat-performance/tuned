@@ -67,7 +67,7 @@ class DBusController(object):
 
 		try:
 			method = self._interface.get_dbus_method(method_name)
-			return method(*args, **kwargs)
+			return method(*args, timeout=40)
 		except dbus.exceptions.DBusException as dbus_exception:
 			err_str = "DBus call to Tuned daemon failed"
 			if self._debug:
