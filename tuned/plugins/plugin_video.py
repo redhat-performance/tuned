@@ -65,10 +65,11 @@ class VideoPlugin(base.Plugin):
 					if (self._cmd.write_to_file(sys_files["method"], "dynpm")):
 						return "dynpm"
 			# new DPM profiles, recommended to use if supported
-			elif v in ["battery", "balanced", "performance"]:
+			elif v in ["dpm-battery", "dpm-balanced", "dpm-performance"]:
 				if not sim:
+					state = v[len("dpm-"):]
 					if (self._cmd.write_to_file(sys_files["method"], "dpm") and
-						self._cmd.write_to_file(sys_files["dpm_state"], v)):
+						self._cmd.write_to_file(sys_files["dpm_state"], state)):
 						return v
 			else:
 				if not sim:
@@ -85,6 +86,6 @@ class VideoPlugin(base.Plugin):
 		elif method == "dynpm":
 			return method
 		elif method == "dpm":
-			return self._cmd.read_file(sys_files["dpm_state"]).strip()
+			return "dpm-" + self._cmd.read_file(sys_files["dpm_state"]).strip()
 		else:
 			return None
