@@ -6,6 +6,7 @@ from tuned.exceptions import TunedException
 from tuned.profiles.exceptions import InvalidProfileException
 import tuned.consts as consts
 from tuned.utils.commands import commands
+from tuned import exports
 import re
 
 log = tuned.logs.get()
@@ -127,6 +128,8 @@ class Daemon(object):
 		self._unit_manager.start_tuning()
 		self._profile_applied.set()
 		log.info("static tuning from profile '%s' applied" % self._profile.name)
+		if self._daemon:
+			exports.start()
 		self._notify_profile_changed(self._profile.name, True, "OK")
 
 		if self._daemon:

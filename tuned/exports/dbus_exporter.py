@@ -56,6 +56,9 @@ class DBusExporter(interfaces.ExporterInterface):
 	def object_name(self):
 		return self._object_name
 
+	def running(self):
+		return self._thread is not None
+
 	def export(self, method, in_signature, out_signature):
 		if not inspect.ismethod(method):
 			raise Exception("Only bound methods can be exported.")
@@ -129,6 +132,8 @@ class DBusExporter(interfaces.ExporterInterface):
 		self._dbus_object_cls = cls
 
 	def start(self):
+		if self.running():
+			return
 		if self._dbus_object_cls is None:
 			self._construct_dbus_object_class()
 
