@@ -116,12 +116,14 @@ class Daemon(object):
 			self._application._dbus_exporter.send_signal(consts.DBUS_SIGNAL_PROFILE_CHANGED, profile_names, result, errstr)
 		return errstr
 
-	def _system_shutting_down(self):
+	def _full_rollback_required(self):
 		retcode, out = self._cmd.execute(["systemctl", "is-system-running"], no_errors = [0])
+		if retcode < 0:
+			return False
 		if out[:8] == "stopping":
-			return True
+			return False
 		retcode, out = self._cmd.execute(["systemctl", "list-jobs"], no_errors = [0])
-		return re.search(r"\b(shutdown|reboot|halt|poweroff)\.target.*start", out) is not None
+		return re.search(r"\b(shutdown|reboot|halt|poweroff)\.target.*start", out) is None
 
 	def _thread_code(self):
 		if self._profile is None:
@@ -170,11 +172,11 @@ class Daemon(object):
 			# stopped by user and in such case do full cleanup, without systemd never
 			# do full cleanup
 			full_rollback = False
-			if self._system_shutting_down():
-				log.info("terminating Tuned due to system shutdown / reboot")
-			else:
+			if self._full_rollback_required():
 				log.info("terminating Tuned, rolling back all changes")
 				full_rollback = True
+			else:
+				log.info("terminating Tuned due to system shutdown / reboot")
 		if self._daemon:
 			self._unit_manager.stop_tuning(full_rollback)
 		self._unit_manager.destroy_all()
