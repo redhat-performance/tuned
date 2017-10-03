@@ -11,6 +11,7 @@ start() {
     sed -i '/^IRQBALANCE_BANNED_CPUS=/d' /etc/sysconfig/irqbalance
     echo "IRQBALANCE_BANNED_CPUS=$TUNED_isolated_cpumask" >>/etc/sysconfig/irqbalance
     setup_kvm_mod_low_latency
+    disable_ksm
     return "$?"
 }
 
@@ -21,6 +22,7 @@ stop() {
         sed -i '/^IRQBALANCE_BANNED_CPUS=/d' /etc/sysconfig/irqbalance
         teardown_kvm_mod_low_latency
     fi
+    enable_ksm
     return "$?"
 }
 

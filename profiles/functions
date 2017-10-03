@@ -525,6 +525,43 @@ teardown_kvm_mod_low_latency()
 }
 
 #
+# KSM
+#
+
+KSM_SERVICES="ksm ksmtuned"
+KSM_RUN_PATH=/sys/kernel/mm/ksm/run
+
+disable_ksm()
+{
+	for s in $KSM_SERVICES; do
+		if systemctl is-enabled -q $s; then
+			systemctl -q disable $s
+		fi
+
+		if systemctl is-active -q $s; then
+			systemctl -q stop $s
+		fi
+	done
+
+	if [ -f $KSM_RUN_PATH ]; then
+		# Unmerge all shared pages
+		echo 2 > $KSM_RUN_PATH
+	fi
+}
+
+enable_ksm()
+{
+	for s in $KSM_SERVICES; do
+		systemctl -q preset $s
+
+		# Only start the service if it's enabled by defaut
+		if systemctl is-enabled -q $s; then
+			systemctl start $s
+		fi
+	done
+}
+
+#
 # ACTION PROCESSING
 #
 

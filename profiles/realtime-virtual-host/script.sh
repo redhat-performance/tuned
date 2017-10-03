@@ -42,12 +42,15 @@ start() {
         echo `cat ./lapic_timer_adv_ns` > $ltanfile
     fi
 
+    disable_ksm
+
     return $retval
 }
 
 stop() {
     [ "$1" = "full_rollback" ] && teardown_kvm_mod_low_latency
     python /usr/libexec/tuned/defirqaffinity.py "add" "$TUNED_isolated_cores_expanded"
+    enable_ksm
     return "$?"
 }
 
