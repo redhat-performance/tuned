@@ -28,9 +28,12 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		Controller main loop. The call is blocking.
 		"""
 		log.info("starting controller")
-		self.start()
+		res = self.start()
+		daemon = self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
+		if not res and daemon:
+			exports.start()
 
-		if self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+		if daemon:
 			self._terminate.clear()
 			# we have to pass some timeout, otherwise signals will not work
 			while not self._cmd.wait(self._terminate, 3600):

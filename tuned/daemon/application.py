@@ -186,9 +186,7 @@ class Application(object):
 		# override global config if ran from command line with daemon option (-d)
 		if daemon:
 			self.config.set(consts.CFG_DAEMON, True)
-		if self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
-			exports.start()
-		else:
+		if not self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
 			log.warn("Using one shot no deamon mode, most of the functionality will be not available, it can be changed in global config")
 		result = self._controller.run()
 		if self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):

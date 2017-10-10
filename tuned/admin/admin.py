@@ -222,7 +222,7 @@ class Admin(object):
 			return self._action_dbus_list()
 		profile_name = " ".join(profiles)
 		if profile_name == "":
-			return False
+			return self._controller.exit(False)
 		self._daemon_action_finished.clear()
 		(ret, msg) = self._controller.switch_profile(profile_name)
 		if self._async or not ret:
