@@ -500,10 +500,10 @@ class commands:
 				if profile_name is not None:
 					f.write(profile_name + "\n")
 		except (OSError,IOError) as e:
-			raise TunedException("Cannot write active profile into %s: %s" % (consts.ACTIVE_PROFILE_FILE, str(e)))
+			raise TunedException("Failed to save active profile: %s" % e.strerror)
 		try:
 			with open(consts.PROFILE_MODE_FILE, "w") as f:
 				mode = consts.ACTIVE_PROFILE_MANUAL if manual else consts.ACTIVE_PROFILE_AUTO
 				f.write(mode + "\n")
 		except (OSError,IOError) as e:
-			raise TunedException("Cannot write profile mode into %s: %s" % (consts.PROFILE_MODE_FILE, str(e)))
+			raise TunedException("Failed to save profile mode: %s" % e.strerror)
