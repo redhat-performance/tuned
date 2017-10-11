@@ -110,7 +110,7 @@ class SchedulerPlugin(base.Plugin):
 		(rc, out) = self._cmd.execute(["ps", "-eopid,cmd", "--no-headers"])
 		if rc != 0 or len(out) <= 0:
 			return None
-		return dict(map(lambda (pid, cmd): (pid.lstrip(), cmd.lstrip()),
+		return dict(map(lambda (pid, cmd): (int(pid.lstrip()), cmd.lstrip()),
 			filter(lambda i: len(i) == 2, map(lambda s: s.split(None, 1), out.split("\n")))))
 
 	def _parse_val(self, val):
