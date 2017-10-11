@@ -127,18 +127,24 @@ try:
 except ValueError:
 	pass
 
+ret = 0
 for i in interruptdirs:
 	fname = irqpath + i + "/smp_affinity"
 	cpulist = parse_def_affinity(fname)
 	mask = 0
-	for i in cpulist:
-		mask = mask | 1 << i;
-	for i in fields:
+	for j in cpulist:
+		mask = mask | 1 << j;
+	for j in fields:
 		if sys.argv[1] == "add":
-			mask = mask | 1 << int(i);
+			mask = mask | 1 << int(j);
 		elif sys.argv[1] == "remove":
-			mask = mask & ~(1 << int(i));
+			mask = mask & ~(1 << int(j));
 	string = get_cpumask(mask)
-	fo = open(fname, "wb")
-	fo.write(string)
-	fo.close()
+	try:
+		fo = open(fname, "wb")
+		fo.write(string)
+		fo.close()
+	except IOError as e:
+		sys.stderr.write('Failed to set smp_affinity for IRQ %s: %s\n' % (str(i), str(e)))
+		ret = 1
+sys.exit(ret)
