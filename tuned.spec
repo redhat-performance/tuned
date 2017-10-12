@@ -10,8 +10,8 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.8.0
-Release: 1%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.9.0
+Release: 0.1.rc1%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source: https://codeload.github.com/redhat-performance/%{name}/tar.gz/v%{version}#/%{name}-%{version}.tar.gz
 URL: http://www.tuned-project.org/
@@ -399,6 +399,53 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Thu Oct 12 2017 Jaroslav Škarvada <jskarvad@redhat.com> - 2.9.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#1467576
+  - added recommend.d functionality
+    resolves: rhbz#1459146
+  - recommend: added support for matching of processes
+    resolves: rhbz#1461838
+  - plugin_video: added support for the 'dpm' power method
+    resolves: rhbz#1417659
+  - list available profiles on 'tuned-adm profile'
+    resolves: rhbz#988433
+  - cpu-partitioning: used tuned instead of tuna for cores isolation
+    resolves: rhbz#1442229
+  - inventory: added workaround for pyudev < 0.18
+    resolves: rhbz#1251240
+  - realtime: used skew_tick=1 in kernel cmdline
+    resolves: rhbz#1447938
+  - realtime-virtual-guest: re-assigned kernel thread priorities
+    resolves: rhbz#1452357
+  - bootloader: splitted string for removal from cmdline
+    resolves: rhbz#1461279
+  - network-latency: added skew_tick=1 kernel command line parameter
+    resolves: rhbz#1451073
+  - bootloader: accepted only certain values for initrd_remove_dir
+    resolves: rhbz#1455161
+  - increased udev monitor buffer size, made it configurable
+    resolves: rhbz#1442306
+  - bootloader: don't add nonexistent overlay image to grub.cfg
+    resolves: rhbz#1454340
+  - plugin_cpu: don't log error in execute() if EPB is not supported
+    resolves: rhbz#1443182
+  - sap-hana: fixed description of the sap-hana profiles
+    resolves: rhbz#1482005
+  - plugin_systemd: on full_rollback notify about need of initrd regeneration
+    resolves: rhbz#1469258
+  - don't log errors about missing files on verify with ignore_missing set
+    resolves: rhbz#1451435
+  - plugin_scheduler: improved logging
+    resolves: rhbz#1474961
+  - improved checking if we are rebooting or not
+    resolves: rhbz#1475571
+  - started dbus exports after a profile is applied
+    resolves: rhbz#1443142
+  - sap-hana: changed force_latency to 70
+    resolves: rhbz#1501252
+
 * Fri Apr  7 2017 Jaroslav Škarvada <jskarvad@redhat.com> - 2.8.0-1
 - new release
   - rebase tuned to latest upstream
