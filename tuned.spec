@@ -8,12 +8,18 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
+%global prerelease rc
+%global prereleasenum 1
+
+%global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
+%global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
+
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.9.0
-Release: 0.1.rc1%{?with_snapshot:.%{git_suffix}}%{?dist}
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
-Source: https://codeload.github.com/redhat-performance/%{name}/tar.gz/v%{version}#/%{name}-%{version}.tar.gz
+Source: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}.tar.gz#/%{name}-%{version}%{?prerel1}.tar.gz
 URL: http://www.tuned-project.org/
 BuildArch: noarch
 BuildRequires: python, systemd, desktop-file-utils
@@ -158,7 +164,7 @@ Additional tuned profiles mainly for backward compatibility with tuned 1.0.
 It can be also used to fine tune your system for specific scenarios.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}%{?prerel2}
 
 
 %build
