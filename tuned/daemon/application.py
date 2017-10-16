@@ -21,6 +21,12 @@ class Application(object):
 		storage_provider = storage.PickleProvider()
 		storage_factory = storage.Factory(storage_provider)
 
+		self.config = GlobalConfig() if config is None else config
+		if self.config.get_bool(consts.CFG_DYNAMIC_TUNING):
+			log.info("dynamic tuning is enabled (can be overridden in plugins)")
+		else:
+			log.info("dynamic tuning is globally disabled")
+
 		monitors_repository = monitors.Repository()
 		udev_buffer_size = config.get_size("udev_buffer_size", consts.CFG_DEF_UDEV_BUFFER_SIZE)
 		hardware_inventory = hardware.Inventory(buffer_size=udev_buffer_size)
@@ -28,12 +34,6 @@ class Application(object):
 		device_matcher_udev = hardware.DeviceMatcherUdev()
 		plugin_instance_factory = plugins.instance.Factory()
 		self.variables = profiles.variables.Variables()
-
-		self.config = GlobalConfig() if config is None else config
-		if self.config.get_bool(consts.CFG_DYNAMIC_TUNING):
-			log.info("dynamic tuning is enabled (can be overridden in plugins)")
-		else:
-			log.info("dynamic tuning is globally disabled")
 
 		plugins_repository = plugins.Repository(monitors_repository, storage_factory, hardware_inventory,\
 			device_matcher, device_matcher_udev, plugin_instance_factory, self.config, self.variables)
