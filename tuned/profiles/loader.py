@@ -60,7 +60,13 @@ class Loader(object):
 		if "variables" in final_profile.units:
 			self._variables.add_from_cfg(final_profile.units["variables"].options)
 			del(final_profile.units["variables"])
+		# FIXME hack, do all variable expansions in one place
+		self._expand_vars_in_devices(final_profile)
 		return final_profile
+
+	def _expand_vars_in_devices(self, profile):
+		for unit in profile.units:
+			profile.units[unit].devices = self._variables.expand(profile.units[unit].devices)
 
 	def _load_profile(self, profile_names, profiles, processed_files):
 		for name in profile_names:
