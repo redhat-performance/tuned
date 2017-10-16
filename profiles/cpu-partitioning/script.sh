@@ -2,6 +2,38 @@
 
 . /usr/lib/tuned/functions
 
+rebalance_cpus_file=no-rebalance-cpus.txt
+
+change_sd_balance_bit()
+{
+    local set_bit=$1
+    local flags_cur=
+    local file=
+    local cpu=
+
+    for cpu in $(cat $rebalance_cpus_file); do
+        for file in $(find /proc/sys/kernel/sched_domain/cpu$cpu -name flags -print); do
+            flags_cur=$(cat $file)
+            if [ $set_bit -eq 1 ]; then
+                flags_cur=$(echo $((flags_cur | 0x1)))
+            else
+                flags_cur=$(echo $((flags_cur & 0xfffe)))
+            fi
+            echo $flags_cur > $file
+        done
+    done
+}
+
+disable_rebalance_domains()
+{
+    change_sd_balance_bit 0
+}
+
+enable_rebalance_domains()
+{
+    change_sd_balance_bit 1
+}
+
 start() {
     mkdir -p "${TUNED_tmpdir}/etc/systemd"
     mkdir -p "${TUNED_tmpdir}/usr/lib/dracut/hooks/pre-udev"
@@ -12,6 +44,9 @@ start() {
     echo "IRQBALANCE_BANNED_CPUS=$TUNED_isolated_cpumask" >>/etc/sysconfig/irqbalance
     setup_kvm_mod_low_latency
     disable_ksm
+
+    echo "$TUNED_no_balance_cores_expanded" | sed 's/,/ /g' > $rebalance_cpus_file
+    disable_rebalance_domains
     return "$?"
 }
 
@@ -23,6 +58,7 @@ stop() {
         teardown_kvm_mod_low_latency
     fi
     enable_ksm
+    enable_rebalance_domains
     return "$?"
 }
 
