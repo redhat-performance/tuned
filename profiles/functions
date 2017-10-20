@@ -8,6 +8,7 @@
 # Config
 #
 STORAGE=/run/tuned
+STORAGE_PERSISTENT=/var/lib/tuned
 STORAGE_SUFFIX=".save"
 
 #

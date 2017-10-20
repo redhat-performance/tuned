@@ -2,7 +2,7 @@
 
 . /usr/lib/tuned/functions
 
-rebalance_cpus_file=no-rebalance-cpus.txt
+rebalance_cpus_file=$STORAGE/no-rebalance-cpus.txt
 
 change_sd_balance_bit()
 {
@@ -15,9 +15,9 @@ change_sd_balance_bit()
         for file in $(find /proc/sys/kernel/sched_domain/cpu$cpu -name flags -print); do
             flags_cur=$(cat $file)
             if [ $set_bit -eq 1 ]; then
-                flags_cur=$(echo $((flags_cur | 0x1)))
+                flags_cur=$((flags_cur | 0x1))
             else
-                flags_cur=$(echo $((flags_cur & 0xfffe)))
+                flags_cur=$((flags_cur & 0xfffe))
             fi
             echo $flags_cur > $file
         done

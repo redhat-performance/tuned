@@ -210,6 +210,8 @@ fi
 if [ "$1" == 0 ]; then
 # clear persistent storage
   rm -f %{_var}/lib/tuned/*
+# clear temporal storage
+  rm -f /run/tuned/*
 fi
 
 
