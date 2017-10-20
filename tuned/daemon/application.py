@@ -28,7 +28,7 @@ class Application(object):
 			log.info("dynamic tuning is globally disabled")
 
 		monitors_repository = monitors.Repository()
-		udev_buffer_size = config.get_size("udev_buffer_size", consts.CFG_DEF_UDEV_BUFFER_SIZE)
+		udev_buffer_size = self.config.get_size("udev_buffer_size", consts.CFG_DEF_UDEV_BUFFER_SIZE)
 		hardware_inventory = hardware.Inventory(buffer_size=udev_buffer_size)
 		device_matcher = hardware.DeviceMatcher()
 		device_matcher_udev = hardware.DeviceMatcherUdev()
