@@ -1,6 +1,6 @@
 #!/bin/bash
 
-QEMU=/usr/libexec/qemu-kvm
+QEMU=$(type -P qemu-kvm || echo /usr/libexec/qemu-kvm)
 
 if [ ! -f /sys/module/kvm/parameters/lapic_timer_advance_ns ]; then
         echo "/sys/module/kvm/parameters/lapic_timer_advance_ns not found"
@@ -14,7 +14,7 @@ for i in `seq 1000 500 7000`; do
 	chrt -f 1 taskset -c $1 $QEMU -enable-kvm -device pc-testdev \
 		-device isa-debug-exit,iobase=0xf4,iosize=0x4 \
 		-display none -serial stdio -device pci-testdev \
-		-kernel /usr/share/qemu-kvm/tscdeadline_latency.flat  \
+		-kernel /usr/share/tuned/tscdeadline_latency.flat  \
 		-cpu host | grep latency | cut -f 2 -d ":" > $dir/out
 
 	A=0
