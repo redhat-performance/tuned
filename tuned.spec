@@ -9,7 +9,7 @@
 %endif
 
 %global prerelease rc
-%global prereleasenum 1
+%global prereleasenum 2
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
@@ -17,7 +17,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.9.0
-Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Release: 0.2%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}.tar.gz#/%{name}-%{version}%{?prerel1}.tar.gz
 URL: http://www.tuned-project.org/
@@ -407,6 +407,15 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Fri Oct 20 2017 Jaroslav Škarvada <jskarvad@redhat.com> - 2.9.0-0.2.rc2
+- new release
+  - rebased tuned to latest upstream
+    related: rhbz#1467576
+  - fixed expansion of the variables in the 'devices' section
+    related: rhbz#1490399
+  - cpu-partitioning: add no_rebalance_cores= option
+    resolves: rhbz#1497182
+
 * Thu Oct 12 2017 Jaroslav Škarvada <jskarvad@redhat.com> - 2.9.0-0.1.rc1
 - new release
   - rebased tuned to latest upstream
