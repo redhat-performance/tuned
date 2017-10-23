@@ -295,6 +295,7 @@ fi
 %exclude %{_prefix}/lib/tuned/cpu-partitioning
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
+%dir %{_sysconfdir}/tuned/recommend.d
 %dir %{_libexecdir}/tuned
 %{_libexecdir}/tuned/defirqaffinity*
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/active_profile
