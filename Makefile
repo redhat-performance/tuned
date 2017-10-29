@@ -33,7 +33,7 @@ DOCDIR = $(DATADIR)/doc/$(NAME)
 PYTHON_SITELIB = $(shell python -c 'from distutils.sysconfig import get_python_lib; print get_python_lib();' || echo /usr/lib/python2.7/site-packages)
 TUNED_PROFILESDIR = /usr/lib/tuned
 TUNED_RECOMMEND_DIR = $(TUNED_PROFILESDIR)/recommend.d
-TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/recommend.d
+TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/tuned/recommend.d
 BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
 
 release-dir:
