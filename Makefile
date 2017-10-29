@@ -27,11 +27,13 @@ TMPFILESDIR_DETECT = $(shell pkg-config systemd --variable tmpfilesdir || rpm --
 TMPFILESDIR = $(TMPFILESDIR_DETECT:%{_tmpfilesdir}=$(TMPFILESDIR_FALLBACK))
 VERSIONED_NAME = $(NAME)-$(VERSION)$(GIT_PSUFFIX)
 
+SYSCONFDIR = /etc
 DATADIR = /usr/share
 DOCDIR = $(DATADIR)/doc/$(NAME)
 PYTHON_SITELIB = $(shell python -c 'from distutils.sysconfig import get_python_lib; print get_python_lib();' || echo /usr/lib/python2.7/site-packages)
 TUNED_PROFILESDIR = /usr/lib/tuned
 TUNED_RECOMMEND_DIR = $(TUNED_PROFILESDIR)/recommend.d
+TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/recommend.d
 BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
 
 release-dir:
@@ -101,7 +103,9 @@ install-dirs:
 	mkdir -p $(DESTDIR)/var/log/tuned
 	mkdir -p $(DESTDIR)/run/tuned
 	mkdir -p $(DESTDIR)$(DOCDIR)
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)
 	mkdir -p $(DESTDIR)$(TUNED_RECOMMEND_DIR)
+	mkdir -p $(DESTDIR)$(TUNED_USER_RECOMMEND_DIR)
 
 install: install-dirs
 	# library
@@ -121,25 +125,25 @@ install: install-dirs
 	install -Dpm 0755 experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
 
 	# configuration files
-	install -Dpm 0644 tuned-main.conf $(DESTDIR)/etc/tuned/tuned-main.conf
+	install -Dpm 0644 tuned-main.conf $(DESTDIR)$(SYSCONFDIR)/tuned/tuned-main.conf
 	# None profile in the moment, autodetection will be used
-	echo -n > $(DESTDIR)/etc/tuned/active_profile
-	echo -n > $(DESTDIR)/etc/tuned/profile_mode
-	install -Dpm 0644 bootcmdline $(DESTDIR)/etc/tuned/bootcmdline
-	install -Dpm 0644 modules.conf $(DESTDIR)/etc/modprobe.d/tuned.conf
+	echo -n > $(DESTDIR)$(SYSCONFDIR)/tuned/active_profile
+	echo -n > $(DESTDIR)$(SYSCONFDIR)/tuned/profile_mode
+	install -Dpm 0644 bootcmdline $(DESTDIR)$(SYSCONFDIR)/tuned/bootcmdline
+	install -Dpm 0644 modules.conf $(DESTDIR)$(SYSCONFDIR)/modprobe.d/tuned.conf
 
 	# profiles & system config
 	cp -a profiles/* $(DESTDIR)$(TUNED_PROFILESDIR)/
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime/realtime-variables.conf \
-		$(DESTDIR)/etc/tuned/realtime-variables.conf
+		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-variables.conf
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime-virtual-guest/realtime-virtual-guest-variables.conf \
-		$(DESTDIR)/etc/tuned/realtime-virtual-guest-variables.conf
+		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-virtual-guest-variables.conf
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime-virtual-host/realtime-virtual-host-variables.conf \
-		$(DESTDIR)/etc/tuned/realtime-virtual-host-variables.conf
+		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-virtual-host-variables.conf
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning/cpu-partitioning-variables.conf \
-		$(DESTDIR)/etc/tuned/cpu-partitioning-variables.conf
+		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-variables.conf
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/sap-hana-vmware/sap-hana-vmware-variables.conf \
-		$(DESTDIR)/etc/tuned/sap-hana-vmware-variables.conf
+		$(DESTDIR)$(SYSCONFDIR)/tuned/sap-hana-vmware-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_RECOMMEND_DIR)/50-tuned.conf
 
 	# bash completion
@@ -152,10 +156,10 @@ install: install-dirs
 	install -Dpm 0644 tuned.service $(DESTDIR)$(UNITDIR)/tuned.service
 
 	# dbus configuration
-	install -Dpm 0644 dbus.conf $(DESTDIR)/etc/dbus-1/system.d/com.redhat.tuned.conf
+	install -Dpm 0644 dbus.conf $(DESTDIR)$(SYSCONFDIR)/dbus-1/system.d/com.redhat.tuned.conf
 
 	# grub template
-	install -Dpm 0755 00_tuned $(DESTDIR)/etc/grub.d/00_tuned
+	install -Dpm 0755 00_tuned $(DESTDIR)$(SYSCONFDIR)/grub.d/00_tuned
 
 	# polkit configuration
 	install -Dpm 0644 com.redhat.tuned.policy $(DESTDIR)$(DATADIR)/polkit-1/actions/com.redhat.tuned.policy
