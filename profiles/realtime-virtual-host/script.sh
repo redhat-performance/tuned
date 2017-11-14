@@ -4,6 +4,40 @@
 
 ltanfile=/sys/module/kvm/parameters/lapic_timer_advance_ns
 
+QEMU=$(type -P qemu-kvm || echo /usr/libexec/qemu-kvm)
+TSCDEADLINE_LATENCY="/usr/share/qemu-kvm/tscdeadline_latency.flat"
+if [ ! -f "$TSCDEADLINE_LATENCY" ]; then
+    TSCDEADLINE_LATENCY="/usr/share/tuned/tscdeadline_latency.flat"
+fi
+
+run_tsc_deadline_latency()
+{
+    if [ ! -f /sys/module/kvm/parameters/lapic_timer_advance_ns ]; then
+        echo "/sys/module/kvm/parameters/lapic_timer_advance_ns not found"
+        return 1
+    fi
+
+    dir=`mktemp -d`
+
+    for i in `seq 1000 500 7000`; do
+        echo $i > /sys/module/kvm/parameters/lapic_timer_advance_ns
+        chrt -f 1 taskset -c $1 $QEMU -enable-kvm -device pc-testdev \
+            -device isa-debug-exit,iobase=0xf4,iosize=0x4 \
+            -display none -serial stdio -device pci-testdev \
+            -kernel "$TSCDEADLINE_LATENCY"  \
+            -cpu host | grep latency | cut -f 2 -d ":" > $dir/out
+
+        A=0
+        while read l; do
+            A=$(($A+$l))
+        done < $dir/out
+
+        lines=`wc -l $dir/out | cut -f 1 -d " "`
+        ans=$(($A/$lines))
+        echo $i: $ans
+    done
+}
+
 start() {
     python /usr/libexec/tuned/defirqaffinity.py "remove" "$TUNED_isolated_cores_expanded" &&
     retval = "$?"
@@ -26,10 +60,10 @@ start() {
 
 
     if [ -f $ltanfile -a ! -f ./lapic_timer_adv_ns ]; then
-        if [ -f /usr/share/tuned/tscdeadline_latency.flat ]; then
+        if [ -f "$TSCDEADLINE_LATENCY" ]; then
              tempdir=`mktemp -d`
              isolatedcpu=`echo "$TUNED_isolated_cores_expanded" | cut -f 1 -d ","`
-             sh ./run-tscdeadline-latency.sh $isolatedcpu > $tempdir/lat.out
+             run_tscdeadline_latency $isolatedcpu > $tempdir/lat.out
              sh ./find-lapictscdeadline-optimal.sh $tempdir/lat.out > $tempdir/opt.out
              if [ $? -eq 0 ]; then
                   echo `cat $tempdir/opt.out | cut -f 2 -d ":"` > ./lapic_timer_adv_ns

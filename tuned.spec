@@ -1,4 +1,12 @@
+%global _binaries_in_noarch_packages_terminate_build 0
+
 %bcond_with snapshot
+
+%if 0%{?fedora}
+%bcond_without tscdeadline_latency
+%else
+%bcond_with tscdeadline_latency
+%endif
 
 %if %{with snapshot}
 %if 0%{!?git_short_commit:1}
@@ -7,6 +15,8 @@
 %global git_date %(date +'%Y%m%d')
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
+
+%global kvm_tests_snap 20171020
 
 #%%global prerelease rc
 #%%global prereleasenum 2
@@ -19,10 +29,16 @@ Name: tuned
 Version: 2.9.0
 Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
-Source: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}.tar.gz#/%{name}-%{version}%{?prerel1}.tar.gz
+Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}.tar.gz#/%{name}-%{version}%{?prerel1}.tar.gz
+%if %{with tscdeadline_latency}
+Source1: https://git.kernel.org/pub/scm/virt/kvm/kvm-unit-tests.git/snapshot/kvm-unit-tests-%{kvm_tests_snap}.tar.gz
+%endif
 URL: http://www.tuned-project.org/
 BuildArch: noarch
 BuildRequires: python, systemd, desktop-file-utils
+%if %{with tscdeadline_latency}
+BuildRequires: gcc-x86_64-linux-gnu
+%endif
 Requires(post): systemd, virt-what
 Requires(preun): systemd
 Requires(postun): systemd
@@ -128,15 +144,25 @@ Summary: Additional tuned profile(s) targeted to Network Function Virtualization
 Requires: %{name} = %{version}
 Requires: %{name}-profiles-realtime = %{version}
 Requires: tuna
-%if 0%{?fedora} > 22
-Recommends: qemu-kvm-tools-rhev
+%if %{with tscdeadline_latency}
+Requires: %{name}-profiles-nfv-host-bin = %{version}
 %endif
-%if 0%{?rhel} == 7
+%if 0%{?rhel} >= 7 && %{without tscdeadline_latency}
 Requires: qemu-kvm-tools-rhev
 %endif
 
 %description profiles-nfv-host
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host.
+
+%if %{with tscdeadline_latency}
+%package profiles-nfv-host-bin
+Summary: Binaries that are needed for the Network Function Virtualization (NFV) host tuned profile.
+Requires: %{name} = %{version}
+ExclusiveArch: %{ix86} x86_64
+
+%description profiles-nfv-host-bin
+Binaries that are needed for the Network Function Virtualization (NFV) host tuned profile.
+%endif
 
 # this is kept for backward compatibility, it should be dropped for RHEL-8
 %package profiles-nfv
@@ -165,10 +191,17 @@ It can be also used to fine tune your system for specific scenarios.
 
 %prep
 %setup -q -n %{name}-%{version}%{?prerel2}
-
+%if %{with tscdeadline_latency}
+cd .. && tar xf %{SOURCE1}
+%endif
 
 %build
-
+%if %{with tscdeadline_latency}
+cd ../kvm-unit-tests-%{kvm_tests_snap}
+./configure --cross-prefix=x86_64-linux-gnu-
+make x86/tscdeadline_latency.flat
+x86_64-linux-gnu-strip x86/tscdeadline_latency.flat
+%endif
 
 %install
 make install DESTDIR=%{buildroot} DOCDIR=%{docdir}
@@ -181,6 +214,10 @@ sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tun
 mkdir -p %{buildroot}%{_datadir}/tuned/grub2
 mv %{buildroot}%{_sysconfdir}/grub.d/00_tuned %{buildroot}%{_datadir}/tuned/grub2/00_tuned
 rmdir %{buildroot}%{_sysconfdir}/grub.d
+
+%if %{with tscdeadline_latency}
+install -m 0644 ../kvm-unit-tests-%{kvm_tests_snap}/x86/tscdeadline_latency.flat %{buildroot}%{_datadir}/tuned
+%endif
 
 # ghost for persistent storage
 mkdir -p %{buildroot}%{_var}/lib/tuned
@@ -385,6 +422,12 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
 %{_prefix}/lib/tuned/realtime-virtual-host
 %{_mandir}/man7/tuned-profiles-nfv-host.7*
+
+%if %{with tscdeadline_latency}
+%files profiles-nfv-host-bin
+%defattr(-,root,root,-)
+%{_datadir}/tuned/tscdeadline_latency.flat
+%endif
 
 %files profiles-nfv
 %defattr(-,root,root,-)
