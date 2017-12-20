@@ -1,0 +1,25 @@
+Web page license / trademarks
+-----------------------------
+
+Copyright (C) 2008-2017 Red Hat, Inc.
+
+The web page and associated graphics except the Red Hat logo are licensed
+under Creative Commons Attribution-ShareAlike 3.0 license
+(http://creativecommons.org/licenses/by-sa/3.0/legalcode).
+
+The Red Hat logo is property of Red Hat and it is not permitted to
+use it without the prior written consent of Red Hat. For more details
+see:
+https://www.redhat.com/en/about/trademark-guidelines-and-policies
+
+
+Graphics / web page authors
+---------------------------
+
+The Tuned icon and header (banner) were created by Mariia Leonova
+<mleonova@redhat.com>.
+
+There are other contributors. In case you want to contact individual
+contributor, you will find the e-mail address in every commit message in
+the gh-pages branch of our Git repository:
+https://github.com/redhat-performance/tuned.git
