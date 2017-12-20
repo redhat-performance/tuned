@@ -5,6 +5,9 @@ BUILD = release
 MOCK_CONFIG = rhel-7-x86_64
 # scratch-build for triggering Jenkins
 SCRATCH_BUILD_TARGET = rhel-7.5-candidate
+KVM_UNIT_TESTS_SNAP = 20171020
+KVM_UNIT_TESTS = kvm-unit-tests-$(KVM_UNIT_TESTS_SNAP).tar.gz
+KVM_UNIT_TESTS_URL = https://git.kernel.org/pub/scm/virt/kvm/kvm-unit-tests.git/snapshot/$(KVM_UNIT_TESTS)
 VERSION = $(shell awk '/^Version:/ {print $$2}' tuned.spec)
 GIT_DATE = $(shell date +'%Y%m%d')
 ifeq ($(BUILD), release)
@@ -56,7 +59,10 @@ archive: clean release-cp
 rpm-build-dir:
 	mkdir rpm-build-dir
 
-srpm: archive rpm-build-dir
+$(KVM_UNIT_TESTS):
+	wget '$(KVM_UNIT_TESTS_URL)'
+
+srpm: $(KVM_UNIT_TESTS) archive rpm-build-dir
 	rpmbuild --define "_sourcedir `pwd`/rpm-build-dir" --define "_srcrpmdir `pwd`/rpm-build-dir" \
 		--define "_specdir `pwd`/rpm-build-dir" --nodeps $(RPM_ARGS) -ts $(VERSIONED_NAME).tar.gz
 
