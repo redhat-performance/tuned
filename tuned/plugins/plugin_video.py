@@ -1,5 +1,5 @@
-import base
-from decorators import *
+from . import base
+from .decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
 import os
@@ -24,7 +24,7 @@ class VideoPlugin(base.Plugin):
 		self._cmd = commands()
 
 	def _get_device_objects(self, devices):
-		return map(lambda x: self._hardware_inventory.get_device("drm", x), devices)
+		return [self._hardware_inventory.get_device("drm", x) for x in devices]
 
 	@classmethod
 	def _get_config_options(self):

@@ -1,6 +1,6 @@
 import errno
-import hotplug
-from decorators import *
+from . import hotplug
+from .decorators import *
 import tuned.logs
 import tuned.consts as consts
 from tuned.utils.commands import commands
@@ -29,7 +29,7 @@ class SCSIHostPlugin(hotplug.Plugin):
 		self._assigned_devices = set()
 
 	def _get_device_objects(self, devices):
-		return map(lambda x: self._hardware_inventory.get_device("scsi", x), devices)
+		return [self._hardware_inventory.get_device("scsi", x) for x in devices]
 
 	@classmethod
 	def _device_is_supported(cls, device):

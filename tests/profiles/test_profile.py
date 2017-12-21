@@ -20,7 +20,7 @@ class ProfileTestCase(unittest.TestCase):
 
 		self.assertIs(type(profile.units), collections.OrderedDict)
 		self.assertEqual(len(profile.units), 2)
-		self.assertListEqual(sorted(map(lambda (name, config): name, profile.units)), sorted(["network", "storage"]))
+		self.assertListEqual(sorted([name_config[0] for name_config in profile.units]), sorted(["network", "storage"]))
 
 	def test_create_units_empty(self):
 		profile = MockProfile("test", {"main":{}})
@@ -47,7 +47,7 @@ class ProfileTestCase(unittest.TestCase):
 		})
 
 		self.assertIs(type(profile.options), dict)
-		self.assertEquals(profile.options["anything"], 10)
+		self.assertEqual(profile.options["anything"], 10)
 
 	def test_sets_options_empty(self):
 		profile = MockProfile("test", {
@@ -55,4 +55,4 @@ class ProfileTestCase(unittest.TestCase):
 		})
 
 		self.assertIs(type(profile.options), dict)
-		self.assertEquals(len(profile.options), 0)
+		self.assertEqual(len(profile.options), 0)

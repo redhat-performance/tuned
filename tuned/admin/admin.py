@@ -1,8 +1,9 @@
+
 from __future__ import print_function
 import tuned.admin
 from tuned.utils.commands import commands
 from tuned.profiles import Locator as profiles_locator
-from exceptions import TunedAdminDBusException
+from .exceptions import TunedAdminDBusException
 from tuned.exceptions import TunedException
 import tuned.consts as consts
 import os
@@ -94,7 +95,7 @@ class Admin(object):
 			profile_names = self._controller.profiles2()
 		except TunedAdminDBusException as e:
 			# fallback to older API
-			profile_names = map(lambda profile:(profile, ""), self._controller.profiles())
+			profile_names = [(profile, "") for profile in self._controller.profiles()]
 		self._print_profiles(profile_names)
 		self._action_dbus_active()
 		return self._controller.exit(True)

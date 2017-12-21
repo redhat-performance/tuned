@@ -1,6 +1,6 @@
 import errno
-import hotplug
-from decorators import *
+from . import hotplug
+from .decorators import *
 import tuned.logs
 import tuned.consts as consts
 from tuned.utils.commands import commands
@@ -34,7 +34,7 @@ class DiskPlugin(hotplug.Plugin):
 		self._assigned_devices = set()
 
 	def _get_device_objects(self, devices):
-		return map(lambda x: self._hardware_inventory.get_device("block", x), devices)
+		return [self._hardware_inventory.get_device("block", x) for x in devices]
 
 	@classmethod
 	def _device_is_supported(cls, device):
@@ -196,12 +196,12 @@ class DiskPlugin(hotplug.Plugin):
 		instance._stats[device]["new"] = new_load
 
 		# load difference
-		diff = map(lambda (new, old): new - old, zip(new_load, old_load))
+		diff = [new_old[0] - new_old[1] for new_old in zip(new_load, old_load)]
 		instance._stats[device]["diff"] = diff
 
 		# adapt maximum expected load if the difference is higer
 		old_max_load = instance._stats[device]["max"]
-		max_load = map(lambda pair: max(pair), zip(old_max_load, diff))
+		max_load = [max(pair) for pair in zip(old_max_load, diff)]
 		instance._stats[device]["max"] = max_load
 
 		# read/write ratio

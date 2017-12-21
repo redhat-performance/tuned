@@ -69,7 +69,7 @@ class LoaderTestCase(unittest.TestCase):
 		profile = self.loader.load("default")
 		self.assertIn("main", profile.test_config)
 		self.assertIn("disk", profile.test_config)
-		self.assertEquals(profile.test_config["network"]["devices"], "em*")
+		self.assertEqual(profile.test_config["network"]["devices"], "em*")
 
 	def test_load_empty(self):
 		profile = self.loader.load("empty")
@@ -85,7 +85,7 @@ class LoaderTestCase(unittest.TestCase):
 
 	def test_load_order(self):
 		profile = self.loader.load("custom")
-		self.assertEquals(profile.test_config["custom"]["type"], "two")
+		self.assertEqual(profile.test_config["custom"]["type"], "two")
 
 	def test_default_load(self):
 		profile = self.loader.load("empty")

@@ -1,4 +1,4 @@
-from instance import Instance
+from .instance import Instance
 
 class Factory(object):
 	def create(self, *args, **kwargs):

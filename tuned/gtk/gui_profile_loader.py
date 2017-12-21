@@ -109,7 +109,7 @@ class GuiProfileLoader(object):
             # profile dont have main section
 
             pass
-        for (name, unit) in profile.units.items():
+        for (name, unit) in list(profile.units.items()):
             config[name] = unit.options
         if not os.path.exists(path):
             os.makedirs(path)
@@ -150,7 +150,7 @@ class GuiProfileLoader(object):
             # profile dont have main section
 
             pass
-        for (name, unit) in profile.units.items():
+        for (name, unit) in list(profile.units.items()):
             config[name] = unit.options
 
         if not os.path.exists(path):
@@ -159,7 +159,7 @@ class GuiProfileLoader(object):
         self._refresh_profiles()
 
     def get_names(self):
-        return self.profiles.keys()
+        return list(self.profiles.keys())
 
     def get_profile(self, profile):
         return self.profiles[profile]

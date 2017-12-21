@@ -1,4 +1,4 @@
-import device_matcher
+from . import device_matcher
 import re
 
 __all__ = ["DeviceMatcherUdev"]
@@ -12,7 +12,7 @@ class DeviceMatcherUdev(device_matcher.DeviceMatcher):
 		"""
 
 		properties = ''
-		for key, val in device.items():
+		for key, val in list(device.items()):
 			properties += key + '=' + val + '\n'
 
 		return re.search(regex, properties, re.MULTILINE) is not None

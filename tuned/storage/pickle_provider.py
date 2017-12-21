@@ -1,4 +1,4 @@
-import interfaces
+from . import interfaces
 import tuned.logs
 import pickle
 import os

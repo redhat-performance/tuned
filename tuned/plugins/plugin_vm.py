@@ -1,5 +1,5 @@
-import base
-from decorators import *
+from . import base
+from .decorators import *
 import tuned.logs
 
 import os

@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+from __future__ import print_function
 import argparse
 import os
 import sys
@@ -31,7 +32,7 @@ import tuned.version as ver
 from tuned.utils.global_config import GlobalConfig
 
 def error(message):
-	print >>sys.stderr, message
+	print(message, file=sys.stderr)
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description = "Daemon for monitoring and adaptive tuning of system devices.")

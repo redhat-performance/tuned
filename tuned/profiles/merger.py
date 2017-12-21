@@ -1,4 +1,5 @@
 import collections
+from functools import reduce
 
 class Merger(object):
 	"""
@@ -25,7 +26,7 @@ class Merger(object):
 
 		profile_a.options.update(profile_b.options)
 
-		for unit_name, unit in profile_b.units.items():
+		for unit_name, unit in list(profile_b.units.items()):
 			if unit.replace or unit_name not in profile_a.units:
 				profile_a.units[unit_name] = unit
 			else:

@@ -39,7 +39,7 @@ class Loader(object):
 		if type(profile_names) is not list:
 			profile_names = profile_names.split()
 
-		profile_names = filter(self.safe_name, profile_names)
+		profile_names = list(filter(self.safe_name, profile_names))
 		if len(profile_names) == 0:
 			raise InvalidProfileException("No profile or invalid profiles were specified.")
 
@@ -93,10 +93,10 @@ class Loader(object):
 			raise InvalidProfileException("Cannot parse '%s'." % file_name, e)
 
 		config = collections.OrderedDict()
-		for section in config_obj.keys():
+		for section in list(config_obj.keys()):
 			config[section] = collections.OrderedDict()
 			try:
-				keys = config_obj[section].keys()
+				keys = list(config_obj[section].keys())
 			except AttributeError:
 				raise InvalidProfileException("Error parsing section '%s' in file '%s'." % (section, file_name))
 			for option in keys:

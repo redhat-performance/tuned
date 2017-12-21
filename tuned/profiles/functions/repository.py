@@ -1,5 +1,5 @@
 from tuned.utils.plugin_loader import PluginLoader
-import base
+from . import base
 import tuned.logs
 import tuned.consts as consts
 from tuned.utils.commands import commands
@@ -38,6 +38,6 @@ class Repository(PluginLoader):
 	def delete(self, function):
 		assert isinstance(function, self._interface)
 		log.debug("removing function %s" % function)
-		for k, v in self._functions.items():
+		for k, v in list(self._functions.items()):
 			if v == function:
 				del self._functions[k]

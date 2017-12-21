@@ -1,5 +1,5 @@
 import tuned.consts as consts
-import base
+from . import base
 import tuned.logs
 import os
 from subprocess import Popen, PIPE
@@ -35,7 +35,7 @@ class ScriptPlugin(base.Plugin):
 			environ = os.environ
 			environ.update(self._variables.get_env())
 			log.info("calling script '%s' with arguments '%s'" % (script, str(arguments)))
-			log.debug("using environment '%s'" % str(environ.items()))
+			log.debug("using environment '%s'" % str(list(environ.items())))
 			try:
 				proc = Popen([script] +  arguments, stdout=PIPE, stderr=PIPE, close_fds=True, env=environ, \
 					cwd = os.path.dirname(script))

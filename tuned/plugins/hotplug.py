@@ -1,4 +1,4 @@
-import base
+from . import base
 import tuned.consts as consts
 import tuned.logs
 
@@ -36,7 +36,7 @@ class Plugin(base.Plugin):
 		if device_name in (self._assigned_devices | self._free_devices):
 			return
 
-		for instance_name, instance in self._instances.items():
+		for instance_name, instance in list(self._instances.items()):
 			if len(self._get_matching_devices(instance, [device_name])) == 1:
 				log.info("instance %s: adding new device %s" % (instance_name, device_name))
 				self._assigned_devices.add(device_name)
@@ -54,7 +54,7 @@ class Plugin(base.Plugin):
 		if device_name not in (self._assigned_devices | self._free_devices):
 			return
 
-		for instance in self._instances.values():
+		for instance in list(self._instances.values()):
 			if device_name in instance.devices:
 				self._call_device_script(instance, instance.script_post, "unapply", [device_name])
 				self._removed_device_unapply_tuning(instance, device_name)

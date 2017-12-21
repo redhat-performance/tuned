@@ -1,4 +1,4 @@
-import interfaces
+from . import interfaces
 import inspect
 import tuned.patterns
 

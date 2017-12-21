@@ -1,6 +1,6 @@
-import interfaces
-import controller
-import dbus_exporter as dbus
+from . import interfaces
+from . import controller
+from . import dbus_exporter as dbus
 
 def export(*args, **kwargs):
 	"""Decorator, use to mark exportable methods."""

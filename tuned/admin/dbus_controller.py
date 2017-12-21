@@ -3,7 +3,7 @@ import dbus.exceptions
 import time
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib, GObject
-from exceptions import TunedAdminDBusException
+from .exceptions import TunedAdminDBusException
 
 __all__ = ["DBusController"]
 

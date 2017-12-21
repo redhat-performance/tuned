@@ -24,6 +24,7 @@ Created on Oct 15, 2013
 
 @author: mstana
 '''
+from __future__ import print_function
 try:
     import gi
 except ImportError:
@@ -92,7 +93,7 @@ class Base(object):
 				tuned.admin.DBusController(consts.DBUS_BUS,
 					consts.DBUS_INTERFACE, consts.DBUS_OBJECT)
 			self.controller.is_running()
-		except tuned.admin.exceptions.TunedAdminDBusException, ex:
+		except tuned.admin.exceptions.TunedAdminDBusException as ex:
 			response = self.tuned_daemon_exception_dialog.run()
 			if response == 0:
 
@@ -120,7 +121,7 @@ class Base(object):
 		try:
 			self.builder.add_from_file(GLADEUI)
 		except GObject.GError as e:
-			print >> sys.stderr, "Error loading '%s'" % GLADEUI
+			print("Error loading '%s'" % GLADEUI, file=sys.stderr)
 			sys.exit(1)
 		#
 		#	DIALOGS
@@ -535,7 +536,7 @@ class Base(object):
 					)
 			return
 		options = '\n'.join('%s = %r' % (key, val) for (key, val) in
-							plugin._get_config_options().iteritems())
+							plugin._get_config_options().items())
 
 		self.textview_plugin_avaible_text.get_buffer().set_text(options)
 		self.textview_plugin_documentation_text.get_buffer().set_text(plugin.__doc__)
@@ -570,7 +571,7 @@ class Base(object):
 				if item[0] == profile:
 					iter = self.treestore_profiles.get_iter(item.path)
 					self.treestore_profiles.remove(iter)
-		except ManagerException, ex:
+		except ManagerException as ex:
 			self.error_dialog('Profile can not be remove', ex.__str__())
 
 	def execute_cancel_window_profile_editor(self, button):
@@ -767,7 +768,7 @@ class Base(object):
 
 			# load all values not just normal
 
-			for (name, unit) in profile.units.items():
+			for (name, unit) in list(profile.units.items()):
 				self.notebook_plugins.append_page_menu(self.treeview_for_data(unit.options),
 						Gtk.Label(unit.name), Gtk.Label(unit.name))
 			self.notebook_plugins.show_all()
@@ -783,7 +784,7 @@ class Base(object):
 		treestore = Gtk.ListStore(GObject.TYPE_STRING,
 								  GObject.TYPE_STRING)
 
-		for (option, value) in data.items():
+		for (option, value) in list(data.items()):
 			treestore.append([str(value), option])
 		treeview = Gtk.TreeView(treestore)
 		renderer = Gtk.CellRendererText()
@@ -1021,12 +1022,12 @@ if __name__ == '__main__':
 			# Explicitly disabling shell to be safe
 			ec = subprocess.call(['pkexec', EXECNAME] + sys.argv[1:], shell = False)
 		except (subprocess.CalledProcessError) as e:
-			print >> sys.stderr, 'Error elevating privileges: %s' % e
+			print('Error elevating privileges: %s' % e, file=sys.stderr)
 		else:
 			# If not pkexec error
 			if ec not in [126, 127]:
 				sys.exit(0)
 		# In case of error elevating privileges
-		print >> sys.stderr, 'Superuser permissions are required to run the daemon.'
+		print('Superuser permissions are required to run the daemon.', file=sys.stderr)
 		sys.exit(1)
 	base = Base()

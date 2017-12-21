@@ -45,19 +45,19 @@ class LocatorTestCase(unittest.TestCase):
 
 	def test_get_config(self):
 		config_name = self.locator.get_config("custom")
-		self.assertEquals(config_name, os.path.join(self._tmp_load_dirs[1], "custom", "tuned.conf"))
+		self.assertEqual(config_name, os.path.join(self._tmp_load_dirs[1], "custom", "tuned.conf"))
 
 	def test_get_config_priority(self):
 		customized = self.locator.get_config("balanced")
-		self.assertEquals(customized, os.path.join(self._tmp_load_dirs[1], "balanced", "tuned.conf"))
+		self.assertEqual(customized, os.path.join(self._tmp_load_dirs[1], "balanced", "tuned.conf"))
 		system = self.locator.get_config("balanced", [customized])
-		self.assertEquals(system, os.path.join(self._tmp_load_dirs[0], "balanced", "tuned.conf"))
+		self.assertEqual(system, os.path.join(self._tmp_load_dirs[0], "balanced", "tuned.conf"))
 		none = self.locator.get_config("balanced", [customized, system])
 		self.assertIsNone(none)
 
 	def test_ignore_nonexistent_dirs(self):
 		locator = Locator([self._tmp_load_dirs[0], "/tmp/some-dir-which-does-not-exist-for-sure"])
 		balanced = locator.get_config("balanced")
-		self.assertEquals(balanced, os.path.join(self._tmp_load_dirs[0], "balanced", "tuned.conf"))
+		self.assertEqual(balanced, os.path.join(self._tmp_load_dirs[0], "balanced", "tuned.conf"))
 		known = locator.get_known_names()
 		self.assertListEqual(known, ["balanced", "powersafe"])

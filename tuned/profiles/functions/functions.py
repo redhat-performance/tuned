@@ -1,7 +1,7 @@
 import os
 import re
 import glob
-import repository
+from . import repository
 import tuned.logs
 import tuned.consts as consts
 from tuned.utils.commands import commands
@@ -46,7 +46,7 @@ class Functions():
 		sl = re.split(r'(?<!\\):', self._str[_from:self._cnt])
 		if sl[0] != "${f":
 			return
-		sl = map(lambda v: str(v).replace("\:", ":"), sl)
+		sl = [str(v).replace("\:", ":") for v in sl]
 		if not re.match(r'\w+$', sl[1]):
 			log.error("invalid function name '%s'" % sl[1])
 			return

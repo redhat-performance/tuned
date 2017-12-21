@@ -1,6 +1,6 @@
 import tuned.consts as consts
-import base
-from decorators import *
+from . import base
+from .decorators import *
 from subprocess import Popen,PIPE
 import tuned.logs
 from tuned.utils.commands import commands
@@ -24,7 +24,7 @@ class MountsPlugin(base.Plugin):
 		current_disk = None
 
 		stdout, stderr = Popen(["lsblk", "-rno", "TYPE,RM,KNAME,FSTYPE,MOUNTPOINT"], stdout=PIPE, stderr=PIPE, close_fds=True).communicate()
-		for columns in map(lambda line: line.split(), stdout.splitlines()):
+		for columns in [line.split() for line in stdout.splitlines()]:
 			if len(columns) < 3:
 				continue
 			device_type, device_removable, device_name = columns[:3]

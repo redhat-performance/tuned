@@ -102,4 +102,4 @@ class Locator(object):
 		return sorted(self.list_profiles())
 
 	def get_known_names_summary(self):
-		return map(lambda profile: (profile, self.get_profile_attrs(profile, [consts.PROFILE_ATTR_SUMMARY], [""])[2]), sorted(self.list_profiles()))
+		return [(profile, self.get_profile_attrs(profile, [consts.PROFILE_ATTR_SUMMARY], [""])[2]) for profile in sorted(self.list_profiles())]

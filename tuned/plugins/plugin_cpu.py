@@ -1,5 +1,5 @@
-import base
-from decorators import *
+from . import base
+from .decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
 import tuned.consts as consts
@@ -41,7 +41,7 @@ class CPULatencyPlugin(base.Plugin):
 		self._assigned_devices = set()
 
 	def _get_device_objects(self, devices):
-		return map(lambda x: self._hardware_inventory.get_device("cpu", x), devices)
+		return [self._hardware_inventory.get_device("cpu", x) for x in devices]
 
 	@classmethod
 	def _get_config_options(self):
@@ -95,7 +95,7 @@ class CPULatencyPlugin(base.Plugin):
 		instance._has_dynamic_tuning = False
 
 		# only the first instance of the plugin can control the latency
-		if self._instances.values()[0] == instance:
+		if list(self._instances.values())[0] == instance:
 			instance._first_instance = True
 			try:
 				self._cpu_latency_fd = os.open(consts.PATH_CPU_DMA_LATENCY, os.O_WRONLY)
@@ -236,7 +236,7 @@ class CPULatencyPlugin(base.Plugin):
 		if governor is None:
 			log.debug("ignoring sampling_down_factor setting for CPU '%s', cannot match governor" % device)
 			return None
-		if governor not in self._governors_map.values():
+		if governor not in list(self._governors_map.values()):
 			self._governors_map[device] = governor
 			path = self._sampling_down_factor_path(governor)
 			if not os.path.exists(path):

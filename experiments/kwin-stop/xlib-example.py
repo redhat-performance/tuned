@@ -1,4 +1,6 @@
 #!/usr/bin/python -Es
+
+from __future__ import print_function
 import os
 import Xlib
 
@@ -38,8 +40,8 @@ def loop():
 							else:
 								if not win in showed:
 									showed.append(win)
-				print "Showed:", showed
-				print "Minimized:", hidden
+				print("Showed:", showed)
+				print("Minimized:", hidden)
 
 if __name__ == '__main__':
 	loop()

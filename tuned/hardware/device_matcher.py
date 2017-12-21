@@ -19,10 +19,10 @@ class DeviceMatcher(object):
 		which matches all devices is added. The device matches if and only
 		if it matches some positive rule, but no negative rule.
 		"""
-		if isinstance(rules, basestring):
+		if isinstance(rules, str):
 			rules = re.split(r"\s|,\s*", rules)
 
-		positive_rules = filter(lambda rule: not rule.startswith("!") and not rule.strip() == '', rules)
+		positive_rules = [rule for rule in rules if not rule.startswith("!") and not rule.strip() == '']
 		negative_rules = [rule[1:] for rule in rules if rule not in positive_rules]
 
 		if len(positive_rules) == 0:

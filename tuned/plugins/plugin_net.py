@@ -1,5 +1,5 @@
-import base
-from decorators import *
+from . import base
+from .decorators import *
 import tuned.logs
 from tuned.utils.nettool import ethcard
 from tuned.utils.commands import commands
@@ -34,7 +34,7 @@ class NetTuningPlugin(base.Plugin):
 		log.debug("devices: %s" % str(self._free_devices));
 
 	def _get_device_objects(self, devices):
-		return map(lambda x: self._hardware_inventory.get_device("net", x), devices)
+		return [self._hardware_inventory.get_device("net", x) for x in devices]
 
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
@@ -58,7 +58,7 @@ class NetTuningPlugin(base.Plugin):
 		self._instance_update_dynamic(instance, device)
 
 	def _instance_update_dynamic(self, instance, device):
-		load = map(lambda value: int(value), instance._load_monitor.get_device_load(device))
+		load = [int(value) for value in instance._load_monitor.get_device_load(device)]
 		if load is None:
 			return
 
@@ -145,12 +145,12 @@ class NetTuningPlugin(base.Plugin):
 		instance._stats[device]["new"] = new_load
 
 		# load difference
-		diff = map(lambda (new, old): new - old, zip(new_load, old_load))
+		diff = [new_old[0] - new_old[1] for new_old in zip(new_load, old_load)]
 		instance._stats[device]["diff"] = diff
 
 		# adapt maximum expected load if the difference is higer
 		old_max_load = instance._stats[device]["max"]
-		max_load = map(lambda pair: max(pair), zip(old_max_load, diff))
+		max_load = [max(pair) for pair in zip(old_max_load, diff)]
 		instance._stats[device]["max"] = max_load
 
 		# read/write ratio
@@ -190,7 +190,7 @@ class NetTuningPlugin(base.Plugin):
 		if lv == 0:
 			return dict()
 		# convert flat list to dict
-		return dict(zip(v[::2], v[1::2]))
+		return dict(list(zip(v[::2], v[1::2])))
 
 	# parse features/coalesce device parameters (those returned by ethtool)
 	def _parse_device_parameters(self, value):
@@ -206,13 +206,12 @@ class NetTuningPlugin(base.Plugin):
 		"tx-frame-high:": "tx-frames-high:",
 		"large-receive-offload:": "lro:"}, value)
 		# remove empty lines, remove fixed parameters (those with "[fixed]")
-		vl = filter(lambda v: len(str(v)) > 0 and not re.search("\[fixed\]$", str(v)), value.split('\n'))
+		vl = [v for v in value.split('\n') if len(str(v)) > 0 and not re.search("\[fixed\]$", str(v))]
 		if len(vl) < 2:
 			return None
 		# skip first line (device name), split to key/value,
 		# remove pairs which are not key/value
-		return dict(filter(lambda u: len(u) == 2, \
-		map(lambda v: re.split(r":\s*", str(v)), vl[1:])))
+		return dict([u for u in [re.split(r":\s*", str(v)) for v in vl[1:]] if len(u) == 2])
 
 	@classmethod
 	def _nf_conntrack_hashsize_path(self):
@@ -285,8 +284,8 @@ class NetTuningPlugin(base.Plugin):
 				"RX": "rx",
 				"TX": "tx"}, s)
 		l = s.split("\n")[1:]
-		l = filter(lambda x: x != '' and not re.search(r"\[fixed\]", x), l)
-		return dict(filter(lambda x: len(x) == 2, map(lambda x: re.split(r":\s*", x), l)))
+		l = [x for x in l if x != '' and not re.search(r"\[fixed\]", x)]
+		return dict([x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2])
 
 	# parse output of ethtool -g
 	def _parse_ring_parameters(self, s):
@@ -298,8 +297,8 @@ class NetTuningPlugin(base.Plugin):
 				"RX Jumbo": "rx-jumbo",
 				"TX": "tx"}, s)
 		l = s.split("\n")
-		l = filter(lambda x: x != '', l)
-		l = filter(lambda x: len(x) == 2, map(lambda x: re.split(r":\s*", x), l))
+		l = [x for x in l if x != '']
+		l = [x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2]
 		return dict(l)
 
 	def _get_device_parameters(self, context, device):
@@ -338,10 +337,10 @@ class NetTuningPlugin(base.Plugin):
 			cd = self._get_device_parameters(context, device)
 			d = self._set_device_parameters(context, value, device, verify)
 			# backup only parameters which are changed
-			sd = dict(filter(lambda (k, v): k in d, cd.items()))
+			sd = dict([k_v for k_v in list(cd.items()) if k_v[0] in d])
 			if len(d) != len(sd):
 				log.error("unable to save previous %s, wanted to save: '%s', but read: '%s'" % \
-				(context, str(d.keys()), str(cd.items())))
+				(context, str(list(d.keys())), str(list(cd.items()))))
 				return False
 			if verify:
 				return self._cmd.dict2list(d) == self._cmd.dict2list(sd)

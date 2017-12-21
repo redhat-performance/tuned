@@ -1,5 +1,5 @@
-import interfaces
-import storage
+from . import interfaces
+from . import storage
 
 class Factory(interfaces.Factory):
 	__slots__ = ["_storage_provider"]

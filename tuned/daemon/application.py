@@ -1,8 +1,8 @@
 from tuned import storage, units, monitors, plugins, profiles, exports, hardware
 from tuned.exceptions import TunedException
 import tuned.logs
-import controller
-import daemon
+from . import controller
+from . import daemon
 import signal
 import os
 import sys

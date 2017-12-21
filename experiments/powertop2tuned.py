@@ -19,6 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+from __future__ import print_function
+from builtins import chr
 import os
 import sys
 import tempfile
@@ -26,8 +28,13 @@ import shutil
 import argparse
 import codecs
 from subprocess import *
-from HTMLParser import HTMLParser
-from htmlentitydefs import name2codepoint
+try:
+	from html.parser import HTMLParser
+	from html.entities import name2codepoint
+except ImportError:
+	from HTMLParser import HTMLParser
+	from htmlentitydefs import name2codepoint
+
 
 SCRIPT_SH = """#!/bin/sh
 
@@ -141,7 +148,7 @@ class PowertopHTMLParser(HTMLParser):
 
 	def handle_entityref(self, name):
 		if self.inScript:
-			self.currentScript += unichr(name2codepoint[name])
+			self.currentScript += chr(name2codepoint[name])
 
 	def handle_data(self, data):
 		prefix = self.prefix
@@ -179,23 +186,23 @@ class PowertopProfile:
 	def checkPrivs(self):
 		myuid = os.geteuid()
 		if myuid != 0:
-			print >> sys.stderr, 'Run this program as root'
+			print('Run this program as root', file=sys.stderr)
 			return False
 		return True
 
 	def generateHTML(self):
-		print "Running PowerTOP, please wait..."
+		print("Running PowerTOP, please wait...")
 		environment = os.environ.copy()
 		environment["LC_ALL"] = "C"
 		try:
 			proc = Popen(["/usr/sbin/powertop", "--html=/tmp/powertop", "--time=1"], stdout=PIPE, stderr=PIPE, env=environment)
 			output = proc.communicate()[1]
 		except (OSError, IOError):
-			print >> sys.stderr, 'Unable to execute PowerTOP, is PowerTOP installed?'
+			print('Unable to execute PowerTOP, is PowerTOP installed?', file=sys.stderr)
 			return -2
 
 		if proc.returncode != 0:
-			print >> sys.stderr, 'PowerTOP returned error code: %d' % proc.returncode
+			print('PowerTOP returned error code: %d' % proc.returncode, file=sys.stderr)
 			return -2
 
 		prefix = "PowerTOP outputing using base filename "
@@ -226,31 +233,31 @@ class PowertopProfile:
 		return parser.getParsedData(), parser.getPlugins()
 
 	def generateShellScript(self, data):
-		print "Generating shell script", os.path.join(self.output, "script.sh")
+		print("Generating shell script", os.path.join(self.output, "script.sh"))
 		f = None
 		try:
 			f = codecs.open(os.path.join(self.output, "script.sh"), "w", "utf-8")
 			f.write(SCRIPT_SH % (data, ""))
-			os.fchmod(f.fileno(), 0755)
+			os.fchmod(f.fileno(), 0o755)
 			f.close()
 		except (OSError, IOError) as e:
-			print >> sys.stderr, "Error writing shell script: %s" % e
+			print("Error writing shell script: %s" % e, file=sys.stderr)
 			if f is not None:
 				f.close()
 			return False
 		return True
 
 	def generateTunedConf(self, profile, plugins):
-		print "Generating Tuned config file", os.path.join(self.output, "tuned.conf")
+		print("Generating Tuned config file", os.path.join(self.output, "tuned.conf"))
 		f = codecs.open(os.path.join(self.output, "tuned.conf"), "w", "utf-8")
 		f.write(TUNED_CONF_PROLOG)
 		if profile is not None:
 			if self.profile_name == profile:
-				print >> sys.stderr, 'New profile has same name as active profile, not including active profile (avoiding circular deps).'
+				print('New profile has same name as active profile, not including active profile (avoiding circular deps).', file=sys.stderr)
 			else:
 				f.write(TUNED_CONF_INCLUDE % ("include=" + profile))
 
-		for plugin in plugins.values():
+		for plugin in list(plugins.values()):
 			f.write(plugin + "\n")
 
 		f.write(TUNED_CONF_EPILOG)
@@ -274,7 +281,7 @@ class PowertopProfile:
 			os.unlink(self.name)
 
 		if len(data) == 0 and len(plugins) == 0:
-			print >> sys.stderr, 'Your Powertop version is incompatible (maybe too old) or the generated HTML output is malformed'
+			print('Your Powertop version is incompatible (maybe too old) or the generated HTML output is malformed', file=sys.stderr)
 			return self.PARSING_ERROR
 
 		if new_profile is False:
@@ -297,9 +304,9 @@ class PowertopProfile:
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Creates Tuned profile from Powertop HTML output.')
-	parser.add_argument('profile', metavar='profile_name', type=unicode, nargs='?', help='Name for the profile to be written.')
-	parser.add_argument('-i', '--input', metavar='input_html', type=unicode, help='Path to Powertop HTML report. If not given, it is generated automatically.')
-	parser.add_argument('-o', '--output', metavar='output_directory', type=unicode, help='Directory where the profile will be written, default is /etc/tuned/profile_name directory.')
+	parser.add_argument('profile', metavar='profile_name', type=str, nargs='?', help='Name for the profile to be written.')
+	parser.add_argument('-i', '--input', metavar='input_html', type=str, help='Path to Powertop HTML report. If not given, it is generated automatically.')
+	parser.add_argument('-o', '--output', metavar='output_directory', type=str, help='Directory where the profile will be written, default is /etc/tuned/profile_name directory.')
 	parser.add_argument('-n', '--new-profile', action='store_true', help='Creates new profile, otherwise it merges (include) your current profile.')
 	parser.add_argument('-m', '--merge-profile', action = 'store', help = 'Merges (includes) the specified profile (can be suppressed by -n option).')
 	parser.add_argument('-f', '--force', action='store_true', help='Overwrites the output directory if it already exists.')
@@ -308,7 +315,7 @@ if __name__ == "__main__":
 	args = vars(args)
 
 	if not args['profile'] and not args['output']:
-		print >> sys.stderr, 'You have to specify the profile_name or output directory using the --output argument.'
+		print('You have to specify the profile_name or output directory using the --output argument.', file=sys.stderr)
 		parser.print_help()
 		sys.exit(-1)
 
@@ -322,7 +329,7 @@ if __name__ == "__main__":
 		args['input'] = ''
 
 	if os.path.exists(args['output']) and not args['force']:
-		print >> sys.stderr, 'Output directory already exists, use --force to overwrite it.'
+		print('Output directory already exists, use --force to overwrite it.', file=sys.stderr)
 		sys.exit(-1)
 
 	p = PowertopProfile(args['output'], args['profile'], args['input'])

@@ -32,4 +32,4 @@ class DiskMonitor(tuned.monitors.Monitor):
 	@classmethod
 	def _update_disk(cls, dev):
 		with open("/sys/block/" + dev + "/stat") as statfile:
-			cls._load[dev] = map(int, statfile.read().split())
+			cls._load[dev] = list(map(int, statfile.read().split()))

@@ -1,2 +1,2 @@
-from instance import Instance
-from factory import Factory
+from .instance import Instance
+from .factory import Factory

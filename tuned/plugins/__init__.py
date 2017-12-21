@@ -1,2 +1,2 @@
-from repository import *
-import instance
+from .repository import *
+from . import instance

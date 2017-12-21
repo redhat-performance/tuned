@@ -19,6 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+from __future__ import print_function
 import argparse
 import sys
 import traceback
@@ -94,7 +95,7 @@ if __name__ == "__main__":
 		result = admin.action(action_name, **options)
 	except tuned.admin.TunedAdminException as e:
 		if not debug:
-			print >>sys.stderr, e
+			print(e, file=sys.stderr)
 		else:
 			traceback.print_exc()
 		sys.exit(2)

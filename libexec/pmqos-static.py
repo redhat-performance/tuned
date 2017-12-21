@@ -21,6 +21,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+from __future__ import print_function
 import os
 import signal
 import struct
@@ -47,7 +48,7 @@ def close_fds():
 	os.dup2(s_err.fileno(), sys.stderr.fileno())
 
 def write_pidfile():
-	f = os.open(PIDFILE, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0644)
+	f = os.open(PIDFILE, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o644)
 	os.write(f, "%d" % os.getpid())
 	os.close(f)
 
@@ -65,7 +66,7 @@ def set_pmqos(name, value):
 	try:
 		fd = os.open(filename, os.O_WRONLY)
 	except OSError:
-		print >>sys.stderr, "Cannot open (%s)." % filename
+		print("Cannot open (%s)." % filename, file=sys.stderr)
 		return None
 	os.write(fd, bin_value)
 	return fd
@@ -86,14 +87,14 @@ def run_daemon(options):
 		daemonize()
 		write_pidfile()
 		signal.signal(signal.SIGTERM, sigterm_handler)
-	except Exception, e:
-		print >>sys.stderr, "Cannot daemonize (%s)." % e
+	except Exception as e:
+		print("Cannot daemonize (%s)." % e, file=sys.stderr)
 		return False
 
 	global pmqos_fds
 	pmqos_fds = []
 
-	for (name, value) in options.items():
+	for (name, value) in list(options.items()):
 		try:
 			new_fd = set_pmqos(name, value)
 			if new_fd is not None:
@@ -111,20 +112,20 @@ def kill_daemon(force = False):
 	try:
 		with open(PIDFILE, "r") as pidfile:
 			daemon_pid = int(pidfile.read())
-	except IOError, e:
-		if not force: print >>sys.stderr, "Cannot open PID file (%s)." % e
+	except IOError as e:
+		if not force: print("Cannot open PID file (%s)." % e, file=sys.stderr)
 		return False
 
 	try:
 		os.kill(daemon_pid, signal.SIGTERM)
-	except OSError, e:
-		if not force: print >>sys.stderr, "Cannot terminate the daemon (%s)." % e
+	except OSError as e:
+		if not force: print("Cannot terminate the daemon (%s)." % e, file=sys.stderr)
 		return False
 
 	try:
 		os.unlink(PIDFILE)
-	except OSError, e:
-		if not force: print >>sys.stderr, "Cannot delete the PID file (%s)." % e
+	except OSError as e:
+		if not force: print("Cannot delete the PID file (%s)." % e, file=sys.stderr)
 		return False
 
 	return True
@@ -148,14 +149,14 @@ if __name__ == "__main__":
 		if name in ALLOWED_INTERFACES and len(value) > 0:
 			options[name] = value
 		else:
-			print >>sys.stderr, "Invalid option (%s)." % option
+			print("Invalid option (%s)." % option, file=sys.stderr)
 
 
 	if disable:
 		sys.exit(0 if kill_daemon() else 1)
 
 	if len(options) == 0:
-		print >>sys.stderr, "No options set. Not starting."
+		print("No options set. Not starting.", file=sys.stderr)
 		sys.exit(1)
 
 	kill_daemon(True)

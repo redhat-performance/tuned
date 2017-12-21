@@ -2,8 +2,8 @@
 # perf code was borrowed from kernel/tools/perf/python/twatch.py
 # thanks to Arnaldo Carvalho de Melo <acme@redhat.com>
 
-import base
-from decorators import *
+from . import base
+from .decorators import *
 import tuned.logs
 import re
 from subprocess import *
@@ -110,8 +110,7 @@ class SchedulerPlugin(base.Plugin):
 		(rc, out) = self._cmd.execute(["ps", "-eopid,cmd", "--no-headers"])
 		if rc != 0 or len(out) <= 0:
 			return None
-		return dict(map(lambda (pid, cmd): (int(pid.lstrip()), cmd.lstrip()),
-			filter(lambda i: len(i) == 2, map(lambda s: s.split(None, 1), out.split("\n")))))
+		return dict([(int(pid_cmd1[0].lstrip()), pid_cmd1[1].lstrip()) for pid_cmd1 in [i for i in [s.split(None, 1) for s in out.split("\n")] if len(i) == 2]])
 
 	def _parse_val(self, val):
 		v = val.split(":", 1)
@@ -246,9 +245,9 @@ class SchedulerPlugin(base.Plugin):
 		if ps is None:
 			log.error("error applying tuning, cannot get information about running processes")
 			return
-		instance._sched_cfg = map(lambda (option, value): (option, str(value).split(":", 4)), instance._scheduler.items())
-		buf = filter(lambda (option, vals): re.match(r"group\.", option) and len(vals) == 5, instance._sched_cfg)
-		instance._sched_cfg = sorted(buf, key=lambda (option, vals): vals[0])
+		instance._sched_cfg = [(option_value[0], str(option_value[1]).split(":", 4)) for option_value in list(instance._scheduler.items())]
+		buf = [option_vals3 for option_vals3 in instance._sched_cfg if re.match(r"group\.", option_vals3[0]) and len(option_vals3[1]) == 5]
+		instance._sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
 		sched_all = dict()
 		# for runtime tunning
 		instance._sched_lookup = {}
@@ -258,15 +257,15 @@ class SchedulerPlugin(base.Plugin):
 			except re.error as e:
 				log.error("error compiling regular expression: '%s'" % str(vals[4]))
 				continue
-			processes = filter(lambda (pid, cmd): re.search(r, cmd) is not None, ps.items())
+			processes = [pid_cmd2 for pid_cmd2 in list(ps.items()) if re.search(r, pid_cmd2[1]) is not None]
 			#cmd - process name, option - group name, vals[0] - rule prio, vals[1] - sched, vals[2] - prio,
 			#vals[3] - affinity, vals[4] - regex
-			sched = dict(map(lambda (pid, cmd): (pid, (cmd, option, vals[1], vals[2], vals[3], vals[4])), processes))
+			sched = dict([(pid_cmd[0], (pid_cmd[1], option, vals[1], vals[2], vals[3], vals[4])) for pid_cmd in processes])
 			sched_all.update(sched)
 			v4 = str(vals[4]).replace("(", r"\(")
 			v4 = v4.replace(")", r"\)")
 			instance._sched_lookup[v4] = [vals[1], vals[2], vals[3]]
-		for pid, vals in sched_all.items():
+		for pid, vals in list(sched_all.items()):
 			#vals[0] - process name, vals[1] - rule prio, vals[2] - sched, vals[3] - prio, vals[4] - affinity,
 			#vals[5] - regex
 			self._tune_process(instance, pid, vals[0], vals[2], vals[3], vals[4])
@@ -282,7 +281,7 @@ class SchedulerPlugin(base.Plugin):
 			instance._terminate.set()
 			instance._thread.join()
 
-		for pid, vals in instance._scheduler_original.items():
+		for pid, vals in list(instance._scheduler_original.items()):
 			# if command line for the pid didn't change, it's very probably the same process
 			try:
 				if ps[pid] == vals[0]:
@@ -335,7 +334,7 @@ class SchedulerPlugin(base.Plugin):
 		if verify:
 			return None
 		if enabling and value is not None:
-			self._ps_whitelist = "|".join(map(lambda v: "(%s)" % v, re.split(r"(?<!\\);", str(value))))
+			self._ps_whitelist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
 	@command_custom("ps_blacklist", per_device = False)
 	def _ps_blacklist(self, enabling, value, verify, ignore_missing):
@@ -343,7 +342,7 @@ class SchedulerPlugin(base.Plugin):
 		if verify:
 			return None
 		if enabling and value is not None:
-			self._ps_blacklist = "|".join(map(lambda v: "(%s)" % v, re.split(r"(?<!\\);", str(value))))
+			self._ps_blacklist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
 	# TODO: merge with _get_affinity
 	def _get_affinity2(self, pid):
@@ -391,8 +390,8 @@ class SchedulerPlugin(base.Plugin):
 				if not self._set_affinity2(obj, _affinity):
 					continue
 			# process threads
-			if not threads and objs[obj].has_key("threads"):
-				self._set_all_obj_affinity(dict(objs[obj]["threads"].items()), affinity, True, intersect)
+			if not threads and "threads" in objs[obj]:
+				self._set_all_obj_affinity(dict(list(objs[obj]["threads"].items())), affinity, True, intersect)
 
 	def _get_stat_comm(self, o):
 		try:
@@ -405,15 +404,15 @@ class SchedulerPlugin(base.Plugin):
 		affinity_hex = self._cmd.cpulist2hex(_affinity)
 		ps = procfs.pidstats()
 		ps.reload_threads()
-		psl = filter(lambda v: re.search(self._ps_whitelist, self._get_stat_comm(v)) is not None, ps.values())
+		psl = [v for v in list(ps.values()) if re.search(self._ps_whitelist, self._get_stat_comm(v)) is not None]
 		if self._ps_blacklist != "":
-			psl = filter(lambda v: re.search(self._ps_blacklist, self._get_stat_comm(v)) is None, psl)
-		psd = dict(map(lambda v: (v.pid, v), psl))
+			psl = [v for v in psl if re.search(self._ps_blacklist, self._get_stat_comm(v)) is None]
+		psd = dict([(v.pid, v) for v in psl])
 		self._set_all_obj_affinity(psd, affinity, False, intersect)
 
 		# process IRQs
 		irqs = procfs.interrupts()
-		for irq in irqs.keys():
+		for irq in list(irqs.keys()):
 			try:
 				prev_affinity = irqs[irq]["affinity"]
 			except KeyError:

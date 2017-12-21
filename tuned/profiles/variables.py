@@ -1,7 +1,7 @@
 import os
 import re
 import tuned.logs
-import functions.functions as functions
+from .functions import functions as functions
 import tuned.consts as consts
 from tuned.utils.commands import commands
 from configobj import ConfigObj, ConfigObjError

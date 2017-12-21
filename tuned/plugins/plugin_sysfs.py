@@ -1,8 +1,8 @@
-import base
+from . import base
 import glob
 import re
 import os.path
-from decorators import *
+from .decorators import *
 import tuned.logs
 from subprocess import *
 from tuned.utils.commands import commands
@@ -25,14 +25,14 @@ class SysfsPlugin(base.Plugin):
 		instance._has_dynamic_tuning = False
 		instance._has_static_tuning = True
 
-		instance._sysfs = dict(map(lambda (key, value): (os.path.normpath(key), value), instance.options.items()))
+		instance._sysfs = dict([(os.path.normpath(key_value[0]), key_value[1]) for key_value in list(instance.options.items())])
 		instance._sysfs_original = {}
 
 	def _instance_cleanup(self, instance):
 		pass
 
 	def _instance_apply_static(self, instance):
-		for key, value in instance._sysfs.items():
+		for key, value in list(instance._sysfs.items()):
 			v = self._variables.expand(value)
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
@@ -43,7 +43,7 @@ class SysfsPlugin(base.Plugin):
 
 	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
-		for key, value in instance._sysfs.items():
+		for key, value in list(instance._sysfs.items()):
 			v = self._variables.expand(value)
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
@@ -53,7 +53,7 @@ class SysfsPlugin(base.Plugin):
 		return ret
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
-		for key, value in instance._sysfs_original.items():
+		for key, value in list(instance._sysfs_original.items()):
 			self._write_sysfs(key, value)
 
 	def _check_sysfs(self, sysfs_file):

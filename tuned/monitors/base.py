@@ -99,19 +99,19 @@ class Monitor(object):
 		self._refresh_updating_devices()
 
 	def add_device(self, device):
-		assert isinstance(device, basestring)
+		assert isinstance(device, str)
 		if device in self._available_devices:
 			self._devices.add(device)
 			self._updating_devices.add(device)
 
 	def remove_device(self, device):
-		assert isinstance(device, basestring)
+		assert isinstance(device, str)
 		if device in self._devices:
 			self._devices.remove(device)
 			self._updating_devices.remove(device)
 
 	def get_load(self):
-		return dict(filter(lambda (dev, load): dev in self._devices, self._load.items()))
+		return dict([dev_load for dev_load in list(self._load.items()) if dev_load[0] in self._devices])
 
 	def get_device_load(self, device):
 		return self._load.get(device, None)

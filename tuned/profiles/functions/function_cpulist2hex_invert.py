@@ -1,6 +1,6 @@
 import os
 import tuned.logs
-import base
+from . import base
 from tuned.utils.commands import commands
 
 log = tuned.logs.get()

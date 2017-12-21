@@ -31,7 +31,7 @@ class Manager(object):
 
 	def create(self, instances_config):
 		instance_info_list = []
-		for instance_name, instance_info in instances_config.items():
+		for instance_name, instance_info in list(instances_config.items()):
 			if not instance_info.enabled:
 				log.debug("skipping disabled instance '%s'" % instance_name)
 				continue
@@ -45,7 +45,7 @@ class Manager(object):
 			instance_info.options.pop("priority")
 			plugins_by_name[instance_info.type] = None
 
-		for plugin_name, none in plugins_by_name.items():
+		for plugin_name, none in list(plugins_by_name.items()):
 			try:
 				plugin = self._plugins_repository.create(plugin_name)
 				plugins_by_name[plugin_name] = plugin

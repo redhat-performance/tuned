@@ -1,4 +1,4 @@
-import interfaces
+from . import interfaces
 import decorator
 import dbus.service
 import dbus.mainloop.glib
@@ -87,7 +87,7 @@ class DBusExporter(interfaces.ExporterInterface):
 				args[-1] = ""
 			return method(*args, **kwargs)
 
-		wrapper = decorator.decorator(wrapper, method.im_func)
+		wrapper = decorator.decorator(wrapper, method.__func__)
 		wrapper = dbus.service.method(self._interface_name, in_signature, out_signature, sender_keyword = "caller")(wrapper)
 
 		self._dbus_methods[method_name] = wrapper
@@ -103,7 +103,7 @@ class DBusExporter(interfaces.ExporterInterface):
 		def wrapper(wrapped, owner, *args, **kwargs):
 			return method(*args, **kwargs)
 
-		wrapper = decorator.decorator(wrapper, method.im_func)
+		wrapper = decorator.decorator(wrapper, method.__func__)
 		wrapper = dbus.service.signal(self._interface_name, out_signature)(wrapper)
 
 		self._dbus_methods[method_name] = wrapper

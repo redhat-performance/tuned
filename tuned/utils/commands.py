@@ -62,7 +62,7 @@ class commands:
 	def re_lookup_compile(self, d):
 		if d is None:
 			return None
-		return re.compile("(%s)" % ")|(".join(d.keys()))
+		return re.compile("(%s)" % ")|(".join(list(d.keys())))
 
 	# Do multiple regex replaces in 's' according to lookup table described by
 	# dictionary 'd', e.g.: d = {"re1": "replace1", "re2": "replace2", ...}
@@ -76,7 +76,7 @@ class commands:
 				return s
 		if r is None:
 			r = self.re_lookup_compile(d)
-		return r.sub(lambda mo: d.values()[mo.lastindex - 1], s, flags)
+		return r.sub(lambda mo: list(d.values())[mo.lastindex - 1], s, flags)
 
 	# Do regex lookup on 's' according to lookup table described by
 	# dictionary 'd' and return corresponding value from the dictionary,
@@ -89,7 +89,7 @@ class commands:
 			r = self.re_lookup_compile(d)
 		mo = r.search(s)
 		if mo:
-			return d.values()[mo.lastindex - 1]
+			return list(d.values())[mo.lastindex - 1]
 		return None
 
 	def write_to_file(self, f, data, makedir = False, no_error = False):
@@ -315,7 +315,7 @@ class commands:
 			else:
 				try:
 					if len(vl) > 1:
-						rl += range(int(vl[0]), int(vl[1]) + 1)
+						rl += list(range(int(vl[0]), int(vl[1]) + 1))
 					else:
 						rl.append(int(vl[0]))
 				except ValueError:
@@ -381,9 +381,9 @@ class commands:
 			if not os.path.isfile(fname):
 				return None
 			config = ConfigObj(fname, list_values = False, interpolation = False)
-			for section in config.keys():
+			for section in list(config.keys()):
 				match = True
-				for option in config[section].keys():
+				for option in list(config[section].keys()):
 					value = config[section][option]
 					if value == "":
 						value = r"^$"

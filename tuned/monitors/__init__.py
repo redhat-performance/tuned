@@ -1,2 +1,2 @@
-from base import *
-from repository import *
+from .base import *
+from .repository import *
