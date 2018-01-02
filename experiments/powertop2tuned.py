@@ -20,7 +20,11 @@
 #
 
 from __future__ import print_function
-from builtins import chr
+# exception handler for python 2/3 compatibility
+try:
+	from builtins import chr
+except ImportError:
+	pass
 import os
 import sys
 import tempfile
@@ -28,6 +32,7 @@ import shutil
 import argparse
 import codecs
 from subprocess import *
+# exception handler for python 2/3 compatibility
 try:
 	from html.parser import HTMLParser
 	from html.entities import name2codepoint
