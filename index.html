@@ -4,44 +4,82 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="generator" content="vi and me :)" />
 <meta http-equiv="X-UA-Compatible" content="IE=9999" />
+<link rel="stylesheet" type="text/css" href="style.css">
 <title>Tuned project</title>
 </head>
 <body>
-<p>
 <map id="download">
   <area shape="rect" coords="754,90,1032,149" href="https://github.com/redhat-performance/tuned/releases" alt="Download" />
 </map>
-<img alt="Tuned header" src="header1.png" usemap="#download" /></p>
+<img alt="Tuned header" src="header1.png" usemap="#download" />
 
 <h1>Introduction</h1>
-<p>Tuned is a daemon that uses udev to monitor connected devices and tunes system settings
-according to a selected profile. It has plugin architecture to support various types of
-configuration like sysctl, sysfs, kernel boot command line parameters, etc. All configuration
-is stored in one place - in the so called Tuned profile. So instead of having configuration on multiple
-places and in custom scripts it can be cleanly handled by Tuned profiles. Tuned profiles can be
-defined hiearchicaly which can reduce duplication and simplify maintenance, i.e. more specialized
-profiles can inherit generic profiles and just change what's needed instead of duplicating the code.
-For example you can built generic profile for HTTP server upon throughput-performance profile and later
-create two more specialized profiles for Apache server and Nginx server both profiles based on the generic
-HTTP server profile.</p>
+<p>Tuned is a system tuning service for Linux. It:</p>
 
-<p>When applying the profile full rollback is supported, i.e. the system can be easily returned to the
-state before the profile was applied. This can be handy for testing, benchmarking, experimenting, etc.
-For example you can setup cron to have different profile applied during business hours and different
-during night. Tuned supports hot plugging of devices and it can be controlled from the command line or
-through the D-Bus, so it can be easily integrated into existing administering solutions. For example
-at the moment it can be used with Cockpit.</p>
+<ul>
+    <li>
+        monitors connected devices using the <code>udev</code> device manager
+    </li>
+    <li>
+        tunes system settings according to a selected profile
+    </li>
+    <li>
+        supports various types of configuration like sysctl, sysfs, 
+        or kernel boot command line parameters, which are integrated 
+        in a plug-in architecture
+    </li>
+    <li>
+        supports hot plugging of devices and can be controlled from
+        the command line or through D-Bus, so it can be easily integrated
+        into existing administering solutions: for example, with Cockpit
+    </li>
+    <li>
+        can be run in no-daemon mode with limited functionality (e.g. no
+        support for D-Bus, <code>udev</code>, tuning of newly created
+        processes, and so on) for systems with reduced resources
+    </li>
+    <li>
+        stores all its configuration cleanly in one place, in the 
+        Tuned profile, instead of having configuration on multiple places 
+        and in custom scripts
+    </li>
+</ul>
 
-<p>Tuned is distributed with a number of predefined profiles for common use cases like high
-throughput, low latency, or powersave. Profiles optimizing performance for various products
-like SAP, dBase servers, etc. are also provided and it's possible to customize them. For systems with
-reduced resources Tuned can be run in no-daemon mode with limited functionality (e.g. no support
-for D-Bus, udev, tuning of newly created processes, etc.).</p>
+<p>Tuned profiles:</p>
+<ul>
+    <li>
+        <p>can be defined hiearchicaly, which reduces duplication 
+        and simplifies maintenance:</p>
+        <p>More specialized profiles can inherit generic profiles and just
+        change what's needed instead of duplicating the code.
+        For example, you can built a generic profile for HTTP server upon
+        the throughput-performance profile and later create two more 
+        specialized profiles for the Apache server and the Nginx server, 
+        basing both profiles on the generic HTTP server profile.
+        </p>
+    </li>
+    <li>
+        <p>support full rollback:</p>
+        <p>The system can be easily returned to the
+        state before the profile was applied. This can be handy for testing,
+        benchmarking, experimenting, and so on.
+        For example, you can set up a <code>cron</code> rule 
+        to apply a certain profile during business hours and 
+        a different one at night. </p>
+    </li>
+    <li>
+        <p>include a number of predefined profiles for common use cases:</p>
+        <p>For example, presets for high throughput, low latency, or powersave
+        are distributed. Profiles optimizing performance for various products
+        like SAP, dBase servers, and so on are also provided, and it's possible
+        to fully customize them.</p>
+    </li>
+</ul>
 
 <h1>Documentation</h1>
 <p>Some documentation is available in the
 <a href="https://docs-old.fedoraproject.org/en-US/Fedora/20/html/Power_Management_Guide/tuned.html">Fedora Power Management Guide</a>,
-but it's incomplete and may not be up-to-date. New documentation is worked on.</p>
+but it's incomplete and may not be up-to-date. New documentation is being worked on.</p>
 
 <h1>Download</h1>
 <p>Releases are available for download from the
@@ -53,14 +91,14 @@ but it's incomplete and may not be up-to-date. New documentation is worked on.</
 
 <h1>Development</h1>
 <p>All development happens on the <a href="https://github.com/redhat-performance/tuned">GitHub project page</a>.</p>
-<p>If you want to contribute, the best way is to create pull request through the GitHub.
-If you are not familiar with the GitHub, you can also send patches / ideas to:
-<a href="mailto:power-management@lists.fedoraproject.org">power-management AT lists.fedoraproject.org</a> or to
+<p>If you want to contribute, the best way is to create a pull request through GitHub.
+If you are not familiar with GitHub, you can also send patches and ideas to the
+<a href="mailto:power-management@lists.fedoraproject.org">power-management AT lists.fedoraproject.org</a> e-mail address or to
 individual authors from the git log who worked on the last release.</p>
 
 <h1>License</h1>
-<p>GNU General Public License version 2 or later
-(<a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">https://www.gnu.org/licenses/old-licenses/gpl-2.0.html</a>).</p>
+<p>Tuned is distributed under the GNU General Public License version 2 or later:
+<a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">https://www.gnu.org/licenses/old-licenses/gpl-2.0.html</a>.</p>
 <p><img alt="Red Hat logo" src="RedHat_logo_110x70.png" /></p>
 
 </body>
