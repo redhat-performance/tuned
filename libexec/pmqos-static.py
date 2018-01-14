@@ -48,9 +48,8 @@ def close_fds():
 	os.dup2(s_err.fileno(), sys.stderr.fileno())
 
 def write_pidfile():
-	f = os.open(PIDFILE, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o644)
-	os.write(f, "%d" % os.getpid())
-	os.close(f)
+	with os.fdopen(os.open(PIDFILE, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o644), "w") as f:
+		f.write("%d" % os.getpid())
 
 def daemonize():
 	do_fork()

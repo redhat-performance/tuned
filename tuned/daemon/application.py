@@ -7,6 +7,7 @@ import signal
 import os
 import sys
 import select
+import struct
 import tuned.consts as consts
 from tuned.utils.global_config import GlobalConfig
 
@@ -89,7 +90,11 @@ class Application(object):
 		if len(response) == 0:
 			raise TunedException("Cannot daemonize, no response from child process received.")
 
-		if response != ("%c" % True):
+		try:
+			val = struct.unpack("?", response)[0]
+		except struct.error:
+			raise TunedException("Cannot daemonize, invalid response from child process received.")
+		if val != True:
 			raise TunedException("Cannot daemonize, child process reports failure.")
 
 	def write_pid_file(self, pid_file = consts.PID_FILE):
@@ -100,9 +105,8 @@ class Application(object):
 			if not os.path.exists(dir_name):
 				os.makedirs(dir_name)
 
-			fd = os.open(self._pid_file, os.O_CREAT|os.O_TRUNC|os.O_WRONLY , 0o644)
-			os.write(fd, "%d" % os.getpid())
-			os.close(fd)
+			with os.fdopen(os.open(self._pid_file, os.O_CREAT|os.O_TRUNC|os.O_WRONLY , 0o644), "w") as f:
+				f.write("%d" % os.getpid())
 		except (OSError,IOError) as error:
 			log.critical("cannot write the PID to %s: %s" % (self._pid_file, str(error)))
 
@@ -130,7 +134,8 @@ class Application(object):
 				sys.exit(0)
 		except OSError as error:
 			log.critical("cannot daemonize, fork() error: %s" % str(error))
-			os.write(child_out_fd, "%c" % False)
+			val = struct.pack("?", False)
+			os.write(child_out_fd, val)
 			os.close(child_out_fd)
 			raise TunedException("Cannot daemonize, second fork() failed.")
 
@@ -144,7 +149,8 @@ class Application(object):
 		self.write_pid_file(pid_file)
 
 		log.debug("successfully daemonized")
-		os.write(child_out_fd, "%c" % True)
+		val = struct.pack("?", True)
+		os.write(child_out_fd, val)
 		os.close(child_out_fd)
 
 	def daemonize(self, pid_file = consts.PID_FILE):
