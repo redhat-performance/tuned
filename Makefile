@@ -33,7 +33,16 @@ VERSIONED_NAME = $(NAME)-$(VERSION)$(GIT_PSUFFIX)
 SYSCONFDIR = /etc
 DATADIR = /usr/share
 DOCDIR = $(DATADIR)/doc/$(NAME)
-PYTHON_SITELIB = $(shell python -c 'from distutils.sysconfig import get_python_lib; print get_python_lib();' || echo /usr/lib/python2.7/site-packages)
+PYTHON = python2
+PYLINT = pylint-2
+ifeq ($(PYTHON),python3)
+PYLINT = pylint-3
+endif
+SHEBANG_REWRITE_REGEX= '1s/^(\#!\/usr\/bin\/)\<python\>/\1$(PYTHON)/'
+PYTHON_SITELIB = $(shell $(PYTHON) -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib());')
+ifeq ($(PYTHON_SITELIB),)
+$(error Failed to determine python library directory)
+endif
 TUNED_PROFILESDIR = /usr/lib/tuned
 TUNED_RECOMMEND_DIR = $(TUNED_PROFILESDIR)/recommend.d
 TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/tuned/recommend.d
@@ -118,17 +127,30 @@ install: install-dirs
 	cp -a tuned $(DESTDIR)$(PYTHON_SITELIB)
 
 	# binaries
-	install -Dpm 0755 tuned.py $(DESTDIR)/usr/sbin/tuned
-	install -Dpm 0755 tuned-adm.py $(DESTDIR)/usr/sbin/tuned-adm
-	install -Dpm 0755 tuned-gui.py $(DESTDIR)/usr/sbin/tuned-gui
+	install -Dm 0755 tuned.py $(DESTDIR)/usr/sbin/tuned
+	install -Dm 0755 tuned-adm.py $(DESTDIR)/usr/sbin/tuned-adm
+	install -Dm 0755 tuned-gui.py $(DESTDIR)/usr/sbin/tuned-gui
+	sed -i -r -e $(SHEBANG_REWRITE_REGEX) \
+		$(DESTDIR)/usr/sbin/tuned \
+		$(DESTDIR)/usr/sbin/tuned-adm \
+		$(DESTDIR)/usr/sbin/tuned-gui
+	touch -r tuned.py $(DESTDIR)/usr/sbin/tuned
+	touch -r tuned-adm.py $(DESTDIR)/usr/sbin/tuned-adm
+	touch -r tuned-gui.py $(DESTDIR)/usr/sbin/tuned-gui
 	$(foreach file, $(wildcard systemtap/*), \
 		install -Dpm 0755 $(file) $(DESTDIR)/usr/sbin/$(notdir $(file));)
+	sed -i -r -e $(SHEBANG_REWRITE_REGEX) \
+		$(DESTDIR)/usr/sbin/varnetload
+	touch -r systemtap/varnetload $(DESTDIR)/usr/sbin/varnetload
 
 	# glade
 	install -Dpm 0644 tuned-gui.glade $(DESTDIR)$(DATADIR)/tuned/ui/tuned-gui.glade
 
 	# tools
-	install -Dpm 0755 experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
+	install -Dm 0755 experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
+	sed -i -r -e $(SHEBANG_REWRITE_REGEX) \
+		$(DESTDIR)/usr/bin/powertop2tuned
+	touch -r experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
 
 	# configuration files
 	install -Dpm 0644 tuned-main.conf $(DESTDIR)$(SYSCONFDIR)/tuned/tuned-main.conf
@@ -181,7 +203,11 @@ install: install-dirs
 
 	# libexec scripts
 	$(foreach file, $(wildcard libexec/*), \
-		install -Dpm 0755 $(file) $(DESTDIR)/usr/libexec/tuned/$(notdir $(file));)
+		install -Dm 0755 $(file) $(DESTDIR)/usr/libexec/tuned/$(notdir $(file)); \
+		sed -i -r -e $(SHEBANG_REWRITE_REGEX) \
+			$(DESTDIR)/usr/libexec/tuned/$(notdir $(file)); \
+		touch -r $(file) $(DESTDIR)/usr/libexec/tuned/$(notdir $(file)); \
+		)
 
 	# icon
 	install -Dpm 0644 icons/tuned.svg $(DESTDIR)$(DATADIR)/icons/hicolor/scalable/apps/tuned.svg
@@ -195,9 +221,9 @@ clean:
 	rm -rf $(VERSIONED_NAME) rpm-build-dir
 
 test:
-	python -m unittest discover tests
+	$(PYTHON) -m unittest discover tests
 
 lint:
-	pylint -E -f parseable tuned *.py
+	$(PYLINT) -E -f parseable tuned *.py
 
 .PHONY: clean archive srpm tag test lint
