@@ -33,10 +33,10 @@ VERSIONED_NAME = $(NAME)-$(VERSION)$(GIT_PSUFFIX)
 SYSCONFDIR = /etc
 DATADIR = /usr/share
 DOCDIR = $(DATADIR)/doc/$(NAME)
-PYTHON = python2
-PYLINT = pylint-2
-ifeq ($(PYTHON),python3)
+PYTHON = python3
 PYLINT = pylint-3
+ifeq ($(PYTHON),python2)
+PYLINT = pylint-2
 endif
 SHEBANG_REWRITE_REGEX= '1s/^(\#!\/usr\/bin\/)\<python\>/\1$(PYTHON)/'
 PYTHON_SITELIB = $(shell $(PYTHON) -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib());')
