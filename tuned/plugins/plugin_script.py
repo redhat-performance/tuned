@@ -37,8 +37,11 @@ class ScriptPlugin(base.Plugin):
 			log.info("calling script '%s' with arguments '%s'" % (script, str(arguments)))
 			log.debug("using environment '%s'" % str(list(environ.items())))
 			try:
-				proc = Popen([script] +  arguments, stdout=PIPE, stderr=PIPE, close_fds=True, env=environ, \
-					cwd = os.path.dirname(script))
+				proc = Popen([script] +  arguments, \
+						stdout=PIPE, stderr=PIPE, \
+						close_fds=True, env=environ, \
+						universal_newlines = True, \
+						cwd = os.path.dirname(script))
 				out, err = proc.communicate()
 				if proc.returncode:
 					log.error("script '%s' error: %d, '%s'" % (script, proc.returncode, err[:-1]))
