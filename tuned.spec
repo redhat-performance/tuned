@@ -35,7 +35,8 @@ Source1: https://git.kernel.org/pub/scm/virt/kvm/kvm-unit-tests.git/snapshot/kvm
 %endif
 URL: http://www.tuned-project.org/
 BuildArch: noarch
-BuildRequires: python, systemd, desktop-file-utils
+BuildRequires: python, python-devel
+BuildRequires: systemd, desktop-file-utils
 %if %{with tscdeadline_latency}
 BuildRequires: gcc-x86_64-linux-gnu
 %endif
@@ -304,8 +305,8 @@ fi
 %exclude %{docdir}/README.NFV
 %doc %{docdir}
 %{_datadir}/bash-completion/completions/tuned-adm
-%exclude %{python_sitelib}/tuned/gtk
-%{python_sitelib}/tuned
+%exclude %{python2_sitelib}/tuned/gtk
+%{python2_sitelib}/tuned
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
 %exclude %{_sysconfdir}/tuned/realtime-variables.conf
@@ -357,7 +358,7 @@ fi
 %files gtk
 %defattr(-,root,root,-)
 %{_sbindir}/tuned-gui
-%{python_sitelib}/tuned/gtk
+%{python2_sitelib}/tuned/gtk
 %{_datadir}/tuned/ui
 %{_datadir}/polkit-1/actions/com.redhat.tuned.gui.policy
 %{_datadir}/icons/hicolor/scalable/apps/tuned.svg
