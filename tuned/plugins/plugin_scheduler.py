@@ -207,7 +207,7 @@ class SchedulerPlugin(base.Plugin):
 			else:
 				return 1
 		except IOError as e:
-			if e[0] == errno.ENOENT or e[0] == errno.ESRCH:
+			if e.errno == errno.ENOENT or e.errno == errno.ESRCH:
 				log.debug("Unable to set affinity for PID %s, the task vanished." % pid)
 				return -1
 			else:
