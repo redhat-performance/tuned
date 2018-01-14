@@ -442,7 +442,8 @@ class SchedulerPlugin(base.Plugin):
 				affinity = self._cmd.cpulist_invert(value)
 				sa = set(affinity)
 				if set(cpus).intersection(sa) != sa:
-					log.error("invalid isolated_cores specified, '%s' don't match available cores '%s'" % (value, ",".cpus))
+					str_cpus = ",".join([str(x) for x in cpus])
+					log.error("invalid isolated_cores specified, '%s' don't match available cores '%s'" % (value, str_cpus))
 					return None
 				self._set_ps_affinity(affinity, True)
 		else:
