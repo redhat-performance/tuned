@@ -40,12 +40,6 @@ class TunedLogger(logging.getLoggerClass()):
 		self.setLevel(logging.INFO)
 		self.switch_to_console()
 
-	def set_level(self, level, default = logging.NOTSET):
-		"""Set logging level. The 'level' parameter can be str or logging module constant."""
-		if type(level) is str:
-			level = logging._levelNames.get(level.upper(), logging.NOTSET)
-		self.level = level
-
 	def switch_to_console(self):
 		self._setup_console_handler()
 		self.remove_all_handlers()
