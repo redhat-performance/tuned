@@ -49,12 +49,12 @@ class ScriptPlugin(base.Plugin):
 		return True
 
 	def _instance_apply_static(self, instance):
-		super(self.__class__, self)._instance_apply_static(instance)
+		super(ScriptPlugin, self)._instance_apply_static(instance)
 		self._call_scripts(instance._scripts, ["start"])
 
 	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
-		if super(self.__class__, self)._instance_verify_static(instance, ignore_missing) == False:
+		if super(ScriptPlugin, self)._instance_verify_static(instance, ignore_missing) == False:
 			ret = False
 		args = ["verify"]
 		if ignore_missing:
@@ -71,4 +71,4 @@ class ScriptPlugin(base.Plugin):
 		if full_rollback:
 			args = args + ["full_rollback"]
 		self._call_scripts(reversed(instance._scripts), args)
-		super(self.__class__, self)._instance_unapply_static(instance, full_rollback)
+		super(ScriptPlugin, self)._instance_unapply_static(instance, full_rollback)

@@ -29,7 +29,7 @@ class SchedulerPlugin(base.Plugin):
 		"SCHED_OTHER":"o", "SCHED_IDLE":"i"}
 
 	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
-		super(self.__class__, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
+		super(SchedulerPlugin, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
 		self._has_dynamic_options = True
 		self._daemon = consts.CFG_DEF_DAEMON
 		self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
@@ -240,7 +240,7 @@ class SchedulerPlugin(base.Plugin):
 			self._set_affinity(pid, affinity, no_error)
 
 	def _instance_apply_static(self, instance):
-		super(self.__class__, self)._instance_apply_static(instance)
+		super(SchedulerPlugin, self)._instance_apply_static(instance)
 		ps = self.get_processes()
 		if ps is None:
 			log.error("error applying tuning, cannot get information about running processes")
@@ -275,7 +275,7 @@ class SchedulerPlugin(base.Plugin):
 			instance._thread.start()
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
-		super(self.__class__, self)._instance_unapply_static(instance, full_rollback)
+		super(SchedulerPlugin, self)._instance_unapply_static(instance, full_rollback)
 		ps = self.get_processes()
 		if self._daemon and instance._runtime_tuning:
 			instance._terminate.set()

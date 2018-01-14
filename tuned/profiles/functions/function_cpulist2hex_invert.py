@@ -11,10 +11,10 @@ class cpulist2hex_invert(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(self.__class__, self).__init__("cpulist2hex_invert", 0)
+		super(cpulist2hex_invert, self).__init__("cpulist2hex_invert", 0)
 
 	def execute(self, args):
-		if not super(self.__class__, self).execute(args):
+		if not super(cpulist2hex_invert, self).execute(args):
 			return None
 		# current implementation inverts the CPU list and then converts it to hexmask
 		return self._cmd.cpulist2hex(",".join(str(v) for v in self._cmd.cpulist_invert(",,".join(args))))

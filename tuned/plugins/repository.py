@@ -9,7 +9,7 @@ __all__ = ["Repository"]
 class Repository(PluginLoader):
 
 	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
-		super(self.__class__, self).__init__()
+		super(Repository, self).__init__()
 		self._plugins = set()
 		self._monitor_repository = monitor_repository
 		self._storage_factory = storage_factory

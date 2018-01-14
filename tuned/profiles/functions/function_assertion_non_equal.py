@@ -14,10 +14,10 @@ class assertion_non_equal(base.Function):
 	"""
 	def __init__(self):
 		# 2 arguments
-		super(self.__class__, self).__init__("assertion_non_equal", 3)
+		super(assertion_non_equal, self).__init__("assertion_non_equal", 3)
 
 	def execute(self, args):
-		if not super(self.__class__, self).execute(args):
+		if not super(assertion_non_equal, self).execute(args):
 			return None
 		if args[1] == args[2]:
 			log.error("assertion '%s' failed: '%s' == '%s'" % (args[0], args[1], args[2]))

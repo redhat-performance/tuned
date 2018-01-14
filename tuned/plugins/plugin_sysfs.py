@@ -17,7 +17,7 @@ class SysfsPlugin(base.Plugin):
 	# TODO: resolve possible conflicts with sysctl settings from other plugins
 
 	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
+		super(SysfsPlugin, self).__init__(*args, **kwargs)
 		self._has_dynamic_options = True
 		self._cmd = commands()
 

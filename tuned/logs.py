@@ -36,7 +36,7 @@ class TunedLogger(logging.getLoggerClass()):
 	_file_handler = None
 
 	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
+		super(TunedLogger, self).__init__(*args, **kwargs)
 		self.setLevel(logging.INFO)
 		self.switch_to_console()
 

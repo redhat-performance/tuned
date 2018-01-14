@@ -15,7 +15,7 @@ class DiskPlugin(hotplug.Plugin):
 	"""
 
 	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
+		super(DiskPlugin, self).__init__(*args, **kwargs)
 
 		self._power_levels = [254, 225, 195, 165, 145, 125, 105, 85, 70, 55, 30, 20]
 		self._spindown_levels = [0, 250, 230, 210, 190, 170, 150, 130, 110, 90, 70, 60]
@@ -51,17 +51,17 @@ class DiskPlugin(hotplug.Plugin):
 
 	def _hardware_events_callback(self, event, device):
 		if self._device_is_supported(device):
-			super(self.__class__, self)._hardware_events_callback(event, device)
+			super(DiskPlugin, self)._hardware_events_callback(event, device)
 
 	def _added_device_apply_tuning(self, instance, device_name):
 		if instance._load_monitor is not None:
 			instance._load_monitor.add_device(device_name)
-		super(self.__class__, self)._added_device_apply_tuning(instance, device_name)
+		super(DiskPlugin, self)._added_device_apply_tuning(instance, device_name)
 
 	def _removed_device_unapply_tuning(self, instance, device_name):
 		if instance._load_monitor is not None:
 			instance._load_monitor.remove_device(device_name)
-		super(self.__class__, self)._removed_device_unapply_tuning(instance, device_name)
+		super(DiskPlugin, self)._removed_device_unapply_tuning(instance, device_name)
 
 	@classmethod
 	def _get_config_options(cls):

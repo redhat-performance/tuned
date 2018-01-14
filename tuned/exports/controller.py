@@ -8,7 +8,7 @@ class ExportsController(tuned.patterns.Singleton):
 	"""
 
 	def __init__(self):
-		super(self.__class__, self).__init__()
+		super(ExportsController, self).__init__()
 		self._exporters = []
 		self._objects = []
 		self._exports_initialized = False

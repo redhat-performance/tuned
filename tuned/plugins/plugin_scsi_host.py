@@ -15,7 +15,7 @@ class SCSIHostPlugin(hotplug.Plugin):
 	"""
 
 	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
+		super(SCSIHostPlugin, self).__init__(*args, **kwargs)
 
 		self._cmd = commands()
 
@@ -43,13 +43,13 @@ class SCSIHostPlugin(hotplug.Plugin):
 
 	def _hardware_events_callback(self, event, device):
 		if self._device_is_supported(device):
-			super(self.__class__, self)._hardware_events_callback(event, device)
+			super(SCSIHostPlugin, self)._hardware_events_callback(event, device)
 
 	def _added_device_apply_tuning(self, instance, device_name):
-		super(self.__class__, self)._added_device_apply_tuning(instance, device_name)
+		super(SCSIHostPlugin, self)._added_device_apply_tuning(instance, device_name)
 
 	def _removed_device_unapply_tuning(self, instance, device_name):
-		super(self.__class__, self)._removed_device_unapply_tuning(instance, device_name)
+		super(SCSIHostPlugin, self)._removed_device_unapply_tuning(instance, device_name)
 
 	@classmethod
 	def _get_config_options(cls):
