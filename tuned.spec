@@ -24,6 +24,10 @@
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
+%if 0%{?fedora} > 27 || 0%{?rhel} > 7
+%global with_python3 1
+%endif
+
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.9.0
@@ -35,7 +39,6 @@ Source1: https://git.kernel.org/pub/scm/virt/kvm/kvm-unit-tests.git/snapshot/kvm
 %endif
 URL: http://www.tuned-project.org/
 BuildArch: noarch
-BuildRequires: python, python-devel
 BuildRequires: systemd, desktop-file-utils
 %if %{with tscdeadline_latency}
 BuildRequires: gcc-x86_64-linux-gnu
@@ -43,10 +46,19 @@ BuildRequires: gcc-x86_64-linux-gnu
 Requires(post): systemd, virt-what
 Requires(preun): systemd
 Requires(postun): systemd
-Requires: python-decorator, dbus-python, pygobject3-base, python-pyudev
-Requires: virt-what, python-configobj, ethtool, gawk, hdparm
-Requires: util-linux, python-perf, dbus, polkit, python-linux-procfs
-Requires: python-schedutils
+%if 0%{?with_python3} == 1
+BuildRequires: python3, python3-devel
+Requires: python3-decorator, python3-dbus, python3-pygobject3-base
+Requires: python3-pyudev, python3-configobj, python3-schedutils
+Requires: python3-linux-procfs, python3-perf
+%else
+BuildRequires: python, python-devel
+Requires: python-decorator, dbus-python, pygobject3-base
+Requires: python-pyudev, python-configobj, python-schedutils
+Requires: python-linux-procfs, python-perf
+%endif
+Requires: virt-what, ethtool, gawk, hdparm
+Requires: util-linux, dbus, polkit
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
 Recommends: kernel-tools
 %endif
@@ -205,7 +217,12 @@ x86_64-linux-gnu-strip x86/tscdeadline_latency.flat
 %endif
 
 %install
-make install DESTDIR=%{buildroot} DOCDIR=%{docdir}
+make install DESTDIR=%{buildroot} DOCDIR=%{docdir} \
+%if 0%{?with_python3} == 1
+	PYTHON=python3
+%else
+	PYTHON=python2
+%endif
 %if 0%{?rhel}
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
 %endif
@@ -305,8 +322,13 @@ fi
 %exclude %{docdir}/README.NFV
 %doc %{docdir}
 %{_datadir}/bash-completion/completions/tuned-adm
+%if 0%{?with_python3} == 1
+%exclude %{python3_sitelib}/tuned/gtk
+%{python3_sitelib}/tuned
+%else
 %exclude %{python2_sitelib}/tuned/gtk
 %{python2_sitelib}/tuned
+%endif
 %{_sbindir}/tuned
 %{_sbindir}/tuned-adm
 %exclude %{_sysconfdir}/tuned/realtime-variables.conf
@@ -358,7 +380,11 @@ fi
 %files gtk
 %defattr(-,root,root,-)
 %{_sbindir}/tuned-gui
+%if 0%{?with_python3} == 1
+%{python3_sitelib}/tuned/gtk
+%else
 %{python2_sitelib}/tuned/gtk
+%endif
 %{_datadir}/tuned/ui
 %{_datadir}/polkit-1/actions/com.redhat.tuned.gui.policy
 %{_datadir}/icons/hicolor/scalable/apps/tuned.svg
