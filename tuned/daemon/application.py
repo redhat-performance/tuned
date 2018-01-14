@@ -139,12 +139,10 @@ class Application(object):
 			os.close(child_out_fd)
 			raise TunedException("Cannot daemonize, second fork() failed.")
 
-		si = file("/dev/null", "r")
-		so = file("/dev/null", "a+")
-		se = file("/dev/null", "a+", 0)
-		os.dup2(si.fileno(), sys.stdin.fileno())
-		os.dup2(so.fileno(), sys.stdout.fileno())
-		os.dup2(se.fileno(), sys.stderr.fileno())
+		fd = open("/dev/null", "w+")
+		os.dup2(fd.fileno(), sys.stdin.fileno())
+		os.dup2(fd.fileno(), sys.stdout.fileno())
+		os.dup2(fd.fileno(), sys.stderr.fileno())
 
 		self.write_pid_file(pid_file)
 

@@ -41,9 +41,8 @@ def parse_def_affinity(fname):
 	if os.getuid() != 0:
 		return
 	try:
-		f = file(fname)
-		line = f.readline()
-		f.close()
+		with open(fname, 'r') as f:
+			line = f.readline()
 		return bitmasklist(line)
 	except IOError:
 		return [ 0 ]

@@ -40,12 +40,10 @@ def do_fork():
 		sys.exit(0)
 
 def close_fds():
-	s_in = file('/dev/null', 'r')
-	s_out = file('/dev/null', 'a+')
-	s_err = file('/dev/null', 'a+', 0)
-	os.dup2(s_in.fileno(), sys.stdin.fileno())
-	os.dup2(s_out.fileno(), sys.stdout.fileno())
-	os.dup2(s_err.fileno(), sys.stderr.fileno())
+	f = open('/dev/null', 'w+')
+	os.dup2(f.fileno(), sys.stdin.fileno())
+	os.dup2(f.fileno(), sys.stdout.fileno())
+	os.dup2(f.fileno(), sys.stderr.fileno())
 
 def write_pidfile():
 	with os.fdopen(os.open(PIDFILE, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o644), "w") as f:
