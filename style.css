@@ -12,3 +12,19 @@ h1, h2, h3 {
     line-height: 1.2;
 }
 
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a:link {
+    color: #009dbb;
+}
+
+a:visited {
+    color: #36738a;
+}
+
