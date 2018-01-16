@@ -30,7 +30,8 @@
         tunes system settings according to a selected profile
     </li>
     <li>
-        supports various types of configuration like sysctl, sysfs, 
+      supports various types of configuration like <code>sysctl</code>, 
+      <code>sysfs</code>, 
         or kernel boot command line parameters, which are integrated 
         in a plug-in architecture
     </li>
@@ -40,13 +41,13 @@
         into existing administering solutions: for example, with Cockpit
     </li>
     <li>
-        can be run in no-daemon mode with limited functionality (e.g. no
+        can be run in no-daemon mode with limited functionality (for example, no
         support for D-Bus, <code>udev</code>, tuning of newly created
         processes, and so on) for systems with reduced resources
     </li>
     <li>
-        stores all its configuration cleanly in one place, in the 
-        Tuned profile, instead of having configuration on multiple places 
+        stores all its configuration cleanly in one place &ndash; in the 
+        Tuned profile &ndash; instead of having configuration on multiple places 
         and in custom scripts
     </li>
 </ul>
@@ -54,13 +55,13 @@
 <p>Tuned profiles:</p>
 <ul>
     <li>
-        <p>can be defined hiearchicaly, which reduces duplication 
+        <p>can be defined hierarchically, which reduces duplication 
         and simplifies maintenance:</p>
         <p>More specialized profiles can inherit generic profiles and just
-        change what's needed instead of duplicating the code.
+        change what is needed instead of duplicating the code.
         For example, you can built a generic profile for HTTP server upon
-        the throughput-performance profile and later create two more 
-        specialized profiles for the Apache server and the Nginx server, 
+        the <code>throughput-performance</code> profile and later create two 
+        more specialized profiles for the Apache server and the Nginx server, 
         basing both profiles on the generic HTTP server profile.
         </p>
     </li>
@@ -77,7 +78,7 @@
         <p>include a number of predefined profiles for common use cases:</p>
         <p>For example, presets for high throughput, low latency, or powersave
         are distributed. Profiles optimizing performance for various products
-        like SAP, dBase servers, and so on are also provided, and it's possible
+        like SAP, dBase servers, and so on are also provided, and it is possible
         to fully customize them.</p>
     </li>
 </ul>
@@ -85,7 +86,7 @@
 <h1>Documentation</h1>
 <p>Some documentation is available in the
 <a href="https://docs-old.fedoraproject.org/en-US/Fedora/20/html/Power_Management_Guide/tuned.html">Fedora Power Management Guide</a>,
-but it's incomplete and may not be up-to-date. New documentation is being worked on.</p>
+but it is incomplete and may not be up-to-date. New documentation is being worked on.</p>
 
 <h1>Download</h1>
 <p>Releases are available for download from the
