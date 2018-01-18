@@ -31,8 +31,14 @@
 #    useful values range from 0 to 500.
 #
 
+from __future__ import print_function
 import time, getopt, sys
-from urllib2 import *
+# exception handler for python 2/3 compatibility
+try:
+	from urllib.request import *
+	from urllib.error import *
+except ImportError:
+	from urllib2 import *
 
 def usage():
 	print("Usage: varnetload [-d delay in milliseconds] [-t runtime in seconds] [-u URL]")
