@@ -43,8 +43,8 @@ url = "http://myhost.mydomain/index.html"
 
 try:
 	opts, args = getopt.getopt(sys.argv[1:], "d:t:u:")
-except getopt.error, e:
-        print("Error parsing command-line arguments: %s" % e)
+except getopt.error as e:
+	print("Error parsing command-line arguments: %s" % e)
 	usage()
 	sys.exit(1)
 
@@ -89,7 +89,7 @@ try:
 		urlopen(url).read(409600)
 		time.sleep(delay)
 		count += 1
-except URLError, e:
+except URLError as e:
 	print("Downloading failed: %s" % e.reason)
 	sys.exit(2)
 

@@ -20,7 +20,7 @@ class SystemdPlugin(base.Plugin):
 	def __init__(self, *args, **kwargs):
 		if not os.path.isfile(consts.SYSTEMD_SYSTEM_CONF_FILE):
 			raise exceptions.NotSupportedPluginException("Required systemd '%s' configuration file not found, disabling plugin." % consts.SYSTEMD_SYSTEM_CONF_FILE)
-		super(self.__class__, self).__init__(*args, **kwargs)
+		super(SystemdPlugin, self).__init__(*args, **kwargs)
 		self._cmd = commands()
 
 	def _instance_init(self, instance):

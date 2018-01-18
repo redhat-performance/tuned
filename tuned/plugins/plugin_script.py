@@ -37,8 +37,11 @@ class ScriptPlugin(base.Plugin):
 			log.info("calling script '%s' with arguments '%s'" % (script, str(arguments)))
 			log.debug("using environment '%s'" % str(list(environ.items())))
 			try:
-				proc = Popen([script] +  arguments, stdout=PIPE, stderr=PIPE, close_fds=True, env=environ, \
-					cwd = os.path.dirname(script))
+				proc = Popen([script] +  arguments, \
+						stdout=PIPE, stderr=PIPE, \
+						close_fds=True, env=environ, \
+						universal_newlines = True, \
+						cwd = os.path.dirname(script))
 				out, err = proc.communicate()
 				if proc.returncode:
 					log.error("script '%s' error: %d, '%s'" % (script, proc.returncode, err[:-1]))
@@ -49,12 +52,12 @@ class ScriptPlugin(base.Plugin):
 		return True
 
 	def _instance_apply_static(self, instance):
-		super(self.__class__, self)._instance_apply_static(instance)
+		super(ScriptPlugin, self)._instance_apply_static(instance)
 		self._call_scripts(instance._scripts, ["start"])
 
 	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
-		if super(self.__class__, self)._instance_verify_static(instance, ignore_missing) == False:
+		if super(ScriptPlugin, self)._instance_verify_static(instance, ignore_missing) == False:
 			ret = False
 		args = ["verify"]
 		if ignore_missing:
@@ -71,4 +74,4 @@ class ScriptPlugin(base.Plugin):
 		if full_rollback:
 			args = args + ["full_rollback"]
 		self._call_scripts(reversed(instance._scripts), args)
-		super(self.__class__, self)._instance_unapply_static(instance, full_rollback)
+		super(ScriptPlugin, self)._instance_unapply_static(instance, full_rollback)

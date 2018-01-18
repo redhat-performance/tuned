@@ -9,9 +9,9 @@ class strip(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument
-		super(self.__class__, self).__init__("strip", 0, 1)
+		super(strip, self).__init__("strip", 0, 1)
 
 	def execute(self, args):
-		if not super(self.__class__, self).execute(args):
+		if not super(strip, self).execute(args):
 			return None
 		return "".join(args).strip()

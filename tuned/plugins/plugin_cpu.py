@@ -19,7 +19,7 @@ class CPULatencyPlugin(base.Plugin):
 	"""
 
 	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
+		super(CPULatencyPlugin, self).__init__(*args, **kwargs)
 
 		self._has_pm_qos = True
 		self._has_energy_perf_bias = True
@@ -142,7 +142,7 @@ class CPULatencyPlugin(base.Plugin):
 		return v
 
 	def _instance_apply_static(self, instance):
-		super(self.__class__, self)._instance_apply_static(instance)
+		super(CPULatencyPlugin, self)._instance_apply_static(instance)
 
 		if not instance._first_instance:
 			return
@@ -156,7 +156,7 @@ class CPULatencyPlugin(base.Plugin):
 			self._no_turbo_save = self._getset_intel_pstate_attr("no_turbo", instance.options["no_turbo"])
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
-		super(self.__class__, self)._instance_unapply_static(instance, full_rollback)
+		super(CPULatencyPlugin, self)._instance_unapply_static(instance, full_rollback)
 
 		if instance._first_instance and self._has_intel_pstate:
 			self._set_intel_pstate_attr("min_perf_pct", self._min_perf_pct_save)

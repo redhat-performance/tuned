@@ -14,7 +14,7 @@ class SysctlPlugin(base.Plugin):
 	"""
 
 	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
+		super(SysctlPlugin, self).__init__(*args, **kwargs)
 		self._has_dynamic_options = True
 		self._cmd = commands()
 

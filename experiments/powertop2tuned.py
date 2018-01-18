@@ -182,7 +182,8 @@ class PowertopProfile:
 		self.output = output
 
 	def currentActiveProfile(self):
-		proc = Popen(["tuned-adm", "active"], stdout=PIPE)
+		proc = Popen(["tuned-adm", "active"], stdout=PIPE, \
+				universal_newlines = True)
 		output = proc.communicate()[0]
 		if output and output.find("Current active profile: ") == 0:
 			return output[len("Current active profile: "):output.find("\n")]
@@ -200,7 +201,11 @@ class PowertopProfile:
 		environment = os.environ.copy()
 		environment["LC_ALL"] = "C"
 		try:
-			proc = Popen(["/usr/sbin/powertop", "--html=/tmp/powertop", "--time=1"], stdout=PIPE, stderr=PIPE, env=environment)
+			proc = Popen(["/usr/sbin/powertop", \
+					"--html=/tmp/powertop", "--time=1"], \
+					stdout=PIPE, stderr=PIPE, \
+					env=environment, \
+					universal_newlines = True)
 			output = proc.communicate()[1]
 		except (OSError, IOError):
 			print('Unable to execute PowerTOP, is PowerTOP installed?', file=sys.stderr)

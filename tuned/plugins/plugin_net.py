@@ -16,7 +16,7 @@ class NetTuningPlugin(base.Plugin):
 	"""
 
 	def __init__(self, *args, **kwargs):
-		super(self.__class__, self).__init__(*args, **kwargs)
+		super(NetTuningPlugin, self).__init__(*args, **kwargs)
 		self._load_smallest = 0.05
 		self._level_steps = 6
 		self._cmd = commands()

@@ -211,7 +211,11 @@ class commands:
 		out = ""
 		err_msg = None
 		try:
-			proc = Popen(args, stdout = PIPE, stderr = PIPE, env = self._environment, shell = shell, cwd = cwd, close_fds = True)
+			proc = Popen(args, stdout = PIPE, stderr = PIPE, \
+					env = self._environment, \
+					shell = shell, cwd = cwd, \
+					close_fds = True, \
+					universal_newlines = True)
 			out, err = proc.communicate()
 
 			retcode = proc.returncode

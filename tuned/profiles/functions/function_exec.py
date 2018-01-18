@@ -9,10 +9,10 @@ class execute(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument (the name of executable)
-		super(self.__class__, self).__init__("exec", 0, 1)
+		super(execute, self).__init__("exec", 0, 1)
 
 	def execute(self, args):
-		if not super(self.__class__, self).execute(args):
+		if not super(execute, self).execute(args):
 			return None
 		(ret, out) = self._cmd.execute(args)
 		if ret == 0:

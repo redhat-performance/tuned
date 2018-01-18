@@ -13,9 +13,9 @@ class cpulist_pack(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(self.__class__, self).__init__("cpulist_pack", 0)
+		super(cpulist_pack, self).__init__("cpulist_pack", 0)
 
 	def execute(self, args):
-		if not super(self.__class__, self).execute(args):
+		if not super(cpulist_pack, self).execute(args):
 			return None
 		return ",".join(str(v) for v in self._cmd.cpulist_pack(",,".join(args)))

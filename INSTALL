@@ -4,3 +4,7 @@ Installation instructions
 The tuned daemon is written in pure Python. Nothing requires to be built.
 
 For installation use 'make install'. Optionally DESTDIR can be appended.
+By default, the tuned modules are installed to the Python3 destination
+(e.g. /usr/lib/python3.6/site-packages/) and shebangs in executable
+Python files are modified to use Python3. If you want tuned to use Python2
+instead, use 'make PYTHON=python2 install'.

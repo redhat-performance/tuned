@@ -11,10 +11,10 @@ class virt_check(base.Function):
 	"""
 	def __init__(self):
 		# 2 arguments
-		super(self.__class__, self).__init__("virt_check", 2)
+		super(virt_check, self).__init__("virt_check", 2)
 
 	def execute(self, args):
-		if not super(self.__class__, self).execute(args):
+		if not super(virt_check, self).execute(args):
 			return None
 		(ret, out) = self._cmd.execute(["virt-what"])
 		if ret == 0 and len(out) > 0:

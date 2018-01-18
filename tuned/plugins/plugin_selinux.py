@@ -27,7 +27,7 @@ class SelinuxPlugin(base.Plugin):
 		if self._selinux_path is None:
 			raise exceptions.NotSupportedPluginException("SELinux is not enabled on your system or incompatible version is used.")
 		self._cache_threshold_path = os.path.join(self._selinux_path, "avc", "cache_threshold")
-		super(self.__class__, self).__init__(*args, **kwargs)
+		super(SelinuxPlugin, self).__init__(*args, **kwargs)
 
 	@classmethod
 	def _get_config_options(self):

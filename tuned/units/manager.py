@@ -14,7 +14,7 @@ class Manager(object):
 	"""
 
 	def __init__(self, plugins_repository, monitors_repository, def_instance_priority):
-		super(self.__class__, self).__init__()
+		super(Manager, self).__init__()
 		self._plugins_repository = plugins_repository
 		self._monitors_repository = monitors_repository
 		self._def_instance_priority = def_instance_priority

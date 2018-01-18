@@ -113,8 +113,13 @@ class Nettool:
 
 		# run ethtool and preprocess output
 
-		p_ethtool = Popen(["ethtool", self._interface], stdout=PIPE, stderr=PIPE, close_fds=True)
-		p_filter = Popen(["sed", "s/^\s*//;s/:\s*/:\\n/g"], stdin=p_ethtool.stdout, stdout=PIPE, close_fds=True)
+		p_ethtool = Popen(["ethtool", self._interface], \
+				stdout=PIPE, stderr=PIPE, close_fds=True, \
+				universal_newlines = True)
+		p_filter = Popen(["sed", "s/^\s*//;s/:\s*/:\\n/g"], \
+				stdin=p_ethtool.stdout, stdout=PIPE, \
+				universal_newlines = True, \
+				close_fds=True)
 
 		output = p_filter.communicate()[0]
 		errors = p_ethtool.communicate()[1]
