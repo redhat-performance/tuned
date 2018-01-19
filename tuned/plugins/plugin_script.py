@@ -43,8 +43,10 @@ class ScriptPlugin(base.Plugin):
 						universal_newlines = True, \
 						cwd = os.path.dirname(script))
 				out, err = proc.communicate()
+				if len(err):
+					log.error("script '%s' error output: '%s'" % (script, err[:-1]))
 				if proc.returncode:
-					log.error("script '%s' error: %d, '%s'" % (script, proc.returncode, err[:-1]))
+					log.error("script '%s' returned error code: %d" % (script, proc.returncode))
 					return False
 			except (OSError,IOError) as e:
 				log.error("script '%s' error: %s" % (script, e))
