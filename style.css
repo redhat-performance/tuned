@@ -62,6 +62,7 @@ body {
     color: #333;
     padding: 0 10px;
     font-family: 'Overpass', sans-serif;
+    text-align: justify;
 }
 
 h1, h2, h3 {
@@ -72,15 +73,12 @@ h1, h2, h3 {
 a {
     text-decoration: none;
 }
-
 a:hover {
     text-decoration: underline;
 }
-
 a:link {
     color: #009dbb;
 }
-
 a:visited {
     color: #36738a;
 }
@@ -91,4 +89,9 @@ code {
     font-size: 95%;
     background-color: #f2f2f2;
     border: 1px solid #e0e0e0;
+}
+
+ul {
+    /* Indent list elements both from the left and the right */
+    padding: 0 50px;
 }
