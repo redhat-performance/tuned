@@ -24,6 +24,36 @@
        font-style: italic;
 }
 
+/* Embedded Hack fonts: regular */
+@font-face {
+  font-family: 'Hack';
+  src: url('fonts/hack-regular.woff2') format('woff2');
+       font-weight: 500;
+       font-style: normal;
+}
+/* Uncomment the following if bold and italic styles of Hack are needed: */
+/*
+ * @font-face {
+ *   font-family: 'Hack';
+ *   src: url('fonts/hack-italic.woff2') format('woff2');
+ *        font-weight: 500;
+ *        font-style: italic;
+ * }
+ * @font-face {
+ *   font-family: 'Hack';
+ *   src: url('fonts/hack-bold.woff2') format('woff2');
+ *        font-weight: 700;
+ *        font-style: normal;
+ * }
+ * @font-face {
+ *   font-family: 'Hack';
+ *   src: url('fonts/hack-bolditalic.woff2') format('woff2');
+ *        font-weight: 700;
+ *        font-style: italic;
+ *
+ * }
+ */
+
 body {
     margin: 0px auto;
     max-width: 1124px;
@@ -56,6 +86,9 @@ a:visited {
 }
 
 code {
+    font-family: 'Hack';
+    /* Hack has a larger x-height than Overpass; shrinking it to compensate */
+    font-size: 95%;
     background-color: #f2f2f2;
     border: 1px solid #e0e0e0;
 }
