@@ -1,3 +1,29 @@
+/* Embedded Overpass fonts: regular, italic, bold, and bold italic */
+@font-face {
+  font-family: 'overpass';
+  src: url('fonts/overpass-regular.woff2') format('woff2');
+       font-weight: 500;
+       font-style: normal;
+}
+@font-face {
+  font-family: 'overpass';
+  src: url('fonts/overpass-italic.woff2') format('woff2');
+       font-weight: 500;
+       font-style: italic;
+}
+@font-face {
+  font-family: 'overpass';
+  src: url('fonts/overpass-bold.woff2') format('woff2');
+       font-weight: 700;
+       font-style: normal;
+}
+@font-face {
+  font-family: 'overpass';
+  src: url('fonts/overpass-bold-italic.woff2') format('woff2');
+       font-weight: 700;
+       font-style: italic;
+}
+
 body {
     margin: 0px auto;
     max-width: 1124px;
