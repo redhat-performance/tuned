@@ -84,7 +84,7 @@ a:visited {
 }
 
 code {
-    font-family: 'Hack';
+    font-family: 'Hack', monospace;
     /* Hack has a larger x-height than Overpass; shrinking it to compensate */
     font-size: 95%;
     background-color: #f2f2f2;
