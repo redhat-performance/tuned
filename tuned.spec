@@ -4,8 +4,28 @@
 
 %if 0%{?fedora}
 %bcond_without tscdeadline_latency
+%if 0%{?fedora} > 27
+%bcond_without python3
 %else
+%bcond_with python3
+%endif
+%else
+%if 0%{?rhel} && 0%{?rhel} < 8
+%bcond_with python3
+%else
+%bcond_without python3
+%endif
 %bcond_with tscdeadline_latency
+%endif
+
+%if %{with python3}
+%global _py python3
+%else
+%if 0%{?rhel} && 0%{?rhel} < 8
+%global _py python
+%else
+%global _py python2
+%endif
 %endif
 
 %if %{with snapshot}
@@ -23,10 +43,6 @@
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
-
-%if 0%{?fedora} > 27 || 0%{?rhel} > 7
-%global with_python3 1
-%endif
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
@@ -46,16 +62,14 @@ BuildRequires: gcc-x86_64-linux-gnu
 Requires(post): systemd, virt-what
 Requires(preun): systemd
 Requires(postun): systemd
-%if 0%{?with_python3} == 1
-BuildRequires: python3, python3-devel
-Requires: python3-decorator, python3-dbus, python3-pygobject3-base
-Requires: python3-pyudev, python3-configobj, python3-schedutils
-Requires: python3-linux-procfs, python3-perf
+BuildRequires: %{_py}, %{_py}-devel
+Requires: %{_py}-decorator, %{_py}-pyudev, %{_py}-configobj
+Requires: %{_py}-schedutils, %{_py}-linux-procfs, %{_py}-perf
+# requires for packages with inconsistent python2/3 names
+%if %{with python3}
+Requires: python3-dbus, python3-pygobject3-base
 %else
-BuildRequires: python, python-devel
-Requires: python-decorator, dbus-python, pygobject3-base
-Requires: python-pyudev, python-configobj, python-schedutils
-Requires: python-linux-procfs, python-perf
+Requires: dbus-python, pygobject3-base
 %endif
 Requires: virt-what, ethtool, gawk, hdparm
 Requires: util-linux, dbus, polkit
@@ -81,7 +95,13 @@ network and ATA harddisk devices are implemented.
 %package gtk
 Summary: GTK GUI for tuned
 Requires: %{name} = %{version}-%{release}
-Requires: powertop, pygobject3-base, polkit
+Requires: powertop, polkit
+# requires for packages with inconsistent python2/3 names
+%if %{with python3}
+Requires: python3-pygobject3-base
+%else
+Requires: pygobject3-base
+%endif
 
 %description gtk
 GTK GUI that can control tuned and provides simple profile editor.
@@ -218,7 +238,7 @@ x86_64-linux-gnu-strip x86/tscdeadline_latency.flat
 
 %install
 make install DESTDIR=%{buildroot} DOCDIR=%{docdir} \
-%if 0%{?with_python3} == 1
+%if %{with python3}
 	PYTHON=python3
 %else
 	PYTHON=python2
@@ -322,7 +342,7 @@ fi
 %exclude %{docdir}/README.NFV
 %doc %{docdir}
 %{_datadir}/bash-completion/completions/tuned-adm
-%if 0%{?with_python3} == 1
+%if %{with python3}
 %exclude %{python3_sitelib}/tuned/gtk
 %{python3_sitelib}/tuned
 %else
@@ -380,7 +400,7 @@ fi
 %files gtk
 %defattr(-,root,root,-)
 %{_sbindir}/tuned-gui
-%if 0%{?with_python3} == 1
+%if %{with python3}
 %{python3_sitelib}/tuned/gtk
 %else
 %{python2_sitelib}/tuned/gtk
