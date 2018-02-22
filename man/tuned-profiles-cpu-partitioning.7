@@ -1,7 +1,7 @@
 .\"/* 
 .\" * All rights reserved
 .\" * Copyright (C) 2015-2017 Red Hat, Inc.
-.\" * Authors: Jaroslav Škarvada
+.\" * Authors: Jaroslav Škarvada, Luiz Capitulino
 .\" *
 .\" * This program is free software; you can redistribute it and/or
 .\" * modify it under the terms of the GNU General Public License
@@ -18,37 +18,89 @@
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
 .\" 
-.TH TUNED_PROFILES_CPU_PARTITIONING "7" "30 Mar 2017" "tuned"
+.TH TUNED_PROFILES_CPU_PARTITIONING "7" "22 Feb 2018" "tuned"
 .SH NAME
-tuned\-profiles\-cpu\-partitioning - description of profile provided for for CPU partitioning
+tuned\-profiles\-cpu\-partitioning - Partition CPUs into isolated and housekeeping.
 
 .SH DESCRIPTION
-The profile is provided for CPU partitioning.
+The cpu-partitioning profile partitions the system CPUs into isolated and
+housekeeping CPUs. This profile is intended to be used for latency-sensitive
+workloads.
 
-.SH PROFILES
-The following profiles is provided:
+An isolated CPU incurs reduced jitter and reduced interruptions by the
+kernel. This is achived by clearing the CPU from user-space processes, movable
+kernel threads, interruption handlers, kernel timers, etc. The only fixed
+source of interruptions is the 1Hz tick maintained by the kernel to keep
+CPU usage statistics. Otherwise, the incurred jitter and interruptions, if
+any, depend on the kernel services used by the thread running on the isolated
+CPU. Threads that run a busy loop without doing system calls, such as
+user-space drivers that access the hardware directly, are only expected to
+be interrupted once a second by the 1Hz tick.
+
+A housekeeping CPU is the opposite of an isolated CPU. Housekeeping CPUs
+run all daemons, shell processes, kernel threads, interruption handlers
+and work that can be dispatched from isolated CPUs such as disk I/O,
+RCU work, timers, etc.
+
+.SH CONFIGURATION
+The cpu-partitioning profile is configured by editing the
+.I /etc/tuned/cpu-partitioning-variables.conf
+file. There are two configuration options:
 
 .TP
-.BI "cpu\-partitioning"
-Profile optimized for CPU partitioning.
+.B isolated_cores=<CPU-LIST>
+List of CPUs to isolate. This option is mandatory. Any CPUs not in this list
+is automatically considered a housekeeping CPU.
+.TP
+.B no_balance_cores=<CPU-LIST>
+List of CPUs not be considered by the kernel when doing system wide
+process load-balancing. Usually, this list should be the same as
+isolated_cores=. This option is optional.
+
+.SH IMPORTANT NOTES
+
+.IP * 2
+.B The system should be rebooted after applying the cpu-partitioning profile
+for the first time or changing its configuration
+.IP *
+.B The cpu-partitioning profile can be used in bare-metal and virtual machines
+.IP *
+.B The cpu-partitioning profile does not use the kernel's isolcpus= feature
+.IP *
+.B On a NUMA system, it is recommended to have at least one housekeeping CPU
+per NUMA node
+.IP *
+.B The cpu-partitioning profile does not support isolating the L3 cache. This
+means that a housekeeping CPU can still thrash cache entries pertaining to
+isolated CPUs. It is recommended to use cache isolation technologies to remedy
+this problem, such as Intel's Cache Allocation Technology
+.IP *
+.B Whether or not the kernel is going to be able to deactivate the tick on
+isolated CPUs depend on a few factors concerning the running thread behavior.
+Please, consult the nohz_full documentation in the kernel to learn more
+.IP *
+.B The Linux real-time project has put together a document on the best
+practices for writting real-time applications. Even though the
+cpu-partitioning profile does not guarantee real-time response time, much
+of the techniques for writting real-time applications also apply for
+applications intended to run under the cpu-partitioning profile. Please,
+refer to this document at
+.I https://rt.wiki.kernel.org
 
 .SH "FILES"
 .nf
-.I /etc/tuned/*
-.I /usr/lib/tuned/*
+.I /etc/tuned/cpu-partitioning-variables.conf
+.I /etc/tuned/tuned-main.conf
 
 .SH "SEE ALSO"
 .BR tuned (8)
 .BR tuned\-adm (8)
 .BR tuned\-profiles (7)
-.BR tuned\-profiles\-atomic (7)
-.BR tuned\-profiles\-sap (7)
-.BR tuned\-profiles\-sap\-hana (7)
-.BR tuned\-profiles\-oracle (7)
 .BR tuned\-profiles\-realtime (7)
 .BR tuned\-profiles\-nfv\-host (7)
 .BR tuned\-profiles\-nfv\-guest (7)
-.BR tuned\-profiles\-compat (7)
 .SH AUTHOR
 .nf
 Jaroslav Škarvada <jskarvad@redhat.com>
+Luiz Capitulino <lcapitulino@redhat.com>
+Andrew Theurer <atheurer@redhat.com>
