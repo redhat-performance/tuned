@@ -63,7 +63,7 @@ start() {
         if [ -f "$TSCDEADLINE_LATENCY" ]; then
              tempdir=`mktemp -d`
              isolatedcpu=`echo "$TUNED_isolated_cores_expanded" | cut -f 1 -d ","`
-             run_tscdeadline_latency $isolatedcpu > $tempdir/lat.out
+             run_tsc_deadline_latency $isolatedcpu > $tempdir/lat.out
              sh ./find-lapictscdeadline-optimal.sh $tempdir/lat.out > $tempdir/opt.out
              if [ $? -eq 0 ]; then
                   echo `cat $tempdir/opt.out | cut -f 2 -d ":"` > ./lapic_timer_adv_ns
