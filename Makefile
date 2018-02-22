@@ -48,6 +48,12 @@ TUNED_RECOMMEND_DIR = $(TUNED_PROFILESDIR)/recommend.d
 TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/tuned/recommend.d
 BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
 
+copy_executable = install -Dm 0755 $(1) $(2)
+rewrite_shebang = sed -i -r -e $(SHEBANG_REWRITE_REGEX) $(1)
+restore_timestamp = touch -r $(1) $(2)
+install_python_script = $(call copy_executable,$(1),$(2)) \
+	&& $(call rewrite_shebang,$(2)) && $(call restore_timestamp,$(1),$(2));
+
 release-dir:
 	mkdir -p $(VERSIONED_NAME)
 
@@ -127,30 +133,21 @@ install: install-dirs
 	cp -a tuned $(DESTDIR)$(PYTHON_SITELIB)
 
 	# binaries
-	install -Dm 0755 tuned.py $(DESTDIR)/usr/sbin/tuned
-	install -Dm 0755 tuned-adm.py $(DESTDIR)/usr/sbin/tuned-adm
-	install -Dm 0755 tuned-gui.py $(DESTDIR)/usr/sbin/tuned-gui
-	sed -i -r -e $(SHEBANG_REWRITE_REGEX) \
-		$(DESTDIR)/usr/sbin/tuned \
-		$(DESTDIR)/usr/sbin/tuned-adm \
-		$(DESTDIR)/usr/sbin/tuned-gui
-	touch -r tuned.py $(DESTDIR)/usr/sbin/tuned
-	touch -r tuned-adm.py $(DESTDIR)/usr/sbin/tuned-adm
-	touch -r tuned-gui.py $(DESTDIR)/usr/sbin/tuned-gui
-	$(foreach file, $(wildcard systemtap/*), \
-		install -Dpm 0755 $(file) $(DESTDIR)/usr/sbin/$(notdir $(file));)
-	sed -i -r -e $(SHEBANG_REWRITE_REGEX) \
-		$(DESTDIR)/usr/sbin/varnetload
-	touch -r systemtap/varnetload $(DESTDIR)/usr/sbin/varnetload
+	$(call install_python_script,tuned.py,$(DESTDIR)/usr/sbin/tuned)
+	$(call install_python_script,tuned-adm.py,$(DESTDIR)/usr/sbin/tuned-adm)
+	$(call install_python_script,tuned-gui.py,$(DESTDIR)/usr/sbin/tuned-gui)
+
+	$(foreach file, diskdevstat netdevstat scomes, \
+		install -Dpm 0755 systemtap/$(file) $(DESTDIR)/usr/sbin/$(notdir $(file));)
+	$(call install_python_script, \
+		systemtap/varnetload, $(DESTDIR)/usr/sbin/varnetload)
 
 	# glade
 	install -Dpm 0644 tuned-gui.glade $(DESTDIR)$(DATADIR)/tuned/ui/tuned-gui.glade
 
 	# tools
-	install -Dm 0755 experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
-	sed -i -r -e $(SHEBANG_REWRITE_REGEX) \
-		$(DESTDIR)/usr/bin/powertop2tuned
-	touch -r experiments/powertop2tuned.py $(DESTDIR)/usr/bin/powertop2tuned
+	$(call install_python_script, \
+		 experiments/powertop2tuned.py, $(DESTDIR)/usr/bin/powertop2tuned)
 
 	# configuration files
 	install -Dpm 0644 tuned-main.conf $(DESTDIR)$(SYSCONFDIR)/tuned/tuned-main.conf
@@ -203,11 +200,8 @@ install: install-dirs
 
 	# libexec scripts
 	$(foreach file, $(wildcard libexec/*), \
-		install -Dm 0755 $(file) $(DESTDIR)/usr/libexec/tuned/$(notdir $(file)); \
-		sed -i -r -e $(SHEBANG_REWRITE_REGEX) \
-			$(DESTDIR)/usr/libexec/tuned/$(notdir $(file)); \
-		touch -r $(file) $(DESTDIR)/usr/libexec/tuned/$(notdir $(file)); \
-		)
+		$(call install_python_script, \
+			$(file), $(DESTDIR)/usr/libexec/tuned/$(notdir $(file))))
 
 	# icon
 	install -Dpm 0644 icons/tuned.svg $(DESTDIR)$(DATADIR)/icons/hicolor/scalable/apps/tuned.svg
