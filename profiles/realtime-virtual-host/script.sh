@@ -13,11 +13,6 @@ fi
 
 run_tsc_deadline_latency()
 {
-    if [ ! -f $KVM_LAPIC_FILE ]; then
-        echo "$KVM_LAPIC_FILE not found"
-        return 1
-    fi
-
     dir=`mktemp -d`
 
     for i in `seq 1000 500 7000`; do
@@ -27,6 +22,15 @@ run_tsc_deadline_latency()
             -display none -serial stdio -device pci-testdev \
             -kernel "$TSCDEADLINE_LATENCY"  \
             -cpu host | grep latency | cut -f 2 -d ":" > $dir/out
+
+	if [ ! -f $dir/out ]; then
+	    die running $TSCDEADLINE_LATENCY failed
+	fi
+
+	tmp=$(wc -l $dir/out | awk '{ print $1 }')
+	if [ $tmp -eq 0 ]; then
+	    die running $TSCDEADLINE_LATENCY failed
+	fi
 
         A=0
         while read l; do
@@ -40,17 +44,21 @@ run_tsc_deadline_latency()
 }
 
 start() {
-    python /usr/libexec/tuned/defirqaffinity.py "remove" "$TUNED_isolated_cores_expanded" &&
-    retval = "$?"
-
-    if [ ! $retval -eq 0 ]; then
-        return $retval
+    if ! /usr/libexec/tuned/defirqaffinity.py "remove" "$TUNED_isolated_cores_expanded"; then
+	die defirqaffinity.py remove failed
     fi
 
     setup_kvm_mod_low_latency
 
+    disable_ksm
+
+    # If CPU model has changed, clean the cache
     if [ -f $CACHE_CPU_FILE ]; then
         curmodel=`cat /proc/cpuinfo | grep "model name" | cut -f 2 -d ":" | uniq`
+	if [ -z "$curmodel" ]; then
+	    die failed to read CPU model
+	fi
+
         genmodel=`cat $CACHE_CPU_FILE`
 
         if [ "$curmodel" != "$genmodel" ]; then
@@ -59,27 +67,32 @@ start() {
         fi
     fi
 
+    # If the cache is empty, find the best lapic_timer_advance_ns value
+    # and cache it
 
-    if [ -f $KVM_LAPIC_FILE -a ! -f $CACHE_VALUE_FILE ]; then
+    if [ ! -f $KVM_LAPIC_FILE ]; then
+	die $KVM_LAPIC_FILE not found
+    fi
+
+    if [ ! -f $CACHE_VALUE_FILE ]; then
         if [ -f "$TSCDEADLINE_LATENCY" ]; then
              tempdir=`mktemp -d`
              isolatedcpu=`echo "$TUNED_isolated_cores_expanded" | cut -f 1 -d ","`
              run_tsc_deadline_latency $isolatedcpu > $tempdir/lat.out
-             sh ./find-lapictscdeadline-optimal.sh $tempdir/lat.out > $tempdir/opt.out
-             if [ $? -eq 0 ]; then
-                  echo `cat $tempdir/opt.out | cut -f 2 -d ":"` > $CACHE_VALUE_FILE
-                  curmodel=`cat /proc/cpuinfo | grep "model name" | cut -f 2 -d ":" | uniq`
-                  echo "$curmodel" > $CACHE_CPU_FILE
-             fi
+             if ! ./find-lapictscdeadline-optimal.sh $tempdir/lat.out > $tempdir/opt.out; then
+		die could not find optimal latency
+	     fi
+             echo `cat $tempdir/opt.out | cut -f 2 -d ":"` > $CACHE_VALUE_FILE
+             curmodel=`cat /proc/cpuinfo | grep "model name" | cut -f 2 -d ":" | uniq`
+             echo "$curmodel" > $CACHE_CPU_FILE
         fi
     fi
-    if [ -f $KVM_LAPIC_FILE -a -f $CACHE_VALUE_FILE ]; then
+
+    if [ -f $CACHE_VALUE_FILE ]; then
         echo `cat $CACHE_VALUE_FILE` > $KVM_LAPIC_FILE
     fi
 
-    disable_ksm
-
-    return $retval
+    return 0
 }
 
 stop() {
