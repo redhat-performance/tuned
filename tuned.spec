@@ -21,6 +21,7 @@
 %if %{with python3}
 %global _py python3
 %else
+%{!?python2_sitelib:%global python2_sitelib %{python_sitelib}}
 %if 0%{?rhel} && 0%{?rhel} < 8
 %global _py python
 %else
