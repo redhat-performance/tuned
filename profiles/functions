@@ -562,6 +562,11 @@ enable_ksm()
 	done
 }
 
+die() {
+	echo "$@" >&2
+	exit 1
+}
+
 #
 # ACTION PROCESSING
 #
