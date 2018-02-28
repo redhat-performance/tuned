@@ -199,7 +199,7 @@ class SchedulerPlugin(base.Plugin):
 			if process["stat"].is_bound_to_cpu():
 				if process["stat"]["state"] == "Z":
 					log.debug("Affinity of zombie task with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
-				elif len(process["cmdline"]) == 0:
+				elif process["stat"]["flags"] & procfs.pidstat.PF_KTHREAD != 0:
 					log.debug("Affinity of kernel thread with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
 				else:
 					log.warn("Affinity of task with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
