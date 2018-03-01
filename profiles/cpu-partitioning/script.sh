@@ -2,7 +2,7 @@
 
 . /usr/lib/tuned/functions
 
-rebalance_cpus_file=$STORAGE/no-rebalance-cpus.txt
+no_balance_cpus_file=$STORAGE/no-balance-cpus.txt
 
 change_sd_balance_bit()
 {
@@ -11,7 +11,7 @@ change_sd_balance_bit()
     local file=
     local cpu=
 
-    for cpu in $(cat $rebalance_cpus_file); do
+    for cpu in $(cat $no_balance_cpus_file); do
         for file in $(find /proc/sys/kernel/sched_domain/cpu$cpu -name flags -print); do
             flags_cur=$(cat $file)
             if [ $set_bit -eq 1 ]; then
@@ -24,12 +24,12 @@ change_sd_balance_bit()
     done
 }
 
-disable_rebalance_domains()
+disable_balance_domains()
 {
     change_sd_balance_bit 0
 }
 
-enable_rebalance_domains()
+enable_balance_domains()
 {
     change_sd_balance_bit 1
 }
@@ -46,8 +46,8 @@ start() {
     setup_kvm_mod_low_latency
     disable_ksm
 
-    echo "$TUNED_no_balance_cores_expanded" | sed 's/,/ /g' > $rebalance_cpus_file
-    disable_rebalance_domains
+    echo "$TUNED_no_balance_cores_expanded" | sed 's/,/ /g' > $no_balance_cpus_file
+    disable_balance_domains
     return "$?"
 }
 
@@ -59,7 +59,7 @@ stop() {
         teardown_kvm_mod_low_latency
     fi
     enable_ksm
-    enable_rebalance_domains
+    enable_balance_domains
     return "$?"
 }
 
