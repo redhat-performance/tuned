@@ -173,7 +173,7 @@ Requires: tuna
 %if 0%{?rhel} == 7
 Requires: qemu-kvm-tools-rhev
 %else
-Requires: tuned-profiles-nfv-host-bin
+Recommends: tuned-profiles-nfv-host-bin
 %endif
 
 %description profiles-nfv-host
