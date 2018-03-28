@@ -31,7 +31,7 @@ class commands:
 		return {"Y":"1", "YES":"1", "T":"1", "TRUE":"1", "N":"0", "NO":"0", "F":"0", "FALSE":"0"}.get(v, value)
 
 	def remove_ws(self, s):
-		return re.sub('\s+', ' ', s).strip()
+		return re.sub('\s+', ' ', str(s)).strip()
 
 	def unquote(self, v):
 		return re.sub("^\"(.*)\"$", r"\1", v)

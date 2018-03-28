@@ -44,7 +44,7 @@ class SysctlPlugin(base.Plugin):
 			original_value = self._read_sysctl(option)
 			if original_value != None:
 				instance._sysctl_original[option] = original_value
-			self._write_sysctl(option, self._variables.expand(self._cmd.unquote(value)))
+			self._write_sysctl(option, self._process_assignment_modifiers(self._variables.expand(self._cmd.unquote(value)), original_value))
 
 		self._storage.set("options", instance._sysctl_original)
 
@@ -58,8 +58,10 @@ class SysctlPlugin(base.Plugin):
 		ignore_missing = True
 		for option, value in list(instance._sysctl.items()):
 			curr_val = self._read_sysctl(option)
-			if self._verify_value(option, self._cmd.remove_ws(self._variables.expand(value)), curr_val, ignore_missing) == False:
-				ret = False
+			value = self._process_assignment_modifiers(self._variables.expand(value), curr_val)
+			if value is not None:
+				if self._verify_value(option, self._cmd.remove_ws(value), curr_val, ignore_missing) == False:
+					ret = False
 		return ret
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
