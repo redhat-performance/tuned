@@ -60,7 +60,7 @@ class SysfsPlugin(base.Plugin):
 		return re.match(r"^/sys/.*", sysfs_file)
 
 	def _read_sysfs(self, sysfs_file):
-		data = self._cmd.read_file(sysfs_file)
+		data = self._cmd.read_file(sysfs_file).strip()
 		if len(data) > 0:
 			return self._cmd.get_active_option(data, False)
 		else:

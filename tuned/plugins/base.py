@@ -490,8 +490,8 @@ class Plugin(object):
 
 	def _norm_value(self, value):
 		v = self._cmd.unquote(str(value))
-		if re.match(r'\s*(0+,)+[\da-fA-F]*\s*$', v):
-			return re.sub(r'^\s*(0+,)+', "", v)
+		if re.match(r'\s*(0+,?)+([\da-fA-F]*,?)*\s*$', v):
+			return re.sub(r'^\s*(0+,?)+', "", v)
 		return v
 
 	def _verify_value(self, name, new_value, current_value, ignore_missing, device = None):
