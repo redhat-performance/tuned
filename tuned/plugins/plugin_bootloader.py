@@ -92,6 +92,9 @@ class BootloaderPlugin(base.Plugin):
 		return self._cmd.add_modify_option_in_file(consts.BOOT_CMDLINE_FILE, d)
 
 	def _remove_grub2_tuning(self):
+		if self._grub2_cfg_file_name is None:
+			log.error("cannot find grub.cfg to patch, you need to regenerate it by hand using grub2-mkconfig")
+			return
 		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : "", consts.BOOT_CMDLINE_INITRD_ADD_VAR : ""})
 		self._cmd.add_modify_option_in_file(self._grub2_cfg_file_name, {"set\s+" + consts.GRUB2_TUNED_VAR : "", "set\s+" + consts.GRUB2_TUNED_INITRD_VAR : ""}, add = False)
 		if self._initrd_dst_img_val is not None:
