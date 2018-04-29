@@ -1,4 +1,5 @@
 import collections
+import traceback
 import tuned.exceptions
 import tuned.logs
 import tuned.plugins.exceptions
@@ -69,13 +70,25 @@ class Manager(object):
 			plugin.initialize_instance(new_instance)
 			self._instances.append(new_instance)
 
+	def _try_call(self, caller, exc_ret, f, *args, **kwargs):
+		try:
+			return f(*args, **kwargs)
+		except Exception as e:
+			trace = traceback.format_exc()
+			log.error("BUG: Unhandled exception in %s: %s"
+					% (caller, str(e)))
+			log.debug(trace)
+			return exc_ret
+
 	def destroy_all(self):
 		for instance in self._instances:
 			log.debug("destroying instance %s" % instance.name)
-			instance.plugin.destroy_instance(instance)
+			self._try_call("destroy_all", None,
+					instance.plugin.destroy_instance,
+					instance)
 		for plugin in self._plugins:
 			log.debug("cleaning plugin '%s'" % plugin.name)
-			plugin.cleanup()
+			self._try_call("destroy_all", None, plugin.cleanup)
 
 		del self._plugins[:]
 		del self._instances[:]
@@ -83,22 +96,26 @@ class Manager(object):
 	def update_monitors(self):
 		for monitor in self._monitors_repository.monitors:
 			log.debug("updating monitor %s" % monitor)
-			monitor.update()
+			self._try_call("update_monitors", None, monitor.update)
 
 	def start_tuning(self):
 		for instance in self._instances:
-			instance.apply_tuning()
+			self._try_call("start_tuning", None,
+					instance.apply_tuning)
 
 	def verify_tuning(self, ignore_missing):
 		ret = True
 		for instance in self._instances:
-			if instance.verify_tuning(ignore_missing) == False:
+			res = self._try_call("verify_tuning", False,
+					instance.verify_tuning, ignore_missing)
+			if res == False:
 				ret = False
 		return ret
 
 	def update_tuning(self):
 		for instance in self._instances:
-			instance.update_tuning()
+			self._try_call("update_tuning", None,
+					instance.update_tuning)
 
 	# full_rollback is a helper telling plugins whether soft or full roll
 	# back is needed, e.g. for bootloader plugin we need e.g grub.cfg
@@ -110,4 +127,5 @@ class Manager(object):
 	# party config files, etc.
 	def stop_tuning(self, full_rollback = False):
 		for instance in reversed(self._instances):
-			instance.unapply_tuning(full_rollback)
+			self._try_call("stop_tuning", None,
+					instance.unapply_tuning, full_rollback)
