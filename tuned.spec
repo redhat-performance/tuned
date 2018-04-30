@@ -1,5 +1,3 @@
-%global _binaries_in_noarch_packages_terminate_build 0
-
 %bcond_with snapshot
 
 %if 0%{?fedora}
@@ -34,8 +32,6 @@
 %global git_date %(date +'%Y%m%d')
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
-
-%global kvm_tests_snap 20171020
 
 #%%global prerelease rc
 #%%global prereleasenum 2
