@@ -56,7 +56,7 @@ Requires: %{_py}-decorator, %{_py}-pyudev, %{_py}-configobj
 Requires: %{_py}-schedutils, %{_py}-linux-procfs, %{_py}-perf
 # requires for packages with inconsistent python2/3 names
 %if %{with python3}
-Requires: python3-dbus, python3-pygobject3-base
+Requires: python3-dbus, python3-gobject-base
 %else
 Requires: dbus-python, pygobject3-base
 %endif
@@ -87,7 +87,7 @@ Requires: %{name} = %{version}-%{release}
 Requires: powertop, polkit
 # requires for packages with inconsistent python2/3 names
 %if %{with python3}
-Requires: python3-pygobject3-base
+Requires: python3-gobject-base
 %else
 Requires: pygobject3-base
 %endif
