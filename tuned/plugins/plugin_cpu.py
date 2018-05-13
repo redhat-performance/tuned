@@ -282,8 +282,18 @@ class CPULatencyPlugin(base.Plugin):
 				v = s
 		return v
 
+	# Before Linux 4.13
 	def _energy_perf_policy_to_human(self, s):
 		return {0:"performance", 6:"normal", 15:"powersave"}.get(self._try_parse_num(s), s)
+
+	# Since Linux 4.13
+	def _energy_perf_policy_to_human_v2(self, s):
+		return {0:"performance",
+				4:"balance-performance",
+				6:"normal",
+				8:"balance-power",
+				15:"power",
+				}.get(self._try_parse_num(s), s)
 
 	@command_get("energy_perf_bias")
 	def _get_energy_perf_bias(self, device, ignore_missing=False):
@@ -299,6 +309,9 @@ class CPULatencyPlugin(base.Plugin):
 					l = line.split()
 					if len(l) == 2:
 						energy_perf_bias = self._energy_perf_policy_to_human(l[1])
+						break
+					elif len(l) == 3:
+						energy_perf_bias = self._energy_perf_policy_to_human_v2(l[2])
 						break
 
 		return energy_perf_bias
