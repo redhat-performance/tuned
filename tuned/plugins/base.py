@@ -515,6 +515,13 @@ class Plugin(object):
 					ret = int(new_value, 16) == int(current_value, 16)
 				except ValueError:
 					ret = str(new_value) == str(current_value)
+					if not ret:
+						vals = str(new_value).split('|')
+						for val in vals:
+							val = val.strip()
+							ret = val == current_value
+							if ret:
+								break
 		if ret:
 			if device is None:
 				log.info(consts.STR_VERIFY_PROFILE_VALUE_OK % (name, str(current_value).strip()))
