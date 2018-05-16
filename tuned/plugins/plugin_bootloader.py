@@ -188,7 +188,12 @@ class BootloaderPlugin(base.Plugin):
 		if self._initrd_dst_img_val is None:
 			self._initrd_dst_img_val = os.path.join(consts.BOOT_DIR, os.path.basename(name))
 
+	def _check_petitboot(self):
+		return os.path.isdir(consts.PETITBOOT_DETECT_DIR)
+
 	def _install_initrd(self, img):
+		if self._check_petitboot():
+			log.warn("Detected Petitboot which doesn't support initrd overlays. The initrd overlay will be ignored by bootloader.")
 		log.info("installing initrd image as '%s'" % self._initrd_dst_img_val)
 		img_name = os.path.basename(self._initrd_dst_img_val)
 		if not self._cmd.copy(img, self._initrd_dst_img_val):

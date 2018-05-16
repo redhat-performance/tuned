@@ -34,6 +34,7 @@ INITRD_IMAGE_DIR = "/boot"
 BOOT_CMDLINE_TUNED_VAR = "TUNED_BOOT_CMDLINE"
 BOOT_CMDLINE_INITRD_ADD_VAR = "TUNED_BOOT_INITRD_ADD"
 BOOT_CMDLINE_FILE = "/etc/tuned/bootcmdline"
+PETITBOOT_DETECT_DIR = "/sys/firmware/opal"
 
 # modules plugin configuration
 MODULES_FILE = "/etc/modprobe.d/tuned.conf"
