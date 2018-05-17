@@ -355,7 +355,7 @@ class SchedulerPlugin(base.Plugin):
 			return schedutils.get_affinity(pid)
 		# Workaround for old python-schedutils which incorrectly raised error
 		except (SystemError, OSError) as e:
-			if e[0] == 3:
+			if hasattr(e, "errno") and e.errno == errno.ESRCH:
 				log.debug("Unable to read affinity for PID %s, the task vanished." % pid)
 				return None
 			log.error("unable to get affinity for PID '%s': %s" % (str(pid), e))
@@ -367,7 +367,7 @@ class SchedulerPlugin(base.Plugin):
 			schedutils.set_affinity(pid, affinity)
 		# Workaround for old python-schedutils which incorrectly raised error
 		except (SystemError, OSError) as e:
-			if e[0] == 3:
+			if hasattr(e, "errno") and e.errno == errno.ESRCH:
 				log.debug("Unable to set affinity for PID %s, the task vanished." % pid)
 				return False
 			log.error("unable to set affinity '%s' for PID '%s': %s" % (str(affinity), str(pid), e))
