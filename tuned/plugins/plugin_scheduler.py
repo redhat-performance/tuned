@@ -378,8 +378,12 @@ class SchedulerPlugin(base.Plugin):
 
 	def _set_all_obj_affinity(self, objs, affinity, threads = False, intersect = False):
 		_affinity = affinity
-		for obj in objs:
-			if self._affinity_changeable(obj, process = objs[obj]) != 1:
+		psl = [v for v in objs if re.search(self._ps_whitelist, self._get_stat_comm(v)) is not None]
+		if self._ps_blacklist != "":
+			psl = [v for v in psl if re.search(self._ps_blacklist, self._get_stat_comm(v)) is None]
+		psd = dict([(v.pid, v) for v in psl])
+		for obj in psd:
+			if self._affinity_changeable(obj, process = psd[obj]) != 1:
 				continue
 			prev_affinity = self._get_affinity2(obj)
 			if prev_affinity is None:
@@ -390,8 +394,8 @@ class SchedulerPlugin(base.Plugin):
 				if not self._set_affinity2(obj, _affinity):
 					continue
 			# process threads
-			if not threads and "threads" in objs[obj]:
-				self._set_all_obj_affinity(dict(list(objs[obj]["threads"].items())), affinity, True, intersect)
+			if not threads and "threads" in psd[obj]:
+				self._set_all_obj_affinity(psd[obj]["threads"].values(), affinity, True, intersect)
 
 	def _get_stat_comm(self, o):
 		try:
@@ -404,11 +408,7 @@ class SchedulerPlugin(base.Plugin):
 		affinity_hex = self._cmd.cpulist2hex(_affinity)
 		ps = procfs.pidstats()
 		ps.reload_threads()
-		psl = [v for v in list(ps.values()) if re.search(self._ps_whitelist, self._get_stat_comm(v)) is not None]
-		if self._ps_blacklist != "":
-			psl = [v for v in psl if re.search(self._ps_blacklist, self._get_stat_comm(v)) is None]
-		psd = dict([(v.pid, v) for v in psl])
-		self._set_all_obj_affinity(psd, affinity, False, intersect)
+		self._set_all_obj_affinity(ps.values(), affinity, False, intersect)
 
 		# process IRQs
 		irqs = procfs.interrupts()
