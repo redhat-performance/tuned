@@ -142,14 +142,13 @@ class SchedulerPlugin(base.Plugin):
 		log.debug("read scheduler policy '%s' and priority '%s' for pid '%s'" % (sched, prio, pid))
 		return (sched, prio)
 
-	def _get_affinity(self, pid, no_error = False):
-		(rc, out, err_msg) = self._cmd.execute(["taskset", "-p", str(pid)], no_errors = [1] if no_error else [], return_err = True)
+	def _get_affinity(self, pid):
+		(rc, out, err_msg) = self._cmd.execute(["taskset", "-p", str(pid)], no_errors = [], return_err = True)
 		if rc != 0:
-			if rc != 1 or not no_error:
-				if self._pid_exists(pid):
-					log.error(err_msg)
-				else:
-					log.debug("Unable to read affinity for PID %s, the task vanished." % pid)
+			if rc != 1 or self._pid_exists(pid):
+				log.error(err_msg)
+			else:
+				log.debug("Unable to read affinity for PID %s, the task vanished." % pid)
 			return None
 		v = self._parse_val(out.split("\n", 1)[0])
 		log.debug("read affinity '%s' for pid '%s'" % (v, pid))
@@ -230,7 +229,7 @@ class SchedulerPlugin(base.Plugin):
 	def _tune_process(self, pid, cmd, sched, prio, affinity, no_error = False):
 		#rt[0] - prev_sched, rt[1] - prev_prio
 		rt = self._get_rt(pid)
-		prev_affinity = self._get_affinity(pid, no_error)
+		prev_affinity = self._get_affinity(pid)
 		if prev_affinity is not None and rt is not None and len(rt) == 2 and rt[0] is not None and rt[1] is not None:
 			self._scheduler_original[pid] = (cmd, rt[0], rt[1], prev_affinity)
 		self._set_rt(pid, self._schedcfg2param(sched), prio, no_error)
