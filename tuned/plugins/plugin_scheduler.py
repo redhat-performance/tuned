@@ -18,6 +18,14 @@ import errno
 
 log = tuned.logs.get()
 
+class SchedulerParams(object):
+	def __init__(self, cmdline = None, scheduler = None, priority = None,
+			affinity = None):
+		self.cmdline = cmdline
+		self.scheduler = scheduler
+		self.priority = priority
+		self.affinity = affinity
+
 # TODO move from cmdline tools to schedutils and consolidate the code
 class SchedulerPlugin(base.Plugin):
 	"""
@@ -108,7 +116,9 @@ class SchedulerPlugin(base.Plugin):
 		(rc, out) = self._cmd.execute(["ps", "-eopid,cmd", "--no-headers"])
 		if rc != 0 or len(out) <= 0:
 			return None
-		return dict([(int(pid_cmd1[0].lstrip()), pid_cmd1[1].lstrip()) for pid_cmd1 in [i for i in [s.split(None, 1) for s in out.split("\n")] if len(i) == 2]])
+		lines = out.split("\n")
+		pid_cmd_list = [i for i in [s.split(None, 1) for s in lines] if len(i) == 2]
+		return dict([(int(pid.lstrip()), cmd.lstrip()) for pid, cmd in pid_cmd_list])
 
 	def _parse_val(self, val):
 		v = val.split(":", 1)
@@ -231,7 +241,11 @@ class SchedulerPlugin(base.Plugin):
 		rt = self._get_rt(pid)
 		prev_affinity = self._get_affinity(pid)
 		if prev_affinity is not None and rt is not None and len(rt) == 2 and rt[0] is not None and rt[1] is not None:
-			self._scheduler_original[pid] = (cmd, rt[0], rt[1], prev_affinity)
+			self._scheduler_original[pid] = SchedulerParams(
+					cmdline = cmd,
+					scheduler = rt[0],
+					priority = rt[1],
+					affinity = prev_affinity)
 		self._set_rt(pid, self._schedcfg2param(sched), prio)
 		if affinity != "*":
 			self._set_affinity(pid, affinity)
@@ -242,30 +256,31 @@ class SchedulerPlugin(base.Plugin):
 		if ps is None:
 			log.error("error applying tuning, cannot get information about running processes")
 			return
-		instance._sched_cfg = [(option_value[0], str(option_value[1]).split(":", 4)) for option_value in list(instance._scheduler.items())]
-		buf = [option_vals3 for option_vals3 in instance._sched_cfg if re.match(r"group\.", option_vals3[0]) and len(option_vals3[1]) == 5]
+		instance._sched_cfg = [(option, str(value).split(":", 4)) for option, value in instance._scheduler.items()]
+		buf = [(option, vals) for option, vals in instance._sched_cfg if re.match(r"group\.", option) and len(vals) == 5]
 		instance._sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
 		sched_all = dict()
 		# for runtime tunning
 		instance._sched_lookup = {}
-		for option, vals in instance._sched_cfg:
+		for option, (rule_prio, scheduler, priority, affinity, regex) \
+				in instance._sched_cfg:
 			try:
-				r = re.compile(vals[4])
+				r = re.compile(regex)
 			except re.error as e:
-				log.error("error compiling regular expression: '%s'" % str(vals[4]))
+				log.error("error compiling regular expression: '%s'" % str(regex))
 				continue
-			processes = [pid_cmd2 for pid_cmd2 in list(ps.items()) if re.search(r, pid_cmd2[1]) is not None]
-			#cmd - process name, option - group name, vals[0] - rule prio, vals[1] - sched, vals[2] - prio,
-			#vals[3] - affinity, vals[4] - regex
-			sched = dict([(pid_cmd[0], (pid_cmd[1], option, vals[1], vals[2], vals[3], vals[4])) for pid_cmd in processes])
+			processes = [(pid, cmd) for pid, cmd in ps.items() if re.search(r, cmd) is not None]
+			#cmd - process name, option - group name
+			sched = dict([(pid, (cmd, option, scheduler, priority, affinity, regex))
+					for pid, cmd in processes])
 			sched_all.update(sched)
-			v4 = str(vals[4]).replace("(", r"\(")
-			v4 = v4.replace(")", r"\)")
-			instance._sched_lookup[v4] = [vals[1], vals[2], vals[3]]
-		for pid, vals in list(sched_all.items()):
-			#vals[0] - process name, vals[1] - rule prio, vals[2] - sched, vals[3] - prio, vals[4] - affinity,
-			#vals[5] - regex
-			self._tune_process(pid, vals[0], vals[2], vals[3], vals[4])
+			regex = str(regex).replace("(", r"\(")
+			regex = regex.replace(")", r"\)")
+			instance._sched_lookup[regex] = [scheduler, priority, affinity]
+		for pid, (cmd, option, scheduler, priority, affinity, regex) \
+				in sched_all.items():
+			self._tune_process(pid, cmd, scheduler,
+					priority, affinity)
 		storage_key = self._storage_key()
 		self._storage.set(storage_key, self._scheduler_original)
 		if self._daemon and instance._runtime_tuning:
@@ -274,12 +289,13 @@ class SchedulerPlugin(base.Plugin):
 
 	def _restore_ps_affinity(self):
 		ps = self.get_processes()
-		for pid, vals in list(self._scheduler_original.items()):
+		for pid, orig_params in self._scheduler_original.items():
 			# if command line for the pid didn't change, it's very probably the same process
-			if pid not in ps or ps[int(pid)] != vals[0]:
+			if pid not in ps or ps[int(pid)] != orig_params.cmdline:
 				continue
-			self._set_rt(pid, self._sched2param(vals[1]), vals[2])
-			self._set_affinity(pid, vals[3])
+			self._set_rt(pid, self._sched2param(orig_params.scheduler),
+					orig_params.priority)
+			self._set_affinity(pid, orig_params.affinity)
 		self._scheduler_original = {}
 		self._storage.unset(self._storage_key())
 
@@ -298,8 +314,9 @@ class SchedulerPlugin(base.Plugin):
 		v = self._cmd.re_lookup(instance._sched_lookup, cmd, r)
 		if v is not None and not pid in self._scheduler_original:
 			log.debug("tuning new process '%s' with pid '%s' by '%s'" % (cmd, pid, str(v)))
-			#v[0] - sched, v[1] - prio, v[2] - affinity
-			self._tune_process(pid, cmd, v[0], v[1], v[2])
+			(sched, prio, affinity) = v
+			self._tune_process(pid, cmd, sched, prio,
+					affinity)
 			storage_key = self._storage_key()
 			self._storage.set(storage_key, self._scheduler_original)
 
