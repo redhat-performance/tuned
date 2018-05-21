@@ -102,11 +102,11 @@ class SchedulerPlugin(base.Plugin):
 		}
 
 	def get_process(self, pid):
-		cmd = self._cmd.read_file("/proc/" + pid + "/comm", no_error = True)
+		cmd = self._cmd.read_file("/proc/" + str(pid) + "/comm", no_error = True)
 		if cmd == "":
 			return ""
 		cmd = cmd.strip()
-		cmdline = self._cmd.read_file("/proc/" + pid + "/cmdline", no_error = True)
+		cmdline = self._cmd.read_file("/proc/" + str(pid) + "/cmdline", no_error = True)
 		if cmdline == "":
 			return "[" + cmd + "]"
 		else:
@@ -140,7 +140,7 @@ class SchedulerPlugin(base.Plugin):
 			if self._pid_exists(pid):
 				log.error(err_msg)
 			else:
-				log.debug("Unable to read scheduling parameters for PID %s, the task vanished." % pid)
+				log.debug("Unable to read scheduling parameters for PID %d, the task vanished." % pid)
 			return None
 		vals = out.split("\n", 1)
 		if len(vals) > 1:
@@ -149,7 +149,7 @@ class SchedulerPlugin(base.Plugin):
 		else:
 			sched = None
 			prio = None
-		log.debug("read scheduler policy '%s' and priority '%s' for pid '%s'" % (sched, prio, pid))
+		log.debug("read scheduler policy '%s' and priority '%s' for pid '%d'" % (sched, prio, pid))
 		return (sched, prio)
 
 	def _get_affinity(self, pid):
@@ -158,10 +158,10 @@ class SchedulerPlugin(base.Plugin):
 			if rc != 1 or self._pid_exists(pid):
 				log.error(err_msg)
 			else:
-				log.debug("Unable to read affinity for PID %s, the task vanished." % pid)
+				log.debug("Unable to read affinity for PID %d, the task vanished." % pid)
 			return None
 		v = self._parse_val(out.split("\n", 1)[0])
-		log.debug("read affinity '%s' for pid '%s'" % (v, pid))
+		log.debug("read affinity '%s' for pid '%d'" % (v, pid))
 		return v
 
 	def _schedcfg2param(self, sched):
@@ -182,17 +182,17 @@ class SchedulerPlugin(base.Plugin):
 			return
 		if sched is not None and len(sched) > 0:
 			schedl = [sched]
-			log.debug("setting scheduler policy to '%s' for PID '%s'" % (sched,  pid))
+			log.debug("setting scheduler policy to '%s' for PID '%d'" % (sched,  pid))
 		else:
 			schedl = []
-		log.debug("setting scheduler priority to '%s' for PID '%s'" % (prio, pid))
+		log.debug("setting scheduler priority to '%s' for PID '%d'" % (prio, pid))
 		(ret, out, err_msg) = self._cmd.execute(["chrt"] + schedl + ["-p", str(prio), str(pid)], no_errors = [], return_err = True)
 		if ret == 0:
 			return
 		if self._pid_exists(pid):
 			log.error(err_msg)
 		else:
-			log.debug("Unable to set scheduling parameters for PID %s, the task vanished." % pid)
+			log.debug("Unable to set scheduling parameters for PID %d, the task vanished." % pid)
 
 	# Return codes:
 	# 0 - Affinity is fixed
@@ -205,29 +205,29 @@ class SchedulerPlugin(base.Plugin):
 				process = procfs.process(pid)
 			if process["stat"].is_bound_to_cpu():
 				if process["stat"]["state"] == "Z":
-					log.debug("Affinity of zombie task with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
+					log.debug("Affinity of zombie task with PID %d cannot be changed, the task's affinity mask is fixed." % pid)
 				elif process["stat"]["flags"] & procfs.pidstat.PF_KTHREAD != 0:
-					log.debug("Affinity of kernel thread with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
+					log.debug("Affinity of kernel thread with PID %d cannot be changed, the task's affinity mask is fixed." % pid)
 				else:
-					log.warn("Affinity of task with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
+					log.warn("Affinity of task with PID %d cannot be changed, the task's affinity mask is fixed." % pid)
 				return 0
 			else:
 				return 1
 		except (OSError, IOError) as e:
 			if e.errno == errno.ENOENT or e.errno == errno.ESRCH:
-				log.debug("Unable to set affinity for PID %s, the task vanished." % pid)
+				log.debug("Unable to set affinity for PID %d, the task vanished." % pid)
 				return -1
 			else:
-				log.error("Failed to get task info for PID %s: %s" % (pid, str(e)))
+				log.error("Failed to get task info for PID %d: %s" % (pid, str(e)))
 				return -2
 		except (AttributeError, KeyError) as e:
-			log.error("Failed to get task info for PID %s: %s" % (pid, str(e)))
+			log.error("Failed to get task info for PID %d: %s" % (pid, str(e)))
 			return -2
 
 	def _set_affinity(self, pid, affinity):
 		if pid is None or affinity is None:
 			return
-		log.debug("setting affinity to '%s' for PID '%s'" % (affinity, pid))
+		log.debug("setting affinity to '%s' for PID '%d'" % (affinity, pid))
 		(ret, out, err_msg) = self._cmd.execute(["taskset", "-p", str(affinity), str(pid)], no_errors = [], return_err = True)
 		if ret == 0:
 			return
@@ -291,7 +291,7 @@ class SchedulerPlugin(base.Plugin):
 		ps = self.get_processes()
 		for pid, orig_params in self._scheduler_original.items():
 			# if command line for the pid didn't change, it's very probably the same process
-			if pid not in ps or ps[int(pid)] != orig_params.cmdline:
+			if pid not in ps or ps[pid] != orig_params.cmdline:
 				continue
 			self._set_rt(pid, self._sched2param(orig_params.scheduler),
 					orig_params.priority)
@@ -313,7 +313,7 @@ class SchedulerPlugin(base.Plugin):
 			return
 		v = self._cmd.re_lookup(instance._sched_lookup, cmd, r)
 		if v is not None and not pid in self._scheduler_original:
-			log.debug("tuning new process '%s' with pid '%s' by '%s'" % (cmd, pid, str(v)))
+			log.debug("tuning new process '%s' with PID '%d' by '%s'" % (cmd, pid, str(v)))
 			(sched, prio, affinity) = v
 			self._tune_process(pid, cmd, sched, prio,
 					affinity)
@@ -323,7 +323,7 @@ class SchedulerPlugin(base.Plugin):
 	def _remove_pid(self, instance, pid):
 		if pid in self._scheduler_original:
 			del self._scheduler_original[pid]
-			log.debug("removed PID %s from the rollback database" % pid)
+			log.debug("removed PID %d from the rollback database" % pid)
 			storage_key = self._storage_key()
 			self._storage.set(storage_key, self._scheduler_original)
 
@@ -343,9 +343,9 @@ class SchedulerPlugin(base.Plugin):
 						if event:
 							read_events = True
 							if event.type == perf.RECORD_COMM:
-								self._add_pid(instance, str(event.pid), r)
+								self._add_pid(instance, int(event.pid), r)
 							elif event.type == perf.RECORD_EXIT:
-								self._remove_pid(instance, str(event.pid))
+								self._remove_pid(instance, int(event.pid))
 
 	@command_custom("ps_whitelist", per_device = False)
 	def _ps_whitelist(self, enabling, value, verify, ignore_missing):
@@ -370,9 +370,9 @@ class SchedulerPlugin(base.Plugin):
 		# Workaround for old python-schedutils which incorrectly raised error
 		except (SystemError, OSError) as e:
 			if hasattr(e, "errno") and e.errno == errno.ESRCH:
-				log.debug("Unable to read affinity for PID %s, the task vanished." % pid)
+				log.debug("Unable to read affinity for PID %d, the task vanished." % pid)
 				return None
-			log.error("unable to get affinity for PID '%s': %s" % (str(pid), e))
+			log.error("unable to get affinity for PID '%d': %s" % (pid, e))
 			return None
 
 	# TODO: merge with _set_affinity
@@ -382,9 +382,9 @@ class SchedulerPlugin(base.Plugin):
 		# Workaround for old python-schedutils which incorrectly raised error
 		except (SystemError, OSError) as e:
 			if hasattr(e, "errno") and e.errno == errno.ESRCH:
-				log.debug("Unable to set affinity for PID %s, the task vanished." % pid)
+				log.debug("Unable to set affinity for PID %d, the task vanished." % pid)
 				return False
-			log.error("unable to set affinity '%s' for PID '%s': %s" % (str(affinity), str(pid), e))
+			log.error("unable to set affinity '%s' for PID '%d': %s" % (str(affinity), pid, e))
 			return False
 		return True
 
