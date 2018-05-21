@@ -167,7 +167,7 @@ class SchedulerPlugin(base.Plugin):
 		except KeyError:
 			return ""
 
-	def _set_rt(self, pid, sched, prio, no_error = False):
+	def _set_rt(self, pid, sched, prio):
 		if pid is None or prio is None:
 			return
 		if sched is not None and len(sched) > 0:
@@ -176,8 +176,8 @@ class SchedulerPlugin(base.Plugin):
 		else:
 			schedl = []
 		log.debug("setting scheduler priority to '%s' for PID '%s'" % (prio, pid))
-		(ret, out, err_msg) = self._cmd.execute(["chrt"] + schedl + ["-p", str(prio), str(pid)], no_errors = [1] if no_error else [], return_err = True)
-		if ret == 0 or (ret == 1 and no_error):
+		(ret, out, err_msg) = self._cmd.execute(["chrt"] + schedl + ["-p", str(prio), str(pid)], no_errors = [], return_err = True)
+		if ret == 0:
 			return
 		if self._pid_exists(pid):
 			log.error(err_msg)
@@ -226,13 +226,13 @@ class SchedulerPlugin(base.Plugin):
 			log.error(err_msg)
 
 	#tune process and store previous values
-	def _tune_process(self, pid, cmd, sched, prio, affinity, no_error = False):
+	def _tune_process(self, pid, cmd, sched, prio, affinity):
 		#rt[0] - prev_sched, rt[1] - prev_prio
 		rt = self._get_rt(pid)
 		prev_affinity = self._get_affinity(pid)
 		if prev_affinity is not None and rt is not None and len(rt) == 2 and rt[0] is not None and rt[1] is not None:
 			self._scheduler_original[pid] = (cmd, rt[0], rt[1], prev_affinity)
-		self._set_rt(pid, self._schedcfg2param(sched), prio, no_error)
+		self._set_rt(pid, self._schedcfg2param(sched), prio)
 		if affinity != "*":
 			self._set_affinity(pid, affinity)
 
@@ -301,7 +301,7 @@ class SchedulerPlugin(base.Plugin):
 		if v is not None and not pid in self._scheduler_original:
 			log.debug("tuning new process '%s' with pid '%s' by '%s'" % (cmd, pid, str(v)))
 			#v[0] - sched, v[1] - prio, v[2] - affinity
-			self._tune_process(pid, cmd, v[0], v[1], v[2], no_error = True)
+			self._tune_process(pid, cmd, v[0], v[1], v[2])
 			storage_key = self._storage_key()
 			self._storage.set(storage_key, self._scheduler_original)
 
