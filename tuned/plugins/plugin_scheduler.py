@@ -214,12 +214,12 @@ class SchedulerPlugin(base.Plugin):
 			log.error("Failed to get task info for PID %s: %s" % (pid, str(e)))
 			return -2
 
-	def _set_affinity(self, pid, affinity, no_error = False):
+	def _set_affinity(self, pid, affinity):
 		if pid is None or affinity is None:
 			return
 		log.debug("setting affinity to '%s' for PID '%s'" % (affinity, pid))
-		(ret, out, err_msg) = self._cmd.execute(["taskset", "-p", str(affinity), str(pid)], no_errors = [1] if no_error else [], return_err = True)
-		if ret == 0 or (ret == 1 and no_error):
+		(ret, out, err_msg) = self._cmd.execute(["taskset", "-p", str(affinity), str(pid)], no_errors = [], return_err = True)
+		if ret == 0:
 			return
 		res = self._affinity_changeable(pid)
 		if res == 1 or res == -2:
@@ -234,7 +234,7 @@ class SchedulerPlugin(base.Plugin):
 			self._scheduler_original[pid] = (cmd, rt[0], rt[1], prev_affinity)
 		self._set_rt(pid, self._schedcfg2param(sched), prio, no_error)
 		if affinity != "*":
-			self._set_affinity(pid, affinity, no_error)
+			self._set_affinity(pid, affinity)
 
 	def _instance_apply_static(self, instance):
 		super(SchedulerPlugin, self)._instance_apply_static(instance)
