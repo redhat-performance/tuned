@@ -33,8 +33,13 @@ class SchedulerPlugin(base.Plugin):
 	priorities of system threads (it is substitution for the rtctl tool).
 	"""
 
-	_dict_sched2param = {"SCHED_FIFO":"f", "SCHED_BATCH":"b", "SCHED_RR":"r",
-		"SCHED_OTHER":"o", "SCHED_IDLE":"i"}
+	_dict_schedcfg2num = {
+			"f": schedutils.SCHED_FIFO,
+			"b": schedutils.SCHED_BATCH,
+			"r": schedutils.SCHED_RR,
+			"o": schedutils.SCHED_OTHER,
+			"i": schedutils.SCHED_IDLE,
+			}
 
 	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
 		super(SchedulerPlugin, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
@@ -134,23 +139,17 @@ class SchedulerPlugin(base.Plugin):
 		except:
 			return False
 
+	# Raises OSError
+	# Raises SystemError with old (pre-0.4) python-schedutils
+	# instead of OSError
+	# If PID doesn't exist, errno == ESRCH
 	def _get_rt(self, pid):
-		(rc, out, err_msg) = self._cmd.execute(["chrt", "-p", str(pid)], return_err = True)
-		if rc != 0:
-			if self._pid_exists(pid):
-				log.error(err_msg)
-			else:
-				log.debug("Unable to read scheduling parameters for PID %d, the task vanished." % pid)
-			return None
-		vals = out.split("\n", 1)
-		if len(vals) > 1:
-			sched = self._parse_val(vals[0])
-			prio = self._parse_val(vals[1])
-		else:
-			sched = None
-			prio = None
-		log.debug("read scheduler policy '%s' and priority '%s' for pid '%d'" % (sched, prio, pid))
-		return (sched, prio)
+		scheduler = schedutils.get_scheduler(pid)
+		sched_str = schedutils.schedstr(scheduler)
+		priority = schedutils.get_priority(pid)
+		log.debug("Read scheduler policy '%s' and priority '%d' of PID '%d'"
+				% (sched_str, priority, pid))
+		return (scheduler, priority)
 
 	def _get_affinity(self, pid):
 		(rc, out, err_msg) = self._cmd.execute(["taskset", "-p", str(pid)], no_errors = [], return_err = True)
@@ -164,35 +163,31 @@ class SchedulerPlugin(base.Plugin):
 		log.debug("read affinity '%s' for pid '%d'" % (v, pid))
 		return v
 
-	def _schedcfg2param(self, sched):
-		if sched in ["f", "b", "r", "o"]:
-			return "-" + sched
-		# including '*'
-		else:
-			return ""
-
-	def _sched2param(self, sched):
-		try:
-			return "-" + self._dict_sched2param[sched]
-		except KeyError:
-			return ""
-
 	def _set_rt(self, pid, sched, prio):
-		if pid is None or prio is None:
-			return
-		if sched is not None and len(sched) > 0:
-			schedl = [sched]
-			log.debug("setting scheduler policy to '%s' for PID '%d'" % (sched,  pid))
-		else:
-			schedl = []
-		log.debug("setting scheduler priority to '%s' for PID '%d'" % (prio, pid))
-		(ret, out, err_msg) = self._cmd.execute(["chrt"] + schedl + ["-p", str(prio), str(pid)], no_errors = [], return_err = True)
-		if ret == 0:
-			return
-		if self._pid_exists(pid):
-			log.error(err_msg)
-		else:
-			log.debug("Unable to set scheduling parameters for PID %d, the task vanished." % pid)
+		sched_str = schedutils.schedstr(sched)
+		log.debug("Setting scheduler policy to '%s' and priority to '%d' of PID '%d'."
+				% (sched_str, prio, pid))
+		try:
+			prio_min = schedutils.get_priority_min(sched)
+			prio_max = schedutils.get_priority_max(sched)
+			if prio < prio_min or prio > prio_max:
+				log.error("Priority for %s must be in range %d - %d. '%d' was given."
+						% (sched_str, prio_min,
+						prio_max, prio))
+		# Workaround for old (pre-0.4) python-schedutils which raised
+		# SystemError instead of OSError
+		except (SystemError, OSError) as e:
+			log.error("Failed to get allowed priority range: %s"
+					% e)
+		try:
+			schedutils.set_scheduler(pid, sched, prio)
+		except (SystemError, OSError) as e:
+			if hasattr(e, "errno") and e.errno == errno.ESRCH:
+				log.debug("Failed to set scheduling parameters of PID %d, the task vanished."
+						% pid)
+			else:
+				log.error("Failed to set scheduling parameters of PID %d: %s"
+						% (pid, e))
 
 	# Return codes:
 	# 0 - Affinity is fixed
@@ -235,38 +230,94 @@ class SchedulerPlugin(base.Plugin):
 		if res == 1 or res == -2:
 			log.error(err_msg)
 
-	#tune process and store previous values
-	def _tune_process(self, pid, cmd, sched, prio, affinity):
-		rt = self._get_rt(pid)
-		(prev_sched, prev_prio) = (None, None) if rt is None else rt
-		if prev_sched is not None and prev_prio is not None:
-			sched = self._schedcfg2param(sched)
-			if sched == "":
-				prev_sched = None
+	def _store_orig_process_rt(self, pid, scheduler, priority):
+		try:
+			params = self._scheduler_original[pid]
+		except KeyError:
+			params = SchedulerParams()
+			self._scheduler_original[pid] = params
+		if params.scheduler is None and params.priority is None:
+			params.scheduler = scheduler
+			params.priority = priority
+
+	def _tune_process_rt(self, pid, sched, prio):
+		cont = True
+		if sched is None and prio is None:
+			return cont
+		try:
+			(prev_sched, prev_prio) = self._get_rt(pid)
+			if sched is None:
+				sched = prev_sched
 			self._set_rt(pid, sched, prio)
-		elif not self._pid_exists(pid):
-			return
-		else:
-			log.error("Refusing to set scheduler and priority of PID %d, reading original scheduling parameters failed."
-					% pid)
+			self._store_orig_process_rt(pid, prev_sched, prev_prio)
+		except (SystemError, OSError) as e:
+			if hasattr(e, "errno") and e.errno == errno.ESRCH:
+				log.debug("Failed to read scheduler policy of PID %d, the task vanished."
+						% pid)
+				if pid in self._scheduler_original:
+					del self._scheduler_original[pid]
+				cont = False
+			else:
+				log.error("Refusing to set scheduler and priority of PID %d, reading original scheduling parameters failed: %s"
+						% (pid, e))
+		return cont
+
+	def _store_orig_process_affinity(self, pid, affinity):
+		try:
+			params = self._scheduler_original[pid]
+		except KeyError:
+			params = SchedulerParams()
+			self._scheduler_original[pid] = params
+		if params.affinity is None:
+			params.affinity = affinity
+
+	def _tune_process_affinity(self, pid, affinity):
+		cont = True
+		if affinity == "*":
+			return cont
 		prev_affinity = self._get_affinity(pid)
 		if prev_affinity is not None:
-			if affinity == "*":
-				prev_affinity = None
-			else:
-				self._set_affinity(pid, affinity)
+			self._set_affinity(pid, affinity)
+			self._store_orig_process_affinity(pid, prev_affinity)
 		elif not self._pid_exists(pid):
-			return
+			if pid in self._scheduler_original:
+				del self._scheduler_original[pid]
+			cont = False
 		else:
 			log.error("Refusing to set CPU affinity of PID %d, reading original affinity failed."
 					% pid)
-		if prev_sched is not None or prev_prio is not None \
-				or prev_affinity is not None:
-			self._scheduler_original[pid] = SchedulerParams(
-					cmdline = cmd,
-					scheduler = prev_sched,
-					priority = prev_prio,
-					affinity = prev_affinity)
+		return cont
+
+	#tune process and store previous values
+	def _tune_process(self, pid, cmd, sched, prio, affinity):
+		cont = self._tune_process_rt(pid, sched, prio)
+		if not cont:
+			return
+		cont = self._tune_process_affinity(pid, affinity)
+		if not cont or pid not in self._scheduler_original:
+			return
+		self._scheduler_original[pid].cmdline = cmd
+
+	def _convert_sched_params(self, str_scheduler, str_priority):
+		scheduler = self._dict_schedcfg2num.get(str_scheduler)
+		if scheduler is None and str_scheduler != "*":
+			log.error("Invalid scheduler: %s. Scheduler and priority will be ignored."
+					% str_scheduler)
+			return (None, None)
+		else:
+			try:
+				priority = int(str_priority)
+			except ValueError:
+				log.error("Invalid priority: %s. Scheduler and priority will be ignored."
+							% str_priority)
+				return (None, None)
+		return (scheduler, priority)
+
+	def _convert_sched_cfg(self, vals):
+		(rule_prio, scheduler, priority, affinity, regex) = vals
+		(scheduler, priority) = self._convert_sched_params(
+				scheduler, priority)
+		return (rule_prio, scheduler, priority, affinity, regex)
 
 	def _instance_apply_static(self, instance):
 		super(SchedulerPlugin, self)._instance_apply_static(instance)
@@ -275,7 +326,10 @@ class SchedulerPlugin(base.Plugin):
 			log.error("error applying tuning, cannot get information about running processes")
 			return
 		sched_cfg = [(option, str(value).split(":", 4)) for option, value in instance._scheduler.items()]
-		buf = [(option, vals) for option, vals in sched_cfg if re.match(r"group\.", option) and len(vals) == 5]
+		buf = [(option, self._convert_sched_cfg(vals))
+				for option, vals in sched_cfg
+				if re.match(r"group\.", option)
+				and len(vals) == 5]
 		sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
 		sched_all = dict()
 		# for runtime tunning
@@ -311,9 +365,10 @@ class SchedulerPlugin(base.Plugin):
 			# if command line for the pid didn't change, it's very probably the same process
 			if pid not in ps or ps[pid] != orig_params.cmdline:
 				continue
-			if orig_params.priority is not None:
-				sched = self._sched2param(orig_params.scheduler)
-				self._set_rt(pid, sched, orig_params.priority)
+			if orig_params.scheduler is not None \
+					and orig_params.priority is not None:
+				self._set_rt(pid, orig_params.scheduler,
+						orig_params.priority)
 			if orig_params.affinity is not None:
 				self._set_affinity(pid, orig_params.affinity)
 		self._scheduler_original = {}
