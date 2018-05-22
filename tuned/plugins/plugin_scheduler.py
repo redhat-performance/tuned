@@ -237,23 +237,36 @@ class SchedulerPlugin(base.Plugin):
 
 	#tune process and store previous values
 	def _tune_process(self, pid, cmd, sched, prio, affinity):
-		#rt[0] - prev_sched, rt[1] - prev_prio
 		rt = self._get_rt(pid)
+		(prev_sched, prev_prio) = (None, None) if rt is None else rt
+		if prev_sched is not None and prev_prio is not None:
+			sched = self._schedcfg2param(sched)
+			if sched == "":
+				prev_sched = None
+			self._set_rt(pid, sched, prio)
+		elif not self._pid_exists(pid):
+			return
+		else:
+			log.error("Refusing to set scheduler and priority of PID %d, reading original scheduling parameters failed."
+					% pid)
 		prev_affinity = self._get_affinity(pid)
-		if prev_affinity is not None and rt is not None and len(rt) == 2 and rt[0] is not None and rt[1] is not None:
+		if prev_affinity is not None:
+			if affinity == "*":
+				prev_affinity = None
+			else:
+				self._set_affinity(pid, affinity)
+		elif not self._pid_exists(pid):
+			return
+		else:
+			log.error("Refusing to set CPU affinity of PID %d, reading original affinity failed."
+					% pid)
+		if prev_sched is not None or prev_prio is not None \
+				or prev_affinity is not None:
 			self._scheduler_original[pid] = SchedulerParams(
 					cmdline = cmd,
-					scheduler = rt[0],
-					priority = rt[1],
+					scheduler = prev_sched,
+					priority = prev_prio,
 					affinity = prev_affinity)
-		else:
-			if self._pid_exists(pid):
-				log.error("Refusing to tune PID %d, reading original scheduling parameters failed."
-						% pid)
-			return
-		self._set_rt(pid, self._schedcfg2param(sched), prio)
-		if affinity != "*":
-			self._set_affinity(pid, affinity)
 
 	def _instance_apply_static(self, instance):
 		super(SchedulerPlugin, self)._instance_apply_static(instance)
@@ -298,9 +311,11 @@ class SchedulerPlugin(base.Plugin):
 			# if command line for the pid didn't change, it's very probably the same process
 			if pid not in ps or ps[pid] != orig_params.cmdline:
 				continue
-			self._set_rt(pid, self._sched2param(orig_params.scheduler),
-					orig_params.priority)
-			self._set_affinity(pid, orig_params.affinity)
+			if orig_params.priority is not None:
+				sched = self._sched2param(orig_params.scheduler)
+				self._set_rt(pid, sched, orig_params.priority)
+			if orig_params.affinity is not None:
+				self._set_affinity(pid, orig_params.affinity)
 		self._scheduler_original = {}
 		self._storage.unset(self._storage_key())
 
