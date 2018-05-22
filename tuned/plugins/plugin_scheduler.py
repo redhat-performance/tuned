@@ -256,14 +256,14 @@ class SchedulerPlugin(base.Plugin):
 		if ps is None:
 			log.error("error applying tuning, cannot get information about running processes")
 			return
-		instance._sched_cfg = [(option, str(value).split(":", 4)) for option, value in instance._scheduler.items()]
-		buf = [(option, vals) for option, vals in instance._sched_cfg if re.match(r"group\.", option) and len(vals) == 5]
-		instance._sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
+		sched_cfg = [(option, str(value).split(":", 4)) for option, value in instance._scheduler.items()]
+		buf = [(option, vals) for option, vals in sched_cfg if re.match(r"group\.", option) and len(vals) == 5]
+		sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
 		sched_all = dict()
 		# for runtime tunning
 		instance._sched_lookup = {}
 		for option, (rule_prio, scheduler, priority, affinity, regex) \
-				in instance._sched_cfg:
+				in sched_cfg:
 			try:
 				r = re.compile(regex)
 			except re.error as e:
