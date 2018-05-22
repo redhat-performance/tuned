@@ -246,6 +246,11 @@ class SchedulerPlugin(base.Plugin):
 					scheduler = rt[0],
 					priority = rt[1],
 					affinity = prev_affinity)
+		else:
+			if self._pid_exists(pid):
+				log.error("Refusing to tune PID %d, reading original scheduling parameters failed."
+						% pid)
+			return
 		self._set_rt(pid, self._schedcfg2param(sched), prio)
 		if affinity != "*":
 			self._set_affinity(pid, affinity)
