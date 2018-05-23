@@ -117,13 +117,33 @@ class SchedulerPlugin(base.Plugin):
 		else:
 			return cmdline.replace("\0", " ").strip()
 
+	# Raises OSError, IOError
+	def _get_cmdline(self, process):
+		if not isinstance(process, procfs.process):
+			pid = process
+			process = procfs.process(pid)
+		cmdline = procfs.process_cmdline(process)
+		if self._is_kthread(process):
+			cmdline = "[" + cmdline + "]"
+		return cmdline
+
+	# Raises OSError, IOError
 	def get_processes(self):
-		(rc, out) = self._cmd.execute(["ps", "-eopid,cmd", "--no-headers"])
-		if rc != 0 or len(out) <= 0:
-			return None
-		lines = out.split("\n")
-		pid_cmd_list = [i for i in [s.split(None, 1) for s in lines] if len(i) == 2]
-		return dict([(int(pid.lstrip()), cmd.lstrip()) for pid, cmd in pid_cmd_list])
+		ps = procfs.pidstats()
+		ps.reload_threads()
+		processes = {}
+		for proc in ps.values():
+			try:
+				cmd = self._get_cmdline(proc)
+				pid = proc["pid"]
+				processes[pid] = cmd
+			except (OSError, IOError) as e:
+				if e.errno == errno.ENOENT \
+						or e.errno == errno.ESRCH:
+					continue
+				else:
+					raise
+		return processes
 
 	def _parse_val(self, val):
 		v = val.split(":", 1)
@@ -326,9 +346,11 @@ class SchedulerPlugin(base.Plugin):
 
 	def _instance_apply_static(self, instance):
 		super(SchedulerPlugin, self)._instance_apply_static(instance)
-		ps = self.get_processes()
-		if ps is None:
-			log.error("error applying tuning, cannot get information about running processes")
+		try:
+			ps = self.get_processes()
+		except (OSError, IOError) as e:
+			log.error("error applying tuning, cannot get information about running processes: %s"
+					% e)
 			return
 		sched_cfg = [(option, str(value).split(":", 4)) for option, value in instance._scheduler.items()]
 		buf = [(option, self._convert_sched_cfg(vals))
@@ -365,7 +387,12 @@ class SchedulerPlugin(base.Plugin):
 			instance._thread.start()
 
 	def _restore_ps_affinity(self):
-		ps = self.get_processes()
+		try:
+			ps = self.get_processes()
+		except (OSError, IOError) as e:
+			log.error("error unapplying tuning, cannot get information about running processes: %s"
+					% e)
+			return
 		for pid, orig_params in self._scheduler_original.items():
 			# if command line for the pid didn't change, it's very probably the same process
 			if pid not in ps or ps[pid] != orig_params.cmdline:
@@ -505,10 +532,13 @@ class SchedulerPlugin(base.Plugin):
 	def _set_ps_affinity(self, affinity, intersect = False):
 		_affinity = affinity
 		affinity_hex = self._cmd.cpulist2hex(_affinity)
-		ps = procfs.pidstats()
-		ps.reload_threads()
-		self._set_all_obj_affinity(ps.values(), affinity, False, intersect)
-
+		try:
+			ps = procfs.pidstats()
+			ps.reload_threads()
+			self._set_all_obj_affinity(ps.values(), affinity, False, intersect)
+		except (OSError, IOError) as e:
+			log.error("error applying tuning, cannot get information about running processes: %s"
+					% e)
 		# process IRQs
 		irqs = procfs.interrupts()
 		for irq in list(irqs.keys()):
