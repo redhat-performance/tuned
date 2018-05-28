@@ -189,6 +189,11 @@ class SchedulerPlugin(base.Plugin):
 				log.error("Failed to set scheduling parameters of PID %d: %s"
 						% (pid, e))
 
+	# process is a procfs.process object
+	# Raises OSError, IOError
+	def _is_kthread(self, process):
+		return process["stat"]["flags"] & procfs.pidstat.PF_KTHREAD != 0
+
 	# Return codes:
 	# 0 - Affinity is fixed
 	# 1 - Affinity is changeable
@@ -201,7 +206,7 @@ class SchedulerPlugin(base.Plugin):
 			if process["stat"].is_bound_to_cpu():
 				if process["stat"]["state"] == "Z":
 					log.debug("Affinity of zombie task with PID %d cannot be changed, the task's affinity mask is fixed." % pid)
-				elif process["stat"]["flags"] & procfs.pidstat.PF_KTHREAD != 0:
+				elif self._is_kthread(process):
 					log.debug("Affinity of kernel thread with PID %d cannot be changed, the task's affinity mask is fixed." % pid)
 				else:
 					log.warn("Affinity of task with PID %d cannot be changed, the task's affinity mask is fixed." % pid)
