@@ -106,17 +106,6 @@ class SchedulerPlugin(base.Plugin):
 			"ps_blacklist": None,
 		}
 
-	def get_process(self, pid):
-		cmd = self._cmd.read_file("/proc/" + str(pid) + "/comm", no_error = True)
-		if cmd == "":
-			return ""
-		cmd = cmd.strip()
-		cmdline = self._cmd.read_file("/proc/" + str(pid) + "/cmdline", no_error = True)
-		if cmdline == "":
-			return "[" + cmd + "]"
-		else:
-			return cmdline.replace("\0", " ").strip()
-
 	# Raises OSError, IOError
 	def _get_cmdline(self, process):
 		if not isinstance(process, procfs.process):
@@ -414,9 +403,16 @@ class SchedulerPlugin(base.Plugin):
 		self._restore_ps_affinity()
 
 	def _add_pid(self, instance, pid, r):
-		cmd = self.get_process(pid)
-		# check to filter short living process
-		if cmd == "":
+		try:
+			cmd = self._get_cmdline(pid)
+		except (OSError, IOError) as e:
+			if e.errno == errno.ENOENT \
+					or e.errno == errno.ESRCH:
+				log.debug("Failed to get cmdline of PID %d, the task vanished."
+						% pid)
+			else:
+				log.error("Failed to get cmdline of PID %d: %s"
+						% (pid, e))
 			return
 		v = self._cmd.re_lookup(instance._sched_lookup, cmd, r)
 		if v is not None and not pid in self._scheduler_original:
