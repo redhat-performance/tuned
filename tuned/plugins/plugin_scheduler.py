@@ -53,6 +53,7 @@ class SchedulerPlugin(base.Plugin):
 		# default is to whitelist all and blacklist none
 		self._ps_whitelist = ".*"
 		self._ps_blacklist = ""
+		self._cpus = perf.cpu_map()
 
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
@@ -80,15 +81,14 @@ class SchedulerPlugin(base.Plugin):
 		instance._terminate = threading.Event()
 		if self._daemon and instance._runtime_tuning:
 			try:
-				instance._cpus = perf.cpu_map()
 				instance._threads = perf.thread_map()
 				evsel = perf.evsel(type = perf.TYPE_SOFTWARE,
 					config = perf.COUNT_SW_DUMMY,
 					task = 1, comm = 1, mmap = 0, freq = 0,
 					wakeup_events = 1, watermark = 1,
 					sample_type = perf.SAMPLE_TID | perf.SAMPLE_CPU)
-				evsel.open(cpus = instance._cpus, threads = instance._threads)
-				instance._evlist = perf.evlist(instance._cpus, instance._threads)
+				evsel.open(cpus = self._cpus, threads = instance._threads)
+				instance._evlist = perf.evlist(self._cpus, instance._threads)
 				instance._evlist.add(evsel)
 				instance._evlist.mmap()
 			# no perf
@@ -445,7 +445,7 @@ class SchedulerPlugin(base.Plugin):
 				read_events = True
 				while read_events:
 					read_events = False
-					for cpu in instance._cpus:
+					for cpu in self._cpus:
 						event = instance._evlist.read_on_cpu(cpu)
 						if event:
 							read_events = True
@@ -564,16 +564,14 @@ class SchedulerPlugin(base.Plugin):
 		# currently unsupported
 		if verify:
 			return None
-		# TODO merge with instance._cpus
-		cpus = list(perf.cpu_map())
 		if enabling:
 			if value is not None:
 				affinity = self._cmd.cpulist_invert(value)
 				sa = set(affinity)
-				if set(cpus).intersection(sa) != sa:
-					str_cpus = ",".join([str(x) for x in cpus])
+				if set(self._cpus).intersection(sa) != sa:
+					str_cpus = ",".join([str(x) for x in self._cpus])
 					log.error("invalid isolated_cores specified, '%s' don't match available cores '%s'" % (value, str_cpus))
 					return None
 				self._set_ps_affinity(affinity, True)
 		else:
-			self._set_ps_affinity(cpus, False)
+			self._set_ps_affinity(list(self._cpus), False)
