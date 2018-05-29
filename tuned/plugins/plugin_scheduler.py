@@ -504,24 +504,31 @@ class SchedulerPlugin(base.Plugin):
 
 	def _set_all_obj_affinity(self, objs, affinity, threads = False, intersect = False):
 		_affinity = affinity
-		psl = [v for v in objs if re.search(self._ps_whitelist, self._get_stat_comm(v)) is not None]
+		psl = [v for v in objs if re.search(self._ps_whitelist,
+				self._get_stat_comm(v)) is not None]
 		if self._ps_blacklist != "":
-			psl = [v for v in psl if re.search(self._ps_blacklist, self._get_stat_comm(v)) is None]
+			psl = [v for v in psl if re.search(self._ps_blacklist,
+					self._get_stat_comm(v)) is None]
 		psd = dict([(v.pid, v) for v in psl])
-		for obj in psd:
-			if self._affinity_changeable(obj, process = psd[obj]) != 1:
+		for pid in psd:
+			if self._affinity_changeable(pid, process = psd[pid]) \
+					!= 1:
 				continue
-			prev_affinity = self._get_affinity2(obj)
+			prev_affinity = self._get_affinity2(pid)
 			if prev_affinity is None:
 				continue
 			if intersect:
-				_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
+				_affinity = self._get_intersect_affinity(
+						prev_affinity, affinity,
+						affinity)
 			if set(_affinity) != set(prev_affinity):
-				if not self._set_affinity2(obj, _affinity):
+				if not self._set_affinity2(pid, _affinity):
 					continue
 			# process threads
-			if not threads and "threads" in psd[obj]:
-				self._set_all_obj_affinity(psd[obj]["threads"].values(), affinity, True, intersect)
+			if not threads and "threads" in psd[pid]:
+				self._set_all_obj_affinity(
+						psd[pid]["threads"].values(),
+						affinity, True, intersect)
 
 	def _get_stat_comm(self, o):
 		try:
