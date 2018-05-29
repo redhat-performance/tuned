@@ -276,12 +276,10 @@ class SchedulerPlugin(base.Plugin):
 		ps = self.get_processes()
 		for pid, vals in list(self._scheduler_original.items()):
 			# if command line for the pid didn't change, it's very probably the same process
-			try:
-				if ps[int(pid)] == vals[0]:
-					self._set_rt(pid, self._sched2param(vals[1]), vals[2])
-					self._set_affinity(pid, vals[3])
-			except KeyError as e:
-				pass
+			if pid not in ps or ps[int(pid)] != vals[0]:
+				continue
+			self._set_rt(pid, self._sched2param(vals[1]), vals[2])
+			self._set_affinity(pid, vals[3])
 		self._scheduler_original = {}
 		self._storage.unset(self._storage_key())
 
