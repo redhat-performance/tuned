@@ -269,7 +269,8 @@ class SchedulerPlugin(base.Plugin):
 			#vals[0] - process name, vals[1] - rule prio, vals[2] - sched, vals[3] - prio, vals[4] - affinity,
 			#vals[5] - regex
 			self._tune_process(instance, pid, vals[0], vals[2], vals[3], vals[4])
-		self._storage.set("options", instance._scheduler_original)
+		storage_key = self._scheduler_storage_key(instance)
+		self._storage.set(storage_key, instance._scheduler_original)
 		if self._daemon and instance._runtime_tuning:
 			instance._thread = threading.Thread(target = self._thread_code, args = [instance])
 			instance._thread.start()
@@ -304,13 +305,15 @@ class SchedulerPlugin(base.Plugin):
 			log.debug("tuning new process '%s' with pid '%s' by '%s'" % (cmd, pid, str(v)))
 			#v[0] - sched, v[1] - prio, v[2] - affinity
 			self._tune_process(instance, pid, cmd, v[0], v[1], v[2], no_error = True)
-			self._storage.set("options", instance._scheduler_original)
+			storage_key = self._scheduler_storage_key(instance)
+			self._storage.set(storage_key, instance._scheduler_original)
 
 	def _remove_pid(self, instance, pid):
 		if pid in instance._scheduler_original:
 			del instance._scheduler_original[pid]
 			log.debug("removed PID %s from the rollback database" % pid)
-			self._storage.set("options", instance._scheduler_original)
+			storage_key = self._scheduler_storage_key(instance)
+			self._storage.set(storage_key, instance._scheduler_original)
 
 	def _thread_code(self, instance):
 		r = self._cmd.re_lookup_compile(instance._sched_lookup)

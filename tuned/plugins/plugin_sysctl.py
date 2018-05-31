@@ -46,7 +46,8 @@ class SysctlPlugin(base.Plugin):
 				instance._sysctl_original[option] = original_value
 			self._write_sysctl(option, self._process_assignment_modifiers(self._variables.expand(self._cmd.unquote(value)), original_value))
 
-		self._storage.set("options", instance._sysctl_original)
+		storage_key = self._sysctl_storage_key(instance)
+		self._storage.set(storage_key, instance._sysctl_original)
 
 		if self._global_cfg.get_bool(consts.CFG_REAPPLY_SYSCTL, consts.CFG_DEF_REAPPLY_SYSCTL):
 			log.info("reapplying system sysctl")
