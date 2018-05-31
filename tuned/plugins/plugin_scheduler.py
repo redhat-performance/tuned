@@ -41,9 +41,6 @@ class SchedulerPlugin(base.Plugin):
 		self._ps_whitelist = ".*"
 		self._ps_blacklist = ""
 
-	def _scheduler_storage_key(self, instance):
-		return "%s/options" % instance.name
-
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
 		instance._has_static_tuning = True
@@ -54,12 +51,13 @@ class SchedulerPlugin(base.Plugin):
 
 		# FIXME: do we want to do this here?
 		# recover original values in case of crash
-		instance._scheduler_original = self._storage.get(self._scheduler_storage_key(instance), {})
+		storage_key = self._storage_key(instance.name)
+		instance._scheduler_original = self._storage.get(storage_key, {})
 		if len(instance._scheduler_original) > 0:
 			log.info("recovering scheduling settings from previous run")
 			self._restore_ps_affinity(instance)
 			instance._scheduler_original = {}
-			self._storage.unset(self._scheduler_storage_key(instance))
+			self._storage.unset(storage_key)
 
 		instance._scheduler = instance.options
 		for k in instance._scheduler:
@@ -269,7 +267,7 @@ class SchedulerPlugin(base.Plugin):
 			#vals[0] - process name, vals[1] - rule prio, vals[2] - sched, vals[3] - prio, vals[4] - affinity,
 			#vals[5] - regex
 			self._tune_process(instance, pid, vals[0], vals[2], vals[3], vals[4])
-		storage_key = self._scheduler_storage_key(instance)
+		storage_key = self._storage_key(instance.name)
 		self._storage.set(storage_key, instance._scheduler_original)
 		if self._daemon and instance._runtime_tuning:
 			instance._thread = threading.Thread(target = self._thread_code, args = [instance])
@@ -286,7 +284,7 @@ class SchedulerPlugin(base.Plugin):
 			except KeyError as e:
 				pass
 		instance._scheduler_original = {}
-		self._storage.unset(self._scheduler_storage_key(instance))
+		self._storage.unset(self._storage_key(instance.name))
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
 		super(SchedulerPlugin, self)._instance_unapply_static(instance, full_rollback)
@@ -305,14 +303,14 @@ class SchedulerPlugin(base.Plugin):
 			log.debug("tuning new process '%s' with pid '%s' by '%s'" % (cmd, pid, str(v)))
 			#v[0] - sched, v[1] - prio, v[2] - affinity
 			self._tune_process(instance, pid, cmd, v[0], v[1], v[2], no_error = True)
-			storage_key = self._scheduler_storage_key(instance)
+			storage_key = self._storage_key(instance.name)
 			self._storage.set(storage_key, instance._scheduler_original)
 
 	def _remove_pid(self, instance, pid):
 		if pid in instance._scheduler_original:
 			del instance._scheduler_original[pid]
 			log.debug("removed PID %s from the rollback database" % pid)
-			storage_key = self._scheduler_storage_key(instance)
+			storage_key = self._storage_key(instance.name)
 			self._storage.set(storage_key, instance._scheduler_original)
 
 	def _thread_code(self, instance):

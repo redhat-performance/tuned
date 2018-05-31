@@ -332,7 +332,9 @@ class NetTuningPlugin(base.Plugin):
 		return d
 
 	def _custom_parameters(self, context, start, value, device, verify):
-		storage_key = self._storage_key(context, device)
+		storage_key = self._storage_key(
+				command_name = context,
+				device_name = device)
 		if start:
 			cd = self._get_device_parameters(context, device)
 			d = self._set_device_parameters(context, value, device, verify)
