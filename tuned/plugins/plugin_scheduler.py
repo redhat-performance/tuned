@@ -51,12 +51,12 @@ class SchedulerPlugin(base.Plugin):
 
 		# FIXME: do we want to do this here?
 		# recover original values in case of crash
-		storage_key = self._storage_key(instance.name)
-		instance._scheduler_original = self._storage.get(storage_key, {})
-		if len(instance._scheduler_original) > 0:
+		storage_key = self._storage_key()
+		self._scheduler_original = self._storage.get(storage_key, {})
+		if len(self._scheduler_original) > 0:
 			log.info("recovering scheduling settings from previous run")
-			self._restore_ps_affinity(instance)
-			instance._scheduler_original = {}
+			self._restore_ps_affinity()
+			self._scheduler_original = {}
 			self._storage.unset(storage_key)
 
 		instance._scheduler = instance.options
@@ -227,12 +227,12 @@ class SchedulerPlugin(base.Plugin):
 			log.error(err_msg)
 
 	#tune process and store previous values
-	def _tune_process(self, instance, pid, cmd, sched, prio, affinity, no_error = False):
+	def _tune_process(self, pid, cmd, sched, prio, affinity, no_error = False):
 		#rt[0] - prev_sched, rt[1] - prev_prio
 		rt = self._get_rt(pid)
 		prev_affinity = self._get_affinity(pid, no_error)
 		if prev_affinity is not None and rt is not None and len(rt) == 2 and rt[0] is not None and rt[1] is not None:
-			instance._scheduler_original[pid] = (cmd, rt[0], rt[1], prev_affinity)
+			self._scheduler_original[pid] = (cmd, rt[0], rt[1], prev_affinity)
 		self._set_rt(pid, self._schedcfg2param(sched), prio, no_error)
 		if affinity != "*":
 			self._set_affinity(pid, affinity, no_error)
@@ -266,16 +266,16 @@ class SchedulerPlugin(base.Plugin):
 		for pid, vals in list(sched_all.items()):
 			#vals[0] - process name, vals[1] - rule prio, vals[2] - sched, vals[3] - prio, vals[4] - affinity,
 			#vals[5] - regex
-			self._tune_process(instance, pid, vals[0], vals[2], vals[3], vals[4])
-		storage_key = self._storage_key(instance.name)
-		self._storage.set(storage_key, instance._scheduler_original)
+			self._tune_process(pid, vals[0], vals[2], vals[3], vals[4])
+		storage_key = self._storage_key()
+		self._storage.set(storage_key, self._scheduler_original)
 		if self._daemon and instance._runtime_tuning:
 			instance._thread = threading.Thread(target = self._thread_code, args = [instance])
 			instance._thread.start()
 
-	def _restore_ps_affinity(self, instance):
+	def _restore_ps_affinity(self):
 		ps = self.get_processes()
-		for pid, vals in list(instance._scheduler_original.items()):
+		for pid, vals in list(self._scheduler_original.items()):
 			# if command line for the pid didn't change, it's very probably the same process
 			try:
 				if ps[int(pid)] == vals[0]:
@@ -283,15 +283,15 @@ class SchedulerPlugin(base.Plugin):
 					self._set_affinity(pid, vals[3])
 			except KeyError as e:
 				pass
-		instance._scheduler_original = {}
-		self._storage.unset(self._storage_key(instance.name))
+		self._scheduler_original = {}
+		self._storage.unset(self._storage_key())
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
 		super(SchedulerPlugin, self)._instance_unapply_static(instance, full_rollback)
 		if self._daemon and instance._runtime_tuning:
 			instance._terminate.set()
 			instance._thread.join()
-		self._restore_ps_affinity(instance)
+		self._restore_ps_affinity()
 
 	def _add_pid(self, instance, pid, r):
 		cmd = self.get_process(pid)
@@ -299,19 +299,19 @@ class SchedulerPlugin(base.Plugin):
 		if cmd == "":
 			return
 		v = self._cmd.re_lookup(instance._sched_lookup, cmd, r)
-		if v is not None and not pid in instance._scheduler_original:
+		if v is not None and not pid in self._scheduler_original:
 			log.debug("tuning new process '%s' with pid '%s' by '%s'" % (cmd, pid, str(v)))
 			#v[0] - sched, v[1] - prio, v[2] - affinity
-			self._tune_process(instance, pid, cmd, v[0], v[1], v[2], no_error = True)
-			storage_key = self._storage_key(instance.name)
-			self._storage.set(storage_key, instance._scheduler_original)
+			self._tune_process(pid, cmd, v[0], v[1], v[2], no_error = True)
+			storage_key = self._storage_key()
+			self._storage.set(storage_key, self._scheduler_original)
 
 	def _remove_pid(self, instance, pid):
-		if pid in instance._scheduler_original:
-			del instance._scheduler_original[pid]
+		if pid in self._scheduler_original:
+			del self._scheduler_original[pid]
 			log.debug("removed PID %s from the rollback database" % pid)
-			storage_key = self._storage_key(instance.name)
-			self._storage.set(storage_key, instance._scheduler_original)
+			storage_key = self._storage_key()
+			self._storage.set(storage_key, self._scheduler_original)
 
 	def _thread_code(self, instance):
 		r = self._cmd.re_lookup_compile(instance._sched_lookup)
