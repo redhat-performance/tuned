@@ -284,7 +284,7 @@ class SchedulerPlugin(base.Plugin):
 		for pid, vals in list(instance._scheduler_original.items()):
 			# if command line for the pid didn't change, it's very probably the same process
 			try:
-				if ps[pid] == vals[0]:
+				if ps[int(pid)] == vals[0]:
 					self._set_rt(pid, self._sched2param(vals[1]), vals[2])
 					self._set_affinity(pid, vals[3])
 			except KeyError as e:
