@@ -126,6 +126,10 @@ class SchedulerPlugin(base.Plugin):
 				cmd = self._get_cmdline(proc)
 				pid = proc["pid"]
 				processes[pid] = cmd
+				if "threads" in proc:
+					for pid in proc["threads"].keys():
+						cmd = self._get_cmdline(proc)
+						processes[pid] = cmd
 			except (OSError, IOError) as e:
 				if e.errno == errno.ENOENT \
 						or e.errno == errno.ESRCH:
@@ -446,9 +450,9 @@ class SchedulerPlugin(base.Plugin):
 						if event:
 							read_events = True
 							if event.type == perf.RECORD_COMM:
-								self._add_pid(instance, int(event.pid), r)
+								self._add_pid(instance, int(event.tid), r)
 							elif event.type == perf.RECORD_EXIT:
-								self._remove_pid(instance, int(event.pid))
+								self._remove_pid(instance, int(event.tid))
 
 	@command_custom("ps_whitelist", per_device = False)
 	def _ps_whitelist(self, enabling, value, verify, ignore_missing):
