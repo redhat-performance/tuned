@@ -204,14 +204,14 @@ class SchedulerPlugin(base.Plugin):
 				return 0
 			else:
 				return 1
-		except IOError as e:
+		except (OSError, IOError) as e:
 			if e.errno == errno.ENOENT or e.errno == errno.ESRCH:
 				log.debug("Unable to set affinity for PID %s, the task vanished." % pid)
 				return -1
 			else:
 				log.error("Failed to get task info for PID %s: %s" % (pid, str(e)))
 				return -2
-		except (OSError, AttributeError, KeyError) as e:
+		except (AttributeError, KeyError) as e:
 			log.error("Failed to get task info for PID %s: %s" % (pid, str(e)))
 			return -2
 
