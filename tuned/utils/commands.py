@@ -259,17 +259,21 @@ class commands:
 		if mask is None:
 			return None
 		mask = str(mask).replace(",", "")
-		cpu = 0
-		cpus = []
 		try:
 			m = int(mask, 16)
 		except ValueError:
 			log.error("invalid hexadecimal mask '%s'" % str(mask))
 			return []
-		while m > 0:
-			if m & 1:
+		return self.bitmask2cpulist(m)
+
+	# Converts an integer bitmask to a list of cpus (e.g. [0,3,4])
+	def bitmask2cpulist(self, mask):
+		cpu = 0
+		cpus = []
+		while mask > 0:
+			if mask & 1:
 				cpus.append(cpu)
-			m >>= 1
+			mask >>= 1
 			cpu += 1
 		return cpus
 
@@ -366,18 +370,22 @@ class commands:
 	def cpulist2hex(self, l):
 		if l is None:
 			return None
-		m = 0
 		ul = self.cpulist_unpack(l)
 		if ul is None:
 			return None
-		for v in ul:
-			m |= pow(2, v)
+		m = self.cpulist2bitmask(ul)
 		s = "%x" % m
 		ls = len(s)
 		if ls % 8 != 0:
 			ls += 8 - ls % 8
 		s = s.zfill(ls)
 		return ",".join(s[i:i + 8] for i in range(0, len(s), 8))
+
+	def cpulist2bitmask(self, l):
+		m = 0
+		for v in l:
+			m |= pow(2, v)
+		return m
 
 	def process_recommend_file(self, fname):
 		matching_profile = None

@@ -19,12 +19,27 @@ import errno
 log = tuned.logs.get()
 
 class SchedulerParams(object):
-	def __init__(self, cmdline = None, scheduler = None, priority = None,
-			affinity = None):
+	def __init__(self, cmd, cmdline = None, scheduler = None,
+			priority = None, affinity = None):
+		self._cmd = cmd
 		self.cmdline = cmdline
 		self.scheduler = scheduler
 		self.priority = priority
 		self.affinity = affinity
+
+	@property
+	def affinity(self):
+		if self._affinity is None:
+			return None
+		else:
+			return self._cmd.bitmask2cpulist(self._affinity)
+
+	@affinity.setter
+	def affinity(self, value):
+		if value is None:
+			self._affinity = None
+		else:
+			self._affinity = self._cmd.cpulist2bitmask(value)
 
 class IRQAffinities(object):
 	def __init__(self):
@@ -228,7 +243,7 @@ class SchedulerPlugin(base.Plugin):
 		try:
 			params = self._scheduler_original[pid]
 		except KeyError:
-			params = SchedulerParams()
+			params = SchedulerParams(self._cmd)
 			self._scheduler_original[pid] = params
 		if params.scheduler is None and params.priority is None:
 			params.scheduler = scheduler
@@ -260,7 +275,7 @@ class SchedulerPlugin(base.Plugin):
 		try:
 			params = self._scheduler_original[pid]
 		except KeyError:
-			params = SchedulerParams()
+			params = SchedulerParams(self._cmd)
 			self._scheduler_original[pid] = params
 		if params.affinity is None:
 			params.affinity = affinity
