@@ -57,7 +57,7 @@ class SchedulerPlugin(base.Plugin):
 		instance._scheduler_original = self._storage.get(self._scheduler_storage_key(instance), {})
 		if len(instance._scheduler_original) > 0:
 			log.info("recovering scheduling settings from previous run")
-			self._instance_unapply_static(instance)
+			self._restore_ps_affinity(instance)
 			instance._scheduler_original = {}
 			self._storage.unset(self._scheduler_storage_key(instance))
 
@@ -274,13 +274,8 @@ class SchedulerPlugin(base.Plugin):
 			instance._thread = threading.Thread(target = self._thread_code, args = [instance])
 			instance._thread.start()
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
-		super(SchedulerPlugin, self)._instance_unapply_static(instance, full_rollback)
+	def _restore_ps_affinity(self, instance):
 		ps = self.get_processes()
-		if self._daemon and instance._runtime_tuning:
-			instance._terminate.set()
-			instance._thread.join()
-
 		for pid, vals in list(instance._scheduler_original.items()):
 			# if command line for the pid didn't change, it's very probably the same process
 			try:
@@ -289,6 +284,15 @@ class SchedulerPlugin(base.Plugin):
 					self._set_affinity(pid, vals[3])
 			except KeyError as e:
 				pass
+		instance._scheduler_original = {}
+		self._storage.unset(self._scheduler_storage_key(instance))
+
+	def _instance_unapply_static(self, instance, full_rollback = False):
+		super(SchedulerPlugin, self)._instance_unapply_static(instance, full_rollback)
+		if self._daemon and instance._runtime_tuning:
+			instance._terminate.set()
+			instance._thread.join()
+		self._restore_ps_affinity(instance)
 
 	def _add_pid(self, instance, pid, r):
 		cmd = self.get_process(pid)
