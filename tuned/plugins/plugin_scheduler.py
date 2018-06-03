@@ -280,12 +280,16 @@ class SchedulerPlugin(base.Plugin):
 		if params.affinity is None:
 			params.affinity = affinity
 
-	def _tune_process_affinity(self, pid, affinity):
+	def _tune_process_affinity(self, pid, affinity, intersect = False):
 		cont = True
 		if affinity is None:
 			return cont
 		try:
 			prev_affinity = self._get_affinity(pid)
+			if intersect:
+				affinity = self._get_intersect_affinity(
+						prev_affinity, affinity,
+						affinity)
 			self._set_affinity(pid, affinity)
 			self._store_orig_process_affinity(pid,
 					prev_affinity)
@@ -511,8 +515,7 @@ class SchedulerPlugin(base.Plugin):
 			return list(aff)
 		return affinity3
 
-	def _set_all_obj_affinity(self, objs, affinity, threads = False, intersect = False):
-		_affinity = affinity
+	def _set_all_obj_affinity(self, objs, affinity, threads = False):
 		psl = [v for v in objs if re.search(self._ps_whitelist,
 				self._get_stat_comm(v)) is not None]
 		if self._ps_blacklist != "":
@@ -521,26 +524,27 @@ class SchedulerPlugin(base.Plugin):
 		psd = dict([(v.pid, v) for v in psl])
 		for pid in psd:
 			try:
-				prev_affinity = self._get_affinity(pid)
-			except (SystemError, OSError) as e:
-				if hasattr(e, "errno") and e.errno == errno.ESRCH:
-					log.debug("Failed to read affinity of PID %d, the task vanished."
+				cmd = self._get_cmdline(psd[pid])
+			except (OSError, IOError) as e:
+				if e.errno == errno.ENOENT \
+						or e.errno == errno.ESRCH:
+					log.debug("Failed to get cmdline of PID %d, the task vanished."
 							% pid)
 				else:
-					log.error("Refusing to set CPU affinity of PID %d, reading original affinity failed: %s"
+					log.error("Refusing to set affinity of PID %d, failed to get its cmdline: %s"
 							% (pid, e))
 				continue
-			if intersect:
-				_affinity = self._get_intersect_affinity(
-						prev_affinity, affinity,
-						affinity)
-			if not self._set_affinity(pid, _affinity):
+			cont = self._tune_process_affinity(pid, affinity,
+					intersect = True)
+			if not cont:
 				continue
+			if pid in self._scheduler_original:
+				self._scheduler_original[pid].cmdline = cmd
 			# process threads
 			if not threads and "threads" in psd[pid]:
 				self._set_all_obj_affinity(
 						psd[pid]["threads"].values(),
-						affinity, True, intersect)
+						affinity, True)
 
 	def _get_stat_comm(self, o):
 		try:
@@ -548,11 +552,11 @@ class SchedulerPlugin(base.Plugin):
 		except (OSError, IOError, KeyError):
 			return ""
 
-	def _set_ps_affinity(self, affinity, intersect = False):
+	def _set_ps_affinity(self, affinity):
 		try:
 			ps = procfs.pidstats()
 			ps.reload_threads()
-			self._set_all_obj_affinity(ps.values(), affinity, False, intersect)
+			self._set_all_obj_affinity(ps.values(), affinity, False)
 		except (OSError, IOError) as e:
 			log.error("error applying tuning, cannot get information about running processes: %s"
 					% e)
@@ -614,8 +618,9 @@ class SchedulerPlugin(base.Plugin):
 					str_cpus = ",".join([str(x) for x in self._cpus])
 					log.error("invalid isolated_cores specified, '%s' don't match available cores '%s'" % (value, str_cpus))
 					return None
-				self._set_ps_affinity(affinity, True)
+				self._set_ps_affinity(affinity)
 				self._set_all_irq_affinity(affinity)
 		else:
-			self._set_ps_affinity(list(self._cpus), False)
+			# Restoring processes' affinity is done in
+			# _instance_unapply_static()
 			self._restore_all_irq_affinity()
