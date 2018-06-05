@@ -686,7 +686,8 @@ class Base(object):
 
 	def data_to_profile_config(self):
 		name = self.entry_profile_name.get_text()
-		config = configobj.ConfigObj()
+		config = configobj.ConfigObj(list_values = False,
+				interpolation = False)
 
 		activated = self.combobox_include_profile.get_active()
 		model = self.combobox_include_profile.get_model()
