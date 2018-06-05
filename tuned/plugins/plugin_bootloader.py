@@ -34,7 +34,7 @@ class BootloaderPlugin(base.Plugin):
 		self._initrd_dst_img_val = None
 		self._cmdline_val = ""
 		self._initrd_val = ""
-		self._grub2_cfg_file_name = self._get_grub2_cfg_file()
+		self._grub2_cfg_file_names = self._get_grub2_cfg_files()
 
 	def _instance_cleanup(self, instance):
 		pass
@@ -82,21 +82,23 @@ class BootloaderPlugin(base.Plugin):
 			effective["cmdline"] = cmdline
 		return effective
 
-	def _get_grub2_cfg_file(self):
+	def _get_grub2_cfg_files(self):
+		cfg_files = []
 		for f in consts.GRUB2_CFG_FILES:
 			if os.path.exists(f):
-				return f
-		return None
+				cfg_files.append(f)
+		return cfg_files
 
 	def _patch_bootcmdline(self, d):
 		return self._cmd.add_modify_option_in_file(consts.BOOT_CMDLINE_FILE, d)
 
 	def _remove_grub2_tuning(self):
-		if self._grub2_cfg_file_name is None:
+		if not self._grub2_cfg_file_names:
 			log.error("cannot find grub.cfg to patch, you need to regenerate it by hand using grub2-mkconfig")
 			return
 		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : "", consts.BOOT_CMDLINE_INITRD_ADD_VAR : ""})
-		self._cmd.add_modify_option_in_file(self._grub2_cfg_file_name, {"set\s+" + consts.GRUB2_TUNED_VAR : "", "set\s+" + consts.GRUB2_TUNED_INITRD_VAR : ""}, add = False)
+		for f in self._grub2_cfg_file_names:
+			self._cmd.add_modify_option_in_file(f, {"set\s+" + consts.GRUB2_TUNED_VAR : "", "set\s+" + consts.GRUB2_TUNED_INITRD_VAR : ""}, add = False)
 		if self._initrd_dst_img_val is not None:
 			log.info("removing initrd image '%s'" % self._initrd_dst_img_val)
 			self._cmd.unlink(self._initrd_dst_img_val)
@@ -154,29 +156,30 @@ class BootloaderPlugin(base.Plugin):
 
 	def _grub2_cfg_patch(self, d):
 		log.debug("patching grub.cfg")
-		if self._grub2_cfg_file_name is None:
+		if not self._grub2_cfg_file_names:
 			log.error("cannot find grub.cfg to patch, you need to regenerate it by hand by grub2-mkconfig")
 			return False
-		grub2_cfg = self._cmd.read_file(self._grub2_cfg_file_name)
-		if len(grub2_cfg) <= 0:
-			log.error("error patching %s, you need to regenerate it by hand by grub2-mkconfig" % self._grub2_cfg_file_name)
-			return False
-		log.debug("adding boot command line parameters to '%s'" % self._grub2_cfg_file_name)
-		grub2_cfg_new = grub2_cfg
-		patch_initial = False
-		for opt in d:
-			(grub2_cfg_new, nsubs) = re.subn(r"\b(set\s+" + opt + "\s*=).*$", r"\1" + "\"" + d[opt] + "\"", grub2_cfg_new, flags = re.MULTILINE)
-			if nsubs < 1 or re.search(r"\$" + opt, grub2_cfg, flags = re.MULTILINE) is None:
-				patch_initial = True
+		for f in self._grub2_cfg_file_names:
+			grub2_cfg = self._cmd.read_file(f)
+			if len(grub2_cfg) <= 0:
+				log.error("error patching %s, you need to regenerate it by hand by grub2-mkconfig" % f)
+				return False
+			log.debug("adding boot command line parameters to '%s'" % f)
+			grub2_cfg_new = grub2_cfg
+			patch_initial = False
+			for opt in d:
+				(grub2_cfg_new, nsubs) = re.subn(r"\b(set\s+" + opt + "\s*=).*$", r"\1" + "\"" + d[opt] + "\"", grub2_cfg_new, flags = re.MULTILINE)
+				if nsubs < 1 or re.search(r"\$" + opt, grub2_cfg, flags = re.MULTILINE) is None:
+					patch_initial = True
 
-		# workaround for rhbz#1442117
-		if len(re.findall(r"\$" + consts.GRUB2_TUNED_VAR, grub2_cfg, flags = re.MULTILINE)) != \
-			len(re.findall(r"\$" + consts.GRUB2_TUNED_INITRD_VAR, grub2_cfg, flags = re.MULTILINE)):
-				patch_initial = True
+			# workaround for rhbz#1442117
+			if len(re.findall(r"\$" + consts.GRUB2_TUNED_VAR, grub2_cfg, flags = re.MULTILINE)) != \
+				len(re.findall(r"\$" + consts.GRUB2_TUNED_INITRD_VAR, grub2_cfg, flags = re.MULTILINE)):
+					patch_initial = True
 
-		if patch_initial:
-			grub2_cfg_new = self._grub2_cfg_patch_initial(self._grub2_cfg_unpatch(grub2_cfg), d)
-		self._cmd.write_to_file(self._grub2_cfg_file_name, grub2_cfg_new)
+			if patch_initial:
+				grub2_cfg_new = self._grub2_cfg_patch_initial(self._grub2_cfg_unpatch(grub2_cfg), d)
+			self._cmd.write_to_file(f, grub2_cfg_new)
 		self._grub2_default_env_patch()
 		return True
 
@@ -215,7 +218,7 @@ class BootloaderPlugin(base.Plugin):
 		if verify:
 			return None
 		if enabling and value is not None:
-			self._grub2_cfg_file_name = str(value)
+			self._grub2_cfg_file_names = [str(value)]
 
 	@command_custom("initrd_dst_img")
 	def _initrd_dst_img(self, enabling, value, verify, ignore_missing):
