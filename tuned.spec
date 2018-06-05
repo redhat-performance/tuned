@@ -123,6 +123,13 @@ Requires: %{name} = %{version}
 %description profiles-sap
 Additional tuned profile(s) targeted to SAP NetWeaver loads.
 
+%package profiles-mssql
+Summary: Additional tuned profile(s) for MS SQL Server
+Requires: %{name} = %{version}
+
+%description profiles-mssql
+Additional tuned profile(s) for MS SQL Server.
+
 %package profiles-oracle
 Summary: Additional tuned profile(s) targeted to Oracle loads
 Requires: %{name} = %{version}
@@ -331,6 +338,7 @@ fi
 %exclude %{_prefix}/lib/tuned/sap-netweaver
 %exclude %{_prefix}/lib/tuned/sap-hana
 %exclude %{_prefix}/lib/tuned/sap-hana-vmware
+%exclude %{_prefix}/lib/tuned/mssql
 %exclude %{_prefix}/lib/tuned/oracle
 %exclude %{_prefix}/lib/tuned/atomic-host
 %exclude %{_prefix}/lib/tuned/atomic-guest
@@ -405,6 +413,11 @@ fi
 %{_prefix}/lib/tuned/sap-hana
 %{_prefix}/lib/tuned/sap-hana-vmware
 %{_mandir}/man7/tuned-profiles-sap-hana.7*
+
+%files profiles-mssql
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/mssql
+%{_mandir}/man7/tuned-profiles-mssql.7*
 
 %files profiles-oracle
 %defattr(-,root,root,-)

@@ -1,6 +1,6 @@
 .\"/* 
 .\" * All rights reserved
-.\" * Copyright (C) 2015-2017 Red Hat, Inc.
+.\" * Copyright (C) 2018 Red Hat, Inc.
 .\" * Authors: Jaroslav Škarvada
 .\" *
 .\" * This program is free software; you can redistribute it and/or
@@ -18,21 +18,13 @@
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
 .\" 
-.TH TUNED_PROFILES_ORACLE "7" "30 Mar 2017" "Fedora Power Management SIG" "tuned"
+.TH TUNED_PROFILES_MSSQL "7" "05 Jun 2018" "Red Hat, Inc." "tuned"
 .SH NAME
-tuned\-profiles\-oracle - description of profiles provided for the Oracle
+tuned\-profiles\-mssql - description of profile provided for the MS SQL Server
 
 .SH DESCRIPTION
-These profiles are provided for the Oracle loads.
-
-.SH PROFILES
-The following profiles are provided:
-
-.TP
-.BI "oracle"
-Profile optimized for Oracle databases based on throughput\-performance profile.
-It additionally disables transparent huge pages and modifies some other
-performance related kernel parameters.
+This profile is provided for the MS SQL Server. It's based on the
+throughput-performance profile.
 
 .SH "FILES"
 .nf
@@ -45,7 +37,7 @@ performance related kernel parameters.
 .BR tuned\-profiles (7)
 .BR tuned\-profiles\-sap (7)
 .BR tuned\-profiles\-sap\-hana (7)
-.BR tuned\-profiles\-mssql (7)
+.BR tuned\-profiles\-oracle (7)
 .BR tuned\-profiles\-atomic (7)
 .BR tuned\-profiles\-realtime (7)
 .BR tuned\-profiles\-nfv\-host (7)
