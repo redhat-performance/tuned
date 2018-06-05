@@ -125,7 +125,9 @@ class MountsPlugin(base.Plugin):
 
 	@command_custom("disable_barriers", per_device=True)
 	def _disable_barriers(self, start, value, mountpoint, verify, ignore_missing):
-		storage_key = self._storage_key("disable_barriers", mountpoint)
+		storage_key = self._storage_key(
+				command_name = "disable_barriers",
+				device_name = mountpoint)
 		force = str(value).lower() == "force"
 		value = force or self._option_bool(value)
 

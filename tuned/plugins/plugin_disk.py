@@ -319,7 +319,9 @@ class DiskPlugin(hotplug.Plugin):
 	def _multiply_readahead(self, enabling, multiplier, device, verify, ignore_missing):
 		if verify:
 			return None
-		storage_key = self._storage_key("readahead_multiply", device)
+		storage_key = self._storage_key(
+				command_name = "readahead_multiply",
+				device_name = device)
 		if enabling:
 			old_readahead = self._get_readahead(device)
 			if old_readahead is None:

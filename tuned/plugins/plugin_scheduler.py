@@ -18,15 +18,47 @@ import errno
 
 log = tuned.logs.get()
 
-# TODO move from cmdline tools to schedutils and consolidate the code
+class SchedulerParams(object):
+	def __init__(self, cmd, cmdline = None, scheduler = None,
+			priority = None, affinity = None):
+		self._cmd = cmd
+		self.cmdline = cmdline
+		self.scheduler = scheduler
+		self.priority = priority
+		self.affinity = affinity
+
+	@property
+	def affinity(self):
+		if self._affinity is None:
+			return None
+		else:
+			return self._cmd.bitmask2cpulist(self._affinity)
+
+	@affinity.setter
+	def affinity(self, value):
+		if value is None:
+			self._affinity = None
+		else:
+			self._affinity = self._cmd.cpulist2bitmask(value)
+
+class IRQAffinities(object):
+	def __init__(self):
+		self.irqs = {}
+		self.default = None
+
 class SchedulerPlugin(base.Plugin):
 	"""
 	Plugin for tuning of scheduler. Currently it can control scheduling
 	priorities of system threads (it is substitution for the rtctl tool).
 	"""
 
-	_dict_sched2param = {"SCHED_FIFO":"f", "SCHED_BATCH":"b", "SCHED_RR":"r",
-		"SCHED_OTHER":"o", "SCHED_IDLE":"i"}
+	_dict_schedcfg2num = {
+			"f": schedutils.SCHED_FIFO,
+			"b": schedutils.SCHED_BATCH,
+			"r": schedutils.SCHED_RR,
+			"o": schedutils.SCHED_OTHER,
+			"i": schedutils.SCHED_IDLE,
+			}
 
 	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
 		super(SchedulerPlugin, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
@@ -40,9 +72,11 @@ class SchedulerPlugin(base.Plugin):
 		# default is to whitelist all and blacklist none
 		self._ps_whitelist = ".*"
 		self._ps_blacklist = ""
-
-	def _scheduler_storage_key(self, instance):
-		return "%s/options" % instance.name
+		self._cpus = perf.cpu_map()
+		self._scheduler_storage_key = self._storage_key(
+				command_name = "scheduler")
+		self._irq_storage_key = self._storage_key(
+				command_name = "irq")
 
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
@@ -54,12 +88,13 @@ class SchedulerPlugin(base.Plugin):
 
 		# FIXME: do we want to do this here?
 		# recover original values in case of crash
-		instance._scheduler_original = self._storage.get(self._scheduler_storage_key(instance), {})
-		if len(instance._scheduler_original) > 0:
+		self._scheduler_original = self._storage.get(
+				self._scheduler_storage_key, {})
+		if len(self._scheduler_original) > 0:
 			log.info("recovering scheduling settings from previous run")
-			self._instance_unapply_static(instance)
-			instance._scheduler_original = {}
-			self._storage.unset(self._scheduler_storage_key(instance))
+			self._restore_ps_affinity()
+			self._scheduler_original = {}
+			self._storage.unset(self._scheduler_storage_key)
 
 		instance._scheduler = instance.options
 		for k in instance._scheduler:
@@ -69,15 +104,14 @@ class SchedulerPlugin(base.Plugin):
 		instance._terminate = threading.Event()
 		if self._daemon and instance._runtime_tuning:
 			try:
-				instance._cpus = perf.cpu_map()
 				instance._threads = perf.thread_map()
 				evsel = perf.evsel(type = perf.TYPE_SOFTWARE,
 					config = perf.COUNT_SW_DUMMY,
 					task = 1, comm = 1, mmap = 0, freq = 0,
 					wakeup_events = 1, watermark = 1,
 					sample_type = perf.SAMPLE_TID | perf.SAMPLE_CPU)
-				evsel.open(cpus = instance._cpus, threads = instance._threads)
-				instance._evlist = perf.evlist(instance._cpus, instance._threads)
+				evsel.open(cpus = self._cpus, threads = instance._threads)
+				instance._evlist = perf.evlist(self._cpus, instance._threads)
 				instance._evlist.add(evsel)
 				instance._evlist.mmap()
 			# no perf
@@ -95,218 +129,321 @@ class SchedulerPlugin(base.Plugin):
 			"ps_blacklist": None,
 		}
 
-	def get_process(self, pid):
-		cmd = self._cmd.read_file("/proc/" + pid + "/comm", no_error = True)
-		if cmd == "":
-			return ""
-		cmd = cmd.strip()
-		cmdline = self._cmd.read_file("/proc/" + pid + "/cmdline", no_error = True)
-		if cmdline == "":
-			return "[" + cmd + "]"
-		else:
-			return cmdline.replace("\0", " ").strip()
+	# Raises OSError, IOError
+	def _get_cmdline(self, process):
+		if not isinstance(process, procfs.process):
+			pid = process
+			process = procfs.process(pid)
+		cmdline = procfs.process_cmdline(process)
+		if self._is_kthread(process):
+			cmdline = "[" + cmdline + "]"
+		return cmdline
 
+	# Raises OSError, IOError
 	def get_processes(self):
-		(rc, out) = self._cmd.execute(["ps", "-eopid,cmd", "--no-headers"])
-		if rc != 0 or len(out) <= 0:
-			return None
-		return dict([(int(pid_cmd1[0].lstrip()), pid_cmd1[1].lstrip()) for pid_cmd1 in [i for i in [s.split(None, 1) for s in out.split("\n")] if len(i) == 2]])
-
-	def _parse_val(self, val):
-		v = val.split(":", 1)
-		if len(v) == 2:
-			return v[1].strip()
-		else:
-			return None
-
-	def _pid_exists(self, pid):
-		try:
-			p = procfs.pidstat(pid)
-			return True
-		except:
-			return False
-
-	def _get_rt(self, pid):
-		(rc, out, err_msg) = self._cmd.execute(["chrt", "-p", str(pid)], return_err = True)
-		if rc != 0:
-			if self._pid_exists(pid):
-				log.error(err_msg)
-			else:
-				log.debug("Unable to read scheduling parameters for PID %s, the task vanished." % pid)
-			return None
-		vals = out.split("\n", 1)
-		if len(vals) > 1:
-			sched = self._parse_val(vals[0])
-			prio = self._parse_val(vals[1])
-		else:
-			sched = None
-			prio = None
-		log.debug("read scheduler policy '%s' and priority '%s' for pid '%s'" % (sched, prio, pid))
-		return (sched, prio)
-
-	def _get_affinity(self, pid, no_error = False):
-		(rc, out, err_msg) = self._cmd.execute(["taskset", "-p", str(pid)], no_errors = [1] if no_error else [], return_err = True)
-		if rc != 0:
-			if rc != 1 or not no_error:
-				if self._pid_exists(pid):
-					log.error(err_msg)
+		ps = procfs.pidstats()
+		ps.reload_threads()
+		processes = {}
+		for proc in ps.values():
+			try:
+				cmd = self._get_cmdline(proc)
+				pid = proc["pid"]
+				processes[pid] = cmd
+				if "threads" in proc:
+					for pid in proc["threads"].keys():
+						cmd = self._get_cmdline(proc)
+						processes[pid] = cmd
+			except (OSError, IOError) as e:
+				if e.errno == errno.ENOENT \
+						or e.errno == errno.ESRCH:
+					continue
 				else:
-					log.debug("Unable to read affinity for PID %s, the task vanished." % pid)
-			return None
-		v = self._parse_val(out.split("\n", 1)[0])
-		log.debug("read affinity '%s' for pid '%s'" % (v, pid))
-		return v
+					raise
+		return processes
 
-	def _schedcfg2param(self, sched):
-		if sched in ["f", "b", "r", "o"]:
-			return "-" + sched
-		# including '*'
-		else:
-			return ""
+	# Raises OSError
+	# Raises SystemError with old (pre-0.4) python-schedutils
+	# instead of OSError
+	# If PID doesn't exist, errno == ESRCH
+	def _get_rt(self, pid):
+		scheduler = schedutils.get_scheduler(pid)
+		sched_str = schedutils.schedstr(scheduler)
+		priority = schedutils.get_priority(pid)
+		log.debug("Read scheduler policy '%s' and priority '%d' of PID '%d'"
+				% (sched_str, priority, pid))
+		return (scheduler, priority)
 
-	def _sched2param(self, sched):
+	def _set_rt(self, pid, sched, prio):
+		sched_str = schedutils.schedstr(sched)
+		log.debug("Setting scheduler policy to '%s' and priority to '%d' of PID '%d'."
+				% (sched_str, prio, pid))
 		try:
-			return "-" + self._dict_sched2param[sched]
-		except KeyError:
-			return ""
+			prio_min = schedutils.get_priority_min(sched)
+			prio_max = schedutils.get_priority_max(sched)
+			if prio < prio_min or prio > prio_max:
+				log.error("Priority for %s must be in range %d - %d. '%d' was given."
+						% (sched_str, prio_min,
+						prio_max, prio))
+		# Workaround for old (pre-0.4) python-schedutils which raised
+		# SystemError instead of OSError
+		except (SystemError, OSError) as e:
+			log.error("Failed to get allowed priority range: %s"
+					% e)
+		try:
+			schedutils.set_scheduler(pid, sched, prio)
+		except (SystemError, OSError) as e:
+			if hasattr(e, "errno") and e.errno == errno.ESRCH:
+				log.debug("Failed to set scheduling parameters of PID %d, the task vanished."
+						% pid)
+			else:
+				log.error("Failed to set scheduling parameters of PID %d: %s"
+						% (pid, e))
 
-	def _set_rt(self, pid, sched, prio, no_error = False):
-		if pid is None or prio is None:
-			return
-		if sched is not None and len(sched) > 0:
-			schedl = [sched]
-			log.debug("setting scheduler policy to '%s' for PID '%s'" % (sched,  pid))
-		else:
-			schedl = []
-		log.debug("setting scheduler priority to '%s' for PID '%s'" % (prio, pid))
-		(ret, out, err_msg) = self._cmd.execute(["chrt"] + schedl + ["-p", str(prio), str(pid)], no_errors = [1] if no_error else [], return_err = True)
-		if ret == 0 or (ret == 1 and no_error):
-			return
-		if self._pid_exists(pid):
-			log.error(err_msg)
-		else:
-			log.debug("Unable to set scheduling parameters for PID %s, the task vanished." % pid)
+	# process is a procfs.process object
+	# Raises OSError, IOError
+	def _is_kthread(self, process):
+		return process["stat"]["flags"] & procfs.pidstat.PF_KTHREAD != 0
 
 	# Return codes:
 	# 0 - Affinity is fixed
 	# 1 - Affinity is changeable
 	# -1 - Task vanished
 	# -2 - Error
-	def _affinity_changeable(self, pid, process = None):
+	def _affinity_changeable(self, pid):
 		try:
-			if process is None:
-				process = procfs.process(pid)
+			process = procfs.process(pid)
 			if process["stat"].is_bound_to_cpu():
 				if process["stat"]["state"] == "Z":
-					log.debug("Affinity of zombie task with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
-				elif process["stat"]["flags"] & procfs.pidstat.PF_KTHREAD != 0:
-					log.debug("Affinity of kernel thread with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
+					log.debug("Affinity of zombie task with PID %d cannot be changed, the task's affinity mask is fixed."
+							% pid)
+				elif self._is_kthread(process):
+					log.debug("Affinity of kernel thread with PID %d cannot be changed, the task's affinity mask is fixed."
+							% pid)
 				else:
-					log.warn("Affinity of task with PID %s cannot be changed, the task's affinity mask is fixed." % pid)
+					log.warn("Affinity of task with PID %d cannot be changed, the task's affinity mask is fixed."
+							% pid)
 				return 0
 			else:
 				return 1
-		except IOError as e:
+		except (OSError, IOError) as e:
 			if e.errno == errno.ENOENT or e.errno == errno.ESRCH:
-				log.debug("Unable to set affinity for PID %s, the task vanished." % pid)
+				log.debug("Failed to get task info for PID %d, the task vanished."
+						% pid)
 				return -1
 			else:
-				log.error("Failed to get task info for PID %s: %s" % (pid, str(e)))
+				log.error("Failed to get task info for PID %d: %s"
+						% (pid, e))
 				return -2
-		except (OSError, AttributeError, KeyError) as e:
-			log.error("Failed to get task info for PID %s: %s" % (pid, str(e)))
+		except (AttributeError, KeyError) as e:
+			log.error("Failed to get task info for PID %d: %s"
+					% (pid, e))
 			return -2
 
-	def _set_affinity(self, pid, affinity, no_error = False):
-		if pid is None or affinity is None:
-			return
-		log.debug("setting affinity to '%s' for PID '%s'" % (affinity, pid))
-		(ret, out, err_msg) = self._cmd.execute(["taskset", "-p", str(affinity), str(pid)], no_errors = [1] if no_error else [], return_err = True)
-		if ret == 0 or (ret == 1 and no_error):
-			return
-		res = self._affinity_changeable(pid)
-		if res == 1 or res == -2:
-			log.error(err_msg)
+	def _store_orig_process_rt(self, pid, scheduler, priority):
+		try:
+			params = self._scheduler_original[pid]
+		except KeyError:
+			params = SchedulerParams(self._cmd)
+			self._scheduler_original[pid] = params
+		if params.scheduler is None and params.priority is None:
+			params.scheduler = scheduler
+			params.priority = priority
+
+	def _tune_process_rt(self, pid, sched, prio):
+		cont = True
+		if sched is None and prio is None:
+			return cont
+		try:
+			(prev_sched, prev_prio) = self._get_rt(pid)
+			if sched is None:
+				sched = prev_sched
+			self._set_rt(pid, sched, prio)
+			self._store_orig_process_rt(pid, prev_sched, prev_prio)
+		except (SystemError, OSError) as e:
+			if hasattr(e, "errno") and e.errno == errno.ESRCH:
+				log.debug("Failed to read scheduler policy of PID %d, the task vanished."
+						% pid)
+				if pid in self._scheduler_original:
+					del self._scheduler_original[pid]
+				cont = False
+			else:
+				log.error("Refusing to set scheduler and priority of PID %d, reading original scheduling parameters failed: %s"
+						% (pid, e))
+		return cont
+
+	def _store_orig_process_affinity(self, pid, affinity):
+		try:
+			params = self._scheduler_original[pid]
+		except KeyError:
+			params = SchedulerParams(self._cmd)
+			self._scheduler_original[pid] = params
+		if params.affinity is None:
+			params.affinity = affinity
+
+	def _tune_process_affinity(self, pid, affinity, intersect = False):
+		cont = True
+		if affinity is None:
+			return cont
+		try:
+			prev_affinity = self._get_affinity(pid)
+			if intersect:
+				affinity = self._get_intersect_affinity(
+						prev_affinity, affinity,
+						affinity)
+			self._set_affinity(pid, affinity)
+			self._store_orig_process_affinity(pid,
+					prev_affinity)
+		except (SystemError, OSError) as e:
+			if hasattr(e, "errno") and e.errno == errno.ESRCH:
+				log.debug("Failed to read affinity of PID %d, the task vanished."
+						% pid)
+				if pid in self._scheduler_original:
+					del self._scheduler_original[pid]
+				cont = False
+			else:
+				log.error("Refusing to set CPU affinity of PID %d, reading original affinity failed: %s"
+						% (pid, e))
+		return cont
 
 	#tune process and store previous values
-	def _tune_process(self, instance, pid, cmd, sched, prio, affinity, no_error = False):
-		#rt[0] - prev_sched, rt[1] - prev_prio
-		rt = self._get_rt(pid)
-		prev_affinity = self._get_affinity(pid, no_error)
-		if prev_affinity is not None and rt is not None and len(rt) == 2 and rt[0] is not None and rt[1] is not None:
-			instance._scheduler_original[pid] = (cmd, rt[0], rt[1], prev_affinity)
-		self._set_rt(pid, self._schedcfg2param(sched), prio, no_error)
-		if affinity != "*":
-			self._set_affinity(pid, affinity, no_error)
+	def _tune_process(self, pid, cmd, sched, prio, affinity):
+		cont = self._tune_process_rt(pid, sched, prio)
+		if not cont:
+			return
+		cont = self._tune_process_affinity(pid, affinity)
+		if not cont or pid not in self._scheduler_original:
+			return
+		self._scheduler_original[pid].cmdline = cmd
+
+	def _convert_sched_params(self, str_scheduler, str_priority):
+		scheduler = self._dict_schedcfg2num.get(str_scheduler)
+		if scheduler is None and str_scheduler != "*":
+			log.error("Invalid scheduler: %s. Scheduler and priority will be ignored."
+					% str_scheduler)
+			return (None, None)
+		else:
+			try:
+				priority = int(str_priority)
+			except ValueError:
+				log.error("Invalid priority: %s. Scheduler and priority will be ignored."
+							% str_priority)
+				return (None, None)
+		return (scheduler, priority)
+
+	def _convert_affinity(self, str_affinity):
+		if str_affinity == "*":
+			affinity = None
+		else:
+			affinity = self._cmd.hex2cpulist(str_affinity)
+			if not affinity:
+				log.error("Invalid affinity: %s. It will be ignored."
+						% str_affinity)
+				affinity = None
+		return affinity
+
+	def _convert_sched_cfg(self, vals):
+		(rule_prio, scheduler, priority, affinity, regex) = vals
+		(scheduler, priority) = self._convert_sched_params(
+				scheduler, priority)
+		affinity = self._convert_affinity(affinity)
+		return (rule_prio, scheduler, priority, affinity, regex)
 
 	def _instance_apply_static(self, instance):
 		super(SchedulerPlugin, self)._instance_apply_static(instance)
-		ps = self.get_processes()
-		if ps is None:
-			log.error("error applying tuning, cannot get information about running processes")
+		try:
+			ps = self.get_processes()
+		except (OSError, IOError) as e:
+			log.error("error applying tuning, cannot get information about running processes: %s"
+					% e)
 			return
-		instance._sched_cfg = [(option_value[0], str(option_value[1]).split(":", 4)) for option_value in list(instance._scheduler.items())]
-		buf = [option_vals3 for option_vals3 in instance._sched_cfg if re.match(r"group\.", option_vals3[0]) and len(option_vals3[1]) == 5]
-		instance._sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
+		sched_cfg = [(option, str(value).split(":", 4)) for option, value in instance._scheduler.items()]
+		buf = [(option, self._convert_sched_cfg(vals))
+				for option, vals in sched_cfg
+				if re.match(r"group\.", option)
+				and len(vals) == 5]
+		sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
 		sched_all = dict()
 		# for runtime tunning
 		instance._sched_lookup = {}
-		for option, vals in instance._sched_cfg:
+		for option, (rule_prio, scheduler, priority, affinity, regex) \
+				in sched_cfg:
 			try:
-				r = re.compile(vals[4])
+				r = re.compile(regex)
 			except re.error as e:
-				log.error("error compiling regular expression: '%s'" % str(vals[4]))
+				log.error("error compiling regular expression: '%s'" % str(regex))
 				continue
-			processes = [pid_cmd2 for pid_cmd2 in list(ps.items()) if re.search(r, pid_cmd2[1]) is not None]
-			#cmd - process name, option - group name, vals[0] - rule prio, vals[1] - sched, vals[2] - prio,
-			#vals[3] - affinity, vals[4] - regex
-			sched = dict([(pid_cmd[0], (pid_cmd[1], option, vals[1], vals[2], vals[3], vals[4])) for pid_cmd in processes])
+			processes = [(pid, cmd) for pid, cmd in ps.items() if re.search(r, cmd) is not None]
+			#cmd - process name, option - group name
+			sched = dict([(pid, (cmd, option, scheduler, priority, affinity, regex))
+					for pid, cmd in processes])
 			sched_all.update(sched)
-			v4 = str(vals[4]).replace("(", r"\(")
-			v4 = v4.replace(")", r"\)")
-			instance._sched_lookup[v4] = [vals[1], vals[2], vals[3]]
-		for pid, vals in list(sched_all.items()):
-			#vals[0] - process name, vals[1] - rule prio, vals[2] - sched, vals[3] - prio, vals[4] - affinity,
-			#vals[5] - regex
-			self._tune_process(instance, pid, vals[0], vals[2], vals[3], vals[4])
-		self._storage.set("options", instance._scheduler_original)
+			regex = str(regex).replace("(", r"\(")
+			regex = regex.replace(")", r"\)")
+			instance._sched_lookup[regex] = [scheduler, priority, affinity]
+		for pid, (cmd, option, scheduler, priority, affinity, regex) \
+				in sched_all.items():
+			self._tune_process(pid, cmd, scheduler,
+					priority, affinity)
+		self._storage.set(self._scheduler_storage_key,
+				self._scheduler_original)
 		if self._daemon and instance._runtime_tuning:
 			instance._thread = threading.Thread(target = self._thread_code, args = [instance])
 			instance._thread.start()
 
+	def _restore_ps_affinity(self):
+		try:
+			ps = self.get_processes()
+		except (OSError, IOError) as e:
+			log.error("error unapplying tuning, cannot get information about running processes: %s"
+					% e)
+			return
+		for pid, orig_params in self._scheduler_original.items():
+			# if command line for the pid didn't change, it's very probably the same process
+			if pid not in ps or ps[pid] != orig_params.cmdline:
+				continue
+			if orig_params.scheduler is not None \
+					and orig_params.priority is not None:
+				self._set_rt(pid, orig_params.scheduler,
+						orig_params.priority)
+			if orig_params.affinity is not None:
+				self._set_affinity(pid, orig_params.affinity)
+		self._scheduler_original = {}
+		self._storage.unset(self._scheduler_storage_key)
+
 	def _instance_unapply_static(self, instance, full_rollback = False):
 		super(SchedulerPlugin, self)._instance_unapply_static(instance, full_rollback)
-		ps = self.get_processes()
 		if self._daemon and instance._runtime_tuning:
 			instance._terminate.set()
 			instance._thread.join()
-
-		for pid, vals in list(instance._scheduler_original.items()):
-			# if command line for the pid didn't change, it's very probably the same process
-			try:
-				if ps[pid] == vals[0]:
-					self._set_rt(pid, self._sched2param(vals[1]), vals[2])
-					self._set_affinity(pid, vals[3])
-			except KeyError as e:
-				pass
+		self._restore_ps_affinity()
 
 	def _add_pid(self, instance, pid, r):
-		cmd = self.get_process(pid)
-		# check to filter short living process
-		if cmd == "":
+		try:
+			cmd = self._get_cmdline(pid)
+		except (OSError, IOError) as e:
+			if e.errno == errno.ENOENT \
+					or e.errno == errno.ESRCH:
+				log.debug("Failed to get cmdline of PID %d, the task vanished."
+						% pid)
+			else:
+				log.error("Failed to get cmdline of PID %d: %s"
+						% (pid, e))
 			return
 		v = self._cmd.re_lookup(instance._sched_lookup, cmd, r)
-		if v is not None and not pid in instance._scheduler_original:
-			log.debug("tuning new process '%s' with pid '%s' by '%s'" % (cmd, pid, str(v)))
-			#v[0] - sched, v[1] - prio, v[2] - affinity
-			self._tune_process(instance, pid, cmd, v[0], v[1], v[2], no_error = True)
-			self._storage.set("options", instance._scheduler_original)
+		if v is not None and not pid in self._scheduler_original:
+			log.debug("tuning new process '%s' with PID '%d' by '%s'" % (cmd, pid, str(v)))
+			(sched, prio, affinity) = v
+			self._tune_process(pid, cmd, sched, prio,
+					affinity)
+			self._storage.set(self._scheduler_storage_key,
+					self._scheduler_original)
 
 	def _remove_pid(self, instance, pid):
-		if pid in instance._scheduler_original:
-			del instance._scheduler_original[pid]
-			log.debug("removed PID %s from the rollback database" % pid)
-			self._storage.set("options", instance._scheduler_original)
+		if pid in self._scheduler_original:
+			del self._scheduler_original[pid]
+			log.debug("removed PID %d from the rollback database" % pid)
+			self._storage.set(self._scheduler_storage_key,
+					self._scheduler_original)
 
 	def _thread_code(self, instance):
 		r = self._cmd.re_lookup_compile(instance._sched_lookup)
@@ -319,14 +456,14 @@ class SchedulerPlugin(base.Plugin):
 				read_events = True
 				while read_events:
 					read_events = False
-					for cpu in instance._cpus:
+					for cpu in self._cpus:
 						event = instance._evlist.read_on_cpu(cpu)
 						if event:
 							read_events = True
 							if event.type == perf.RECORD_COMM:
-								self._add_pid(instance, str(event.pid), r)
+								self._add_pid(instance, int(event.tid), r)
 							elif event.type == perf.RECORD_EXIT:
-								self._remove_pid(instance, str(event.pid))
+								self._remove_pid(instance, int(event.tid))
 
 	@command_custom("ps_whitelist", per_device = False)
 	def _ps_whitelist(self, enabling, value, verify, ignore_missing):
@@ -344,30 +481,32 @@ class SchedulerPlugin(base.Plugin):
 		if enabling and value is not None:
 			self._ps_blacklist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
-	# TODO: merge with _get_affinity
-	def _get_affinity2(self, pid):
-		try:
-			return schedutils.get_affinity(pid)
-		# Workaround for old python-schedutils which incorrectly raised error
-		except (SystemError, OSError) as e:
-			if e[0] == 3:
-				log.debug("Unable to read affinity for PID %s, the task vanished." % pid)
-				return None
-			log.error("unable to get affinity for PID '%s': %s" % (str(pid), e))
-			return None
+	# Raises OSError
+	# Raises SystemError with old (pre-0.4) python-schedutils
+	# instead of OSError
+	# If PID doesn't exist, errno == ESRCH
+	def _get_affinity(self, pid):
+		res = schedutils.get_affinity(pid)
+		log.debug("Read affinity '%s' of PID %d" % (res, pid))
+		return res
 
-	# TODO: merge with _set_affinity
-	def _set_affinity2(self, pid, affinity):
+	def _set_affinity(self, pid, affinity):
+		log.debug("Setting CPU affinity of PID %d to '%s'." % (pid, affinity))
 		try:
 			schedutils.set_affinity(pid, affinity)
-		# Workaround for old python-schedutils which incorrectly raised error
+			return True
+		# Workaround for old python-schedutils (pre-0.4) which
+		# incorrectly raised SystemError instead of OSError
 		except (SystemError, OSError) as e:
-			if e[0] == 3:
-				log.debug("Unable to set affinity for PID %s, the task vanished." % pid)
-				return False
-			log.error("unable to set affinity '%s' for PID '%s': %s" % (str(affinity), str(pid), e))
+			if hasattr(e, "errno") and e.errno == errno.ESRCH:
+				log.debug("Failed to set affinity of PID %d, the task vanished."
+						% pid)
+			else:
+				res = self._affinity_changeable(pid)
+				if res == 1 or res == -2:
+					log.error("Failed to set affinity of PID %d to '%s': %s"
+							% (pid, affinity, e))
 			return False
-		return True
 
 	# returns intersection of affinity1 with affinity2, if intersection is empty it returns affinity3
 	def _get_intersect_affinity(self, affinity1, affinity2, affinity3):
@@ -376,26 +515,36 @@ class SchedulerPlugin(base.Plugin):
 			return list(aff)
 		return affinity3
 
-	def _set_all_obj_affinity(self, objs, affinity, threads = False, intersect = False):
-		_affinity = affinity
-		psl = [v for v in objs if re.search(self._ps_whitelist, self._get_stat_comm(v)) is not None]
+	def _set_all_obj_affinity(self, objs, affinity, threads = False):
+		psl = [v for v in objs if re.search(self._ps_whitelist,
+				self._get_stat_comm(v)) is not None]
 		if self._ps_blacklist != "":
-			psl = [v for v in psl if re.search(self._ps_blacklist, self._get_stat_comm(v)) is None]
+			psl = [v for v in psl if re.search(self._ps_blacklist,
+					self._get_stat_comm(v)) is None]
 		psd = dict([(v.pid, v) for v in psl])
-		for obj in psd:
-			if self._affinity_changeable(obj, process = psd[obj]) != 1:
+		for pid in psd:
+			try:
+				cmd = self._get_cmdline(psd[pid])
+			except (OSError, IOError) as e:
+				if e.errno == errno.ENOENT \
+						or e.errno == errno.ESRCH:
+					log.debug("Failed to get cmdline of PID %d, the task vanished."
+							% pid)
+				else:
+					log.error("Refusing to set affinity of PID %d, failed to get its cmdline: %s"
+							% (pid, e))
 				continue
-			prev_affinity = self._get_affinity2(obj)
-			if prev_affinity is None:
+			cont = self._tune_process_affinity(pid, affinity,
+					intersect = True)
+			if not cont:
 				continue
-			if intersect:
-				_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
-			if set(_affinity) != set(prev_affinity):
-				if not self._set_affinity2(obj, _affinity):
-					continue
+			if pid in self._scheduler_original:
+				self._scheduler_original[pid].cmdline = cmd
 			# process threads
-			if not threads and "threads" in psd[obj]:
-				self._set_all_obj_affinity(psd[obj]["threads"].values(), affinity, True, intersect)
+			if not threads and "threads" in psd[pid]:
+				self._set_all_obj_affinity(
+						psd[pid]["threads"].values(),
+						affinity, True)
 
 	def _get_stat_comm(self, o):
 		try:
@@ -403,48 +552,75 @@ class SchedulerPlugin(base.Plugin):
 		except (OSError, IOError, KeyError):
 			return ""
 
-	def _set_ps_affinity(self, affinity, intersect = False):
-		_affinity = affinity
-		affinity_hex = self._cmd.cpulist2hex(_affinity)
-		ps = procfs.pidstats()
-		ps.reload_threads()
-		self._set_all_obj_affinity(ps.values(), affinity, False, intersect)
+	def _set_ps_affinity(self, affinity):
+		try:
+			ps = procfs.pidstats()
+			ps.reload_threads()
+			self._set_all_obj_affinity(ps.values(), affinity, False)
+		except (OSError, IOError) as e:
+			log.error("error applying tuning, cannot get information about running processes: %s"
+					% e)
 
-		# process IRQs
+	def _set_irq_affinity(self, irq, affinity_hex):
+		self._cmd.write_to_file("/proc/irq/%s/smp_affinity" % irq,
+				affinity_hex, no_error = True)
+
+	def _set_default_irq_affinity(self, affinity_hex):
+		self._cmd.write_to_file("/proc/irq/default_smp_affinity",
+				affinity_hex)
+
+	def _set_all_irq_affinity(self, affinity):
+		irq_original = IRQAffinities()
 		irqs = procfs.interrupts()
-		for irq in list(irqs.keys()):
+		for irq in irqs.keys():
 			try:
 				prev_affinity = irqs[irq]["affinity"]
+				log.debug("Read affinity of IRQ '%s': '%s'"
+						% (irq, prev_affinity))
 			except KeyError:
 				continue
-			if intersect:
-				_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
-				affinity_hex = self._cmd.cpulist2hex(_affinity)
-			self._cmd.write_to_file("/proc/irq/%s/smp_affinity" % irq, affinity_hex, no_error = True)
+			_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
+			affinity_hex = self._cmd.cpulist2hex(_affinity)
+			self._set_irq_affinity(irq, affinity_hex)
+			irq_original.irqs[irq] = prev_affinity
 
 		# default affinity
 		prev_affinity_hex = self._cmd.read_file("/proc/irq/default_smp_affinity")
 		prev_affinity = self._cmd.hex2cpulist(prev_affinity_hex)
-		if intersect:
-			_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
-			affinity_hex = self._cmd.cpulist2hex(_affinity)
-		self._cmd.write_to_file("/proc/irq/default_smp_affinity", affinity_hex)
+		_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
+		affinity_hex = self._cmd.cpulist2hex(_affinity)
+		self._set_default_irq_affinity(affinity_hex)
+		irq_original.default = prev_affinity
+		self._storage.set(self._irq_storage_key, irq_original)
+
+	def _restore_all_irq_affinity(self):
+		irq_original = self._storage.get(self._irq_storage_key, None)
+		if irq_original is None:
+			return
+		for irq, affinity in irq_original.irqs.items():
+			affinity_hex = self._cmd.cpulist2hex(affinity)
+			self._set_irq_affinity(irq, affinity_hex)
+		affinity = irq_original.default
+		affinity_hex = self._cmd.cpulist2hex(affinity)
+		self._set_default_irq_affinity(affinity_hex)
+		self._storage.unset(self._irq_storage_key)
 
 	@command_custom("isolated_cores", per_device = False, priority = 10)
 	def _isolated_cores(self, enabling, value, verify, ignore_missing):
 		# currently unsupported
 		if verify:
 			return None
-		# TODO merge with instance._cpus
-		cpus = list(perf.cpu_map())
 		if enabling:
 			if value is not None:
 				affinity = self._cmd.cpulist_invert(value)
 				sa = set(affinity)
-				if set(cpus).intersection(sa) != sa:
-					str_cpus = ",".join([str(x) for x in cpus])
+				if set(self._cpus).intersection(sa) != sa:
+					str_cpus = ",".join([str(x) for x in self._cpus])
 					log.error("invalid isolated_cores specified, '%s' don't match available cores '%s'" % (value, str_cpus))
 					return None
-				self._set_ps_affinity(affinity, True)
+				self._set_ps_affinity(affinity)
+				self._set_all_irq_affinity(affinity)
 		else:
-			self._set_ps_affinity(cpus, False)
+			# Restoring processes' affinity is done in
+			# _instance_unapply_static()
+			self._restore_all_irq_affinity()

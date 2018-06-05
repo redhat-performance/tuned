@@ -379,11 +379,14 @@ class Plugin(object):
 	# Operations with persistent storage for status data.
 	#
 
-	def _storage_key(self, instance_name, command_name, device_name=None):
-		if device_name is not None:
-			return "%s/%s/%s" % (command_name, instance_name, device_name)
-		else:
-			return "%s/%s" % (command_name, instance_name)
+	def _storage_key(self, instance_name = None, command_name = None,
+			device_name = None):
+		class_name = type(self).__name__
+		instance_name = "" if instance_name is None else instance_name
+		command_name = "" if command_name is None else command_name
+		device_name = "" if device_name is None else device_name
+		return "%s/%s/%s/%s" % (class_name, instance_name,
+				command_name, device_name)
 
 	def _storage_set(self, instance, command, value, device_name=None):
 		key = self._storage_key(instance.name, command["name"], device_name)
