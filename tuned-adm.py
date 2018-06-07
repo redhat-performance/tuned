@@ -93,12 +93,6 @@ if __name__ == "__main__":
 		admin = tuned.admin.Admin(dbus, debug, async, timeout)
 
 		result = admin.action(action_name, **options)
-	except tuned.admin.TunedAdminException as e:
-		if not debug:
-			print(e, file=sys.stderr)
-		else:
-			traceback.print_exc()
-		sys.exit(2)
 	except:
 		traceback.print_exc()
 		sys.exit(3)
