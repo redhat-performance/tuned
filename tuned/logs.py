@@ -40,6 +40,9 @@ class TunedLogger(logging.getLoggerClass()):
 		self.setLevel(logging.INFO)
 		self.switch_to_console()
 
+	def console(self, msg, *args, **kwargs):
+		self.log(consts.LOG_LEVEL_CONSOLE, msg, *args, **kwargs)
+
 	def switch_to_console(self):
 		self._setup_console_handler()
 		self.remove_all_handlers()
@@ -78,5 +81,6 @@ class TunedLogger(logging.getLoggerClass()):
 			filename, maxBytes = consts.LOG_FILE_MAXBYTES, backupCount = consts.LOG_FILE_COUNT)
 		cls._file_handler.setFormatter(cls._formatter)
 
+logging.addLevelName(consts.LOG_LEVEL_CONSOLE, consts.LOG_LEVEL_CONSOLE_NAME)
 logging.setLoggerClass(TunedLogger)
 atexit.register(logging.shutdown)
