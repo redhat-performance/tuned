@@ -17,6 +17,7 @@ class DBusController(object):
 		self._debug = debug
 		self._main_loop = None
 		self._action = None
+		self._on_exit_action = None
 		self._ret = True
 		self._exit = False
 		self._exception = None
@@ -42,11 +43,19 @@ class DBusController(object):
 				self._exit = True
 
 		if self._exit:
+			if self._on_exit_action is not None:
+				self._on_exit_action(*self._on_exit_action_args,
+						**self._on_exit_action_kwargs)
 			self._main_loop.quit()
 			return False
 		else:
 			time.sleep(1)
 		return True
+
+	def set_on_exit_action(self, action, *args, **kwargs):
+		self._on_exit_action = action
+		self._on_exit_action_args = args
+		self._on_exit_action_kwargs = kwargs
 
 	def set_action(self, action, *args, **kwargs):
 		self._action = action
@@ -95,6 +104,12 @@ class DBusController(object):
 
 	def profile_info(self, profile_name):
 		return self._call("profile_info", profile_name)
+
+	def log_capture_start(self, log_level, timeout):
+		return self._call("log_capture_start", log_level, timeout)
+
+	def log_capture_finish(self, token):
+		return self._call("log_capture_finish", token)
 
 	def active_profile(self):
 		return self._call("active_profile")

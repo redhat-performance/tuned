@@ -37,6 +37,15 @@ def check_positive(value):
 		raise argparse.ArgumentTypeError("%s has to be >= 0" % value)
 	return val
 
+def check_log_level(value):
+	try:
+		return consts.CAPTURE_LOG_LEVELS[value.lower()]
+	except KeyError:
+		levels = ", ".join(consts.CAPTURE_LOG_LEVELS.keys())
+		raise argparse.ArgumentTypeError(
+				"Invalid log level: %s. Valid log levels: %s."
+				% (value, levels))
+
 if __name__ == "__main__":
 	config = GlobalConfig()
 	parser = argparse.ArgumentParser(description="Manage tuned daemon.")
@@ -44,6 +53,13 @@ if __name__ == "__main__":
 	parser.add_argument("--debug", "-d", action="store_true", help="show debug messages")
 	parser.add_argument("--async", "-a", action="store_true", help="with dbus do not wait on commands completion and return immediately")
 	parser.add_argument("--timeout", "-t", default = consts.ADMIN_TIMEOUT, type = check_positive, help="with sync operation use specific timeout instead of the default %d second(s)" % consts.ADMIN_TIMEOUT)
+	levels = ", ".join(consts.CAPTURE_LOG_LEVELS.keys())
+	help = "level of log messages to capture (one of %s). Default: %s" \
+			% (levels, consts.CAPTURE_LOG_LEVEL)
+	parser.add_argument("--loglevel", "-l",
+			default = consts.CAPTURE_LOG_LEVEL,
+			type = check_log_level,
+			help = help)
 
 	subparsers = parser.add_subparsers()
 
@@ -85,12 +101,13 @@ if __name__ == "__main__":
 	async = options.pop("async")
 	timeout = options.pop("timeout")
 	action_name = options.pop("action")
+	log_level = options.pop("loglevel")
 	result = False
 
 	dbus = config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
 
 	try:
-		admin = tuned.admin.Admin(dbus, debug, async, timeout)
+		admin = tuned.admin.Admin(dbus, debug, async, timeout, log_level)
 
 		result = admin.action(action_name, **options)
 	except:
