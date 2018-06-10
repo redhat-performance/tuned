@@ -1,0 +1,7 @@
+* Implement a configurable policy which determines how many (and how big)
+  log buffers can a user with a given UID create using the log_capture_start
+  DBus call.
+* Destroy the log handler created by log_capture_start() when the caller
+  disconnects from DBus.
+* Use only one timer for destroying log handlers at a time. Create a new
+  timer as necessary when the old timer fires.

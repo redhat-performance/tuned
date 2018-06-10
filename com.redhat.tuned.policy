@@ -127,6 +127,26 @@
     </defaults>
   </action>
 
+  <action id="com.redhat.tuned.log_capture_start">
+    <description>Start log capture</description>
+    <message>Authentication is required to start log capture</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="com.redhat.tuned.log_capture_finish">
+    <description>Stop log capture and return captured log</description>
+    <message>Authentication is required to stop log capture</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
   <action id="com.redhat.tuned.auto_profile">
     <description>Enable automatic profile selection mode</description>
     <message>Authentication is required to change profile selection mode</message>
