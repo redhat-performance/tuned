@@ -33,16 +33,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 2
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.9.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.10.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}.tar.gz#/%{name}-%{version}%{?prerel1}.tar.gz
 URL: http://www.tuned-project.org/
@@ -470,6 +470,37 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Mon Jun 11 2018 Jaroslav Škarvada <jskarvad@redhat.com> - 2.10.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#1546598
+  - script: show stderr output in the log
+    resolves: rhbz#1536476
+  - realtime-virtual-host: script.sh: add error checking
+    resolves: rhbz#1461509
+  - man: improved tuned-profiles-cpu-partitioning.7
+    resolves: rhbz#1548148
+  - bootloader: check if grub2_cfg_file_name is None in _remove_grub2_tuning()
+    resolves: rhbz#1571403
+  - plugin_scheduler: whitelist/blacklist processed also for thread names
+    resolves: rhbz#1512295
+  - bootloader: patch all GRUB2 config files
+    resolves: rhbz#1556990
+  - profiles: added mssql profile
+    resolves: rhbz#1442122
+  - tuned-adm: print log excerpt when changing profile
+    resolves: rhbz#1538745
+  - cpu-partitioning: use no_balance_cores instead of no_rebalance_cores
+    resolves: rhbz#1550573
+  - sysctl: support assignment modifiers as other plugins do
+    resolves: rhbz#1564092
+  - oracle: fixed ip_local_port_range parity warning
+    resolves: rhbz#1527219
+  - Fix verifying cpumask on systems with more than 32 cores
+    resolves: rhbz#1528368
+  - oracle: updated the profile to be in sync with KCS 39188
+    resolves: rhbz#1447323
+
 * Sun Oct 29 2017 Jaroslav Škarvada <jskarvad@redhat.com> - 2.9.0-1
 - new release
   - rebased tuned to latest upstream
