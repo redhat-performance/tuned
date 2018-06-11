@@ -234,7 +234,8 @@ class Admin(object):
 			log_msgs = self._controller.log_capture_finish(
 					self._log_token)
 			self._log_token = None
-			self._error(log_msgs)
+			print(log_msgs, end = "", file = sys.stderr)
+			sys.stderr.flush()
 		except TunedAdminDBusException as e:
 			self._error("Error: Failed to stop log capture. Restart the Tuned daemon to prevent a memory leak.")
 
