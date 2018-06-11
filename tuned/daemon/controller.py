@@ -10,6 +10,30 @@ __all__ = ["Controller"]
 
 log = tuned.logs.get()
 
+class TimerStore(object):
+	def __init__(self):
+		self._timers = dict()
+		self._timers_lock = threading.Lock()
+
+	def store_timer(self, token, timer):
+		with self._timers_lock:
+			self._timers[token] = timer
+
+	def drop_timer(self, token):
+		with self._timers_lock:
+			try:
+				timer = self._timers[token]
+				timer.cancel()
+				del self._timers[token]
+			except:
+				pass
+
+	def cancel_all(self):
+		with self._timers_lock:
+			for timer in self._timers.values():
+				timer.cancel()
+			self._timers.clear()
+
 class Controller(tuned.exports.interfaces.ExportableInterface):
 	"""
 	Controller's purpose is to keep the program running, start/stop the tuning,
@@ -22,6 +46,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		self._global_config = global_config
 		self._terminate = threading.Event()
 		self._cmd = commands()
+		self._timer_store = TimerStore()
 
 	def run(self):
 		"""
@@ -54,6 +79,32 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	# identifying caller (with DBus it's the caller bus name) if authorized and empty
 	# string if not authorized, caller must be the last argument
 
+	def _log_capture_abort(self, token):
+		tuned.logs.log_capture_finish(token)
+		self._timer_store.drop_timer(token)
+
+	@exports.export("ii", "s")
+	def log_capture_start(self, log_level, timeout, caller = None):
+		if caller == "":
+			return ""
+		token = tuned.logs.log_capture_start(log_level)
+		if token is None:
+			return ""
+		if timeout > 0:
+			timer = threading.Timer(timeout,
+					self._log_capture_abort, args = [token])
+			self._timer_store.store_timer(token, timer)
+			timer.start()
+		return "" if token is None else token
+
+	@exports.export("s", "s")
+	def log_capture_finish(self, token, caller = None):
+		if caller == "":
+			return ""
+		res = tuned.logs.log_capture_finish(token)
+		self._timer_store.drop_timer(token)
+		return "" if res is None else res
+
 	@exports.export("", "b")
 	def start(self, caller = None):
 		if caller == "":
@@ -70,9 +121,11 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if caller == "":
 			return False
 		if not self._daemon.is_running():
-			return True
+			res = True
 		else:
-			return self._daemon.stop()
+			res = self._daemon.stop()
+		self._timer_store.cancel_all()
+		return res
 
 	@exports.export("", "b")
 	def reload(self, caller = None):

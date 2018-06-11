@@ -1,3 +1,5 @@
+import logging
+
 GLOBAL_CONFIG_FILE = "/etc/tuned/tuned-main.conf"
 ACTIVE_PROFILE_FILE = "/etc/tuned/active_profile"
 PROFILE_MODE_FILE = "/etc/tuned/profile_mode"
@@ -110,3 +112,15 @@ ADMIN_TIMEOUT = 600
 # was set automatically or manually
 ACTIVE_PROFILE_AUTO = "auto"
 ACTIVE_PROFILE_MANUAL = "manual"
+
+LOG_LEVEL_CONSOLE = 60
+LOG_LEVEL_CONSOLE_NAME = "CONSOLE"
+CAPTURE_LOG_LEVEL = "error"
+CAPTURE_LOG_LEVELS = {
+		"debug": logging.DEBUG,
+		"info": logging.INFO,
+		"warn": logging.WARN,
+		"error": logging.ERROR,
+		"console": LOG_LEVEL_CONSOLE,
+		"none": None,
+		}
