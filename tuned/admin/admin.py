@@ -337,6 +337,10 @@ class Admin(object):
 		return False
 
 	def _action_dbus_off(self):
+		# 25 seconds default DBus timeout + 5 secs safety margin
+		timeout = 25 + 5
+		self._log_token = self._controller.log_capture_start(
+				self._log_level, timeout)
 		ret = self._controller.off()
 		if not ret:
 			self._error("Cannot disable active profile.")
