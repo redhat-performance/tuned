@@ -104,12 +104,14 @@ stop() {
 
 verify() {
     python /usr/libexec/tuned/defirqaffinity.py "verify" "$TUNED_isolated_cores_expanded"
-    retval = "$?"
+    retval=$?
     if [ $retval -eq 0 -a -f /sys/module/kvm/parameters/kvmclock_periodic_sync ]; then
-        retval = `cat /sys/module/kvm/parameters/kvmclock_periodic_sync`
+        test "$(cat /sys/module/kvm/parameters/kvmclock_periodic_sync)" = 0
+        retval=$?
     fi
     if [ $retval -eq 0 -a -f /sys/module/kvm_intel/parameters/ple_gap ]; then
-        retval = `cat /sys/module/kvm_intel/parameters/ple_gap`
+        test "$(cat /sys/module/kvm_intel/parameters/ple_gap)" = 0
+        retval=$?
     fi
     return $retval
 }
