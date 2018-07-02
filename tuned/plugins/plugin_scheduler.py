@@ -561,13 +561,39 @@ class SchedulerPlugin(base.Plugin):
 			log.error("error applying tuning, cannot get information about running processes: %s"
 					% e)
 
-	def _set_irq_affinity(self, irq, affinity_hex):
-		self._cmd.write_to_file("/proc/irq/%s/smp_affinity" % irq,
-				affinity_hex, no_error = True)
+	def _set_irq_affinity(self, irq, affinity, restoring):
+		try:
+			affinity_hex = self._cmd.cpulist2hex(affinity)
+			log.debug("Setting SMP affinity of IRQ %s to '%s'"
+					% (irq, affinity_hex))
+			filename = "/proc/irq/%s/smp_affinity" % irq
+			with open(filename, "w") as f:
+				f.write(affinity_hex)
+			return True
+		except (OSError, IOError) as e:
+			# EIO is returned by
+			# kernel/irq/proc.c:write_irq_affinity() if changing
+			# the affinity is not supported
+			# (at least on kernels 3.10 and 4.18)
+			if hasattr(e, "errno") and e.errno == errno.EIO \
+					and not restoring:
+				log.debug("Setting SMP affinity of IRQ %s is not supported"
+						% irq)
+			else:
+				log.error("Failed to set SMP affinity of IRQ %s to '%s': %s"
+						% (irq, affinity_hex, e))
+			return False
 
-	def _set_default_irq_affinity(self, affinity_hex):
-		self._cmd.write_to_file("/proc/irq/default_smp_affinity",
-				affinity_hex)
+	def _set_default_irq_affinity(self, affinity):
+		try:
+			affinity_hex = self._cmd.cpulist2hex(affinity)
+			log.debug("Setting default SMP IRQ affinity to '%s'"
+					% affinity_hex)
+			with open("/proc/irq/default_smp_affinity", "w") as f:
+				f.write(affinity_hex)
+		except (OSError, IOError) as e:
+			log.error("Failed to set default SMP IRQ affinity to '%s': %s"
+					% (affinity_hex, e))
 
 	def _set_all_irq_affinity(self, affinity):
 		irq_original = IRQAffinities()
@@ -582,16 +608,14 @@ class SchedulerPlugin(base.Plugin):
 			_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
 			if set(_affinity) == set(prev_affinity):
 				continue
-			affinity_hex = self._cmd.cpulist2hex(_affinity)
-			if self._set_irq_affinity(irq, affinity_hex):
+			if self._set_irq_affinity(irq, _affinity, False):
 				irq_original.irqs[irq] = prev_affinity
 
 		# default affinity
 		prev_affinity_hex = self._cmd.read_file("/proc/irq/default_smp_affinity")
 		prev_affinity = self._cmd.hex2cpulist(prev_affinity_hex)
 		_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
-		affinity_hex = self._cmd.cpulist2hex(_affinity)
-		self._set_default_irq_affinity(affinity_hex)
+		self._set_default_irq_affinity(_affinity)
 		irq_original.default = prev_affinity
 		self._storage.set(self._irq_storage_key, irq_original)
 
@@ -600,11 +624,9 @@ class SchedulerPlugin(base.Plugin):
 		if irq_original is None:
 			return
 		for irq, affinity in irq_original.irqs.items():
-			affinity_hex = self._cmd.cpulist2hex(affinity)
-			self._set_irq_affinity(irq, affinity_hex)
+			self._set_irq_affinity(irq, affinity, True)
 		affinity = irq_original.default
-		affinity_hex = self._cmd.cpulist2hex(affinity)
-		self._set_default_irq_affinity(affinity_hex)
+		self._set_default_irq_affinity(affinity)
 		self._storage.unset(self._irq_storage_key)
 
 	@command_custom("isolated_cores", per_device = False, priority = 10)
