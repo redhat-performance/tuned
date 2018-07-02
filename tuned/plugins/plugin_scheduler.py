@@ -580,9 +580,10 @@ class SchedulerPlugin(base.Plugin):
 			except KeyError:
 				continue
 			_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
-			if set(_affinity) != set(prev_affinity):
-				affinity_hex = self._cmd.cpulist2hex(_affinity)
-				self._set_irq_affinity(irq, affinity_hex)
+			if set(_affinity) == set(prev_affinity):
+				continue
+			affinity_hex = self._cmd.cpulist2hex(_affinity)
+			if self._set_irq_affinity(irq, affinity_hex):
 				irq_original.irqs[irq] = prev_affinity
 
 		# default affinity
