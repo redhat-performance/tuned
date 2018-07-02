@@ -607,20 +607,24 @@ class SchedulerPlugin(base.Plugin):
 
 	@command_custom("isolated_cores", per_device = False, priority = 10)
 	def _isolated_cores(self, enabling, value, verify, ignore_missing):
+		affinity = None
+		if value is not None:
+			isolated = set(self._cmd.cpulist_unpack(value))
+			present = set(self._cpus)
+			if isolated.issubset(present):
+				affinity = list(present - isolated)
+			else:
+				str_cpus = ",".join([str(x) for x in self._cpus])
+				log.error("Invalid isolated_cores specified, '%s' does not match available cores '%s'"
+						% (value, str_cpus))
+		if (enabling or verify) and affinity is None:
+			return None
 		# currently unsupported
 		if verify:
 			return None
-		if enabling:
-			if value is not None:
-				isolated = set(self._cmd.cpulist_unpack(value))
-				present = set(self._cpus)
-				if not isolated.issubset(present):
-					str_cpus = ",".join([str(x) for x in self._cpus])
-					log.error("invalid isolated_cores specified, '%s' don't match available cores '%s'" % (value, str_cpus))
-					return None
-				affinity = list(present - isolated)
-				self._set_ps_affinity(affinity)
-				self._set_all_irq_affinity(affinity)
+		elif enabling:
+			self._set_ps_affinity(affinity)
+			self._set_all_irq_affinity(affinity)
 		else:
 			# Restoring processes' affinity is done in
 			# _instance_unapply_static()
