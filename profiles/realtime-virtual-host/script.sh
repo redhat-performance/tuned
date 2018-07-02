@@ -44,10 +44,6 @@ run_tsc_deadline_latency()
 }
 
 start() {
-    if ! /usr/libexec/tuned/defirqaffinity.py "remove" "$TUNED_isolated_cores_expanded"; then
-	die defirqaffinity.py remove failed
-    fi
-
     setup_kvm_mod_low_latency
 
     disable_ksm
@@ -97,15 +93,12 @@ start() {
 
 stop() {
     [ "$1" = "full_rollback" ] && teardown_kvm_mod_low_latency
-    python /usr/libexec/tuned/defirqaffinity.py "add" "$TUNED_isolated_cores_expanded"
     enable_ksm
     return "$?"
 }
 
 verify() {
-    python /usr/libexec/tuned/defirqaffinity.py "verify" "$TUNED_isolated_cores_expanded"
-    retval=$?
-    if [ $retval -eq 0 -a -f /sys/module/kvm/parameters/kvmclock_periodic_sync ]; then
+    if [ -f /sys/module/kvm/parameters/kvmclock_periodic_sync ]; then
         test "$(cat /sys/module/kvm/parameters/kvmclock_periodic_sync)" = 0
         retval=$?
     fi
