@@ -629,6 +629,43 @@ class SchedulerPlugin(base.Plugin):
 		self._set_default_irq_affinity(affinity)
 		self._storage.unset(self._irq_storage_key)
 
+	def _verify_irq_affinity(self, irq_description, correct_affinity,
+			current_affinity):
+		res = set(current_affinity).issubset(set(correct_affinity))
+		if res:
+			log.info(consts.STR_VERIFY_PROFILE_VALUE_OK
+					% (irq_description, current_affinity))
+		else:
+			log.error(consts.STR_VERIFY_PROFILE_VALUE_FAIL
+					% (irq_description, current_affinity,
+					correct_affinity))
+		return res
+
+	def _verify_all_irq_affinity(self, correct_affinity):
+		irqs = procfs.interrupts()
+		res = True
+		for irq in irqs.keys():
+			try:
+				current_affinity = irqs[irq]["affinity"]
+				log.debug("Read SMP affinity of IRQ '%s': '%s'"
+						% (irq, current_affinity))
+				irq_description = "SMP affinity of IRQ %s" % irq
+				if not self._verify_irq_affinity(
+						irq_description,
+						correct_affinity,
+						current_affinity):
+					res = False
+			except KeyError:
+				continue
+
+		current_affinity_hex = self._cmd.read_file(
+				"/proc/irq/default_smp_affinity")
+		current_affinity = self._cmd.hex2cpulist(current_affinity_hex)
+		if not self._verify_irq_affinity("default IRQ SMP affinity",
+				current_affinity, correct_affinity):
+			res = False
+		return res
+
 	@command_custom("isolated_cores", per_device = False, priority = 10)
 	def _isolated_cores(self, enabling, value, verify, ignore_missing):
 		affinity = None
@@ -643,9 +680,9 @@ class SchedulerPlugin(base.Plugin):
 						% (value, str_cpus))
 		if (enabling or verify) and affinity is None:
 			return None
-		# currently unsupported
+		# currently only IRQ affinity verification is supported
 		if verify:
-			return None
+			return self._verify_all_irq_affinity(affinity)
 		elif enabling:
 			self._set_ps_affinity(affinity)
 			self._set_all_irq_affinity(affinity)
