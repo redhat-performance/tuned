@@ -612,12 +612,13 @@ class SchedulerPlugin(base.Plugin):
 			return None
 		if enabling:
 			if value is not None:
-				affinity = self._cmd.cpulist_invert(value)
-				sa = set(affinity)
-				if set(self._cpus).intersection(sa) != sa:
+				isolated = set(self._cmd.cpulist_unpack(value))
+				present = set(self._cpus)
+				if not isolated.issubset(present):
 					str_cpus = ",".join([str(x) for x in self._cpus])
 					log.error("invalid isolated_cores specified, '%s' don't match available cores '%s'" % (value, str_cpus))
 					return None
+				affinity = list(present - isolated)
 				self._set_ps_affinity(affinity)
 				self._set_all_irq_affinity(affinity)
 		else:
