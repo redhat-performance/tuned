@@ -17,20 +17,31 @@ run_tsc_deadline_latency()
 
     for i in `seq 1000 500 7000`; do
         echo $i > $KVM_LAPIC_FILE
-        chrt -f 1 taskset -c $1 $QEMU -enable-kvm -device pc-testdev \
+
+        unixpath=`mktemp`
+
+        chrt -f 1 $QEMU -S -enable-kvm -device pc-testdev \
             -device isa-debug-exit,iobase=0xf4,iosize=0x4 \
             -display none -serial stdio -device pci-testdev \
             -kernel "$TSCDEADLINE_LATENCY"  \
-            -cpu host | grep latency | cut -f 2 -d ":" > $dir/out
+            -cpu host \
+            -mon chardev=char0,mode=readline \
+            -chardev socket,id=char0,nowait,path=$unixpath,server | grep latency | cut -f 2 -d ":" > $dir/out &
 
-	if [ ! -f $dir/out ]; then
-	    die running $TSCDEADLINE_LATENCY failed
-	fi
+        sleep 1s
+        pidofvcpu=`echo "info cpus" | nc -U $unixpath | grep thread_id | cut -f 3 -d "=" | tr -d "\r"`
+        taskset -p -c $1 $pidofvcpu >/dev/null
+        echo "cont" | nc -U $unixpath >/dev/null
+        wait
 
-	tmp=$(wc -l $dir/out | awk '{ print $1 }')
-	if [ $tmp -eq 0 ]; then
-	    die running $TSCDEADLINE_LATENCY failed
-	fi
+        if [ ! -f $dir/out ]; then
+             die running $TSCDEADLINE_LATENCY failed
+        fi
+
+        tmp=$(wc -l $dir/out | awk '{ print $1 }')
+        if [ $tmp -eq 0 ]; then
+            die running $TSCDEADLINE_LATENCY failed
+        fi
 
         A=0
         while read l; do
