@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
 	options = vars(args)
 	debug = options.pop("debug")
-	async = options.pop("async")
+	asynco = options.pop("async")
 	timeout = options.pop("timeout")
 	action_name = options.pop("action")
 	log_level = options.pop("loglevel")
@@ -107,7 +107,7 @@ if __name__ == "__main__":
 	dbus = config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
 
 	try:
-		admin = tuned.admin.Admin(dbus, debug, async, timeout, log_level)
+		admin = tuned.admin.Admin(dbus, debug, asynco, timeout, log_level)
 
 		result = admin.action(action_name, **options)
 	except:

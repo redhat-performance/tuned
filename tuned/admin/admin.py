@@ -14,12 +14,12 @@ import threading
 import logging
 
 class Admin(object):
-	def __init__(self, dbus = True, debug = False, async = False,
+	def __init__(self, dbus = True, debug = False, asynco = False,
 			timeout = consts.ADMIN_TIMEOUT,
 			log_level = logging.ERROR):
 		self._dbus = dbus
 		self._debug = debug
-		self._async = async
+		self._async = asynco
 		self._timeout = timeout
 		self._cmd = commands(debug)
 		self._profiles_locator = profiles_locator(consts.LOAD_DIRECTORIES)
