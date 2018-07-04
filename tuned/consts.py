@@ -115,7 +115,7 @@ ACTIVE_PROFILE_MANUAL = "manual"
 
 LOG_LEVEL_CONSOLE = 60
 LOG_LEVEL_CONSOLE_NAME = "CONSOLE"
-CAPTURE_LOG_LEVEL = "error"
+CAPTURE_LOG_LEVEL = "console"
 CAPTURE_LOG_LEVELS = {
 		"debug": logging.DEBUG,
 		"info": logging.INFO,
