@@ -30,8 +30,6 @@ class Admin(object):
 		self._controller = None
 		self._log_token = None
 		self._log_level = log_level
-		# 25 seconds default DBus timeout + 5 seconds safety margin
-		self._log_capture_timeout = self._timeout + 25 + 5
 		if self._dbus:
 			self._controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_INTERFACE, consts.DBUS_OBJECT, debug)
 			try:
@@ -247,9 +245,10 @@ class Admin(object):
 			return self._controller.exit(False)
 		self._daemon_action_finished.clear()
 		if not self._async and self._log_level is not None:
+			# 25 seconds default DBus timeout + 5 secs safety margin
+			timeout = self._timeout + 25 + 5
 			self._log_token = self._controller.log_capture_start(
-					self._log_level,
-					self._log_capture_timeout)
+					self._log_level, timeout)
 		(ret, msg) = self._controller.switch_profile(profile_name)
 		if self._async or not ret:
 			return self._controller.exit(self._profile_print_status(ret, msg))
@@ -292,9 +291,10 @@ class Admin(object):
 		profile_name = self._controller.recommend_profile()
 		self._daemon_action_finished.clear()
 		if not self._async and self._log_level is not None:
+			# 25 seconds default DBus timeout + 5 secs safety margin
+			timeout = self._timeout + 25 + 5
 			self._log_token = self._controller.log_capture_start(
-					self._log_level,
-					self._log_capture_timeout)
+					self._log_level, timeout)
 		(ret, msg) = self._controller.auto_profile()
 		if self._async or not ret:
 			return self._controller.exit(self._profile_print_status(ret, msg))
@@ -337,6 +337,10 @@ class Admin(object):
 		return False
 
 	def _action_dbus_off(self):
+		# 25 seconds default DBus timeout + 5 secs safety margin
+		timeout = 25 + 5
+		self._log_token = self._controller.log_capture_start(
+				self._log_level, timeout)
 		ret = self._controller.off()
 		if not ret:
 			self._error("Cannot disable active profile.")
