@@ -292,21 +292,6 @@ if [ -d %{_sysconfdir}/grub.d ]; then
 fi
 
 
-%post gtk
-/bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
-
-
-%postun gtk
-if [ $1 -eq 0 ] ; then
-    /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
-    /usr/bin/gtk-update-icon-cache -f %{_datadir}/icons/hicolor &>/dev/null || :
-fi
-
-
-%posttrans gtk
-/usr/bin/gtk-update-icon-cache -f %{_datadir}/icons/hicolor &>/dev/null || :
-
-
 %files
 %defattr(-,root,root,-)
 %exclude %{docdir}/README.utils
