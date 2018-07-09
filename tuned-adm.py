@@ -94,6 +94,9 @@ if __name__ == "__main__":
 	parser_profile_mode = subparsers.add_parser("profile_mode", help="show current profile selection mode")
 	parser_profile_mode.set_defaults(action="profile_mode")
 
+	if len(sys.argv) < 2:
+		parser.print_usage(file = sys.stderr)
+		sys.exit(1)
 	args = parser.parse_args(sys.argv[1:])
 
 	options = vars(args)
