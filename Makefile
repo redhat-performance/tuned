@@ -30,12 +30,12 @@ VERSIONED_NAME = $(NAME)-$(VERSION)$(GIT_PSUFFIX)
 SYSCONFDIR = /etc
 DATADIR = /usr/share
 DOCDIR = $(DATADIR)/doc/$(NAME)
-PYTHON = python3
+PYTHON = /usr/bin/python3
 PYLINT = pylint-3
 ifeq ($(PYTHON),python2)
 PYLINT = pylint-2
 endif
-SHEBANG_REWRITE_REGEX= '1s/^(\#!\/usr\/bin\/)\<python\>/\1$(PYTHON)/'
+SHEBANG_REWRITE_REGEX= '1s|^\#!/usr/bin/\<python\>|\#!$(PYTHON)|'
 PYTHON_SITELIB = $(shell $(PYTHON) -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib());')
 ifeq ($(PYTHON_SITELIB),)
 $(error Failed to determine python library directory)

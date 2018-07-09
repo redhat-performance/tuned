@@ -215,9 +215,9 @@ It can be also used to fine tune your system for specific scenarios.
 %install
 make install DESTDIR=%{buildroot} DOCDIR=%{docdir} \
 %if %{with python3}
-	PYTHON=python3
+	PYTHON=%{__python3}
 %else
-	PYTHON=python2
+	PYTHON=%{__python2}
 %endif
 %if 0%{?rhel}
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
