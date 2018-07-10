@@ -278,7 +278,8 @@ class Base(object):
 		self.treestore_profiles = Gtk.ListStore(GObject.TYPE_STRING,
 				GObject.TYPE_STRING)
 		self.treestore_plugins = Gtk.ListStore(GObject.TYPE_STRING)
-		for plugin in sorted(self.plugin_loader.plugins):
+		for plugin in sorted(self.plugin_loader.plugins,
+				key = lambda plugin: plugin.name):
 			self.treestore_plugins.append([plugin.name])
 		self.combobox_plugins = \
 			self.builder.get_object('comboboxPlugins')
