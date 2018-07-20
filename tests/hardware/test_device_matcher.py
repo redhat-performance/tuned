@@ -1,7 +1,7 @@
-import unittest
+import unittest2
 from tuned.hardware.device_matcher import DeviceMatcher
 
-class DeviceMatcherTestCase(unittest.TestCase):
+class DeviceMatcherTestCase(unittest2.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.matcher = DeviceMatcher()
