@@ -73,7 +73,7 @@ class Admin(object):
 			action = getattr(self, "_action_" + action_name)
 		except AttributeError as e:
 			if not self._dbus:
-				self._error(e + ", action '%s' is not implemented" % action_name)
+				self._error(str(e) + ", action '%s' is not implemented" % action_name)
 				return False
 		if self._dbus:
 			try:
