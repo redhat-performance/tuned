@@ -212,6 +212,8 @@ test:
 	$(PYTHON) -m unittest discover tests
 
 lint:
-	$(PYLINT) -E -f parseable tuned *.py
+	# --ignore commands.py is a workaround for
+	# https://bugzilla.redhat.com/show_bug.cgi?id=1613466
+	$(PYLINT) --ignore commands.py -E -f parseable tuned *.py
 
 .PHONY: clean archive srpm tag test lint

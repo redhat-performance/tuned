@@ -9,6 +9,7 @@ import re
 import procfs
 from subprocess import *
 from tuned.exceptions import TunedException
+import dmidecode
 
 log = tuned.logs.get()
 
@@ -412,6 +413,13 @@ class commands:
 						ps = procfs.pidstats()
 						ps.reload_threads()
 						if len(ps.find_by_regex(re.compile(value))) == 0:
+							match = False
+					elif option == "chassis_type":
+						for chassis in dmidecode.chassis().values():
+							chassis_type = chassis["data"]["Type"]
+							if re.match(value, chassis_type, re.IGNORECASE):
+								break
+						else:
 							match = False
 				if match:
 					# remove the ",.*" suffix
