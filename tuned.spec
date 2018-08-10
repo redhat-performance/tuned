@@ -67,6 +67,9 @@ Requires: util-linux, dbus, polkit
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
 Recommends: kernel-tools
 %endif
+%if 0%{?rhel} > 7
+Requires: python3-syspurpose
+%endif
 
 %description
 The tuned package contains a daemon that tunes system settings dynamically.
