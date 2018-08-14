@@ -173,8 +173,11 @@ class Daemon(object):
 			# do full cleanup
 			full_rollback = False
 			if self._full_rollback_required():
-				log.info("terminating Tuned, rolling back all changes")
-				full_rollback = True
+				if self._daemon:
+					log.info("terminating Tuned, rolling back all changes")
+					full_rollback = True
+				else:
+					log.info("terminating Tuned")
 			else:
 				log.info("terminating Tuned due to system shutdown / reboot")
 		if self._daemon:
