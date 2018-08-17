@@ -1,0 +1,24 @@
+language: generic
+sudo: required
+services:
+  - docker
+matrix:
+ include:
+ - name: "fedora 28 python 2 test suite"
+   env:
+    - python=2
+    - os=fedora:28
+    - package_manager=dnf
+ - name: "fedora 28 python 3 test suite"
+   env:
+    - python=3
+    - os=fedora:28
+    - package_manager=dnf
+ - name: "centos 7 test suite"
+   env:
+    - python=2
+    - os=centos:7
+    - package_manager=yum
+script:
+  - docker build --build-arg PYTHON=${python} --build-arg OS=${os} --build-arg PACKAGE_MANAGER=${package_manager} -t tuned_image -f tests/Dockerfile .
+  - docker run tuned_image /bin/sh -c "make test PYTHON=/usr/bin/python${python}"
