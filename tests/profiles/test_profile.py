@@ -1,4 +1,4 @@
-import unittest
+import unittest2
 import tuned.profiles
 import collections
 
@@ -6,7 +6,7 @@ class MockProfile(tuned.profiles.profile.Profile):
 	def _create_unit(self, name, config):
 		return (name, config)
 
-class ProfileTestCase(unittest.TestCase):
+class ProfileTestCase(unittest2.TestCase):
 
 	def test_init(self):
 		MockProfile("test", {})
@@ -20,7 +20,7 @@ class ProfileTestCase(unittest.TestCase):
 
 		self.assertIs(type(profile.units), collections.OrderedDict)
 		self.assertEqual(len(profile.units), 2)
-		self.assertListEqual(sorted([name_config[0] for name_config in profile.units]), sorted(["network", "storage"]))
+		self.assertListEqual(sorted([name_config for name_config in profile.units]), sorted(["network", "storage"]))
 
 	def test_create_units_empty(self):
 		profile = MockProfile("test", {"main":{}})
