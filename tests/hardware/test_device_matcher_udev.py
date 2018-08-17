@@ -9,16 +9,28 @@ class DeviceMatcherUdevTestCase(unittest2.TestCase):
 		cls.udev_context = pyudev.Context()
 		cls.matcher = DeviceMatcherUdev()
 
-
 	def test_simple_search(self):
-		device = pyudev.Devices.from_path(self.udev_context,'/devices/virtual/cpuid/cpu0')
-		self.assertTrue(self.matcher.match('cpu0',device))
-		device = pyudev.Devices.from_path(self.udev_context,'/devices/virtual/cpuid/cpu1')
-		self.assertFalse(self.matcher.match('cpu0',device))
-
+		try:
+			device = pyudev.Devices.from_sys_path(self.udev_context,
+				"/sys/devices/virtual/tty/tty0")
+		except AttributeError:
+			device = pyudev.Device.from_sys_path(self.udev_context,
+				"/sys/devices/virtual/tty/tty0")
+		self.assertTrue(self.matcher.match("tty0", device))
+		try:
+			device = pyudev.Devices.from_sys_path(self.udev_context,
+				"/sys/devices/virtual/tty/tty1")
+		except AttributeError:
+			device = pyudev.Device.from_sys_path(self.udev_context,
+				"/sys/devices/virtual/tty/tty1")
+		self.assertFalse(self.matcher.match("tty0", device))
 
 	def test_regex_search(self):
-		device = pyudev.Devices.from_path(self.udev_context,'/devices/virtual/cpuid/cpu0')
-		self.assertTrue(self.matcher.match('cpu.',device))
-		device = pyudev.Devices.from_path(self.udev_context,'/devices/virtual/cpuid/cpu0')
-		self.assertFalse(self.matcher.match('cpu[1-9]',device))
+		try:
+			device = pyudev.Devices.from_sys_path(self.udev_context,
+				"/sys/devices/virtual/tty/tty0")
+		except AttributeError:
+			device = pyudev.Device.from_sys_path(self.udev_context,
+				"/sys/devices/virtual/tty/tty0")
+		self.assertTrue(self.matcher.match("tty.", device))
+		self.assertFalse(self.matcher.match("tty[1-9]", device))
