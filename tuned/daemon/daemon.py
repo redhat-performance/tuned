@@ -177,7 +177,7 @@ class Daemon(object):
 					log.info("terminating Tuned, rolling back all changes")
 					full_rollback = True
 				else:
-					log.info("terminating Tuned")
+					log.info("terminating Tuned in one-shot mode")
 			else:
 				log.info("terminating Tuned due to system shutdown / reboot")
 		if self._daemon:
