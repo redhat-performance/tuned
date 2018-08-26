@@ -363,8 +363,8 @@ class commands:
 	# Inverts CPU list (i.e. makes its complement)
 	def cpulist_invert(self, l):
 		cpus = self.cpulist_unpack(l)
-		present = self.cpulist_unpack(self.read_file("/sys/devices/system/cpu/present"))
-		return list(set(present) - set(cpus))
+		online = self.cpulist_unpack(self.read_file("/sys/devices/system/cpu/online"))
+		return list(set(online) - set(cpus))
 
 	# Converts CPU list to hexadecimal CPU mask
 	def cpulist2hex(self, l):

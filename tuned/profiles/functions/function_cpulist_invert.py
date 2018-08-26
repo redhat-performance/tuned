@@ -8,7 +8,7 @@ log = tuned.logs.get()
 class cpulist_invert(base.Function):
 	"""
 	Inverts list of CPUs (makes its complement). For the complement it
-	gets number of present CPUs from the /sys/devices/system/cpu/present,
+	gets number of online CPUs from the /sys/devices/system/cpu/online,
 	e.g. system with 4 CPUs (0-3), the inversion of list "0,2,3" will be
 	"1"
 	"""
