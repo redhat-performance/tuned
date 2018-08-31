@@ -534,15 +534,7 @@ KSM_RUN_PATH=/sys/kernel/mm/ksm/run
 
 disable_ksm()
 {
-	for s in $KSM_SERVICES; do
-		if systemctl is-enabled -q $s; then
-			systemctl -q disable $s
-		fi
-
-		if systemctl is-active -q $s; then
-			systemctl -q stop $s
-		fi
-	done
+	systemctl -q --runtime --now mask $KSM_SERVICES
 
 	if [ -f $KSM_RUN_PATH ]; then
 		# Unmerge all shared pages
@@ -552,14 +544,7 @@ disable_ksm()
 
 enable_ksm()
 {
-	for s in $KSM_SERVICES; do
-		systemctl -q preset $s
-
-		# Only start the service if it's enabled by defaut
-		if systemctl is-enabled -q $s; then
-			systemctl start $s
-		fi
-	done
+	systemctl -q unmask $KSM_SERVICES
 }
 
 die() {
