@@ -98,6 +98,7 @@ start() {
     if [ -f $CACHE_VALUE_FILE ]; then
         echo `cat $CACHE_VALUE_FILE` > $KVM_LAPIC_FILE
     fi
+    systemctl start rt-entsk
 
     return 0
 }
@@ -105,6 +106,7 @@ start() {
 stop() {
     [ "$1" = "full_rollback" ] && teardown_kvm_mod_low_latency
     enable_ksm
+    systemctl stop rt-entsk
     return "$?"
 }
 
