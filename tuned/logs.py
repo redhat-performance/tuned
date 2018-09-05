@@ -8,6 +8,7 @@ import tuned.consts as consts
 import random
 import string
 import threading
+from tuned.utils.global_config import GlobalConfig
 try:
 	from StringIO import StringIO
 except:
@@ -95,6 +96,7 @@ class TunedLogger(logging.getLoggerClass()):
 		super(TunedLogger, self).__init__(*args, **kwargs)
 		self.setLevel(logging.INFO)
 		self.switch_to_console()
+		self.config = GlobalConfig()
 
 	def console(self, msg, *args, **kwargs):
 		self.log(consts.LOG_LEVEL_CONSOLE, msg, *args, **kwargs)
@@ -133,8 +135,10 @@ class TunedLogger(logging.getLoggerClass()):
 		if not os.path.exists(log_directory):
 			os.makedirs(log_directory)
 
+		maxBytes = cls.config.get_size("log_file_maxbytes", consts.LOG_FILE_MAXBYTES)
+		backupCount = cls.config.get_size("log_file_count", consts.LOG_FILE_COUNT)
 		cls._file_handler = logging.handlers.RotatingFileHandler(
-			filename, maxBytes = consts.LOG_FILE_MAXBYTES, backupCount = consts.LOG_FILE_COUNT)
+			filename, maxBytes, backupCount )
 		cls._file_handler.setFormatter(cls._formatter)
 
 logging.addLevelName(consts.LOG_LEVEL_CONSOLE, consts.LOG_LEVEL_CONSOLE_NAME)
