@@ -104,8 +104,10 @@ class TunedLogger(logging.getLoggerClass()):
 		self.remove_all_handlers()
 		self.addHandler(self._console_handler)
 
-	def switch_to_file(self, filename = consts.LOG_FILE):
-		self._setup_file_handler(filename)
+	def switch_to_file(self, filename = consts.LOG_FILE, 
+			   maxBytes = consts.LOG_FILE_MAXBYTES,
+			   backupCount = consts.LOG_FILE_COUNT):
+		self._setup_file_handler(filename, maxBytes, backupCount)
 		self.remove_all_handlers()
 		self.addHandler(self._file_handler)
 
@@ -123,7 +125,7 @@ class TunedLogger(logging.getLoggerClass()):
 		cls._console_handler.setFormatter(cls._formatter)
 
 	@classmethod
-	def _setup_file_handler(cls, filename):
+	def _setup_file_handler(cls, filename, maxBytes, backupCount):
 		if cls._file_handler is not None:
 			return
 
@@ -134,7 +136,7 @@ class TunedLogger(logging.getLoggerClass()):
 			os.makedirs(log_directory)
 
 		cls._file_handler = logging.handlers.RotatingFileHandler(
-			filename, maxBytes = consts.LOG_FILE_MAXBYTES, backupCount = consts.LOG_FILE_COUNT)
+			filename, maxBytes = maxBytes, backupCount = backupCount)
 		cls._file_handler.setFormatter(cls._formatter)
 
 logging.addLevelName(consts.LOG_LEVEL_CONSOLE, consts.LOG_LEVEL_CONSOLE_NAME)
