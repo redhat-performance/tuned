@@ -28,7 +28,7 @@ housekeeping CPUs. This profile is intended to be used for latency\-sensitive
 workloads.
 
 An isolated CPU incurs reduced jitter and reduced interruptions by the
-kernel. This is achived by clearing the CPU from user\-space processes, movable
+kernel. This is achieved by clearing the CPU from user\-space processes, movable
 kernel threads, interruption handlers, kernel timers, etc. The only fixed
 source of interruptions is the 1Hz tick maintained by the kernel to keep
 CPU usage statistics. Otherwise, the incurred jitter and interruptions, if
@@ -80,9 +80,9 @@ isolated CPUs depend on a few factors concerning the running thread behavior.
 Please, consult the nohz_full documentation in the kernel to learn more
 .IP *
 The Linux real\-time project has put together a document on the best
-practices for writting real\-time applications. Even though the
+practices for writing real\-time applications. Even though the
 cpu\-partitioning profile does not guarantee real\-time response time, much
-of the techniques for writting real\-time applications also apply for
+of the techniques for writing real\-time applications also apply for
 applications intended to run under the cpu\-partitioning profile. Please,
 refer to this document at
 .I https://rt.wiki.kernel.org
