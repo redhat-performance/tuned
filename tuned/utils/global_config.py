@@ -16,9 +16,9 @@ class GlobalConfig():
 		"update_interval = integer(default=%s)" % consts.CFG_DEF_UPDATE_INTERVAL,
 		"recommend_command = boolean(default=%s)" % consts.CFG_DEF_RECOMMEND_COMMAND]
 
-	def __init__(self):
+	def __init__(self,config_file = consts.GLOBAL_CONFIG_FILE):
 		self._cfg = {}
-		self.load_config()
+		self.load_config(file_name=config_file)
 		self._cmd = commands()
 
 	def load_config(self, file_name = consts.GLOBAL_CONFIG_FILE):
