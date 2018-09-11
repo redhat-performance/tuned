@@ -188,6 +188,7 @@ class DummyDevice(Mapping):
 	def __init__(self,sysname,dictionary,*args,**kwargs):
 		super(DummyDevice,self).__init__(*args,**kwargs)
 		self.dictionary = dictionary
+		self.properties = dictionary
 		self.sys_name = sysname
 		self.setting = '101'
 
