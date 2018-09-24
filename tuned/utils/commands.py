@@ -9,6 +9,12 @@ import re
 import procfs
 from subprocess import *
 from tuned.exceptions import TunedException
+import dmidecode
+try:
+	import syspurpose.files
+	have_syspurpose = True
+except:
+	have_syspurpose = False
 
 log = tuned.logs.get()
 
@@ -413,6 +419,30 @@ class commands:
 						ps.reload_threads()
 						if len(ps.find_by_regex(re.compile(value))) == 0:
 							match = False
+					elif option == "chassis_type":
+						for chassis in dmidecode.chassis().values():
+							chassis_type = chassis["data"]["Type"]
+							if re.match(value, chassis_type, re.IGNORECASE):
+								break
+						else:
+							match = False
+					elif option == "syspurpose_role":
+						if have_syspurpose:
+							s = syspurpose.files.SyspurposeStore(
+									syspurpose.files.USER_SYSPURPOSE,
+									raise_on_error = True)
+							role = ""
+							try:
+								s.read_file()
+								role = s.contents["role"]
+							except (IOError, OSError, KeyError) as e:
+								if hasattr(e, "errno") and e.errno != errno.ENOENT:
+									log.error("Failed to load the syspurpose file: %s" % e)
+							if re.match(value, role, re.IGNORECASE) is None:
+								match = False
+						else:
+							log.error("Failed to process 'syspurpose_role' in '%s', the syspurpose module is not available" % fname)
+
 				if match:
 					# remove the ",.*" suffix
 					r = re.compile(r",[^,]*$")
