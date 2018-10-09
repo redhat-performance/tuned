@@ -65,6 +65,12 @@ for the first time or changing its configuration
 .IP *
 The cpu\-partitioning profile can be used in bare\-metal and virtual machines
 .IP *
+When using the cpu\-partitioning profile in bare\-metal, it is strongly
+recommended to "mask" the ksm and ksmtuned services in systemd (if they are
+installed). This can be done with the following command:
+
+    # systemctl mask ksm ksmtuned
+.IP *
 The cpu\-partitioning profile does not use the kernel's isolcpus= feature
 .IP *
 On a NUMA system, it is recommended to have at least one housekeeping CPU
