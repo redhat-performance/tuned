@@ -421,7 +421,7 @@ class commands:
 							match = False
 					elif option == "chassis_type":
 						for chassis in dmidecode.chassis().values():
-							chassis_type = chassis["data"]["Type"]
+							chassis_type = chassis["data"]["Type"].decode("ascii")
 							if re.match(value, chassis_type, re.IGNORECASE):
 								break
 						else:
