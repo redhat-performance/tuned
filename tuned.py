@@ -55,13 +55,15 @@ if __name__ == "__main__":
 		log.setLevel("DEBUG")
 
 	try:
+		maxBytes = config.get_size("log_file_max_size", consts.LOG_FILE_MAXBYTES)
+		backupCount = config.get("log_file_count", consts.LOG_FILE_COUNT)
 		if args.daemon:
 			if args.log is None:
 				args.log = consts.LOG_FILE
-			log.switch_to_file(args.log)
+			log.switch_to_file(args.log, maxBytes, backupCount)
 		else:
 			if args.log is not None:
-				log.switch_to_file(args.log)
+				log.switch_to_file(args.log, maxBytes, backupCount)
 
 		app = tuned.daemon.Application(args.profile, config)
 
