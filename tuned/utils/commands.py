@@ -9,7 +9,11 @@ import re
 import procfs
 from subprocess import *
 from tuned.exceptions import TunedException
-import dmidecode
+try:
+	import dmidecode
+	have_dmidecode = True
+except:
+	have_dmidecode = False
 try:
 	import syspurpose.files
 	have_syspurpose = True
@@ -420,12 +424,15 @@ class commands:
 						if len(ps.find_by_regex(re.compile(value))) == 0:
 							match = False
 					elif option == "chassis_type":
-						for chassis in dmidecode.chassis().values():
-							chassis_type = chassis["data"]["Type"].decode("ascii")
-							if re.match(value, chassis_type, re.IGNORECASE):
-								break
+						if have_dmidecode:
+							for chassis in dmidecode.chassis().values():
+								chassis_type = chassis["data"]["Type"].decode("ascii")
+								if re.match(value, chassis_type, re.IGNORECASE):
+									break
+							else:
+								match = False
 						else:
-							match = False
+							log.debug("Ignoring 'chassis_type' in '%s', dmidecode is not available." % fname)
 					elif option == "syspurpose_role":
 						if have_syspurpose:
 							s = syspurpose.files.SyspurposeStore(

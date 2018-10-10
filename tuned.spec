@@ -57,10 +57,10 @@ Requires: %{_py}-schedutils, %{_py}-linux-procfs, %{_py}-perf
 # requires for packages with inconsistent python2/3 names
 %if %{with python3}
 Requires: python3-dbus, python3-gobject-base
-Requires: python3-dmidecode
+Recommends: python3-dmidecode
 %else
 Requires: dbus-python, pygobject3-base
-Requires: python-dmidecode
+Recommends: python-dmidecode
 %endif
 Requires: virt-what, ethtool, gawk, hdparm
 Requires: util-linux, dbus, polkit
