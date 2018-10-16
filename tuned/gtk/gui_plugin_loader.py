@@ -25,21 +25,19 @@ Created on Mar 30, 2014
 '''
 
 import os
+import importlib
+import inspect
 from validate import Validator
 
 import tuned.plugins.base
 import tuned.consts as consts
 import tuned.logs
-import tuned.plugins.repository as repository
+
 import configobj as ConfigObj
 from tuned.exceptions import TunedException
 
-from tuned import plugins
 from tuned.utils.plugin_loader import PluginLoader
-from tuned import storage, units, monitors, plugins, profiles, exports, \
-    hardware
-
-import tuned.plugins as Plugins
+from tuned import plugins
 
 __all__ = ['GuiPluginLoader']
 
@@ -62,43 +60,22 @@ class GuiPluginLoader(PluginLoader):
         Constructor
         '''
 
-        self._plugins = set()
+        self._plugins = []
         self.plugins_doc = {}
-
-        storage_provider = storage.PickleProvider()
-        storage_factory = storage.Factory(storage_provider)
-        monitors_repository = monitors.Repository()
-        hardware_inventory = hardware.Inventory()
-        device_matcher = hardware.DeviceMatcher()
-        device_matcher_udev = hardware.DeviceMatcherUdev()
-        plugin_instance_factory = plugins.instance.Factory()
-
-        self.repo = repository.Repository(
-            monitors_repository,
-            storage_factory,
-            hardware_inventory,
-            device_matcher,
-            device_matcher_udev,
-            plugin_instance_factory,
-            None,
-            None
-            )
-        self._set_loader_parameters(),
-        self.create_all(self._import_plugin_names())
+        self._prefix = 'plugin_'
+        self._sufix = '.py'
+        self._find_plugins()
 
     @property
     def plugins(self):
-        return self.repo.plugins
+        return self._plugins
 
-    def _set_loader_parameters(self):
-        '''
-        Sets private atributes.
-        '''
-
-        self._namespace = 'tuned.plugins'
-        self._prefix = 'plugin_'
-        self._sufix = '.py'
-        self._interface = tuned.plugins.base.Plugin
+    def _find_plugins(self):
+        for module_name in self._import_plugin_names():
+            module = importlib.import_module('tuned.plugins.%s' % (module_name))
+            for name, obj in inspect.getmembers(module):
+                if inspect.isclass(obj) and issubclass(obj,tuned.plugins.base.Plugin):
+                    self._plugins.append(obj)
 
     def _import_plugin_names(self):
         '''
@@ -106,31 +83,14 @@ class GuiPluginLoader(PluginLoader):
         '''
 
         names = []
-        for name in os.listdir(Plugins.__path__[0]):
-            file = name.split(self._prefix).pop()
-            if file.endswith(self._sufix):
-                (file_name, file_extension) = os.path.splitext(file)
-                names.append(file_name)
+        for module_file in os.listdir(plugins.__path__[0]):
+            if (module_file.startswith(self._prefix) and module_file.endswith(self._sufix)):
+                names.append(module_file[:-3])
         return names
 
-    def create_all(self, names):
-        for plugin_name in names:
-            try:
-                self._plugins.add(self.repo.create(plugin_name))
-            except ImportError:
-                pass
-            except tuned.plugins.exceptions.NotSupportedPluginException:
-
-#                 problem with importing of plugin
-#                 print(str(ImportError) + plugin_name)
-
-                pass
-
-#                 print(plugin_name + " is not supported!")
-
     def get_plugin(self, plugin_name):
-        for plugin in self.plugins:
-            if plugin_name == plugin.name:
+        for plugin in self._plugins:
+            if plugin_name == os.path.basename(inspect.getfile(plugin))[7:].replace('.py',''):
                 return plugin
 
     def _load_global_config(self, file_name=consts.GLOBAL_CONFIG_FILE):
