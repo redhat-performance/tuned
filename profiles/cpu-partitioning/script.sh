@@ -54,8 +54,8 @@ stop() {
     then
         sed -i '/^IRQBALANCE_BANNED_CPUS=/d' /etc/sysconfig/irqbalance
         teardown_kvm_mod_low_latency
+        enable_ksm
     fi
-    enable_ksm
     enable_balance_domains
     return "$?"
 }

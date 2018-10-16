@@ -531,20 +531,30 @@ teardown_kvm_mod_low_latency()
 
 KSM_SERVICES="ksm ksmtuned"
 KSM_RUN_PATH=/sys/kernel/mm/ksm/run
+KSM_MASK_FILE="${STORAGE_PERSISTENT}/ksm-masked"
 
 disable_ksm()
 {
-	systemctl -q --runtime --now mask $KSM_SERVICES
-
-	if [ -f $KSM_RUN_PATH ]; then
+	if [ ! -f $KSM_MASK_FILE ]; then
+		# Always create $KSM_MASK_FILE, since we don't want to
+		# run any systemctl commands during boot
+		if ! touch $KSM_MASK_FILE; then
+			die "failed to create $KSM_MASK_FILE"
+		fi
+		systemctl --now --quiet mask $KSM_SERVICES
 		# Unmerge all shared pages
-		echo 2 > $KSM_RUN_PATH
+		test -f $KSM_RUN_PATH && echo 2 > $KSM_RUN_PATH
 	fi
 }
 
+# Should only be called when full_rollback == true
 enable_ksm()
 {
-	systemctl -q unmask $KSM_SERVICES
+	if [ -f $KSM_MASK_FILE ]; then
+		if systemctl --quiet unmask $KSM_SERVICES; then
+			rm -f $KSM_MASK_FILE
+		fi
+	fi
 }
 
 die() {
