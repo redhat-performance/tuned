@@ -7,6 +7,7 @@ from tuned.profiles.exceptions import InvalidProfileException
 import tuned.consts as consts
 from tuned.utils.commands import commands
 from tuned import exports
+from tuned.utils.profile_recommender import ProfileRecommender
 import re
 
 log = tuned.logs.get()
@@ -192,7 +193,7 @@ class Daemon(object):
 
 	def _get_recommended_profile(self):
 		log.info("Running in automatic mode, checking what profile is recommended for your configuration.")
-		profile = self._cmd.recommend_profile(hardcoded = not self._recommend_command)
+		profile = ProfileRecommender().recommend(hardcoded = not self._recommend_command)
 		log.info("Using '%s' profile" % profile)
 		return profile
 
