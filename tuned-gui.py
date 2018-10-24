@@ -50,8 +50,8 @@ import os
 import time
 import configobj
 import inspect
-
 import subprocess
+
 import tuned.logs
 import tuned.consts as consts
 import tuned.version as version
@@ -144,7 +144,7 @@ class Base(object):
 				GObject.TYPE_STRING)
 		self.treestore_plugins = Gtk.ListStore(GObject.TYPE_STRING)
 		for plugin_class in self.plugin_loader.plugins:
-			plugin_name = os.path.basename(inspect.getfile(plugin_class))[7:].replace('.py','')
+			plugin_name = self.plugin_loader.get_plugin_name(plugin_class)
 			self.treestore_plugins.append([plugin_name])
 
 		self._gobj('comboboxPlugins').set_model(self.treestore_plugins)
@@ -331,8 +331,11 @@ class Base(object):
 			self._gobj('textviewPluginDocumentationText').get_buffer().set_text(''
 					)
 			return
-		options = '\n'.join('%s = %r' % (key, val) for (key, val) in
-							plugin._get_config_options().items())
+
+		options = ''
+		for (key, val) in plugin._get_config_options().items():
+			options += '%s = %r\n' % (key, val)
+			options += '%s\n' % (plugin.get_config_options_hints().get(key, ''))
 
 		self._gobj('textviewPluginAvaibleText').get_buffer().set_text(options)
 		self._gobj('textviewPluginDocumentationText').get_buffer().set_text(plugin.__doc__)
@@ -387,7 +390,9 @@ class Base(object):
 			plugin_name = self._gobj('comboboxPlugins').get_active_text()
 			plugin_to_tab = None
 			for plugin in self.plugin_loader.plugins:
-				cur_plugin_name = os.path.basename(inspect.getfile(plugin))[7:].replace('.py','')
+				cur_plugin_name = self.plugin_loader.get_plugin_name(
+					plugin
+				)
 				if cur_plugin_name == plugin_name:
 					for children in self._gobj('notebookPlugins'):
 						if plugin_name \
@@ -396,7 +401,7 @@ class Base(object):
 									+ ' is already in profile.', '')
 							return
 					plugin_to_tab = plugin
-					self._gobj('notebookPlugins').append_page_menu(self.treeview_for_data(plugin_to_tab._get_config_options()),
+					self._gobj('notebookPlugins').append_page_menu(self.treeview_for_data(plugin_to_tab._get_config_options(), cur_plugin_name),
 							Gtk.Label(cur_plugin_name),
 							Gtk.Label(cur_plugin_name)
 							)
@@ -595,12 +600,12 @@ class Base(object):
 		# load all values not just normal
 
 		for (name, unit) in list(profile.units.items()):
-			self._gobj('notebookPlugins').append_page_menu(self.treeview_for_data(unit.options),
+			self._gobj('notebookPlugins').append_page_menu(self.treeview_for_data(unit.options, unit.name),
 					Gtk.Label(unit.name), Gtk.Label(unit.name))
 		self._gobj('notebookPlugins').show_all()
 		self._gobj('windowProfileEditor').show()
 
-	def treeview_for_data(self, data):
+	def treeview_for_data(self, data, plugin_name):
 		"""
 		This prepare treestore and treeview for data and return treeview
 		"""
@@ -619,6 +624,20 @@ class Base(object):
 		treeview.enable_grid_lines = True
 		treeview.connect('row-activated', self.change_value_dialog)
 		treeview.connect('button_press_event', self.on_treeview_click)
+		treeview.set_property('has-tooltip',True)
+		model = treeview.get_model()
+		treeview.connect(
+			'query-tooltip',
+			lambda widget, x, y, keyboard_mode, tooltip:
+				self.on_option_tooltip(widget,
+					x,
+					y,
+					keyboard_mode,
+					tooltip,
+					plugin_name,
+					model
+					)
+			)
 		return treeview
 
 	def execute_change_profile(self, button):
@@ -821,6 +840,31 @@ class Base(object):
 	def _execute(self, args):
 		rc = subprocess.call(args)
 		return rc
+
+	def on_option_tooltip(self, widget, x, y, keyboard_mode, tooltip, plugin_name, model):
+		path = widget.get_path_at_pos(x, y)
+		plugin_class = self.plugin_loader.get_plugin(plugin_name)
+		if plugin_class is None:
+			return False
+		config_option_hints = plugin_class.get_config_options_hints()
+		if not path:
+			row_count = model.iter_n_children(None)
+			if (row_count == 0):
+				return False
+			iterator = model.get_iter(row_count - 1)
+			option_name = model.get_value(iterator, 1)
+		elif int(str(path[0])) < 1:
+			return False
+		else:
+			iterator = model.get_iter(int(str(path[0])) -1)
+			option_name = model.get_value(iterator, 1)
+		path = model.get_path(iterator)
+		hint = config_option_hints.get(option_name, None)
+		if not hint:
+			return False
+		tooltip.set_text(hint)
+		widget.set_tooltip_row(tooltip, path)
+		return True
 
 	def gtk_main_quit(self, sender):
 		Gtk.main_quit()

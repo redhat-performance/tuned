@@ -48,6 +48,14 @@ class AudioPlugin(base.Plugin):
 			"reset_controller": False,
 		}
 
+	@classmethod
+	def get_config_options_hints(cls):
+		"""Explanation of each config option function"""
+		return {
+			"timeout": "just a timeout explanation",
+			"reset_controller": "how to reset pls",
+		}
+
 	def _timeout_path(self, device):
 		return "/sys/module/%s/parameters/power_save" % device
 

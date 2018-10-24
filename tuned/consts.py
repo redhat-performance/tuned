@@ -57,7 +57,7 @@ FUNCTION_PREFIX = "function_"
 ENV_PREFIX = "TUNED_"
 
 # tuned-gui
-PREFIX_PROFILE_FACTORY = "Factory"
+PREFIX_PROFILE_FACTORY = "System"
 PREFIX_PROFILE_USER = "User"
 
 CFG_DAEMON = "daemon"

@@ -90,8 +90,14 @@ class GuiPluginLoader(PluginLoader):
 
     def get_plugin(self, plugin_name):
         for plugin in self._plugins:
-            if plugin_name == os.path.basename(inspect.getfile(plugin))[7:].replace('.py',''):
+            if plugin_name == self.get_plugin_name(plugin):
                 return plugin
+        return None
+
+    def get_plugin_name(self, plugin):
+        return os.path.splitext(
+            os.path.basename(inspect.getfile(plugin))[7:]
+            )[0]
 
     def _load_global_config(self, file_name=consts.GLOBAL_CONFIG_FILE):
         """

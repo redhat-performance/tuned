@@ -231,9 +231,9 @@
     </action-widgets>
   </object>
   <object class="GtkWindow" id="mainWindow">
-    <signal name="destroy" handler="gtk_main_quit" swapped="no"/>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Tuned Manager</property>
+    <signal name="destroy" handler="gtk_main_quit" swapped="no"/>
     <child>
       <placeholder/>
     </child>
@@ -258,12 +258,12 @@
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkImageMenuItem" id="imagemenuitemQuit">
-                        <signal name="activate" handler="gtk_main_quit" swapped="no"/>
                         <property name="label">gtk-quit</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="gtk_main_quit" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -282,12 +282,12 @@
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkImageMenuItem" id="imagemenuitemAbout">
-                        <signal name="activate" handler="execute_about" swapped="no"/>
                         <property name="label">gtk-about</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="execute_about" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -342,8 +342,6 @@
                         </child>
                         <child>
                           <object class="GtkSwitch" id="switchTunedStartStop">
-                            <signal name="notify::active" handler="execute_switch_tuned" swapped="no"/>
-                            <property name="active">True</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="halign">start</property>
@@ -351,6 +349,8 @@
                             <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
                             <property name="hexpand">True</property>
+                            <property name="active">True</property>
+                            <signal name="notify::active" handler="execute_switch_tuned" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -359,7 +359,6 @@
                         </child>
                         <child>
                           <object class="GtkSwitch" id="switchTunedStartupStartStop">
-                            <signal name="notify::active" handler="execute_switch_tuned" swapped="no"/>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="halign">start</property>
@@ -367,6 +366,7 @@
                             <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
                             <property name="hexpand">True</property>
+                            <signal name="notify::active" handler="execute_switch_tuned" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -405,12 +405,12 @@
                         </child>
                         <child>
                           <object class="GtkSwitch" id="switchTunedAdminFunctions">
-                            <signal name="notify::active" handler="execute_switch_tuned_admin_functions" swapped="no"/>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="halign">start</property>
                             <property name="valign">center</property>
                             <property name="hexpand">True</property>
+                            <signal name="notify::active" handler="execute_switch_tuned_admin_functions" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -583,13 +583,13 @@
                     <property name="margin_bottom">20</property>
                     <child>
                       <object class="GtkButton" id="buttonCreateProfile">
-                        <signal name="clicked" handler="execute_create_profile" swapped="no"/>
                         <property name="label" translatable="yes">Create New Profile</property>
                         <property name="width_request">200</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="margin_right">120</property>
+                        <signal name="clicked" handler="execute_create_profile" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -598,14 +598,14 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="buttonUpadteSelectedProfile">
-                        <signal name="clicked" handler="execute_update_profile" swapped="no"/>
-                        <property name="label" translatable="yes">Update</property>
+                        <property name="label" translatable="yes">Edit</property>
                         <property name="width_request">200</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="margin_right">10</property>
                         <property name="resize_mode">queue</property>
+                        <signal name="clicked" handler="execute_update_profile" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -614,7 +614,6 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="buttonDeleteSelectedProfile">
-                        <signal name="clicked" handler="execute_remove_profile" swapped="no"/>
                         <property name="label" translatable="yes">Delete</property>
                         <property name="width_request">200</property>
                         <property name="visible">True</property>
@@ -623,6 +622,7 @@
                         <property name="halign">center</property>
                         <property name="valign">center</property>
                         <property name="image_position">right</property>
+                        <signal name="clicked" handler="execute_remove_profile" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -686,9 +686,9 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkComboBoxText" id="comboboxMainPlugins">
-                    <signal name="changed" handler="on_changed_combobox_plugins" swapped="no"/>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <signal name="changed" handler="on_changed_combobox_plugins" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -716,11 +716,19 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkTextView" id="textviewPluginAvaibleText">
-                        <property name="editable">False</property>
-                        <property name="height_request">100</property>
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="shadow_type">in</property>
+                        <property name="min_content_height">200</property>
+                        <child>
+                          <object class="GtkTextView" id="textviewPluginAvaibleText">
+                            <property name="height_request">100</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="editable">False</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -743,11 +751,19 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkTextView" id="textviewPluginDocumentationText">
-                        <property name="editable">False</property>
-                        <property name="height_request">250</property>
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="shadow_type">in</property>
+                        <property name="min_content_height">200</property>
+                        <child>
+                          <object class="GtkTextView" id="textviewPluginDocumentationText">
+                            <property name="height_request">250</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="editable">False</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -951,11 +967,11 @@
             <property name="margin_bottom">2</property>
             <child>
               <object class="GtkButton" id="buttonFastChangeProfile">
-                <signal name="clicked" handler="execute_change_profile" swapped="no"/>
                 <property name="label" translatable="yes">Change Profile</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="execute_change_profile" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -990,7 +1006,6 @@
               <object class="GtkSpinner" id="spinnerFastChangeProfile">
                 <property name="width_request">20</property>
                 <property name="height_request">20</property>
-                <property name="visible">False</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
                 <property name="margin_right">5</property>
@@ -1080,10 +1095,10 @@
   </object>
   <object class="GtkTreeStore" id="treestoreActualPlugins"/>
   <object class="GtkTreeView" id="treeviewActualPlugins">
-    <signal name="row-activated" handler="on_treeview_click" swapped="no"/>
     <property name="visible">True</property>
     <property name="can_focus">True</property>
     <property name="model">treestoreActualPlugins</property>
+    <signal name="row-activated" handler="on_treeview_click" swapped="no"/>
     <child internal-child="selection">
       <object class="GtkTreeSelection" id="treeview-selection2"/>
     </child>
@@ -1119,11 +1134,11 @@
             </child>
             <child>
               <object class="GtkButton" id="cancel_button">
-                <signal name="clicked" handler="HideTunedDaemonExceptionDialog" swapped="no"/>
                 <property name="label" translatable="yes">Exit</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="HideTunedDaemonExceptionDialog" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1160,10 +1175,10 @@
     </action-widgets>
   </object>
   <object class="GtkWindow" id="windowProfileEditor">
-    <signal name="delete-event" handler="on_delete_event" swapped="no"/>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Profile Editor</property>
     <property name="destroy_with_parent">True</property>
+    <signal name="delete-event" handler="on_delete_event" swapped="no"/>
     <child>
       <placeholder/>
     </child>
@@ -1196,7 +1211,6 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkButton" id="buttonAddPlugin">
-                    <signal name="clicked" handler="execute_add_plugin_to_notebook" swapped="no"/>
                     <property name="label" translatable="yes">Add Plugin</property>
                     <property name="width_request">160</property>
                     <property name="visible">True</property>
@@ -1206,6 +1220,7 @@
                     <property name="margin_right">20</property>
                     <property name="margin_top">12</property>
                     <property name="margin_bottom">13</property>
+                    <signal name="clicked" handler="execute_add_plugin_to_notebook" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1215,7 +1230,6 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="buttonRemovePlugin">
-                    <signal name="clicked" handler="execute_remove_plugin_from_notebook" swapped="no"/>
                     <property name="label" translatable="yes">Remove Plugin</property>
                     <property name="width_request">160</property>
                     <property name="visible">True</property>
@@ -1223,6 +1237,7 @@
                     <property name="receives_default">True</property>
                     <property name="margin_left">20</property>
                     <property name="margin_right">20</property>
+                    <signal name="clicked" handler="execute_remove_plugin_from_notebook" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1252,7 +1267,6 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="buttonOpenRaw">
-                        <signal name="clicked" handler="execute_open_raw_button" swapped="no"/>
                         <property name="label" translatable="yes">Raw Editor</property>
                         <property name="width_request">160</property>
                         <property name="visible">True</property>
@@ -1261,6 +1275,7 @@
                         <property name="halign">center</property>
                         <property name="margin_top">10</property>
                         <property name="margin_bottom">10</property>
+                        <signal name="clicked" handler="execute_open_raw_button" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1288,7 +1303,6 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="buttonConfirmProfileCreate">
-                    <signal name="clicked" handler="on_click_button_confirm_profile_create" swapped="no"/>
                     <property name="label" translatable="yes">Confirm</property>
                     <property name="width_request">160</property>
                     <property name="visible">True</property>
@@ -1298,6 +1312,7 @@
                     <property name="margin_right">20</property>
                     <property name="margin_top">20</property>
                     <property name="margin_bottom">20</property>
+                    <signal name="clicked" handler="on_click_button_confirm_profile_create" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1307,7 +1322,6 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="buttonConfirmProfileUpdate">
-                    <signal name="clicked" handler="on_click_button_confirm_profile_update" swapped="no"/>
                     <property name="label" translatable="yes">Confirm</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -1316,6 +1330,7 @@
                     <property name="margin_right">20</property>
                     <property name="margin_top">20</property>
                     <property name="margin_bottom">20</property>
+                    <signal name="clicked" handler="on_click_button_confirm_profile_update" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1325,7 +1340,6 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="buttonCancel">
-                    <signal name="clicked" handler="execute_cancel_window_profile_editor" swapped="no"/>
                     <property name="label">gtk-cancel</property>
                     <property name="width_request">160</property>
                     <property name="visible">True</property>
@@ -1335,6 +1349,7 @@
                     <property name="margin_right">20</property>
                     <property name="margin_bottom">20</property>
                     <property name="use_stock">True</property>
+                    <signal name="clicked" handler="execute_cancel_window_profile_editor" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1477,8 +1492,8 @@
     </child>
   </object>
   <object class="GtkWindow" id="windowProfileEditorRaw">
-    <signal name="delete-event" handler="on_delete_event" swapped="no"/>
     <property name="can_focus">False</property>
+    <signal name="delete-event" handler="on_delete_event" swapped="no"/>
     <child>
       <placeholder/>
     </child>
@@ -1508,7 +1523,6 @@
             <property name="shadow_type">in</property>
             <child>
               <object class="GtkTextView" id="textviewProfileConfigRaw">
-                <property name="editable">True</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="margin_left">5</property>
@@ -1531,7 +1545,6 @@
             <property name="halign">end</property>
             <child>
               <object class="GtkButton" id="buttonApply">
-                <signal name="clicked" handler="execute_apply_window_profile_editor_raw" swapped="no"/>
                 <property name="label">gtk-apply</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1541,6 +1554,7 @@
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="execute_apply_window_profile_editor_raw" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -1549,7 +1563,6 @@
             </child>
             <child>
               <object class="GtkButton" id="buttonCancelRaw">
-                <signal name="clicked" handler="execute_cancel_window_profile_editor_raw" swapped="no"/>
                 <property name="label">gtk-close</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1559,6 +1572,7 @@
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="execute_cancel_window_profile_editor_raw" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
