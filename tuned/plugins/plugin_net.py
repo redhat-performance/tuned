@@ -197,14 +197,26 @@ class NetTuningPlugin(base.Plugin):
 		# substitute "Adaptive RX: val1  TX: val2" to 'adaptive-rx: val1' and
 		# 'adaptive-tx: val2' and workaround for ethtool inconsistencies
 		# (rhbz#1225375)
-		value = self._cmd.multiple_re_replace(\
-		{"Adaptive RX:": "adaptive-rx:", \
-		"\s+TX:": "\nadaptive-tx:", \
-		"rx-frame-low:": "rx-frames-low:", \
-		"rx-frame-high:": "rx-frames-high:", \
-		"tx-frame-low:": "tx-frames-low:", \
-		"tx-frame-high:": "tx-frames-high:",
-		"large-receive-offload:": "lro:"}, value)
+		value = self._cmd.multiple_re_replace({
+			"Adaptive RX:": "adaptive-rx:",
+			"\s+TX:": "\nadaptive-tx:",
+			"rx-frame-low:": "rx-frames-low:",
+			"rx-frame-high:": "rx-frames-high:",
+			"tx-frame-low:": "tx-frames-low:",
+			"tx-frame-high:": "tx-frames-high:",
+			"large-receive-offload:": "lro:",
+			"rx-checksumming:": "rx:",
+			"tx-checksumming:": "tx:",
+			"scatter-gather:": "sg:",
+			"tcp-segmentation-offload:": "tso:",
+			"udp-fragmentation-offload:": "ufo:",
+			"generic-segmentation-offload:": "gso:",
+			"generic-receive-offload:": "gro:",
+			"rx-vlan-offload:": "rxvlan:",
+			"tx-vlan-offload:": "txvlan:",
+			"ntuple-filters:": "ntuple:",
+			"receive-hashing:": "rxhash:",
+		}, value)
 		# remove empty lines, remove fixed parameters (those with "[fixed]")
 		vl = [v for v in value.split('\n') if len(str(v)) > 0 and not re.search("\[fixed\]$", str(v))]
 		if len(vl) < 2:
