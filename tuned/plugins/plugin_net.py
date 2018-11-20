@@ -313,6 +313,29 @@ class NetTuningPlugin(base.Plugin):
 		l = [x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2]
 		return dict(l)
 
+	def _check_device_support(self, context, parameters, device, dev_params):
+		"""Filter unsupported parameters and log warnings about it
+
+		Positional parameters:
+		context -- context of change
+		parameters -- parameters to change
+		device -- name of device on which should be parameters set
+		dev_params -- dictionary of currently known parameters of device
+		"""
+		supported_parameters = set(dev_params.keys())
+		parameters_to_change = set(parameters.keys())
+		# if parameters_to_change contains unsupported parameter(s) then remove
+		# it/them
+		unsupported_parameters = (parameters_to_change
+			- supported_parameters)
+		for param in unsupported_parameters:
+			log.warning("%s parameter %s is not supported by device %s" % (
+				context,
+				param,
+				device,
+			))
+			parameters.pop(param, None)
+
 	def _get_device_parameters(self, context, device):
 		context2opt = { "coalesce": "-c", "features": "-k", "pause": "-a", "ring": "-g" }
 		opt = context2opt[context]
@@ -329,13 +352,18 @@ class NetTuningPlugin(base.Plugin):
 			return None
 		return d
 
-	def _set_device_parameters(self, context, value, device, sim):
+	def _set_device_parameters(self, context, value, device, sim,
+				dev_params = None):
 		if value is None or len(value) == 0:
 			return None
 		d = self._parse_config_parameters(value, context)
 		if d is None or not self._check_parameters(context, d):
-			return None
-		if not sim:
+			return {}
+		# check if device supports parameters and filter out unsupported ones
+		if dev_params:
+			self._check_device_support(context, d, device, dev_params)
+
+		if not sim and len(d) != 0:
 			log.debug("setting %s: %s" % (context, str(d)))
 			context2opt = { "coalesce": "-C", "features": "-K", "pause": "-A", "ring": "-G" }
 			opt = context2opt[context]
@@ -349,20 +377,19 @@ class NetTuningPlugin(base.Plugin):
 				device_name = device)
 		if start:
 			cd = self._get_device_parameters(context, device)
-			d = self._set_device_parameters(context, value, device, verify)
-			# backup only parameters which are changed
-			sd = dict([k_v for k_v in list(cd.items()) if k_v[0] in d])
-			if len(d) != len(sd):
-				log.error("unable to save previous %s, wanted to save: '%s', but read: '%s'" % \
-				(context, str(list(d.keys())), str(list(cd.items()))))
+			d = self._set_device_parameters(context, value, device, verify,
+					dev_params = cd)
+			# if none of parameters passed checks then the command completely
+			# failed
+			if len(d) == 0:
 				return False
-			if verify:
-				return self._cmd.dict2list(d) == self._cmd.dict2list(sd)
-			self._storage.set(storage_key," ".join(self._cmd.dict2list(sd)))
+			# saved are only those parameters which passed checks
+			self._storage.set(storage_key," ".join(self._cmd.dict2list(d)))
 		else:
-			if not verify:
-				original_value = self._storage.get(storage_key)
-				self._set_device_parameters(context, original_value, device, False)
+			original_value = self._storage.get(storage_key)
+			# in storage are only those parameters which were already tested
+			# so skip check for supported parameters
+			self._set_device_parameters(context, original_value, device, False)
 		return None
 
 	@command_custom("features", per_device = True)
