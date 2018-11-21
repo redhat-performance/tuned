@@ -320,7 +320,18 @@ class commands:
 					hexmask = True
 					hv = sv
 				elif sv and (sv[0] == "^" or sv[0] == "!"):
-					negation_list.append(int(sv[1:]))
+					nl = sv[1:].split("-")
+					try:
+						if (len(nl) > 1):
+							negation_list += list(range(
+								int(nl[0]),
+								int(nl[1]) + 1
+								)
+							)
+						else:
+							negation_list.append(int(sv[1:]))
+					except ValueError:
+						return []
 				else:
 					if len(sv) > 0:
 						ll2.append(sv)

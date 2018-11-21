@@ -190,8 +190,12 @@ class CommandsTestCase(unittest2.TestCase):
 		self.assertEqual(self._commands.hex2cpulist('0x1,0000,0001'),[0,32])
 
 	def test_cpulist_unpack(self):
-		cpus = '4-8,^6,0xf00,,'
-		self.assertEqual(self._commands.cpulist_unpack(cpus),[4,5,7,8,9,10,11])
+		cpus = '4-8,^6,0xf00,,!10-11'
+		self.assertEqual(self._commands.cpulist_unpack(cpus),[4,5,7,8,9])
+		cpus = '1,2,3-x'
+		self.assertEqual(self._commands.cpulist_unpack(cpus),[])
+		cpus = '1,2,!3-x'
+		self.assertEqual(self._commands.cpulist_unpack(cpus),[])
 
 	def test_cpulist_pack(self):
 		self.assertEqual(self._commands.cpulist_pack([0,1,3,4,5,6,8,9,32]),\
