@@ -104,8 +104,10 @@ start() {
 }
 
 stop() {
-    [ "$1" = "full_rollback" ] && teardown_kvm_mod_low_latency
-    enable_ksm
+    if [ "$1" = "full_rollback" ]; then
+        teardown_kvm_mod_low_latency
+        enable_ksm
+    fi
     systemctl stop rt-entsk
     return "$?"
 }
