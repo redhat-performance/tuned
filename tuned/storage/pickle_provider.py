@@ -31,14 +31,14 @@ class PickleProvider(interfaces.Provider):
 	def save(self):
 		try:
 			log.debug("Saving %s" % str(self._data))
-			with open(self._path, "w") as f:
+			with open(self._path, "wb") as f:
 				pickle.dump(self._data, f)
 		except (OSError, IOError) as e:
 			log.error("Error saving storage file '%s': %s" % (self._path, e))
 
 	def load(self):
 		try:
-			with open(self._path, "r") as f:
+			with open(self._path, "rb") as f:
 				self._data = pickle.load(f)
 		except (OSError, IOError) as e:
 			log.debug("Error loading storage file '%s': %s" % (self._path, e))

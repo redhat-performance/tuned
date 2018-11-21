@@ -1,4 +1,4 @@
-import unittest
+import unittest2
 import tests.globals
 import tuned.monitors.base
 
@@ -13,7 +13,7 @@ class MockMonitor(tuned.monitors.base.Monitor):
 			cls._load.setdefault(device, 0)
 			cls._load[device] += 1
 
-class MonitorBaseClassTestCase(unittest.TestCase):
+class MonitorBaseClassTestCase(unittest2.TestCase):
 	def test_fail_base_class_init(self):
 		with self.assertRaises(NotImplementedError):
 			tuned.monitors.base.Monitor()

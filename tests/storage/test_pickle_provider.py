@@ -1,7 +1,12 @@
 import unittest
 import os.path
 import tempfile
+
 import tuned.storage
+import tuned.consts as consts
+
+temp_storage_file = tempfile.TemporaryFile(mode='r')
+consts.DEFAULT_STORAGE_FILE = temp_storage_file.name
 
 class StoragePickleProviderTestCase(unittest.TestCase):
 	def setUp(self):
@@ -17,7 +22,7 @@ class StoragePickleProviderTestCase(unittest.TestCase):
 		self.assertEqual(self._temp_filename, provider._path)
 
 		provider = tuned.storage.PickleProvider()
-		self.assertEqual("/run/tuned/save.pickle", provider._path)
+		self.assertEqual(temp_storage_file.name, provider._path)
 
 	def test_memory_persistence(self):
 		provider = tuned.storage.PickleProvider(self._temp_filename)
@@ -66,3 +71,7 @@ class StoragePickleProviderTestCase(unittest.TestCase):
 		provider.load()
 		self.assertIsNone(provider.get("ns1", "opt1"))
 		self.assertIsNone(provider.get("ns2", "opt2"))
+
+	@classmethod
+	def tearDownClass(cls):
+		temp_storage_file.close()
