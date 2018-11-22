@@ -60,6 +60,7 @@ import tuned.gtk.gui_profile_loader
 import tuned.gtk.gui_plugin_loader
 import tuned.profiles.profile as profile
 import tuned.utils.global_config
+from tuned.gtk.tuned_dialog import TunedDialog
 
 from tuned.gtk.managerException import ManagerException
 
@@ -365,7 +366,13 @@ class Base(object):
 								  'Please close edit window and try again.'
 								  )
 				return
-			self.manager.remove_profile(profile, is_admin=self.is_admin)
+
+			try:
+				self.manager.remove_profile(profile, is_admin=self.is_admin)
+			except ManagerException:
+				self.error_dialog('failed to authorize', '')
+				return
+
 			for item in self.treestore_profiles:
 				if item[0] == profile:
 					iter = self.treestore_profiles.get_iter(item.path)
@@ -484,7 +491,12 @@ class Base(object):
 			except KeyError:
 				raise KeyError('this cant happen')
 
-		self.manager.update_profile(profile_name, prof, self.is_admin)
+		try:
+			self.manager.update_profile(profile_name, prof, self.is_admin)
+		except ManagerException:
+			self.error_dialog('failed to authorize', '')
+			return
+
 		if self.manager.is_profile_factory(prof.name):
 			prefix = consts.PREFIX_PROFILE_FACTORY
 		else:
@@ -517,7 +529,11 @@ class Base(object):
 		# try:
 
 		prof = self.data_to_profile_config()
-		self.manager.save_profile(prof)
+		try:
+			self.manager.save_profile(prof)
+		except ManagerException:
+			self.error_dialog('failed to authorize', '')
+			return
 		self.manager._load_all_profiles()
 		self.treestore_profiles.append([prof.name, consts.PREFIX_PROFILE_USER])
 		self._gobj('windowProfileEditor').hide()
@@ -561,17 +577,28 @@ class Base(object):
 		if not self.manager.is_profile_removable(self.editing_profile_name):
 			if not self.manager.get_profile(
 					self.editing_profile_name + '-modified'):
-				self.error_dialog(
-					'Factory profile can not be modified',
-					'but you can use its copy')
+				if not TunedDialog('System profile can not be modified '
+							+ 'but you can create its copy',
+							'create copy',
+							'cancel'
+							).run():
+					return
+
 				copied_profile = self.manager.get_profile(
 					self.editing_profile_name)
 				copied_profile.name = self.editing_profile_name + '-modified'
-				self.manager.save_profile(copied_profile)
+				try:
+					self.manager.save_profile(copied_profile)
+				except ManagerException:
+					self.error_dialog('failed to authorize', '')
+					return
 			else:
-				self.error_dialog(
-					'Factory profile can not be modified',
-					'You can use its already existing copy')
+				if not TunedDialog('System profile can not be modified '
+							+ 'but you can use its copy',
+							'open copy',
+							'cancel'
+							).run():
+					return
 				copied_profile = self.manager.get_profile(
 					self.editing_profile_name + '-modified')
 			self._update_profile_list()
