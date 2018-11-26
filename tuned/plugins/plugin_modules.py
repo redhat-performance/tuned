@@ -39,7 +39,7 @@ class ModulesPlugin(base.Plugin):
 			if retcode != 0:
 				log.warn("cannot insert/reinsert module '%s', reboot is required: %s" % (module, out.strip()))
 
-	def _instance_apply_static(self, instance):
+	def _instance_apply_static(self, instance, devices):
 		self._clear_modprobe_file()
 		s = ""
 		retcode = 0
@@ -73,7 +73,7 @@ class ModulesPlugin(base.Plugin):
 	def _unquote_path(self, path):
 		return str(path).replace("/", "")
 
-	def _instance_verify_static(self, instance, ignore_missing):
+	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret = True
 		# not all modules exports all their parameteters through sysfs, so hardcode check with ignore_missing
 		ignore_missing = True
@@ -100,7 +100,7 @@ class ModulesPlugin(base.Plugin):
 								ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
+	def _instance_unapply_static(self, instance, devices, full_rollback = False):
 		if full_rollback:
 			self._clear_modprobe_file()
 

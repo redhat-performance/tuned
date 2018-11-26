@@ -103,7 +103,7 @@ class BootloaderPlugin(base.Plugin):
 			log.info("removing initrd image '%s'" % self._initrd_dst_img_val)
 			self._cmd.unlink(self._initrd_dst_img_val)
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
+	def _instance_unapply_static(self, instance, devices, full_rollback = False):
 		if full_rollback:
 			log.info("removing grub2 tuning previously added by Tuned")
 			self._remove_grub2_tuning()
