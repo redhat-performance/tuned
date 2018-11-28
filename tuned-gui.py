@@ -144,8 +144,7 @@ class Base(object):
 		self.treestore_profiles = Gtk.ListStore(GObject.TYPE_STRING,
 				GObject.TYPE_STRING)
 		self.treestore_plugins = Gtk.ListStore(GObject.TYPE_STRING)
-		for plugin_class in self.plugin_loader.plugins:
-			plugin_name = self.plugin_loader.get_plugin_name(plugin_class)
+		for plugin_name in self.plugin_loader.plugins:
 			self.treestore_plugins.append([plugin_name])
 
 		self._gobj('comboboxPlugins').set_model(self.treestore_plugins)
@@ -325,21 +324,26 @@ class Base(object):
 	#		 return True
 
 	def on_changed_combobox_plugins(self, combo):
-		plugin = \
-			self.plugin_loader.get_plugin(self._gobj('comboboxMainPlugins').get_active_text())
-		if plugin is None:
+		plugin_name = self._gobj('comboboxMainPlugins').get_active_text()
+		plugin_parameters = self.plugin_loader.plugins.get(plugin_name, None)
+		if plugin_parameters is None:
 			self._gobj('textviewPluginAvaibleText').get_buffer().set_text('')
 			self._gobj('textviewPluginDocumentationText').get_buffer().set_text(''
 					)
 			return
-
+		plugin_hints = self.plugin_loader.get_plugin_hints(plugin_name)
 		options = ''
-		for (key, val) in plugin._get_config_options().items():
-			options += '%s = %r\n' % (key, val)
-			options += '%s\n' % (plugin.get_config_options_hints().get(key, ''))
+		for (key, val) in plugin_parameters.items():
+			options += '%s = %r\n' % (key, str(val))
+			hint = plugin_hints.get(key, None)
+			if hint:
+				options += '%s\n' % (str(hint))
 
 		self._gobj('textviewPluginAvaibleText').get_buffer().set_text(options)
-		self._gobj('textviewPluginDocumentationText').get_buffer().set_text(plugin.__doc__)
+		plugin_doc = self.plugin_loader.get_plugin_doc(plugin_name)
+		self._gobj('textviewPluginDocumentationText').get_buffer().set_text(
+			plugin_doc
+		)
 
 	def on_delete_event(self, window, data):
 		window.hide()
@@ -397,20 +401,19 @@ class Base(object):
 			plugin_name = self._gobj('comboboxPlugins').get_active_text()
 			plugin_to_tab = None
 			for plugin in self.plugin_loader.plugins:
-				cur_plugin_name = self.plugin_loader.get_plugin_name(
-					plugin
-				)
-				if cur_plugin_name == plugin_name:
+				if plugin == plugin_name:
 					for children in self._gobj('notebookPlugins'):
 						if plugin_name \
 							== self._gobj('notebookPlugins').get_menu_label_text(children):
 							self.error_dialog('Plugin ' + plugin_name
 									+ ' is already in profile.', '')
 							return
-					plugin_to_tab = plugin
-					self._gobj('notebookPlugins').append_page_menu(self.treeview_for_data(plugin_to_tab._get_config_options(), cur_plugin_name),
-							Gtk.Label(cur_plugin_name),
-							Gtk.Label(cur_plugin_name)
+					config_options = self.plugin_loader.plugins[plugin]
+					self._gobj('notebookPlugins').append_page_menu(
+							self.treeview_for_data(
+								config_options, plugin),
+							Gtk.Label(plugin),
+							Gtk.Label(plugin)
 							)
 
 					self._gobj('notebookPlugins').show_all()
@@ -870,10 +873,9 @@ class Base(object):
 
 	def on_option_tooltip(self, widget, x, y, keyboard_mode, tooltip, plugin_name, model):
 		path = widget.get_path_at_pos(x, y)
-		plugin_class = self.plugin_loader.get_plugin(plugin_name)
-		if plugin_class is None:
+		plugin_hints = self.plugin_loader.get_plugin_hints(plugin_name)
+		if plugin_hints is None or len(plugin_hints) == 0:
 			return False
-		config_option_hints = plugin_class.get_config_options_hints()
 		if not path:
 			row_count = model.iter_n_children(None)
 			if (row_count == 0):
@@ -886,7 +888,7 @@ class Base(object):
 			iterator = model.get_iter(int(str(path[0])) -1)
 			option_name = model.get_value(iterator, 1)
 		path = model.get_path(iterator)
-		hint = config_option_hints.get(option_name, None)
+		hint = plugin_hints.get(option_name, None)
 		if not hint:
 			return False
 		tooltip.set_text(hint)

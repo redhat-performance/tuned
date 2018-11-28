@@ -1,4 +1,5 @@
 import tuned.logs
+import os
 
 __all__ = ["PluginLoader"]
 
@@ -45,3 +46,21 @@ class PluginLoader(object):
 				return cls
 
 		raise ImportError("Cannot find the plugin class.")
+
+	def load_all_plugins(self):
+		plugins_package = __import__(self._namespace)
+		plugin_clss = []
+		for module_name in os.listdir(plugins_package.plugins.__path__[0]):
+			try:
+				module_name = os.path.splitext(module_name)[0]
+				if not module_name.startswith("plugin_"):
+					continue
+				plugin_class = self._get_class(
+					"%s.%s" % (self._namespace, module_name)
+					)
+				if plugin_class not in plugin_clss:
+					plugin_clss.append(plugin_class)
+			except ImportError:
+				pass
+		return plugin_clss
+

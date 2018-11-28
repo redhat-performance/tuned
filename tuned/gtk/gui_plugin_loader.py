@@ -24,20 +24,16 @@ Created on Mar 30, 2014
 @author: mstana
 '''
 
-import os
 import importlib
-import inspect
 from validate import Validator
 
-import tuned.plugins.base
 import tuned.consts as consts
 import tuned.logs
 
 import configobj as ConfigObj
 from tuned.exceptions import TunedException
 
-from tuned.utils.plugin_loader import PluginLoader
-from tuned import plugins
+from tuned.admin.dbus_controller import DBusController
 
 __all__ = ['GuiPluginLoader']
 
@@ -49,7 +45,7 @@ global_config_spec = ['dynamic_tuning = boolean(default=%s)'
                       % consts.CFG_DEF_UPDATE_INTERVAL]
 
 
-class GuiPluginLoader(PluginLoader):
+class GuiPluginLoader():
 
     '''
     Class for scan, import and load actual avaible plugins.
@@ -60,44 +56,27 @@ class GuiPluginLoader(PluginLoader):
         Constructor
         '''
 
-        self._plugins = []
+        self._plugins = {}
         self.plugins_doc = {}
         self._prefix = 'plugin_'
         self._sufix = '.py'
-        self._find_plugins()
+        self._dbus_controller = DBusController(consts.DBUS_BUS,
+			consts.DBUS_INTERFACE, consts.DBUS_OBJECT
+            )
+        self._get_plugins()
 
     @property
     def plugins(self):
         return self._plugins
 
-    def _find_plugins(self):
-        for module_name in self._import_plugin_names():
-            module = importlib.import_module('tuned.plugins.%s' % (module_name))
-            for name, obj in inspect.getmembers(module):
-                if inspect.isclass(obj) and issubclass(obj,tuned.plugins.base.Plugin):
-                    self._plugins.append(obj)
+    def _get_plugins(self):
+        self._plugins = self._dbus_controller.get_plugins()
 
-    def _import_plugin_names(self):
-        '''
-        Scan directories and find names to load
-        '''
+    def get_plugin_doc(self, plugin_name):
+        return self._dbus_controller.get_plugin_documentation(plugin_name)
 
-        names = []
-        for module_file in os.listdir(plugins.__path__[0]):
-            if (module_file.startswith(self._prefix) and module_file.endswith(self._sufix)):
-                names.append(module_file[:-3])
-        return names
-
-    def get_plugin(self, plugin_name):
-        for plugin in self._plugins:
-            if plugin_name == self.get_plugin_name(plugin):
-                return plugin
-        return None
-
-    def get_plugin_name(self, plugin):
-        return os.path.splitext(
-            os.path.basename(inspect.getfile(plugin))[7:]
-            )[0]
+    def get_plugin_hints(self, plugin_name):
+        return self._dbus_controller.get_plugin_hints(plugin_name)
 
     def _load_global_config(self, file_name=consts.GLOBAL_CONFIG_FILE):
         """

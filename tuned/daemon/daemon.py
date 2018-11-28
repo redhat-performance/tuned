@@ -205,6 +205,37 @@ class Daemon(object):
 			profile = self._get_recommended_profile()
 		return profile, manual
 
+	def get_all_plugins(self):
+		"""Return all accessible plugin classes"""
+		return self._unit_manager.plugins_repository.load_all_plugins()
+
+	def get_plugin_documentation(self, plugin_name):
+		"""Return plugin class docstring"""
+		try:
+			plugin_class = self._unit_manager.plugins_repository.load_plugin(
+				plugin_name
+			)
+		except ImportError:
+			return ""
+		return plugin_class.__doc__
+
+	def get_plugin_hints(self, plugin_name):
+		"""Return plugin's parameters and their hints
+
+		Parameters:
+		plugin_name -- plugins name
+
+		Return:
+		dictionary -- {parameter_name: hint}
+		"""
+		try:
+			plugin_class = self._unit_manager.plugins_repository.load_plugin(
+				plugin_name
+			)
+		except ImportError:
+			return {}
+		return plugin_class.get_config_options_hints()
+
 	def is_enabled(self):
 		return self._profile is not None
 

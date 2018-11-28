@@ -63,8 +63,17 @@ if __name__ == "__main__":
 
 	subparsers = parser.add_subparsers()
 
-	parser_list = subparsers.add_parser("list", help="list available profiles")
-	parser_list.set_defaults(action="list")
+	parser_list = subparsers.add_parser("list", help="list available profiles or plugins")
+	parser_list.set_defaults(action="list_profiles")
+
+	subparsers_list = parser_list.add_subparsers()
+
+	parser_list_plugins = subparsers_list.add_parser("plugins", help="list avaible plugins")
+	parser_list_plugins.set_defaults(action="list_plugins")
+	parser_list_plugins.add_argument("--verbouse", "-v", action="store_true", help="show plugin's configuration parameters and their meaning")
+
+	parser_list_profiles = subparsers_list.add_parser("profiles", help="list available profiles")
+	parser_list_profiles.set_defaults(action="list_profiles")
 
 	parser_active = subparsers.add_parser("active", help="show active profile")
 	parser_active.set_defaults(action="active")
