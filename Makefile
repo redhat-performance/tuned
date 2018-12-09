@@ -40,6 +40,7 @@ PYTHON_SITELIB = $(shell $(PYTHON) -c 'from distutils.sysconfig import get_pytho
 ifeq ($(PYTHON_SITELIB),)
 $(error Failed to determine python library directory)
 endif
+KERNELINSTALLHOOKDIR = /usr/lib/kernel/install.d
 TUNED_PROFILESDIR = /usr/lib/tuned
 TUNED_RECOMMEND_DIR = $(TUNED_PROFILESDIR)/recommend.d
 TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/tuned/recommend.d
@@ -59,7 +60,7 @@ release-cp: release-dir
 
 	cp -a tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
 		tuned-adm.bash dbus.conf recommend.conf tuned-main.conf 00_tuned \
-		bootcmdline modules.conf com.redhat.tuned.policy \
+		91-tuned.install bootcmdline modules.conf com.redhat.tuned.policy \
 		com.redhat.tuned.gui.policy tuned-gui.py tuned-gui.glade \
 		tuned-gui.desktop $(VERSIONED_NAME)
 	cp -a doc experiments libexec man profiles systemtap tuned contrib icons \
@@ -179,6 +180,9 @@ install: install-dirs
 
 	# grub template
 	install -Dpm 0755 00_tuned $(DESTDIR)$(SYSCONFDIR)/grub.d/00_tuned
+
+	# kernel install hook
+	install -Dpm 0755 91-tuned.install $(DESTDIR)$(KERNELINSTALLHOOKDIR)/91-tuned.install
 
 	# polkit configuration
 	install -Dpm 0644 com.redhat.tuned.policy $(DESTDIR)$(DATADIR)/polkit-1/actions/com.redhat.tuned.policy

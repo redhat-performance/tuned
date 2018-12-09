@@ -1,0 +1,31 @@
+#!/bin/bash
+
+COMMAND="$1"
+KERNEL_VERSION="$2"
+BOOT_DIR_ABS="$3"
+KERNEL_IMAGE="$4"
+
+if ! [[ $KERNEL_INSTALL_MACHINE_ID ]]; then
+  exit 0
+fi
+
+MACHINE_ID=$KERNEL_INSTALL_MACHINE_ID
+
+# with grub2 always /boot
+BOOT_ROOT="/boot"
+LOADER_ENTRIES="$BOOT_ROOT/loader/entries"
+
+[ -d "$LOADER_ENTRIES" ] || exit 0
+
+[ "$COMMAND" = "add" ] || exit 0
+
+pushd "$LOADER_ENTRIES"
+for f in `basename "$MACHINE_ID"`-*.conf; do
+  if [ -f "$f" -a "${f: -12}" != "-rescue.conf" ]; then
+    grep -q '^\s*options\s\+.*\$tuned_params' "$f" || sed -i '/^\s*options\s\+/ s/\(.*\)/\1 \$tuned_params/' "$f"
+    grep -q '^\s*initrd\s\+.*\$tuned_initrd' "$f" || sed -i '/^\s*initrd\s\+/ s/\(.*\)/\1 \$tuned_initrd/' "$f"
+  fi
+done
+popd
+
+exit 0

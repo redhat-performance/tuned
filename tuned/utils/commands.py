@@ -25,7 +25,6 @@ log = tuned.logs.get()
 class commands:
 
 	def __init__(self, logging = True):
-		self._environment = None
 		self._logging = logging
 
 	def _error(self, msg):
@@ -208,21 +207,25 @@ class commands:
 
 		return self.write_to_file(f, data)
 
+	# returns machine ID or empty string "" in case of error
+	def get_machine_id(self, no_error = True):
+		return self.read_file(consts.MACHINE_ID_FILE, no_error).strip()
+
 	# "no_errors" can be list of return codes not treated as errors, if 0 is in no_errors, it means any error
 	# returns (retcode, out), where retcode is exit code of the executed process or -errno if
 	# OSError or IOError exception happened
-	def execute(self, args, shell = False, cwd = None, no_errors = [], return_err = False):
+	def execute(self, args, shell = False, cwd = None, env = {}, no_errors = [], return_err = False):
 		retcode = 0
-		if self._environment is None:
-			self._environment = os.environ.copy()
-			self._environment["LC_ALL"] = "C"
+		_environment = os.environ.copy()
+		_environment["LC_ALL"] = "C"
+		_environment.update(env)
 
 		self._debug("Executing %s." % str(args))
 		out = ""
 		err_msg = None
 		try:
 			proc = Popen(args, stdout = PIPE, stderr = PIPE, \
-					env = self._environment, \
+					env = _environment, \
 					shell = shell, cwd = cwd, \
 					close_fds = True, \
 					universal_newlines = True)

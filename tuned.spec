@@ -278,6 +278,24 @@ if [ "$1" == 0 ]; then
   if [ -r "%{_sysconfdir}/default/grub" ]; then
     sed -i '/GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT:+$GRUB_CMDLINE_LINUX_DEFAULT }\\$tuned_params"/d' %{_sysconfdir}/default/grub
   fi
+
+# cleanup for Boot loader specification (BLS)
+
+# clear grubenv variables
+  grub2-editenv - unset tuned_params tuned_initrd &>/dev/null || :
+# unpatch BLS entries
+  MACHINE_ID=`cat /etc/machine-id 2>/dev/null`
+  if [ "$MACHINE_ID" ]
+  then
+    for f in /boot/loader/entries/$MACHINE_ID-*.conf
+    do
+      if [ -f "$f" -a "${f: -12}" != "-rescue.conf" ]
+      then
+        sed -i '/^\s*options\s\+.*\$tuned_params/ s/\s\+\$tuned_params\b//g' "$f" &>/dev/null || :
+        sed -i '/^\s*initrd\s\+.*\$tuned_initrd/ s/\s\+\$tuned_initrd\b//g' "$f" &>/dev/null || :
+      fi
+    done
+  fi
 fi
 
 
@@ -359,6 +377,7 @@ fi
 %{_datadir}/tuned/grub2
 %{_datadir}/polkit-1/actions/com.redhat.tuned.policy
 %ghost %{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
+%{_prefix}/lib/kernel/install.d/91-tuned.install
 
 %files gtk
 %defattr(-,root,root,-)
