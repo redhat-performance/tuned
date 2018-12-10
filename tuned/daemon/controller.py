@@ -134,7 +134,11 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if not self._daemon.is_running():
 			return False
 		else:
-			return self.stop() and self.start()
+			stop_ok = self.stop()
+			if not stop_ok:
+				return False
+			self._daemon.reload_profile_config()
+			return self.start()
 
 	def _switch_profile(self, profile_name, manual):
 		was_running = self._daemon.is_running()

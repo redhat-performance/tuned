@@ -58,6 +58,10 @@ class Daemon(object):
 		self._not_used.set()
 		self._profile_applied = threading.Event()
 
+	def reload_profile_config(self):
+		"""Read configuration files again and load profile according to them"""
+		self._init_profile(None)
+
 	def _init_profile(self, profile_names):
 		manual = True
 		if profile_names is None:
