@@ -11,8 +11,8 @@ class Unit(object):
 	def __init__(self, name, config):
 		self._name = name
 		self._type = config.pop("type", self._name)
-		self._enabled = config.pop("enabled", True) in [True, "true", 1]
-		self._replace = config.pop("replace", False) in [True, "true", 1]
+		self._enabled = config.pop("enabled", True) in [True, "true", 1, "1"]
+		self._replace = config.pop("replace", False) in [True, "true", 1, "1"]
 		self._devices = config.pop("devices", "*")
 		self._devices_udev_regex = config.pop("devices_udev_regex", None)
 		self._script_pre = config.pop("script_pre", None)
