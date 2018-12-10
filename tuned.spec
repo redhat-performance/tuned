@@ -377,7 +377,7 @@ fi
 %{_datadir}/tuned/grub2
 %{_datadir}/polkit-1/actions/com.redhat.tuned.policy
 %ghost %{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
-%{_prefix}/lib/kernel/install.d/91-tuned.install
+%{_prefix}/lib/kernel/install.d/92-tuned.install
 
 %files gtk
 %defattr(-,root,root,-)

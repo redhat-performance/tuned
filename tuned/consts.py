@@ -38,7 +38,7 @@ BOOT_CMDLINE_INITRD_ADD_VAR = "TUNED_BOOT_INITRD_ADD"
 BOOT_CMDLINE_FILE = "/etc/tuned/bootcmdline"
 PETITBOOT_DETECT_DIR = "/sys/firmware/opal"
 MACHINE_ID_FILE = "/etc/machine-id"
-KERNEL_UPDATE_HOOK_FILE = "/usr/lib/kernel/install.d/91-tuned.install"
+KERNEL_UPDATE_HOOK_FILE = "/usr/lib/kernel/install.d/92-tuned.install"
 BLS_ENTRIES_PATH = "/boot/loader/entries"
 
 # modules plugin configuration
