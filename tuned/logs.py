@@ -30,7 +30,7 @@ def _random_string(length):
 	chars = string.ascii_letters + string.digits
 	res = ""
 	for i in range(length):
-		res += random.choice(chars)
+		res += r.choice(chars)
 	return res
 
 def log_capture_start(log_level):
