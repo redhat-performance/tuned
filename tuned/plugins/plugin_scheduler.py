@@ -448,7 +448,11 @@ class SchedulerPlugin(base.Plugin):
 	def _thread_code(self, instance):
 		r = self._cmd.re_lookup_compile(instance._sched_lookup)
 		poll = select.poll()
-		for fd in instance._evlist.get_pollfd():
+		# Store the file objects in a local variable so that they don't
+		# go out of scope too soon. This is a workaround for
+		# python3-perf bug rhbz#1659445.
+		fds = instance._evlist.get_pollfd()
+		for fd in fds:
 			poll.register(fd)
 		while not instance._terminate.is_set():
 			# timeout to poll in milliseconds
