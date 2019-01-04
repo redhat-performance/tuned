@@ -1,0 +1,25 @@
+[id="tuned-no-daemon-mode_{context}"]
+= Tuned no-daemon mode
+
+// TODO: Should this be a procedure? A user story? Is there a common use case?
+
+You can run *Tuned* in `no-daemon` mode, which does not require any resident memory. In this mode, *Tuned* applies the settings and exits.
+
+By default, `no-daemon` mode is disabled because a lot of *Tuned* functionality is missing in this mode, including:
+
+* D-Bus support
+* Hot-plug support
+* Rollback support for settings
+
+To enable `no-daemon` mode, include the following line in the [filename]`/etc/tuned/tuned-main.conf` file:
+
+----
+daemon = 0
+----
+
+// [discrete]
+// == Additional resources
+// 
+// * A bulleted list of links to other material closely related to the contents of the concept module.
+// * For more details on writing concept modules, see the link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].
+// * Use a consistent system for file names, IDs, and titles. For tips, see _Anchor Names and File Names_ in link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].

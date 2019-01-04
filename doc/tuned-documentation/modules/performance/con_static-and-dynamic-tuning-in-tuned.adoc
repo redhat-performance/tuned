@@ -1,0 +1,39 @@
+[id="static-and-dynamic-tuning-in-tuned_{context}"]
+= Static and dynamic tuning in Tuned
+
+This section explains the difference between the two categories of system tuning that *Tuned* applies: _static_ and _dynamic_.
+
+// TODO: Move some of this content into a separate module ("Enabling dynamic tuning"). It seems to be necessary to (1) enable dynamic tuning globally *and* (2) manually enable it in performance-oriented profiles.
+
+Static tuning::
+Mainly consists of the application of predefined `sysctl` and `sysfs` settings and one-shot activation of several configuration tools such as `ethtool`.
+
+Dynamic tuning::
+Watches how various system components are used throughout the uptime of your system. *Tuned* adjusts system settings dynamically based on that monitoring information.
++
+For example, the hard drive is used heavily during startup and login, but is barely used later when the user might mainly work with applications such as web browsers or email clients. Similarly, the CPU and network devices are used differently at different times. *Tuned* monitors the activity of these components and reacts to the changes in their use.
++
+By default, dynamic tuning is disabled. To enable it, edit the [filename]`/etc/tuned/tuned-main.conf` file and change the [option]`dynamic_tuning` option to `1`. *Tuned* then periodically analyzes system statistics and uses them to update your system tuning settings. To configure the time interval in seconds between these updates, use the [option]`update_interval` option.
++
+Currently implemented dynamic tuning algorithms try to balance the performance and powersave, and are therefore disabled in the performance profiles. Dynamic tuning for individual plug-ins can be enabled or disabled in the *Tuned* profiles.
+
+// Internal note: Dynamic tuning is still disabled as of RHEL 8.0 Beta.
+
+.Static and dynamic tuning on a workstation
+====
+On a typical office workstation, the Ethernet network interface is inactive most of the time. Only a few emails go in and out or some web pages might be loaded.
+
+For those kinds of loads, the network interface does not have to run at full speed all the time, as it does by default. *Tuned* has a monitoring and tuning plug-in for network devices that can detect this low activity and then automatically lower the speed of that interface, typically resulting in a lower power usage.
+
+If the activity on the interface increases for a longer period of time, for example because a DVD image is being downloaded or an email with a large attachment is opened, *Tuned* detects this and sets the interface speed to maximum to offer the best performance while the activity level is high.
+
+This principle is used for other plug-ins for CPU and disks as well.
+====
+
+
+// [discrete]
+// == Additional resources
+// 
+// * A bulleted list of links to other material closely related to the contents of the concept module.
+// * For more details on writing concept modules, see the link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].
+// * Use a consistent system for file names, IDs, and titles. For tips, see _Anchor Names and File Names_ in link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].

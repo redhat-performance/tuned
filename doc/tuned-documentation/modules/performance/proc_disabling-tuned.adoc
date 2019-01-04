@@ -1,0 +1,34 @@
+[id="disabling-tuned_{context}"]
+= Disabling Tuned
+
+This procedure disables *Tuned* and resets all affected system settings to their original state before *Tuned* modified them.
+
+// [discrete]
+// == Prerequisites
+// 
+// * A bulleted list of conditions that must be satisfied before the user starts following this assembly.
+// * You can also link to other modules or assemblies the user must follow before starting this assembly.
+// * Delete the section title and bullets if the assembly has no prerequisites.
+
+[discrete]
+== Procedure
+
+* To disable all tunings temporarily:
++
+----
+# tuned-adm off
+----
++
+The tunings are applied again after the `tuned` service restarts.
+
+* Alternatively, to stop and disable the `tuned` service permanently:
++
+----
+# systemctl disable --now tuned
+----
+
+[discrete]
+== Additional resources
+
+* The `tuned-adm(8)` man page.
+

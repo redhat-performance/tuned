@@ -1,0 +1,96 @@
+[id="variables-and-built-in-functions-in-tuned-profiles_{context}"]
+= Variables and built-in functions in Tuned profiles
+
+Variables and built-in functions expand at run time when a *Tuned* profile is activated.
+
+Using *Tuned* variables reduces the amount of necessary typing in *Tuned* profiles. You can also:
+
+* Use various built-in functions together with *Tuned* variables
+* Create custom functions in Python and add them to *Tuned* in the form of plug-ins
+
+[discrete]
+== Variables
+
+There are no predefined variables in *Tuned* profiles. You can define your own variables by creating the `[variables]` section in a profile and using the following syntax:
+
+[subs=+quotes]
+----
+[variables]
+
+[replaceable]__variable_name__=[replaceable]__value__
+----
+
+To expand the value of a variable in a profile, use the following syntax:
+
+[subs=+quotes]
+----
+${[replaceable]__variable_name__}
+----
+
+.Isolating CPU cores using variables
+====
+In the following example, the `${isolated_cores}` variable expands to `1,2`; hence the kernel boots with the [option]`isolcpus=1,2` option:
+
+----
+[variables]
+isolated_cores=1,2
+
+[bootloader]
+cmdline=isolcpus=${isolated_cores}
+----
+
+The variables can be specified in a separate file. For example, you can add the following lines to [filename]`tuned.conf`:
+
+[subs=+quotes]
+----
+[variables]
+include=/etc/tuned/[replaceable]_my-variables.conf_
+
+[bootloader]
+cmdline=isolcpus=${isolated_cores}
+----
+
+If you add the [option]`isolated_cores=1,2` option to the [filename]`/etc/tuned/my-variables.conf` file, the kernel boots with the [option]`isolcpus=1,2` option.
+
+====
+
+
+[discrete]
+== Functions
+
+To call a function, use the following syntax:
+
+[subs=+quotes]
+----
+${f:[replaceable]__function_name__:[replaceable]__argument_1__:[replaceable]__argument_2__}
+----
+
+To expand the directory path where the profile and the `tuned.conf` file are located, use the `PROFILE_DIR` function, which requires special syntax:
+
+----
+${i:PROFILE_DIR}
+----
+
+
+
+.Isolating CPU cores using variables and built-in functions
+====
+In the following example, the `${non_isolated_cores}` variable expands to `0,3-5`, and the `cpulist_invert` built-in function is called with the `0,3-5` argument:
+
+----
+[variables]
+non_isolated_cores=0,3-5
+
+[bootloader]
+cmdline=isolcpus=${f:cpulist_invert:${non_isolated_cores}}
+----
+
+The `cpulist_invert` function inverts the list of CPUs. For a 6-CPU machine, the inversion is `1,2`, and the kernel boots with the [option]`isolcpus=1,2` command-line option.
+
+====
+
+[discrete]
+== Additional resources
+
+* The `tuned.conf(5)` man page
+

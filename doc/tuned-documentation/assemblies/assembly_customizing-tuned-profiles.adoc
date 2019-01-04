@@ -1,0 +1,44 @@
+:parent-context-of-customizing-tuned-profiles: {context}
+
+[id='customizing-tuned-profiles_{context}']
+= Customizing Tuned profiles
+
+:context: customizing-tuned-profiles
+
+You can create or modify *Tuned* profiles to optimize system performance for your intended use case.
+
+[id='prerequisites-{context}']
+== Prerequisites
+
+* Install and enable *Tuned* as described in xref:installing-and-enabling-tuned_getting-started-with-tuned[].
+
+
+include::modules/performance/con_tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/con_inheritance-between-tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/con_static-and-dynamic-tuning-in-tuned.adoc[leveloffset=+1]
+
+include::modules/performance/con_tuned-plug-ins.adoc[leveloffset=+1]
+
+include::modules/performance/ref_available-tuned-plug-ins.adoc[leveloffset=+1]
+
+include::modules/performance/con_variables-and-built-in-functions-in-tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/ref_built-in-functions-available-in-tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/proc_creating-new-tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/proc_modifying-existing-tuned-profiles.adoc[leveloffset=+1]
+
+// Commented out because the module hasn't been written yet
+// include::modules/performance/proc_creating-tuned-plug-ins.adoc[leveloffset=+1]
+
+
+[id='related-information-{context}']
+== Related information
+
+* The `tuned.conf(5)` man page
+* The *Tuned* project website: link:https://tuned-project.org/[]
+
+:context: {parent-context-of-customizing-tuned-profiles}

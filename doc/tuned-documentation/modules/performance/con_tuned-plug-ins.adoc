@@ -1,0 +1,112 @@
+[id="tuned-plug-ins_{context}"]
+= Tuned plug-ins
+
+Plug-ins are modules in *Tuned* profiles that *Tuned* uses to monitor or optimize different devices on the system.
+
+*Tuned* uses two types of plug-ins:
+
+* monitoring plug-ins
+* tuning plug-ins
+
+[discrete]
+== Monitoring plug-ins
+
+Monitoring plug-ins are used to get information from a running system. The output of the monitoring plug-ins can be used by tuning plug-ins for dynamic tuning.
+
+Monitoring plug-ins are automatically instantiated whenever their metrics are needed by any of the enabled tuning plug-ins. If two tuning plug-ins require the same data, only one instance of the monitoring plug-in is created and the data is shared.
+
+[discrete]
+== Tuning plug-ins
+
+Each tuning plug-in tunes an individual subsystem and takes several parameters that are populated from the tuned profiles. Each subsystem can have multiple devices, such as multiple CPUs or network cards, that are handled by individual instances of the tuning plug-ins. Specific settings for individual devices are also supported. 
+
+[discrete]
+== Syntax for plug-ins in Tuned profiles
+
+Sections describing plug-in instances are formatted in the following way:
+
+[subs=quotes]
+----
+[_NAME_]
+type=_TYPE_
+devices=_DEVICES_
+----
+
+NAME::
+is the name of the plug-in instance as it is used in the logs. It can be an arbitrary string. 
+
+TYPE::
+is the type of the tuning plug-in. 
+
+DEVICES::
+is the list of devices that this plug-in instance handles. 
++
+The `devices` line can contain a list, a wildcard (`\*`), and negation (`!`). If there is no `devices` line, all devices present or later attached on the system of the [replaceable]_TYPE_ are handled by the plug-in instance. This is same as using the [option]`devices=*` option.
++
+.Matching block devices with a plug-in
+====
+The following example matches all block devices starting with `sd`, such as `sda` or `sdb`, and does not disable barriers on them:
+
+----
+[data_disk]
+type=disk
+devices=sd*
+disable_barriers=false
+----
+
+The following example matches all block devices except `sda1` and `sda2`:
+
+----
+[data_disk]
+type=disk
+devices=!sda1, !sda2 
+disable_barriers=false
+----
+
+====
+
+If no instance of a plug-in is specified, the plug-in is not enabled. 
+
+If the plug-in supports more options, they can be also specified in the plug-in section. If the option is not specified and it was not previously specified in the included plug-in, the default value is used.
+
+[discrete]
+== Short plug-in syntax
+
+If you do not need custom names for the plug-in instance and there is only one definition of the instance in your configuration file, *Tuned* supports the following short syntax:
+
+[subs=quotes]
+----
+[_TYPE_]
+devices=_DEVICES_
+----
+
+In this case, it is possible to omit the `type` line. The instance is then referred to with a name, same as the type. The previous example could be then rewritten into:
+
+.Matching block devices using the short syntax
+====
+----
+[disk]
+devices=sdb*
+disable_barriers=false
+----
+====
+
+[discrete]
+== Conflicting plug-in definitions in a profile
+
+If the same section is specified more than once using the `include` option, the settings are merged. If they cannot be merged due to a conflict, the last conflicting definition overrides the previous settings. If you do not know what was previously defined, you can use the [option]`replace` Boolean option and set it to `true`. This causes all the previous definitions with the same name to be overwritten and the merge does not happen.
+
+You can also disable the plug-in by specifying the [option]`enabled=false` option. This has the same effect as if the instance was never defined. Disabling the plug-in is useful if you are redefining the previous definition from the [option]`include` option and do not want the plug-in to be active in your custom profile.
+
+[discrete]
+== Functionality not implemented in any plug-in
+
+*Tuned* includes the ability to run any shell command as part of enabling or disabling a tuning profile. This enables you to extend *Tuned* profiles with functionality that has not been integrated into Tuned yet.
+
+You can specify arbitrary shell commands using the `script` plug-in.
+
+[discrete]
+== Additional resources
+
+* The `tuned.conf(5)` man page
+

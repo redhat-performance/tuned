@@ -1,0 +1,67 @@
+[id="setting-a-tuned-profile_{context}"]
+= Setting a Tuned profile
+
+This procedure activates a selected *Tuned* profile on your system.
+
+[discrete]
+== Prerequisites
+
+* The `tuned` service is running. See xref:installing-and-enabling-tuned_{context}[] for details.
+
+[discrete]
+== Procedure
+
+. Optionally, you can let *Tuned* recommend the most suitable profile for your system:
++
+[subs=+quotes]
+----
+# tuned-adm recommend
+
+[replaceable]_balanced_
+----
+
+. Activate a profile:
++
+[subs=+quotes]
+----
+# tuned-adm profile [replaceable]_selected-profile_
+----
++
+Alternatively, you can activate a combination of multiple profiles:
++
+[subs=+quotes]
+----
+# tuned-adm profile [replaceable]_profile1_ [replaceable]_profile2_
+----
++
+.A virtual machine optimized for low power consumption
+====
+The following example optimizes the system to run in a virtual machine with the best performance and concurrently tunes it for low power consumption, while the low power consumption is the priority:
+
+----
+# tuned-adm profile virtual-guest powersave
+----
+====
+
+. Verify that the *Tuned* profile is active and applied:
++
+[subs=+quotes]
+----
+$ tuned-adm active
+
+Current active profile: [replaceable]_selected-profile_
+----
++
+----
+$ tuned-adm verify
+
+Verfication succeeded, current system settings match the preset profile.
+See tuned log file ('/var/log/tuned/tuned.log') for details.
+----
+
+
+[discrete]
+== Additional resources
+
+* The `tuned-adm(8)` man page
+

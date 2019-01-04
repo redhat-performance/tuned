@@ -1,0 +1,26 @@
+// This flag is used to compile an upstream, vendor-agnostic
+// book from the same source as the downstream RHEL documentation.
+// Modules can check if the flag is defined and enable different
+// content based on it.
+:upstream:
+
+:Year: 2019
+
+// The following attribute is necessary for images to work
+:imagesdir: images
+
+// Red Hat and divisions
+:RH: Red{nbsp}Hat
+:CCS: Customer Content Services
+:OrgName: {RH}
+:OrgDiv: {CCS}
+
+// The product (RHEL)
+:ProductName: {RH} Enterprise{nbsp}Linux
+:RHEL: {ProductName}
+:ProductShortName: RHEL
+// This is the version displayed under "Red Hat Enterprise Linux"
+:ProductNumber: 8
+:RHEL8: {RHEL}{nbsp}8
+:ProductRelease: Beta
+

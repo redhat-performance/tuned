@@ -1,0 +1,39 @@
+[id="inheritance-between-tuned-profiles_{context}"]
+= Inheritance between Tuned profiles
+
+*Tuned* profiles can be based on other profiles and modify only certain aspects of their parent profile.
+
+The `[main]` section of *Tuned* profiles recognizes the [option]`include` option:
+
+[subs=+quotes]
+----
+[main]
+include=[replaceable]_parent_
+----
+
+All settings from the [replaceable]_parent_ profile are loaded in this _child_ profile. In the following sections, the _child_ profile can override certain settings inherited from the [replaceable]_parent_ profile or add new settings not present in the [replaceable]_parent_ profile.
+
+You can create your own _child_ profile in the [filename]`/etc/tuned/` directory based on a pre-installed profile in [filename]`/usr/lib/tuned/` with only some parameters adjusted.
+
+If the [replaceable]_parent_ profile is updated, such as after a *Tuned* upgrade, the changes are reflected in the _child_ profile. 
+
+
+.A power-saving profile based on balanced
+====
+The following is an example of a custom profile that extends the `balanced` profile and sets Aggressive Link Power Management (ALPM) for all devices to the maximum powersaving.
+
+----
+[main]
+include=balanced
+
+[scsi_host]
+alpm=min_power
+----
+====
+
+
+[discrete]
+== Additional resources
+
+* The `tuned.conf(5)` man page
+

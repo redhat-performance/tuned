@@ -1,0 +1,84 @@
+[id="modifying-existing-tuned-profiles_{context}"]
+= Modifying existing Tuned profiles
+
+This procedure creates a modified child profile based on an existing *Tuned* profile.
+
+[discrete]
+== Prerequisites
+
+* The `tuned` service is installed and running. See xref:installing-and-enabling-tuned_getting-started-with-tuned[] for details.
+
+[discrete]
+== Procedure
+
+. In the [filename]`/etc/tuned/` directory, create a new directory named the same as the profile that you want to create:
++
+[subs=+quotes]
+----
+# mkdir /etc/tuned/[replaceable]_modified-profile_
+----
+
+. In the new directory, create a file named [filename]`tuned.conf`, and set the `[main]` section as follows:
++
+[subs=+quotes]
+----
+[main]
+include=[replaceable]_parent-profile_
+----
++
+Replace [replaceable]_parent-profile_ with the name of the profile you are modifying.
+
+. Include your profile modifications.
++
+--
+.Lowering swappiness in the throughput-performance profile
+====
+To use the settings from the `throughput-performance` profile and change the value of `vm.swappiness` to 5, instead of the default 10, use:
+
+----
+[main]
+include=throughput-performance
+
+[sysctl]
+vm.swappiness=5
+----
+====
+--
+
+. To activate the profile, use:
++
+[subs=+quotes]
+----
+# tuned-adm profile [replaceable]_modified-profile_
+----
+
+. Verify that the *Tuned* profile is active and the system settings are applied:
++
+[subs=+quotes]
+----
+$ tuned-adm active
+
+Current active profile: [replaceable]_my-profile_
+----
++
+----
+$ tuned-adm verify
+
+Verfication succeeded, current system settings match the preset profile.
+See tuned log file ('/var/log/tuned/tuned.log') for details.
+----
+
+// .An alternative approach
+// . Alternatively, copy the directory with a system profile from /user/lib/tuned/ to /etc/tuned/. For example:
+// +
+// ----
+// # cp -r /usr/lib/tuned/throughput-performance /etc/tuned
+// ----
+// 
+// . Then, edit the profile in /etc/tuned according to your needs. Note that if there are two profiles of the same name, the profile located in /etc/tuned/ is loaded. The disadvantage of this approach is that if a system profile is updated after a tuned upgrade, the changes will not be reflected in the now-outdated modified version. 
+
+[discrete]
+== Additional resources
+
+* The `tuned.conf(5)` man page
+
