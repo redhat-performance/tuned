@@ -5,26 +5,6 @@
 
 :context: optimizing-power-usage
 
-ifdef::internal[]
-[cols="1,4"]
-|===
-| Included in |
-LIST OF ASSEMBLIES
-| User story |
-USER STORY
-| Jira |
-JIRA LINK
-| BZ |
-BUGZILLA LINK
-| SMEs |
-SME NAMES
-| SME Ack |
-YES/NO
-| Peer Ack |
-YES/NO
-|===
-endif::[]
-
 This paragraph is the assembly introduction. It explains what the user will accomplish by working through the modules in the assembly and sets the context for the user story the assembly is based on. Can include more than one paragraph. Consider using the information from the user story.
 
 [id='prerequisites-{context}']

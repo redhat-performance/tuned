@@ -5,47 +5,7 @@
 
 :context: getting-started-with-tuned
 
-////
-ifdef::internal[]
-[cols="1,4"]
-|===
-| Included in |
-monitor-and-automate/monitoring-and-managing-system-status-and-performance
-| User story |
-As a sysadmin, I need a high-level understanding of the tools and procedures to use to tune the performance of my system.
-| Jira |
-https://projects.engineering.redhat.com/browse/RHELPLAN-3290
-| BZ |
-https://bugzilla.redhat.com/show_bug.cgi?id=1546385
-| SMEs |
-Jiří Škarvada
-| SME Ack |
-No
-| Peer Ack |
-No
-|===
-endif::[]
-////
-
 As a system administrator, you can use the *Tuned* service to optimize the performance profile of your system for a variety of use cases.
-
-////
-This is a suggested Table of Contents, taken from BZ#1340944:
-
-* Tuned introduction & overview
-* Tuned (service) + available parameters
-* The config files description: /etc/tuned/*
-* tuned-adm (use content currently in the PTG and update/expand)
-* Plug-ins and their parameters -- move from the guide part of the PTG, rewrite, update.
-* Profiles -- move from the guide part of the PTG, rewrite, update
-   ** how to create profiles and inheritance (the guide part will link here for details)
-   ** description of profiles that are provided with tuned in RHEL 7
-   ** customizing profiles
-* Creating plug-ins 
-   ** will be probably short, not a priority
-   ** jkarvad will provide a first draft
-* Manual pages -- updated and expanded
-////
 
 // [id='prerequisites-{context}']
 // == Prerequisites
