@@ -20,6 +20,7 @@ class VMPlugin(base.Plugin):
 		return {
 			"transparent_hugepages" : None,
 			"transparent_hugepage" : None,
+			"transparent_hugepage.defrag" : None,
 		}
 
 	def _instance_init(self, instance):
@@ -30,10 +31,11 @@ class VMPlugin(base.Plugin):
 		pass
 
 	@classmethod
-	def _thp_file(self):
-		path = "/sys/kernel/mm/transparent_hugepage/enabled"
+	def _thp_path(self):
+		path = "/sys/kernel/mm/transparent_hugepage"
 		if not os.path.exists(path):
-			path =  "/sys/kernel/mm/redhat_transparent_hugepage/enabled"
+			# RHEL-6 support
+			path =  "/sys/kernel/mm/redhat_transparent_hugepage"
 		return path
 
 	@command_set("transparent_hugepages")
@@ -49,7 +51,7 @@ class VMPlugin(base.Plugin):
 				log.info("transparent_hugepage is already set in kernel boot cmdline, ingoring value from profile")
 			return None
 
-		sys_file = self._thp_file()
+		sys_file = os.path.join(self._thp_path(), "enabled")
 		if os.path.exists(sys_file):
 			if not sim:
 				cmd.write_to_file(sys_file, value)
@@ -66,7 +68,7 @@ class VMPlugin(base.Plugin):
 
 	@command_get("transparent_hugepages")
 	def _get_transparent_hugepages(self):
-		sys_file = self._thp_file()
+		sys_file = os.path.join(self._thp_path(), "enabled")
 		if os.path.exists(sys_file):
 			return cmd.get_active_option(cmd.read_file(sys_file))
 		else:
@@ -76,3 +78,23 @@ class VMPlugin(base.Plugin):
 	@command_get("transparent_hugepage")
 	def _get_transparent_hugepage(self):
 		return self._get_transparent_hugepages()
+
+	@command_set("transparent_hugepage.defrag")
+	def _set_transparent_hugepage_defrag(self, value, sim):
+		sys_file = os.path.join(self._thp_path(), "defrag")
+		if os.path.exists(sys_file):
+			if not sim:
+				cmd.write_to_file(sys_file, value)
+			return value
+		else:
+			if not sim:
+				log.warn("Option 'transparent_hugepage.defrag' is not supported on current hardware.")
+			return None
+
+	@command_get("transparent_hugepage.defrag")
+	def _get_transparent_hugepage_defrag(self):
+		sys_file = os.path.join(self._thp_path(), "defrag")
+		if os.path.exists(sys_file):
+			return cmd.get_active_option(cmd.read_file(sys_file))
+		else:
+			return None
