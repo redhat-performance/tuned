@@ -379,7 +379,8 @@ class Admin(object):
 		return False
 
 	def _action_dbus_off(self):
-		self._log_capture_start()
+		if self._log_level is not None:
+			self._log_capture_start()
 		ret = self._controller.off()
 		if not ret:
 			self._error("Cannot disable active profile.")
