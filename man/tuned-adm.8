@@ -100,6 +100,14 @@ entry is used.
 .B off
 Unload tunings.
 
+.TP
+.B --loglevel [debug " | " info " | " warn " | " error " | " console " | " none]
+Level of log messages to capture
+(one of debug, info, warn, error, console, none). Default: console
+This option is useful with 'profile' of 'verify' command as it prints
+log messages which occured during these actions. Use this if you need to debug
+problems with profiles.
+
 .SH "FILES"
 .nf
 /etc/tuned/*
