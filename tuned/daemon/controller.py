@@ -87,6 +87,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def log_capture_start(self, log_level, timeout, caller = None):
 		if caller == "":
 			return ""
+		log.info('bus name of sender is %s' % caller)
 		token = tuned.logs.log_capture_start(log_level)
 		if token is None:
 			return ""
