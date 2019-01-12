@@ -136,7 +136,7 @@ class TunedLogger(logging.getLoggerClass()):
 			os.makedirs(log_directory)
 
 		cls._file_handler = logging.handlers.RotatingFileHandler(
-			filename, maxBytes = maxBytes, backupCount = backupCount)
+			filename, maxBytes = int(maxBytes), backupCount = int(backupCount))
 		cls._file_handler.setFormatter(cls._formatter)
 
 logging.addLevelName(consts.LOG_LEVEL_CONSOLE, consts.LOG_LEVEL_CONSOLE_NAME)
