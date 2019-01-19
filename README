@@ -71,11 +71,13 @@ https://github.com/redhat-performance/tuned.git
 
 You can also join #fedora-power IRC channel on Freenode.
 
+Web page:
+https://tuned-project.org/
 
 License
 -------
 
-Copyright (C) 2008-2016 Red Hat, Inc.
+Copyright (C) 2008-2019 Red Hat, Inc.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
