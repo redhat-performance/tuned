@@ -148,7 +148,7 @@ class CPULatencyPlugin(base.Plugin):
 			instance._first_instance = False
 			log.info("Latency settings from non-first CPU plugin instance '%s' will be ignored." % instance.name)
 
-		instance._first_device = list(instance.devices)[0]
+		instance._first_device = list(instance.assigned_devices)[0]
 
 	def _instance_cleanup(self, instance):
 		if instance._first_instance:

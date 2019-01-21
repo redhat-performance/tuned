@@ -31,11 +31,11 @@ class Plugin(object):
 
 		self._instances = collections.OrderedDict()
 		self._init_commands()
-		self._init_devices()
 
 		self._global_cfg = global_cfg
 		self._variables = variables
 		self._has_dynamic_options = False
+		self._devices_inited = False
 
 		self._options_used_by_dynamic = self._get_config_options_used_by_dynamic()
 
@@ -43,6 +43,11 @@ class Plugin(object):
 
 	def cleanup(self):
 		self.destroy_instances()
+
+	def init_devices(self):
+		if not self._devices_inited:
+			self._init_devices()
+			self._devices_inited = True
 
 	@property
 	def name(self):
@@ -172,7 +177,7 @@ class Plugin(object):
 			if instance.name != self.name:
 				name += " (%s)" % self.name
 			log.info("instance %s: assigning devices %s" % (name, ", ".join(to_assign)))
-			instance.devices.update(to_assign) # cannot use |=
+			instance.assigned_devices.update(to_assign) # cannot use |=
 			self._assigned_devices |= to_assign
 			self._free_devices -= to_assign
 
@@ -180,10 +185,13 @@ class Plugin(object):
 		if not self._devices_supported:
 			return
 
-		to_release = instance.devices & self._assigned_devices
+		to_release = (instance.processed_devices \
+				| instance.assigned_devices) \
+				& self._assigned_devices
 
 		instance.active = False
-		instance.devices.clear()
+		instance.processed_devices.clear()
+		instance.assigned_devices.clear()
 		self._assigned_devices -= to_release
 		self._free_devices |= to_release
 
@@ -191,10 +199,8 @@ class Plugin(object):
 	# Tuning activation and deactivation.
 	#
 
-	def _run_for_each_device(self, instance, callback):
-		if self._devices_supported:
-			devices = instance.devices
-		else:
+	def _run_for_each_device(self, instance, callback, devices):
+		if not self._devices_supported:
 			devices = [None, ]
 
 		for device in devices:
@@ -249,13 +255,17 @@ class Plugin(object):
 			return
 
 		if instance.has_static_tuning:
-			self._call_device_script(instance, instance.script_pre, "apply", instance.devices)
+			self._call_device_script(instance, instance.script_pre,
+					"apply", instance.assigned_devices)
 			self._instance_pre_static(instance, True)
 			self._instance_apply_static(instance)
 			self._instance_post_static(instance, True)
-			self._call_device_script(instance, instance.script_post, "apply", instance.devices)
+			self._call_device_script(instance, instance.script_post,
+					"apply", instance.assigned_devices)
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
-			self._run_for_each_device(instance, self._instance_apply_dynamic)
+			self._run_for_each_device(instance, self._instance_apply_dynamic, instance.assigned_devices)
+		instance.processed_devices.update(instance.assigned_devices)
+		instance.assigned_devices.clear()
 
 	def instance_verify_tuning(self, instance, ignore_missing):
 		"""
@@ -264,12 +274,15 @@ class Plugin(object):
 		if not instance.active:
 			return None
 
+		if len(instance.assigned_devices) != 0:
+			log.error("BUG: Some devices have not been tuned: %s"
+					% ", ".join(instance.assigned_devices))
 		if instance.has_static_tuning:
-			if self._call_device_script(instance, instance.script_pre, "verify", instance.devices) == False:
+			if self._call_device_script(instance, instance.script_pre, "verify", instance.processed_devices) == False:
 				return False
 			if self._instance_verify_static(instance, ignore_missing) == False:
 				return False
-			if self._call_device_script(instance, instance.script_post, "verify", instance.devices) == False:
+			if self._call_device_script(instance, instance.script_post, "verify", instance.processed_devices) == False:
 				return False
 			return True
 		else:
@@ -282,35 +295,38 @@ class Plugin(object):
 		if not instance.active:
 			return
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
-			self._run_for_each_device(instance, self._instance_update_dynamic)
+			self._run_for_each_device(instance, self._instance_update_dynamic, instance.processed_devices.copy())
 
 	def instance_unapply_tuning(self, instance, full_rollback = False):
 		"""
 		Remove all tunings applied by the plugin instance.
 		"""
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
-			self._run_for_each_device(instance, self._instance_unapply_dynamic)
+			self._run_for_each_device(instance, self._instance_unapply_dynamic, instance.processed_devices)
 		if instance.has_static_tuning:
-			self._call_device_script(instance, instance.script_post, "unapply", instance.devices, full_rollback = full_rollback)
+			self._call_device_script(instance, instance.script_post,
+					"unapply", instance.processed_devices,
+					full_rollback = full_rollback)
 			self._instance_pre_static(instance, False)
 			self._instance_unapply_static(instance, full_rollback)
 			self._instance_post_static(instance, False)
-			self._call_device_script(instance, instance.script_pre, "unapply", instance.devices, full_rollback = full_rollback)
+			self._call_device_script(instance, instance.script_pre, "unapply", instance.processed_devices, full_rollback = full_rollback)
 
 	def _instance_apply_static(self, instance):
 		self._execute_all_non_device_commands(instance)
-		self._execute_all_device_commands(instance, instance.devices)
+		self._execute_all_device_commands(instance, instance.assigned_devices)
 
 	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
 		if self._verify_all_non_device_commands(instance, ignore_missing) == False:
 			ret = False
-		if self._verify_all_device_commands(instance, instance.devices, ignore_missing) == False:
+		if self._verify_all_device_commands(instance, instance.processed_devices, ignore_missing) == False:
 			ret = False
 		return ret
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
-		self._cleanup_all_device_commands(instance, instance.devices)
+		self._cleanup_all_device_commands(instance,
+				instance.processed_devices)
 		self._cleanup_all_non_device_commands(instance)
 
 	def _instance_apply_dynamic(self, instance, device):

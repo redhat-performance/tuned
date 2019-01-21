@@ -66,11 +66,20 @@ class Inventory(object):
 		else:
 			self._subscriptions[subsystem] = [callback_data, ]
 			self._udev_monitor.filter_by(subsystem)
+			# After start(), HW events begin to get queued up
+			self._udev_monitor.start()
 
+	def start_processing_events(self):
 		if self._monitor_observer is None:
 			log.debug("starting monitor observer")
 			self._monitor_observer = self._monitor_observer_factory.create(self._udev_monitor, self._handle_udev_event)
 			self._monitor_observer.start()
+
+	def stop_processing_events(self):
+		if self._monitor_observer is not None:
+			log.debug("stopping monitor observer")
+			self._monitor_observer.stop()
+			self._monitor_observer = None
 
 	def _unsubscribe_subsystem(self, plugin, subsystem):
 		for callback_data in self._subscriptions[subsystem]:
@@ -90,11 +99,6 @@ class Inventory(object):
 
 		for _subsystem in empty_subsystems:
 			del self._subscriptions[_subsystem]
-
-		if len(self._subscriptions) == 0 and self._monitor_observer is not None:
-			log.debug("stopping monitor observer")
-			self._monitor_observer.stop()
-			self._monitor_observer = None
 
 class _MonitorObserverFactory(object):
 	def create(self, *args, **kwargs):

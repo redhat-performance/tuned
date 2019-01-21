@@ -40,7 +40,7 @@ class NetTuningPlugin(base.Plugin):
 		instance._has_static_tuning = True
 		if self._option_bool(instance.options["dynamic"]):
 			instance._has_dynamic_tuning = True
-			instance._load_monitor = self._monitors_repository.create("net", instance.devices)
+			instance._load_monitor = self._monitors_repository.create("net", instance.assigned_devices)
 			instance._idle = {}
 			instance._stats = {}
 		else:
