@@ -46,11 +46,6 @@ class Inventory(object):
 		"""Get list of devices on a given subsystem."""
 		return self._udev_context.list_devices(subsystem=subsystem)
 
-	def _remove_unused_filters(self):
-		self._udev_monitor.remove_filter()
-		for subsystem in self._subscriptions:
-			self._udev_monitor.filter_by(subsystem)
-
 	def _handle_udev_event(self, event, device):
 		if not device.subsystem in self._subscriptions:
 			return
