@@ -35,6 +35,12 @@ class Monitor(object):
 		raise NotImplementedError()
 
 	@classmethod
+	def _update_available_devices(cls):
+		cls._init_available_devices()
+		log.debug("available devices updated to: %s"
+				% ", ".join(cls._available_devices))
+
+	@classmethod
 	def get_available_devices(cls):
 		return cls._available_devices
 
@@ -100,6 +106,7 @@ class Monitor(object):
 
 	def add_device(self, device):
 		assert (isinstance(device,str) or isinstance(device,unicode))
+		self._update_available_devices()
 		if device in self._available_devices:
 			self._devices.add(device)
 			self._updating_devices.add(device)
