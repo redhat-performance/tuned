@@ -81,7 +81,7 @@ class Manager(object):
 			trace = traceback.format_exc()
 			log.error("BUG: Unhandled exception in %s: %s"
 					% (caller, str(e)))
-			log.debug(trace)
+			log.error(trace)
 			return exc_ret
 
 	def destroy_all(self):
