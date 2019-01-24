@@ -39,7 +39,7 @@ class DiskPlugin(hotplug.Plugin):
 	@classmethod
 	def _device_is_supported(cls, device):
 		return  device.device_type == "disk" and \
-			device.attributes.get("removable", None) == "0" and \
+			device.attributes.get("removable", None) == b"0" and \
 			(device.parent is None or \
 					device.parent.subsystem in ["scsi", "virtio", "xen"])
 
