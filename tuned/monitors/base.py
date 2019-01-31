@@ -99,13 +99,13 @@ class Monitor(object):
 		self._refresh_updating_devices()
 
 	def add_device(self, device):
-		assert isinstance(device, str)
+		assert (isinstance(device,str) or isinstance(device,unicode))
 		if device in self._available_devices:
 			self._devices.add(device)
 			self._updating_devices.add(device)
 
 	def remove_device(self, device):
-		assert isinstance(device, str)
+		assert (isinstance(device,str) or isinstance(device,unicode))
 		if device in self._devices:
 			self._devices.remove(device)
 			self._updating_devices.remove(device)

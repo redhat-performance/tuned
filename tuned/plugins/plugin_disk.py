@@ -50,7 +50,7 @@ class DiskPlugin(hotplug.Plugin):
 		self._hardware_inventory.unsubscribe(self)
 
 	def _hardware_events_callback(self, event, device):
-		if self._device_is_supported(device):
+		if self._device_is_supported(device) or event == "remove":
 			super(DiskPlugin, self)._hardware_events_callback(event, device)
 
 	def _added_device_apply_tuning(self, instance, device_name):
