@@ -7,6 +7,8 @@ import tuned.consts as consts
 import os
 import struct
 import errno
+import platform
+import procfs
 
 log = tuned.logs.get()
 
@@ -22,7 +24,11 @@ class CPULatencyPlugin(base.Plugin):
 		super(CPULatencyPlugin, self).__init__(*args, **kwargs)
 
 		self._has_pm_qos = True
-		self._has_energy_perf_bias = True
+		self._arch = "x86_64"
+		self._is_x86 = False
+		self._is_intel = False
+		self._is_amd = False
+		self._has_energy_perf_bias = False
 		self._has_intel_pstate = False
 
 		self._min_perf_pct_save = None
@@ -57,6 +63,33 @@ class CPULatencyPlugin(base.Plugin):
 			"max_perf_pct"         : None,
 			"no_turbo"             : None,
 		}
+
+	def _check_arch(self):
+		intel_archs = [ "x86_64", "i686", "i585", "i486", "i386" ]
+		self._arch = platform.machine()
+
+		if self._arch in intel_archs:
+                        # Possible other x86 vendors (from arch/x86/kernel/cpu/*):
+                        # "CentaurHauls", "CyrixInstead", "Geode by NSC", "HygonGenuine", "GenuineTMx86",
+                        # "TransmetaCPU", "UMC UMC UMC"
+			cpu = procfs.cpuinfo()
+			vendor = cpu.tags.get("vendor_id")
+			if vendor is "GenuineIntel":
+			        self._is_intel = True
+			elif vendor is "AuthenticAMD" or vendor is "HygonGenuine":
+			        self._is_amd = True
+			else:
+				# We always assign Intel, unless we know better
+				self._is_intel = True
+			log.info("We are running on an x86 %s platform" % vendor)
+		else:
+			log.info("We are running on %s (non x86)" % self._arch)
+
+		if self._is_intel is True:
+			# Check for x86_energy_perf_policy, ignore if not available / supported
+			self._check_energy_perf_bias()
+			# Check for intel_pstate
+			self._check_intel_pstate()
 
 	def _check_energy_perf_bias(self):
 		self._has_energy_perf_bias = False
@@ -110,10 +143,7 @@ class CPULatencyPlugin(base.Plugin):
 			else:
 				instance._load_monitor = None
 
-			# Check for x86_energy_perf_policy, ignore if not available / supported
-			self._check_energy_perf_bias()
-			# Check for intel_pstate
-			self._check_intel_pstate()
+			self._check_arch()
 		else:
 			instance._first_instance = False
 			log.info("Latency settings from non-first CPU plugin instance '%s' will be ignored." % instance.name)
