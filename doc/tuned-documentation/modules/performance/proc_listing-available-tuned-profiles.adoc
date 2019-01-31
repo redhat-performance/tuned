@@ -1,0 +1,49 @@
+[id="listing-available-tuned-profiles_{context}"]
+= Listing available Tuned profiles
+
+This procedure lists all *Tuned* profiles that are currently available on your system.
+
+//No prerequisites are needed
+////
+[discrete]
+== Prerequisites
+
+* The `tuned` service is running. See xref:installing-and-enabling-tuned_{context}[] for details.
+////
+
+[discrete]
+== Procedure
+
+* To list all available *Tuned* profiles on your system, use:
++
+[subs=+quotes,options=+nowrap]
+----
+$ tuned-adm list
+
+Available profiles:
+- balanced               - General non-specialized tuned profile
+- desktop                - Optimize for the desktop use-case
+- latency-performance    - Optimize for deterministic performance at the cost of increased power consumption
+- network-latency        - Optimize for deterministic performance at the cost of increased power consumption, focused on low latency network performance
+- network-throughput     - Optimize for streaming network throughput, generally only necessary on older CPUs or 40G+ networks
+- powersave              - Optimize for low power consumption
+- throughput-performance - Broadly applicable tuning that provides excellent performance across a variety of common server workloads
+- virtual-guest          - Optimize for running inside a virtual guest
+- virtual-host           - Optimize for running KVM guests
+Current active profile: [replaceable]_balanced_
+----
+
+* To display only the currently active profile, use:
++
+[subs=+quotes]
+----
+$ tuned-adm active
+
+Current active profile: [replaceable]_balanced_
+----
+
+[discrete]
+== Additional resources
+
+* The `tuned-adm(8)` man page.
+

@@ -1,0 +1,159 @@
+[id="available-tuned-plug-ins_{context}"]
+= Available Tuned plug-ins
+
+This section lists all monitoring and tuning plug-ins currently available in *Tuned*.
+
+[discrete]
+== Monitoring plug-ins
+
+Currently, the following monitoring plug-ins are implemented:
+
+`disk`::
+Gets disk load (number of IO operations) per device and measurement interval. 
+
+`net`::
+Gets network load (number of transferred packets) per network card and measurement interval. 
+
+`load`::
+Gets CPU load per CPU and measurement interval. 
+
+[discrete]
+== Tuning plug-ins
+
+Currently, the following tuning plug-ins are implemented. Only some of these plug-ins implement dynamic tuning. Options supported by plug-ins are also listed:
+
+`cpu`::
+Sets the CPU governor to the value specified by the [option]`governor` option and dynamically changes the Power Management Quality of Service (PM QoS) CPU Direct Memory Access (DMA) latency according to the CPU load.
++
+If the CPU load is lower than the value specified by the [option]`load_threshold` option, the latency is set to the value specified by the [option]`latency_high` option, otherwise it is set to the value specified by [option]`latency_low`.
++
+You can also force the latency to a specific value and prevent it from dynamically changing further. To do so, set the [option]`force_latency` option to the required latency value. 
+
+`eeepc_she`::
+Dynamically sets the front-side bus (FSB) speed according to the CPU load. 
++
+This feature can be found on some netbooks and is also known as the ASUS Super Hybrid Engine (SHE).
++
+If the CPU load is lower or equal to the value specified by the [option]`load_threshold_powersave` option, the plug-in sets the FSB speed to the value specified by the [option]`she_powersave` option. If the CPU load is higher or equal to the value specified by the [option]`load_threshold_normal` option, it sets the FSB speed to the value specified by the [option]`she_normal` option. 
++
+Static tuning is not supported and the plug-in is transparently disabled if *Tuned* does not detect the hardware support for this feature. 
+
+`net`::
+Configures the Wake-on-LAN functionality to the values specified by the [option]`wake_on_lan` option. It uses the same syntax as the `ethtool` utility. It also dynamically changes the interface speed according to the interface utilization. 
+
+`sysctl`::
+Sets various `sysctl` settings specified by the plug-in options.
++
+The syntax is ``[replaceable]__name__=[replaceable]__value__``, where [replaceable]_name_ is the same as the name provided by the `sysctl` utility.
++
+Use the `sysctl` plug-in if you need to change system settings that are not covered by other plug-ins available in *Tuned*. If the settings are covered by some specific plug-ins, prefer these plug-ins.
+
+`usb`::
+Sets autosuspend timeout of USB devices to the value specified by the [option]`autosuspend` parameter. 
++
+The value `0` means that autosuspend is disabled. 
+
+`vm`::
+Enables or disables transparent huge pages depending on the Boolean value of the [option]`transparent_hugepages` option.
+
+`audio`::
+Sets the autosuspend timeout for audio codecs to the value specified by the [option]`timeout` option.
++
+Currently, the `snd_hda_intel` and `snd_ac97_codec` codecs are supported. The value `0` means that the autosuspend is disabled. You can also enforce the controller reset by setting the Boolean option [option]`reset_controller` to `true`. 
+
+`disk`::
+Sets the disk elevator to the value specified by the [option]`elevator` option.
++
+It also sets:
++
+--
+* APM to the value specified by the [option]`apm` option
+* Scheduler quantum to the value specified by the [option]`scheduler_quantum` option
+* Disk spindown timeout to the value specified by the [option]`spindown` option
+* Disk readahead to the value specified by the [option]`readahead` parameter
+* The current disk readahead to a value multiplied by the constant specified by the [option]`readahead_multiply` option
+--
++
+In addition, this plug-in dynamically changes the advanced power management and spindown timeout setting for the drive according to the current drive utilization. The dynamic tuning can be controlled by the Boolean option [option]`dynamic` and is enabled by default. 
+
+`scsi_host`::
+Tunes options for SCSI hosts.
++
+It sets Aggressive Link Power Management (ALPM) to the value specified by the [option]`alpm` option.
+
+`mounts`::
+Enables or disables barriers for mounts according to the Boolean value of the [option]`disable_barriers` option. 
+
+`script`::
+Can be used for the execution of an external script that is run when the profile is loaded or unloaded.
++
+The script is called by one argument which can be `start` or `stop`, depending on whether the script is called during the profile load or unload. The script file name can be specified by the `script` parameter.
++
+You need to correctly implement the stop action in your script and revert all settings that you changed during the start action. Otherwise, the roll-back step after changing your *Tuned* profile will not work. 
++
+The `functions` Bash helper script is installed by default and enables you to import and use various functions defined in it. 
++
+Note that this plug-in is provided mainly for backwards compatibility, and it is recommended that you use it as the last resort and prefer other plug-ins if they cover the required settings. 
+
+`sysfs`::
+Sets various `sysfs` settings specified by the plug-in options.
++
+The syntax is ``[replaceable]__name__=[replaceable]__value__``, where [replaceable]_name_ is the `sysfs` path to use. 
++
+Use this plugin in case you need to change some settings that are not covered by other plug-ins. Prefer specific plug-ins if they cover the required settings.
+
+`video`::
+Sets various powersave levels on video cards. Currently, only the Radeon cards are supported.
++
+The powersave level can be specified by using the [option]`radeon_powersave` option. Supported values are: 
++
+--
+* `default`
+* `auto`
+* `low`
+* `mid`
+* `high`
+* `dynpm`
+* `dpm-battery`
+* `dpm-balanced`
+* `dpm-perfomance`
+--
++
+For details, see link:http://www.x.org/wiki/RadeonFeature#KMS_Power_Management_Options[www.x.org]. Note that this plug-in is experimental and the option might change in future releases. 
+
+`bootloader`::
+Adds options to the kernel command line. This plug-in supports only the GRUB 2 boot loader.
++
+Customized non-standard location of the GRUB 2 configuration file can be specified by the [option]`grub2_cfg_file` option.
++
+The kernel options are added to the current GRUB configuration and its templates. The system needs to be rebooted for the kernel options to take effect.
++
+Switching to another profile or manually stopping the `tuned` service removes the additional options. If you shut down or reboot the system, the kernel options persist in the [filename]`grub.cfg` file.
++
+The kernel options can be specified by the following syntax:
++
+[subs=+quotes]
+----
+cmdline=[replaceable]_arg1_ [replaceable]_arg2_ ... [replaceable]_argN_
+----
++
+--
+.Modifying the kernel command line
+====
+For example, to add the [option]`quiet` kernel option to a *Tuned* profile, include the following lines in the [filename]`tuned.conf` file:
+
+----
+[bootloader]
+cmdline=quiet
+----
+
+The following is an example of a custom profile that adds the [option]`isolcpus=2` option to the kernel command line:
+
+----
+[bootloader]
+cmdline=isolcpus=2
+----
+
+====
+--
+

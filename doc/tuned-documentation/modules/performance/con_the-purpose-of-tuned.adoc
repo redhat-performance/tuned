@@ -1,0 +1,23 @@
+[id="the-purpose-of-tuned_{context}"]
+= The purpose of Tuned
+
+*Tuned* is a service that monitors your system and optimizes the performance under certain workloads. The core of *Tuned* are _profiles_, which tune your system for different use cases.
+
+*Tuned* is distributed with a number of predefined profiles for use cases such as:
+
+* High throughput
+* Low latency
+* Saving power
+
+It is possible to modify the rules defined for each profile and customize how to tune a particular device. When you switch to another profile or deactivate *Tuned*, all changes made to the system settings by the previous profile revert back to their original state.
+
+You can also configure *Tuned* to react to changes in device usage and adjusts settings to improve performance of active devices and reduce power consumption of inactive devices.
+
+// The tuned tuning service can adapt the operating system to perform better under certain workloads by setting a tuning profile.
+
+// [discrete]
+// == Additional resources
+// 
+// * A bulleted list of links to other material closely related to the contents of the concept module.
+// * For more details on writing concept modules, see the link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].
+// * Use a consistent system for file names, IDs, and titles. For tips, see _Anchor Names and File Names_ in link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].

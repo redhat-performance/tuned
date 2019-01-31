@@ -1,0 +1,44 @@
+:parent-context-of-getting-started-with-tuned: {context}
+
+[id='getting-started-with-tuned_{context}']
+= Getting started with Tuned
+
+:context: getting-started-with-tuned
+
+As a system administrator, you can use the *Tuned* service to optimize the performance profile of your system for a variety of use cases.
+
+// [id='prerequisites-{context}']
+// == Prerequisites
+// 
+// * A bulleted list of conditions that must be satisfied before the user starts following this assembly.
+// * You can also link to other modules or assemblies the user must follow before starting this assembly.
+// * Delete the section title and bullets if the assembly has no prerequisites.
+
+
+include::modules/performance/con_the-purpose-of-tuned.adoc[leveloffset=+1]
+
+include::modules/performance/con_tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/ref_tuned-profiles-distributed-with-red-hat-enterprise-linux.adoc[leveloffset=+1]
+
+include::modules/performance/con_static-and-dynamic-tuning-in-tuned.adoc[leveloffset=+1]
+
+include::modules/performance/con_tuned-no-daemon-mode.adoc[leveloffset=+1]
+
+include::modules/performance/proc_installing-and-enabling-tuned.adoc[leveloffset=+1]
+
+include::modules/performance/proc_listing-available-tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/proc_setting-a-tuned-profile.adoc[leveloffset=+1]
+
+include::modules/performance/proc_disabling-tuned.adoc[leveloffset=+1]
+
+
+[id='related-information-{context}']
+== Related information
+
+* The `tuned(8)` man page 
+* The `tuned-adm(8)` man page
+* The *Tuned* project website: link:https://tuned-project.org/[]
+
+:context: {parent-context-of-getting-started-with-tuned}

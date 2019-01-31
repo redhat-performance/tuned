@@ -1,0 +1,18 @@
+= About this documentation
+
+This directory contains source files of Tuned documentation intended for system administrators.
+
+== Building the source
+
+The documentation is written in the *AsciiDoc* markup language. To build it, install the link:https://asciidoctor.org/[asciidoctor] utility and use it to convert the master file:
+
+----
+$ asciidoctor doc/tuned-documentation/master.adoc
+----
+
+This generates the `master.html` file, which you can open with your web browser.
+
+== Structure
+
+The `master.adoc` file is the main entry point for the documentation. It _includes_ (or, imports, loads) _assembly_ files from the `assemblies/` directory, which represent user stories. These assembly files then include _modules_ located in `modules/performance/`. Modules are reusable sections of content representing a concept, a procedure, or a reference.
+

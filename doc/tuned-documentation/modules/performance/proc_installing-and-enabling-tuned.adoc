@@ -1,0 +1,56 @@
+[id="installing-and-enabling-tuned_{context}"]
+= Installing and enabling Tuned
+
+This procedure installs and enables the *Tuned* service, installs *Tuned* profiles, and presets a default *Tuned* profile for your system.
+
+// [discrete]
+// == Prerequisites
+// 
+// * A bulleted list of conditions that must be satisfied before the user starts following this assembly.
+// * You can also link to other modules or assemblies the user must follow before starting this assembly.
+// * Delete the section title and bullets if the assembly has no prerequisites.
+
+[discrete]
+== Procedure
+
+. Install the [package]`tuned` package:
++
+----
+# yum install tuned
+----
+
+. Enable and start the `tuned` service:
++
+----
+# systemctl enable --now tuned
+----
+
+. Optionally, install *Tuned* profiles for real-time systems or for {RHEL} Atomic Host:
++
+----
+# yum install tuned-profiles-realtime tuned-profiles-nfv \
+              tuned-profiles-atomic
+----
+
+. Verify that a *Tuned* profile is active and applied:
++
+[subs=+quotes]
+----
+$ tuned-adm active
+
+Current active profile: [replaceable]_balanced_
+----
++
+----
+$ tuned-adm verify
+
+Verfication succeeded, current system settings match the preset profile.
+See tuned log file ('/var/log/tuned/tuned.log') for details.
+----
+
+
+// [discrete]
+// == Additional resources
+// 
+// * The `tuned-adm(8)` man page.
+

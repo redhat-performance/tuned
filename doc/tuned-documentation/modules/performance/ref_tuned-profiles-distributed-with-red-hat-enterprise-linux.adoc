@@ -1,0 +1,104 @@
+[id="tuned-profiles-distributed-with-red-hat-enterprise-linux_{context}"]
+= Tuned profiles distributed with Red Hat Enterprise Linux
+
+The following is a list of profiles that are installed with *Tuned* on {RHEL}:
+
+NOTE: There might be more product-specific or third-party *Tuned* profiles available. Such profiles are usually provided by separate RPM packages.
+
+
+`balanced`::
+The default power-saving profile. It is intended to be a compromise between performance and power consumption. It uses auto-scaling and auto-tuning whenever possible. The only drawback is the increased latency. In the current *Tuned* release, it enables the CPU, disk, audio, and video plugins, and activates the `conservative` CPU governor. The `radeon_powersave` option uses the `dpm-balanced` value if it is supported, otherwise it is set to `auto`. 
+
+`powersave`::
+A profile for maximum power saving performance. It can throttle the performance in order to minimize the actual power consumption. In the current *Tuned* release it enables USB autosuspend, WiFi power saving, and Aggressive Link Power Management (ALPM) power savings for SATA host adapters. It also schedules multi-core power savings for systems with a low wakeup rate and activates the `ondemand` governor. It enables AC97 audio power saving or, depending on your system, HDA-Intel power savings with a 10 seconds timeout. If your system contains a supported Radeon graphics card with enabled KMS, the profile configures it to automatic power saving. On ASUS Eee PCs, a dynamic Super Hybrid Engine is enabled.
++
+[NOTE]
+--
+In certain cases, the `balanced` profile is more efficient compared to the `powersave` profile.
+
+Consider there is a defined amount of work that needs to be done, for example a video file that needs to be transcoded. Your machine might consume less energy if the transcoding is done on the full power, because the task is finished quickly, the machine starts to idle, and it can automatically step-down to very efficient power save modes. On the other hand, if you transcode the file with a throttled machine, the machine consumes less power during the transcoding, but the process takes longer and the overall consumed energy can be higher.
+
+That is why the `balanced` profile can be generally a better option. 
+--
+
+`throughput-performance`::
+A server profile optimized for high throughput. It disables power savings mechanisms and enables `sysctl` settings that improve the throughput performance of the disk and network IO. CPU governor is set to `performance`. 
+
+`latency-performance`::
+A server profile optimized for low latency. It disables power savings mechanisms and enables `sysctl` settings that improve latency. CPU governor is set to `performance` and the CPU is locked to the low C states (by PM QoS). 
+
+`network-latency`::
+A profile for low latency network tuning. It is based on the `latency-performance` profile. It additionally disables transparent huge pages and NUMA balancing, and tunes several other network-related `sysctl` parameters. 
+
+`network-throughput`::
+A profile for throughput network tuning. It is based on the `throughput-performance` profile. It additionally increases kernel network buffers. 
+
+`virtual-guest`::
+A profile designed for virtual guests based on the `throughput-performance` profile that, among other tasks, decreases virtual memory swappiness and increases disk readahead values. It does not disable disk barriers. 
+
+`virtual-host`::
+A profile designed for virtual hosts based on the `throughput-performance` profile that, among other tasks, decreases virtual memory swappiness, increases disk readahead values, and enables a more aggressive value of dirty pages writeback.
+
+`oracle`::
+A profile optimized for Oracle databases loads based on `throughput-performance` profile. It additionally disables transparent huge pages and modifies other performance-related kernel parameters. This profile is provided by the [package]`tuned-profiles-oracle` package.
+
+`desktop`::
+A profile optimized for desktops, based on the `balanced` profile. It additionally enables scheduler autogroups for better response of interactive applications. 
+
+// The below section is commented out for the reason: the package is about to be dropped https://docs.google.com/document/d/1sC0aqHdvNj1sCPMJjWQKTxmfZ_CFDxAZZCTcoiJ5kGg/edit?disco=uiAAAACO8spDQ
+////
+[discrete]
+== Compat profiles
+
+// Additional predefined profiles can be installed with the [package]`tuned-profiles-compat` package available in the Optional channel. These profiles are intended for backward compatibility and are no longer developed.
+Additional predefined profiles can be installed with the [package]`tuned-profiles-compat` package. These profiles are intended for backward compatibility and are no longer developed.
+
+The generalized profiles from the base package mostly perform the same or better. If you do not have a specific reason for using them, please prefer the above mentioned profiles from the base package.
+
+The compat profiles are following:
+
+`default`::
+This has the lowest impact on power saving of the available profiles and only enables CPU and disk plugins of *Tuned*. 
+
+`desktop-powersave`::
+A power-saving profile directed at desktop systems. Enables ALPM power saving for SATA host adapters as well as the CPU, Ethernet, and disk plug-ins of *Tuned*. 
+
+`laptop-ac-powersave`::
+A medium-impact power-saving profile directed at laptops running on AC. Enables ALPM power saving for SATA host adapters, Wi-Fi power saving, as well as the CPU, Ethernet, and disk plug-ins of *Tuned*. 
+
+`laptop-battery-powersave`::
+A high-impact power-saving profile directed at laptops running on battery. In the current *Tuned* implementation, it is an alias for the `powersave` profile. 
+
+`spindown-disk`::
+A power-saving profile for machines with classic HDDs to minimize the spindown timeout. It enables USB autosuspend, disables Bluetooth, enables Wi-Fi power saving, disables logs syncing, increases disk write-back time, and lowers disk swappiness. All partitions are remounted with the `noatime` option. 
+
+`enterprise-storage`::
+A server profile directed at enterprise-class storage, maximizing I/O throughput. It activates the same settings as the `throughput-performance` profile, multiplies readahead settings, and disables barriers on non-root and non-boot partitions. 
+////
+
+[discrete]
+== Profiles for {RHEL} Atomic Host
+
+Profiles optimized for {RHEL} Atomic Host are provided by the [package]`tuned-profiles-atomic` package. The *Tuned* profiles for {RHEL} Atomic Host are:
+
+`atomic-host`::
+A profile optimized for {RHEL} Atomic Host, when used as a host system on a bare-metal server, based on the `throughput-performance` profile. It additionally increases SELinux AVC cache, PID limit, and tunes `netfilter` connections tracking. 
+
+`atomic-guest`::
+A profile optimized for {RHEL} Atomic Host, when used as a guest system based on the `virtual-guest` profile. It additionally increases SELinux AVC cache, PID limit, and tunes `netfilter` connections tracking. 
+
+Use the `atomic-host` profile on physical machines, and the `atomic-guest` profile on virtual machines.
+
+[discrete]
+== Real-time profiles
+
+// TODO: What are these? Profiles for real-time-enabled systems? Profiles that make your system real-time?
+
+The following real-time profiles are available:
+
+`realtime`::
+Available from the [package]`tuned-profiles-realtime` package.
+
+`realtime-virtual-host` and `realtime-virtual-guest`::
+Available from the [package]`tuned-profiles-nfv` package.
+

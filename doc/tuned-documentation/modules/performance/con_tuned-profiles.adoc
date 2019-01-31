@@ -1,0 +1,73 @@
+[id="tuned-profiles_{context}"]
+= Tuned profiles
+
+A detailed analysis of a system can be very time-consuming. *Tuned* provides a number of predefined profiles for typical use cases. You can also create, modify, and delete profiles.
+
+The profiles provided with *Tuned* are divided into the following categories:
+
+* Power-saving profiles
+* Performance-boosting profiles
+
+The performance-boosting profiles include profiles that focus on the following aspects:
+
+* Low latency for storage and network
+* High throughput for storage and network
+* Virtual machine performance
+* Virtualization host performance
+
+[discrete]
+== The default profile
+
+During the installation, the best profile for your system is selected automatically. Currently, the default profile is selected according to the following customizable rules:
+
+[options="header",cols="2,2,3"]
+|===
+| Environment | Default profile | Goal
+| Compute nodes | `throughput-performance` | The best throughput performance
+| Virtual machines | `virtual-guest` | The best performance. If you are not interested in the best performance, you can change it to the `balanced` or `powersave` profile.
+| Other cases | `balanced` | Balanced performance and power consumption
+|===
+
+
+[discrete]
+== Merged profiles
+
+As an experimental feature, it is possible to select more profiles at once. *Tuned* will try to merge them during the load.
+
+If there are conflicts, the settings from the last specified profile takes precedence.
+
+.Low power consumption in a virtual guest
+====
+The following example optimizes the system to run in a virtual machine for the best performance and concurrently tunes it for low power consumption, while the low power consumption is the priority:
+
+----
+# tuned-adm profile virtual-guest powersave
+----
+====
+
+WARNING: Merging is done automatically without checking whether the resulting combination of parameters makes sense. Consequently, the feature might tune some parameters the opposite way, which might be counterproductive: for example, setting the disk for high throughput by using the `throughput-performance` profile and concurrently setting the disk spindown to the low value by the `spindown-disk` profile.
+
+[discrete]
+== The location of profiles
+
+*Tuned* stores profiles in the following directories:
+
+[filename]`/usr/lib/tuned/`::
+Distribution-specific profiles are stored in the  directory. Each profile has its own directory. The profile consists of the main configuration file called `tuned.conf`, and optionally other files, for example helper scripts.
+
+[filename]`/etc/tuned/`::
+If you need to customize a profile, copy the profile directory into the  directory, which is used for custom profiles. If there are two profiles of the same name, the custom profile located in [filename]`/etc/tuned/` is used.
+
+
+[discrete]
+== The syntax of profile configuration
+
+The `tuned.conf` file can contain one `[main]` section and other sections for configuring plug-in instances. However, all sections are optional.
+
+Lines starting with the hash sign (`#`) are comments.
+
+[discrete]
+== Additional resources
+
+* The `tuned.conf(5)` man page.
+
