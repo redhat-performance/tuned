@@ -74,6 +74,10 @@ You can also join #fedora-power IRC channel on Freenode.
 Web page:
 https://tuned-project.org/
 
+Contributing
+------------
+See the file CONTRIBUTING.md for guidelines for contributing.
+
 License
 -------
 
@@ -94,6 +98,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 Full text of the license is enclosed in COPYING file.
+
+The Developer Certificate of Origin, distributed in the file 'DCO' is licensed
+differently, see the file for the text of the license.
 
 
 The icon:
