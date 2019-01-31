@@ -97,7 +97,7 @@ class Admin(object):
 			else:
 				print("- %s" % profile[0])
 
-	def _action_dbus_list(self):
+	def _action_dbus_list_profiles(self):
 		try:
 			profile_names = self._controller.profiles2()
 		except TunedAdminDBusException as e:
@@ -107,7 +107,7 @@ class Admin(object):
 		self._action_dbus_active()
 		return self._controller.exit(True)
 
-	def _action_list(self):
+	def _action_list_profiles(self):
 		self._print_profiles(self._profiles_locator.get_known_names_summary())
 		self._action_active()
 		return True
@@ -347,5 +347,28 @@ class Admin(object):
 		return self._controller.exit(ret)
 
 	def _action_off(self):
+		print("Not supported in no_daemon mode.")
+		return False
+
+	def _action_dbus_list_plugins(self, verbouse=False):
+		"""Print accessible plugins
+
+		Keyword arguments:
+		verbouse -- if is set to True then parameters and hints are printed
+		"""
+		plugins = self._controller.get_plugins()
+		for plugin in plugins.keys():
+			print(plugin)
+			if not verbouse or len(plugins[plugin]) == 0:
+				continue
+			hints = self._controller.get_plugin_hints(plugin)
+			for parameter in plugins[plugin]:
+				print("\t%s" %(parameter))
+				hint = hints.get(parameter, None)
+				if hint:
+					print("\t\t%s" %(hint))
+		return self._controller.exit(True)
+
+	def _action_list_plugins(self, verbouse=False):
 		print("Not supported in no_daemon mode.")
 		return False

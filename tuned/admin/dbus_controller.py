@@ -137,6 +137,29 @@ class DBusController(object):
 	def off(self):
 		return self._call("disable")
 
+	def get_plugins(self):
+		"""Return dict with plugin names and their hints
+
+		Return:
+		dictionary -- {plugin_name: {parameter_name: default_value}}
+		"""
+		return self._call("get_all_plugins")
+
+	def get_plugin_documentation(self, plugin_name):
+		"""Return docstring of plugin's class"""
+		return self._call("get_plugin_documentation", plugin_name)
+
+	def get_plugin_hints(self, plugin_name):
+		"""Return dictionary with parameters of plugin and their hints
+
+		Parameters:
+		plugin_name -- name of plugin
+
+		Return:
+		dictionary -- {parameter_name: hint}
+		"""
+		return self._call("get_plugin_hints", plugin_name)
+
 	def exit(self, ret):
 		self.set_action(None)
 		self._ret = ret

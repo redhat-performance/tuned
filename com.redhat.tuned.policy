@@ -176,4 +176,34 @@
       <allow_active>yes</allow_active>
     </defaults>
   </action>
+
+  <action id="com.redhat.tuned.get_all_plugins">
+    <description>Get plugins which Tuned daemon can acces</description>
+    <message>Authentication is required to get Tuned plugins</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="com.redhat.tuned.get_plugin_documentation">
+    <description>Get documentation of tuned plugin</description>
+    <message>Authentication is required to get documentation of tuned plugin</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="com.redhat.tuned.get_plugin_hints">
+    <description>Get hints for parameters of Tuned plugin</description>
+    <message>Authentication is required to get hints for parameters of Tuned plugin</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
 </policyconfig>

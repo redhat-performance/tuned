@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.16.1 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkAboutDialog" id="aboutdialog1">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
     <property name="program_name">Tuned Manager</property>
+    <property name="logo_icon_name">image-missing</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="aboutdialog-vbox1">
         <property name="can_focus">False</property>
@@ -29,11 +33,12 @@
       </object>
     </child>
   </object>
-  <object class="GtkAction" id="addCustomPluginValue"/>
-  <object class="GtkAction" id="addPluginValue"/>
   <object class="GtkDialog" id="changeValueDialog">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox4">
         <property name="can_focus">False</property>
@@ -129,141 +134,12 @@
       <action-widget response="-1">buttonCancel1</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkAction" id="deletePluginValue"/>
-  <object class="GtkMenu" id="menuAddPluginValue">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkMenuItem" id="AddPluginValueMenuItem">
-        <property name="related_action">addPluginValue</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Add Value</property>
-        <property name="use_underline">True</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="AddCustomPluginValueItem">
-        <property name="related_action">addCustomPluginValue</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Add Custom Value</property>
-        <property name="use_underline">True</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="menuitem4">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="DeleteValueMenuItem">
-        <property name="related_action">deletePluginValue</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Delete Value</property>
-        <property name="use_underline">True</property>
-      </object>
-    </child>
-  </object>
-  <object class="GtkDialog" id="dialogAddCustomPluginValue">
-    <property name="can_focus">False</property>
-    <property name="type_hint">dialog</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox8">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area8">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="button3">
-                <property name="label">gtk-add</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="xalign">0.40999999642372131</property>
-                <property name="yalign">0.60000002384185791</property>
-                <property name="image_position">bottom</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button4">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox" id="box13">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkLabel" id="Choose plugin value to add:1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Choose plugin value to add:</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry2">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="placeholder_text" translatable="yes">Value ...</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="1">button3</action-widget>
-      <action-widget response="-1">button4</action-widget>
-    </action-widgets>
-  </object>
   <object class="GtkDialog" id="dialogAddPlugin">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox2">
         <property name="can_focus">False</property>
@@ -354,45 +230,44 @@
       <action-widget response="-1">buttonCloseAddPlugin</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkDialog" id="dialogAddPluginValue">
+  <object class="GtkDialog" id="dialogYesNo">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox5">
+      <object class="GtkBox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area5">
+          <object class="GtkButtonBox">
             <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
+            <property name="margin_left">66</property>
+            <property name="layout_style">spread</property>
             <child>
-              <object class="GtkButton" id="button1">
-                <property name="label">gtk-add</property>
+              <object class="GtkButton" id="buttonPositiveYesNoDialog">
+                <property name="label" translatable="yes">Yes</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="xalign">0.40999999642372131</property>
-                <property name="yalign">0.60000002384185791</property>
-                <property name="image_position">bottom</property>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button2">
-                <property name="label">gtk-cancel</property>
+              <object class="GtkButton" id="buttonNegativeYesNoDialog">
+                <property name="label" translatable="yes">No</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
@@ -400,39 +275,15 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack_type">end</property>
+            <property name="fill">False</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="box12">
+          <object class="GtkLabel" id="labelQuestionYesNoDialog">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkLabel" id="Choose plugin value to add:">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Choose plugin value to add:</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBoxText" id="comboboxPluginsValues">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
+            <property name="label" translatable="yes">label</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -443,13 +294,17 @@
       </object>
     </child>
     <action-widgets>
-      <action-widget response="1">button1</action-widget>
-      <action-widget response="-1">button2</action-widget>
+      <action-widget response="1">buttonPositiveYesNoDialog</action-widget>
+      <action-widget response="0">buttonNegativeYesNoDialog</action-widget>
     </action-widgets>
   </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Tuned Manager</property>
+    <signal name="destroy" handler="gtk_main_quit" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox" id="box1">
         <property name="visible">True</property>
@@ -476,6 +331,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="gtk_main_quit" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -499,6 +355,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="execute_about" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -541,16 +398,14 @@
                             <property name="can_focus">False</property>
                             <property name="halign">end</property>
                             <property name="hexpand">True</property>
-                            <property name="xalign">0</property>
                             <property name="label" translatable="yes">Tuned On Startup</property>
                             <property name="ellipsize">end</property>
                             <property name="angle">0.029999999999999999</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
                             <property name="top_attach">1</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -562,12 +417,12 @@
                             <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
                             <property name="hexpand">True</property>
+                            <property name="active">True</property>
+                            <signal name="notify::active" handler="execute_switch_tuned" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">0</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -579,12 +434,11 @@
                             <property name="margin_top">5</property>
                             <property name="margin_bottom">5</property>
                             <property name="hexpand">True</property>
+                            <signal name="notify::active" handler="execute_switch_tuned" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">1</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -594,15 +448,13 @@
                             <property name="can_focus">False</property>
                             <property name="halign">end</property>
                             <property name="hexpand">True</property>
-                            <property name="xalign">0</property>
                             <property name="label" translatable="yes">Start Tuned Daemon</property>
                             <property name="ellipsize">end</property>
+                            <property name="xalign">0</property>
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
                             <property name="top_attach">0</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -617,8 +469,6 @@
                           <packing>
                             <property name="left_attach">0</property>
                             <property name="top_attach">2</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -628,12 +478,11 @@
                             <property name="halign">start</property>
                             <property name="valign">center</property>
                             <property name="hexpand">True</property>
+                            <signal name="notify::active" handler="execute_switch_tuned_admin_functions" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">2</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                       </object>
@@ -671,8 +520,6 @@
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">0</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -686,8 +533,6 @@
                           <packing>
                             <property name="left_attach">0</property>
                             <property name="top_attach">0</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -700,8 +545,6 @@
                           <packing>
                             <property name="left_attach">0</property>
                             <property name="top_attach">1</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -714,8 +557,6 @@
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">1</property>
-                            <property name="width">1</property>
-                            <property name="height">1</property>
                           </packing>
                         </child>
                       </object>
@@ -816,29 +657,27 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="margin_right">120</property>
+                        <signal name="clicked" handler="execute_create_profile" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">0</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="buttonUpadteSelectedProfile">
-                        <property name="label" translatable="yes">Update</property>
+                        <property name="label" translatable="yes">Edit</property>
                         <property name="width_request">200</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="margin_right">10</property>
                         <property name="resize_mode">queue</property>
+                        <signal name="clicked" handler="execute_update_profile" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">0</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -851,12 +690,11 @@
                         <property name="halign">center</property>
                         <property name="valign">center</property>
                         <property name="image_position">right</property>
+                        <signal name="clicked" handler="execute_remove_profile" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
                         <property name="top_attach">0</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                   </object>
@@ -918,6 +756,7 @@
                   <object class="GtkComboBoxText" id="comboboxMainPlugins">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <signal name="changed" handler="on_changed_combobox_plugins" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -945,10 +784,19 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkTextView" id="textviewPluginAvaibleText">
-                        <property name="height_request">100</property>
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="shadow_type">in</property>
+                        <property name="min_content_height">200</property>
+                        <child>
+                          <object class="GtkTextView" id="textviewPluginAvaibleText">
+                            <property name="height_request">100</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="editable">False</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -971,10 +819,19 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkTextView" id="textviewPluginDocumentationText">
-                        <property name="height_request">250</property>
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="shadow_type">in</property>
+                        <property name="min_content_height">200</property>
+                        <child>
+                          <object class="GtkTextView" id="textviewPluginDocumentationText">
+                            <property name="height_request">250</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="editable">False</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1044,8 +901,6 @@
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1063,8 +918,6 @@
               <packing>
                 <property name="left_attach">3</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1082,8 +935,6 @@
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1101,8 +952,6 @@
               <packing>
                 <property name="left_attach">4</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1119,8 +968,6 @@
               <packing>
                 <property name="left_attach">6</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1137,8 +984,6 @@
               <packing>
                 <property name="left_attach">7</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1150,8 +995,6 @@
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1163,8 +1006,6 @@
               <packing>
                 <property name="left_attach">5</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
           </object>
@@ -1198,12 +1039,11 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="execute_change_profile" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1215,8 +1055,6 @@
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1230,15 +1068,12 @@
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkSpinner" id="spinnerFastChangeProfile">
                 <property name="width_request">20</property>
                 <property name="height_request">20</property>
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
                 <property name="margin_right">5</property>
@@ -1248,8 +1083,6 @@
               <packing>
                 <property name="left_attach">3</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
           </object>
@@ -1333,6 +1166,7 @@
     <property name="visible">True</property>
     <property name="can_focus">True</property>
     <property name="model">treestoreActualPlugins</property>
+    <signal name="row-activated" handler="on_treeview_click" swapped="no"/>
     <child internal-child="selection">
       <object class="GtkTreeSelection" id="treeview-selection2"/>
     </child>
@@ -1341,6 +1175,9 @@
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="type_hint">dialog</property>
+    <child>
+      <placeholder/>
+    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox1">
         <property name="can_focus">False</property>
@@ -1369,6 +1206,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="HideTunedDaemonExceptionDialog" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1408,6 +1246,10 @@
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Profile Editor</property>
     <property name="destroy_with_parent">True</property>
+    <signal name="delete-event" handler="on_delete_event" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkGrid" id="grid4">
         <property name="visible">True</property>
@@ -1424,8 +1266,6 @@
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">0</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
           </packing>
         </child>
         <child>
@@ -1448,6 +1288,7 @@
                     <property name="margin_right">20</property>
                     <property name="margin_top">12</property>
                     <property name="margin_bottom">13</property>
+                    <signal name="clicked" handler="execute_add_plugin_to_notebook" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1464,6 +1305,7 @@
                     <property name="receives_default">True</property>
                     <property name="margin_left">20</property>
                     <property name="margin_right">20</property>
+                    <signal name="clicked" handler="execute_remove_plugin_from_notebook" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1501,6 +1343,7 @@
                         <property name="halign">center</property>
                         <property name="margin_top">10</property>
                         <property name="margin_bottom">10</property>
+                        <signal name="clicked" handler="execute_open_raw_button" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1537,6 +1380,7 @@
                     <property name="margin_right">20</property>
                     <property name="margin_top">20</property>
                     <property name="margin_bottom">20</property>
+                    <signal name="clicked" handler="on_click_button_confirm_profile_create" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1554,6 +1398,7 @@
                     <property name="margin_right">20</property>
                     <property name="margin_top">20</property>
                     <property name="margin_bottom">20</property>
+                    <signal name="clicked" handler="on_click_button_confirm_profile_update" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1572,6 +1417,7 @@
                     <property name="margin_right">20</property>
                     <property name="margin_bottom">20</property>
                     <property name="use_stock">True</property>
+                    <signal name="clicked" handler="execute_cancel_window_profile_editor" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1583,8 +1429,6 @@
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1617,16 +1461,12 @@
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">4</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
           </packing>
         </child>
         <child>
@@ -1639,8 +1479,6 @@
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">1</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
           </packing>
         </child>
         <child>
@@ -1657,8 +1495,6 @@
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1670,8 +1506,6 @@
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1685,8 +1519,6 @@
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1704,16 +1536,12 @@
               <packing>
                 <property name="left_attach">3</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">2</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
           </packing>
         </child>
         <child>
@@ -1726,8 +1554,6 @@
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">3</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
           </packing>
         </child>
       </object>
@@ -1735,6 +1561,10 @@
   </object>
   <object class="GtkWindow" id="windowProfileEditorRaw">
     <property name="can_focus">False</property>
+    <signal name="delete-event" handler="on_delete_event" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox" id="box8">
         <property name="visible">True</property>
@@ -1792,12 +1622,11 @@
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="execute_apply_window_profile_editor_raw" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -1811,12 +1640,11 @@
                 <property name="margin_top">10</property>
                 <property name="margin_bottom">10</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="execute_cancel_window_profile_editor_raw" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
               </packing>
             </child>
           </object>

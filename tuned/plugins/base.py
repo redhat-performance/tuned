@@ -58,6 +58,11 @@ class Plugin(object):
 		return {}
 
 	@classmethod
+	def get_config_options_hints(cls):
+		"""Explanation of each config option function"""
+		return {}
+
+	@classmethod
 	def _get_config_options_used_by_dynamic(self):
 		"""List of config options used by dynamic tuning. Their previous values will be automatically saved and restored."""
 		return []

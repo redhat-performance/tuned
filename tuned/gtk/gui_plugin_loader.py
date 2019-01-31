@@ -24,22 +24,16 @@ Created on Mar 30, 2014
 @author: mstana
 '''
 
-import os
+import importlib
 from validate import Validator
 
-import tuned.plugins.base
 import tuned.consts as consts
 import tuned.logs
-import tuned.plugins.repository as repository
+
 import configobj as ConfigObj
 from tuned.exceptions import TunedException
 
-from tuned import plugins
-from tuned.utils.plugin_loader import PluginLoader
-from tuned import storage, units, monitors, plugins, profiles, exports, \
-    hardware
-
-import tuned.plugins as Plugins
+from tuned.admin.dbus_controller import DBusController
 
 __all__ = ['GuiPluginLoader']
 
@@ -51,7 +45,7 @@ global_config_spec = ['dynamic_tuning = boolean(default=%s)'
                       % consts.CFG_DEF_UPDATE_INTERVAL]
 
 
-class GuiPluginLoader(PluginLoader):
+class GuiPluginLoader():
 
     '''
     Class for scan, import and load actual avaible plugins.
@@ -62,76 +56,27 @@ class GuiPluginLoader(PluginLoader):
         Constructor
         '''
 
-        self._plugins = set()
+        self._plugins = {}
         self.plugins_doc = {}
-
-        storage_provider = storage.PickleProvider()
-        storage_factory = storage.Factory(storage_provider)
-        monitors_repository = monitors.Repository()
-        hardware_inventory = hardware.Inventory()
-        device_matcher = hardware.DeviceMatcher()
-        device_matcher_udev = hardware.DeviceMatcherUdev()
-        plugin_instance_factory = plugins.instance.Factory()
-
-        self.repo = repository.Repository(
-            monitors_repository,
-            storage_factory,
-            hardware_inventory,
-            device_matcher,
-            device_matcher_udev,
-            plugin_instance_factory,
-            None,
-            None
+        self._prefix = 'plugin_'
+        self._sufix = '.py'
+        self._dbus_controller = DBusController(consts.DBUS_BUS,
+			consts.DBUS_INTERFACE, consts.DBUS_OBJECT
             )
-        self._set_loader_parameters(),
-        self.create_all(self._import_plugin_names())
+        self._get_plugins()
 
     @property
     def plugins(self):
-        return self.repo.plugins
+        return self._plugins
 
-    def _set_loader_parameters(self):
-        '''
-        Sets private atributes.
-        '''
+    def _get_plugins(self):
+        self._plugins = self._dbus_controller.get_plugins()
 
-        self._namespace = 'tuned.plugins'
-        self._prefix = 'plugin_'
-        self._sufix = '.py'
-        self._interface = tuned.plugins.base.Plugin
+    def get_plugin_doc(self, plugin_name):
+        return self._dbus_controller.get_plugin_documentation(plugin_name)
 
-    def _import_plugin_names(self):
-        '''
-        Scan directories and find names to load
-        '''
-
-        names = []
-        for name in os.listdir(Plugins.__path__[0]):
-            file = name.split(self._prefix).pop()
-            if file.endswith(self._sufix):
-                (file_name, file_extension) = os.path.splitext(file)
-                names.append(file_name)
-        return names
-
-    def create_all(self, names):
-        for plugin_name in names:
-            try:
-                self._plugins.add(self.repo.create(plugin_name))
-            except ImportError:
-                pass
-            except tuned.plugins.exceptions.NotSupportedPluginException:
-
-#                 problem with importing of plugin
-#                 print(str(ImportError) + plugin_name)
-
-                pass
-
-#                 print(plugin_name + " is not supported!")
-
-    def get_plugin(self, plugin_name):
-        for plugin in self.plugins:
-            if plugin_name == plugin.name:
-                return plugin
+    def get_plugin_hints(self, plugin_name):
+        return self._dbus_controller.get_plugin_hints(plugin_name)
 
     def _load_global_config(self, file_name=consts.GLOBAL_CONFIG_FILE):
         """

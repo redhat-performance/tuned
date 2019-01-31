@@ -30,6 +30,10 @@ class Manager(object):
 	def instances(self):
 		return self._instances
 
+	@property
+	def plugins_repository(self):
+		return self._plugins_repository
+
 	def create(self, instances_config):
 		instance_info_list = []
 		for instance_name, instance_info in list(instances_config.items()):

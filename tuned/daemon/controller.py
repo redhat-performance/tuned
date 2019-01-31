@@ -5,6 +5,7 @@ from tuned.exceptions import TunedException
 import threading
 import tuned.consts as consts
 from tuned.utils.commands import commands
+from tuned.utils.profile_recommender import ProfileRecommender
 
 __all__ = ["Controller"]
 
@@ -243,7 +244,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def recommend_profile(self, caller = None):
 		if caller == "":
 			return ""
-		return self._cmd.recommend_profile(hardcoded = not self._global_config.get_bool(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND))
+		return ProfileRecommender().recommend(hardcoded = not self._global_config.get_bool(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND))
 
 	@exports.export("", "b")
 	def verify_profile(self, caller = None):
@@ -256,3 +257,42 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if caller == "":
 			return False
 		return self._daemon.verify_profile(ignore_missing = True)
+
+	@exports.export("", "a{sa{ss}}")
+	def get_all_plugins(self, caller = None):
+		"""Return dictionary with accesible plugins
+
+		Return:
+		dictionary -- {plugin_name: {parameter_name: default_value}}
+		"""
+		if caller == "":
+			return False
+		plugins = {}
+		for plugin_class in self._daemon.get_all_plugins():
+			plugin_name = plugin_class.__module__.split(".")[-1].split("_", 1)[1]
+			conf_options = plugin_class._get_config_options()
+			plugins[plugin_name] = {}
+			for key, val in conf_options.items():
+				plugins[plugin_name][key] = str(val)
+		return plugins
+
+	@exports.export("s","s")
+	def get_plugin_documentation(self, plugin_name, caller = None):
+		"""Return docstring of plugin's class"""
+		if caller == "":
+			return False
+		return self._daemon.get_plugin_documentation(str(plugin_name))
+
+	@exports.export("s","a{ss}")
+	def get_plugin_hints(self, plugin_name, caller = None):
+		"""Return dictionary with plugin's parameters and their hints
+
+		Parameters:
+		plugin_name -- name of plugin
+
+		Return:
+		dictionary -- {parameter_name: hint}
+		"""
+		if caller == "":
+			return False
+		return self._daemon.get_plugin_hints(str(plugin_name))
