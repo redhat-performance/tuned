@@ -28,7 +28,7 @@ class SysctlPlugin(base.Plugin):
 		instance._sysctl_original = self._storage.get(storage_key, {})
 		if len(instance._sysctl_original) > 0:
 			log.info("recovering old sysctl settings from previous run")
-			self._instance_unapply_static(instance, self._copy_instance_devices(instance))
+			self._instance_unapply_static(instance)
 			instance._sysctl_original = {}
 			self._storage.unset(storage_key)
 
@@ -38,7 +38,7 @@ class SysctlPlugin(base.Plugin):
 		storage_key = self._storage_key(instance.name)
 		self._storage.unset(storage_key)
 
-	def _instance_apply_static(self, instance, devices):
+	def _instance_apply_static(self, instance):
 		for option, value in list(instance._sysctl.items()):
 			original_value = self._read_sysctl(option)
 			if original_value != None:
@@ -52,7 +52,7 @@ class SysctlPlugin(base.Plugin):
 			log.info("reapplying system sysctl")
 			self._cmd.execute(["sysctl", "--system"])
 
-	def _instance_verify_static(self, instance, ignore_missing, devices):
+	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
 		# override, so always skip missing
 		ignore_missing = True
@@ -64,7 +64,7 @@ class SysctlPlugin(base.Plugin):
 					ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, devices, full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = False):
 		for option, value in list(instance._sysctl_original.items()):
 			self._write_sysctl(option, value)
 

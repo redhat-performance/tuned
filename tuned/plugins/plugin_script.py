@@ -53,13 +53,13 @@ class ScriptPlugin(base.Plugin):
 				return False
 		return True
 
-	def _instance_apply_static(self, instance, devices):
-		super(ScriptPlugin, self)._instance_apply_static(instance, devices)
+	def _instance_apply_static(self, instance):
+		super(ScriptPlugin, self)._instance_apply_static(instance)
 		self._call_scripts(instance._scripts, ["start"])
 
-	def _instance_verify_static(self, instance, ignore_missing, devices):
+	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
-		if super(ScriptPlugin, self)._instance_verify_static(instance, ignore_missing, devices) == False:
+		if super(ScriptPlugin, self)._instance_verify_static(instance, ignore_missing) == False:
 			ret = False
 		args = ["verify"]
 		if ignore_missing:
@@ -71,9 +71,9 @@ class ScriptPlugin(base.Plugin):
 			ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, devices,full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = False):
 		args = ["stop"]
 		if full_rollback:
 			args = args + ["full_rollback"]
 		self._call_scripts(reversed(instance._scripts), args)
-		super(ScriptPlugin, self)._instance_unapply_static(instance, devices, full_rollback)
+		super(ScriptPlugin, self)._instance_unapply_static(instance, full_rollback)

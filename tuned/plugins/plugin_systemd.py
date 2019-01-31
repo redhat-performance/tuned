@@ -95,7 +95,7 @@ class SystemdPlugin(base.Plugin):
 				conf = self._add_keyval(conf, consts.SYSTEMD_CPUAFFINITY_VAR, cpu_affinity_saved)
 			self._write_systemd_system_conf(conf)
 
-	def _instance_unapply_static(self, instance, devices, full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = False):
 		if full_rollback:
 			log.info("removing '%s' systemd tuning previously added by Tuned" % consts.SYSTEMD_CPUAFFINITY_VAR)
 			self._remove_systemd_tuning()

@@ -6,7 +6,6 @@ import collections
 from tuned.utils.commands import commands
 import os
 from subprocess import Popen, PIPE
-import copy
 
 log = tuned.logs.get()
 
@@ -192,19 +191,19 @@ class Plugin(object):
 	# Tuning activation and deactivation.
 	#
 
-	def _run_for_each_device(self, instance, callback, instance_devices):
+	def _run_for_each_device(self, instance, callback):
 		if self._devices_supported:
-			devices = instance_devices
+			devices = instance.devices
 		else:
 			devices = [None, ]
 
 		for device in devices:
 			callback(instance, device)
 
-	def _instance_pre_static(self, instance, enabling, devices):
+	def _instance_pre_static(self, instance, enabling):
 		pass
 
-	def _instance_post_static(self, instance, enabling, devices):
+	def _instance_post_static(self, instance, enabling):
 		pass
 
 	def _call_device_script(self, instance, script, op, devices, full_rollback = False):
@@ -242,10 +241,6 @@ class Plugin(object):
 				ret = False
 		return ret
 
-	def _copy_instance_devices(self, instance):
-		"""Return a copy of instance devices"""
-		return copy.copy(instance.devices)
-
 	def instance_apply_tuning(self, instance):
 		"""
 		Apply static and dynamic tuning if the plugin instance is active.
@@ -253,16 +248,14 @@ class Plugin(object):
 		if not instance.active:
 			return
 
-		current_devices = self._copy_instance_devices(instance)
-
 		if instance.has_static_tuning:
-			self._call_device_script(instance, instance.script_pre, "apply", current_devices)
-			self._instance_pre_static(instance, True, current_devices)
-			self._instance_apply_static(instance, current_devices)
-			self._instance_post_static(instance, True, current_devices)
-			self._call_device_script(instance, instance.script_post, "apply", current_devices)
+			self._call_device_script(instance, instance.script_pre, "apply", instance.devices)
+			self._instance_pre_static(instance, True)
+			self._instance_apply_static(instance)
+			self._instance_post_static(instance, True)
+			self._call_device_script(instance, instance.script_post, "apply", instance.devices)
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
-			self._run_for_each_device(instance, self._instance_apply_dynamic, current_devices)
+			self._run_for_each_device(instance, self._instance_apply_dynamic)
 
 	def instance_verify_tuning(self, instance, ignore_missing):
 		"""
@@ -271,14 +264,12 @@ class Plugin(object):
 		if not instance.active:
 			return None
 
-		current_devices = self._copy_instance_devices(instance)
-
 		if instance.has_static_tuning:
-			if self._call_device_script(instance, instance.script_pre, "verify", current_devices) == False:
+			if self._call_device_script(instance, instance.script_pre, "verify", instance.devices) == False:
 				return False
-			if self._instance_verify_static(instance, ignore_missing, current_devices) == False:
+			if self._instance_verify_static(instance, ignore_missing) == False:
 				return False
-			if self._call_device_script(instance, instance.script_post, "verify", current_devices) == False:
+			if self._call_device_script(instance, instance.script_post, "verify", instance.devices) == False:
 				return False
 			return True
 		else:
@@ -291,37 +282,35 @@ class Plugin(object):
 		if not instance.active:
 			return
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
-			self._run_for_each_device(instance, self._instance_update_dynamic, self._copy_instance_devices(instance))
+			self._run_for_each_device(instance, self._instance_update_dynamic)
 
 	def instance_unapply_tuning(self, instance, full_rollback = False):
 		"""
 		Remove all tunings applied by the plugin instance.
 		"""
-		current_devices = self._copy_instance_devices(instance)
-
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
-			self._run_for_each_device(instance, self._instance_unapply_dynamic, current_devices)
+			self._run_for_each_device(instance, self._instance_unapply_dynamic)
 		if instance.has_static_tuning:
-			self._call_device_script(instance, instance.script_post, "unapply", current_devices, full_rollback = full_rollback)
-			self._instance_pre_static(instance, False, current_devices)
-			self._instance_unapply_static(instance, current_devices, full_rollback)
-			self._instance_post_static(instance, False, current_devices)
-			self._call_device_script(instance, instance.script_pre, "unapply", current_devices, full_rollback = full_rollback)
+			self._call_device_script(instance, instance.script_post, "unapply", instance.devices, full_rollback = full_rollback)
+			self._instance_pre_static(instance, False)
+			self._instance_unapply_static(instance, full_rollback)
+			self._instance_post_static(instance, False)
+			self._call_device_script(instance, instance.script_pre, "unapply", instance.devices, full_rollback = full_rollback)
 
-	def _instance_apply_static(self, instance, devices):
+	def _instance_apply_static(self, instance):
 		self._execute_all_non_device_commands(instance)
-		self._execute_all_device_commands(instance, devices)
+		self._execute_all_device_commands(instance, instance.devices)
 
-	def _instance_verify_static(self, instance, ignore_missing, devices):
+	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
 		if self._verify_all_non_device_commands(instance, ignore_missing) == False:
 			ret = False
-		if self._verify_all_device_commands(instance, devices, ignore_missing) == False:
+		if self._verify_all_device_commands(instance, instance.devices, ignore_missing) == False:
 			ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, devices, full_rollback = False):
-		self._cleanup_all_device_commands(instance, devices)
+	def _instance_unapply_static(self, instance, full_rollback = False):
+		self._cleanup_all_device_commands(instance, instance.devices)
 		self._cleanup_all_non_device_commands(instance)
 
 	def _instance_apply_dynamic(self, instance, device):
