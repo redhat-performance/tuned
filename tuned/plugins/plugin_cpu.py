@@ -141,8 +141,8 @@ class CPULatencyPlugin(base.Plugin):
 		self._set_intel_pstate_attr(attr, value)
 		return v
 
-	def _instance_apply_static(self, instance, devices):
-		super(CPULatencyPlugin, self)._instance_apply_static(instance, devices)
+	def _instance_apply_static(self, instance):
+		super(CPULatencyPlugin, self)._instance_apply_static(instance)
 
 		if not instance._first_instance:
 			return
@@ -155,8 +155,8 @@ class CPULatencyPlugin(base.Plugin):
 			self._max_perf_pct_save = self._getset_intel_pstate_attr("max_perf_pct", instance.options["max_perf_pct"])
 			self._no_turbo_save = self._getset_intel_pstate_attr("no_turbo", instance.options["no_turbo"])
 
-	def _instance_unapply_static(self, instance, devices, full_rollback = False):
-		super(CPULatencyPlugin, self)._instance_unapply_static(instance, devices, full_rollback)
+	def _instance_unapply_static(self, instance, full_rollback = False):
+		super(CPULatencyPlugin, self)._instance_unapply_static(instance, full_rollback)
 
 		if instance._first_instance and self._has_intel_pstate:
 			self._set_intel_pstate_attr("min_perf_pct", self._min_perf_pct_save)

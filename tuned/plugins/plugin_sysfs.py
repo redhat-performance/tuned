@@ -31,7 +31,7 @@ class SysfsPlugin(base.Plugin):
 	def _instance_cleanup(self, instance):
 		pass
 
-	def _instance_apply_static(self, instance, devices):
+	def _instance_apply_static(self, instance):
 		for key, value in list(instance._sysfs.items()):
 			v = self._variables.expand(value)
 			for f in glob.iglob(key):
@@ -41,7 +41,7 @@ class SysfsPlugin(base.Plugin):
 				else:
 					log.error("rejecting write to '%s' (not inside /sys)" % f)
 
-	def _instance_verify_static(self, instance, ignore_missing, devices):
+	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
 		for key, value in list(instance._sysfs.items()):
 			v = self._variables.expand(value)
@@ -52,7 +52,7 @@ class SysfsPlugin(base.Plugin):
 						ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, devices, full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = False):
 		for key, value in list(instance._sysfs_original.items()):
 			self._write_sysfs(key, value)
 

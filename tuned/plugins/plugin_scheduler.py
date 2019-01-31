@@ -348,8 +348,8 @@ class SchedulerPlugin(base.Plugin):
 		affinity = self._convert_affinity(affinity)
 		return (rule_prio, scheduler, priority, affinity, regex)
 
-	def _instance_apply_static(self, instance, devices):
-		super(SchedulerPlugin, self)._instance_apply_static(instance, devices)
+	def _instance_apply_static(self, instance):
+		super(SchedulerPlugin, self)._instance_apply_static(instance)
 		try:
 			ps = self.get_processes()
 		except (OSError, IOError) as e:
@@ -410,8 +410,8 @@ class SchedulerPlugin(base.Plugin):
 		self._scheduler_original = {}
 		self._storage.unset(self._scheduler_storage_key)
 
-	def _instance_unapply_static(self, instance, devices, full_rollback = False):
-		super(SchedulerPlugin, self)._instance_unapply_static(instance, devices, full_rollback)
+	def _instance_unapply_static(self, instance, full_rollback = False):
+		super(SchedulerPlugin, self)._instance_unapply_static(instance, full_rollback)
 		if self._daemon and instance._runtime_tuning:
 			instance._terminate.set()
 			instance._thread.join()
