@@ -49,7 +49,6 @@ import sys
 import os
 import time
 import configobj
-import inspect
 import subprocess
 
 import tuned.logs
