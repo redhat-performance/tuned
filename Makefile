@@ -215,6 +215,6 @@ test:
 	$(PYTHON) -m unittest discover tests
 
 lint:
-	$(PYLINT) -E -f parseable tuned *.py
+	$(PYLINT) -E -f parseable tuned *.py tests
 
 .PHONY: clean archive srpm tag test lint
