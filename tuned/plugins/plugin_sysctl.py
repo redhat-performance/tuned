@@ -5,8 +5,12 @@ import tuned.logs
 from subprocess import *
 from tuned.utils.commands import commands
 import tuned.consts as consts
+import errno
+import os
 
 log = tuned.logs.get()
+
+DEPRECATED_SYSCTL_OPTIONS = [ "base_reachable_time", "retrans_time" ]
 
 class SysctlPlugin(base.Plugin):
 	"""
@@ -68,20 +72,49 @@ class SysctlPlugin(base.Plugin):
 		for option, value in list(instance._sysctl_original.items()):
 			self._write_sysctl(option, value)
 
-	def _execute_sysctl(self, arguments):
-		execute = ["sysctl"] + arguments
-		log.debug("executing %s" % execute)
-		return self._cmd.execute(execute)
+	def _get_sysctl_path(self, option):
+		return "/proc/sys/%s" % option.replace(".", "/")
 
 	def _read_sysctl(self, option):
-		retcode, stdout = self._execute_sysctl(["-e", option])
-		if retcode == 0:
-			parts = [self._cmd.remove_ws(value) for value in stdout.split("=", 1)]
-			if len(parts) == 2:
-				option, value = parts
-				return value
-		return None
+		path = self._get_sysctl_path(option)
+		try:
+			with open(path, "r") as f:
+				line = ""
+				for i, line in enumerate(f):
+					if i > 0:
+						log.error("Failed to read sysctl parameter '%s', multi-line values are unsupported"
+								% option)
+						return None
+				value = line.strip()
+			log.debug("Value of sysctl parameter '%s' is '%s'"
+					% (option, value))
+			return value
+		except (OSError, IOError) as e:
+			if e.errno == errno.ENOENT:
+				log.error("Failed to read sysctl parameter '%s', the parameter does not exist"
+						% option)
+			else:
+				log.error("Failed to read sysctl parameter '%s': %s"
+						% (option, str(e)))
+			return None
 
 	def _write_sysctl(self, option, value):
-		retcode, stdout = self._execute_sysctl(["-q", "-w", "%s=%s" % (option, value)])
-		return retcode == 0
+		path = self._get_sysctl_path(option)
+		if os.path.basename(path) in DEPRECATED_SYSCTL_OPTIONS:
+			log.error("Refusing to set deprecated sysctl option %s"
+					% option)
+			return False
+		try:
+			log.debug("Setting sysctl parameter '%s' to '%s'"
+					% (option, value))
+			with open(path, "w") as f:
+				f.write(value)
+			return True
+		except (OSError, IOError) as e:
+			if e.errno == errno.ENOENT:
+				log.error("Failed to set sysctl parameter '%s' to '%s', the parameter does not exist"
+						% (option, value))
+			else:
+				log.error("Failed to set sysctl parameter '%s' to '%s': %s"
+						% (option, value, str(e)))
+			return False
