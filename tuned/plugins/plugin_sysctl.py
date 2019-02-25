@@ -44,10 +44,10 @@ class SysctlPlugin(base.Plugin):
 
 	def _instance_apply_static(self, instance):
 		for option, value in list(instance._sysctl.items()):
-			original_value = self._read_sysctl(option)
+			original_value = _read_sysctl(option)
 			if original_value != None:
 				instance._sysctl_original[option] = original_value
-			self._write_sysctl(option, self._process_assignment_modifiers(self._variables.expand(self._cmd.unquote(value)), original_value))
+			_write_sysctl(option, self._process_assignment_modifiers(self._variables.expand(self._cmd.unquote(value)), original_value))
 
 		storage_key = self._storage_key(instance.name)
 		self._storage.set(storage_key, instance._sysctl_original)
@@ -61,7 +61,7 @@ class SysctlPlugin(base.Plugin):
 		# override, so always skip missing
 		ignore_missing = True
 		for option, value in list(instance._sysctl.items()):
-			curr_val = self._read_sysctl(option)
+			curr_val = _read_sysctl(option)
 			value = self._process_assignment_modifiers(self._variables.expand(value), curr_val)
 			if value is not None:
 				if self._verify_value(option, self._cmd.remove_ws(value), curr_val, ignore_missing) == False:
@@ -70,51 +70,52 @@ class SysctlPlugin(base.Plugin):
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
 		for option, value in list(instance._sysctl_original.items()):
-			self._write_sysctl(option, value)
+			_write_sysctl(option, value)
 
-	def _get_sysctl_path(self, option):
-		return "/proc/sys/%s" % option.replace(".", "/")
 
-	def _read_sysctl(self, option):
-		path = self._get_sysctl_path(option)
-		try:
-			with open(path, "r") as f:
-				line = ""
-				for i, line in enumerate(f):
-					if i > 0:
-						log.error("Failed to read sysctl parameter '%s', multi-line values are unsupported"
-								% option)
-						return None
-				value = line.strip()
-			log.debug("Value of sysctl parameter '%s' is '%s'"
-					% (option, value))
-			return value
-		except (OSError, IOError) as e:
-			if e.errno == errno.ENOENT:
-				log.error("Failed to read sysctl parameter '%s', the parameter does not exist"
-						% option)
-			else:
-				log.error("Failed to read sysctl parameter '%s': %s"
-						% (option, str(e)))
-			return None
+def _get_sysctl_path(option):
+	return "/proc/sys/%s" % option.replace(".", "/")
 
-	def _write_sysctl(self, option, value):
-		path = self._get_sysctl_path(option)
-		if os.path.basename(path) in DEPRECATED_SYSCTL_OPTIONS:
-			log.error("Refusing to set deprecated sysctl option %s"
+def _read_sysctl(option):
+	path = _get_sysctl_path(option)
+	try:
+		with open(path, "r") as f:
+			line = ""
+			for i, line in enumerate(f):
+				if i > 0:
+					log.error("Failed to read sysctl parameter '%s', multi-line values are unsupported"
+							% option)
+					return None
+			value = line.strip()
+		log.debug("Value of sysctl parameter '%s' is '%s'"
+				% (option, value))
+		return value
+	except (OSError, IOError) as e:
+		if e.errno == errno.ENOENT:
+			log.error("Failed to read sysctl parameter '%s', the parameter does not exist"
 					% option)
-			return False
-		try:
-			log.debug("Setting sysctl parameter '%s' to '%s'"
+		else:
+			log.error("Failed to read sysctl parameter '%s': %s"
+					% (option, str(e)))
+		return None
+
+def _write_sysctl(option, value):
+	path = _get_sysctl_path(option)
+	if os.path.basename(path) in DEPRECATED_SYSCTL_OPTIONS:
+		log.error("Refusing to set deprecated sysctl option %s"
+				% option)
+		return False
+	try:
+		log.debug("Setting sysctl parameter '%s' to '%s'"
+				% (option, value))
+		with open(path, "w") as f:
+			f.write(value)
+		return True
+	except (OSError, IOError) as e:
+		if e.errno == errno.ENOENT:
+			log.error("Failed to set sysctl parameter '%s' to '%s', the parameter does not exist"
 					% (option, value))
-			with open(path, "w") as f:
-				f.write(value)
-			return True
-		except (OSError, IOError) as e:
-			if e.errno == errno.ENOENT:
-				log.error("Failed to set sysctl parameter '%s' to '%s', the parameter does not exist"
-						% (option, value))
-			else:
-				log.error("Failed to set sysctl parameter '%s' to '%s': %s"
-						% (option, value, str(e)))
-			return False
+		else:
+			log.error("Failed to set sysctl parameter '%s' to '%s': %s"
+					% (option, value, str(e)))
+		return False
