@@ -11,6 +11,11 @@ import os
 log = tuned.logs.get()
 
 DEPRECATED_SYSCTL_OPTIONS = [ "base_reachable_time", "retrans_time" ]
+SYSCTL_CONFIG_DIRS = [ "/run/sysctl.d",
+		"/etc/sysctl.d",
+		"/usr/local/lib/sysctl.d",
+		"/usr/lib/sysctl.d",
+		"/lib/sysctl.d" ]
 
 class SysctlPlugin(base.Plugin):
 	"""
@@ -61,7 +66,7 @@ class SysctlPlugin(base.Plugin):
 
 		if self._global_cfg.get_bool(consts.CFG_REAPPLY_SYSCTL, consts.CFG_DEF_REAPPLY_SYSCTL):
 			log.info("reapplying system sysctl")
-			self._cmd.execute(["sysctl", "--system"])
+			_apply_system_sysctl()
 
 	def _instance_verify_static(self, instance, ignore_missing):
 		ret = True
@@ -79,6 +84,56 @@ class SysctlPlugin(base.Plugin):
 		for option, value in list(instance._sysctl_original.items()):
 			_write_sysctl(option, value)
 
+
+def _apply_system_sysctl():
+	files = {}
+	for d in SYSCTL_CONFIG_DIRS:
+		try:
+			flist = os.listdir(d)
+		except:
+			continue
+		for fname in flist:
+			if not fname.endswith(".conf"):
+				continue
+			if fname not in files:
+				files[fname] = d
+
+	for fname in sorted(files.keys()):
+		d = files[fname]
+		path = "%s/%s" % (d, fname)
+		_apply_sysctl_config_file(path)
+	_apply_sysctl_config_file("/etc/sysctl.conf")
+
+def _apply_sysctl_config_file(path):
+	log.debug("Applying sysctl settings from file %s" % path)
+	try:
+		with open(path, "r") as f:
+			for lineno, line in enumerate(f, 1):
+				_apply_sysctl_config_line(path, lineno, line)
+		log.debug("Finished applying sysctl settings from file %s"
+				% path)
+	except (OSError, IOError) as e:
+		if e.errno != errno.ENOENT:
+			log.error("Error reading sysctl settings from file %s: %s"
+					% (path, str(e)))
+
+def _apply_sysctl_config_line(path, lineno, line):
+	line = line.strip()
+	if len(line) == 0 or line[0] == "#" or line[0] == ";":
+		return
+	tmp = line.split("=", 1)
+	if len(tmp) != 2:
+		log.error("Syntax error in file %s, line %d"
+				% (path, lineno))
+		return
+	option, value = tmp
+	option = option.strip()
+	if len(option) == 0:
+		log.error("Syntax error in file %s, line %d"
+				% (path, lineno))
+		return
+	value = value.strip()
+	_write_sysctl(option, value)
 
 def _get_sysctl_path(option):
 	return "/proc/sys/%s" % option.replace(".", "/")
