@@ -15,6 +15,6 @@ class s2kb(base.Function):
 		if not super(s2kb, self).execute(args):
 			return None
 		try:
-			return str(int(args[0]) / 2)
+			return str(int(round(int(args[0]) / 2)))
 		except ValueError:
 			return None
