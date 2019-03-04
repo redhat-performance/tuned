@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
 	parser_list_plugins = subparsers_list.add_parser("plugins", help="list avaible plugins")
 	parser_list_plugins.set_defaults(action="list_plugins")
-	parser_list_plugins.add_argument("--verbouse", "-v", action="store_true", help="show plugin's configuration parameters and their meaning")
+	parser_list_plugins.add_argument("--verbose", "-v", action="store_true", help="show plugin's configuration parameters and their meaning")
 
 	parser_list_profiles = subparsers_list.add_parser("profiles", help="list available profiles")
 	parser_list_profiles.set_defaults(action="list_profiles")

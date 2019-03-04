@@ -350,16 +350,16 @@ class Admin(object):
 		print("Not supported in no_daemon mode.")
 		return False
 
-	def _action_dbus_list_plugins(self, verbouse=False):
+	def _action_dbus_list_plugins(self, verbose=False):
 		"""Print accessible plugins
 
 		Keyword arguments:
-		verbouse -- if is set to True then parameters and hints are printed
+		verbose -- if is set to True then parameters and hints are printed
 		"""
 		plugins = self._controller.get_plugins()
 		for plugin in plugins.keys():
 			print(plugin)
-			if not verbouse or len(plugins[plugin]) == 0:
+			if not verbose or len(plugins[plugin]) == 0:
 				continue
 			hints = self._controller.get_plugin_hints(plugin)
 			for parameter in plugins[plugin]:
@@ -369,6 +369,6 @@ class Admin(object):
 					print("\t\t%s" %(hint))
 		return self._controller.exit(True)
 
-	def _action_list_plugins(self, verbouse=False):
+	def _action_list_plugins(self, verbose=False):
 		print("Not supported in no_daemon mode.")
 		return False
