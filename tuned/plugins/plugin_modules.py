@@ -73,7 +73,7 @@ class ModulesPlugin(base.Plugin):
 	def _unquote_path(self, path):
 		return str(path).replace("/", "")
 
-	def _instance_verify_static(self, instance, ignore_missing):
+	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret = True
 		# not all modules exports all their parameteters through sysfs, so hardcode check with ignore_missing
 		ignore_missing = True

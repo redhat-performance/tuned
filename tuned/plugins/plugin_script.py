@@ -57,9 +57,10 @@ class ScriptPlugin(base.Plugin):
 		super(ScriptPlugin, self)._instance_apply_static(instance)
 		self._call_scripts(instance._scripts, ["start"])
 
-	def _instance_verify_static(self, instance, ignore_missing):
+	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret = True
-		if super(ScriptPlugin, self)._instance_verify_static(instance, ignore_missing) == False:
+		if super(ScriptPlugin, self)._instance_verify_static(instance,
+				ignore_missing, devices) == False:
 			ret = False
 		args = ["verify"]
 		if ignore_missing:

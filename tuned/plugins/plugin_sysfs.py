@@ -41,7 +41,7 @@ class SysfsPlugin(base.Plugin):
 				else:
 					log.error("rejecting write to '%s' (not inside /sys)" % f)
 
-	def _instance_verify_static(self, instance, ignore_missing):
+	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret = True
 		for key, value in list(instance._sysfs.items()):
 			v = self._variables.expand(value)

@@ -277,12 +277,13 @@ class Plugin(object):
 		if len(instance.assigned_devices) != 0:
 			log.error("BUG: Some devices have not been tuned: %s"
 					% ", ".join(instance.assigned_devices))
+		devices = instance.processed_devices.copy()
 		if instance.has_static_tuning:
-			if self._call_device_script(instance, instance.script_pre, "verify", instance.processed_devices) == False:
+			if self._call_device_script(instance, instance.script_pre, "verify", devices) == False:
 				return False
-			if self._instance_verify_static(instance, ignore_missing) == False:
+			if self._instance_verify_static(instance, ignore_missing, devices) == False:
 				return False
-			if self._call_device_script(instance, instance.script_post, "verify", instance.processed_devices) == False:
+			if self._call_device_script(instance, instance.script_post, "verify", devices) == False:
 				return False
 			return True
 		else:
@@ -316,11 +317,11 @@ class Plugin(object):
 		self._execute_all_non_device_commands(instance)
 		self._execute_all_device_commands(instance, instance.assigned_devices)
 
-	def _instance_verify_static(self, instance, ignore_missing):
+	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret = True
 		if self._verify_all_non_device_commands(instance, ignore_missing) == False:
 			ret = False
-		if self._verify_all_device_commands(instance, instance.processed_devices, ignore_missing) == False:
+		if self._verify_all_device_commands(instance, devices, ignore_missing) == False:
 			ret = False
 		return ret
 
