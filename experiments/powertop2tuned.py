@@ -65,7 +65,7 @@ TUNED_CONF_INCLUDE = """[main]
 TUNED_CONF_EPILOG="""\n[powertop_script]
 type=script
 replace=1
-script=script.sh
+script=${i:PROFILE_DIR}/script.sh
 """
 
 
