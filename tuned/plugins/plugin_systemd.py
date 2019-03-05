@@ -61,7 +61,7 @@ class SystemdPlugin(base.Plugin):
 
 	def _read_systemd_system_conf(self):
 		systemd_system_conf = self._cmd.read_file(consts.SYSTEMD_SYSTEM_CONF_FILE, err_ret = None)
-		if systemd_system_conf == None:
+		if systemd_system_conf is None:
 			log.error("error reading systemd configuration file")
 			return None
 		return systemd_system_conf
