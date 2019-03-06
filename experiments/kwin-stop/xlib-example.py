@@ -32,7 +32,7 @@ def loop():
 						root = dpy.screen(num).root
 						for win in root.get_full_property(dpy.get_atom('_NET_CLIENT_LIST'), 0).value.tolist():
 							window = dpy.create_resource_object('window', win)
-							if window.get_full_property(dpy.get_atom('_NET_WM_STATE'), Xatom.WINDOW) == None:
+							if window.get_full_property(dpy.get_atom('_NET_WM_STATE'), Xatom.WINDOW) is None:
 								continue
 							if dpy.get_atom("_NET_WM_STATE_HIDDEN") in window.get_full_property(dpy.get_atom('_NET_WM_STATE'), 0).value.tolist():
 								if not win in hidden:
