@@ -20,6 +20,7 @@ class SCSIHostPlugin(hotplug.Plugin):
 		self._cmd = commands()
 
 	def _init_devices(self):
+		super(SCSIHostPlugin, self)._init_devices()
 		self._devices_supported = True
 		self._free_devices = set()
 		for device in self._hardware_inventory.get_devices("scsi"):

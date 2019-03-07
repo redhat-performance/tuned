@@ -63,6 +63,7 @@ class PluginBaseTestCase(unittest2.TestCase):
 		instance = self._plugin.create_instance(\
 			'first_instance','test','test','test','test',\
 			{'default_option1':'default_value2'})
+		instance.plugin.init_devices()
 
 		self._plugin.destroy_instance(instance)
 		self.assertIn(instance,self._plugin.cleaned_instances)

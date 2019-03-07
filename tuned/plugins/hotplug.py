@@ -11,7 +11,6 @@ class Plugin(base.Plugin):
 
 	def __init__(self, *args, **kwargs):
 		super(Plugin, self).__init__(*args, **kwargs)
-		self._hardware_events_init()
 
 	def cleanup(self):
 		super(Plugin, self).cleanup()
@@ -22,6 +21,9 @@ class Plugin(base.Plugin):
 
 	def _hardware_events_cleanup(self):
 		raise NotImplementedError()
+
+	def _init_devices(self):
+		self._hardware_events_init()
 
 	def _hardware_events_callback(self, event, device):
 		if event == "add":
@@ -40,10 +42,10 @@ class Plugin(base.Plugin):
 			if len(self._get_matching_devices(instance, [device_name])) == 1:
 				log.info("instance %s: adding new device %s" % (instance_name, device_name))
 				self._assigned_devices.add(device_name)
-				instance.devices.add(device_name)
 				self._call_device_script(instance, instance.script_pre, "apply", [device_name])
 				self._added_device_apply_tuning(instance, device_name)
 				self._call_device_script(instance, instance.script_post, "apply", [device_name])
+				instance.processed_devices.add(device_name)
 				break
 		else:
 			log.debug("no instance wants %s" % device_name)
@@ -55,12 +57,15 @@ class Plugin(base.Plugin):
 			return
 
 		for instance in list(self._instances.values()):
-			if device_name in instance.devices:
+			if device_name in instance.processed_devices:
 				self._call_device_script(instance, instance.script_post, "unapply", [device_name])
 				self._removed_device_unapply_tuning(instance, device_name)
 				self._call_device_script(instance, instance.script_pre, "unapply", [device_name])
-				instance.devices.remove(device_name)
-				instance.active = len(instance.devices) > 0
+				instance.processed_devices.remove(device_name)
+				# This can be a bit racy (we can overcount),
+				# but it shouldn't affect the boolean result
+				instance.active = len(instance.processed_devices) \
+						+ len(instance.assigned_devices) > 0
 				self._assigned_devices.remove(device_name)
 				break
 		else:

@@ -68,7 +68,7 @@ class SysctlPlugin(base.Plugin):
 			log.info("reapplying system sysctl")
 			_apply_system_sysctl()
 
-	def _instance_verify_static(self, instance, ignore_missing):
+	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret = True
 		# override, so always skip missing
 		ignore_missing = True

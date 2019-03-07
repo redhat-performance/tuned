@@ -14,7 +14,8 @@ class Instance(object):
 		self._active = True
 		self._has_static_tuning = False
 		self._has_dynamic_tuning = False
-		self._devices = set()
+		self._assigned_devices = set()
+		self._processed_devices = set()
 
 	# properties
 
@@ -40,8 +41,12 @@ class Instance(object):
 		return self._devices_expression
 
 	@property
-	def devices(self):
-		return self._devices
+	def assigned_devices(self):
+		return self._assigned_devices
+
+	@property
+	def processed_devices(self):
+		return self._processed_devices
 
 	@property
 	def devices_udev_regex(self):

@@ -14,11 +14,13 @@ class Manager(object):
 	Manager creates plugin instances and keeps a track of them.
 	"""
 
-	def __init__(self, plugins_repository, monitors_repository, def_instance_priority):
+	def __init__(self, plugins_repository, monitors_repository,
+			def_instance_priority, hardware_inventory):
 		super(Manager, self).__init__()
 		self._plugins_repository = plugins_repository
 		self._monitors_repository = monitors_repository
 		self._def_instance_priority = def_instance_priority
+		self._hardware_inventory = hardware_inventory
 		self._instances = []
 		self._plugins = []
 
@@ -63,6 +65,7 @@ class Manager(object):
 				log.exception(e)
 				continue
 
+		instances = []
 		for instance_info in instance_info_list:
 			plugin = plugins_by_name[instance_info.type]
 			if plugin is None:
@@ -70,9 +73,15 @@ class Manager(object):
 			log.debug("creating '%s' (%s)" % (instance_info.name, instance_info.type))
 			new_instance = plugin.create_instance(instance_info.name, instance_info.devices, instance_info.devices_udev_regex, \
 				instance_info.script_pre, instance_info.script_post, instance_info.options)
-			plugin.assign_free_devices(new_instance)
-			plugin.initialize_instance(new_instance)
-			self._instances.append(new_instance)
+			instances.append(new_instance)
+		for instance in instances:
+			instance.plugin.init_devices()
+			instance.plugin.assign_free_devices(instance)
+			instance.plugin.initialize_instance(instance)
+		# At this point we should be able to start the HW events
+		# monitoring/processing thread, without risking race conditions
+		self._hardware_inventory.start_processing_events()
+		self._instances.extend(instances)
 
 	def _try_call(self, caller, exc_ret, f, *args, **kwargs):
 		try:
@@ -81,7 +90,7 @@ class Manager(object):
 			trace = traceback.format_exc()
 			log.error("BUG: Unhandled exception in %s: %s"
 					% (caller, str(e)))
-			log.debug(trace)
+			log.error(trace)
 			return exc_ret
 
 	def destroy_all(self):
@@ -130,6 +139,7 @@ class Manager(object):
 	# it means to remove all temporal or helper files, unpatch third
 	# party config files, etc.
 	def stop_tuning(self, full_rollback = False):
+		self._hardware_inventory.stop_processing_events()
 		for instance in reversed(self._instances):
 			self._try_call("stop_tuning", None,
 					instance.unapply_tuning, full_rollback)

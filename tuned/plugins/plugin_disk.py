@@ -25,6 +25,7 @@ class DiskPlugin(hotplug.Plugin):
 		self._cmd = commands()
 
 	def _init_devices(self):
+		super(DiskPlugin, self)._init_devices()
 		self._devices_supported = True
 		self._free_devices = set()
 		for device in self._hardware_inventory.get_devices("block"):
@@ -90,7 +91,9 @@ class DiskPlugin(hotplug.Plugin):
 
 		if self._option_bool(instance.options["dynamic"]):
 			instance._has_dynamic_tuning = True
-			instance._load_monitor = self._monitors_repository.create("disk", instance.devices)
+			instance._load_monitor = \
+					self._monitors_repository.create(
+					"disk", instance.assigned_devices)
 			instance._device_idle = {}
 			instance._stats = {}
 			instance._idle = {}

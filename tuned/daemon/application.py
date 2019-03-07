@@ -39,7 +39,9 @@ class Application(object):
 		plugins_repository = plugins.Repository(monitors_repository, storage_factory, hardware_inventory,\
 			device_matcher, device_matcher_udev, plugin_instance_factory, self.config, self.variables)
 		def_instance_priority = int(self.config.get(consts.CFG_DEFAULT_INSTANCE_PRIORITY, consts.CFG_DEF_DEFAULT_INSTANCE_PRIORITY))
-		unit_manager = units.Manager(plugins_repository, monitors_repository, def_instance_priority)
+		unit_manager = units.Manager(
+				plugins_repository, monitors_repository,
+				def_instance_priority, hardware_inventory)
 
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()
