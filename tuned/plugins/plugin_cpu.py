@@ -222,17 +222,33 @@ class CPULatencyPlugin(base.Plugin):
 		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).strip().split()
 
 	@command_set("governor", per_device=True)
-	def _set_governor(self, governor, device, sim):
+	def _set_governor(self, governors, device, sim):
 		if not self._check_cpu_can_change_governor(device):
 			return None
-		if governor not in self._get_available_governors(device):
-			if not sim:
-				log.info("ignoring governor '%s' on cpu '%s', it is not supported" % (governor, device))
-			return None
-		if not sim:
-			log.info("setting governor '%s' on cpu '%s'" % (governor, device))
-			self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, str(governor))
-		return str(governor)
+		governors = str(governors)
+		governors = governors.split("|")
+		governors = [governor.strip() for governor in governors]
+		for governor in governors:
+			if len(governor) == 0:
+				log.error("The 'governor' option contains an empty value.")
+				return None
+		available_governors = self._get_available_governors(device)
+		for governor in governors:
+			if governor in available_governors:
+				if not sim:
+					log.info("setting governor '%s' on cpu '%s'"
+							% (governor, device))
+					self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor"
+							% device, governor)
+				break
+			elif not sim:
+				log.debug("Ignoring governor '%s' on cpu '%s', it is not supported"
+						% (governor, device))
+		else:
+			log.warn("None of the scaling governors is supported: %s"
+					% ", ".join(governors))
+			governor = None
+		return governor
 
 	@command_get("governor")
 	def _get_governor(self, device, ignore_missing=False):
