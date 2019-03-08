@@ -91,7 +91,7 @@ class GuiProfileLoader(object):
     def _load_all_profiles(self):
         for d in self.directories:
             for profile in os.listdir(d):
-                if os.path.isdir(d + '/' + profile):
+                if self._is_dir_profile(os.path.join(d, profile)):
                     try:
                         self.profiles[profile] = p.Profile(profile,
                                 self.load_profile_config(profile, d))
@@ -102,6 +102,10 @@ class GuiProfileLoader(object):
 #                     except:
 #                         raise managerException.ManagerException("Can not make profile")
 #                         print "can not make \""+ profile +"\" profile without correct config with path: " + d
+
+    def _is_dir_profile(self, path):
+        return (os.path.isdir(path) and
+                os.path.isfile(os.path.join(path, 'tuned.conf')))
 
     def _refresh_profiles(self):
         self.profiles = {}
