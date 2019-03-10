@@ -57,10 +57,18 @@ Requires: %{_py}-schedutils, %{_py}-linux-procfs, %{_py}-perf
 # requires for packages with inconsistent python2/3 names
 %if %{with python3}
 Requires: python3-dbus, python3-gobject-base
+%if 0%{?fedora} > 22 || 0%{?rhel} > 7
 Recommends: python3-dmidecode
 %else
+Requires: python3-dmidecode
+%endif
+%else
 Requires: dbus-python, pygobject3-base
+%if 0%{?fedora} > 22 || 0%{?rhel} > 7
 Recommends: python-dmidecode
+%else
+Requires: python-dmidecode
+%endif
 %endif
 Requires: virt-what, ethtool, gawk, hdparm
 Requires: util-linux, dbus, polkit
