@@ -396,7 +396,6 @@ fi
 %{python2_sitelib}/tuned/gtk
 %endif
 %{_datadir}/tuned/ui
-%{_datadir}/polkit-1/actions/com.redhat.tuned.gui.policy
 %{_datadir}/icons/hicolor/scalable/apps/tuned.svg
 %{_datadir}/applications/tuned-gui.desktop
 
