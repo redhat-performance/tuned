@@ -33,16 +33,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.10.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.11.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -482,6 +482,49 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Sun Mar 10 2019 Jaroslav Škarvada <jskarvad@redhat.com> - 2.11.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#1643654
+  - use online CPUs for cpusets calculations instead of present CPUs
+    resolves: rhbz#1613478
+  - realtime-virtual-guest: run script.sh
+    related: rhbz#1616043
+  - make python-dmidecode a weak dependency
+    resolves: rhbz#1565598
+  - make virtual-host identical to latency-performance
+    resolves: rhbz#1588932
+  - added support for Boot loader specification (BLS)
+    resolves: rhbz#1576435
+  - scheduler: keep polling file objects alive long enough
+    resolves: rhbz#1659140
+  - mssql: updated tuning
+    resolves: rhbz#1660178
+  - s2kb: fixed to be compatible with python3
+    resolves: rhbz#1684122
+  - profiles: fallback to the 'powersave' scaling governor
+    resolves: rhbz#1679205
+  - disable KSM only once, re-enable it only on full rollback
+    resolves: rhbz#1622239
+  - functions: reworked setup_kvm_mod_low_latency to count with kernel changes
+    resolves: rhbz#1649408
+  - updated virtual-host profile
+    resolves: rhbz#1569375
+  - added log message for unsupported parameters in plugin_net
+    resolves: rhbz#1533852
+  - added range feature for cpu exclusion
+    resolves: rhbz#1533908
+  - make a copy of devices when verifying tuning
+    resolves: rhbz#1592743
+  - fixed disk plugin/plugout problem
+    resolves: rhbz#1595156
+  - fixed unit configuration reading
+    resolves: rhbz#1613379
+  - reload profile configuration on SIGHUP
+    resolves: rhbz#1631744
+  - use built-in functionality to apply system sysctl
+    resolves: rhbz#1663412
+
 * Wed Jul  4 2018 Jaroslav Škarvada <jskarvad@redhat.com> - 2.10.0-1
 - new release
   - rebased tuned to latest upstream
