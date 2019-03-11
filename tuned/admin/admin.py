@@ -6,6 +6,7 @@ from tuned.profiles import Locator as profiles_locator
 from .exceptions import TunedAdminDBusException
 from tuned.exceptions import TunedException
 import tuned.consts as consts
+from tuned.utils.profile_recommender import ProfileRecommender
 import os
 import sys
 import errno
@@ -30,6 +31,7 @@ class Admin(object):
 		self._controller = None
 		self._log_token = None
 		self._log_level = log_level
+		self._profile_recommender = ProfileRecommender()
 		if self._dbus:
 			self._controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_INTERFACE, consts.DBUS_OBJECT, debug)
 			try:
@@ -304,7 +306,7 @@ class Admin(object):
 		return self._profile_print_status(ret, msg)
 
 	def _action_auto_profile(self):
-		profile_name = self._cmd.recommend_profile()
+		profile_name = self._profile_recommender.recommend()
 		return self._set_profile(profile_name, False)
 
 	def _action_dbus_recommend_profile(self):
@@ -312,7 +314,7 @@ class Admin(object):
 		return self._controller.exit(True)
 
 	def _action_recommend_profile(self):
-		print(self._cmd.recommend_profile())
+		print(self._profile_recommender.recommend())
 		return True
 
 	def _action_dbus_verify_profile(self, ignore_missing):
