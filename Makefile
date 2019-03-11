@@ -6,6 +6,10 @@ MOCK_CONFIG = rhel-7-x86_64
 # scratch-build for triggering Jenkins
 SCRATCH_BUILD_TARGET = rhel-7.5-candidate
 VERSION = $(shell awk '/^Version:/ {print $$2}' tuned.spec)
+PRERELEASENUM = $(shell awk '/^\s*%global prereleasenum/ {print $$3}' tuned.spec)
+ifneq ($(strip $(PRERELEASENUM)),)
+	PRERELEASE = -rc.$(PRERELEASENUM)
+endif
 GIT_DATE = $(shell date +'%Y%m%d')
 ifeq ($(BUILD), release)
 	RPM_ARGS += --without snapshot
@@ -25,7 +29,7 @@ UNITDIR = $(UNITDIR_DETECT:%{_unitdir}=$(UNITDIR_FALLBACK))
 TMPFILESDIR_FALLBACK = /usr/lib/tmpfiles.d
 TMPFILESDIR_DETECT = $(shell pkg-config systemd --variable tmpfilesdir || rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo $(TMPFILESDIR_FALLBACK))
 TMPFILESDIR = $(TMPFILESDIR_DETECT:%{_tmpfilesdir}=$(TMPFILESDIR_FALLBACK))
-VERSIONED_NAME = $(NAME)-$(VERSION)$(GIT_PSUFFIX)
+VERSIONED_NAME = $(NAME)-$(VERSION)$(PRERELEASE)$(GIT_PSUFFIX)
 
 SYSCONFDIR = /etc
 DATADIR = /usr/share
