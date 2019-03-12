@@ -547,7 +547,13 @@ class Plugin(object):
 							ret = val == current_value
 							if ret:
 								break
-		if ret:
+		self._log_verification_result(name, ret, new_value,
+				current_value, device = device)
+		return ret
+
+	def _log_verification_result(self, name, success, new_value,
+			current_value, device = None):
+		if success:
 			if device is None:
 				log.info(consts.STR_VERIFY_PROFILE_VALUE_OK % (name, str(current_value).strip()))
 			else:
