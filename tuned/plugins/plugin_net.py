@@ -376,15 +376,18 @@ class NetTuningPlugin(base.Plugin):
 				command_name = context,
 				device_name = device)
 		if start:
-			cd = self._get_device_parameters(context, device)
-			d = self._set_device_parameters(context, value, device, verify,
-					dev_params = cd)
+			params_current = self._get_device_parameters(context,
+					device)
+			params_set = self._set_device_parameters(context,
+					value, device, verify,
+					dev_params = params_current)
 			# if none of parameters passed checks then the command completely
 			# failed
-			if len(d) == 0:
+			if len(params_set) == 0:
 				return False
 			# saved are only those parameters which passed checks
-			self._storage.set(storage_key," ".join(self._cmd.dict2list(d)))
+			self._storage.set(storage_key, " ".join(
+					self._cmd.dict2list(params_set)))
 		else:
 			original_value = self._storage.get(storage_key)
 			# in storage are only those parameters which were already tested
