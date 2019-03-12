@@ -31,9 +31,9 @@ TMPFILESDIR_DETECT = $(shell pkg-config systemd --variable tmpfilesdir || rpm --
 TMPFILESDIR = $(TMPFILESDIR_DETECT:%{_tmpfilesdir}=$(TMPFILESDIR_FALLBACK))
 VERSIONED_NAME = $(NAME)-$(VERSION)$(PRERELEASE)$(GIT_PSUFFIX)
 
-SYSCONFDIR = /etc
-DATADIR = /usr/share
-DOCDIR = $(DATADIR)/doc/$(NAME)
+export SYSCONFDIR = /etc
+export DATADIR = /usr/share
+export DOCDIR = $(DATADIR)/doc/$(NAME)
 PYTHON = /usr/bin/python3
 PYLINT = pylint-3
 ifeq ($(PYTHON),python2)
@@ -116,6 +116,15 @@ scratch-build: mock-devel-build
 nightly: tidy-mock-result-dir createrepo scratch-build
 	rsync -ave ssh --delete --progress mock-result-dir/ jskarvad@fedorapeople.org:/home/fedora/jskarvad/public_html/tuned/devel/repo/
 
+html:
+	$(MAKE) -C doc/guide
+
+install-html:
+	$(MAKE) -C doc/guide install
+
+clean-html:
+	$(MAKE) -C doc/guide clean
+
 install-dirs:
 	mkdir -p $(DESTDIR)$(PYTHON_SITELIB)
 	mkdir -p $(DESTDIR)$(TUNED_PROFILESDIR)
@@ -196,7 +205,7 @@ install: install-dirs
 		install -Dpm 0644 $(file) $(DESTDIR)$(DATADIR)/man/man$(man_section)/$(notdir $(file));))
 
 	# documentation
-	cp -a doc/* $(DESTDIR)$(DOCDIR)
+	cp -a doc/{README*,*.txt} $(DESTDIR)$(DOCDIR)
 	cp AUTHORS COPYING README $(DESTDIR)$(DOCDIR)
 
 	# libexec scripts
@@ -211,7 +220,7 @@ install: install-dirs
 	install -dD $(DESTDIR)$(DATADIR)/applications
 	desktop-file-install --dir=$(DESTDIR)$(DATADIR)/applications tuned-gui.desktop
 
-clean:
+clean: clean-html
 	find -name "*.pyc" | xargs rm -f
 	rm -rf $(VERSIONED_NAME) rpm-build-dir
 

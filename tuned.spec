@@ -48,6 +48,11 @@ Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?pre
 URL: http://www.tuned-project.org/
 BuildArch: noarch
 BuildRequires: systemd, desktop-file-utils
+%if 0%{?rhel}
+BuildRequires: asciidoc
+%else
+BuildRequires: asciidoctor
+%endif
 Requires(post): systemd, virt-what
 Requires(preun): systemd
 Requires(postun): systemd
@@ -220,6 +225,7 @@ It can be also used to fine tune your system for specific scenarios.
 %setup -q -n %{name}-%{version}%{?prerel2}
 
 %build
+make html
 
 %install
 make install DESTDIR=%{buildroot} DOCDIR=%{docdir} \
@@ -231,6 +237,9 @@ make install DESTDIR=%{buildroot} DOCDIR=%{docdir} \
 %if 0%{?rhel}
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
 %endif
+
+# guide
+make install-html DESTDIR=%{buildroot} DOCDIR=%{docdir}
 
 # conditional support for grub2, grub2 is not available on all architectures
 # and tuned is noarch package, thus the following hack is needed
