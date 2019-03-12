@@ -389,6 +389,14 @@ class NetTuningPlugin(base.Plugin):
 					in params_current.items()
 					if param in params_set]
 			relevant_params_current = dict(relevant_params_current)
+			if verify:
+				res = (self._cmd.dict2list(params_set)
+						== self._cmd.dict2list(relevant_params_current))
+				self._log_verification_result(context, res,
+						params_set,
+						relevant_params_current,
+						device = device)
+				return res
 			# saved are only those parameters which passed checks
 			self._storage.set(storage_key, " ".join(
 					self._cmd.dict2list(relevant_params_current)))
