@@ -385,9 +385,13 @@ class NetTuningPlugin(base.Plugin):
 			# failed
 			if len(params_set) == 0:
 				return False
+			relevant_params_current = [(param, value) for param, value
+					in params_current.items()
+					if param in params_set]
+			relevant_params_current = dict(relevant_params_current)
 			# saved are only those parameters which passed checks
 			self._storage.set(storage_key, " ".join(
-					self._cmd.dict2list(params_set)))
+					self._cmd.dict2list(relevant_params_current)))
 		else:
 			original_value = self._storage.get(storage_key)
 			# in storage are only those parameters which were already tested
