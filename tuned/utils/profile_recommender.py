@@ -67,7 +67,7 @@ class ProfileRecommender:
 						value = r"^$"
 					if option == "virt":
 						if not re.match(value,
-								self._commands.execute("virt-what")[1], re.S):
+								self._commands.execute(["virt-what"])[1], re.S):
 							match = False
 					elif option == "system":
 						if not re.match(value,
