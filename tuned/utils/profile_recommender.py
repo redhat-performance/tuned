@@ -32,7 +32,11 @@ class ProfileRecommender:
 		profile = consts.DEFAULT_PROFILE
 		if hardcoded:
 			return profile
-		matching = self.process_config(consts.RECOMMEND_CONF_FILE)
+		has_root = os.geteuid() == 0
+		if not has_root:
+			log.warning("Profile recommender is running without root privileges. Profiles with virt recommendation condition will be omitted.")
+		matching = self.process_config(consts.RECOMMEND_CONF_FILE,
+									   has_root=has_root)
 		if matching is not None:
 			return matching
 		files = {}
@@ -48,12 +52,12 @@ class ProfileRecommender:
 				files[name] = path
 		for name in sorted(files.keys()):
 			path = files[name]
-			matching = self.process_config(path)
+			matching = self.process_config(path, has_root=has_root)
 			if matching is not None:
 				return matching
 		return profile
 
-	def process_config(self, fname):
+	def process_config(self, fname, has_root=True):
 		matching_profile = None
 		try:
 			if not os.path.isfile(fname):
@@ -66,6 +70,9 @@ class ProfileRecommender:
 					if value == "":
 						value = r"^$"
 					if option == "virt":
+						if not has_root:
+							match = False
+							break
 						if not re.match(value,
 								self._commands.execute(["virt-what"])[1], re.S):
 							match = False
