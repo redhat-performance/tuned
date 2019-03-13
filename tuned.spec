@@ -238,7 +238,7 @@ make install DESTDIR=%{buildroot} DOCDIR=%{docdir} \
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
 %endif
 
-# guide
+# manual
 make install-html DESTDIR=%{buildroot} DOCDIR=%{docdir}
 
 # conditional support for grub2, grub2 is not available on all architectures

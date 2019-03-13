@@ -117,13 +117,13 @@ nightly: tidy-mock-result-dir createrepo scratch-build
 	rsync -ave ssh --delete --progress mock-result-dir/ jskarvad@fedorapeople.org:/home/fedora/jskarvad/public_html/tuned/devel/repo/
 
 html:
-	$(MAKE) -C doc/guide
+	$(MAKE) -C doc/manual
 
 install-html:
-	$(MAKE) -C doc/guide install
+	$(MAKE) -C doc/manual install
 
 clean-html:
-	$(MAKE) -C doc/guide clean
+	$(MAKE) -C doc/manual clean
 
 install-dirs:
 	mkdir -p $(DESTDIR)$(PYTHON_SITELIB)
