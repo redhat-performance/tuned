@@ -2,15 +2,16 @@ import os
 import re
 import errno
 import procfs
+import platform
 from configobj import ConfigObj, ConfigObjError
+
+have_dmidecode = False
 try:
-	if (os.getuid() == 0):
+	if (os.getuid() == 0 and platform.machine() in ["i386", "i486", "i586", "i686", "x86_64"]):
 		import dmidecode
 		have_dmidecode = True
-	else:
-		have_dmidecode = False
 except:
-	have_dmidecode = False
+	pass
 try:
 	import syspurpose.files
 	have_syspurpose = True
