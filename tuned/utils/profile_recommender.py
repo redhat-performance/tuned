@@ -7,7 +7,7 @@ from configobj import ConfigObj, ConfigObjError
 
 have_dmidecode = False
 try:
-	if (os.getuid() == 0 and platform.machine() in ["i386", "i486", "i586", "i686", "x86_64"]):
+	if (os.geteuid() == 0 and platform.machine() in ["i386", "i486", "i586", "i686", "x86_64"]):
 		import dmidecode
 		have_dmidecode = True
 except:
