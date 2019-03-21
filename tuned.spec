@@ -16,8 +16,10 @@
 
 %if %{with python3}
 %global _py python3
+%global make_python_arg PYTHON=%{__python3}
 %else
 %{!?python2_sitelib:%global python2_sitelib %{python_sitelib}}
+%global make_python_arg PYTHON=%{__python2}
 %if 0%{?rhel} && 0%{?rhel} < 8
 %global _py python
 %else
@@ -225,15 +227,10 @@ It can be also used to fine tune your system for specific scenarios.
 %setup -q -n %{name}-%{version}%{?prerel2}
 
 %build
-make html
+make html %{make_python_arg}
 
 %install
-make install DESTDIR=%{buildroot} DOCDIR=%{docdir} \
-%if %{with python3}
-	PYTHON=%{__python3}
-%else
-	PYTHON=%{__python2}
-%endif
+make install DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
 %if 0%{?rhel}
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
 %endif
