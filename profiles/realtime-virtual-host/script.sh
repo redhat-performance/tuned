@@ -7,9 +7,8 @@ CACHE_CPU_FILE=./lapic_timer_adv_ns.cpumodel
 KVM_LAPIC_FILE=/sys/module/kvm/parameters/lapic_timer_advance_ns
 QEMU=$(type -P qemu-kvm || echo /usr/libexec/qemu-kvm)
 TSCDEADLINE_LATENCY="/usr/share/qemu-kvm/tscdeadline_latency.flat"
-if [ ! -f "$TSCDEADLINE_LATENCY" ]; then
-    TSCDEADLINE_LATENCY="/usr/share/tuned/tscdeadline_latency.flat"
-fi
+[ -f "$TSCDEADLINE_LATENCY" ] || TSCDEADLINE_LATENCY="/usr/share/tuned-profiles-nfv-host-bin/tscdeadline_latency.flat"
+[ -f "$TSCDEADLINE_LATENCY" ] || TSCDEADLINE_LATENCY="/usr/share/tuned/tscdeadline_latency.flat"
 
 run_tsc_deadline_latency()
 {
@@ -62,9 +61,9 @@ start() {
     # If CPU model has changed, clean the cache
     if [ -f $CACHE_CPU_FILE ]; then
         curmodel=`cat /proc/cpuinfo | grep "model name" | cut -f 2 -d ":" | uniq`
-	if [ -z "$curmodel" ]; then
-	    die failed to read CPU model
-	fi
+        if [ -z "$curmodel" ]; then
+            die failed to read CPU model
+        fi
 
         genmodel=`cat $CACHE_CPU_FILE`
 
@@ -78,7 +77,7 @@ start() {
     # and cache it
 
     if [ ! -f $KVM_LAPIC_FILE ]; then
-	die $KVM_LAPIC_FILE not found
+        die $KVM_LAPIC_FILE not found
     fi
 
     if [ ! -f $CACHE_VALUE_FILE ]; then
@@ -87,8 +86,8 @@ start() {
              isolatedcpu=`echo "$TUNED_isolated_cores_expanded" | cut -f 1 -d ","`
              run_tsc_deadline_latency $isolatedcpu > $tempdir/lat.out
              if ! ./find-lapictscdeadline-optimal.sh $tempdir/lat.out > $tempdir/opt.out; then
-		die could not find optimal latency
-	     fi
+                die could not find optimal latency
+             fi
              echo `cat $tempdir/opt.out | cut -f 2 -d ":"` > $CACHE_VALUE_FILE
              curmodel=`cat /proc/cpuinfo | grep "model name" | cut -f 2 -d ":" | uniq`
              echo "$curmodel" > $CACHE_CPU_FILE
