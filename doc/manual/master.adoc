@@ -19,7 +19,7 @@ include::meta/attributes.adoc[]
 
 // Abstract (Preamble):
 
-This documentation explains how to use the *Tuned* service to monitor and optimize the throughput, latency, and power consumption of your system in different scenarios.
+This documentation explains how to use the *Tuned* application to monitor and optimize the throughput, latency, and power consumption of your system in different scenarios.
 
 // The following is copied from the standard Red Hat legal notice
 // as used in all Red Hat documentation.
