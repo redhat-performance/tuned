@@ -5,7 +5,7 @@
 
 :context: getting-started-with-tuned
 
-As a system administrator, you can use the *Tuned* service to optimize the performance profile of your system for a variety of use cases.
+As a system administrator, you can use the *Tuned* application to optimize the performance profile of your system for a variety of use cases.
 
 // [id='prerequisites-{context}']
 // == Prerequisites

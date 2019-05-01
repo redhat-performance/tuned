@@ -1,7 +1,7 @@
 [id="installing-and-enabling-tuned_{context}"]
 = Installing and enabling Tuned
 
-This procedure installs and enables the *Tuned* service, installs *Tuned* profiles, and presets a default *Tuned* profile for your system.
+This procedure installs and enables the *Tuned* application, installs *Tuned* profiles, and presets a default *Tuned* profile for your system.
 
 // [discrete]
 // == Prerequisites
