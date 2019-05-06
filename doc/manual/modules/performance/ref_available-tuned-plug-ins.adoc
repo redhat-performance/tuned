@@ -85,15 +85,32 @@ It sets Aggressive Link Power Management (ALPM) to the value specified by the [o
 Enables or disables barriers for mounts according to the Boolean value of the [option]`disable_barriers` option. 
 
 `script`::
-Can be used for the execution of an external script that is run when the profile is loaded or unloaded.
+Executes an external script or binary when the profile is loaded or unloaded. You can choose an arbitrary executable.
 +
-The script is called by one argument which can be `start` or `stop`, depending on whether the script is called during the profile load or unload. The script file name can be specified by the `script` parameter.
+IMPORTANT: The `script` plug-in is provided mainly for compatibility with earlier releases. Prefer other *Tuned* plug-ins if they cover the required functionality. 
 +
-You need to correctly implement the stop action in your script and revert all settings that you changed during the start action. Otherwise, the roll-back step after changing your *Tuned* profile will not work. 
+*Tuned* calls the executable with one of the following arguments:
 +
-The `functions` Bash helper script is installed by default and enables you to import and use various functions defined in it. 
+--
+** `start` when loading the profile
+** `stop` when unloading the profile
+--
 +
-Note that this plug-in is provided mainly for backwards compatibility, and it is recommended that you use it as the last resort and prefer other plug-ins if they cover the required settings. 
+You need to correctly implement the `stop` action in your executable and revert all settings that you changed during the `start` action. Otherwise, the roll-back step after changing your *Tuned* profile will not work. 
++
+Bash scripts can import the [filename]`/usr/lib/tuned/functions` Bash library and use the functions defined there. Use these functions only for functionality that is not natively provided by *Tuned*. If a function name starts with an underscore, such as `_wifi_set_power_level`, consider the function private and do not use it in your scripts, because it might change in the future.
++
+Specify the path to the executable using the `script` parameter in the plug-in configuration.
++
+.Running a Bash script from a profile
+====
+To run a Bash script named `script.sh` that is located in the profile directory, use:
+
+----
+[script]
+script=${i:PROFILE_DIR}/script.sh
+----
+====
 
 `sysfs`::
 Sets various `sysfs` settings specified by the plug-in options.
