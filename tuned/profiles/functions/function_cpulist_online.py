@@ -19,4 +19,4 @@ class cpulist_online(base.Function):
 			return None
 		cpus = self._cmd.cpulist_unpack(",".join(args))
 		online = self._cmd.cpulist_unpack(self._cmd.read_file("/sys/devices/system/cpu/online"))
-		return ",".join(str(v) for v in set(cpus).intersection(set(online)))
+		return ",".join(str(v) for v in cpus if v in online)
