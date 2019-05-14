@@ -76,7 +76,7 @@ class SysctlPlugin(base.Plugin):
 			curr_val = _read_sysctl(option)
 			value = self._process_assignment_modifiers(self._variables.expand(value), curr_val)
 			if value is not None:
-				if self._verify_value(option, self._cmd.remove_ws(value), curr_val, ignore_missing) == False:
+				if self._verify_value(option, self._cmd.remove_ws(value), self._cmd.remove_ws(curr_val), ignore_missing) == False:
 					ret = False
 		return ret
 
