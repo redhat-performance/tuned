@@ -25,11 +25,10 @@ This procedure installs and enables the *Tuned* application, installs *Tuned* pr
 # systemctl enable --now tuned
 ----
 
-. Optionally, install *Tuned* profiles for real-time systems or for {RHEL} Atomic Host:
+. Optionally, install *Tuned* profiles for real-time systems:
 +
 ----
-# yum install tuned-profiles-realtime tuned-profiles-nfv \
-              tuned-profiles-atomic
+# yum install tuned-profiles-realtime tuned-profiles-nfv
 ----
 
 . Verify that a *Tuned* profile is active and applied:
