@@ -134,6 +134,7 @@ class TunedLogger(logging.getLoggerClass()):
 			log_directory = '.'
 		if not os.path.exists(log_directory):
 			os.makedirs(log_directory)
+			os.chmod(log_directory, 0o750)
 
 		cls._file_handler = logging.handlers.RotatingFileHandler(
 			filename, maxBytes = int(maxBytes), backupCount = int(backupCount))
