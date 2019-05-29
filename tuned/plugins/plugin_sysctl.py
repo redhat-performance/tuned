@@ -90,7 +90,7 @@ def _apply_system_sysctl():
 	for d in SYSCTL_CONFIG_DIRS:
 		try:
 			flist = os.listdir(d)
-		except:
+		except OSError:
 			continue
 		for fname in flist:
 			if not fname.endswith(".conf"):
