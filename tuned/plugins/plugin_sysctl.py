@@ -133,7 +133,7 @@ def _apply_sysctl_config_line(path, lineno, line):
 				% (path, lineno))
 		return
 	value = value.strip()
-	_write_sysctl(option, value)
+	_write_sysctl(option, value, ignore_missing = True)
 
 def _get_sysctl_path(option):
 	return "/proc/sys/%s" % option.replace(".", "/")
@@ -161,7 +161,7 @@ def _read_sysctl(option):
 					% (option, str(e)))
 		return None
 
-def _write_sysctl(option, value):
+def _write_sysctl(option, value, ignore_missing = False):
 	path = _get_sysctl_path(option)
 	if os.path.basename(path) in DEPRECATED_SYSCTL_OPTIONS:
 		log.error("Refusing to set deprecated sysctl option %s"
@@ -175,7 +175,8 @@ def _write_sysctl(option, value):
 		return True
 	except (OSError, IOError) as e:
 		if e.errno == errno.ENOENT:
-			log.error("Failed to set sysctl parameter '%s' to '%s', the parameter does not exist"
+			log_func = log.debug if ignore_missing else log.error
+			log_func("Failed to set sysctl parameter '%s' to '%s', the parameter does not exist"
 					% (option, value))
 		else:
 			log.error("Failed to set sysctl parameter '%s' to '%s': %s"
