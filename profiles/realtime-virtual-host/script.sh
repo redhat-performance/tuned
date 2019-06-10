@@ -23,7 +23,7 @@ run_tsc_deadline_latency()
             -device isa-debug-exit,iobase=0xf4,iosize=0x4 \
             -display none -serial stdio -device pci-testdev \
             -kernel "$TSCDEADLINE_LATENCY"  \
-            -cpu host \
+            -cpu host,tsc-deadline=on \
             -mon chardev=char0,mode=readline \
             -chardev socket,id=char0,nowait,path=$unixpath,server | grep latency | cut -f 2 -d ":" > $dir/out &
 
