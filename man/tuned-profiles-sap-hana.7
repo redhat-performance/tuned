@@ -35,14 +35,6 @@ It is based on throughput\-performance profile. It additionally disables
 transparent hugepages, locks CPU to the low C states (by PM QoS) and tunes sysctl
 regarding semaphores.
 
-.TP
-.BI "sap\-hana\-vmware"
-A performance optimized profile for the SAP HANA applications on VMware.
-It is based on throughput\-performance profile. It additionally disables
-transparent hugepages, locks CPU to the low C states (by PM QoS) and tunes sysctl
-regarding semaphores. It decreases virtual memory swappiness and disables large
-receive offload for the network adapter.
-
 .SH "FILES"
 .nf
 .I /etc/tuned/*
