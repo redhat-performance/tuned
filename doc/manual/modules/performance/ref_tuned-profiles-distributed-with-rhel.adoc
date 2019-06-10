@@ -1,7 +1,7 @@
-[id="tuned-profiles-distributed-with-red-hat-enterprise-linux_{context}"]
-= Tuned profiles distributed with Red Hat Enterprise Linux
+[id="tuned-profiles-distributed-with-rhel_{context}"]
+= Tuned profiles distributed with RHEL
 
-The following is a list of profiles that are installed with *Tuned* on {RHEL}:
+The following is a list of profiles that are installed with *Tuned* on {RHEL}.
 
 NOTE: There might be more product-specific or third-party *Tuned* profiles available. Such profiles are usually provided by separate RPM packages.
 
@@ -45,49 +45,6 @@ A profile optimized for Oracle databases loads based on `throughput-performance`
 `desktop`::
 A profile optimized for desktops, based on the `balanced` profile. It additionally enables scheduler autogroups for better response of interactive applications. 
 
-// The below section is commented out for the reason: the package is about to be dropped https://docs.google.com/document/d/1sC0aqHdvNj1sCPMJjWQKTxmfZ_CFDxAZZCTcoiJ5kGg/edit?disco=uiAAAACO8spDQ
-////
-[discrete]
-== Compat profiles
-
-// Additional predefined profiles can be installed with the [package]`tuned-profiles-compat` package available in the Optional channel. These profiles are intended for backward compatibility and are no longer developed.
-Additional predefined profiles can be installed with the [package]`tuned-profiles-compat` package. These profiles are intended for backward compatibility and are no longer developed.
-
-The generalized profiles from the base package mostly perform the same or better. If you do not have a specific reason for using them, please prefer the above mentioned profiles from the base package.
-
-The compat profiles are following:
-
-`default`::
-This has the lowest impact on power saving of the available profiles and only enables CPU and disk plugins of *Tuned*. 
-
-`desktop-powersave`::
-A power-saving profile directed at desktop systems. Enables ALPM power saving for SATA host adapters as well as the CPU, Ethernet, and disk plug-ins of *Tuned*. 
-
-`laptop-ac-powersave`::
-A medium-impact power-saving profile directed at laptops running on AC. Enables ALPM power saving for SATA host adapters, Wi-Fi power saving, as well as the CPU, Ethernet, and disk plug-ins of *Tuned*. 
-
-`laptop-battery-powersave`::
-A high-impact power-saving profile directed at laptops running on battery. In the current *Tuned* implementation, it is an alias for the `powersave` profile. 
-
-`spindown-disk`::
-A power-saving profile for machines with classic HDDs to minimize the spindown timeout. It enables USB autosuspend, disables Bluetooth, enables Wi-Fi power saving, disables logs syncing, increases disk write-back time, and lowers disk swappiness. All partitions are remounted with the `noatime` option. 
-
-`enterprise-storage`::
-A server profile directed at enterprise-class storage, maximizing I/O throughput. It activates the same settings as the `throughput-performance` profile, multiplies readahead settings, and disables barriers on non-root and non-boot partitions. 
-////
-
-[discrete]
-== Profiles for {RHEL} Atomic Host
-
-Profiles optimized for {RHEL} Atomic Host are provided by the [package]`tuned-profiles-atomic` package. The *Tuned* profiles for {RHEL} Atomic Host are:
-
-`atomic-host`::
-A profile optimized for {RHEL} Atomic Host, when used as a host system on a bare-metal server, based on the `throughput-performance` profile. It additionally increases SELinux AVC cache, PID limit, and tunes `netfilter` connections tracking. 
-
-`atomic-guest`::
-A profile optimized for {RHEL} Atomic Host, when used as a guest system based on the `virtual-guest` profile. It additionally increases SELinux AVC cache, PID limit, and tunes `netfilter` connections tracking. 
-
-Use the `atomic-host` profile on physical machines, and the `atomic-guest` profile on virtual machines.
 
 [discrete]
 == Real-time profiles
