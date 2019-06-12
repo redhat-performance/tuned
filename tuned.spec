@@ -35,16 +35,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.11.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.12.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -484,6 +484,29 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Wed Jun 12 2019 Jaroslav Škarvada <jskarvad@redhat.com> - 2.12.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#1685585
+  - sap-netweaver: changed values of kernel.shmall and kernel.shmmax to RHEL-8 defaults
+    resolves: rhbz#1708418
+  - sap-netweaver: changed value of kernel.sem to RHEL-8 default
+    resolves: rhbz#1701394
+  - sap-hana-vmware: dropped profile
+    resolves: rhbz#1715541
+  - s2kb function: fixed to be compatible with python3
+    resolves: rhbz#1684122
+  - do fallback to the powersave governor (balanced and powersave profiles)
+    resolves: rhbz#1679205
+  - added support for negation of CPU list
+    resolves: rhbz#1676588
+  - switched from sysctl tool to own implementation
+    resolves: rhbz#1666678
+  - realtime-virtual-host: added tsc-deadline=on to qemu cmdline
+    resolves: rhbz#1554458
+  - fixed handling of devices that have been removed and re-attached
+    resolves: rhbz#1677730
+
 * Thu Mar 21 2019 Jaroslav Škarvada <jskarvad@redhat.com> - 2.11.0-1
 - new release
   - rebased tuned to latest upstream
