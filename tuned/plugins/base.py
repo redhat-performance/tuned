@@ -158,7 +158,7 @@ class Plugin(object):
 		else:
 			udev_devices = self._get_device_objects(devices)
 			if udev_devices is None:
-				log.error("Plugin '%s' does not support the 'devices_udev_regex' option", self.name)
+				log.warn("Plugin '%s' does not support the 'devices_udev_regex' option", self.name)
 				return set()
 			udev_devices = self._device_matcher_udev.match_list(instance.devices_udev_regex, udev_devices)
 			return set([x.sys_name for x in udev_devices])

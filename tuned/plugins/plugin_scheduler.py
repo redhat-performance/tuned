@@ -318,15 +318,15 @@ class SchedulerPlugin(base.Plugin):
 	def _convert_sched_params(self, str_scheduler, str_priority):
 		scheduler = self._dict_schedcfg2num.get(str_scheduler)
 		if scheduler is None and str_scheduler != "*":
-			log.error("Invalid scheduler: %s. Scheduler and priority will be ignored."
-					% str_scheduler)
+			log.warn("Invalid scheduler: %s. Scheduler and priority will be ignored."
+					 % str_scheduler)
 			return (None, None)
 		else:
 			try:
 				priority = int(str_priority)
 			except ValueError:
-				log.error("Invalid priority: %s. Scheduler and priority will be ignored."
-							% str_priority)
+				log.warn("Invalid priority: %s. Scheduler and priority will be ignored."
+						 % str_priority)
 				return (None, None)
 		return (scheduler, priority)
 
@@ -336,8 +336,8 @@ class SchedulerPlugin(base.Plugin):
 		else:
 			affinity = self._cmd.hex2cpulist(str_affinity)
 			if not affinity:
-				log.error("Invalid affinity: %s. It will be ignored."
-						% str_affinity)
+				log.warn("Invalid affinity: %s. It will be ignored."
+						 % str_affinity)
 				affinity = None
 		return affinity
 
@@ -584,8 +584,10 @@ class SchedulerPlugin(base.Plugin):
 				log.debug("Setting SMP affinity of IRQ %s is not supported"
 						% irq)
 			else:
-				log.error("Failed to set SMP affinity of IRQ %s to '%s': %s"
-						% (irq, affinity_hex, e))
+				# managed IRQs would have smp_affinity file as RO, so
+				# it could be fine
+				log.warn("Failed to set SMP affinity of IRQ %s to '%s': %s"
+						 % (irq, affinity_hex, e))
 			return False
 
 	def _set_default_irq_affinity(self, affinity):
