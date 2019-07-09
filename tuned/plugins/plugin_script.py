@@ -31,6 +31,7 @@ class ScriptPlugin(base.Plugin):
 		pass
 
 	def _call_scripts(self, scripts, arguments):
+		ret = True
 		for script in scripts:
 			environ = os.environ
 			environ.update(self._variables.get_env())
@@ -47,11 +48,11 @@ class ScriptPlugin(base.Plugin):
 					log.error("script '%s' error output: '%s'" % (script, err[:-1]))
 				if proc.returncode:
 					log.error("script '%s' returned error code: %d" % (script, proc.returncode))
-					return False
+					ret = False
 			except (OSError,IOError) as e:
 				log.error("script '%s' error: %s" % (script, e))
-				return False
-		return True
+				ret = False
+		return ret
 
 	def _instance_apply_static(self, instance):
 		super(ScriptPlugin, self)._instance_apply_static(instance)
