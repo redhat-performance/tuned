@@ -473,6 +473,17 @@ restore_logs_syncing() {
 	mv -Z $RSYSLOG_SAVE $RSYSLOG_CFG || mv $RSYSLOG_SAVE $RSYSLOG_CFG
 }
 
+irqbalance_banned_cpus_clear() {
+    sed -i '/^IRQBALANCE_BANNED_CPUS=/d' /etc/sysconfig/irqbalance
+}
+
+irqbalance_banned_cpus_setup() {
+    irqbalance_banned_cpus_clear
+    if [ -n "$1" ]; then
+        echo "IRQBALANCE_BANNED_CPUS=$1" >> /etc/sysconfig/irqbalance
+    fi
+}
+
 #
 # HARDWARE SPECIFIC tuning
 #
