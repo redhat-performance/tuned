@@ -5,6 +5,7 @@
 CACHE_VALUE_FILE=./lapic_timer_adv_ns
 CACHE_CPU_FILE=./lapic_timer_adv_ns.cpumodel
 KVM_LAPIC_FILE=/sys/module/kvm/parameters/lapic_timer_advance_ns
+KTIMER_LOCKLESS_FILE=/sys/kernel/ktimer_lockless_check
 QEMU=$(type -P qemu-kvm || echo /usr/libexec/qemu-kvm)
 TSCDEADLINE_LATENCY="/usr/share/qemu-kvm/tscdeadline_latency.flat"
 [ -f "$TSCDEADLINE_LATENCY" ] || TSCDEADLINE_LATENCY="/usr/share/tuned-profiles-nfv-host-bin/tscdeadline_latency.flat"
@@ -98,6 +99,10 @@ start() {
         echo `cat $CACHE_VALUE_FILE` > $KVM_LAPIC_FILE
     fi
     systemctl start rt-entsk
+
+    if [ -f $KTIMER_LOCKLESS_FILE ]; then
+        echo 1 > $KTIMER_LOCKLESS_FILE
+    fi
 
     return 0
 }
