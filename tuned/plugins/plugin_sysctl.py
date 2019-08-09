@@ -54,12 +54,13 @@ class SysctlPlugin(base.Plugin):
 				log.error("sysctl option %s will not be set, failed to read the original value."
 						% option)
 			else:
-				instance._sysctl_original[option] = original_value
 				new_value = self._variables.expand(
 						self._cmd.unquote(value))
 				new_value = self._process_assignment_modifiers(
 						new_value, original_value)
-				_write_sysctl(option, new_value)
+				if new_value is not None:
+					instance._sysctl_original[option] = original_value
+					_write_sysctl(option, new_value)
 
 		storage_key = self._storage_key(instance.name)
 		self._storage.set(storage_key, instance._sysctl_original)
