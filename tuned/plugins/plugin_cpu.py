@@ -12,6 +12,8 @@ import procfs
 
 log = tuned.logs.get()
 
+cpuidle_states_path = "/sys/devices/system/cpu/cpu0/cpuidle"
+
 # TODO: force_latency -> command
 #       intel_pstate
 
@@ -210,13 +212,74 @@ class CPULatencyPlugin(base.Plugin):
 	def _instance_unapply_dynamic(self, instance, device):
 		pass
 
+	def _str2int(self, s):
+		try:
+			return int(s)
+		except (ValueError, TypeError):
+			return None
+
+	def _read_cstates_latency(self):
+		self.cstates_latency = {}
+		for d in os.listdir(cpuidle_states_path):
+			cstate_path = cpuidle_states_path + "/%s/" % d
+			name = self._cmd.read_file(cstate_path + "name", err_ret = None, no_error = True)
+			latency = self._cmd.read_file(cstate_path + "latency", err_ret = None, no_error = True)
+			if name is not None and latency is not None:
+				latency = self._str2int(latency)
+				if latency is not None:
+					self.cstates_latency[name.strip()] = latency
+
+	def _get_latency_by_cstate_name(self, name):
+		log.debug("getting latency for cstate with name '%s'" % name)
+		if self.cstates_latency is None:
+			log.debug("reading cstates latency table")
+			self._read_cstates_latency()
+		latency = self.cstates_latency.get(name, None)
+		log.debug("cstate name mapped to latency: %s" % str(latency))
+		return latency
+
+	def _get_latency_by_cstate_id(self, lid):
+		log.debug("getting latency for cstate with ID '%s'" % str(lid))
+		lid = self._str2int(lid)
+		if lid is None:
+			log.debug("cstate ID is invalid")
+			return None
+		latency_path = cpuidle_states_path + "/%s/latency" % ("state%d" % lid)
+		latency = self._str2int(self._cmd.read_file(latency_path, err_ret = None, no_error = True))
+		log.debug("cstate ID mapped to latency: %s" % str(latency))
+		return latency
+
+	def _parse_latency(self, latency):
+		self.cstates_latency = None
+		latencies = str(latency).split("|")
+		log.debug("parsing latency")
+		for latency in latencies:
+			try:
+				latency = int(latency)
+				log.debug("parsed directly specified latency value: %d" % latency)
+			except ValueError:
+				if latency[0:10] == "cstate.id:":
+					latency = self._get_latency_by_cstate_id(latency[10:])
+				elif latency[0:12] == "cstate.name:":
+					latency = self._get_latency_by_cstate_name(latency[12:])
+				else:
+					latency = None
+					log.debug("invalid latency specified: '%s'" % str(latency))
+			if latency is not None:
+				break
+		return latency
+
 	def _set_latency(self, latency):
-		latency = int(latency)
-		if self._has_pm_qos and self._latency != latency:
-			log.info("setting new cpu latency %d" % latency)
-			latency_bin = struct.pack("i", latency)
-			os.write(self._cpu_latency_fd, latency_bin)
-			self._latency = latency
+		latency = self._parse_latency(latency)
+		if self._has_pm_qos:
+			if latency is None:
+				log.error("unable to evaluate latency value (probably wrong settings in the 'cpu' section of current profile), disabling PM QoS")
+				self._has_pm_qos = False
+			elif self._latency != latency:
+				log.info("setting new cpu latency %d" % latency)
+				latency_bin = struct.pack("i", latency)
+				os.write(self._cpu_latency_fd, latency_bin)
+				self._latency = latency
 
 	def _get_available_governors(self, device):
 		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).strip().split()
