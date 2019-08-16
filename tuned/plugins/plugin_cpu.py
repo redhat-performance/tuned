@@ -14,9 +14,6 @@ log = tuned.logs.get()
 
 cpuidle_states_path = "/sys/devices/system/cpu/cpu0/cpuidle"
 
-# TODO: force_latency -> command
-#       intel_pstate
-
 class CPULatencyPlugin(base.Plugin):
 	"""
 	Plugin for tuning CPU options. Powersaving, governor, required latency, etc.
