@@ -78,8 +78,8 @@ class Loader(object):
 			config = self._load_config_data(filename)
 			profile = self._profile_factory.create(name, config)
 			if "include" in profile.options:
-				include_name = self._variables.expand(profile.options.pop("include"))
-				self._load_profile([include_name], profiles, processed_files)
+				include_names = re.split(r"\b\s*[,;]\s*", self._variables.expand(profile.options.pop("include")))
+				self._load_profile(include_names, profiles, processed_files)
 
 			profiles.append(profile)
 
