@@ -122,11 +122,18 @@ class Daemon(object):
 		return errstr
 
 	def _full_rollback_required(self):
-		retcode, out = self._cmd.execute(["systemctl", "is-system-running"], no_errors = [0])
+		retcode, out, err_msg = self._cmd.execute(["systemctl", "is-system-running"], no_errors = [0], return_err = True)
 		if retcode < 0:
 			return False
+
+		# if there is some stderr and not stdout, it means systemctl runs in container
+		# always rollback in that case
+		if len(out) == 0 and len(err_msg) > 0:
+			return True
 		if out[:8] == "stopping":
 			return False
+		if out[:7] == "offline":
+			return True               
 		retcode, out = self._cmd.execute(["systemctl", "list-jobs"], no_errors = [0])
 		return re.search(r"\b(shutdown|reboot|halt|poweroff)\.target.*start", out) is None
 
