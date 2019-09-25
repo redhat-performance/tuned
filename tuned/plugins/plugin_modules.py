@@ -49,12 +49,15 @@ class ModulesPlugin(base.Plugin):
 			module = self._variables.expand(option)
 			v = self._variables.expand(value)
 			if not skip_check:
-				retcode, out = self._cmd.execute(["modinfo", module])
+				# modinfo could fail as expected when module is not
+				# there. Capture the error instead of printing an
+				# ERROR every time even it's a very valid case
+				retcode, out, err = self._cmd.execute(["modinfo", module], return_err=True)
 				if retcode < 0:
 					skip_check = True
-					log.warn("'modinfo' command not found, not checking kernel modules")
+					log.info("'modinfo' command not found, not checking kernel modules")
 				elif retcode > 0:
-					log.error("kernel module '%s' not found, skipping it" % module)
+					log.info("kernel module '%s' not found, skipping it" % module)
 			if skip_check or retcode == 0:
 				if len(v) > 1 and v[0:2] == "+r":
 					v = re.sub(r"^\s*\+r\s*,?\s*", "", v)

@@ -51,8 +51,8 @@ class SysctlPlugin(base.Plugin):
 		for option, value in list(instance._sysctl.items()):
 			original_value = _read_sysctl(option)
 			if original_value is None:
-				log.error("sysctl option %s will not be set, failed to read the original value."
-						% option)
+				log.warn("sysctl option %s will not be set, failed to read the original value."
+						 % option)
 			else:
 				new_value = self._variables.expand(
 						self._cmd.unquote(value))
@@ -155,8 +155,8 @@ def _read_sysctl(option):
 		return value
 	except (OSError, IOError) as e:
 		if e.errno == errno.ENOENT:
-			log.error("Failed to read sysctl parameter '%s', the parameter does not exist"
-					% option)
+			log.warn("Failed to read sysctl parameter '%s', the parameter does not exist"
+					 % option)
 		else:
 			log.error("Failed to read sysctl parameter '%s': %s"
 					% (option, str(e)))
