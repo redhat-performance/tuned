@@ -334,7 +334,14 @@ class BootloaderPlugin(base.Plugin):
 		if enabling and value is not None:
 			log.info("installing additional boot command line parameters to grub2")
 			self.update_grub2_cfg = True
-			self._cmdline_val = v
+                        # remove null valued keypairs such as key= and key=""
+                        newlist = []
+                        for keypair in v.split():
+                                if re.match(r'[^=]+=""|[^=]+=$', keypair):
+                                        pass
+                                else:
+                                        newlist.append(keypair)
+                        self._cmdline_val = ' '.join(newlist)
 
 	def _instance_post_static(self, instance, enabling):
 		if enabling and self.update_grub2_cfg:
