@@ -1,0 +1,5 @@
+PURPOSE of /CoreOS/tuned/Regression/Program-tuned-tried-to-access-dev-mem-between
+Description: Test for BZ#1688371 (Program tuned tried to access /dev/mem between)
+Author: Robin Hack <rhack@redhat.com>
+Bug summary: Program tuned tried to access /dev/mem between f0000->100000.
+Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1688371

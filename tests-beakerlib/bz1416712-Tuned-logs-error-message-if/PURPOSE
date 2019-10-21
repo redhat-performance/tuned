@@ -1,0 +1,5 @@
+PURPOSE of /CoreOS/tuned/Regression/bz1416712-Tuned-logs-error-message-if
+Description: Test for BZ#1416712 (Tuned logs error message if)
+Author: Tereza Cerna <tcerna@redhat.com>
+Bug summary: Tuned logs error message if '/sys/class/scsi_host/host*/link_power_management_policy' file does not exists.
+Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1416712
