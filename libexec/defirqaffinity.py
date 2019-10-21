@@ -107,7 +107,7 @@ if sys.argv[1] == "verify":
 
 string = get_cpumask(mask)
 
-fo = open(irqpath + "default_smp_affinity", "wb")
+fo = open(irqpath + "default_smp_affinity", "w")
 fo.write(string)
 fo.close()
 
@@ -140,7 +140,7 @@ for i in interruptdirs:
 			mask = mask & ~(1 << int(j));
 	string = get_cpumask(mask)
 	try:
-		fo = open(fname, "wb")
+		fo = open(fname, "w")
 		fo.write(string)
 		fo.close()
 	except IOError as e:
