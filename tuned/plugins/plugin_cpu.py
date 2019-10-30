@@ -176,13 +176,23 @@ class CPULatencyPlugin(base.Plugin):
 		if not instance._first_instance:
 			return
 
-		force_latency_value = instance.options["force_latency"]
+		force_latency_value = self._variables.expand(
+			instance.options["force_latency"])
 		if force_latency_value is not None:
 			self._set_latency(force_latency_value)
 		if self._has_intel_pstate:
-			self._min_perf_pct_save = self._getset_intel_pstate_attr("min_perf_pct", instance.options["min_perf_pct"])
-			self._max_perf_pct_save = self._getset_intel_pstate_attr("max_perf_pct", instance.options["max_perf_pct"])
-			self._no_turbo_save = self._getset_intel_pstate_attr("no_turbo", instance.options["no_turbo"])
+			new_value = self._variables.expand(
+				instance.options["min_perf_pct"])
+			self._min_perf_pct_save = self._getset_intel_pstate_attr(
+				"min_perf_pct", new_value)
+			new_value = self._variables.expand(
+				instance.options["max_perf_pct"])
+			self._max_perf_pct_save = self._getset_intel_pstate_attr(
+				"max_perf_pct", new_value)
+			new_value = self._variables.expand(
+				instance.options["no_turbo"])
+			self._no_turbo_save = self._getset_intel_pstate_attr(
+				"no_turbo", new_value)
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
 		super(CPULatencyPlugin, self)._instance_unapply_static(instance, full_rollback)
