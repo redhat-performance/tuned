@@ -640,6 +640,13 @@ class SchedulerPlugin(base.Plugin):
 			log.info(consts.STR_VERIFY_PROFILE_VALUE_OK
 					% (irq_description, current_affinity))
 		else:
+			if not self._set_irq_affinity(self, irq, current_affinity, False):
+				res = True
+				log.info(consts.STR_VERIFY_PROFILE_VALUE_SKIP
+						% (irq_description,
+						"cannot be changed, current value: '%s'"
+						% current_affinity))
+		if not res:
 			log.error(consts.STR_VERIFY_PROFILE_VALUE_FAIL
 					% (irq_description, current_affinity,
 					correct_affinity))
