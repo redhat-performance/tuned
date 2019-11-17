@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # pmqos-static.py: Simple daemon for setting static PM QoS values. It is a part
 #                  of 'tuned' and it should not be called manually.
