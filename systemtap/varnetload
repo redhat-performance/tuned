@@ -1,4 +1,4 @@
-#!/usr/bin/python -Es
+#!/usr/bin/python3 -Es
 #
 # varnetload: A python script to create reproducable sustained network traffic
 

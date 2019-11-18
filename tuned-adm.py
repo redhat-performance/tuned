@@ -1,4 +1,4 @@
-#!/usr/bin/python -Es
+#!/usr/bin/python3 -Es
 #
 # tuned: daemon for monitoring and adaptive tuning of system devices
 #
