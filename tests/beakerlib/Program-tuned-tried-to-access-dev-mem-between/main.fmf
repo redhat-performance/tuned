@@ -1,5 +1,5 @@
 component: tuned
-contact: None <rhack@redhat.com>
+contact: Robin Hack <rhack@redhat.com>
 description: |
     Bug summary: Program tuned tried to access /dev/mem between f0000->100000.
     Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1688371
