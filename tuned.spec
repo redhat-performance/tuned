@@ -59,15 +59,22 @@ Requires(post): systemd, virt-what
 Requires(preun): systemd
 Requires(postun): systemd
 BuildRequires: %{_py}, %{_py}-devel
+# BuildRequires for 'make test'
+BuildRequires: %{_py}-unittest2, %{_py}-flexmock, %{_py}-configobj
+BuildRequires: %{_py}-decorator, %{_py}-pyudev
 Requires: %{_py}-decorator, %{_py}-pyudev, %{_py}-configobj
 Requires: %{_py}-schedutils, %{_py}-linux-procfs, %{_py}-perf
 # requires for packages with inconsistent python2/3 names
 %if %{with python3}
+# BuildRequires for 'make test'
+BuildRequires: python3-dbus, python3-gobject-base
 Requires: python3-dbus, python3-gobject-base
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
 Recommends: python3-dmidecode
 %endif
 %else
+# BuildRequires for 'make test'
+BuildRequires: dbus-python, pygobject3-base
 Requires: dbus-python, pygobject3-base
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
 Recommends: python-dmidecode
@@ -253,6 +260,9 @@ touch %{buildroot}%{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 
 # validate desktop file
 desktop-file-validate %{buildroot}%{_datadir}/applications/tuned-gui.desktop
+
+%check
+make test
 
 %post
 %systemd_post tuned.service
