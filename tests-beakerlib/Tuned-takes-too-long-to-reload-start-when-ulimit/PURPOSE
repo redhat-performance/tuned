@@ -1,5 +1,0 @@
-PURPOSE of /CoreOS/tuned/Regression/Tuned-takes-too-long-to-reload-start-when-ulimit
-Description: Test for BZ#1663412 (Tuned takes too long to reload/start when "ulimit)
-Author: Robin Hack <rhack@redhat.com>
-Bug summary: Tuned takes too long to reload/start when "ulimit -n" is high.
-Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1663412

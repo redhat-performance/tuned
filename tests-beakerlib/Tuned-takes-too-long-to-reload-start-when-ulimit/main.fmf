@@ -1,0 +1,9 @@
+component: tuned
+contact: None <rhack@redhat.com>
+description: |
+    Bug summary: Tuned takes too long to reload/start when "ulimit -n" is high.
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1663412
+duration: 20m
+relevancy: |
+    distro = rhel-4, rhel-5, rhel-6: False
+summary: Test for BZ#1663412 (Tuned takes too long to reload/start when \"ulimit)
