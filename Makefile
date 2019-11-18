@@ -68,7 +68,7 @@ release-cp: release-dir
 		tuned-gui.py tuned-gui.glade \
 		tuned-gui.desktop $(VERSIONED_NAME)
 	cp -a doc experiments libexec man profiles systemtap tuned contrib icons \
-		$(VERSIONED_NAME)
+		tests $(VERSIONED_NAME)
 
 archive: clean release-cp
 	tar czf $(VERSIONED_NAME).tar.gz $(VERSIONED_NAME)
@@ -223,9 +223,9 @@ clean: clean-html
 	rm -rf $(VERSIONED_NAME) rpm-build-dir
 
 test:
-	$(PYTHON) -m unittest discover tests
+	$(PYTHON) -m unittest discover tests/unit
 
 lint:
-	$(PYLINT) -E -f parseable tuned *.py tests
+	$(PYLINT) -E -f parseable tuned *.py tests/unit
 
 .PHONY: clean archive srpm tag test lint

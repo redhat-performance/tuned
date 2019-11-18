@@ -1,6 +1,7 @@
 component: tuned
-contact: None <rhack@redhat.com>
-description: ''
+contact: Robin Hack <rhack@redhat.com>
+description: |
+    Basic tuned-adm functionality check.
 duration: 5m
 relevancy: |
     distro = rhel-6: False
