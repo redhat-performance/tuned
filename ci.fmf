@@ -1,0 +1,4 @@
+discover:
+    how: fmf
+execute:
+    how: beakerlib
