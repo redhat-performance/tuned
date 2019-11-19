@@ -85,13 +85,13 @@ rlJournalStart
     rlPhaseEnd
 
     rlPhaseStartTest "Test tuned-adm VERIFY"
-    	echo > /var/log/tuned/tuned.log
+        echo > /var/log/tuned/tuned.log
         rlServiceStart "tuned"
         rlRun "tuned-adm verify --ignore-missing" 0 
         rlRun "cat /var/log/tuned/tuned.log | grep ERROR" 1
         rlServiceStop "tuned"
         rlRun "tuned-adm verify --ignore-missing" 1
-	    rlRun "cat /var/log/tuned/tuned.log | grep ERROR" 1
+        rlRun "cat /var/log/tuned/tuned.log | grep ERROR" 1
     rlPhaseEnd
 
     rlPhaseStartCleanup
