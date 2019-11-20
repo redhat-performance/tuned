@@ -60,7 +60,11 @@ Requires(preun): systemd
 Requires(postun): systemd
 BuildRequires: %{_py}, %{_py}-devel
 # BuildRequires for 'make test'
-BuildRequires: %{_py}-unittest2, %{_py}-flexmock, %{_py}-configobj
+BuildRequires: %{_py}-unittest2, %{_py}-configobj
+# No flexmock on RHEL
+%if ! 0%{?rhel}
+BuildRequires: %{_py}-flexmock
+%endif
 BuildRequires: %{_py}-decorator, %{_py}-pyudev
 Requires: %{_py}-decorator, %{_py}-pyudev, %{_py}-configobj
 Requires: %{_py}-schedutils, %{_py}-linux-procfs, %{_py}-perf
@@ -262,7 +266,10 @@ touch %{buildroot}%{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 desktop-file-validate %{buildroot}%{_datadir}/applications/tuned-gui.desktop
 
 %check
+# Unit tests not working on RHEL due to missing flexmock dependency
+%if ! 0%{?rhel}
 make test
+%endif
 
 %post
 %systemd_post tuned.service
