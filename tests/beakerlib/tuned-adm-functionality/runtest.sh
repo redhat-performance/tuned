@@ -28,7 +28,7 @@
 
 # Include Beaker environment
 . /usr/bin/rhts-environment.sh
-. /usr/lib/beakerlib/beakerlib.sh
+. /usr/share/beakerlib/beakerlib.sh
 
 PACKAGE="tuned"
 LOG_FILE="profile.log"
