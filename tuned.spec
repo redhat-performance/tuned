@@ -238,7 +238,11 @@ It can be also used to fine tune your system for specific scenarios.
 %setup -q -n %{name}-%{version}%{?prerel2}
 
 %build
+# Docs cannot be generated on RHEL now due to missing asciidoctor dependency
+# asciidoc doesn't seem to be compatible
+%if ! 0%{?rhel}
 make html %{make_python_arg}
+%endif
 
 %install
 make install DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
@@ -246,8 +250,10 @@ make install DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
 %endif
 
+%if ! 0%{?rhel}
 # manual
 make install-html DESTDIR=%{buildroot} DOCDIR=%{docdir}
+%endif
 
 # conditional support for grub2, grub2 is not available on all architectures
 # and tuned is noarch package, thus the following hack is needed
