@@ -45,6 +45,8 @@ class IRQAffinities(object):
 	def __init__(self):
 		self.irqs = {}
 		self.default = None
+		# IRQs that don't support changing CPU affinity:
+		self.unchangeable = []
 
 class SchedulerPlugin(base.Plugin):
 	"""
@@ -565,6 +567,8 @@ class SchedulerPlugin(base.Plugin):
 			log.error("error applying tuning, cannot get information about running processes: %s"
 					% e)
 
+	# Returns 0 on success, -2 if changing the affinity is not
+	# supported, -1 if some other error occurs.
 	def _set_irq_affinity(self, irq, affinity, restoring):
 		try:
 			affinity_hex = self._cmd.cpulist2hex(affinity)
@@ -573,7 +577,7 @@ class SchedulerPlugin(base.Plugin):
 			filename = "/proc/irq/%s/smp_affinity" % irq
 			with open(filename, "w") as f:
 				f.write(affinity_hex)
-			return True
+			return 0
 		except (OSError, IOError) as e:
 			# EIO is returned by
 			# kernel/irq/proc.c:write_irq_affinity() if changing
@@ -583,10 +587,11 @@ class SchedulerPlugin(base.Plugin):
 					and not restoring:
 				log.debug("Setting SMP affinity of IRQ %s is not supported"
 						% irq)
+				return -2
 			else:
 				log.error("Failed to set SMP affinity of IRQ %s to '%s': %s"
 						% (irq, affinity_hex, e))
-			return False
+				return -1
 
 	def _set_default_irq_affinity(self, affinity):
 		try:
@@ -612,8 +617,11 @@ class SchedulerPlugin(base.Plugin):
 			_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
 			if set(_affinity) == set(prev_affinity):
 				continue
-			if self._set_irq_affinity(irq, _affinity, False):
+			res = self._set_irq_affinity(irq, _affinity, False)
+			if res == 0:
 				irq_original.irqs[irq] = prev_affinity
+			elif res == -2:
+				irq_original.unchangeable.append(irq)
 
 		# default affinity
 		prev_affinity_hex = self._cmd.read_file("/proc/irq/default_smp_affinity")
@@ -645,10 +653,15 @@ class SchedulerPlugin(base.Plugin):
 					correct_affinity))
 		return res
 
-	def _verify_all_irq_affinity(self, correct_affinity):
+	def _verify_all_irq_affinity(self, correct_affinity, ignore_missing):
+		irq_original = self._storage.get(self._irq_storage_key, None)
 		irqs = procfs.interrupts()
 		res = True
 		for irq in irqs.keys():
+			if irq in irq_original.unchangeable and ignore_missing:
+				description = "IRQ %s does not support changing SMP affinity" % irq
+				log.info(consts.STR_VERIFY_PROFILE_VALUE_MISSING % description)
+				continue
 			try:
 				current_affinity = irqs[irq]["affinity"]
 				log.debug("Read SMP affinity of IRQ '%s': '%s'"
@@ -686,7 +699,7 @@ class SchedulerPlugin(base.Plugin):
 			return None
 		# currently only IRQ affinity verification is supported
 		if verify:
-			return self._verify_all_irq_affinity(affinity)
+			return self._verify_all_irq_affinity(affinity, ignore_missing)
 		elif enabling:
 			self._set_ps_affinity(affinity)
 			self._set_all_irq_affinity(affinity)
