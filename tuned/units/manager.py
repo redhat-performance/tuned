@@ -1,9 +1,12 @@
 import collections
+import os
+import re
 import traceback
 import tuned.exceptions
 import tuned.logs
 import tuned.plugins.exceptions
 import tuned.consts as consts
+from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
@@ -23,6 +26,7 @@ class Manager(object):
 		self._hardware_inventory = hardware_inventory
 		self._instances = []
 		self._plugins = []
+		self._cmd = commands()
 
 	@property
 	def plugins(self):
@@ -36,12 +40,33 @@ class Manager(object):
 	def plugins_repository(self):
 		return self._plugins_repository
 
+	def _unit_matches_cpuinfo(self, unit):
+		if unit.cpuinfo_regex is None:
+			return True
+		return re.search(unit.cpuinfo_regex,
+				self._cmd.read_file("/proc/cpuinfo"),
+				re.MULTILINE) is not None
+
+	def _unit_matches_uname(self, unit):
+		if unit.uname_regex is None:
+			return True
+		return re.search(unit.uname_regex,
+				" ".join(os.uname()),
+				re.MULTILINE) is not None
+
 	def create(self, instances_config):
 		instance_info_list = []
 		for instance_name, instance_info in list(instances_config.items()):
 			if not instance_info.enabled:
 				log.debug("skipping disabled instance '%s'" % instance_name)
 				continue
+			if not self._unit_matches_cpuinfo(instance_info):
+				log.debug("skipping instance '%s', cpuinfo does not match" % instance_name)
+				continue
+			if not self._unit_matches_uname(instance_info):
+				log.debug("skipping instance '%s', uname does not match" % instance_name)
+				continue
+
 			instance_info.options.setdefault("priority", self._def_instance_priority)
 			instance_info.options["priority"] = int(instance_info.options["priority"])
 			instance_info_list.append(instance_info)

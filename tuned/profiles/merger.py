@@ -35,6 +35,10 @@ class Merger(object):
 				profile_a.units[unit_name].devices = unit.devices
 				if unit.devices_udev_regex is not None:
 					profile_a.units[unit_name].devices_udev_regex = unit.devices_udev_regex
+				if unit.cpuinfo_regex is not None:
+					profile_a.units[unit_name].cpuinfo_regex = unit.cpuinfo_regex
+				if unit.uname_regex is not None:
+					profile_a.units[unit_name].uname_regex = unit.uname_regex
 				if unit.script_pre is not None:
 					profile_a.units[unit_name].script_pre = unit.script_pre
 				if unit.script_post is not None:
