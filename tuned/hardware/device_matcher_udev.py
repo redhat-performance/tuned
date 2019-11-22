@@ -21,4 +21,4 @@ class DeviceMatcherUdev(device_matcher.DeviceMatcher):
 		for key, val in list(items):
 			properties += key + '=' + val + '\n'
 
-		return re.search(regex, properties, re.MULTILINE) is not None
+		return re.search(regex, properties, re.MULTILINE | re.DOTALL) is not None
