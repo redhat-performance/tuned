@@ -164,7 +164,7 @@ class BootloaderPlugin(base.Plugin):
 			grub2_cfg = self._cmd.read_file(f)
 			if len(grub2_cfg) <= 0:
 				log.info("cannot patch %s" % f)
-				return False
+				continue
 			log.debug("adding boot command line parameters to '%s'" % f)
 			grub2_cfg_new = grub2_cfg
 			patch_initial = False
