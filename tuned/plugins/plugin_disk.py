@@ -296,7 +296,10 @@ class DiskPlugin(hotplug.Plugin):
 
 	def _parse_ra(self, value):
 		val = str(value).split(None, 1)
-		v = int(val[0])
+		try:
+			v = int(val[0])
+		except ValueError:
+			return None
 		if len(val) > 1 and val[1][0] == "s":
 			# v *= 512 / 1024
 			v /= 2
@@ -306,8 +309,11 @@ class DiskPlugin(hotplug.Plugin):
 	def _set_readahead(self, value, device, sim):
 		sys_file = self._readahead_file(device)
 		val = self._parse_ra(value)
-		if not sim:
-			self._cmd.write_to_file(sys_file, "%d" % val)
+		if val is None:
+			log.error("Invalid readahead value '%s' for device '%s'" % (value, device))
+		else:
+			if not sim:
+				self._cmd.write_to_file(sys_file, "%d" % val)
 		return val
 
 	@command_get("readahead")
