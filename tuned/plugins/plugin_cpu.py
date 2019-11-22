@@ -93,8 +93,11 @@ class CPULatencyPlugin(base.Plugin):
 	def _check_energy_perf_bias(self):
 		self._has_energy_perf_bias = False
 		retcode_unsupported = 1
-		retcode = self._cmd.execute(["x86_energy_perf_policy", "-r"], no_errors = [errno.ENOENT, retcode_unsupported])[0]
-		if retcode == 0:
+		retcode, out = self._cmd.execute(["x86_energy_perf_policy", "-r"], no_errors = [errno.ENOENT, retcode_unsupported])
+		# With recent versions of the tool, a zero exit code is
+		# returned even if EPB is not supported. The output is empty
+		# in that case, however.
+		if retcode == 0 and out != "":
 			self._has_energy_perf_bias = True
 		elif retcode < 0:
 			log.warning("unable to run x86_energy_perf_policy tool, ignoring CPU energy performance bias, is the tool installed?")
