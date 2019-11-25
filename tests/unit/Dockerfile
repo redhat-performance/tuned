@@ -15,7 +15,7 @@ RUN if [[ $OS == "centos:7" ]]; then yum install -y epel-release; fi;
 
 RUN ${PKM} install -y virt-what ethtool gawk hdparm util-linux dbus polkit make
 ARG PYTHON
-RUN ${PKM} install -y python$PYTHON-flexmock
+RUN ${PKM} install -y python$PYTHON-mock
 
 ARG OS
 ARG PYTHON

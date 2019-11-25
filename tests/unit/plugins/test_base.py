@@ -4,7 +4,6 @@ except ImportError:
 	from collections import Mapping
 import tempfile
 import unittest2
-import flexmock
 
 from tuned.monitors.repository import Repository
 import tuned.plugins.decorators as decorators
@@ -16,10 +15,6 @@ import tuned.plugins as plugins
 import tuned.consts as consts
 from tuned import storage
 import tuned.plugins.base
-
-tuned.plugins.base.log = flexmock.flexmock(info = lambda *args: None,\
-	error = lambda *args: None,debug = lambda *args: None,\
-	warn = lambda *args: None)
 
 temp_storage_file = tempfile.TemporaryFile(mode = 'r')
 consts.DEFAULT_STORAGE_FILE = temp_storage_file.name

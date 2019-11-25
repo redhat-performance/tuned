@@ -1,6 +1,5 @@
 import unittest2
 import tempfile
-import flexmock
 import shutil
 import re
 import os
@@ -9,10 +8,6 @@ from tuned.utils.commands import commands
 import tuned.consts as consts
 from tuned.exceptions import TunedException
 import tuned.utils.commands
-
-tuned.utils.commands.log = flexmock.flexmock(info = lambda *args: None,\
-	error = lambda *args: None,debug = lambda *args: None,\
-	warn = lambda *args: None)
 
 class CommandsTestCase(unittest2.TestCase):
 	def setUp(self):

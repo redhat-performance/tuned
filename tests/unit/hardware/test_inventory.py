@@ -1,5 +1,5 @@
 import unittest2
-from flexmock import flexmock
+from unittest.mock import Mock
 import pyudev
 
 from tuned.hardware.inventory import Inventory
@@ -32,7 +32,7 @@ class InventoryTestCase(unittest2.TestCase):
 				self._dummy.TestCallback)
 		self._inventory.subscribe(self._dummier,subsystem_name,
 				self._dummier.TestCallback)
-		device = flexmock(subsystem = subsystem_name)
+		device = Mock(subsystem = subsystem_name)
 		self._inventory._handle_udev_event("test event", device)
 		self.assertTrue(self._dummy.CallbackWasCalled)
 		self.assertTrue(self._dummier.CallbackWasCalled)
@@ -41,7 +41,7 @@ class InventoryTestCase(unittest2.TestCase):
 		self._dummy.CallbackWasCalled = False
 		self._dummier.CallbackWasCalled = False
 		self._inventory.unsubscribe(self._dummy)
-		device = flexmock(subsystem = subsystem_name)
+		device = Mock(subsystem = subsystem_name)
 		self._inventory._handle_udev_event("test event", device)
 		self.assertFalse(self._dummy.CallbackWasCalled)
 		self.assertTrue(self._dummier.CallbackWasCalled)

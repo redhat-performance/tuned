@@ -1,26 +1,31 @@
 import unittest
-from flexmock import flexmock
+from unittest.mock import Mock
+from unittest.mock import call
 import tuned.storage
 
 class StorageStorageTestCase(unittest.TestCase):
 	def test_set(self):
-		mock_provider = flexmock()
+		mock_provider = Mock()
 		factory = tuned.storage.Factory(mock_provider)
 		storage = factory.create("foo")
 
-		mock_provider.should_receive("set").with_args("foo", "optname", "optval").once
 		storage.set("optname", "optval")
+		mock_provider.set.assert_called_once_with("foo", "optname", "optval")
 
 	def test_get(self):
-		mock_provider = flexmock()
+		mock_provider = Mock()
+		mock_provider.get.side_effect = [ None, "defval", "somevalue" ]
 		factory = tuned.storage.Factory(mock_provider)
 		storage = factory.create("foo")
 
-		mock_provider.should_receive("get").with_args("foo", "optname", None).and_return(None).once.ordered
-		mock_provider.should_receive("get").with_args("foo", "optname", "defval").and_return("defval").once.ordered
-		mock_provider.should_receive("get").with_args("foo", "existing", None).and_return("somevalue").once.ordered
-
-		self.assertIsNone(storage.get("optname"))
+		self.assertEqual(None, storage.get("optname"))
 		self.assertEqual("defval", storage.get("optname", "defval"))
 		self.assertEqual("somevalue", storage.get("existing"))
 
+		calls = [
+				 call("foo", "optname", None),
+				 call("foo", "optname", "defval"),
+				 call("foo", "existing", None)
+				]
+
+		mock_provider.get.assert_has_calls(calls)

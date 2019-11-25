@@ -1,5 +1,4 @@
 import unittest2
-import flexmock
 import tempfile
 import shutil
 import os
@@ -10,10 +9,6 @@ import tuned.utils.global_config as global_config
 class GlobalConfigTestCase(unittest2.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		global_config.log = flexmock.flexmock(info = lambda *args: None,\
-			error = lambda *args: None,debug = lambda *args: None,\
-			warn = lambda *args: None)
-
 		cls.test_dir = tempfile.mkdtemp()
 		with open(cls.test_dir + '/test_config','w') as f:
 			f.write('test_option = hello\ntest_bool = 1\ntest_size = 12MB\n'\

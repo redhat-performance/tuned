@@ -1,5 +1,4 @@
 import unittest2
-import flexmock
 import tempfile
 import shutil
 import os
@@ -10,9 +9,6 @@ from tuned.profiles.exceptions import InvalidProfileException
 class LoaderTestCase(unittest2.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		profiles.loader.log = flexmock.flexmock(info = lambda *args: None,\
-			error = lambda *args: None,debug = lambda *args: None,\
-			warn = lambda *args: None)
 		cls._test_dir = tempfile.mkdtemp()
 		cls._profiles_dir = cls._test_dir + '/test_profiles'
 		cls._dummy_profile_dir = cls._profiles_dir + '/dummy'
