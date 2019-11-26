@@ -219,7 +219,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if self._daemon.is_running():
 			self._daemon.stop()
 		if self._daemon.is_enabled():
-			self._daemon.set_profile(None, None, save_instantly=True)
+			self._daemon.set_profile(None, True, save_instantly=True)
 		return True
 
 	@exports.export("", "b")
