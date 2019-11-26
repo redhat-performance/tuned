@@ -223,7 +223,7 @@ clean: clean-html
 	rm -rf $(VERSIONED_NAME) rpm-build-dir
 
 test:
-	$(PYTHON) -m unittest discover tests/unit
+	$(PYTHON) -B -m unittest discover tests/unit
 
 lint:
 	$(PYLINT) -E -f parseable tuned *.py tests/unit
