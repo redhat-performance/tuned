@@ -138,7 +138,11 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			stop_ok = self.stop()
 			if not stop_ok:
 				return False
-			self._daemon.reload_profile_config()
+			try:
+				self._daemon.reload_profile_config()
+			except TunedException as e:
+				log.error("Failed to reload Tuned: %s" % e)
+				return False
 			return self.start()
 
 	def _switch_profile(self, profile_name, manual):
