@@ -12,10 +12,7 @@ log = tuned.logs.get()
 
 DEPRECATED_SYSCTL_OPTIONS = [ "base_reachable_time", "retrans_time" ]
 SYSCTL_CONFIG_DIRS = [ "/run/sysctl.d",
-		"/etc/sysctl.d",
-		"/usr/local/lib/sysctl.d",
-		"/usr/lib/sysctl.d",
-		"/lib/sysctl.d" ]
+		"/etc/sysctl.d" ]
 
 class SysctlPlugin(base.Plugin):
 	"""

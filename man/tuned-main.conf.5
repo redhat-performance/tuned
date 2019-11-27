@@ -61,14 +61,14 @@ applicable if \fBdaemon\fR is enabled. By default it's set to \fBTrue\fR.
 
 .TP
 .BI reapply_sysctl= BOOL
-This controls whether to reapply sysctl settings from the \fI/etc/sysctl.conf\fR,
-\fI/etc/sysctl.d/*.conf\fR, \fI/usr/lib/sysctl.d/*.conf\fR,
-\fI/usr/local/lib/sysctl.d/*.conf\fR, \fI/lib/sysctl.d/*.conf\fR,
-\fI/run/sysctl.d/*.conf\fR, i.e. all locations supported by
-\fBsysctl --system\fR after Tuned sysctl settings are applied, i.e. if
-set to \fBTrue\fR or \fB1\fR Tuned sysctl settings will not override system
-sysctl settings. If set to \fBFalse\fR or \fB0\fR Tuned sysctl settings will
-override system sysctl settings. By default it's set to \fBTrue\fR.
+This controls whether to reapply sysctl settings from \fI/run/sysctl.d/*.conf\fR,
+\fI/etc/sysctl.d/*.conf\fR and \fI/etc/sysctl.conf\fR after Tuned sysctl
+settings are applied. These are locations supported by \fBsysctl --system\fR,
+excluding those that contain sysctl configuration files provided by system packages.
+So if \fBreapply_sysctl\fR is set to \fBTrue\fR or \fB1\fR, Tuned sysctl settings
+will not override user-provided system sysctl settings. If set to \fBFalse\fR or
+\fB0\fR, Tuned sysctl settings will override system sysctl settings. By default
+it's set to \fBTrue\fR.
 
 .TP
 .BI default_instance_priority= INT
