@@ -1,5 +1,5 @@
 import unittest2
-import flexmock
+from unittest.mock import Mock
 
 from tuned.exports.controller import ExportsController
 import tuned.exports as exports
@@ -60,12 +60,12 @@ class MockExporter(object):
 		self.is_running = False
 
 	def export(self,method,*args,**kwargs):
-		object_to_export = flexmock.flexmock(\
+		object_to_export = Mock(\
 			method = method, args = args, kwargs = kwargs)
 		self.exported_methods.append(object_to_export)
 
 	def signal(self,method,*args,**kwargs):
-		object_to_export = flexmock.flexmock(\
+		object_to_export = Mock(\
 			method = method, args = args, kwargs = kwargs)
 		self.exported_signals.append(object_to_export)
 

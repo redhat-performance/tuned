@@ -1,5 +1,4 @@
 import unittest2
-import tests.unit.globals
 import tuned.monitors.base
 
 class MockMonitor(tuned.monitors.base.Monitor):
