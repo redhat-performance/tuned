@@ -259,6 +259,7 @@ class CPULatencyPlugin(base.Plugin):
 		log.debug("cstate ID mapped to latency: %s" % str(latency))
 		return latency
 
+	# returns (latency, skip), skip means we want to skip latency settings
 	def _parse_latency(self, latency):
 		self.cstates_latency = None
 		latencies = str(latency).split("|")
@@ -272,16 +273,19 @@ class CPULatencyPlugin(base.Plugin):
 					latency = self._get_latency_by_cstate_id(latency[10:])
 				elif latency[0:12] == "cstate.name:":
 					latency = self._get_latency_by_cstate_name(latency[12:])
+				elif latency in ["none", "None"]:
+					log.debug("latency 'none' specified")
+					return None, True
 				else:
 					latency = None
 					log.debug("invalid latency specified: '%s'" % str(latency))
 			if latency is not None:
 				break
-		return latency
+		return latency, False
 
 	def _set_latency(self, latency):
-		latency = self._parse_latency(latency)
-		if self._has_pm_qos:
+		latency, skip = self._parse_latency(latency)
+		if not skip and self._has_pm_qos:
 			if latency is None:
 				log.error("unable to evaluate latency value (probably wrong settings in the 'cpu' section of current profile), disabling PM QoS")
 				self._has_pm_qos = False
