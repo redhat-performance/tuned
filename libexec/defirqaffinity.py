@@ -82,6 +82,7 @@ def verify(shouldbemask):
 	sys.exit(0)
 
 
+sys.stderr.write("defirqaffinity.py is deprecated. Use isolated_cores or other built-in functionality instead.\n")
 
 # adjust default_smp_affinity
 cpulist = parse_def_affinity(irqpath + "default_smp_affinity")
