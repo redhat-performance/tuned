@@ -35,16 +35,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.12.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.13.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -500,6 +500,25 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Sun Dec  1 2019 Jaroslav Škarvada <jskarvad@redhat.com> - 2.13.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#1738250
+  - cpu: fixed checking if EPB is supported
+    resolves: rhbz#1690929
+  - scheduler: fixed IRQ SMP affinity verification to respect ignore_missing
+    resolves: rhbz#1729936
+  - realtime: enabled ktimer_lockless_check
+    resolves: rhbz#1734096
+  - plugins: support cpuinfo_regex and uname_regex matching
+    resolves: rhbz#1748965
+  - sysctl: made reapply_sysctl ignore configs from /usr
+    resolves: rhbz#1759597
+  - added support for multiple include directives
+    resolves: rhbz#1760390
+  - realtime: added nowatchdog kernel command line option
+    resolves: rhbz#1767614
+
 * Thu Jun 27 2019 Jaroslav Škarvada <jskarvad@redhat.com> - 2.12.0-1
 - new release
   - rebased tuned to latest upstream
