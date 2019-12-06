@@ -30,10 +30,12 @@ The following profiles are provided:
 
 .TP
 .BI "sap\-hana"
-A performance optimized profile for the SAP HANA applications.
-It is based on throughput\-performance profile. It additionally disables
-transparent hugepages, locks CPU to the low C states (by PM QoS) and tunes sysctl
-regarding semaphores.
+A performance optimized profile for the SAP HANA applications. It disables
+power saving mechanisms and enables sysctl settings that improve throughput
+performance of disk and network IO. CPU governor is set to performance and CPU
+energy performance bias is set to performance. It also disables transparent
+hugepages, locks CPU to the low C states (by PM QoS) and tunes sysctl regarding
+semaphores.
 
 .SH "FILES"
 .nf
