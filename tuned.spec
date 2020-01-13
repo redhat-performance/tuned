@@ -196,6 +196,7 @@ Summary: Additional tuned profile(s) targeted to Network Function Virtualization
 Requires: %{name} = %{version}
 Requires: %{name}-profiles-realtime = %{version}
 Requires: tuna
+Requires: nmap-ncat
 %if 0%{?rhel} == 7
 Requires: qemu-kvm-tools-rhev
 %else
