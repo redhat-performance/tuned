@@ -29,9 +29,9 @@ run_tsc_deadline_latency()
             -chardev socket,id=char0,nowait,path=$unixpath,server | grep latency | cut -f 2 -d ":" > $dir/out &
 
         sleep 1s
-        pidofvcpu=`echo "info cpus" | nc -U $unixpath | grep thread_id | cut -f 3 -d "=" | tr -d "\r"`
+        pidofvcpu=`echo "info cpus" | ncat -U $unixpath | grep thread_id | cut -f 3 -d "=" | tr -d "\r"`
         taskset -p -c $1 $pidofvcpu >/dev/null
-        echo "cont" | nc -U $unixpath >/dev/null
+        echo "cont" | ncat -U $unixpath >/dev/null
         wait
 
         if [ ! -f $dir/out ]; then
