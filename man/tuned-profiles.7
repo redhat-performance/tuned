@@ -78,6 +78,12 @@ of your disk and network IO. CPU governor is set to performance and CPU energy
 performance bias is set to performance. Disk readahead values are increased.
 
 .TP
+.BI "accelerator\-performance"
+This profile contains the same tuning as the throughput\-performance profile.
+Additionally, it locks the CPU to low C states so that the latency is less than
+100us. This improves the performance of certain accelerators, such as GPUs.
+
+.TP
 .BI "latency\-performance"
 Profile for low latency performance tuning. Disables power saving mechanisms.
 CPU governor is set to performance and locked to the low C states (by PM QoS).
