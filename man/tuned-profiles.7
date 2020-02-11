@@ -122,9 +122,11 @@ Profile optimized for virtual hosts based on throughput\-performance profile.
 It additionally enables more aggressive writeback of dirty pages.
 
 .TP
-.BI "sst"
+.BI "intel-sst"
 Profile optimized for systems with user-defined Intel Speed Select Technology
-configurations.
+configurations. This profile is intended to be used as an overlay on other
+profiles (e.g. cpu\-partitioning profile), example:
+.B tuned\-adm profile cpu\-partitioning intel-sst
 
 .SH "FILES"
 .nf
