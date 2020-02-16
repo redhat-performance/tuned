@@ -203,7 +203,8 @@ install: install-dirs
 		install -Dpm 0644 $(file) $(DESTDIR)$(DATADIR)/man/man$(man_section)/$(notdir $(file));))
 
 	# documentation
-	cp -a doc/{README*,*.txt} $(DESTDIR)$(DOCDIR)
+	cp -a doc/README* $(DESTDIR)$(DOCDIR)
+	cp -a doc/*.txt $(DESTDIR)$(DOCDIR)
 	cp AUTHORS COPYING README $(DESTDIR)$(DOCDIR)
 
 	# libexec scripts
