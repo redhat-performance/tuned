@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 from unittest.mock import Mock
 import pyudev
 
@@ -6,7 +6,7 @@ from tuned.hardware.inventory import Inventory
 
 subsystem_name = "test subsystem"
 
-class InventoryTestCase(unittest2.TestCase):
+class InventoryTestCase(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls._context = pyudev.Context()
@@ -25,7 +25,10 @@ class InventoryTestCase(unittest2.TestCase):
 	def test_get_devices(self):
 		device_list1 = self._context.list_devices(subsystem = "tty")
 		device_list2 = self._inventory.get_devices("tty")
-		self.assertItemsEqual(device_list1,device_list2)
+		try:
+			self.assertCountEqual(device_list1,device_list2)
+		except AttributeError:  # Python 2
+			self.assertItemsEqual(device_list1,device_list2)
 
 	def test_subscribe(self):
 		self._inventory.subscribe(self._dummy,subsystem_name,

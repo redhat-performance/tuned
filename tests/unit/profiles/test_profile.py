@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 import tuned.profiles
 import collections
 
@@ -6,7 +6,7 @@ class MockProfile(tuned.profiles.profile.Profile):
 	def _create_unit(self, name, config):
 		return (name, config)
 
-class ProfileTestCase(unittest2.TestCase):
+class ProfileTestCase(unittest.TestCase):
 
 	def test_init(self):
 		MockProfile("test", {})

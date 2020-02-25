@@ -1,9 +1,9 @@
-import unittest2
+import unittest
 from tuned.profiles.merger import Merger
 from tuned.profiles.profile import Profile
 from collections import OrderedDict
 
-class MergerTestCase(unittest2.TestCase):
+class MergerTestCase(unittest.TestCase):
 	def test_merge_without_replace(self):
 		merger = Merger()
 		config1 = OrderedDict([

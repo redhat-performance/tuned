@@ -1,7 +1,7 @@
-import unittest2
+import unittest
 from tuned.profiles import Unit
 
-class UnitTestCase(unittest2.TestCase):
+class UnitTestCase(unittest.TestCase):
 
 	def test_default_options(self):
 		unit = Unit("sample", {})

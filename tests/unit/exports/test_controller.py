@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 from unittest.mock import Mock
 
 from tuned.exports.controller import ExportsController
 import tuned.exports as exports
 
-class ControllerTestCase(unittest2.TestCase):
+class ControllerTestCase(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls._controller = ExportsController()

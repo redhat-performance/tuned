@@ -60,7 +60,7 @@ Requires(preun): systemd
 Requires(postun): systemd
 BuildRequires: %{_py}, %{_py}-devel
 # BuildRequires for 'make test'
-BuildRequires: %{_py}-unittest2, %{_py}-configobj, %{_py}-mock
+BuildRequires: %{_py}-configobj
 BuildRequires: %{_py}-decorator, %{_py}-pyudev
 Requires: %{_py}-decorator, %{_py}-pyudev, %{_py}-configobj
 Requires: %{_py}-schedutils, %{_py}-linux-procfs, %{_py}-perf

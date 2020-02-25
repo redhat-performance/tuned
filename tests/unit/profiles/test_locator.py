@@ -1,10 +1,10 @@
-import unittest2
+import unittest
 import os
 import shutil
 import tempfile
 from tuned.profiles.locator import Locator
 
-class LocatorTestCase(unittest2.TestCase):
+class LocatorTestCase(unittest.TestCase):
 	def setUp(self):
 		self.locator = Locator(self._tmp_load_dirs)
 

@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 import tempfile
 import shutil
 import os
@@ -6,7 +6,7 @@ import os
 import tuned.profiles as profiles
 from tuned.profiles.exceptions import InvalidProfileException
 
-class LoaderTestCase(unittest2.TestCase):
+class LoaderTestCase(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls._test_dir = tempfile.mkdtemp()

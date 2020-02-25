@@ -1,9 +1,9 @@
-import unittest2
+import unittest
 import pyudev
 
 from tuned.hardware.device_matcher_udev import DeviceMatcherUdev
 
-class DeviceMatcherUdevTestCase(unittest2.TestCase):
+class DeviceMatcherUdevTestCase(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.udev_context = pyudev.Context()

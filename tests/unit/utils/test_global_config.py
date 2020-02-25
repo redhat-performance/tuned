@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 import tempfile
 import shutil
 import os
@@ -6,7 +6,7 @@ import os
 import tuned.consts as consts
 import tuned.utils.global_config as global_config
 
-class GlobalConfigTestCase(unittest2.TestCase):
+class GlobalConfigTestCase(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.test_dir = tempfile.mkdtemp()
