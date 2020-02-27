@@ -5,6 +5,10 @@ def create_IOError(error_code, file_path):
 	return IOError(error_code, "%s: '%s'"
 			% (os.strerror(error_code), file_path))
 
+def create_OSError(error_code, file_path):
+	return OSError(error_code, "%s: '%s'"
+			% (os.strerror(error_code), file_path))
+
 class MockFileOperations(object):
 	def __init__(self, error_to_raise=None):
 		self.files = {}
