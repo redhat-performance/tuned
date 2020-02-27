@@ -2,6 +2,7 @@ from . import base
 from .decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
+from tuned.utils.file import FileHandler
 import tuned.consts as consts
 
 import os
@@ -35,6 +36,7 @@ class CPULatencyPlugin(base.Plugin):
 		self._no_turbo_save = None
 		self._governors_map = {}
 		self._cmd = commands()
+		self._file_handler = FileHandler(log_func=log.debug)
 
 	def _init_devices(self):
 		self._devices_supported = True
@@ -166,8 +168,14 @@ class CPULatencyPlugin(base.Plugin):
 		return self._cmd.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None).strip()
 
 	def _set_intel_pstate_attr(self, attr, val):
-		if val is not None:
-			self._cmd.write_to_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, val)
+		if val is None:
+			return
+		try:
+			path = "/sys/devices/system/cpu/intel_pstate/%s" % attr
+			self._file_handler.write(path, val)
+		except IOError as e:
+			log.error("Failed to set intel_pstate attribute '%s' to '%s': %s"
+					% (attr, val, e))
 
 	def _getset_intel_pstate_attr(self, attr, value):
 		if value is None:
