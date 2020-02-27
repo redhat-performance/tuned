@@ -5,6 +5,7 @@ from tuned.exceptions import TunedException
 import threading
 import tuned.consts as consts
 from tuned.utils.commands import commands
+from tuned.utils.active_profile import ActiveProfileManager
 from tuned.utils.profile_recommender import ProfileRecommender
 
 __all__ = ["Controller"]
@@ -48,6 +49,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		self._terminate = threading.Event()
 		self._cmd = commands()
 		self._timer_store = TimerStore()
+		self._active_profile_manager = ActiveProfileManager()
 
 	def run(self):
 		"""
@@ -200,7 +202,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if manual is None:
 			# This means no profile is applied. Check the preset value.
 			try:
-				profile, manual = self._cmd.get_active_profile()
+				profile, manual = self._active_profile_manager.get()
 				if manual is None:
 					manual = profile is not None
 			except TunedException as e:
