@@ -306,6 +306,16 @@ class CPULatencyPlugin(base.Plugin):
 	def _get_available_governors(self, device):
 		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).strip().split()
 
+	def _set_governor_on_cpu(self, governor, cpu):
+		log.info("setting governor '%s' on cpu '%s'"
+				% (governor, cpu))
+		try:
+			path = "/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % cpu
+			self._file_handler.write(path, governor)
+		except IOError as e:
+			log.error("Failed to set scaling governor to '%s' on cpu '%s': %s"
+					% (governor, cpu, e))
+
 	@command_set("governor", per_device=True)
 	def _set_governor(self, governors, device, sim):
 		if not self._check_cpu_can_change_governor(device):
@@ -321,10 +331,7 @@ class CPULatencyPlugin(base.Plugin):
 		for governor in governors:
 			if governor in available_governors:
 				if not sim:
-					log.info("setting governor '%s' on cpu '%s'"
-							% (governor, device))
-					self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor"
-							% device, governor)
+					self._set_governor_on_cpu(governor, device)
 				break
 			elif not sim:
 				log.debug("Ignoring governor '%s' on cpu '%s', it is not supported"
