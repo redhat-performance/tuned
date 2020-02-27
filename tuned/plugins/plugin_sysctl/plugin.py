@@ -24,7 +24,7 @@ class SysctlPlugin(base.Plugin):
 		self._has_dynamic_options = True
 		self._cmd = commands()
 		file_handler = FileHandler(log_func=log.debug)
-		self._lib = SysctlLib(file_handler, log)
+		self._lib = SysctlLib(file_handler, os.listdir, log)
 
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
@@ -86,15 +86,16 @@ class SysctlPlugin(base.Plugin):
 
 
 class SysctlLib(object):
-	def __init__(self, file_handler, logger):
+	def __init__(self, file_handler, listdir, logger):
 		self._file_handler = file_handler
+		self._listdir = listdir
 		self._log = logger
 
 	def apply_system_sysctl(self):
 		files = {}
 		for d in SYSCTL_CONFIG_DIRS:
 			try:
-				flist = os.listdir(d)
+				flist = self._listdir(d)
 			except OSError:
 				continue
 			for fname in flist:
