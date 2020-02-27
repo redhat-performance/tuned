@@ -1,13 +1,13 @@
 import errno
 import hashlib
 import tuned.logs
+from tuned.exceptions import TunedException
 import copy
 import os
 import shutil
 import tuned.consts as consts
 import re
 from subprocess import *
-from tuned.exceptions import TunedException
 
 log = tuned.logs.get()
 

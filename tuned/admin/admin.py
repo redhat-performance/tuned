@@ -7,6 +7,7 @@ from .exceptions import TunedAdminDBusException
 from tuned.exceptions import TunedException
 import tuned.consts as consts
 from tuned.utils.profile_recommender import ProfileRecommender
+from tuned.utils.active_profile import ActiveProfileManager
 import os
 import sys
 import errno
@@ -32,6 +33,7 @@ class Admin(object):
 		self._log_token = None
 		self._log_level = log_level
 		self._profile_recommender = ProfileRecommender()
+		self._active_profile_manager = ActiveProfileManager()
 		if self._dbus:
 			self._controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_INTERFACE, consts.DBUS_OBJECT, debug)
 			try:
@@ -122,11 +124,11 @@ class Admin(object):
 		return profile_name
 
 	def _get_active_profile(self):
-		profile_name, manual = self._cmd.get_active_profile()
+		profile_name, manual = self._active_profile_manager.get()
 		return profile_name
 
 	def _get_profile_mode(self):
-		(profile, manual) = self._cmd.get_active_profile()
+		(profile, manual) = self._active_profile_manager.get()
 		if manual is None:
 			manual = profile is not None
 		return consts.ACTIVE_PROFILE_MANUAL if manual else consts.ACTIVE_PROFILE_AUTO
@@ -307,7 +309,8 @@ class Admin(object):
 	def _set_profile(self, profile_name, manual):
 		if profile_name in self._profiles_locator.get_known_names():
 			try:
-				self._cmd.save_active_profile(profile_name, manual)
+				self._active_profile_manager.save(
+						profile_name, manual)
 				self._restart_tuned()
 				return True
 			except TunedException as e:

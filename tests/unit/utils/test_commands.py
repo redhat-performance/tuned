@@ -5,7 +5,6 @@ import re
 import os
 
 from tuned.utils.commands import commands
-import tuned.consts as consts
 from tuned.exceptions import TunedException
 import tuned.utils.commands
 
@@ -210,33 +209,6 @@ class CommandsTestCase(unittest.TestCase):
 		self.assertEqual(self._commands.get_size('100kb'),102400)
 		self.assertEqual(self._commands.get_size('1MB'),1024 * 1024)
 		self.assertEqual(self._commands.get_size('1GB'),1024 * 1024 * 1024)
-
-	def test_get_active_profile(self):
-		consts.ACTIVE_PROFILE_FILE = self._test_dir + '/active_profile'
-		consts.PROFILE_MODE_FILE = self._test_dir + '/profile_mode'
-		with open(consts.ACTIVE_PROFILE_FILE,'w') as f:
-			f.write('test_profile')
-		with open(consts.PROFILE_MODE_FILE,'w') as f:
-			f.write('auto')
-		(profile,mode) = self._commands.get_active_profile()
-		self.assertEqual(profile,'test_profile')
-		self.assertEqual(mode,False)
-		os.remove(consts.ACTIVE_PROFILE_FILE)
-		os.remove(consts.PROFILE_MODE_FILE)
-		(profile,mode) = self._commands.get_active_profile()
-		self.assertEqual(profile,None)
-		self.assertEqual(mode,None)
-
-	def test_save_active_profile(self):
-		consts.ACTIVE_PROFILE_FILE = self._test_dir + '/active_profile'
-		consts.PROFILE_MODE_FILE = self._test_dir + '/profile_mode'
-		self._commands.save_active_profile('test_profile',False)
-		with open(consts.ACTIVE_PROFILE_FILE) as f:
-			self.assertEqual(f.read(),'test_profile\n')
-		with open(consts.PROFILE_MODE_FILE) as f:
-			self.assertEqual(f.read(),'auto\n')
-		os.remove(consts.ACTIVE_PROFILE_FILE)
-		os.remove(consts.PROFILE_MODE_FILE)
 
 	def tearDown(self):
 		self._test_file.close()
