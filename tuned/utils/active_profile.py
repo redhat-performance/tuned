@@ -18,8 +18,6 @@ class ActiveProfileManager(object):
 		except IOError as e:
 			if e.errno != errno.ENOENT:
 				raise TunedException("Failed to read active profile: %s" % e)
-		except (OSError, EOFError) as e:
-			raise TunedException("Failed to read active profile: %s" % e)
 		try:
 			mode = self._file_handler.read(consts.PROFILE_MODE_FILE)
 			mode = mode.strip()
@@ -28,8 +26,6 @@ class ActiveProfileManager(object):
 		except IOError as e:
 			if e.errno != errno.ENOENT:
 				raise TunedException("Failed to read profile mode: %s" % e)
-		except (OSError, EOFError) as e:
-			raise TunedException("Failed to read profile mode: %s" % e)
 		if mode == "":
 			manual = None
 		else:
