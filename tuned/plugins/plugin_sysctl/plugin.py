@@ -6,6 +6,7 @@ from tuned.utils.commands import commands
 import tuned.consts as consts
 import errno
 import os
+from tuned.utils.file import FileHandler
 
 log = tuned.logs.get()
 
@@ -22,7 +23,8 @@ class SysctlPlugin(base.Plugin):
 		super(SysctlPlugin, self).__init__(*args, **kwargs)
 		self._has_dynamic_options = True
 		self._cmd = commands()
-		self._lib = SysctlLib(log)
+		file_handler = FileHandler(log_func=log.debug)
+		self._lib = SysctlLib(file_handler, log)
 
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
@@ -84,7 +86,8 @@ class SysctlPlugin(base.Plugin):
 
 
 class SysctlLib(object):
-	def __init__(self, logger):
+	def __init__(self, file_handler, logger):
+		self._file_handler = file_handler
 		self._log = logger
 
 	def apply_system_sysctl(self):
@@ -109,9 +112,10 @@ class SysctlLib(object):
 	def _apply_sysctl_config_file(self, path):
 		self._log.debug("Applying sysctl settings from file %s" % path)
 		try:
-			with open(path, "r") as f:
-				for lineno, line in enumerate(f, 1):
-					self._apply_sysctl_config_line(path, lineno, line)
+			content = self._file_handler.read(path)
+			lines = content.split("\n")
+			for lineno, line in enumerate(lines, 1):
+				self._apply_sysctl_config_line(path, lineno, line)
 			self._log.debug("Finished applying sysctl settings from file %s"
 					% path)
 		except (OSError, IOError) as e:
@@ -144,14 +148,14 @@ class SysctlLib(object):
 	def read_sysctl(self, option):
 		path = self._get_sysctl_path(option)
 		try:
-			with open(path, "r") as f:
-				line = ""
-				for i, line in enumerate(f):
-					if i > 0:
-						self._log.error("Failed to read sysctl parameter '%s', multi-line values are unsupported"
-								% option)
-						return None
-				value = line.strip()
+			content = self._file_handler.read(path)
+			content = content.strip()
+			lines = content.split("\n")
+			if len(lines) > 1:
+				self._log.error("Failed to read sysctl parameter '%s', multi-line values are unsupported"
+						% option)
+				return None
+			value = lines[0].strip()
 			self._log.debug("Value of sysctl parameter '%s' is '%s'"
 					% (option, value))
 			return value
@@ -173,8 +177,7 @@ class SysctlLib(object):
 		try:
 			self._log.debug("Setting sysctl parameter '%s' to '%s'"
 					% (option, value))
-			with open(path, "w") as f:
-				f.write(value)
+			self._file_handler.write(path, value)
 			return True
 		except (OSError, IOError) as e:
 			if e.errno == errno.ENOENT:
