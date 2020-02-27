@@ -1,5 +1,9 @@
-import re
+from .library import CPUInfoLibrary
+import tuned.logs
 from tuned.profiles.functions import base
+from tuned.utils.file import FileHandler
+
+log = tuned.logs.get()
 
 class cpuinfo_check(base.Function):
 	"""
@@ -14,16 +18,10 @@ class cpuinfo_check(base.Function):
 	def __init__(self):
 		# unlimited number of arguments, min 2 arguments
 		super(cpuinfo_check, self).__init__("cpuinfo_check", 0, 2)
+		file_handler = FileHandler(log_func=log.debug)
+		self._lib = CPUInfoLibrary(file_handler)
 
 	def execute(self, args):
 		if not super(cpuinfo_check, self).execute(args):
 			return None
-		cpuinfo = self._cmd.read_file("/proc/cpuinfo")
-		for i in range(0, len(args), 2):
-			if i + 1 < len(args):
-				if re.search(args[i], cpuinfo, re.MULTILINE):
-					return args[i + 1]
-		if len(args) % 2:
-			return args[-1]
-		else:
-			return ""
+		return self._lib.cpuinfo_match(args)
