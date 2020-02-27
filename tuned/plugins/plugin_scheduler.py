@@ -14,6 +14,7 @@ import tuned.consts as consts
 import procfs
 import schedutils
 from tuned.utils.commands import commands
+from tuned.utils.file import FileHandler
 import errno
 import os
 import collections
@@ -83,6 +84,7 @@ class SchedulerPlugin(base.Plugin):
 				command_name = "scheduler")
 		self._irq_storage_key = self._storage_key(
 				command_name = "irq")
+		self._file_handler = FileHandler(log_func = log.debug)
 
 	def _calc_mmap_pages(self, mmap_pages):
 		if mmap_pages is None:
@@ -842,8 +844,7 @@ class SchedulerPlugin(base.Plugin):
 			log.debug("Setting SMP affinity of IRQ %s to '%s'"
 					% (irq, affinity_hex))
 			filename = "/proc/irq/%s/smp_affinity" % irq
-			with open(filename, "w") as f:
-				f.write(affinity_hex)
+			self._file_handler.write(filename, affinity_hex)
 			return 0
 		except (OSError, IOError) as e:
 			# EIO is returned by
