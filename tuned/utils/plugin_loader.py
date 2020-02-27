@@ -53,7 +53,7 @@ class PluginLoader(object):
 		for module_name in os.listdir(plugins_package.plugins.__path__[0]):
 			try:
 				module_name = os.path.splitext(module_name)[0]
-				if not module_name.startswith("plugin_"):
+				if not module_name.startswith(self._prefix):
 					continue
 				plugin_class = self._get_class(
 					"%s.%s" % (self._namespace, module_name)
