@@ -599,8 +599,8 @@ class SchedulerPlugin(base.Plugin):
 			affinity_hex = self._cmd.cpulist2hex(affinity)
 			log.debug("Setting default SMP IRQ affinity to '%s'"
 					% affinity_hex)
-			with open("/proc/irq/default_smp_affinity", "w") as f:
-				f.write(affinity_hex)
+			path = "/proc/irq/default_smp_affinity"
+			self._file_handler.write(path, affinity_hex)
 		except (OSError, IOError) as e:
 			log.error("Failed to set default SMP IRQ affinity to '%s': %s"
 					% (affinity_hex, e))
