@@ -304,7 +304,14 @@ class CPULatencyPlugin(base.Plugin):
 				self._latency = latency
 
 	def _get_available_governors(self, device):
-		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).strip().split()
+		path = "/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device
+		try:
+			contents = self._file_handler.read(path)
+			return contents.strip().split()
+		except IOError as e:
+			log.error("Failed to read scaling governors available on cpu '%s': %s"
+					% (device, e))
+			return []
 
 	def _set_governor_on_cpu(self, governor, cpu):
 		log.info("setting governor '%s' on cpu '%s'"
