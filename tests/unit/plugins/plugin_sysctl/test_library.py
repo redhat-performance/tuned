@@ -446,3 +446,26 @@ class SysctlLibTestCase(unittest.TestCase):
 		self.assertIn(("debug",
 			       "Failed to set sysctl parameter '%s' to '0', the parameter does not exist" % option),
 			      logger.msgs)
+
+	def test_apply_system_sysctl_ignored_directories(self):
+		for directory in ["/usr/local/lib/sysctl.d",
+                                  "/usr/lib/sysctl.d",
+                                  "/lib/sysctl.d"]:
+			file_ops = MockFileOperations()
+			conf_file = "30-bar.conf"
+			file_ops.files[directory + "/" + conf_file] = "vm.swappiness = 20\n"
+			file_handler = FileHandler(file_ops=file_ops)
+			logger = MockLogger()
+
+			def listdir(path):
+				if path == directory:
+					return [conf_file]
+				else:
+					raise create_OSError(errno.ENOENT, path)
+
+			lib = SysctlLib(file_handler, listdir, logger)
+
+			lib.apply_system_sysctl()
+
+			self.assertEqual(len(file_ops.files), 1)
+			self.assertEqual(file_ops.write_called, 0)
