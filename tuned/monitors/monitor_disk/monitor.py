@@ -1,9 +1,17 @@
+from .library import DiskMonitorLibrary
+import tuned.logs
 import tuned.monitors
+from tuned.utils.file import FileHandler
 import os
 
-class DiskMonitor(tuned.monitors.Monitor):
+log = tuned.logs.get()
 
-	_supported_vendors = ["ATA", "SCSI"]
+class DiskMonitor(tuned.monitors.Monitor):
+	@classmethod
+	def _init_class(cls):
+		file_handler = FileHandler(log_func=log.debug)
+		cls._lib = DiskMonitorLibrary(file_handler)
+		super(DiskMonitor, cls)._init_class()
 
 	@classmethod
 	def _init_available_devices(cls):
@@ -16,13 +24,7 @@ class DiskMonitor(tuned.monitors.Monitor):
 
 	@classmethod
 	def _is_device_supported(cls, device):
-		vendor_file = "/sys/block/%s/device/vendor" % device
-		try:
-			vendor = open(vendor_file).read().strip()
-		except IOError:
-			return False
-
-		return vendor in cls._supported_vendors
+		return cls._lib.is_device_supported(device)
 
 	@classmethod
 	def update(cls):
