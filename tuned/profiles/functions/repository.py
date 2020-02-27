@@ -17,7 +17,7 @@ class Repository(PluginLoader):
 
 	def _set_loader_parameters(self):
 		self._namespace = "tuned.profiles.functions"
-		self._prefix = consts.FUNCTION_PREFIX
+		self._submodule_name = consts.FUNCTION_SUBMODULE_NAME
 		self._interface = tuned.profiles.functions.base.Function
 
 	def create(self, function_name):

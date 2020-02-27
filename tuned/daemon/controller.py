@@ -277,7 +277,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			return False
 		plugins = {}
 		for plugin_class in self._daemon.get_all_plugins():
-			plugin_name = plugin_class.__module__.split(".")[-1].split("_", 1)[1]
+			plugin_name = plugin_class.__module__.split(".")[-2].split("_", 1)[1]
 			conf_options = plugin_class._get_config_options()
 			plugins[plugin_name] = {}
 			for key, val in conf_options.items():
