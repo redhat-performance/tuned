@@ -359,6 +359,15 @@ class CPULatencyPlugin(base.Plugin):
 	def _sampling_down_factor_path(self, governor = "ondemand"):
 		return "/sys/devices/system/cpu/cpufreq/%s/sampling_down_factor" % governor
 
+	def _do_set_sampling_down_factor(self, path, value, governor):
+		log.info("setting sampling_down_factor to '%s' for governor '%s'"
+				% (value, governor))
+		try:
+			self._file_handler.write(path, value)
+		except IOError as e:
+			log.error("Failed to set sampling_down_factor to '%s' for governor '%s': %s"
+					% (value, governor, e))
+
 	@command_set("sampling_down_factor", per_device = True, priority = 10)
 	def _set_sampling_down_factor(self, sampling_down_factor, device, sim):
 		val = None
@@ -382,8 +391,7 @@ class CPULatencyPlugin(base.Plugin):
 				return None
 			val = str(sampling_down_factor)
 			if not sim:
-				log.info("setting sampling_down_factor to '%s' for governor '%s'" % (val, governor))
-				self._cmd.write_to_file(path, val)
+				self._do_set_sampling_down_factor(path, val, governor)
 		return val
 
 	@command_get("sampling_down_factor")
