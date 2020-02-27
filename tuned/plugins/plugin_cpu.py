@@ -352,12 +352,23 @@ class CPULatencyPlugin(base.Plugin):
 			governor = None
 		return governor
 
+	def _get_governor_on_cpu(self, cpu, no_error):
+		path = "/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % cpu
+		try:
+			contents = self._file_handler.read(path)
+			return contents.strip()
+		except IOError as e:
+			if not no_error:
+				log.error("Failed to read scaling governor on cpu '%s': %s"
+						% (cpu, e))
+			return ""
+
 	@command_get("governor")
 	def _get_governor(self, device, ignore_missing=False):
 		governor = None
 		if not self._check_cpu_can_change_governor(device):
 			return None
-		data = self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % device, no_error=ignore_missing).strip()
+		data = self._get_governor_on_cpu(device, ignore_missing)
 		if len(data) > 0:
 			governor = data
 
