@@ -1,5 +1,5 @@
-from . import base
-from . import exceptions
+from tuned.plugins import base
+from tuned.plugins import exceptions
 import tuned.logs
 from tuned.utils.commands import commands
 import os

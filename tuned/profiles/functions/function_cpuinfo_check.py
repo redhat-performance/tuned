@@ -1,5 +1,5 @@
 import re
-from . import base
+from tuned.profiles.functions import base
 
 class cpuinfo_check(base.Function):
 	"""

@@ -1,4 +1,4 @@
-from . import base
+from tuned.profiles.functions import base
 
 class virt_check(base.Function):
 	"""

@@ -2,8 +2,8 @@
 # perf code was borrowed from kernel/tools/perf/python/twatch.py
 # thanks to Arnaldo Carvalho de Melo <acme@redhat.com>
 
-from . import base
-from .decorators import *
+from tuned.plugins import base
+from tuned.plugins.decorators import *
 import tuned.logs
 import re
 from subprocess import *

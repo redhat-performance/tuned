@@ -1,4 +1,4 @@
-from . import base
+from tuned.profiles.functions import base
 
 class cpulist2hex_invert(base.Function):
 	"""

@@ -1,5 +1,5 @@
 import tuned.logs
-from . import base
+from tuned.profiles.functions import base
 from tuned.profiles.exceptions import InvalidProfileException
 
 log = tuned.logs.get()

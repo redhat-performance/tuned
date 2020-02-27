@@ -1,5 +1,5 @@
 import tuned.consts as consts
-from . import base
+from tuned.plugins import base
 import tuned.logs
 import os
 from subprocess import Popen, PIPE

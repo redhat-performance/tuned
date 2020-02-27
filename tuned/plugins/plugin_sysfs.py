@@ -1,8 +1,8 @@
-from . import base
+from tuned.plugins import base
 import glob
 import re
 import os.path
-from .decorators import *
+from tuned.plugins.decorators import *
 import tuned.logs
 from subprocess import *
 from tuned.utils.commands import commands

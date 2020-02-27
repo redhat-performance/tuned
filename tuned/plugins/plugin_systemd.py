@@ -1,7 +1,7 @@
-from . import base
-from .decorators import *
+from tuned.plugins import base
+from tuned.plugins.decorators import *
 import tuned.logs
-from . import exceptions
+from tuned.plugins import exceptions
 from tuned.utils.commands import commands
 import tuned.consts as consts
 
