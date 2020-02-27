@@ -23,3 +23,16 @@ class DiskMonitorLibraryTestCase(unittest.TestCase):
 		lib = DiskMonitorLibrary(file_handler=file_handler)
 
 		self.assertFalse(lib.is_device_supported("sda"))
+
+	def test_get_disk_stats(self):
+		file_ops = MockFileOperations()
+		file_ops.files["/sys/block/sda/stat"] = "  190950    54349  9473802    36375   110658	 55612	4734707	  626975	0    56856   602279	   0	    0	     0	      0	    5306     9002\n"
+		file_handler = FileHandler(file_ops=file_ops)
+		lib = DiskMonitorLibrary(file_handler=file_handler)
+
+		res = lib.get_disk_stats("sda")
+
+		expected = [190950, 54349, 9473802, 36375, 110658, 55612,
+			    4734707, 626975, 0, 56856, 602279, 0, 0, 0, 0,
+			    5306, 9002]
+		self.assertEqual(res, expected)

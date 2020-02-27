@@ -13,3 +13,8 @@ class DiskMonitorLibrary(object):
 			return False
 
 		return vendor in self._supported_vendors
+
+	def get_disk_stats(self, device):
+		path = "/sys/block/" + device + "/stat"
+		content = self._file_handler.read(path)
+		return list(map(int, content.split()))
