@@ -412,6 +412,15 @@ class CPULatencyPlugin(base.Plugin):
 				self._do_set_sampling_down_factor(path, val, governor)
 		return val
 
+	def _do_get_sampling_down_factor(self, path, governor):
+		try:
+			contents = self._file_handler.read(path)
+			return contents.strip()
+		except IOError as e:
+			log.error("Failed to get sampling_down_factor for governor '%s': %s"
+					% (governor, e))
+			return ""
+
 	@command_get("sampling_down_factor")
 	def _get_sampling_down_factor(self, device, ignore_missing=False):
 		governor = self._get_governor(device, ignore_missing=ignore_missing)
@@ -420,7 +429,7 @@ class CPULatencyPlugin(base.Plugin):
 		path = self._sampling_down_factor_path(governor)
 		if not os.path.exists(path):
 			return None
-		return self._cmd.read_file(path).strip()
+		return self._do_get_sampling_down_factor(path, governor)
 
 	def _try_set_energy_perf_bias(self, cpu_id, value):
 		(retcode, out, err_msg) = self._cmd.execute(
