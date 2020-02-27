@@ -1,4 +1,3 @@
-import errno
 from . import hotplug
 from .decorators import *
 import tuned.logs
