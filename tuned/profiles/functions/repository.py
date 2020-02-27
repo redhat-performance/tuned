@@ -2,7 +2,6 @@ from tuned.utils.plugin_loader import PluginLoader
 from . import base
 import tuned.logs
 import tuned.consts as consts
-from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 

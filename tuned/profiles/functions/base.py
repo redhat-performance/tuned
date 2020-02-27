@@ -1,4 +1,3 @@
-import os
 import tuned.logs
 from tuned.utils.commands import commands
 
