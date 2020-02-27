@@ -4,6 +4,7 @@ import tuned.logs
 from tuned.utils.commands import commands
 from tuned.utils.file import FileHandler
 import tuned.consts as consts
+from .library import CPULatencyLibrary
 
 import os
 import struct
@@ -36,7 +37,8 @@ class CPULatencyPlugin(base.Plugin):
 		self._no_turbo_save = None
 		self._governors_map = {}
 		self._cmd = commands()
-		self._file_handler = FileHandler(log_func=log.debug)
+		file_handler = FileHandler(log_func=log.debug)
+		self._lib = CPULatencyLibrary(file_handler, log)
 
 	def _init_devices(self):
 		self._devices_supported = True
@@ -164,31 +166,11 @@ class CPULatencyPlugin(base.Plugin):
 			if instance._load_monitor is not None:
 				self._monitors_repository.delete(instance._load_monitor)
 
-	def _get_intel_pstate_attr(self, attr):
-		path = "/sys/devices/system/cpu/intel_pstate/%s" % attr
-		try:
-			contents = self._file_handler.read(path)
-			return contents.strip()
-		except IOError as e:
-			log.error("Failed to get intel_pstate attribute '%s': %s"
-					% (attr, e))
-			return None
-
-	def _set_intel_pstate_attr(self, attr, val):
-		if val is None:
-			return
-		try:
-			path = "/sys/devices/system/cpu/intel_pstate/%s" % attr
-			self._file_handler.write(path, val)
-		except IOError as e:
-			log.error("Failed to set intel_pstate attribute '%s' to '%s': %s"
-					% (attr, val, e))
-
 	def _getset_intel_pstate_attr(self, attr, value):
 		if value is None:
 			return None
-		v = self._get_intel_pstate_attr(attr)
-		self._set_intel_pstate_attr(attr, value)
+		v = self._lib.get_intel_pstate_attr(attr)
+		self._lib.set_intel_pstate_attr(attr, value)
 		return v
 
 	def _instance_apply_static(self, instance):
@@ -219,9 +201,9 @@ class CPULatencyPlugin(base.Plugin):
 		super(CPULatencyPlugin, self)._instance_unapply_static(instance, full_rollback)
 
 		if instance._first_instance and self._has_intel_pstate:
-			self._set_intel_pstate_attr("min_perf_pct", self._min_perf_pct_save)
-			self._set_intel_pstate_attr("max_perf_pct", self._max_perf_pct_save)
-			self._set_intel_pstate_attr("no_turbo", self._no_turbo_save)
+			self._lib.set_intel_pstate_attr("min_perf_pct", self._min_perf_pct_save)
+			self._lib.set_intel_pstate_attr("max_perf_pct", self._max_perf_pct_save)
+			self._lib.set_intel_pstate_attr("no_turbo", self._no_turbo_save)
 
 	def _instance_apply_dynamic(self, instance, device):
 		self._instance_update_dynamic(instance, device)
@@ -313,26 +295,6 @@ class CPULatencyPlugin(base.Plugin):
 				os.write(self._cpu_latency_fd, latency_bin)
 				self._latency = latency
 
-	def _get_available_governors(self, device):
-		path = "/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device
-		try:
-			contents = self._file_handler.read(path)
-			return contents.strip().split()
-		except IOError as e:
-			log.error("Failed to read scaling governors available on cpu '%s': %s"
-					% (device, e))
-			return []
-
-	def _set_governor_on_cpu(self, governor, cpu):
-		log.info("setting governor '%s' on cpu '%s'"
-				% (governor, cpu))
-		try:
-			path = "/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % cpu
-			self._file_handler.write(path, governor)
-		except IOError as e:
-			log.error("Failed to set scaling governor to '%s' on cpu '%s': %s"
-					% (governor, cpu, e))
-
 	@command_set("governor", per_device=True)
 	def _set_governor(self, governors, device, sim):
 		if not self._check_cpu_can_change_governor(device):
@@ -344,11 +306,11 @@ class CPULatencyPlugin(base.Plugin):
 			if len(governor) == 0:
 				log.error("The 'governor' option contains an empty value.")
 				return None
-		available_governors = self._get_available_governors(device)
+		available_governors = self._lib.get_available_governors(device)
 		for governor in governors:
 			if governor in available_governors:
 				if not sim:
-					self._set_governor_on_cpu(governor, device)
+					self._lib.set_governor_on_cpu(governor, device)
 				break
 			elif not sim:
 				log.debug("Ignoring governor '%s' on cpu '%s', it is not supported"
@@ -359,23 +321,12 @@ class CPULatencyPlugin(base.Plugin):
 			governor = None
 		return governor
 
-	def _get_governor_on_cpu(self, cpu, no_error):
-		path = "/sys/devices/system/cpu/%s/cpufreq/scaling_governor" % cpu
-		try:
-			contents = self._file_handler.read(path)
-			return contents.strip()
-		except IOError as e:
-			if not no_error:
-				log.error("Failed to read scaling governor on cpu '%s': %s"
-						% (cpu, e))
-			return ""
-
 	@command_get("governor")
 	def _get_governor(self, device, ignore_missing=False):
 		governor = None
 		if not self._check_cpu_can_change_governor(device):
 			return None
-		data = self._get_governor_on_cpu(device, ignore_missing)
+		data = self._lib.get_governor_on_cpu(device, ignore_missing)
 		if len(data) > 0:
 			governor = data
 
@@ -383,18 +334,6 @@ class CPULatencyPlugin(base.Plugin):
 			log.error("could not get current governor on cpu '%s'" % device)
 
 		return governor
-
-	def _sampling_down_factor_path(self, governor = "ondemand"):
-		return "/sys/devices/system/cpu/cpufreq/%s/sampling_down_factor" % governor
-
-	def _do_set_sampling_down_factor(self, path, value, governor):
-		log.info("setting sampling_down_factor to '%s' for governor '%s'"
-				% (value, governor))
-		try:
-			self._file_handler.write(path, value)
-		except IOError as e:
-			log.error("Failed to set sampling_down_factor to '%s' for governor '%s': %s"
-					% (value, governor, e))
 
 	@command_set("sampling_down_factor", per_device = True, priority = 10)
 	def _set_sampling_down_factor(self, sampling_down_factor, device, sim):
@@ -413,33 +352,24 @@ class CPULatencyPlugin(base.Plugin):
 			return None
 		if governor not in list(self._governors_map.values()):
 			self._governors_map[device] = governor
-			path = self._sampling_down_factor_path(governor)
+			path = self._lib.sampling_down_factor_path(governor)
 			if not os.path.exists(path):
 				log.debug("ignoring sampling_down_factor setting for CPU '%s', governor '%s' doesn't support it" % (device, governor))
 				return None
 			val = str(sampling_down_factor)
 			if not sim:
-				self._do_set_sampling_down_factor(path, val, governor)
+				self._lib.set_sampling_down_factor(path, val, governor)
 		return val
-
-	def _do_get_sampling_down_factor(self, path, governor):
-		try:
-			contents = self._file_handler.read(path)
-			return contents.strip()
-		except IOError as e:
-			log.error("Failed to get sampling_down_factor for governor '%s': %s"
-					% (governor, e))
-			return ""
 
 	@command_get("sampling_down_factor")
 	def _get_sampling_down_factor(self, device, ignore_missing=False):
 		governor = self._get_governor(device, ignore_missing=ignore_missing)
 		if governor is None:
 			return None
-		path = self._sampling_down_factor_path(governor)
+		path = self._lib.sampling_down_factor_path(governor)
 		if not os.path.exists(path):
 			return None
-		return self._do_get_sampling_down_factor(path, governor)
+		return self._lib.get_sampling_down_factor(path, governor)
 
 	def _try_set_energy_perf_bias(self, cpu_id, value):
 		(retcode, out, err_msg) = self._cmd.execute(
