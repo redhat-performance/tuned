@@ -49,7 +49,7 @@ class PluginLoader(object):
 
 	def load_all_plugins(self):
 		plugins_package = __import__(self._namespace)
-		plugin_clss = []
+		plugin_classes = []
 		for module_name in os.listdir(plugins_package.plugins.__path__[0]):
 			try:
 				module_name = os.path.splitext(module_name)[0]
@@ -58,9 +58,9 @@ class PluginLoader(object):
 				plugin_class = self._get_class(
 					"%s.%s" % (self._namespace, module_name)
 					)
-				if plugin_class not in plugin_clss:
-					plugin_clss.append(plugin_class)
+				if plugin_class not in plugin_classes:
+					plugin_classes.append(plugin_class)
 			except ImportError:
 				pass
-		return plugin_clss
+		return plugin_classes
 
