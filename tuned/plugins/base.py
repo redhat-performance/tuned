@@ -51,7 +51,7 @@ class Plugin(object):
 
 	@property
 	def name(self):
-		return self.__class__.__module__.split(".")[-1].split("_", 1)[1]
+		return self.__class__.__module__.split(".")[-2].split("_", 1)[1]
 
 	#
 	# Plugin configuration manipulation and helpers.

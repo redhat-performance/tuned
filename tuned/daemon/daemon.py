@@ -6,6 +6,7 @@ from tuned.exceptions import TunedException
 from tuned.profiles.exceptions import InvalidProfileException
 import tuned.consts as consts
 from tuned.utils.commands import commands
+from tuned.utils.active_profile import ActiveProfileManager
 from tuned import exports
 from tuned.utils.profile_recommender import ProfileRecommender
 import re
@@ -44,6 +45,7 @@ class Daemon(object):
 		self._profile_loader = profile_loader
 		self._init_threads()
 		self._cmd = commands()
+		self._active_profile_manager = ActiveProfileManager()
 		try:
 			self._init_profile(profile_names)
 		except TunedException as e:
@@ -191,7 +193,7 @@ class Daemon(object):
 
 	def _save_active_profile(self, profile_names, manual):
 		try:
-			self._cmd.save_active_profile(profile_names, manual)
+			self._active_profile_manager.save(profile_names, manual)
 		except TunedException as e:
 			log.error(str(e))
 
@@ -202,7 +204,7 @@ class Daemon(object):
 		return profile
 
 	def _get_startup_profile(self):
-		profile, manual = self._cmd.get_active_profile()
+		profile, manual = self._active_profile_manager.get()
 		if manual is None:
 			manual = profile is not None
 		if not manual:
