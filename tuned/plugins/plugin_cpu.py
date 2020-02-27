@@ -165,7 +165,14 @@ class CPULatencyPlugin(base.Plugin):
 				self._monitors_repository.delete(instance._load_monitor)
 
 	def _get_intel_pstate_attr(self, attr):
-		return self._cmd.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None).strip()
+		path = "/sys/devices/system/cpu/intel_pstate/%s" % attr
+		try:
+			contents = self._file_handler.read(path)
+			return contents.strip()
+		except IOError as e:
+			log.error("Failed to get intel_pstate attribute '%s': %s"
+					% (attr, e))
+			return None
 
 	def _set_intel_pstate_attr(self, attr, val):
 		if val is None:
