@@ -1,7 +1,8 @@
 import errno
 import unittest
 
-from tests.unit.lib import create_OSError, MockFileOperations, MockLogger
+from tests.unit.lib import create_IOError, create_OSError
+from tests.unit.lib import MockFileOperations, MockLogger
 from tuned.plugins.plugin_sysctl.library import SysctlLib
 from tuned.utils.file import FileHandler
 
@@ -171,6 +172,28 @@ class SysctlLibTestCase(unittest.TestCase):
 		self.assertIn("Failed to set sysctl", logger.msgs[1][1])
 		self.assertIn(option, logger.msgs[1][1])
 		self.assertIn("Permission denied", logger.msgs[1][1])
+
+	def test_write_sysctl_ignore_missing(self):
+		file_ops = MockFileOperations(error_to_raise=errno.ENOENT)
+		file_handler = FileHandler(file_ops=file_ops)
+		logger = MockLogger()
+		lib = SysctlLib(file_handler, None, logger)
+		option = "net.bridge.bridge-nf-call-arptables"
+
+		res = lib.write_sysctl(option, "0", ignore_missing=True)
+
+		self.assertFalse(res)
+		self.assertEqual(len(logger.msgs), 2)
+
+		self.assertEqual(logger.msgs[0][0], "debug")
+		self.assertIn("Setting sysctl parameter", logger.msgs[0][1])
+		self.assertIn(option, logger.msgs[0][1])
+		self.assertIn("0", logger.msgs[0][1])
+
+		self.assertEqual(logger.msgs[1][0], "debug")
+		self.assertIn("Failed to set sysctl", logger.msgs[1][1])
+		self.assertIn(option, logger.msgs[1][1])
+		self.assertIn("does not exist", logger.msgs[1][1])
 
 	def test_apply_system_sysctl_run_sysctl_d(self):
 		file_ops = MockFileOperations()
@@ -397,3 +420,29 @@ class SysctlLibTestCase(unittest.TestCase):
 		self.assertEqual(logger.msgs[1][1], "Syntax error in file /etc/sysctl.conf, line 1")
 		self.assertEqual(logger.msgs[2][0], "debug")
 		self.assertEqual(logger.msgs[2][1], "Finished applying sysctl settings from file /etc/sysctl.conf")
+
+	def test_apply_system_sysctl_ignore_missing(self):
+		class MyFileOps(MockFileOperations):
+			def write(self, path, contents):
+				self.write_called += 1
+				raise create_IOError(errno.ENOENT, path)
+
+		file_ops = MyFileOps()
+		option = "net.bridge.bridge-nf-call-arptables"
+		file_ops.files["/etc/sysctl.conf"] =  option + " = 0\n"
+		file_handler = FileHandler(file_ops=file_ops)
+		logger = MockLogger()
+
+		def listdir(path):
+			raise create_OSError(errno.ENOENT, path)
+
+		lib = SysctlLib(file_handler, listdir, logger)
+
+		lib.apply_system_sysctl()
+
+		self.assertGreater(len(logger.msgs), 0)
+		for log_level, msg in logger.msgs:
+			self.assertNotEqual(log_level, "error")
+		self.assertIn(("debug",
+			       "Failed to set sysctl parameter '%s' to '0', the parameter does not exist" % option),
+			      logger.msgs)
