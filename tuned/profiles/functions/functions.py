@@ -1,14 +1,8 @@
-import os
 import re
-import glob
 from . import repository
 import tuned.logs
-import tuned.consts as consts
-from tuned.utils.commands import commands
 
 log = tuned.logs.get()
-
-cmd = commands()
 
 class Functions():
 	"""

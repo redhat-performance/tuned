@@ -1,7 +1,4 @@
-import os
-import tuned.logs
 from . import base
-from tuned.utils.commands import commands
 
 class kb2s(base.Function):
 	"""
