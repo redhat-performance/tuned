@@ -1,6 +1,6 @@
 import tuned.consts as consts
-from . import base
-from .decorators import *
+from tuned.plugins import base
+from tuned.plugins.decorators import *
 from subprocess import Popen,PIPE
 import tuned.logs
 from tuned.utils.commands import commands

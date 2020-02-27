@@ -1,5 +1,5 @@
-from . import base
-from .decorators import *
+from tuned.plugins import base
+from tuned.plugins.decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
 import glob

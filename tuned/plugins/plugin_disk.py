@@ -1,6 +1,6 @@
 import errno
-from . import hotplug
-from .decorators import *
+from tuned.plugins import hotplug
+from tuned.plugins.decorators import *
 import tuned.logs
 import tuned.consts as consts
 from tuned.utils.commands import commands

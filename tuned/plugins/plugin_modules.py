@@ -1,7 +1,7 @@
 import re
 import os.path
-from . import base
-from .decorators import *
+from tuned.plugins import base
+from tuned.plugins.decorators import *
 import tuned.logs
 from subprocess import *
 from tuned.utils.commands import commands
