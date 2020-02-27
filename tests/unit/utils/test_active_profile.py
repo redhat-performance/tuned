@@ -1,43 +1,42 @@
-import os
-import shutil
-import tempfile
-import unittest2
+import unittest
 
+from tests.unit.lib import MockFileOperations
 import tuned.consts as consts
 from tuned.utils.active_profile import ActiveProfileManager
+from tuned.utils.file import FileHandler
 
-class ActiveProfileManagerTestCase(unittest2.TestCase):
-	def setUp(self):
-		self._test_dir = tempfile.mkdtemp()
-
+class ActiveProfileManagerTestCase(unittest.TestCase):
 	def test_get(self):
-		consts.ACTIVE_PROFILE_FILE = self._test_dir + '/active_profile'
-		consts.PROFILE_MODE_FILE = self._test_dir + '/profile_mode'
-		with open(consts.ACTIVE_PROFILE_FILE,'w') as f:
-			f.write('test_profile')
-		with open(consts.PROFILE_MODE_FILE,'w') as f:
-			f.write('auto')
-		active_profile_manager = ActiveProfileManager()
-		(profile,mode) = active_profile_manager.get()
-		self.assertEqual(profile,'test_profile')
-		self.assertEqual(mode,False)
-		os.remove(consts.ACTIVE_PROFILE_FILE)
-		os.remove(consts.PROFILE_MODE_FILE)
-		(profile,mode) = active_profile_manager.get()
-		self.assertEqual(profile,None)
-		self.assertEqual(mode,None)
+		file_ops = MockFileOperations()
+		file_ops.files[consts.ACTIVE_PROFILE_FILE] = 'test_profile'
+		file_ops.files[consts.PROFILE_MODE_FILE] = 'auto'
+		file_handler = FileHandler(file_ops=file_ops)
+		active_profile_manager = ActiveProfileManager(
+				file_handler=file_handler)
+
+		(profile, mode) = active_profile_manager.get()
+
+		self.assertEqual(profile, 'test_profile')
+		self.assertEqual(mode, False)
+
+		del file_ops.files[consts.ACTIVE_PROFILE_FILE]
+		del file_ops.files[consts.PROFILE_MODE_FILE]
+		(profile, mode) = active_profile_manager.get()
+
+		self.assertEqual(profile, None)
+		self.assertEqual(mode, None)
+		self.assertEqual(file_ops.write_called, 0)
 
 	def test_save(self):
-		consts.ACTIVE_PROFILE_FILE = self._test_dir + '/active_profile'
-		consts.PROFILE_MODE_FILE = self._test_dir + '/profile_mode'
-		active_profile_manager = ActiveProfileManager()
-		active_profile_manager.save('test_profile', False)
-		with open(consts.ACTIVE_PROFILE_FILE) as f:
-			self.assertEqual(f.read(),'test_profile\n')
-		with open(consts.PROFILE_MODE_FILE) as f:
-			self.assertEqual(f.read(),'auto\n')
-		os.remove(consts.ACTIVE_PROFILE_FILE)
-		os.remove(consts.PROFILE_MODE_FILE)
+		file_ops = MockFileOperations()
+		file_handler = FileHandler(file_ops=file_ops)
+		active_profile_manager = ActiveProfileManager(
+				file_handler=file_handler)
 
-	def tearDown(self):
-		shutil.rmtree(self._test_dir)
+		active_profile_manager.save('test_profile', False)
+
+		active_profile = file_ops.files[consts.ACTIVE_PROFILE_FILE]
+		self.assertEqual(active_profile, 'test_profile\n')
+		profile_mode = file_ops.files[consts.PROFILE_MODE_FILE]
+		self.assertEqual(profile_mode, 'auto\n')
+		self.assertEqual(file_ops.read_called, 0)
