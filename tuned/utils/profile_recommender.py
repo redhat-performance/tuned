@@ -2,16 +2,9 @@ import os
 import re
 import errno
 import procfs
-import platform
+import subprocess
 from configobj import ConfigObj, ConfigObjError
 
-have_dmidecode = False
-try:
-	if (os.geteuid() == 0 and platform.machine() in ["i386", "i486", "i586", "i686", "x86_64"]):
-		import dmidecode
-		have_dmidecode = True
-except:
-	pass
 try:
 	import syspurpose.files
 	have_syspurpose = True
@@ -26,13 +19,16 @@ log = tuned.logs.get()
 
 class ProfileRecommender:
 
-	def __init__(self):
+	def __init__(self, is_hardcoded = False):
+		self._is_hardcoded = is_hardcoded
 		self._commands = commands()
+		self._chassis_type = None
 
-	def recommend(self, hardcoded = False):
+	def recommend(self):
 		profile = consts.DEFAULT_PROFILE
-		if hardcoded:
+		if self._is_hardcoded:
 			return profile
+
 		has_root = os.geteuid() == 0
 		if not has_root:
 			log.warning("Profile recommender is running without root privileges. Profiles with virt recommendation condition will be omitted.")
@@ -93,17 +89,13 @@ class ProfileRecommender:
 						if len(ps.find_by_regex(re.compile(value))) == 0:
 							match = False
 					elif option == "chassis_type":
-						if have_dmidecode:
-							for chassis in dmidecode.chassis().values():
-								chassis_type = chassis["data"]["Type"].decode(
-										"ascii")
-								if re.match(value, chassis_type, re.IGNORECASE):
-									break
-							else:
+						chassis_type = self._get_chassis_type()
+
+						if chassis_type:
+							if not re.match(value, chassis_type, re.IGNORECASE):
 								match = False
 						else:
-							log.debug("Ignoring 'chassis_type' in '%s',\
-								dmidecode is not available." % fname)
+							log.debug("Ignoring 'chassis_type' in '%s', could not read DMI value." % fname)
 					elif option == "syspurpose_role":
 						if have_syspurpose:
 							s = syspurpose.files.SyspurposeStore(
@@ -131,3 +123,53 @@ class ProfileRecommender:
 		except (IOError, OSError, ConfigObjError) as e:
 			log.error("error processing '%s', %s" % (fname, e))
 		return matching_profile
+
+	def _get_chassis_type(self):
+		if self._chassis_type is not None:
+			log.debug("returning cached chassis type '%s'" % self._chassis_type)
+			return self._chassis_type
+
+		# Check DMI sysfs first
+		# Based on SMBios 3.3.0 specs (https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.3.0.pdf)
+		DMI_CHASSIS_TYPES = ["", "Other", "Unknown", "Desktop", "Low Profile Desktop", "Pizza Box", "Mini Tower", "Tower",
+							"Portable", "Laptop", "Notebook", "Hand Held", "Docking Station", "All In One", "Sub Notebook",
+							"Space-saving", "Lunch Box", "Main Server Chassis", "Expansion Chassis", "Sub Chassis",
+							"Bus Expansion Chassis", "Peripheral Chassis", "RAID Chassis", "Rack Mount Chassis", "Sealed-case PC",
+							"Multi-system", "CompactPCI", "AdvancedTCA", "Blade", "Blade Enclosing", "Tablet",
+							"Convertible", "Detachable", "IoT Gateway", "Embedded PC", "Mini PC", "Stick PC"]
+		try:
+			with open('/sys/devices/virtual/dmi/id/chassis_type', 'r') as sysfs_chassis_type:
+				chassis_type_id = int(sysfs_chassis_type.read())
+
+			self._chassis_type = DMI_CHASSIS_TYPES[chassis_type_id]
+		except IndexError:
+			log.error("Unknown chassis type id read from dmi sysfs: %d" % chassis_type_id)
+		except (OSError, IOError) as e:
+			log.warn("error accessing dmi sysfs file: %s" % e)
+
+		if self._chassis_type:
+			log.debug("chassis type - %s" % self._chassis_type)
+			return self._chassis_type
+
+		# Fallback - try parsing dmidecode output
+		try:
+			p_dmi = subprocess.Popen(['dmidecode', '-s', 'chassis-type'],
+				stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+				close_fds=True)
+
+			(dmi_output, dmi_error) = p_dmi.communicate()
+
+			if p_dmi.returncode:
+				log.error("dmidecode finished with error (ret %d): '%s'" % (p_dmi.returncode, dmi_error))
+			else:
+				self._chassis_type = dmi_output.strip().decode()
+		except (OSError, IOError) as e:
+			log.warn("error executing dmidecode tool : %s" % e)
+
+		if not self._chassis_type:
+			log.debug("could not determine chassis type.")
+			self._chassis_type = ""
+		else:
+			log.debug("chassis type - %s" % self._chassis_type)
+
+		return self._chassis_type

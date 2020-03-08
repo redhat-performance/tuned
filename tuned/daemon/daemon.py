@@ -40,6 +40,7 @@ class Daemon(object):
 			log.info("dynamic tuning is enabled (can be overridden by plugins)")
 			log.info("using update interval of %d second(s) (%d times of the sleep interval)" % (self._sleep_cycles * self._sleep_interval, self._sleep_cycles))
 
+		self._profile_recommender = ProfileRecommender(is_hardcoded = not self._recommend_command)
 		self._unit_manager = unit_manager
 		self._profile_loader = profile_loader
 		self._init_threads()
@@ -168,6 +169,10 @@ class Daemon(object):
 		return self._post_loaded_profile if self._profile else None
 
 	@property
+	def profile_recommender(self):
+		return self._profile_recommender
+
+	@property
 	def profile_loader(self):
 		return self._profile_loader
 
@@ -263,7 +268,7 @@ class Daemon(object):
 
 	def _get_recommended_profile(self):
 		log.info("Running in automatic mode, checking what profile is recommended for your configuration.")
-		profile = ProfileRecommender().recommend(hardcoded = not self._recommend_command)
+		profile = self._profile_recommender.recommend()
 		log.info("Using '%s' profile" % profile)
 		return profile
 

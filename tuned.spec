@@ -70,14 +70,14 @@ Requires: %{_py}-schedutils, %{_py}-linux-procfs, %{_py}-perf
 BuildRequires: python3-dbus, python3-gobject-base
 Requires: python3-dbus, python3-gobject-base
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
-Recommends: python3-dmidecode
+Recommends: dmidecode
 %endif
 %else
 # BuildRequires for 'make test'
 BuildRequires: dbus-python, pygobject3-base
 Requires: dbus-python, pygobject3-base
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
-Recommends: python-dmidecode
+Recommends: dmidecode
 %endif
 %endif
 Requires: virt-what, ethtool, gawk, hdparm

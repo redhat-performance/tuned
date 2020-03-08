@@ -10,9 +10,4 @@ Python files are modified to use Python3. If you want tuned to use Python2
 instead, set PYTHON to the full path of Python2. Example:
     make PYTHON=/usr/bin/python2 install
 
-tuned requires some Python packages in order to run.
-Those packages are listed in 'requirements.txt'.
-
-Use: 'pip3 install -r requirements.txt' (or 'pip install -r requirements.txt' for Python2) to install them.
-
 
