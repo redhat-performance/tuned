@@ -24,7 +24,7 @@ class Function(object):
 		if args is None or nargs_max is None:
 			return False
 		la = len(args)
-		return (nargs_max == 0 or nargs_max == la) and (nargs_min is None or nargs_min <= la)
+		return (nargs_max == 0 or nargs_max >= la) and (nargs_min is None or nargs_min <= la)
 
 	def execute(self, args):
 		if self._check_args(args, self._nargs_max, self._nargs_min):

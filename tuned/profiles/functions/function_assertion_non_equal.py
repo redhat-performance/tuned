@@ -13,8 +13,8 @@ class assertion_non_equal(base.Function):
 	exception will abort profile loading.
 	"""
 	def __init__(self):
-		# 2 arguments
-		super(assertion_non_equal, self).__init__("assertion_non_equal", 3)
+		# 3 arguments
+		super(assertion_non_equal, self).__init__("assertion_non_equal", 3, 3)
 
 	def execute(self, args):
 		if not super(assertion_non_equal, self).execute(args):

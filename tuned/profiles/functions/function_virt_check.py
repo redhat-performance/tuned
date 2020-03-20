@@ -11,7 +11,7 @@ class virt_check(base.Function):
 	"""
 	def __init__(self):
 		# 2 arguments
-		super(virt_check, self).__init__("virt_check", 2)
+		super(virt_check, self).__init__("virt_check", 2, 2)
 
 	def execute(self, args):
 		if not super(virt_check, self).execute(args):
