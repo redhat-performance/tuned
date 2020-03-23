@@ -13,8 +13,8 @@ class assertion(base.Function):
 	exception will abort profile loading.
 	"""
 	def __init__(self):
-		# 2 arguments
-		super(assertion, self).__init__("assertion", 3)
+		# 3 arguments
+		super(assertion, self).__init__("assertion", 3, 3)
 
 	def execute(self, args):
 		if not super(assertion, self).execute(args):

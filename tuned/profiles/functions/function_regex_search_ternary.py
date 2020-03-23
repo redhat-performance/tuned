@@ -10,7 +10,7 @@ class regex_search_ternary(base.Function):
 	"""
 	def __init__(self):
 		# 4 arguments
-		super(regex_search_ternary, self).__init__("regex_search_ternary", 4)
+		super(regex_search_ternary, self).__init__("regex_search_ternary", 4, 4)
 
 	def execute(self, args):
 		if not super(regex_search_ternary, self).execute(args):
