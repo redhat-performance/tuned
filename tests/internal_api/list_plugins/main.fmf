@@ -1,0 +1,5 @@
+summary: Use the internal API to get the list of plugins
+contact:
+    - Ondřej Lysoněk <olysonek@redhat.com>
+    - Rich Megginson <rmeggins@redhat.com>
+test: ./test.py
