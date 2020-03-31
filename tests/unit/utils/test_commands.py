@@ -1,4 +1,4 @@
-import unittest2
+import unittest
 import tempfile
 import shutil
 import re
@@ -9,7 +9,7 @@ import tuned.consts as consts
 from tuned.exceptions import TunedException
 import tuned.utils.commands
 
-class CommandsTestCase(unittest2.TestCase):
+class CommandsTestCase(unittest.TestCase):
 	def setUp(self):
 		self._commands = commands()
 		self._test_dir = tempfile.mkdtemp()

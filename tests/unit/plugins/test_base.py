@@ -3,7 +3,7 @@ try:
 except ImportError:
 	from collections import Mapping
 import tempfile
-import unittest2
+import unittest
 
 from tuned.monitors.repository import Repository
 import tuned.plugins.decorators as decorators
@@ -26,7 +26,7 @@ plugin_instance_factory = plugins.instance.Factory()
 storage_provider = storage.PickleProvider()
 storage_factory = storage.Factory(storage_provider)
 
-class PluginBaseTestCase(unittest2.TestCase):
+class PluginBaseTestCase(unittest.TestCase):
 	def setUp(self):
 		self._plugin = DummyPlugin(monitors_repository,storage_factory,\
 			hardware_inventory,device_matcher,device_matcher_udev,\
