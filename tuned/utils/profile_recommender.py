@@ -80,7 +80,8 @@ class ProfileRecommender:
 					elif option == "system":
 						if not re.match(value,
 								self._commands.read_file(
-								consts.SYSTEM_RELEASE_FILE), re.S):
+								        consts.SYSTEM_RELEASE_FILE,
+                                                                        no_error = True), re.S):
 							match = False
 					elif option[0] == "/":
 						if not os.path.exists(option) or not re.match(value,
