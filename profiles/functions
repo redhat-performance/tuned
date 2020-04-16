@@ -474,14 +474,18 @@ restore_logs_syncing() {
 }
 
 irqbalance_banned_cpus_clear() {
-    sed -i '/^IRQBALANCE_BANNED_CPUS=/d' /etc/sysconfig/irqbalance
+    sed -i '/^IRQBALANCE_BANNED_CPUS=/d' /etc/sysconfig/irqbalance || return
+    if [ ${1:-restart} = restart ]; then
+        systemctl try-restart irqbalance
+    fi
 }
 
 irqbalance_banned_cpus_setup() {
-    irqbalance_banned_cpus_clear
+    irqbalance_banned_cpus_clear norestart
     if [ -n "$1" ]; then
         echo "IRQBALANCE_BANNED_CPUS=$1" >> /etc/sysconfig/irqbalance
     fi
+    systemctl try-restart irqbalance
 }
 
 #
