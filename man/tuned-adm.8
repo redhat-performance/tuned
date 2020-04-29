@@ -24,7 +24,7 @@
 tuned\-adm - command line tool for switching between different tuning profiles
 .SH SYNOPSIS
 .B tuned\-adm 
-.RB [ list " | " active " | " "profile \fI[profile]\fP" " | " off " | " verify " | " recommend ]
+.RB [ list " | " active " | " "profile \fI[profile]\fP..." " | " off " | " verify " | " recommend ]
 
 .SH DESCRIPTION
 This command line utility allows you to switch between user definable tuning
@@ -63,9 +63,12 @@ List plugin's configuration options and their hints.
 Show current active profile.
 
 .TP
-.BI "profile " [PROFILE_NAME]
-Switches to the given profile. If none is given then all available profiles
-are listed. If the profile given is not valid the command gracefully exits without
+.BI "profile " [PROFILE_NAME] ...
+Switches to the given profile. If more than one profile is given, the
+profiles are merged (in case of conflicting settings, the setting from
+the last profile is used) and the resulting profile is applied. If no
+profile is given, then all available profiles are listed. If the
+profile given is not valid, the command gracefully exits without
 performing any operation.
 
 .TP
