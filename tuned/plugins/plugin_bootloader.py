@@ -61,7 +61,6 @@ class BootloaderPlugin(base.Plugin):
 				effective[key] = options[key]
 			else:
 				log.warn("Unknown option '%s' for plugin '%s'." % (key, self.__class__.__name__))
-		cmdline_keys.sort()
 		cmdline = ""
 		for key in cmdline_keys:
 			val = options[key]
