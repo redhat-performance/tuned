@@ -1,0 +1,59 @@
+.\"/* 
+.\" * All rights reserved
+.\" * Copyright (C) 2020 International Business Machines Corporation 
+.\" * Authors: Luis Bolinches
+.\" *
+.\" * This program is free software; you can redistribute it and/or
+.\" * modify it under the terms of the GNU General Public License
+.\" * as published by the Free Software Foundation; either version 2
+.\" * of the License, or (at your option) any later version.
+.\" *
+.\" * This program is distributed in the hope that it will be useful,
+.\" * but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" * GNU General Public License for more details.
+.\" *
+.\" * You should have received a copy of the GNU General Public License
+.\" * along with this program; if not, write to the Free Software
+.\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+.\" */
+.\" 
+.TH TUNED_PROFILES_SPECTRUMSCALE_ECE "7" "22 Apr 2020" "Fedora Power Management SIG" "tuned"
+.SH NAME
+tuned\-profiles\-spectrumscale-ece - description of profiles provided for Spectrum Scale Erasure Code Edition
+
+.SH DESCRIPTION
+These profiles are provided for Spectrum Scale Erasure Code Edition servers.
+
+.SH PROFILES
+The following profiles are provided:
+
+.TP
+.BI "spectrumscale-ece"
+Profile optimized for Spectrum Scale Erasure Code Edition based on throughput\-performance profile.
+It additionally enables automatic NUMA balancing and modifies some other
+performance related kernel parameters.
+
+.SH "FILES"
+.nf
+.I /etc/tuned/*
+.I /usr/lib/tuned/*
+
+.SH "SEE ALSO"
+.BR tuned (8)
+.BR tuned\-adm (8)
+.BR tuned\-profiles (7)
+.BR tuned\-profiles\-sap (7)
+.BR tuned\-profiles\-sap\-hana (7)
+.BR tuned\-profiles\-mssql (7)
+.BR tuned\-profiles\-atomic (7)
+.BR tuned\-profiles\-oracle (7)
+.BR tuned\-profiles\-realtime (7)
+.BR tuned\-profiles\-nfv\-host (7)
+.BR tuned\-profiles\-nfv\-guest (7)
+.BR tuned\-profiles\-cpu\-partitioning (7)
+.BR tuned\-profiles\-compat (7)
+.SH AUTHOR
+.nf
+Luis Bolinches <luis.bolinches@fi.ibm.com>
+
