@@ -25,7 +25,11 @@ class Inventory(object):
 			buffer_size = consts.CFG_DEF_UDEV_BUFFER_SIZE
 
 		if (set_receive_buffer_size):
-			self._udev_monitor.set_receive_buffer_size(buffer_size)
+			try:
+				self._udev_monitor.set_receive_buffer_size(buffer_size)
+			except EnvironmentError:
+				log.warn("cannot set udev monitor receive buffer size, we are probably running inside " +
+					 "container or with limited capabilites, Tuned functionality may be limited")
 
 		if monitor_observer_factory is None:
 			monitor_observer_factory = _MonitorObserverFactory()
