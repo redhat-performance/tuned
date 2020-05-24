@@ -71,6 +71,8 @@ CFG_RECOMMEND_COMMAND = "recommend_command"
 CFG_REAPPLY_SYSCTL = "reapply_sysctl"
 CFG_DEFAULT_INSTANCE_PRIORITY = "default_instance_priority"
 CFG_UDEV_BUFFER_SIZE = "udev_buffer_size"
+CFG_UNAME_STRING = "uname_string"
+CFG_CPUINFO_STRING = "cpuinfo_string"
 
 # no_daemon mode
 CFG_DEF_DAEMON = True

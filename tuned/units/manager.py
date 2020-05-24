@@ -6,6 +6,7 @@ import tuned.exceptions
 import tuned.logs
 import tuned.plugins.exceptions
 import tuned.consts as consts
+from tuned.utils.global_config import GlobalConfig
 from tuned.utils.commands import commands
 
 log = tuned.logs.get()
@@ -18,7 +19,7 @@ class Manager(object):
 	"""
 
 	def __init__(self, plugins_repository, monitors_repository,
-			def_instance_priority, hardware_inventory):
+			def_instance_priority, hardware_inventory, config = None):
 		super(Manager, self).__init__()
 		self._plugins_repository = plugins_repository
 		self._monitors_repository = monitors_repository
@@ -26,6 +27,7 @@ class Manager(object):
 		self._hardware_inventory = hardware_inventory
 		self._instances = []
 		self._plugins = []
+		self._config = config or GlobalConfig()
 		self._cmd = commands()
 
 	@property
@@ -43,15 +45,19 @@ class Manager(object):
 	def _unit_matches_cpuinfo(self, unit):
 		if unit.cpuinfo_regex is None:
 			return True
-		return re.search(unit.cpuinfo_regex,
-				self._cmd.read_file("/proc/cpuinfo"),
+		cpuinfo_string = self._config.get(consts.CFG_CPUINFO_STRING)
+		if cpuinfo_string is None:
+			cpuinfo_string = self._cmd.read_file("/proc/cpuinfo")
+		return re.search(unit.cpuinfo_regex, cpuinfo_string,
 				re.MULTILINE) is not None
 
 	def _unit_matches_uname(self, unit):
 		if unit.uname_regex is None:
 			return True
-		return re.search(unit.uname_regex,
-				" ".join(os.uname()),
+		uname_string = self._config.get(consts.CFG_UNAME_STRING)
+		if uname_string is None:
+			uname_string = " ".join(os.uname())
+		return re.search(unit.uname_regex, uname_string,
 				re.MULTILINE) is not None
 
 	def create(self, instances_config):
