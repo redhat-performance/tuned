@@ -223,6 +223,13 @@ Requires: %{name} = %{version}
 %description profiles-cpu-partitioning
 Additional tuned profile(s) optimized for CPU partitioning.
 
+%package profiles-spectrumscale
+Summary: Additional tuned profile(s) optimized for IBM Spectrum Scale
+Requires: %{name} = %{version}
+
+%description profiles-spectrumscale
+Additional tuned profile(s) optimized for IBM Spectrum Scale.
+
 %package profiles-compat
 Summary: Additional tuned profiles mainly for backward compatibility with tuned 1.0
 Requires: %{name} = %{version}
@@ -379,6 +386,7 @@ fi
 %exclude %{_prefix}/lib/tuned/realtime-virtual-guest
 %exclude %{_prefix}/lib/tuned/realtime-virtual-host
 %exclude %{_prefix}/lib/tuned/cpu-partitioning
+%exclude %{_prefix}/lib/tuned/spectrumscale-ece
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %dir %{_sysconfdir}/tuned/recommend.d
@@ -488,6 +496,11 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/cpu-partitioning-variables.conf
 %{_prefix}/lib/tuned/cpu-partitioning
 %{_mandir}/man7/tuned-profiles-cpu-partitioning.7*
+
+%files profiles-spectrumscale
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/spectrumscale-ece
+%{_mandir}/man7/tuned-profiles-spectrumscale-ece.7*
 
 %files profiles-compat
 %defattr(-,root,root,-)
