@@ -122,11 +122,19 @@ Profile optimized for virtual hosts based on throughput\-performance profile.
 It additionally enables more aggressive writeback of dirty pages.
 
 .TP
-.BI "intel-sst"
+.BI "intel\-sst"
 Profile optimized for systems with user-defined Intel Speed Select Technology
 configurations. This profile is intended to be used as an overlay on other
 profiles (e.g. cpu\-partitioning profile), example:
-.B tuned\-adm profile cpu\-partitioning intel-sst
+.B tuned\-adm profile cpu\-partitioning intel\-sst
+
+.TP
+.BI "optimize\-serial\-console"
+Profile which tunes down I/O activity to the serial console by reducing the
+printk value. This should make the serial console more responsive.
+This profile is intended to be used as an overlay on other
+profiles (e.g. throughput\-performance profile), example:
+.B tuned\-adm profile throughput\-performance optimize\-serial\-console
 
 .SH "FILES"
 .nf
