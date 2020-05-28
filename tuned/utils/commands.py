@@ -471,3 +471,25 @@ class commands:
 				f.write(mode + "\n")
 		except (OSError,IOError) as e:
 			raise TunedException("Failed to save profile mode: %s" % e.strerror)
+
+	def get_post_loaded_profile(self):
+		profile_name = ""
+		try:
+			with open(consts.POST_LOADED_PROFILE_FILE, "r") as f:
+				profile_name = f.read().strip()
+		except IOError as e:
+			if e.errno != errno.ENOENT:
+				raise TunedException("Failed to read the active post-loaded profile: %s" % e)
+		except (OSError, EOFError) as e:
+			raise TunedException("Failed to read the active post-loaded profile: %s" % e)
+		if profile_name == "":
+			profile_name = None
+		return profile_name
+
+	def save_post_loaded_profile(self, profile_name):
+		try:
+			with open(consts.POST_LOADED_PROFILE_FILE, "w") as f:
+				if profile_name is not None:
+					f.write(profile_name + "\n")
+		except (OSError,IOError) as e:
+			raise TunedException("Failed to save the active post-loaded profile: %s" % e.strerror)

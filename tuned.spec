@@ -394,6 +394,7 @@ fi
 %{_libexecdir}/tuned/defirqaffinity*
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/active_profile
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/profile_mode
+%config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/post_loaded_profile
 %config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/bootcmdline
 %{_sysconfdir}/dbus-1/system.d/com.redhat.tuned.conf
