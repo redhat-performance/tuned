@@ -41,6 +41,13 @@ MACHINE_ID_FILE = "/etc/machine-id"
 KERNEL_UPDATE_HOOK_FILE = "/usr/lib/kernel/install.d/92-tuned.install"
 BLS_ENTRIES_PATH = "/boot/loader/entries"
 
+# scheduler plugin configuration
+# how many times retry to move tasks to parent cgroup on cgroup cleanup
+CGROUP_CLEANUP_TASKS_RETRY = 10
+PROCFS_MOUNT_POINT = "/proc"
+DEF_CGROUP_MOUNT_POINT = "/sys/fs/cgroup/cpuset"
+DEF_CGROUP_MODE = 0o770
+
 # modules plugin configuration
 MODULES_FILE = "/etc/modprobe.d/tuned.conf"
 

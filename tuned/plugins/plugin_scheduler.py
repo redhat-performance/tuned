@@ -15,17 +15,20 @@ import procfs
 import schedutils
 from tuned.utils.commands import commands
 import errno
+import os
+import collections
 
 log = tuned.logs.get()
 
 class SchedulerParams(object):
 	def __init__(self, cmd, cmdline = None, scheduler = None,
-			priority = None, affinity = None):
+			priority = None, affinity = None, cgroup = None):
 		self._cmd = cmd
 		self.cmdline = cmdline
 		self.scheduler = scheduler
 		self.priority = priority
 		self.affinity = affinity
+		self.cgroup = cgroup
 
 	@property
 	def affinity(self):
@@ -98,7 +101,17 @@ class SchedulerPlugin(base.Plugin):
 			self._scheduler_original = {}
 			self._storage.unset(self._scheduler_storage_key)
 
+		self._cgroups_original_affinity = dict()
+
+		# calculated by isolated_cores setter
+		self._affinity = None
+
+		self._cgroup = None
+		self._cgroups = collections.OrderedDict([(self._sanitize_cgroup_path(option[7:]), self._variables.expand(affinity))
+			for option, affinity in instance.options.items() if option[:7] == "cgroup." and len(option) > 7])
+
 		instance._scheduler = instance.options
+
 		for k in instance._scheduler:
 			instance._scheduler[k] = self._variables.expand(instance._scheduler[k])
 		if self._cmd.get_bool(instance._scheduler.get("runtime", 1)) == "0":
@@ -126,10 +139,17 @@ class SchedulerPlugin(base.Plugin):
 	@classmethod
 	def _get_config_options(cls):
 		return {
-			"isolated_cores":       None,
+			"isolated_cores": None,
+			"cgroup_mount_point": consts.DEF_CGROUP_MOUNT_POINT,
+			"cgroup_mount_point_init": False,
+			"cgroup_groups_init": True,
+			"cgroup_for_isolated_cores": None,
 			"ps_whitelist": None,
 			"ps_blacklist": None,
 		}
+
+	def _sanitize_cgroup_path(self, value):
+		return str(value).replace(".", "/") if value is not None else None
 
 	# Raises OSError, IOError
 	def _get_cmdline(self, process):
@@ -273,28 +293,66 @@ class SchedulerPlugin(base.Plugin):
 						% (pid, e))
 		return cont
 
-	def _store_orig_process_affinity(self, pid, affinity):
+	def _is_cgroup_affinity(self, affinity):
+		return str(affinity)[:7] == "cgroup."
+
+	def _store_orig_process_affinity(self, pid, affinity, is_cgroup = False):
 		try:
 			params = self._scheduler_original[pid]
 		except KeyError:
 			params = SchedulerParams(self._cmd)
 			self._scheduler_original[pid] = params
-		if params.affinity is None:
-			params.affinity = affinity
+		if params.affinity is None and params.cgroup is None:
+			if is_cgroup:
+				params.cgroup = affinity
+			else:
+				params.affinity = affinity
+
+	def _get_cgroup_affinity(self, pid):
+		# we cannot use procfs, because it uses comma ',' delimiter which
+		# can be ambiguous
+		for l in self._cmd.read_file("%s/%s/%s" % (consts.PROCFS_MOUNT_POINT, str(pid), "cgroup"), no_error = True).split("\n"):
+			try:
+				cgroup = l.split(":cpuset:")[1][1:]
+				return cgroup if cgroup != "" else "/"
+			except IndexError:
+				pass
+		return "/"
+
+	# it can be arbitrary cgroup even cgroup we didn't set, but it needs to be
+	# under "cgroup_mount_point"
+	def _set_cgroup(self, pid, cgroup):
+		cgroup = self._sanitize_cgroup_path(cgroup)
+		path = self._cgroup_mount_point
+		if cgroup != "/":
+			path = "%s/%s" % (path, cgroup)
+		self._cmd.write_to_file("%s/tasks" % path, str(pid), no_error = True)
+
+	def _parse_cgroup_affinity(self, cgroup):
+		# "cgroup.CGROUP"
+		cgroup = cgroup[7:]
+		# this should be faster than string comparison
+		is_cgroup = not isinstance(cgroup, list) and len(cgroup) > 0
+		return is_cgroup, cgroup
 
 	def _tune_process_affinity(self, pid, affinity, intersect = False):
 		cont = True
 		if affinity is None:
 			return cont
 		try:
-			prev_affinity = self._get_affinity(pid)
-			if intersect:
-				affinity = self._get_intersect_affinity(
-						prev_affinity, affinity,
-						affinity)
-			self._set_affinity(pid, affinity)
+			(is_cgroup, cgroup) = self._parse_cgroup_affinity(affinity)
+			if is_cgroup:
+				prev_affinity = self._get_cgroup_affinity(pid)
+				self._set_cgroup(pid, cgroup)
+			else:
+				prev_affinity = self._get_affinity(pid)
+				if intersect:
+					affinity = self._get_intersect_affinity(
+							prev_affinity, affinity,
+							affinity)
+				self._set_affinity(pid, affinity)
 			self._store_orig_process_affinity(pid,
-					prev_affinity)
+					prev_affinity, is_cgroup)
 		except (SystemError, OSError) as e:
 			if hasattr(e, "errno") and e.errno == errno.ESRCH:
 				log.debug("Failed to read affinity of PID %d, the task vanished."
@@ -335,6 +393,8 @@ class SchedulerPlugin(base.Plugin):
 	def _convert_affinity(self, str_affinity):
 		if str_affinity == "*":
 			affinity = None
+		elif self._is_cgroup_affinity(str_affinity):
+			affinity = str_affinity
 		else:
 			affinity = self._cmd.hex2cpulist(str_affinity)
 			if not affinity:
@@ -350,8 +410,104 @@ class SchedulerPlugin(base.Plugin):
 		affinity = self._convert_affinity(affinity)
 		return (rule_prio, scheduler, priority, affinity, regex)
 
+	def _cgroup_create_group(self, cgroup):
+		path = "%s/%s" % (self._cgroup_mount_point, cgroup)
+		try:
+			os.mkdir(path, consts.DEF_CGROUP_MODE)
+		except OSError as e:
+			log.error("Unable to create cgroup '%s': %s" % (path, e))
+		if (not self._cmd.write_to_file("%s/%s" % (path, "cpuset.mems"),
+				self._cmd.read_file("%s/%s" % (self._cgroup_mount_point, "cpuset.mems"), no_error = True),
+				no_error = True)):
+					log.error("Unable to initialize 'cpuset.mems ' for cgroup '%s'" % path)
+
+	def _cgroup_initialize_groups(self):
+		if self._cgroup is not None and not self._cgroup in self._cgroups:
+			self._cgroup_create_group(self._cgroup)
+		for cg in self._cgroups:
+			self._cgroup_create_group(cg)
+
+	def _cgroup_initialize(self):
+		log.debug("Initializing cgroups settings")
+		try:
+			os.makedirs(self._cgroup_mount_point, consts.DEF_CGROUP_MODE)
+		except OSError as e:
+			log.error("Unable to create cgroup mount point: %s" % e)
+		(ret, out) = self._cmd.execute(["mount", "-t", "cgroup", "-o", "cpuset", "cpuset", self._cgroup_mount_point])
+		if ret != 0:
+			log.error("Unable to mount '%s'" % self._cgroup_mount_point)
+
+	def _remove_dir(self, cgroup):
+		try:
+			os.rmdir(cgroup)
+		except OSError as e:
+			log.error("Unable to remove directory '%s': %s" % (cgroup, e))
+
+	def _cgroup_finalize_groups(self):
+		for cg in reversed(self._cgroups):
+			self._remove_dir("%s/%s" % (self._cgroup_mount_point, cg))
+		if self._cgroup is not None and not self._cgroup in self._cgroups:
+			self._remove_dir("%s/%s" % (self._cgroup_mount_point, self._cgroup))
+
+	def _cgroup_finalize(self):
+		log.debug("Removing cgroups settings")
+		(ret, out) = self._cmd.execute(["umount", self._cgroup_mount_point])
+		if ret != 0:
+			log.error("Unable to umount '%s'" % self._cgroup_mount_point)
+			return False
+		self._remove_dir(self._cgroup_mount_point)
+		d = os.path.dirname(self._cgroup_mount_point)
+		if (d != "/"):
+			self._remove_dir(d)
+
+	def _cgroup_set_affinity_one(self, cgroup, affinity, backup = False):
+		if affinity != "":
+			log.debug("Setting cgroup '%s' affinity to '%s'" % (cgroup, affinity))
+		else:
+			log.debug("Skipping cgroup '%s', empty affinity requested" % cgroup)
+			return
+		path = "%s/%s/%s" % (self._cgroup_mount_point, cgroup, "cpuset.cpus")
+		if backup:
+			orig_affinity = self._cmd.read_file(path, err_ret = "ERR", no_error = True).strip()
+			if orig_affinity != "ERR":
+				self._cgroups_original_affinity[cgroup] = orig_affinity
+			else:
+				log.err("Refusing to set affinity of cgroup '%s', reading original affinity failed" % cgroup)
+				return
+		if not self._cmd.write_to_file(path, affinity, no_error = True):
+			log.error("Unable to set affinity '%s' for cgroup '%s'" % (affinity, cgroup))
+
+	def _cgroup_set_affinity(self):
+		log.debug("Setting cgroups affinities")
+		if self._affinity is not None and self._cgroup is not None and not self._cgroup in self._cgroups:
+			self._cgroup_set_affinity_one(self._cgroup, self._affinity, backup = True)
+		for cg in self._cgroups.items():
+			self._cgroup_set_affinity_one(cg[0], cg[1], backup = True)
+
+	def _cgroup_restore_affinity(self):
+		log.debug("Restoring cgroups affinities")
+		for cg in self._cgroups_original_affinity.items():
+			self._cgroup_set_affinity_one(cg[0], cg[1])
+
 	def _instance_apply_static(self, instance):
+		# need to get "cgroup_mount_point_init", "cgroup_mount_point", "cgroup_groups_init",
+		# "cgroup", and initialize mount point and cgroups before super class implementation call
+		self._cgroup_mount_point = self._variables.expand(instance.options["cgroup_mount_point"])
+		self._cgroup_mount_point_init = self._cmd.get_bool(self._variables.expand(
+			instance.options["cgroup_mount_point_init"])) == "1"
+		self._cgroup_groups_init = self._cmd.get_bool(self._variables.expand(
+			instance.options["cgroup_groups_init"])) == "1"
+		self._cgroup = self._sanitize_cgroup_path(self._variables.expand(
+			instance.options["cgroup_for_isolated_cores"]))
+
+		if self._cgroup_mount_point_init:
+			self._cgroup_initialize()
+		if self._cgroup_groups_init or self._cgroup_mount_point_init:
+			self._cgroup_initialize_groups()
+
 		super(SchedulerPlugin, self)._instance_apply_static(instance)
+
+		self._cgroup_set_affinity()
 		try:
 			ps = self.get_processes()
 		except (OSError, IOError) as e:
@@ -407,10 +563,31 @@ class SchedulerPlugin(base.Plugin):
 					and orig_params.priority is not None:
 				self._set_rt(pid, orig_params.scheduler,
 						orig_params.priority)
-			if orig_params.affinity is not None:
+			if orig_params.cgroup is not None:
+				self._set_cgroup(pid, orig_params.cgroup)
+			elif orig_params.affinity is not None:
 				self._set_affinity(pid, orig_params.affinity)
 		self._scheduler_original = {}
 		self._storage.unset(self._scheduler_storage_key)
+
+	def _cgroup_cleanup_tasks_one(self, cgroup):
+		cnt = int(consts.CGROUP_CLEANUP_TASKS_RETRY)
+		data = " "
+		while data != "" and cnt > 0:
+			data = self._cmd.read_file("%s/%s/%s" % (self._cgroup_mount_point, cgroup, "tasks"),
+				err_ret = " ", no_error = True)
+			if data not in ["", " "]:
+				for l in data.split("\n"):
+					self._cmd.write_to_file("%s/%s" % (self._cgroup_mount_point, "tasks"), l, no_error = True)
+			cnt -= 1
+		if cnt == 0:
+			log.warn("Unable to cleanup tasks from cgroup '%s'" % cgroup)
+
+	def _cgroup_cleanup_tasks(self):
+		if self._cgroup is not None and not self._cgroup in self._cgroups:
+			self._cgroup_cleanup_tasks_one(self._cgroup)
+		for cg in self._cgroups:
+			self._cgroup_cleanup_tasks_one(cg)
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
 		super(SchedulerPlugin, self)._instance_unapply_static(instance, full_rollback)
@@ -418,6 +595,45 @@ class SchedulerPlugin(base.Plugin):
 			instance._terminate.set()
 			instance._thread.join()
 		self._restore_ps_affinity()
+		self._cgroup_restore_affinity()
+		self._cgroup_cleanup_tasks()
+		if self._cgroup_groups_init or self._cgroup_mount_point_init:
+			self._cgroup_finalize_groups()
+		if self._cgroup_mount_point_init:
+			self._cgroup_finalize()
+
+	def _cgroup_verify_affinity_one(self, cgroup, affinity):
+		log.debug("Verifying cgroup '%s' affinity" % cgroup)
+		path = "%s/%s/%s" % (self._cgroup_mount_point, cgroup, "cpuset.cpus")
+		current_affinity = self._cmd.read_file(path, err_ret = "ERR", no_error = True)
+		if current_affinity == "ERR":
+			return True
+		current_affinity = self._cmd.cpulist2string(self._cmd.cpulist_pack(current_affinity))
+		affinity = self._cmd.cpulist2string(self._cmd.cpulist_pack(affinity))
+		affinity_description = "cgroup '%s' affinity" % cgroup
+		if current_affinity == affinity:
+			log.info(consts.STR_VERIFY_PROFILE_VALUE_OK
+					% (affinity_description, current_affinity))
+			return True
+		else:
+			log.error(consts.STR_VERIFY_PROFILE_VALUE_FAIL
+					% (affinity_description, current_affinity,
+					affinity))
+			return False
+
+	def _cgroup_verify_affinity(self):
+		log.debug("Veryfying cgroups affinities")
+		ret = True
+		if self._affinity is not None and self._cgroup is not None and not self._cgroup in self._cgroups:
+			ret = ret and self._cgroup_verify_affinity_one(self._cgroup, self._affinity)
+		for cg in self._cgroups.items():
+			ret = ret and self._cgroup_verify_affinity_one(cg[0], cg[1])
+		return ret
+
+	def _instance_verify_static(self, instance, ignore_missing, devices):
+		ret1 = super(SchedulerPlugin, self)._instance_verify_static(instance, ignore_missing, devices)
+		ret2 = self._cgroup_verify_affinity()
+		return ret1 and ret2
 
 	def _add_pid(self, instance, pid, r):
 		try:
@@ -686,13 +902,15 @@ class SchedulerPlugin(base.Plugin):
 	@command_custom("isolated_cores", per_device = False, priority = 10)
 	def _isolated_cores(self, enabling, value, verify, ignore_missing):
 		affinity = None
+		self._affinity = None
 		if value is not None:
 			isolated = set(self._cmd.cpulist_unpack(value))
 			present = set(self._cpus)
 			if isolated.issubset(present):
 				affinity = list(present - isolated)
+				self._affinity = self._cmd.cpulist2string(affinity)
 			else:
-				str_cpus = ",".join([str(x) for x in self._cpus])
+				str_cpus = self._cmd.cpulist2string(self._cpus)
 				log.error("Invalid isolated_cores specified, '%s' does not match available cores '%s'"
 						% (value, str_cpus))
 		if (enabling or verify) and affinity is None:
@@ -701,7 +919,11 @@ class SchedulerPlugin(base.Plugin):
 		if verify:
 			return self._verify_all_irq_affinity(affinity, ignore_missing)
 		elif enabling:
-			self._set_ps_affinity(affinity)
+			if self._cgroup:
+				ps_affinity = "cgroup.%s" % self._cgroup
+			else:
+				ps_affinity = affinity
+			self._set_ps_affinity(ps_affinity)
 			self._set_all_irq_affinity(affinity)
 		else:
 			# Restoring processes' affinity is done in
