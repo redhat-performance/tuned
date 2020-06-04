@@ -41,7 +41,7 @@ class Application(object):
 		def_instance_priority = int(self.config.get(consts.CFG_DEFAULT_INSTANCE_PRIORITY, consts.CFG_DEF_DEFAULT_INSTANCE_PRIORITY))
 		unit_manager = units.Manager(
 				plugins_repository, monitors_repository,
-				def_instance_priority, hardware_inventory)
+				def_instance_priority, hardware_inventory, self.config)
 
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()
