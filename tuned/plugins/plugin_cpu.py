@@ -73,9 +73,9 @@ class CPULatencyPlugin(base.Plugin):
                         # "TransmetaCPU", "UMC UMC UMC"
 			cpu = procfs.cpuinfo()
 			vendor = cpu.tags.get("vendor_id")
-			if vendor is "GenuineIntel":
+			if vendor == "GenuineIntel":
 			        self._is_intel = True
-			elif vendor is "AuthenticAMD" or vendor is "HygonGenuine":
+			elif vendor == "AuthenticAMD" or vendor == "HygonGenuine":
 			        self._is_amd = True
 			else:
 				# We always assign Intel, unless we know better
