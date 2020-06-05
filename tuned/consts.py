@@ -3,6 +3,7 @@ import logging
 GLOBAL_CONFIG_FILE = "/etc/tuned/tuned-main.conf"
 ACTIVE_PROFILE_FILE = "/etc/tuned/active_profile"
 PROFILE_MODE_FILE = "/etc/tuned/profile_mode"
+POST_LOADED_PROFILE_FILE = "/etc/tuned/post_loaded_profile"
 PROFILE_FILE = "tuned.conf"
 RECOMMEND_CONF_FILE = "/etc/tuned/recommend.conf"
 DAEMONIZE_PARENT_TIMEOUT = 5

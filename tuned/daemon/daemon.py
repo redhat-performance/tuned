@@ -65,42 +65,93 @@ class Daemon(object):
 
 	def _init_profile(self, profile_names):
 		manual = True
+		post_loaded_profile = self._cmd.get_post_loaded_profile()
 		if profile_names is None:
 			(profile_names, manual) = self._get_startup_profile()
 			if profile_names is None:
-				log.info("No profile is preset, running in manual mode. No profile will be enabled.")
+				msg = "No profile is preset, running in manual mode. "
+				if post_loaded_profile:
+					msg += "Only post-loaded profile will be enabled"
+				else:
+					msg += "No profile will be enabled."
+				log.info(msg)
 		# Passed through '-p' cmdline option
 		elif profile_names == "":
-			log.info("No profile will be enabled.")
+			if post_loaded_profile:
+				log.info("Only post-loaded profile will be enabled")
+			else:
+				log.info("No profile will be enabled.")
 
 		self._profile = None
 		self._manual = None
-		self.set_profile(profile_names, manual)
+		self._active_profiles = []
+		self._post_loaded_profile = None
+		self.set_all_profiles(profile_names, manual, post_loaded_profile)
 
-	def set_profile(self, profile_names, manual, save_instantly=False):
-		if self.is_running():
-			raise TunedException(self._notify_profile_changed(profile_names, False, "Cannot set profile while the daemon is running."))
+	def _load_profiles(self):
+		profile_list = self._active_profiles
+		if self._post_loaded_profile:
+			log.info("Using post-loaded profile '%s'"
+				 % self._post_loaded_profile)
+			profile_list = profile_list + [self._post_loaded_profile]
+		for profile in profile_list:
+			if profile not in self.profile_loader.profile_locator.get_known_names():
+				errstr = "Requested profile '%s' doesn't exist." % profile
+				profile_names = " ".join(self._active_profiles)
+				self._notify_profile_changed(profile_names, False, errstr)
+				raise TunedException(errstr)
+		try:
+			if profile_list:
+				self._profile = self._profile_loader.load(profile_list)
+			else:
+				self._profile = None
+		except InvalidProfileException as e:
+			errstr = "Cannot load profile(s) '%s': %s" % (" ".join(profile_list), e)
+			profile_names = " ".join(self._active_profiles)
+			self._notify_profile_changed(profile_names, False, errstr)
+			raise TunedException(errstr)
 
-		if profile_names == "" or profile_names is None:
-			self._profile = None
-			self._manual = manual
+	def _set_profile(self, profile_names, manual):
+		self._manual = manual
+		if profile_names:
+			self._active_profiles = profile_names.split()
 		else:
-			profile_list = profile_names.split()
-			for profile in profile_list:
-				if profile not in self.profile_loader.profile_locator.get_known_names():
-					raise TunedException(self._notify_profile_changed(\
-							profile_names, False,\
-							"Requested profile '%s' doesn't exist." % profile))
-			try:
-				self._profile = self._profile_loader.load(profile_names)
-				self._manual = manual
-			except InvalidProfileException as e:
-				raise TunedException(self._notify_profile_changed(profile_names, False, "Cannot load profile(s) '%s': %s" % (profile_names, e)))
+			self._active_profiles = []
+
+	def set_profile(self, profile_names, manual):
+		if self.is_running():
+			errstr = "Cannot set profile while the daemon is running."
+			self._notify_profile_changed(profile_names, False,
+						     errstr)
+			raise TunedException(errstr)
+
+		self._set_profile(profile_names, manual)
+		self._load_profiles()
+
+	def _set_post_loaded_profile(self, profile_name):
+		if not profile_name:
+			self._post_loaded_profile = None
+		elif len(profile_name.split()) > 1:
+			errstr = "Whitespace is not allowed in profile names; only a single post-loaded profile is allowed."
+			raise TunedException(errstr)
+		else:
+			self._post_loaded_profile = profile_name
+
+	def set_all_profiles(self, active_profiles, manual, post_loaded_profile,
+			     save_instantly=False):
+		if self.is_running():
+			errstr = "Cannot set profile while the daemon is running."
+			self._notify_profile_changed(active_profiles, False,
+						     errstr)
+			raise TunedException(errstr)
+
+		self._set_profile(active_profiles, manual)
+		self._set_post_loaded_profile(post_loaded_profile)
+		self._load_profiles()
 
 		if save_instantly:
-			if profile_names is None:
-				profile_names = ""
-			self._save_active_profile(profile_names, manual)
+			self._save_active_profile(active_profiles, manual)
+			self._save_post_loaded_profile(post_loaded_profile)
 
 	@property
 	def profile(self):
@@ -135,13 +186,16 @@ class Daemon(object):
 			raise TunedException("Cannot start the daemon without setting a profile.")
 
 		self._unit_manager.create(self._profile.units)
-		self._save_active_profile(self._profile.name, self._manual)
+		self._save_active_profile(" ".join(self._active_profiles),
+					  self._manual)
+		self._save_post_loaded_profile(self._post_loaded_profile)
 		self._unit_manager.start_tuning()
 		self._profile_applied.set()
 		log.info("static tuning from profile '%s' applied" % self._profile.name)
 		if self._daemon:
 			exports.start()
-		self._notify_profile_changed(self._profile.name, True, "OK")
+		profile_names = " ".join(self._active_profiles)
+		self._notify_profile_changed(profile_names, True, "OK")
 
 		if self._daemon:
 			# In python 2 interpreter with applied patch for rhbz#917709 we need to periodically
@@ -192,6 +246,12 @@ class Daemon(object):
 	def _save_active_profile(self, profile_names, manual):
 		try:
 			self._cmd.save_active_profile(profile_names, manual)
+		except TunedException as e:
+			log.error(str(e))
+
+	def _save_post_loaded_profile(self, profile_name):
+		try:
+			self._cmd.save_post_loaded_profile(profile_name)
 		except TunedException as e:
 			log.error(str(e))
 
