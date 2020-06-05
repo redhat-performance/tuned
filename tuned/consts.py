@@ -49,6 +49,9 @@ MODULES_FILE = "/etc/modprobe.d/tuned.conf"
 SYSTEMD_SYSTEM_CONF_FILE = "/etc/systemd/system.conf"
 SYSTEMD_CPUAFFINITY_VAR = "CPUAffinity"
 
+# irqbalance plugin configuration
+IRQBALANCE_SYSCONFIG_FILE = "/etc/sysconfig/irqbalance"
+
 # number of backups
 LOG_FILE_COUNT = 2
 LOG_FILE_MAXBYTES = 100*1000
