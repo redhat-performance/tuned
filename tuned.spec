@@ -35,16 +35,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.13.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.14.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -515,6 +515,29 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %changelog
+* Mon Jun  8 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.14.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#1792264
+  - oracle: turned off NUMA balancing
+    resolves: rhbz#1782233
+  - man: documented the possibility to apply multiple profiles
+    resolves: rhbz#1794337
+  - cpu-partitioning: disabled kernel.timer_migration
+    resolves: rhbz#1797629
+  - profiles: new profile optimize-serial-console
+    resolves: rhbz#1840689
+  - added support for a post-loaded profile
+    resolves: rhbz#1798183
+  - plugins: new irqbalance plugin
+    resolves: rhbz#1784645
+  - throughput-performance: added architecture specific tuning for Marvell ThunderX
+    resolves: rhbz#1746961
+  - throughput-performance: added architecture specific tuning for AMD
+    resolves: rhbz#1746957
+  - scheduler: added support for cgroups
+    resolves: rhbz#1784648
+
 * Wed Dec 11 2019 Jaroslav Škarvada <jskarvad@redhat.com> - 2.13.0-1
 - new release
   - rebased tuned to latest upstream
