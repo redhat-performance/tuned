@@ -149,7 +149,12 @@ class Admin(object):
 	def _action_dbus_profile_info(self, profile = ""):
 		if profile == "":
 			profile = self._dbus_get_active_profile()
-		return self._controller.exit(self._print_profile_info(profile, self._controller.profile_info(profile)))
+		if profile:
+			res = self._print_profile_info(profile, self._controller.profile_info(profile))
+		else:
+			print("No current active profile.")
+			res = False
+		return self._controller.exit(res)
 
 	def _action_profile_info(self, profile = ""):
 		if profile == "":
