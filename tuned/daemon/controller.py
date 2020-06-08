@@ -210,6 +210,12 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		mode = consts.ACTIVE_PROFILE_MANUAL if manual else consts.ACTIVE_PROFILE_AUTO
 		return mode, ""
 
+	@exports.export("", "s")
+	def post_loaded_profile(self, caller = None):
+		if caller == "":
+			return ""
+		return self._daemon.post_loaded_profile or ""
+
 	@exports.export("", "b")
 	def disable(self, caller = None):
 		if caller == "":

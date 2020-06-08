@@ -162,6 +162,12 @@ class Daemon(object):
 		return self._manual
 
 	@property
+	def post_loaded_profile(self):
+		# Return the profile name only if the profile is active. If
+		# the profile is not active, then the value is meaningless.
+		return self._post_loaded_profile if self._profile else None
+
+	@property
 	def profile_loader(self):
 		return self._profile_loader
 
