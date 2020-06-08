@@ -117,6 +117,9 @@ class DBusController(object):
 	def profile_mode(self):
 		return self._call("profile_mode")
 
+	def post_loaded_profile(self):
+		return self._call("post_loaded_profile")
+
 	def switch_profile(self, new_profile):
 		if new_profile == "":
 			return (False, "No profile specified")

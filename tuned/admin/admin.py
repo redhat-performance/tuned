@@ -131,6 +131,16 @@ class Admin(object):
 			manual = profile is not None
 		return consts.ACTIVE_PROFILE_MANUAL if manual else consts.ACTIVE_PROFILE_AUTO
 
+	def _dbus_get_post_loaded_profile(self):
+		profile_name = self._controller.post_loaded_profile()
+		if profile_name == "":
+			profile_name = None
+		return profile_name
+
+	def _get_post_loaded_profile(self):
+		profile_name = self._cmd.get_post_loaded_profile()
+		return profile_name
+
 	def _print_profile_info(self, profile, profile_info):
 		if profile_info[0] == True:
 			print("Profile name:")
@@ -176,20 +186,42 @@ class Admin(object):
 			print("Current active profile: %s" % profile_name)
 		return True
 
+	def _print_post_loaded_profile(self, profile_name):
+		if profile_name:
+			print("Current post-loaded profile: %s" % profile_name)
+
 	def _action_dbus_active(self):
-		return self._controller.exit(self._print_profile_name(self._dbus_get_active_profile()))
+		active_profile = self._dbus_get_active_profile()
+		res = self._print_profile_name(active_profile)
+		if res:
+			post_loaded_profile = self._dbus_get_post_loaded_profile()
+			self._print_post_loaded_profile(post_loaded_profile)
+		return self._controller.exit(res)
 
 	def _action_active(self):
 		try:
 			profile_name = self._get_active_profile()
+			post_loaded_profile = self._get_post_loaded_profile()
+			# The result of the DBus call active_profile includes
+			# the post-loaded profile, so add it here as well
+			if post_loaded_profile:
+				if profile_name:
+					profile_name += " "
+				else:
+					profile_name = ""
+				profile_name += post_loaded_profile
 		except TunedException as e:
 			self._error(str(e))
 			return False
 		if profile_name is not None and not self._tuned_is_running():
 			print("It seems that tuned daemon is not running, preset profile is not activated.")
 			print("Preset profile: %s" % profile_name)
+			if post_loaded_profile:
+				print("Preset post-loaded profile: %s" % post_loaded_profile)
 			return True
-		return self._print_profile_name(profile_name)
+		res = self._print_profile_name(profile_name)
+		self._print_post_loaded_profile(post_loaded_profile)
+		return res
 
 	def _print_profile_mode(self, mode):
 		print("Profile selection mode: " + mode)
