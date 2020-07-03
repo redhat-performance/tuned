@@ -106,6 +106,7 @@ class SchedulerPlugin(base.Plugin):
 		# calculated by isolated_cores setter
 		self._affinity = None
 
+		self._cgroup_affinity_initialized = False
 		self._cgroup = None
 		self._cgroups = collections.OrderedDict([(self._sanitize_cgroup_path(option[7:]), self._variables.expand(affinity))
 			for option, affinity in instance.options.items() if option[:7] == "cgroup." and len(option) > 7])
@@ -478,11 +479,14 @@ class SchedulerPlugin(base.Plugin):
 			log.error("Unable to set affinity '%s' for cgroup '%s'" % (affinity, cgroup))
 
 	def _cgroup_set_affinity(self):
+		if self._cgroup_affinity_initialized:
+			return
 		log.debug("Setting cgroups affinities")
 		if self._affinity is not None and self._cgroup is not None and not self._cgroup in self._cgroups:
 			self._cgroup_set_affinity_one(self._cgroup, self._affinity, backup = True)
 		for cg in self._cgroups.items():
 			self._cgroup_set_affinity_one(cg[0], cg[1], backup = True)
+		self._cgroup_affinity_initialized = True
 
 	def _cgroup_restore_affinity(self):
 		log.debug("Restoring cgroups affinities")
@@ -920,6 +924,7 @@ class SchedulerPlugin(base.Plugin):
 			return self._verify_all_irq_affinity(affinity, ignore_missing)
 		elif enabling:
 			if self._cgroup:
+				self._cgroup_set_affinity()
 				ps_affinity = "cgroup.%s" % self._cgroup
 			else:
 				ps_affinity = affinity
