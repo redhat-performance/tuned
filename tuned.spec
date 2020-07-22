@@ -201,11 +201,6 @@ Requires: %{name} = %{version}
 Requires: %{name}-profiles-realtime = %{version}
 Requires: tuna
 Requires: nmap-ncat
-%if 0%{?rhel} == 7
-Requires: qemu-kvm-tools-rhev
-%else
-Recommends: tuned-profiles-nfv-host-bin
-%endif
 
 %description profiles-nfv-host
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host.
