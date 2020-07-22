@@ -81,13 +81,12 @@ Recommends: dmidecode
 # BuildRequires for 'make test'
 BuildRequires: dbus-python, pygobject3-base
 Requires: dbus-python, pygobject3-base
-%if 0%{?fedora} > 22 || 0%{?rhel} > 7
-Recommends: dmidecode
 %endif
-%endif
-Requires: virt-what, ethtool, gawk, hdparm
+Requires: virt-what, ethtool, gawk
 Requires: util-linux, dbus, polkit
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
+Recommends: dmidecode
+Recommends: hdparm
 Recommends: kernel-tools
 %endif
 %if 0%{?rhel} > 7
