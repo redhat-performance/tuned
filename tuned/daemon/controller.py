@@ -5,7 +5,6 @@ from tuned.exceptions import TunedException
 import threading
 import tuned.consts as consts
 from tuned.utils.commands import commands
-from tuned.utils.profile_recommender import ProfileRecommender
 
 __all__ = ["Controller"]
 
@@ -257,7 +256,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def recommend_profile(self, caller = None):
 		if caller == "":
 			return ""
-		return ProfileRecommender().recommend(hardcoded = not self._global_config.get_bool(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND))
+		return self._daemon.profile_recommender.recommend()
 
 	@exports.export("", "b")
 	def verify_profile(self, caller = None):
