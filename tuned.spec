@@ -19,10 +19,11 @@
 %global make_python_arg PYTHON=%{__python3}
 %else
 %{!?python2_sitelib:%global python2_sitelib %{python_sitelib}}
-%global make_python_arg PYTHON=%{__python2}
 %if 0%{?rhel} && 0%{?rhel} < 8
+%global make_python_arg PYTHON=%{__python}
 %global _py python
 %else
+%global make_python_arg PYTHON=%{__python2}
 %global _py python2
 %endif
 %endif
@@ -60,6 +61,10 @@ Requires(preun): systemd
 Requires(postun): systemd
 BuildRequires: %{_py}, %{_py}-devel
 # BuildRequires for 'make test'
+# python-mock is needed for python-2.7, but it's not available on RHEL-7
+%if %{without python3} && ( ! 0%{?rhel} || 0%{?rhel} >= 8 )
+BuildRequires: %{_py}-mock
+%endif
 BuildRequires: %{_py}-configobj
 BuildRequires: %{_py}-decorator, %{_py}-pyudev
 Requires: %{_py}-decorator, %{_py}-pyudev, %{_py}-configobj
@@ -275,8 +280,13 @@ touch %{buildroot}%{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 # validate desktop file
 desktop-file-validate %{buildroot}%{_datadir}/applications/tuned-gui.desktop
 
+# Run tests on RHEL > 7 or non RHEL
+# We cannot run tests on RHEL-7 because there is no python-mock package and
+# python-2.7 doesn't have mock built-in
+%if 0%{?rhel} > 7 || ! 0%{?rhel}
 %check
-make test
+make test %{make_python_arg}
+%endif
 
 %post
 %systemd_post tuned.service

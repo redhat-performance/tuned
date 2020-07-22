@@ -1,1 +1,1 @@
-import tests.unit.globals
+import globals
