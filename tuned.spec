@@ -237,6 +237,13 @@ Requires: %{name} = %{version}
 Additional tuned profiles mainly for backward compatibility with tuned 1.0.
 It can be also used to fine tune your system for specific scenarios.
 
+%package profiles-postgresql
+Summary: Additional tuned profile(s) targeted to PostgreSQL server loads
+Requires: %{name} = %{version}
+
+%description profiles-postgresql
+Additional tuned profile(s) targeted to PostgreSQL server loads.
+
 %prep
 %setup -q -n %{name}-%{version}%{?prerel2}
 
@@ -391,6 +398,7 @@ fi
 %exclude %{_prefix}/lib/tuned/realtime-virtual-host
 %exclude %{_prefix}/lib/tuned/cpu-partitioning
 %exclude %{_prefix}/lib/tuned/spectrumscale-ece
+%exclude %{_prefix}/lib/tuned/postgresql
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %dir %{_sysconfdir}/tuned/recommend.d
@@ -517,6 +525,11 @@ fi
 %{_prefix}/lib/tuned/enterprise-storage
 %{_prefix}/lib/tuned/spindown-disk
 %{_mandir}/man7/tuned-profiles-compat.7*
+
+%files profiles-postgresql
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/postgresql
+%{_mandir}/man7/tuned-profiles-postgresql.7*
 
 %changelog
 * Mon Jun 15 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.14.0-1

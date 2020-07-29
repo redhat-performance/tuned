@@ -45,6 +45,8 @@ A profile optimized for Oracle databases loads based on `throughput-performance`
 `desktop`::
 A profile optimized for desktops, based on the `balanced` profile. It additionally enables scheduler autogroups for better response of interactive applications. 
 
+`postgresql`::
+A profile optimized for PostgreSQL databases loads based on `throughput-performance` profile. It additionally disables transparent huge pages and modifies other performance-related kernel parameters. This profile is provided by the [package]`tuned-profiles-postgresql` package.
 
 [discrete]
 == Real-time profiles
