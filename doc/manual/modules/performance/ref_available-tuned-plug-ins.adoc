@@ -174,3 +174,7 @@ cmdline=isolcpus=2
 ====
 --
 
+`rtentsk`::
+Opens a socket, enables timestamping on it and keeps the socket open for the lifetime of the `tuned` process.
+The rationale is to eliminate inter-processor interrupts caused by processes enabling/disabling the
+timestamping socket option resulting in `static_key_enable`/`static_key_disable` kernel functions calls.
