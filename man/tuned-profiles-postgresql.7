@@ -1,7 +1,9 @@
-.\"/* 
+.\"/*
 .\" * All rights reserved
-.\" * Copyright (C) 2015-2017 Red Hat, Inc.
+.\" * Copyright (C) 2020 Red Hat, Inc.
+.\" * Copyright (C) 2020 Deutsches Elektronen-Synchrotron DESY
 .\" * Authors: Jaroslav Škarvada
+.\" *          Tigran Mkrtchyan
 .\" *
 .\" * This program is free software; you can redistribute it and/or
 .\" * modify it under the terms of the GNU General Public License
@@ -17,20 +19,22 @@
 .\" * along with this program; if not, write to the Free Software
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
-.\" 
-.TH TUNED_PROFILES_NFV_HOST "7" "30 Mar 2017" "Fedora Power Management SIG" "tuned"
+.\"
+.TH TUNED_PROFILES_POSTGRESQL "7" "29 Jul 2020" "Fedora Power Management SIG" "tuned"
 .SH NAME
-tuned\-profiles\-nfv\-host - description of profile provided for the NFV host
+tuned\-profiles\-postgresql - description of profiles provided for PostgreSQL Server
 
 .SH DESCRIPTION
-The profile is provided for the Network Function Virtualization (NFV) host.
+These profiles are provided for the PostgreSQL Database server.
 
 .SH PROFILES
-The following profile is provided:
+The following profiles are provided:
 
 .TP
-.BI "realtime\-virtual\-host"
-Profile optimized for virtual hosts based on realtime profile.
+.BI "postgresql"
+Profile optimized for PostgreSQL databases based on throughput\-performance profile.
+It additionally disables transparent huge pages and modifies some other
+performance related kernel parameters.
 
 .SH "FILES"
 .nf
@@ -41,16 +45,17 @@ Profile optimized for virtual hosts based on realtime profile.
 .BR tuned (8)
 .BR tuned\-adm (8)
 .BR tuned\-profiles (7)
-.BR tuned\-profiles\-atomic (7)
 .BR tuned\-profiles\-sap (7)
 .BR tuned\-profiles\-sap\-hana (7)
-.BR tuned\-profiles\-mssql (7)
 .BR tuned\-profiles\-oracle (7)
+.BR tuned\-profiles\-mssql (7)
+.BR tuned\-profiles\-atomic (7)
 .BR tuned\-profiles\-realtime (7)
+.BR tuned\-profiles\-nfv\-host (7)
 .BR tuned\-profiles\-nfv\-guest (7)
 .BR tuned\-profiles\-cpu\-partitioning (7)
 .BR tuned\-profiles\-compat (7)
-.BR tuned\-profiles\-postgresql (7)
 .SH AUTHOR
 .nf
 Jaroslav Škarvada <jskarvad@redhat.com>
+Tigran Mkrtchyan <tigran.mkrtchyan@desy.de>
