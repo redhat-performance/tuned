@@ -105,8 +105,7 @@ You can also disable the plug-in by specifying the [option]`enabled=false` optio
 
 You can specify arbitrary shell commands using the `script` plug-in.
 
-[discrete]
-== Additional resources
+.Additional resources
 
 * The `tuned.conf(5)` man page
 

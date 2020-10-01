@@ -32,8 +32,7 @@ alpm=min_power
 ====
 
 
-[discrete]
-== Additional resources
+.Additional resources
 
 * The `tuned.conf(5)` man page
 

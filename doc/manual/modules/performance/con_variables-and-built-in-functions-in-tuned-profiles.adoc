@@ -89,8 +89,7 @@ The `cpulist_invert` function inverts the list of CPUs. For a 6-CPU machine, the
 
 ====
 
-[discrete]
-== Additional resources
+.Additional resources
 
 * The `tuned.conf(5)` man page
 
