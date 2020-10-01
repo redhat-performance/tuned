@@ -10,8 +10,11 @@ In the following commands and configuration, replace:
 
 .Prerequisites
 
-// Use an xref if we're inside the performance title.
+// Use an xref if we're inside the performance title or the upstream Tuned manual.
 ifdef::performance-title[]
+:installing-tuned-link: pass:macros[xref:installing-and-enabling-tuned_getting-started-with-tuned[]]
+endif::[]
+ifdef::upstream[]
 :installing-tuned-link: pass:macros[xref:installing-and-enabling-tuned_getting-started-with-tuned[]]
 endif::[]
 
@@ -26,8 +29,11 @@ For details, see {installing-tuned-link}.
 
 .Procedure
 
-// Use an xref if we're inside the performance title.
+// Use an xref if we're inside the performance title or the upstream Tuned manual.
 ifdef::performance-title[]
+:tuned-profiles-link: pass:macros[xref:tuned-profiles-distributed-with-rhel_getting-started-with-tuned[]]
+endif::[]
+ifdef::upstream[]
 :tuned-profiles-link: pass:macros[xref:tuned-profiles-distributed-with-rhel_getting-started-with-tuned[]]
 endif::[]
 
@@ -112,8 +118,11 @@ See tuned log file ('/var/log/tuned/tuned.log') for details.
 
 .Additional resources
 
-// Use an xref if we're inside the performance title.
+// Use an xref if we're inside the performance title or the upstream Tuned manual.
 ifdef::performance-title[]
+:customizing-tuned-link: pass:macros[xref:customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance[]]
+endif::[]
+ifdef::upstream[]
 :customizing-tuned-link: pass:macros[xref:customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance[]]
 endif::[]
 
@@ -123,3 +132,4 @@ ifndef::performance-title[]
 endif::[]
 
 * For more information on creating a *Tuned* profile, see {customizing-tuned-link}.
+
