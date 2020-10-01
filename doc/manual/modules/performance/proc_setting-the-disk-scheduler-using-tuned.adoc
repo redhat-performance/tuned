@@ -123,7 +123,7 @@ ifdef::performance-title[]
 :customizing-tuned-link: pass:macros[xref:customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance[]]
 endif::[]
 ifdef::upstream[]
-:customizing-tuned-link: pass:macros[xref:customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance[]]
+:customizing-tuned-link: pass:macros[xref:customizing-tuned-profiles_tuned-documentation[]]
 endif::[]
 
 // Use a link elsewhere.
