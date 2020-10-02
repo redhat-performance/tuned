@@ -15,8 +15,7 @@ You can also configure *Tuned* to react to changes in device usage and adjusts s
 
 // The tuned tuning service can adapt the operating system to perform better under certain workloads by setting a tuning profile.
 
-// [discrete]
-// == Additional resources
+// .Additional resources
 // 
 // * A bulleted list of links to other material closely related to the contents of the concept module.
 // * For more details on writing concept modules, see the link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].

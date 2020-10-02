@@ -3,13 +3,11 @@
 
 This procedure creates a new *Tuned* profile with custom performance rules.
 
-[discrete]
-== Prerequisites
+.Prerequisites
 
 * The `tuned` service is installed and running. See xref:installing-and-enabling-tuned_getting-started-with-tuned[] for details.
 
-[discrete]
-== Procedure
+.Procedure
 
 . In the [filename]`/etc/tuned/` directory, create a new directory named the same as the profile that you want to create:
 +
@@ -63,8 +61,7 @@ Verfication succeeded, current system settings match the preset profile.
 See tuned log file ('/var/log/tuned/tuned.log') for details.
 ----
 
-[discrete]
-== Additional resources
+.Additional resources
 
 * The `tuned.conf(5)` man page
 

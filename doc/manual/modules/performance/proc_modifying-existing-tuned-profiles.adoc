@@ -3,13 +3,11 @@
 
 This procedure creates a modified child profile based on an existing *Tuned* profile.
 
-[discrete]
-== Prerequisites
+.Prerequisites
 
 * The `tuned` service is installed and running. See xref:installing-and-enabling-tuned_getting-started-with-tuned[] for details.
 
-[discrete]
-== Procedure
+.Procedure
 
 . In the [filename]`/etc/tuned/` directory, create a new directory named the same as the profile that you want to create:
 +
@@ -77,8 +75,7 @@ See tuned log file ('/var/log/tuned/tuned.log') for details.
 // 
 // . Then, edit the profile in /etc/tuned according to your needs. Note that if there are two profiles of the same name, the profile located in /etc/tuned/ is loaded. The disadvantage of this approach is that if a system profile is updated after a tuned upgrade, the changes will not be reflected in the now-outdated modified version. 
 
-[discrete]
-== Additional resources
+.Additional resources
 
 * The `tuned.conf(5)` man page
 

@@ -3,15 +3,13 @@
 
 This procedure disables *Tuned* and resets all affected system settings to their original state before *Tuned* modified them.
 
-// [discrete]
-// == Prerequisites
+// .Prerequisites
 // 
 // * A bulleted list of conditions that must be satisfied before the user starts following this assembly.
 // * You can also link to other modules or assemblies the user must follow before starting this assembly.
 // * Delete the section title and bullets if the assembly has no prerequisites.
 
-[discrete]
-== Procedure
+.Procedure
 
 * To disable all tunings temporarily:
 +
@@ -27,8 +25,7 @@ The tunings are applied again after the `tuned` service restarts.
 # systemctl disable --now tuned
 ----
 
-[discrete]
-== Additional resources
+.Additional resources
 
 * The `tuned-adm(8)` man page.
 

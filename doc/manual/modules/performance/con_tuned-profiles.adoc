@@ -66,8 +66,7 @@ The `tuned.conf` file can contain one `[main]` section and other sections for co
 
 Lines starting with the hash sign (`#`) are comments.
 
-[discrete]
-== Additional resources
+.Additional resources
 
 * The `tuned.conf(5)` man page.
 

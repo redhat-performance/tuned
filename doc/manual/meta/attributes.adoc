@@ -4,10 +4,13 @@
 // content based on it.
 :upstream:
 
-:Year: 2019
+:Year: 2020
 
 // The following attribute is necessary for images to work
 :imagesdir: images
+
+// Enable additional AsciiDoc macros
+:experimental:
 
 // Red Hat and divisions
 :RH: Red{nbsp}Hat
@@ -22,5 +25,4 @@
 // This is the version displayed under "Red Hat Enterprise Linux"
 :ProductNumber: 8
 :RHEL8: {RHEL}{nbsp}8
-:ProductRelease: Beta
 

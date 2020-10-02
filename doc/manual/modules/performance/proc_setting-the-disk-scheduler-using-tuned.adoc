@@ -1,0 +1,135 @@
+[id="setting-the-disk-scheduler-using-tuned_{context}"]
+= Setting the disk scheduler using Tuned
+
+This procedure creates and enables a *Tuned* profile that sets a given disk scheduler for selected block devices. The setting persists across system reboots.
+
+In the following commands and configuration, replace:
+
+* [replaceable]_device_ with the name of the block device, for example `sdf`
+* [replaceable]_selected-scheduler_ with the disk scheduler that you want to set for the device, for example `bfq`
+
+.Prerequisites
+
+// Use an xref if we're inside the performance title or the upstream Tuned manual.
+ifdef::performance-title[]
+:installing-tuned-link: pass:macros[xref:installing-and-enabling-tuned_getting-started-with-tuned[]]
+endif::[]
+ifdef::upstream[]
+:installing-tuned-link: pass:macros[xref:installing-and-enabling-tuned_getting-started-with-tuned[]]
+endif::[]
+
+// Use a link elsewhere.
+ifndef::performance-title[]
+:installing-tuned-link: pass:macros[https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/monitoring_and_managing_system_status_and_performance/getting-started-with-tuned_monitoring-and-managing-system-status-and-performance#installing-and-enabling-tuned_getting-started-with-tuned]
+endif::[]
+
+* The `tuned` service is installed and enabled.
++
+For details, see {installing-tuned-link}.
+
+.Procedure
+
+// Use an xref if we're inside the performance title or the upstream Tuned manual.
+ifdef::performance-title[]
+:tuned-profiles-link: pass:macros[xref:tuned-profiles-distributed-with-rhel_getting-started-with-tuned[]]
+endif::[]
+ifdef::upstream[]
+:tuned-profiles-link: pass:macros[xref:tuned-profiles-distributed-with-rhel_getting-started-with-tuned[]]
+endif::[]
+
+// Use a link elsewhere.
+ifndef::performance-title[]
+:tuned-profiles-link: pass:macros[https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/monitoring_and_managing_system_status_and_performance/getting-started-with-tuned_monitoring-and-managing-system-status-and-performance#tuned-profiles-distributed-with-rhel_getting-started-with-tuned]
+endif::[]
+
+. Optional: Select an existing *Tuned* profile on which your profile will be based. For a list of available profiles, see {tuned-profiles-link}.
++
+To see which profile is currently active, use:
++
+----
+$ tuned-adm active
+----
+
+. Create a new directory to hold your *Tuned* profile:
++
+[subs=+quotes]
+----
+# mkdir /etc/tuned/[replaceable]__my-profile__
+----
+
+. Find the World Wide Name (WWN) identifier of the selected block device:
++
+[subs=+quotes]
+----
+$ udevadm info --query=property --name=/dev/[replaceable]__device__ | grep WWN=
+
+ID_WWN=[replaceable]__0x5002538d00000000__
+----
+
+. Create the [filename]`/etc/tuned/[replaceable]__my-profile__/tuned.conf` configuration file. In the file, set the following options:
+
+** Optional: Include an existing profile:
++
+[subs=+quotes]
+----
+[main]
+include=[replaceable]__existing-profile__
+----
+
+** Set the selected disk scheduler for the device that matches the WWN identifier:
++
+[subs=+quotes]
+----
+[disk]
+devices_udev_regex=ID_WWN=[replaceable]__0x5002538d00000000__
+elevator=[replaceable]__selected-scheduler__
+----
++
+To match multiple devices in the [option]`devices_udev_regex` option, enclose the identifiers in parentheses and separate them with vertical bars:
++
+[subs=+quotes]
+----
+devices_udev_regex=(ID_WWN=[replaceable]__0x5002538d00000000__)|(ID_WWN=[replaceable]__0x1234567800000000__)
+----
+
+. Enable your profile:
++
+[subs=+quotes]
+----
+# tuned-adm profile [replaceable]__my-profile__
+----
+
+. Verify that the Tuned profile is active and applied:
++
+[subs=+quotes]
+----
+$ tuned-adm active
+
+Current active profile: [replaceable]_my-profile_
+----
++
+----
+$ tuned-adm verify
+
+Verification succeeded, current system settings match the preset profile.
+See tuned log file ('/var/log/tuned/tuned.log') for details.
+----
+
+
+.Additional resources
+
+// Use an xref if we're inside the performance title or the upstream Tuned manual.
+ifdef::performance-title[]
+:customizing-tuned-link: pass:macros[xref:customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance[]]
+endif::[]
+ifdef::upstream[]
+:customizing-tuned-link: pass:macros[xref:customizing-tuned-profiles_tuned-documentation[]]
+endif::[]
+
+// Use a link elsewhere.
+ifndef::performance-title[]
+:customizing-tuned-link: pass:macros[https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/monitoring_and_managing_system_status_and_performance/customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance]
+endif::[]
+
+* For more information on creating a *Tuned* profile, see {customizing-tuned-link}.
+
