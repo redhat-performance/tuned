@@ -88,6 +88,7 @@ Requires: util-linux, dbus, polkit
 Recommends: dmidecode
 Recommends: hdparm
 Recommends: kernel-tools
+Recommends: kmod
 %endif
 %if 0%{?rhel} > 7
 Requires: python3-syspurpose
