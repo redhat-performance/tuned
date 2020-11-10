@@ -147,6 +147,7 @@ class SchedulerPlugin(base.Plugin):
 			"cgroup_for_isolated_cores": None,
 			"ps_whitelist": None,
 			"ps_blacklist": None,
+			"default_irq_smp_affinity": "calc",
 		}
 
 	def _sanitize_cgroup_path(self, value):
@@ -707,6 +708,17 @@ class SchedulerPlugin(base.Plugin):
 		if enabling and value is not None:
 			self._ps_blacklist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
+	@command_custom("default_irq_smp_affinity", per_device = False)
+	def _default_irq_smp_affinity(self, enabling, value, verify, ignore_missing):
+		# currently unsupported
+		if verify:
+			return None
+		if enabling and value is not None:
+			if value in ["calc", "ignore"]:
+				self._default_irq_smp_affinity_value = value
+			else:
+				self._default_irq_smp_affinity_value = self._cmd.cpulist_unpack(value)
+
 	# Raises OSError
 	# Raises SystemError with old (pre-0.4) python-schedutils
 	# instead of OSError
@@ -846,9 +858,13 @@ class SchedulerPlugin(base.Plugin):
 		# default affinity
 		prev_affinity_hex = self._cmd.read_file("/proc/irq/default_smp_affinity")
 		prev_affinity = self._cmd.hex2cpulist(prev_affinity_hex)
-		_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
-		self._set_default_irq_affinity(_affinity)
-		irq_original.default = prev_affinity
+		if self._default_irq_smp_affinity_value == "calc":
+			_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
+		elif self._default_irq_smp_affinity_value != "ignore":
+			_affinity = self._default_irq_smp_affinity_value
+		if self._default_irq_smp_affinity_value != "ignore":
+			self._set_default_irq_affinity(_affinity)
+			irq_original.default = prev_affinity
 		self._storage.set(self._irq_storage_key, irq_original)
 
 	def _restore_all_irq_affinity(self):
@@ -857,8 +873,9 @@ class SchedulerPlugin(base.Plugin):
 			return
 		for irq, affinity in irq_original.irqs.items():
 			self._set_irq_affinity(irq, affinity, True)
-		affinity = irq_original.default
-		self._set_default_irq_affinity(affinity)
+		if self._default_irq_smp_affinity_value != "ignore":
+			affinity = irq_original.default
+			self._set_default_irq_affinity(affinity)
 		self._storage.unset(self._irq_storage_key)
 
 	def _verify_irq_affinity(self, irq_description, correct_affinity,
@@ -898,8 +915,9 @@ class SchedulerPlugin(base.Plugin):
 		current_affinity_hex = self._cmd.read_file(
 				"/proc/irq/default_smp_affinity")
 		current_affinity = self._cmd.hex2cpulist(current_affinity_hex)
-		if not self._verify_irq_affinity("default IRQ SMP affinity",
-				current_affinity, correct_affinity):
+		if self._default_irq_smp_affinity_value != "ignore" and not self._verify_irq_affinity("default IRQ SMP affinity",
+				current_affinity, correct_affinity if self._default_irq_smp_affinity_value == "calc" else
+				self._default_irq_smp_affinity_value):
 			res = False
 		return res
 

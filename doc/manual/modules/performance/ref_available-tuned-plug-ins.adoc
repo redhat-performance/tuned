@@ -84,6 +84,25 @@ It sets Aggressive Link Power Management (ALPM) to the value specified by the [o
 `mounts`::
 Enables or disables barriers for mounts according to the Boolean value of the [option]`disable_barriers` option. 
 
+`scheduler`::
+Allows tuning of scheduling priorities, processes/threads/IRQs affinities, and CPU cores isolation.
++
+The `default_irq_smp_affinity` parameter controls the values *Tuned* writes to `/proc/irq/default_smp_affinity`.
+The following values are supported:
++
+--
+`calc`::
+Content of `/proc/irq/default_smp_affinity` will be calculated from the `isolated_cores` parameter.
+Non-isolated cores are calculated as an inversion of the `isolated_cores`. Then the intersection of the non-isolated cores
+and the previous content of `/proc/irq/default_smp_affinity` is written to `/proc/irq/default_smp_affinity`.
+If the intersection is an empty set, then just the non-isolated cores are written to `/proc/irq/default_smp_affinity`.
+This behavior is the default if the parameter `default_irq_smp_affinity` is omitted.
+`ignore`::
+*Tuned* will not touch `/proc/irq/default_smp_affinity`.
+cpulist such as `1,3-4`::
+The cpulist is unpacked and written directly to `/proc/irq/default_smp_affinity`.
+--
+
 `script`::
 Executes an external script or binary when the profile is loaded or unloaded. You can choose an arbitrary executable.
 +
