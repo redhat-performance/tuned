@@ -9,8 +9,6 @@ start() {
 
     disable_ksm
 
-    systemctl start rt-entsk
-
     if [ -f $KTIMER_LOCKLESS_FILE ]; then
         echo 1 > $KTIMER_LOCKLESS_FILE
     fi
@@ -23,7 +21,6 @@ stop() {
         teardown_kvm_mod_low_latency
         enable_ksm
     fi
-    systemctl stop rt-entsk
     return "$?"
 }
 

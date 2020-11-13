@@ -5,7 +5,6 @@
 KTIMER_LOCKLESS_FILE=/sys/kernel/ktimer_lockless_check
 
 start() {
-    systemctl start rt-entsk
     if [ -f $KTIMER_LOCKLESS_FILE ]; then
         echo 1 > $KTIMER_LOCKLESS_FILE
     fi
@@ -13,8 +12,7 @@ start() {
 }
 
 stop() {
-    systemctl stop rt-entsk
-    return "$?"
+    return 0
 }
 
 verify() {
