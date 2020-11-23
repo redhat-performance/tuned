@@ -201,6 +201,11 @@ class commands:
 		data = self.read_file(f)
 		return hashlib.md5(str(data).encode("utf-8")).hexdigest()
 
+	# calcualtes sha256sum of file 'f'
+	def sha256sum(self, f):
+		data = self.read_file(f)
+		return hashlib.sha256(str(data).encode("utf-8")).hexdigest()
+
 	# returns machine ID or empty string "" in case of error
 	def get_machine_id(self, no_error = True):
 		return self.read_file(consts.MACHINE_ID_FILE, no_error).strip()

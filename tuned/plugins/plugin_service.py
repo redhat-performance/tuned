@@ -164,9 +164,9 @@ class SystemdHandler(InitHandler):
 		if not os.path.exists(path):
 			log.error("Service '%s' configuration not installed in '%s'" % (name, path))
 			return False
-		md5sum1 = cmd.md5sum(cfg_file)
-		md5sum2 = cmd.md5sum(path)
-		return md5sum1 == md5sum2
+		sha256sum1 = cmd.sha256sum(cfg_file)
+		sha256sum2 = cmd.sha256sum(path)
+		return sha256sum1 == sha256sum2
 
 class ServicePlugin(base.Plugin):
 	"""
