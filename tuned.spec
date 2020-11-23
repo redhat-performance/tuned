@@ -335,11 +335,18 @@ if [ "$1" == 0 ]; then
   then
     for f in /boot/loader/entries/$MACHINE_ID-*.conf
     do
-      if [ -f "$f" -a "${f: -12}" != "-rescue.conf" ]
+      # Skip non-files and rescue entries
+      if [ ! -f "$f" -o "${f: -12}" == "-rescue.conf" ]
       then
-        sed -i '/^\s*options\s\+.*\$tuned_params/ s/\s\+\$tuned_params\b//g' "$f" &>/dev/null || :
-        sed -i '/^\s*initrd\s\+.*\$tuned_initrd/ s/\s\+\$tuned_initrd\b//g' "$f" &>/dev/null || :
+        continue
       fi
+      # Skip boom managed entries
+      if [[ "$f" =~ \w*-[0-9a-f]{7,}-.*-.*.conf ]]
+      then
+        continue
+      fi
+      sed -i '/^\s*options\s\+.*\$tuned_params/ s/\s\+\$tuned_params\b//g' "$f" &>/dev/null || :
+      sed -i '/^\s*initrd\s\+.*\$tuned_initrd/ s/\s\+\$tuned_initrd\b//g' "$f" &>/dev/null || :
     done
   fi
 fi

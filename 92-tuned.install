@@ -25,10 +25,16 @@ ARCH=`uname -m`
 
 pushd "$LOADER_ENTRIES" &> /dev/null
 for f in `basename "$MACHINE_ID"`-*.conf; do
-  if [ -f "$f" -a "${f: -12}" != "-rescue.conf" ]; then
-    grep -q '^\s*options\s\+.*\$tuned_params' "$f" || sed -i '/^\s*options\s\+/ s/\(.*\)/\1 \$tuned_params/' "$f"
-    grep -q '^\s*initrd\s\+.*\$tuned_initrd' "$f" || sed -i '/^\s*initrd\s\+/ s/\(.*\)/\1 \$tuned_initrd/' "$f"
+  # Skip non-files and rescue entries
+  if [ ! -f "$f" -o "${f: -12}" == "-rescue.conf" ]; then
+    continue
   fi
+  # Skip boom managed entries
+  if [[ "$f" =~ \w*-[0-9a-f]{7,}-.*-.*.conf ]]; then
+    continue
+  fi
+  grep -q '^\s*options\s\+.*\$tuned_params' "$f" || sed -i '/^\s*options\s\+/ s/\(.*\)/\1 \$tuned_params/' "$f"
+  grep -q '^\s*initrd\s\+.*\$tuned_initrd' "$f" || sed -i '/^\s*initrd\s\+/ s/\(.*\)/\1 \$tuned_initrd/' "$f"
 done
 popd &> /dev/null
 
