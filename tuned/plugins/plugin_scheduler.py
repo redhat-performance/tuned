@@ -17,6 +17,7 @@ from tuned.utils.commands import commands
 import errno
 import os
 import collections
+import math
 
 log = tuned.logs.get()
 
@@ -83,6 +84,18 @@ class SchedulerPlugin(base.Plugin):
 		self._irq_storage_key = self._storage_key(
 				command_name = "irq")
 
+	def _calc_mmap_pages(self, mmap_pages):
+		if mmap_pages is None:
+			return None
+		try:
+			mp = int(mmap_pages)
+		except ValueError:
+			return 0
+		if mp <= 0:
+			return 0
+		# round up to the nearest power of two value
+		return int(2 ** math.ceil(math.log(mp, 2)))
+
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
 		instance._has_static_tuning = True
@@ -113,6 +126,14 @@ class SchedulerPlugin(base.Plugin):
 
 		instance._scheduler = instance.options
 
+		perf_mmap_pages_raw = self._variables.expand(instance.options["perf_mmap_pages"])
+		perf_mmap_pages = self._calc_mmap_pages(perf_mmap_pages_raw)
+		if perf_mmap_pages == 0:
+			log.error("Invalid 'perf_mmap_pages' value specified: '%s', using default kernel value" % perf_mmap_pages_raw)
+			perf_mmap_pages = None
+		if perf_mmap_pages is not None and str(perf_mmap_pages) != perf_mmap_pages_raw:
+			log.info("'perf_mmap_pages' value has to be power of two, specified: '%s', using: '%d'" %
+				(perf_mmap_pages_raw, perf_mmap_pages))
 		for k in instance._scheduler:
 			instance._scheduler[k] = self._variables.expand(instance._scheduler[k])
 		if self._cmd.get_bool(instance._scheduler.get("runtime", 1)) == "0":
@@ -129,7 +150,10 @@ class SchedulerPlugin(base.Plugin):
 				evsel.open(cpus = self._cpus, threads = instance._threads)
 				instance._evlist = perf.evlist(self._cpus, instance._threads)
 				instance._evlist.add(evsel)
-				instance._evlist.mmap()
+				if perf_mmap_pages is None:
+					instance._evlist.mmap()
+				else:
+					instance._evlist.mmap(pages = perf_mmap_pages)
 			# no perf
 			except:
 				instance._runtime_tuning = False
@@ -148,6 +172,7 @@ class SchedulerPlugin(base.Plugin):
 			"ps_whitelist": None,
 			"ps_blacklist": None,
 			"default_irq_smp_affinity": "calc",
+			"perf_mmap_pages": None,
 			"perf_process_fork": "false",
 		}
 
