@@ -87,6 +87,13 @@ Enables or disables barriers for mounts according to the Boolean value of the [o
 `scheduler`::
 Allows tuning of scheduling priorities, processes/threads/IRQs affinities, and CPU cores isolation.
 +
+The scheduler plugin uses perf event loop to catch newly created processes. By default it listens to perf.RECORD_COMM and
+perf.RECORD_EXIT events. By setting `perf_process_fork` parameter to `true`, perf.RECORD_FORK events will be also listened to.
+In other words, child processes created by the fork() system call will be processed. Since child processes inherit CPU affinity
+from their parents, the `scheduler` plugin usually does not need to explicitly process these events. As processing perf events
+can pose a significant CPU overhead, the `perf_process_fork` parameter is set to `false` by default and child processes
+are not processed by the scheduler plugin.
++
 The `default_irq_smp_affinity` parameter controls the values *Tuned* writes to `/proc/irq/default_smp_affinity`.
 The following values are supported:
 +

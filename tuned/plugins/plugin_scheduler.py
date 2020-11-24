@@ -148,6 +148,7 @@ class SchedulerPlugin(base.Plugin):
 			"ps_whitelist": None,
 			"ps_blacklist": None,
 			"default_irq_smp_affinity": "calc",
+			"perf_process_fork": "false",
 		}
 
 	def _sanitize_cgroup_path(self, value):
@@ -687,7 +688,8 @@ class SchedulerPlugin(base.Plugin):
 						event = instance._evlist.read_on_cpu(cpu)
 						if event:
 							read_events = True
-							if event.type == perf.RECORD_COMM:
+							if event.type == perf.RECORD_COMM or \
+								(self._perf_process_fork_value and event.type == perf.RECORD_FORK):
 								self._add_pid(instance, int(event.tid), r)
 							elif event.type == perf.RECORD_EXIT:
 								self._remove_pid(instance, int(event.tid))
@@ -718,6 +720,14 @@ class SchedulerPlugin(base.Plugin):
 				self._default_irq_smp_affinity_value = value
 			else:
 				self._default_irq_smp_affinity_value = self._cmd.cpulist_unpack(value)
+
+	@command_custom("perf_process_fork", per_device = False)
+	def _perf_process_fork(self, enabling, value, verify, ignore_missing):
+		# currently unsupported
+		if verify:
+			return None
+		if enabling and value is not None:
+			self._perf_process_fork_value = self._cmd.get_bool(value) == "1"
 
 	# Raises OSError
 	# Raises SystemError with old (pre-0.4) python-schedutils
