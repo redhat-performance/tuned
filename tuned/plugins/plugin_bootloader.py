@@ -35,6 +35,7 @@ class BootloaderPlugin(base.Plugin):
 		self._cmdline_val = ""
 		self._initrd_val = ""
 		self._grub2_cfg_file_names = self._get_grub2_cfg_files()
+		self._bls = self._bls_enabled()
 
 	def _instance_cleanup(self, instance):
 		pass
@@ -87,6 +88,15 @@ class BootloaderPlugin(base.Plugin):
 			if os.path.exists(f):
 				cfg_files.append(f)
 		return cfg_files
+
+	def _bls_enabled(self):
+		grub2_default_env = self._cmd.read_file(consts.GRUB2_DEFAULT_ENV_FILE)
+		if len(grub2_default_env) <= 0:
+			log.info("cannot read '%s'" % consts.GRUB2_DEFAULT_ENV_FILE)
+			return False
+
+		return re.search(r"^\s*GRUB_ENABLE_BLSCFG\s*=\s*\"?\s*[tT][rR][uU][eE]\s*\"?\s*$", grub2_default_env,
+			flags = re.MULTILINE) is not None
 
 	def _patch_bootcmdline(self, d):
 		return self._cmd.add_modify_option_in_file(consts.BOOT_CMDLINE_FILE, d)
@@ -154,6 +164,25 @@ class BootloaderPlugin(base.Plugin):
 			self._cmd.write_to_file(consts.GRUB2_DEFAULT_ENV_FILE, grub2_default_env)
 		return True
 
+	def _grub2_default_env_unpatch(self):
+		grub2_default_env = self._cmd.read_file(consts.GRUB2_DEFAULT_ENV_FILE)
+		if len(grub2_default_env) <= 0:
+			log.info("cannot read '%s'" % consts.GRUB2_DEFAULT_ENV_FILE)
+			return False
+
+		write = False
+		if re.search(r"^GRUB_CMDLINE_LINUX_DEFAULT=\"\$\{GRUB_CMDLINE_LINUX_DEFAULT:\+\$GRUB_CMDLINE_LINUX_DEFAULT \}\\\$" +
+			consts.GRUB2_TUNED_VAR + "\"$", grub2_default_env, flags = re.MULTILINE):
+				write = True
+				cfg = re.sub(r"^GRUB_CMDLINE_LINUX_DEFAULT=\"\$\{GRUB_CMDLINE_LINUX_DEFAULT:\+\$GRUB_CMDLINE_LINUX_DEFAULT \}\\\$" +
+					consts.GRUB2_TUNED_VAR + "\"$\n", "", grub2_default_env, flags = re.MULTILINE)
+				if cfg[-1] != "\n":
+					cfg += "\n"
+		if write:
+			log.debug("unpatching '%s'" % consts.GRUB2_DEFAULT_ENV_FILE)
+			self._cmd.write_to_file(consts.GRUB2_DEFAULT_ENV_FILE, cfg)
+		return True
+
 	def _grub2_cfg_patch(self, d):
 		log.debug("patching grub.cfg")
 		if not self._grub2_cfg_file_names:
@@ -180,7 +209,10 @@ class BootloaderPlugin(base.Plugin):
 			if patch_initial:
 				grub2_cfg_new = self._grub2_cfg_patch_initial(self._grub2_cfg_unpatch(grub2_cfg), d)
 			self._cmd.write_to_file(f, grub2_cfg_new)
-		self._grub2_default_env_patch()
+		if self._bls:
+			self._grub2_default_env_unpatch()
+		else:
+			self._grub2_default_env_patch()
 		return True
 
 	def _grub2_update(self):
