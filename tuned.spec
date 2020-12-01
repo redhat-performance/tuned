@@ -36,16 +36,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.14.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.15.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -540,6 +540,23 @@ fi
 %{_mandir}/man7/tuned-profiles-postgresql.7*
 
 %changelog
+* Tue Dec  1 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.15.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#1874052
+  - added plugin service for linux services control
+    resolves: rhbz#1869991
+  - scheduler: added default_irq_smp_affinity option
+    resolves: rhbz#1896348
+  - bootloader: skip boom managed BLS snippets
+    resolves: rhbz#1901532
+  - scheduler: added perf_process_fork option to enable processing of fork
+    resolves: rhbz#1894610
+  - scheduler: added perf_mmap_pages option to set perf buffer size
+    resolves: rhbz#1890219
+  - bootloader: fixed cmdline duplication with BLS and grub2-mkconfig
+    resolves: rhbz#1777874
+
 * Mon Jun 15 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.14.0-1
 - new release
   - rebased tuned to latest upstream
