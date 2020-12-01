@@ -50,7 +50,7 @@ DEF_CGROUP_MOUNT_POINT = "/sys/fs/cgroup/cpuset"
 DEF_CGROUP_MODE = 0o770
 
 # service plugin configuration
-SERVICE_SYSTEMD_CFG_PATH="/etc/systemd/system/%s.service.d"
+SERVICE_SYSTEMD_CFG_PATH = "/etc/systemd/system/%s.service.d"
 DEF_SERVICE_CFG_DIR_MODE = 0o755
 
 # modules plugin configuration
