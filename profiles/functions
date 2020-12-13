@@ -205,7 +205,7 @@ set_disk_scheduler_quantum() {
 
 restore_disk_scheduler_quantum() {
 	if [ -r "$DISK_QUANTUM_SAVE" ]; then
-		/bin/sh "$DISK_QUANTUM_SAVE" &>/dev/null
+		/bin/bash "$DISK_QUANTUM_SAVE" &>/dev/null
 		rm -f "$DISK_QUANTUM_SAVE"
 	fi
 }
