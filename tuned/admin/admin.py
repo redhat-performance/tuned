@@ -356,12 +356,12 @@ class Admin(object):
 		return True
 
 	def _action_dbus_verify_profile(self, ignore_missing):
-		if self._log_level is not None:
-			self._log_capture_start()
 		if ignore_missing:
-			ret = self._controller.verify_profile_ignore_missing()
+			logs, ret = self._controller.verify_profile_ignore_missing(self._log_level)
 		else:
-			ret = self._controller.verify_profile()
+			logs, ret = self._controller.verify_profile(self._log_level)
+		print(logs, end = "", file = sys.stderr)
+		sys.stderr.flush()
 		if ret:
 			print("Verfication succeeded, current system settings match the preset profile.")
 		else:

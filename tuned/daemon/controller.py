@@ -259,17 +259,23 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			return ""
 		return self._daemon.profile_recommender.recommend()
 
-	@exports.export("", "b")
-	def verify_profile(self, caller = None):
+	@exports.export("i", "(sb)")
+	def verify_profile(self, log_level, caller = None):
 		if caller == "":
 			return False
-		return self._daemon.verify_profile(ignore_missing = False)
+		token = tuned.logs.log_capture_start(log_level)
+		ver_result = self._daemon.verify_profile(ignore_missing = False)
+		logs = tuned.logs.log_capture_finish(token)
+		return (logs, ver_result)
 
-	@exports.export("", "b")
-	def verify_profile_ignore_missing(self, caller = None):
+	@exports.export("i", "(sb)")
+	def verify_profile_ignore_missing(self, log_level, caller = None):
 		if caller == "":
 			return False
-		return self._daemon.verify_profile(ignore_missing = True)
+		token = tuned.logs.log_capture_start(log_level)
+		ver_result = self._daemon.verify_profile(ignore_missing = True)
+		logs = tuned.logs.log_capture_finish(token)
+		return (logs, ver_result)
 
 	@exports.export("", "a{sa{ss}}")
 	def get_all_plugins(self, caller = None):
