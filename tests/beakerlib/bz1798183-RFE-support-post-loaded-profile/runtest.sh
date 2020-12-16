@@ -172,7 +172,7 @@ rlJournalStart
         # Restart Tuned so that the post-loaded profile gets applied
         rlRun "rlServiceStart tuned"
         rlAssertEquals "Check the output of tuned-adm active" \
-                       "$(tuned-adm active)" \
+                       "$(tuned-adm active | grep 'Current active profile')" \
                        "Current active profile: post"
         rlAssertEquals "Check that dirty ratio is set correctly" \
                        "$(sysctl -n $DIRTY_RATIO)" 8
