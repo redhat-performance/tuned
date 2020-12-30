@@ -11,12 +11,27 @@ log = tuned.logs.get()
 cmd = commands()
 
 class AudioPlugin(base.Plugin):
-	"""
-	Plugin for tuning audio cards powersaving options.
+        """
+        This plugin is used for tuning audio cards' powersaving options. It
+        sets the autosuspend timeout for audio codecs to the value specified
+        by the `timeout` option.
+        
+        Currently, the `snd_hda_intel` and `snd_ac97_codec` codecs are
+        supported. If you would like to disable autosuspend for these codecs,
+        set the `timeout` value to `0`. If you would like to enforce the
+        controller reset, set the Boolean option `reset_controller` to `true`.
 
-	Power management is supported per module, not device. From this reason,
-	we take kernel module names as device names.
-	"""
+        Note that power management is supported per module, not device. For this
+        reason, we take kernel module names as device names.
+
+        Example usage:
+
+        ```
+        [audio]
+        timeout=10
+        reset_controller=true
+        ```
+        """
 
 	def _init_devices(self):
 		self._devices_supported = True
