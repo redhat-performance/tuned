@@ -15,14 +15,14 @@ SYSCTL_CONFIG_DIRS = [ "/run/sysctl.d",
 		"/etc/sysctl.d" ]
 
 class SysctlPlugin(base.Plugin):
-	"""
-	This plugin is used for applying custom `sysctl` settings and should only be used to change 
+        """
+        This plugin is used for applying custom `sysctl` settings and should only be used to change 
         system settings that are not covered by other plugins available in *Tuned*. If the settings
         are covered by other *Tuned* plugins, please use those plugins instead.
         
         The syntax for this plugin is `name=value`, where _name_ is the same as the name provided by
         the `sysctl` utility.
-	"""
+        """
 
 	def __init__(self, *args, **kwargs):
 		super(SysctlPlugin, self).__init__(*args, **kwargs)
