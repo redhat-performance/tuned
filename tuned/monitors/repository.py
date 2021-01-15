@@ -1,3 +1,4 @@
+import tuned.consts as consts
 import tuned.logs
 import tuned.monitors
 from tuned.utils.plugin_loader import PluginLoader
@@ -18,7 +19,7 @@ class Repository(PluginLoader):
 
 	def _set_loader_parameters(self):
 		self._namespace = "tuned.monitors"
-		self._prefix = "monitor_"
+		self._submodule_name = consts.MONITOR_SUBMODULE_NAME
 		self._interface = tuned.monitors.Monitor
 
 	def create(self, plugin_name, devices):

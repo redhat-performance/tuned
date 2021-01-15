@@ -1,3 +1,4 @@
+import tuned.consts as consts
 from tuned.utils.plugin_loader import PluginLoader
 import tuned.plugins.base
 import tuned.logs
@@ -26,7 +27,7 @@ class Repository(PluginLoader):
 
 	def _set_loader_parameters(self):
 		self._namespace = "tuned.plugins"
-		self._prefix = "plugin_"
+		self._submodule_name = consts.PLUGIN_SUBMODULE_NAME
 		self._interface = tuned.plugins.base.Plugin
 
 	def create(self, plugin_name):
