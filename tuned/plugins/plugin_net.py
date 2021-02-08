@@ -123,6 +123,13 @@ class NetTuningPlugin(base.Plugin):
 			"tx": None }
 
 	@classmethod
+	def _get_config_options_channels(cls):
+		return { "rx": None,
+			"tx": None,
+			"other": None,
+			"combined": None }
+
+	@classmethod
 	def _get_config_options(cls):
 		return {
 			"dynamic": True,
@@ -132,6 +139,7 @@ class NetTuningPlugin(base.Plugin):
 			"coalesce": None,
 			"pause": None,
 			"ring": None,
+			"channels": None,
 		}
 
 	def _init_stats_and_idle(self, instance, device):
@@ -282,7 +290,8 @@ class NetTuningPlugin(base.Plugin):
 		params = set(d.keys())
 		supported_getter = { "coalesce": self._get_config_options_coalesce, \
 				"pause": self._get_config_options_pause, \
-				"ring": self._get_config_options_ring }
+				"ring": self._get_config_options_ring, \
+				"channels": self._get_config_options_channels }
 		supported = set(supported_getter[context]().keys())
 		if not params.issubset(supported):
 			log.error("unknown %s parameter(s): %s" % (context, str(params - supported)))
@@ -313,6 +322,29 @@ class NetTuningPlugin(base.Plugin):
 		l = [x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2]
 		return dict(l)
 
+	# parse output of ethtool -l
+	def _parse_channels_parameters(self, s):
+		a = re.split(r"^Current hardware settings:$", s, flags=re.MULTILINE)
+		s = a[1]
+		s = self._cmd.multiple_re_replace(\
+				{"RX": "rx",
+				"TX": "tx",
+				"Other": "other",
+				"Combined": "combined"}, s)
+		l = s.split("\n")
+		l = [x for x in l if x != '']
+		l = [x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2]
+		return dict(l)
+
+	def _replace_channels_parameters(self, context, params_list, dev_params):
+		mod_params_list = []
+		if "combined" in params_list:
+			mod_params_list.extend(["rx", params_list[1], "tx", params_list[1]])
+		else:
+			cnt = str(max(int(params_list[1]), int(params_list[3])))
+			mod_params_list.extend(["combined", cnt])
+		return dict(list(zip(mod_params_list[::2], mod_params_list[1::2])))
+
 	def _check_device_support(self, context, parameters, device, dev_params):
 		"""Filter unsupported parameters and log warnings about it
 
@@ -337,7 +369,8 @@ class NetTuningPlugin(base.Plugin):
 			parameters.pop(param, None)
 
 	def _get_device_parameters(self, context, device):
-		context2opt = { "coalesce": "-c", "features": "-k", "pause": "-a", "ring": "-g" }
+		context2opt = { "coalesce": "-c", "features": "-k", "pause": "-a", "ring": "-g", \
+				"channels": "-l"}
 		opt = context2opt[context]
 		ret, value = self._cmd.execute(["ethtool", opt, device])
 		if ret != 0 or len(value) == 0:
@@ -345,7 +378,8 @@ class NetTuningPlugin(base.Plugin):
 		context2parser = { "coalesce": self._parse_device_parameters, \
 				"features": self._parse_device_parameters, \
 				"pause": self._parse_pause_parameters, \
-				"ring": self._parse_ring_parameters }
+				"ring": self._parse_ring_parameters, \
+				"channels": self._parse_channels_parameters }
 		parser = context2parser[context]
 		d = parser(value)
 		if context == "coalesce" and not self._check_parameters(context, d):
@@ -362,10 +396,14 @@ class NetTuningPlugin(base.Plugin):
 		# check if device supports parameters and filter out unsupported ones
 		if dev_params:
 			self._check_device_support(context, d, device, dev_params)
+			# replace the channel parameters based on the device support
+			if context == "channels" and int(dev_params[next(iter(d))]) == 0:
+				d = self._replace_channels_parameters(context, self._cmd.dict2list(d), dev_params)
 
 		if not sim and len(d) != 0:
 			log.debug("setting %s: %s" % (context, str(d)))
-			context2opt = { "coalesce": "-C", "features": "-K", "pause": "-A", "ring": "-G" }
+			context2opt = { "coalesce": "-C", "features": "-K", "pause": "-A", "ring": "-G", \
+                                "channels": "-L"}
 			opt = context2opt[context]
 			# ignore ethtool return code 80, it means parameter is already set
 			self._cmd.execute(["ethtool", opt, device] + self._cmd.dict2list(d), no_errors = [80])
@@ -422,3 +460,7 @@ class NetTuningPlugin(base.Plugin):
 	@command_custom("ring", per_device = True)
 	def _ring(self, start, value, device, verify, ignore_missing):
 		return self._custom_parameters("ring", start, value, device, verify)
+
+	@command_custom("channels", per_device = True)
+	def _channels(self, start, value, device, verify, ignore_missing):
+		return self._custom_parameters("channels", start, value, device, verify)
