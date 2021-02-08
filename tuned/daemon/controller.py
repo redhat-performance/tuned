@@ -61,7 +61,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if daemon:
 			self._terminate.clear()
 			# we have to pass some timeout, otherwise signals will not work
-			while not self._cmd.wait(self._terminate, 3600):
+			while not self._cmd.wait(self._terminate, 10):
 				pass
 
 		log.info("terminating controller")
