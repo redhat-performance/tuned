@@ -59,6 +59,7 @@ BuildRequires: asciidoctor
 Requires(post): systemd, virt-what
 Requires(preun): systemd
 Requires(postun): systemd
+BuildRequires: make
 BuildRequires: %{_py}, %{_py}-devel
 # BuildRequires for 'make test'
 # python-mock is needed for python-2.7, but it's not available on RHEL-7
