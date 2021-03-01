@@ -69,7 +69,10 @@ BuildRequires: %{_py}-mock
 BuildRequires: %{_py}-configobj
 BuildRequires: %{_py}-decorator, %{_py}-pyudev
 Requires: %{_py}-decorator, %{_py}-pyudev, %{_py}-configobj
-Requires: %{_py}-schedutils, %{_py}-linux-procfs, %{_py}-perf
+Requires: %{_py}-linux-procfs, %{_py}-perf
+%if %{without python3}
+Requires: %{_py}-schedutils
+%endif
 # requires for packages with inconsistent python2/3 names
 %if %{with python3}
 # BuildRequires for 'make test'
