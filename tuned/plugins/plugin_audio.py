@@ -35,12 +35,6 @@ class AudioPlugin(base.Plugin):
 	def _instance_cleanup(self, instance):
 		pass
 
-	def _device_module_name(self, device):
-		try:
-			return device.parent.driver
-		except:
-			return None
-
 	@classmethod
 	def _get_config_options(cls):
 		return {

@@ -2,8 +2,8 @@ from . import base
 from .decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
-import os
 import re
+import os.path
 
 log = tuned.logs.get()
 
@@ -19,7 +19,19 @@ class VideoPlugin(base.Plugin):
 
 		# FIXME: this is a blind shot, needs testing
 		for device in self._hardware_inventory.get_devices("drm").match_sys_name("card*").match_property("DEVTYPE", "drm_minor"):
-			self._free_devices.add(device.sys_name)
+			module = self._device_module_name(device)
+			sys_name = device.sys_name
+
+			if module not in ["amdgpu", "radeon"]:
+				log.info("Video plugin not supported on '%s' (module '%s')" % (sys_name, module))
+				continue
+			elif module == "radeon":
+				sys_files = self._radeon_powersave_files(device)
+				if not os.path.exists(sys_files["method"]):
+					log.warn("Power management disabled on '%s' (module 'radeon')" % sys_name)
+					continue
+
+			self._free_devices.add(sys_name)
 
 		self._cmd = commands()
 
@@ -43,49 +55,95 @@ class VideoPlugin(base.Plugin):
 		return {
 			"method" : "/sys/class/drm/%s/device/power_method" % device,
 			"profile": "/sys/class/drm/%s/device/power_profile" % device,
-			"dpm_state": "/sys/class/drm/%s/device/power_dpm_state" % device
+			"dpm_state": "/sys/class/drm/%s/device/power_dpm_state" % device,
+			"level": "/sys/class/drm/%s/device/power_dpm_force_performance_level" % device
 		}
 
 	@command_set("radeon_powersave", per_device=True)
 	def _set_radeon_powersave(self, value, device, sim):
+		device_obj = self._get_device_objects((device,))
+		module = None
+		if device_obj:
+			module = self._device_module_name(device_obj[0])
 		sys_files = self._radeon_powersave_files(device)
+
+		# If there would be implementation for different cards, uncomment this condition
+		# if module not in ["amdgpu", "radeon"] or (module == "radeon" and not os.path.exists(sys_files["profile"])):
+		# 	return None
+
 		va = str(re.sub(r"(\s*:\s*)|(\s+)|(\s*;\s*)|(\s*,\s*)", " ", value)).split()
-		if not os.path.exists(sys_files["method"]):
-			if not sim:
-				log.warn("radeon_powersave is not supported on '%s'" % device)
-				return None
 		for v in va:
 			if v in ["default", "auto", "low", "mid", "high"]:
 				if not sim:
-					if (self._cmd.write_to_file(sys_files["method"], "profile") and
-						self._cmd.write_to_file(sys_files["profile"], v)):
+					if module == "amdgpu":
+						log.warn("Option '%s' not supported on amdgpu module." % v)
+					# https://wiki.archlinux.org/index.php/ATI#Profile-based_frequency_switching
+					elif (self._cmd.write_to_file(sys_files["profile"], v) and
+						self._cmd.write_to_file(sys_files["method"], "profile")):
 						return v
+				elif module == "radeon" and os.path.exists(sys_files["profile"]):
+					return v
 			elif v == "dynpm":
 				if not sim:
-					if (self._cmd.write_to_file(sys_files["method"], "dynpm")):
+					if module == "amdgpu":
+						log.warn("Option '%s' not supported on amdgpu module." % v)
+					# https://wiki.archlinux.org/index.php/ATI#Dynamic_frequency_switching
+					elif self._cmd.write_to_file(sys_files["method"], "dynpm"):
 						return "dynpm"
-			# new DPM profiles, recommended to use if supported
+				elif module == "radeon":
+					return v
 			elif v in ["dpm-battery", "dpm-balanced", "dpm-performance"]:
 				if not sim:
-					state = v[len("dpm-"):]
-					if (self._cmd.write_to_file(sys_files["method"], "dpm") and
-						self._cmd.write_to_file(sys_files["dpm_state"], state)):
+					# https://www.kernel.org/doc/html/latest/gpu/amdgpu.html#power-dpm-state
+					if module == "amdgpu":
+						log.warn("Option '%s' not supported on amdgpu module." % v)
+					# https://wiki.archlinux.org/index.php/ATI#Dynamic_power_management
+					elif (self._cmd.write_to_file(sys_files["dpm_state"], v[len("dpm-"):]) and
+						self._cmd.write_to_file(sys_files["method"], "dpm")):
 						return v
+				elif module == "radeon" and os.path.exists(sys_files["dpm_state"]):
+					return v
+			elif v in ["level-low", "level-high", "level-auto"]:
+				if not sim:
+					if module == "radeon":
+						log.warn("Option '%s' not supported on radeon module." % v)
+					# https://www.kernel.org/doc/html/latest/gpu/amdgpu.html#power-dpm-force-performance-level
+					else:
+						if self._cmd.write_to_file(sys_files["level"], v[len("level-"):]):
+							return v
+				elif module == "amdgpu":
+					return v
 			else:
 				if not sim:
-					log.warn("Invalid option for radeon_powersave.")
+					log.warn("Invalid option '%s' for radeon_powersave." % v)
 				return None
 		return None
 
 	@command_get("radeon_powersave")
 	def _get_radeon_powersave(self, device, ignore_missing = False):
+		device_obj = self._get_device_objects((device,))
+		module = None
+		if device_obj:
+			module = self._device_module_name(device_obj[0])
+
 		sys_files = self._radeon_powersave_files(device)
-		method = self._cmd.read_file(sys_files["method"], no_error=ignore_missing).strip()
-		if method == "profile":
-			return self._cmd.read_file(sys_files["profile"]).strip()
-		elif method == "dynpm":
-			return method
-		elif method == "dpm":
-			return "dpm-" + self._cmd.read_file(sys_files["dpm_state"]).strip()
-		else:
+
+		# If there would be implementation for different cards, uncomment this condition
+		# if module not in ["amdgpu", "radeon"] or (module == "radeon" and not os.path.exists(sys_files["profile"])):
+		# 	return None
+
+		if module == "amdgpu":
+			level = self._cmd.read_file(sys_files["level"], no_error=ignore_missing).strip()
+			if level:
+				return "level-" + level
 			return None
+		else:
+			method = self._cmd.read_file(sys_files["method"], no_error=ignore_missing).strip()
+			if method == "profile":
+				return self._cmd.read_file(sys_files["profile"]).strip()
+			elif method == "dynpm":
+				return method
+			elif method == "dpm":
+				return "dpm-" + self._cmd.read_file(sys_files["dpm_state"]).strip()
+			else:
+				return None
