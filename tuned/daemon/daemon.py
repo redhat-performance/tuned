@@ -89,8 +89,10 @@ class Daemon(object):
 		self._post_loaded_profile = None
 		self.set_all_profiles(profile_names, manual, post_loaded_profile)
 
-	def _load_profiles(self):
-		profile_list = self._active_profiles
+	def _load_profiles(self, profile_names, manual):
+		profile_names = profile_names or ""
+		profile_list = profile_names.split()
+
 		if self._post_loaded_profile:
 			log.info("Using post-loaded profile '%s'"
 				 % self._post_loaded_profile)
@@ -98,7 +100,6 @@ class Daemon(object):
 		for profile in profile_list:
 			if profile not in self.profile_loader.profile_locator.get_known_names():
 				errstr = "Requested profile '%s' doesn't exist." % profile
-				profile_names = " ".join(self._active_profiles)
 				self._notify_profile_changed(profile_names, False, errstr)
 				raise TunedException(errstr)
 		try:
@@ -106,18 +107,13 @@ class Daemon(object):
 				self._profile = self._profile_loader.load(profile_list)
 			else:
 				self._profile = None
+
+			self._manual = manual
+			self._active_profiles = profile_names.split()
 		except InvalidProfileException as e:
 			errstr = "Cannot load profile(s) '%s': %s" % (" ".join(profile_list), e)
-			profile_names = " ".join(self._active_profiles)
 			self._notify_profile_changed(profile_names, False, errstr)
 			raise TunedException(errstr)
-
-	def _set_profile(self, profile_names, manual):
-		self._manual = manual
-		if profile_names:
-			self._active_profiles = profile_names.split()
-		else:
-			self._active_profiles = []
 
 	def set_profile(self, profile_names, manual):
 		if self.is_running():
@@ -126,8 +122,7 @@ class Daemon(object):
 						     errstr)
 			raise TunedException(errstr)
 
-		self._set_profile(profile_names, manual)
-		self._load_profiles()
+		self._load_profiles(profile_names, manual)
 
 	def _set_post_loaded_profile(self, profile_name):
 		if not profile_name:
@@ -146,9 +141,8 @@ class Daemon(object):
 						     errstr)
 			raise TunedException(errstr)
 
-		self._set_profile(active_profiles, manual)
 		self._set_post_loaded_profile(post_loaded_profile)
-		self._load_profiles()
+		self._load_profiles(active_profiles, manual)
 
 		if save_instantly:
 			self._save_active_profile(active_profiles, manual)
