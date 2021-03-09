@@ -215,9 +215,12 @@ class PowertopProfile:
 			print('PowerTOP returned error code: %d' % proc.returncode, file=sys.stderr)
 			return -2
 
-		prefix = "PowerTOP outputing using base filename "
+		prefix = "PowerTOP outputting using base filename "
 		if output.find(prefix) == -1:
-			return -1
+			# workaround for PowerTOP older than 2.13
+			prefix = "PowerTOP outputing using base filename "
+			if output.find(prefix) == -1:
+				return -1
 
 		name = output[output.find(prefix)+len(prefix):-1]
 		#print "Parsed filename=", [name]
