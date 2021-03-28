@@ -10,7 +10,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # X-Interactive:     false
-# Short-Description: Tuned daemon
+# Short-Description: TuneD daemon
 # Description:       Dynamic System Tuning Daemon
 ### END INIT INFO
 # PATH should only include /usr/* if it runs after the mountnfs.sh script

@@ -1,7 +1,7 @@
 [id="available-tuned-plug-ins_{context}"]
-= Available Tuned plug-ins
+= Available TuneD plug-ins
 
-This section lists all monitoring and tuning plug-ins currently available in *Tuned*.
+This section lists all monitoring and tuning plug-ins currently available in *TuneD*.
 
 [discrete]
 == Monitoring plug-ins
@@ -36,7 +36,7 @@ This feature can be found on some netbooks and is also known as the ASUS Super H
 +
 If the CPU load is lower or equal to the value specified by the [option]`load_threshold_powersave` option, the plug-in sets the FSB speed to the value specified by the [option]`she_powersave` option. If the CPU load is higher or equal to the value specified by the [option]`load_threshold_normal` option, it sets the FSB speed to the value specified by the [option]`she_normal` option. 
 +
-Static tuning is not supported and the plug-in is transparently disabled if *Tuned* does not detect the hardware support for this feature. 
+Static tuning is not supported and the plug-in is transparently disabled if *TuneD* does not detect the hardware support for this feature. 
 
 `net`::
 Configures the Wake-on-LAN functionality to the values specified by the [option]`wake_on_lan` option. It uses the same syntax as the `ethtool` utility. It also dynamically changes the interface speed according to the interface utilization. 
@@ -46,7 +46,7 @@ Sets various `sysctl` settings specified by the plug-in options.
 +
 The syntax is ``[replaceable]__name__=[replaceable]__value__``, where [replaceable]_name_ is the same as the name provided by the `sysctl` utility.
 +
-Use the `sysctl` plug-in if you need to change system settings that are not covered by other plug-ins available in *Tuned*. If the settings are covered by some specific plug-ins, prefer these plug-ins.
+Use the `sysctl` plug-in if you need to change system settings that are not covered by other plug-ins available in *TuneD*. If the settings are covered by some specific plug-ins, prefer these plug-ins.
 
 `usb`::
 Sets autosuspend timeout of USB devices to the value specified by the [option]`autosuspend` parameter. 
@@ -100,7 +100,7 @@ can be set with the `perf_mmap_pages` parameter. Value of this parameter has to 
 the nearest bigger power of 2 value is calculated from it and this calculated value is used. If the `perf_mmap_pages`
 parameter is omitted, the default kernel value is used, which should be 128 for the recent kernels (tested on kernel-5.9.8).
 +
-The `default_irq_smp_affinity` parameter controls the values *Tuned* writes to `/proc/irq/default_smp_affinity`.
+The `default_irq_smp_affinity` parameter controls the values *TuneD* writes to `/proc/irq/default_smp_affinity`.
 The following values are supported:
 +
 --
@@ -111,7 +111,7 @@ and the previous content of `/proc/irq/default_smp_affinity` is written to `/pro
 If the intersection is an empty set, then just the non-isolated cores are written to `/proc/irq/default_smp_affinity`.
 This behavior is the default if the parameter `default_irq_smp_affinity` is omitted.
 `ignore`::
-*Tuned* will not touch `/proc/irq/default_smp_affinity`.
+*TuneD* will not touch `/proc/irq/default_smp_affinity`.
 cpulist such as `1,3-4`::
 The cpulist is unpacked and written directly to `/proc/irq/default_smp_affinity`.
 --
@@ -119,18 +119,18 @@ The cpulist is unpacked and written directly to `/proc/irq/default_smp_affinity`
 `script`::
 Executes an external script or binary when the profile is loaded or unloaded. You can choose an arbitrary executable.
 +
-IMPORTANT: The `script` plug-in is provided mainly for compatibility with earlier releases. Prefer other *Tuned* plug-ins if they cover the required functionality. 
+IMPORTANT: The `script` plug-in is provided mainly for compatibility with earlier releases. Prefer other *TuneD* plug-ins if they cover the required functionality. 
 +
-*Tuned* calls the executable with one of the following arguments:
+*TuneD* calls the executable with one of the following arguments:
 +
 --
 ** `start` when loading the profile
 ** `stop` when unloading the profile
 --
 +
-You need to correctly implement the `stop` action in your executable and revert all settings that you changed during the `start` action. Otherwise, the roll-back step after changing your *Tuned* profile will not work. 
+You need to correctly implement the `stop` action in your executable and revert all settings that you changed during the `start` action. Otherwise, the roll-back step after changing your *TuneD* profile will not work. 
 +
-Bash scripts can import the [filename]`/usr/lib/tuned/functions` Bash library and use the functions defined there. Use these functions only for functionality that is not natively provided by *Tuned*. If a function name starts with an underscore, such as `_wifi_set_power_level`, consider the function private and do not use it in your scripts, because it might change in the future.
+Bash scripts can import the [filename]`/usr/lib/tuned/functions` Bash library and use the functions defined there. Use these functions only for functionality that is not natively provided by *TuneD*. If a function name starts with an underscore, such as `_wifi_set_power_level`, consider the function private and do not use it in your scripts, because it might change in the future.
 +
 Specify the path to the executable using the `script` parameter in the plug-in configuration.
 +
@@ -189,7 +189,7 @@ cmdline=[replaceable]_arg1_ [replaceable]_arg2_ ... [replaceable]_argN_
 --
 .Modifying the kernel command line
 ====
-For example, to add the [option]`quiet` kernel option to a *Tuned* profile, include the following lines in the [filename]`tuned.conf` file:
+For example, to add the [option]`quiet` kernel option to a *TuneD* profile, include the following lines in the [filename]`tuned.conf` file:
 
 ----
 [bootloader]

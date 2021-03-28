@@ -1,17 +1,17 @@
 [id="variables-and-built-in-functions-in-tuned-profiles_{context}"]
-= Variables and built-in functions in Tuned profiles
+= Variables and built-in functions in TuneD profiles
 
-Variables and built-in functions expand at run time when a *Tuned* profile is activated.
+Variables and built-in functions expand at run time when a *TuneD* profile is activated.
 
-Using *Tuned* variables reduces the amount of necessary typing in *Tuned* profiles. You can also:
+Using *TuneD* variables reduces the amount of necessary typing in *TuneD* profiles. You can also:
 
-* Use various built-in functions together with *Tuned* variables
-* Create custom functions in Python and add them to *Tuned* in the form of plug-ins
+* Use various built-in functions together with *TuneD* variables
+* Create custom functions in Python and add them to *TuneD* in the form of plug-ins
 
 [discrete]
 == Variables
 
-There are no predefined variables in *Tuned* profiles. You can define your own variables by creating the `[variables]` section in a profile and using the following syntax:
+There are no predefined variables in *TuneD* profiles. You can define your own variables by creating the `[variables]` section in a profile and using the following syntax:
 
 [subs=+quotes]
 ----

@@ -165,7 +165,7 @@ class Manager(object):
 	# back is needed, e.g. for bootloader plugin we need e.g grub.cfg
 	# tuning to persist across reboots and restarts of the daemon, so in
 	# this case the full_rollback is usually set to False,  but we also
-	# need to clean it all up when Tuned is disabled or the profile is
+	# need to clean it all up when TuneD is disabled or the profile is
 	# changed. In this case the full_rollback is set to True. In practice
 	# it means to remove all temporal or helper files, unpatch third
 	# party config files, etc.

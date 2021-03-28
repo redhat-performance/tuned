@@ -1,7 +1,7 @@
 [id="modifying-existing-tuned-profiles_{context}"]
-= Modifying existing Tuned profiles
+= Modifying existing TuneD profiles
 
-This procedure creates a modified child profile based on an existing *Tuned* profile.
+This procedure creates a modified child profile based on an existing *TuneD* profile.
 
 .Prerequisites
 
@@ -50,7 +50,7 @@ vm.swappiness=5
 # tuned-adm profile [replaceable]_modified-profile_
 ----
 
-. Verify that the *Tuned* profile is active and the system settings are applied:
+. Verify that the *TuneD* profile is active and the system settings are applied:
 +
 [subs=+quotes]
 ----
@@ -63,7 +63,7 @@ Current active profile: [replaceable]_my-profile_
 $ tuned-adm verify
 
 Verfication succeeded, current system settings match the preset profile.
-See tuned log file ('/var/log/tuned/tuned.log') for details.
+See TuneD log file ('/var/log/tuned/tuned.log') for details.
 ----
 
 // .An alternative approach
@@ -73,7 +73,7 @@ See tuned log file ('/var/log/tuned/tuned.log') for details.
 // # cp -r /usr/lib/tuned/throughput-performance /etc/tuned
 // ----
 // 
-// . Then, edit the profile in /etc/tuned according to your needs. Note that if there are two profiles of the same name, the profile located in /etc/tuned/ is loaded. The disadvantage of this approach is that if a system profile is updated after a tuned upgrade, the changes will not be reflected in the now-outdated modified version. 
+// . Then, edit the profile in /etc/tuned according to your needs. Note that if there are two profiles of the same name, the profile located in /etc/tuned/ is loaded. The disadvantage of this approach is that if a system profile is updated after a TuneD upgrade, the changes will not be reflected in the now-outdated modified version. 
 
 .Additional resources
 

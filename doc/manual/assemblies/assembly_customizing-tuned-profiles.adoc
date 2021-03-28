@@ -1,15 +1,15 @@
 :parent-context-of-customizing-tuned-profiles: {context}
 
 [id='customizing-tuned-profiles_{context}']
-= Customizing Tuned profiles
+= Customizing TuneD profiles
 
 :context: customizing-tuned-profiles
 
-You can create or modify *Tuned* profiles to optimize system performance for your intended use case.
+You can create or modify *TuneD* profiles to optimize system performance for your intended use case.
 
 .Prerequisites
 
-* Install and enable *Tuned* as described in xref:installing-and-enabling-tuned_getting-started-with-tuned[].
+* Install and enable *TuneD* as described in xref:installing-and-enabling-tuned_getting-started-with-tuned[].
 
 
 include::modules/performance/con_tuned-profiles.adoc[leveloffset=+1]
@@ -37,6 +37,6 @@ include::modules/performance/proc_setting-the-disk-scheduler-using-tuned.adoc[le
 == Related information
 
 * The `tuned.conf(5)` man page
-* The *Tuned* project website: link:https://tuned-project.org/[]
+* The *TuneD* project website: link:https://tuned-project.org/[]
 
 :context: {parent-context-of-customizing-tuned-profiles}

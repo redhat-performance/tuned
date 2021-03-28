@@ -1,16 +1,16 @@
 [id="tuned-profiles-distributed-with-rhel_{context}"]
-= Tuned profiles distributed with RHEL
+= TuneD profiles distributed with RHEL
 
-The following is a list of profiles that are installed with *Tuned* on {RHEL}.
+The following is a list of profiles that are installed with *TuneD* on {RHEL}.
 
-NOTE: There might be more product-specific or third-party *Tuned* profiles available. Such profiles are usually provided by separate RPM packages.
+NOTE: There might be more product-specific or third-party *TuneD* profiles available. Such profiles are usually provided by separate RPM packages.
 
 
 `balanced`::
-The default power-saving profile. It is intended to be a compromise between performance and power consumption. It uses auto-scaling and auto-tuning whenever possible. The only drawback is the increased latency. In the current *Tuned* release, it enables the CPU, disk, audio, and video plugins, and activates the `conservative` CPU governor. The `radeon_powersave` option uses the `dpm-balanced` value if it is supported, otherwise it is set to `auto`.
+The default power-saving profile. It is intended to be a compromise between performance and power consumption. It uses auto-scaling and auto-tuning whenever possible. The only drawback is the increased latency. In the current *TuneD* release, it enables the CPU, disk, audio, and video plugins, and activates the `conservative` CPU governor. The `radeon_powersave` option uses the `dpm-balanced` value if it is supported, otherwise it is set to `auto`.
 
 `powersave`::
-A profile for maximum power saving performance. It can throttle the performance in order to minimize the actual power consumption. In the current *Tuned* release it enables USB autosuspend, WiFi power saving, and Aggressive Link Power Management (ALPM) power savings for SATA host adapters. It also schedules multi-core power savings for systems with a low wakeup rate and activates the `ondemand` governor. It enables AC97 audio power saving or, depending on your system, HDA-Intel power savings with a 10 seconds timeout. If your system contains a supported Radeon graphics card with enabled KMS, the profile configures it to automatic power saving. On ASUS Eee PCs, a dynamic Super Hybrid Engine is enabled.
+A profile for maximum power saving performance. It can throttle the performance in order to minimize the actual power consumption. In the current *TuneD* release it enables USB autosuspend, WiFi power saving, and Aggressive Link Power Management (ALPM) power savings for SATA host adapters. It also schedules multi-core power savings for systems with a low wakeup rate and activates the `ondemand` governor. It enables AC97 audio power saving or, depending on your system, HDA-Intel power savings with a 10 seconds timeout. If your system contains a supported Radeon graphics card with enabled KMS, the profile configures it to automatic power saving. On ASUS Eee PCs, a dynamic Super Hybrid Engine is enabled.
 +
 [NOTE]
 --

@@ -31,7 +31,7 @@ class DBusController(object):
 				self._proxy = bus.get_object(self._bus_name, self._object_name)
 				self._interface = dbus.Interface(self._proxy, dbus_interface = self._interface_name)
 		except dbus.exceptions.DBusException:
-			raise TunedAdminDBusException("Cannot talk to Tuned daemon via DBus. Is Tuned daemon running?")
+			raise TunedAdminDBusException("Cannot talk to TuneD daemon via DBus. Is TuneD daemon running?")
 
 	def _idle(self):
 		if self._action is not None:
@@ -78,7 +78,7 @@ class DBusController(object):
 			method = self._interface.get_dbus_method(method_name)
 			return method(*args, timeout=40)
 		except dbus.exceptions.DBusException as dbus_exception:
-			err_str = "DBus call to Tuned daemon failed"
+			err_str = "DBus call to TuneD daemon failed"
 			if self._debug:
 				err_str += " (%s)" % str(dbus_exception)
 			raise TunedAdminDBusException(err_str)

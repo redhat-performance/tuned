@@ -1,16 +1,16 @@
 .TH "tuned-main.conf" "5" "15 Oct 2013" "Jaroslav Škarvada" "tuned-main.conf file format description"
 .SH NAME
-tuned\-main.conf - Tuned global configuration file
+tuned\-main.conf - TuneD global configuration file
 .SH SYNOPSIS
 .B /etc/tuned/tuned\-main.conf
 .SH DESCRIPTION
-This man page documents format of the Tuned global configuration file.
+This man page documents format of the TuneD global configuration file.
 The \fItuned\-main.conf\fR file uses the ini\-file format.
 
 
 .TP
 .BI daemon= BOOL
-This defines whether Tuned will use daemon or not. It is boolean value.
+This defines whether TuneD will use daemon or not. It is boolean value.
 It can be \fBTrue\fR or \fB1\fR if the daemon is enabled and
 \fBFalse\fR or \fB0\fR if disabled. It is not recommended to disable
 daemon, because many functions will not work without daemon, e.g.
@@ -28,11 +28,11 @@ to individually disable it in plugins. It is only applicable if
 
 .TP
 .BI sleep_interval= INT
-Tuned daemon is periodically waken after \fIINT\fR seconds and checks
+TuneD daemon is periodically waken after \fIINT\fR seconds and checks
 for events. By default this is set to 1 second. If you have Python 2
 interpreter with applied patch from Red Hat Bugzilla #917709 this
-controls responsiveness time of Tuned to commands (i.e. if you
-request profile switch, it may take up to 1 second until Tuned reacts).
+controls responsiveness time of TuneD to commands (i.e. if you
+request profile switch, it may take up to 1 second until TuneD reacts).
 Increase this number for higher responsiveness times and more power
 savings (due to lower number of wakeups). In case you have unpatched
 Python 2 interpreter, this settings will have no visible effect,
@@ -41,11 +41,11 @@ applicable if \fBdaemon\fR is enabled.
 
 .TP
 .BI update_interval= INT
-Update interval for dynamic tuning (in seconds). Tuned daemon is periodically
+Update interval for dynamic tuning (in seconds). TuneD daemon is periodically
 waken after \fIINT\fR seconds, updates its monitors, calculates new tuning
 parameters for enabled plugins and applies the changes. Plugins that have
 disabled dynamic tuning are not processed. By default the \fIINT\fR is set
-to 10 seconds. Tuned daemon doesn't periodically wake if dynamic tuning is
+to 10 seconds. TuneD daemon doesn't periodically wake if dynamic tuning is
 globally disabled (see \fBdynamic_tuning\fR) or this setting set to 0.
 This must be multiple of \fBsleep_interval\fR. It is only applicable if
 \fBdaemon\fR is enabled.
@@ -55,26 +55,26 @@ This must be multiple of \fBsleep_interval\fR. It is only applicable if
 This controls whether recommend functionality will be enabled or not. It is
 boolean value. It can be \fBTrue\fR or \fB1\fR if the recommend command is
 enabled and \fBFalse\fR or \fB0\fR if disabled. If disabled \fBrecommend\fR
-command will be not available in CLI, tuned will not parse \fIrecommend.conf\fR
+command will be not available in CLI, TuneD will not parse \fIrecommend.conf\fR
 and will return one hardcoded profile (by default \fBbalanced\fR). It is only
 applicable if \fBdaemon\fR is enabled. By default it's set to \fBTrue\fR.
 
 .TP
 .BI reapply_sysctl= BOOL
 This controls whether to reapply sysctl settings from \fI/run/sysctl.d/*.conf\fR,
-\fI/etc/sysctl.d/*.conf\fR and \fI/etc/sysctl.conf\fR after Tuned sysctl
+\fI/etc/sysctl.d/*.conf\fR and \fI/etc/sysctl.conf\fR after TuneD sysctl
 settings are applied. These are locations supported by \fBsysctl --system\fR,
 excluding those that contain sysctl configuration files provided by system packages.
-So if \fBreapply_sysctl\fR is set to \fBTrue\fR or \fB1\fR, Tuned sysctl settings
+So if \fBreapply_sysctl\fR is set to \fBTrue\fR or \fB1\fR, TuneD sysctl settings
 will not override user-provided system sysctl settings. If set to \fBFalse\fR or
-\fB0\fR, Tuned sysctl settings will override system sysctl settings. By default
+\fB0\fR, TuneD sysctl settings will override system sysctl settings. By default
 it's set to \fBTrue\fR.
 
 .TP
 .BI default_instance_priority= INT
 Default instance (unit) priority. By default it's \fB0\fR. Each unit has a
 priority which is by default preset to the \fIINT\fR. It can be overridden
-in the Tuned profile by the \fBpriority\fR option. Tuned units are processed
+in the TuneD profile by the \fBpriority\fR option. TuneD units are processed
 in order defined by their priorities, i.e. unit with the lowest number is
 processed as the first.
 

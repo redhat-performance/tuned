@@ -274,7 +274,7 @@ class Admin(object):
 			print(log_msgs, end = "", file = sys.stderr)
 			sys.stderr.flush()
 		except TunedAdminDBusException as e:
-			self._error("Error: Failed to stop log capture. Restart the Tuned daemon to prevent a memory leak.")
+			self._error("Error: Failed to stop log capture. Restart the TuneD daemon to prevent a memory leak.")
 
 	def _action_dbus_profile(self, profiles):
 		if len(profiles) == 0:
@@ -300,9 +300,9 @@ class Admin(object):
 		print("Trying to (re)start tuned...")
 		(ret, msg) = self._cmd.execute(["service", "tuned", "restart"])
 		if ret == 0:
-			print("Tuned (re)started, changes applied.")
+			print("TuneD (re)started, changes applied.")
 		else:
-			print("Tuned (re)start failed, you need to (re)start tuned by hand for changes to apply.")
+			print("TuneD (re)start failed, you need to (re)start TuneD by hand for changes to apply.")
 
 	def _set_profile(self, profile_name, manual):
 		if profile_name in self._profiles_locator.get_known_names():
@@ -363,12 +363,12 @@ class Admin(object):
 			print("Verfication succeeded, current system settings match the preset profile.")
 		else:
 			print("Verification failed, current system settings differ from the preset profile.")
-			print("You can mostly fix this by restarting the Tuned daemon, e.g.:")
+			print("You can mostly fix this by restarting the TuneD daemon, e.g.:")
 			print("  systemctl restart tuned")
 			print("or")
 			print("  service tuned restart")
 			print("Sometimes (if some plugins like bootloader are used) a reboot may be required.")
-		print("See tuned log file ('%s') for details." % consts.LOG_FILE)
+		print("See TuneD log file ('%s') for details." % consts.LOG_FILE)
 		return self._controller.exit(ret)
 
 	def _action_verify_profile(self, ignore_missing):
@@ -390,7 +390,7 @@ class Admin(object):
 		return False
 
 	def _action_dbus_list(self, list_choice="profiles", verbose=False):
-		"""Print accessible profiles or plugins got from tuned dbus api
+		"""Print accessible profiles or plugins got from TuneD dbus api
 
 		Keyword arguments:
 		list_choice -- argument from command line deciding what will be listed

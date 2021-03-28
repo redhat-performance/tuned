@@ -114,7 +114,7 @@ class BootloaderPlugin(base.Plugin):
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
 		if full_rollback:
-			log.info("removing grub2 tuning previously added by Tuned")
+			log.info("removing grub2 tuning previously added by TuneD")
 			self._remove_grub2_tuning()
 			self._update_grubenv({"tuned_params" : "", "tuned_initrd" : ""})
 
@@ -137,9 +137,9 @@ class BootloaderPlugin(base.Plugin):
 
 		d2 = {"linux" : consts.GRUB2_TUNED_VAR, "initrd" : consts.GRUB2_TUNED_INITRD_VAR}
 		for i in d2:
-			# add tuned parameters to all kernels
+			# add TuneD parameters to all kernels
 			grub2_cfg = re.sub(r"^(\s*" + i + r"(16|efi)?\s+.*)$", r"\1 $" + d2[i], grub2_cfg, flags = re.MULTILINE)
-			# remove tuned parameters from rescue kernels
+			# remove TuneD parameters from rescue kernels
 			grub2_cfg = re.sub(r"^(\s*" + i + r"(?:16|efi)?\s+\S+rescue.*)\$" + d2[i] + r" *(.*)$", r"\1\2", grub2_cfg, flags = re.MULTILINE)
 			# fix whitespaces in rescue kernels
 			grub2_cfg = re.sub(r"^(\s*" + i + r"(?:16|efi)?\s+\S+rescue.*) +$", r"\1", grub2_cfg, flags = re.MULTILINE)

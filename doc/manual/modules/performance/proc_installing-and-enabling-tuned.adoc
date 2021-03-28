@@ -1,7 +1,7 @@
 [id="installing-and-enabling-tuned_{context}"]
-= Installing and enabling Tuned
+= Installing and enabling TuneD
 
-This procedure installs and enables the *Tuned* application, installs *Tuned* profiles, and presets a default *Tuned* profile for your system.
+This procedure installs and enables the *TuneD* application, installs *TuneD* profiles, and presets a default *TuneD* profile for your system.
 
 // .Prerequisites
 // 
@@ -23,13 +23,13 @@ This procedure installs and enables the *Tuned* application, installs *Tuned* pr
 # systemctl enable --now tuned
 ----
 
-. Optionally, install *Tuned* profiles for real-time systems:
+. Optionally, install *TuneD* profiles for real-time systems:
 +
 ----
 # yum install tuned-profiles-realtime tuned-profiles-nfv
 ----
 
-. Verify that a *Tuned* profile is active and applied:
+. Verify that a *TuneD* profile is active and applied:
 +
 [subs=+quotes]
 ----
@@ -42,7 +42,7 @@ Current active profile: [replaceable]_balanced_
 $ tuned-adm verify
 
 Verfication succeeded, current system settings match the preset profile.
-See tuned log file ('/var/log/tuned/tuned.log') for details.
+See TuneD log file ('/var/log/tuned/tuned.log') for details.
 ----
 
 

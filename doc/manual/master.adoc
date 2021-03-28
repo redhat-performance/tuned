@@ -3,10 +3,10 @@
 :keywords: documentation, tuned, performance, power, linux
 :toc:
 
-// The revnumber attribute is intended to show the Tuned version for which the document has been updated
+// The revnumber attribute is intended to show the TuneD version for which the document has been updated
 
 [id="{tuned-documentation}"]
-= Tuned documentation: Optimizing system throughput, latency, and power consumption
+= TuneD documentation: Optimizing system throughput, latency, and power consumption
 
 // Load externally defined attributes
 include::meta/attributes.adoc[]
@@ -19,7 +19,7 @@ include::meta/attributes.adoc[]
 
 // Abstract (Preamble):
 
-This documentation explains how to use the *Tuned* application to monitor and optimize the throughput, latency, and power consumption of your system in different scenarios.
+This documentation explains how to use the *TuneD* application to monitor and optimize the throughput, latency, and power consumption of your system in different scenarios.
 
 // The following is copied from the standard Red Hat legal notice
 // as used in all Red Hat documentation.

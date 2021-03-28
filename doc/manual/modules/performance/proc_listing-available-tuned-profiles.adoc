@@ -1,7 +1,7 @@
 [id="listing-available-tuned-profiles_{context}"]
-= Listing available Tuned profiles
+= Listing available TuneD profiles
 
-This procedure lists all *Tuned* profiles that are currently available on your system.
+This procedure lists all *TuneD* profiles that are currently available on your system.
 
 //No prerequisites are needed
 ////
@@ -12,7 +12,7 @@ This procedure lists all *Tuned* profiles that are currently available on your s
 
 .Procedure
 
-* To list all available *Tuned* profiles on your system, use:
+* To list all available *TuneD* profiles on your system, use:
 +
 [subs="+quotes",options="+nowrap",role=white-space-pre]
 ----

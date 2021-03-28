@@ -94,7 +94,7 @@ rlJournalStart
     rlPhaseStartTest "Check that settings from the post-loaded profile are applied"
         rlRun "tuned-adm profile parent"
         rlRun "echo post > $POST_LOADED_PROFILE"
-        # Restart Tuned so that the post-loaded profile gets applied
+        # Restart TuneD so that the post-loaded profile gets applied
         rlRun "rlServiceStart tuned"
         rlAssertEquals "Check that swappiness is set correctly" \
                        "$(sysctl -n $SWAPPINESS)" 20
@@ -112,7 +112,7 @@ rlJournalStart
         pid=$!
         # Give the wait_for_signal script a chance to connect to the bus
         sleep 1
-        rlRun "kill -HUP '$(< $PID_FILE)'" 0 "Send HUP to Tuned"
+        rlRun "kill -HUP '$(< $PID_FILE)'" 0 "Send HUP to TuneD"
         rlRun "wait $pid"
         rlAssertEquals "Check that swappiness is set correctly" \
                        "$(sysctl -n $SWAPPINESS)" 30
@@ -120,10 +120,10 @@ rlJournalStart
                        "$(sysctl -n $DIRTY_RATIO)" 7
     rlPhaseEnd
 
-    rlPhaseStartTest "Check that 'tuned-adm profile' does not cause Tuned to touch the post-loaded profile"
+    rlPhaseStartTest "Check that 'tuned-adm profile' does not cause TuneD to touch the post-loaded profile"
         rlRun "tuned-adm profile parent"
         rlRun "echo post > $POST_LOADED_PROFILE"
-        # Restart Tuned so that the post-loaded profile gets applied
+        # Restart TuneD so that the post-loaded profile gets applied
         rlRun "rlServiceStart tuned"
         # Change the active profile. After this, the profile 'post' must remain applied.
         rlRun "tuned-adm profile parent2"
@@ -136,7 +136,7 @@ rlJournalStart
     rlPhaseStartTest "Check that settings from the post-loaded profile take precedence"
         rlRun "tuned-adm profile parent"
         rlRun "echo conflicting > $POST_LOADED_PROFILE"
-        # Restart Tuned so that the post-loaded profile gets applied
+        # Restart TuneD so that the post-loaded profile gets applied
         rlRun "rlServiceStart tuned"
         rlAssertEquals "Check that swappiness is set correctly" \
                        "$(sysctl -n $SWAPPINESS)" 10
@@ -145,15 +145,15 @@ rlJournalStart
     rlPhaseStartTest "Check that conflicts in the post-loaded profile do not cause verification to fail"
         rlRun "tuned-adm profile parent"
         rlRun "echo conflicting > $POST_LOADED_PROFILE"
-        # Restart Tuned so that the post-loaded profile gets applied
+        # Restart TuneD so that the post-loaded profile gets applied
         rlRun "rlServiceStart tuned"
         rlRun "tuned-adm verify"
     rlPhaseEnd
 
-    rlPhaseStartTest "Check that 'tuned-adm off' causes Tuned to clear the post-loaded profile"
+    rlPhaseStartTest "Check that 'tuned-adm off' causes TuneD to clear the post-loaded profile"
         rlRun "tuned-adm profile parent"
         rlRun "echo post > $POST_LOADED_PROFILE"
-        # Restart Tuned so that the post-loaded profile gets applied
+        # Restart TuneD so that the post-loaded profile gets applied
         rlRun "rlServiceStart tuned"
         rlRun "tuned-adm off"
         rlAssertEquals "Check the output of tuned-adm active" \
@@ -169,7 +169,7 @@ rlJournalStart
         rlRun "> $ACTIVE_PROFILE"
         rlRun "echo manual > $PROFILE_MODE"
         rlRun "echo post > $POST_LOADED_PROFILE"
-        # Restart Tuned so that the post-loaded profile gets applied
+        # Restart TuneD so that the post-loaded profile gets applied
         rlRun "rlServiceStart tuned"
         rlAssertEquals "Check the output of tuned-adm active" \
                        "$(tuned-adm active)" \
@@ -181,7 +181,7 @@ rlJournalStart
     rlPhaseStartTest "Check that the post-loaded profile is listed among active profiles by 'tuned-adm active'"
         rlRun "tuned-adm profile parent"
         rlRun "echo post > $POST_LOADED_PROFILE"
-        # Restart Tuned so that the post-loaded profile gets applied
+        # Restart TuneD so that the post-loaded profile gets applied
         rlRun "rlServiceStart tuned"
         rlAssertEquals "Check the output of tuned-adm active" \
                        "$(tuned-adm active | grep 'Current active profile')" \
@@ -201,8 +201,8 @@ rlJournalStart
         rlAssertEquals "Check the output of tuned-adm active" \
                        "$(tuned-adm active | grep 'Current active profile')" \
                        "Current active profile: parent post"
-        rlRun "kill '$(< $PID_FILE)'" 0 "Kill Tuned"
-        rlRun "wait_for_tuned_stop 15" 0 "Wait for Tuned to exit"
+        rlRun "kill '$(< $PID_FILE)'" 0 "Kill TuneD"
+        rlRun "wait_for_tuned_stop 15" 0 "Wait for TuneD to exit"
     rlPhaseEnd
 
     rlPhaseStartTest "Check that the DBus signal 'profile_changed' contains only the active_profile"
@@ -228,7 +228,7 @@ rlJournalStart
                        "parent"
     rlPhaseEnd
 
-    rlPhaseStartTest "Check that 'tuned-adm profile' does not cause Tuned to reload the post-loaded profile name from disk"
+    rlPhaseStartTest "Check that 'tuned-adm profile' does not cause TuneD to reload the post-loaded profile name from disk"
         rlRun "tuned-adm profile parent"
         rlRun "echo post > $POST_LOADED_PROFILE"
         rlRun "rlServiceStart tuned"
@@ -258,7 +258,7 @@ rlJournalStart
     rlPhaseStartTest "Check that variables are shared among the active_profile and the post-loaded profile"
         rlRun "tuned-adm profile parent-vars"
         rlRun "echo post-vars > $POST_LOADED_PROFILE"
-        # Restart Tuned so that the post-loaded profile gets applied
+        # Restart TuneD so that the post-loaded profile gets applied
         rlRun "rlServiceStart tuned"
         rlAssertEquals "Check that swappiness is set correctly" \
                        "$(sysctl -n $SWAPPINESS)" 12

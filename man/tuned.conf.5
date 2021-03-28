@@ -1,8 +1,8 @@
 .TH "tuned.conf" "5" "13 Mar 2012" "Jan Kaluža" "tuned.conf file format description"
 .SH NAME
-tuned.conf - Tuned profile definition
+tuned.conf - TuneD profile definition
 .SH DESCRIPTION
-This man page documents format of Tuned 2.0 profile definition files.
+This man page documents format of TuneD 2.0 profile definition files.
 The profile definition is stored in /etc/tuned/<profile_name>/tuned.conf or in
 /usr/lib/tuned/<profile_name>/tuned.conf file where the /etc/tuned/ directory has 
 higher priority.
@@ -32,7 +32,7 @@ type=
 Plugin type. Currently there are following upstream plugins: audio, bootloader, cpu, disk,
 eeepc_she, modules, mounts, net, script, scsi_host, selinux, scheduler, sysctl,
 sysfs, systemd, usb, video, vm. This list may be incomplete. If you installed
-tuned through RPM you can list upstream plugins by the following command:
+TuneD through RPM you can list upstream plugins by the following command:
 .B rpm -ql tuned | grep 'plugins/plugin_.*.py$'
 Check the plugins directory returned by this command to see all plugins (e.g. plugins
 provided by 3rd party packages).

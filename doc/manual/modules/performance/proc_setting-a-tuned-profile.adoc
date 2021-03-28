@@ -1,7 +1,7 @@
 [id="setting-a-tuned-profile_{context}"]
-= Setting a Tuned profile
+= Setting a TuneD profile
 
-This procedure activates a selected *Tuned* profile on your system.
+This procedure activates a selected *TuneD* profile on your system.
 
 .Prerequisites
 
@@ -9,7 +9,7 @@ This procedure activates a selected *Tuned* profile on your system.
 
 .Procedure
 
-. Optionally, you can let *Tuned* recommend the most suitable profile for your system:
+. Optionally, you can let *TuneD* recommend the most suitable profile for your system:
 +
 [subs=+quotes]
 ----
@@ -41,7 +41,7 @@ The following example optimizes the system to run in a virtual machine with the 
 ----
 ====
 
-. View the current active *Tuned* profile on your system:
+. View the current active *TuneD* profile on your system:
 +
 [subs=+quotes]
 ----
@@ -58,13 +58,13 @@ Current active profile: [replaceable]_selected-profile_
 
 .Verification steps
 
-* Verify that the *Tuned* profile is active and applied:
+* Verify that the *TuneD* profile is active and applied:
 +
 ----
 $ tuned-adm verify
 
 Verfication succeeded, current system settings match the preset profile.
-See tuned log file ('/var/log/tuned/tuned.log') for details.
+See TuneD log file ('/var/log/tuned/tuned.log') for details.
 ----
 
 

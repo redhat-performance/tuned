@@ -86,7 +86,7 @@ def get():
 		assert False
 
 class TunedLogger(logging.getLoggerClass()):
-	"""Custom tuned daemon logger class."""
+	"""Custom TuneD daemon logger class."""
 	_formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(name)s: %(message)s")
 	_console_handler = None
 	_file_handler = None
