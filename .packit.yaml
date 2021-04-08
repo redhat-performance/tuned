@@ -5,7 +5,7 @@ jobs:
     targets:
     - fedora-all
     - epel-8-x86_64
-    - centos-stream-x86_64
+    - centos-stream-8-x86_64
   trigger: pull_request
 - job: tests
   trigger: pull_request
@@ -13,7 +13,7 @@ jobs:
     targets:
     - fedora-all
     - epel-8-x86_64
-    - centos-stream-x86_64
+    - centos-stream-8-x86_64
 specfile_path: tuned.spec
 synced_files:
 - tuned.spec
