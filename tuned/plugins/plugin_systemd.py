@@ -12,9 +12,25 @@ log = tuned.logs.get()
 
 class SystemdPlugin(base.Plugin):
 	"""
-	Plugin for tuning systemd options.
-
-	These tunings are unloaded only on profile change followed by reboot.
+	`systemd`::
+	
+	Plug-in for tuning systemd options.
+	+
+	The [option]`cpu_affinity` option allows setting CPUAffinity in
+	`/etc/systemd/system.conf`. This configures the CPU affinity for the
+	service manager as well as the default CPU affinity for all forked
+	off processes. The option takes a comma-separated list of CPUs with
+	optional CPU ranges specified by the minus sign (`-`).
+	+
+	.Set the CPUAffinity for `systemd` to `0 1 2 3`
+	====
+	----
+	[systemd]
+	cpu_affinity=0-3
+	----
+	====
+	+
+	NOTE: These tunings are unloaded only on profile change followed by a reboot.
 	"""
 
 	def __init__(self, *args, **kwargs):
