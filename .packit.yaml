@@ -1,21 +1,19 @@
-downstream_package_name: tuned
 jobs:
 - job: copr_build
+  trigger: pull_request
   metadata:
     targets:
     - fedora-all
     - epel-8-x86_64
-    - centos-stream-x86_64
-  trigger: pull_request
+    - centos-stream-8-x86_64
 - job: tests
   trigger: pull_request
   metadata:
     targets:
     - fedora-all
     - epel-8-x86_64
-    - centos-stream-x86_64
-specfile_path: tuned.spec
+    - centos-stream-8-x86_64
+
 synced_files:
 - tuned.spec
 - .packit.yaml
-upstream_package_name: tuned
