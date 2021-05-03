@@ -17,12 +17,11 @@ stop() {
 verify() {
     # set via /etc/modprobe.d/kvm.conf and /etc/modprobe.d/kvm.rt.tuned.conf
     if [ -f /sys/module/kvm/parameters/kvmclock_periodic_sync ]; then
-        test "$(cat /sys/module/kvm/parameters/kvmclock_periodic_sync)" = "Y"
-        retval=$?
-        if [ $retval -eq 0 ]; then
-            echo "  kvmclock_periodic_sync:(Y): enabled: expected N"
+        kps=$(cat /sys/module/kvm/parameters/kvmclock_periodic_sync)
+        if [ "$kps" != "N" -a "$kps" != "0" ]; then
+            echo "  kvmclock_periodic_sync:($kps): enabled: expected N(0)"
         else
-            echo "  kvmclock_periodic_sync:(N): disabled: okay"
+            echo "  kvmclock_periodic_sync:($kps): disabled: okay"
         fi
     fi
     if [ -f /sys/module/kvm_intel/parameters/ple_gap ]; then
