@@ -416,12 +416,14 @@ class NetTuningPlugin(base.Plugin):
 		if start:
 			params_current = self._get_device_parameters(context,
 					device)
+			if params_current is None or len(params_current) == 0:
+				return False
 			params_set = self._set_device_parameters(context,
 					value, device, verify,
 					dev_params = params_current)
 			# if none of parameters passed checks then the command completely
 			# failed
-			if len(params_set) == 0:
+			if params_set is None or len(params_set) == 0:
 				return False
 			relevant_params_current = [(param, value) for param, value
 					in params_current.items()
