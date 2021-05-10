@@ -3,11 +3,13 @@ import os.path
 from . import base
 from .decorators import *
 import tuned.logs
+from tuned.verifylog import VerifyLog
 from subprocess import *
 from tuned.utils.commands import commands
 import tuned.consts as consts
 
 log = tuned.logs.get()
+vlog = VerifyLog.get_obj()
 
 class ModulesPlugin(base.Plugin):
 	"""
@@ -85,9 +87,14 @@ class ModulesPlugin(base.Plugin):
 			mpath = "/sys/module/%s" % module
 			if not os.path.exists(mpath):
 				ret = False
-				log.error(consts.STR_VERIFY_PROFILE_FAIL % "module '%s' is not loaded" % module)
+				emsg = consts.STR_VERIFY_PROFILE_FAIL % "module '%s' is not loaded" % module
+				log.error(emsg)
+				vlog.add_log(instance.name, {module: {"message": emsg, "result": ret}})
 			else:
-				log.info(consts.STR_VERIFY_PROFILE_OK % "module '%s' is loaded" % module)
+				ret = True
+				imsg = consts.STR_VERIFY_PROFILE_OK % "module '%s' is loaded" % module
+				log.info(imsg)
+				vlog.add_log(instance.name, {module: {"message": imsg, "result": ret}})
 				l = r.split(v)
 				for item in l:
 					arg = item.split("=")

@@ -4,10 +4,12 @@ import re
 import os.path
 from .decorators import *
 import tuned.logs
+from tuned.verifylog import VerifyLog
 from subprocess import *
 from tuned.utils.commands import commands
 
 log = tuned.logs.get()
+vlog = VerifyLog.get_obj()
 
 class SysfsPlugin(base.Plugin):
 	"""
@@ -50,6 +52,7 @@ class SysfsPlugin(base.Plugin):
 					curr_val = self._read_sysfs(f)
 					if self._verify_value(f, v, curr_val, ignore_missing) == False:
 						ret = False
+					vlog.add_log(instance.name, {key: {"value": curr_val, "expected": value, "result": ret}})
 		return ret
 
 	def _instance_unapply_static(self, instance, full_rollback = False):

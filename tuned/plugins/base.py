@@ -2,12 +2,14 @@ import re
 import tuned.consts as consts
 import tuned.profiles.variables
 import tuned.logs
+from tuned.verifylog import VerifyLog
 import collections
 from tuned.utils.commands import commands
 import os
 from subprocess import Popen, PIPE
 
 log = tuned.logs.get()
+vlog = VerifyLog.get_obj()
 
 class Plugin(object):
 	"""
@@ -447,6 +449,14 @@ class Plugin(object):
 			if new_value is not None:
 				if self._verify_non_device_command(instance, command, new_value, ignore_missing) == False:
 					ret = False
+			cv = None
+			if ("get" in command.keys()):
+				cv = command["get"]()
+			log = {command["name"]: {"value": cv,
+						"expected": new_value,
+						"result": (cv == new_value)}}
+			vlog.add_log(instance.name, log)
+
 		return ret
 
 	def _verify_all_device_commands(self, instance, devices, ignore_missing):
@@ -455,9 +465,17 @@ class Plugin(object):
 			new_value = instance.options.get(command["name"], None)
 			if new_value is None:
 				continue
+			dvs = []
 			for device in devices:
 				if self._verify_device_command(instance, command, device, new_value, ignore_missing) == False:
 					ret = False
+					vlu = command['get'](device)
+					dvs.append({device:
+                                            {"value": vlu, "result": ret}})
+
+			log = {command["name"]:
+                                {"value": new_value, "devices": dvs}}
+			vlog.add_log(instance.name, log)
 		return ret
 
 	def _process_assignment_modifiers(self, new_value, current_value):

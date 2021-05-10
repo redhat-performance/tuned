@@ -2,6 +2,7 @@ import re
 from . import base
 from .decorators import *
 import tuned.logs
+from tuned.verifylog import VerifyLog
 from subprocess import *
 from tuned.utils.commands import commands
 import tuned.consts as consts
@@ -9,6 +10,7 @@ import errno
 import os
 
 log = tuned.logs.get()
+vlog = VerifyLog.get_obj()
 
 DEPRECATED_SYSCTL_OPTIONS = [ "base_reachable_time", "retrans_time" ]
 SYSCTL_CONFIG_DIRS = [ "/run/sysctl.d",
@@ -76,6 +78,7 @@ class SysctlPlugin(base.Plugin):
 			if value is not None:
 				if self._verify_value(option, self._cmd.remove_ws(value), self._cmd.remove_ws(curr_val), ignore_missing) == False:
 					ret = False
+			vlog.add_log(instance.name, {option: {"value": curr_val, "expected": value, "result": (curr_val == value)}})
 		return ret
 
 	def _instance_unapply_static(self, instance, full_rollback = False):

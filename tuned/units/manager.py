@@ -4,12 +4,14 @@ import re
 import traceback
 import tuned.exceptions
 import tuned.logs
+from tuned.verifylog import VerifyLog
 import tuned.plugins.exceptions
 import tuned.consts as consts
 from tuned.utils.global_config import GlobalConfig
 from tuned.utils.commands import commands
 
 log = tuned.logs.get()
+vlog = VerifyLog.get_obj()
 
 __all__ = ["Manager"]
 
@@ -154,7 +156,7 @@ class Manager(object):
 					instance.verify_tuning, ignore_missing)
 			if res == False:
 				ret = False
-		return ret
+		return ret, vlog.put_log()
 
 	def update_tuning(self):
 		for instance in self._instances:
