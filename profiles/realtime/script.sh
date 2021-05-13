@@ -11,8 +11,12 @@ stop() {
 }
 
 verify() {
-    tuna -c "$TUNED_isolated_cores" -P
-    return "$?"
+    retval=0
+    if [ "$TUNED_isolated_cores" ]; then
+        tuna -c "$TUNED_isolated_cores" -P > /dev/null 2>&1
+        retval=$?
+    fi
+    return $retval
 }
 
 process $@

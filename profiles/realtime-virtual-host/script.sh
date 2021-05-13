@@ -2,36 +2,39 @@
 
 . /usr/lib/tuned/functions
 
-KTIMER_LOCKLESS_FILE=/sys/kernel/ktimer_lockless_check
-
 start() {
     setup_kvm_mod_low_latency
-
-    disable_ksm
-
-    if [ -f $KTIMER_LOCKLESS_FILE ]; then
-        echo 1 > $KTIMER_LOCKLESS_FILE
-    fi
-
     return 0
 }
 
 stop() {
     if [ "$1" = "full_rollback" ]; then
         teardown_kvm_mod_low_latency
-        enable_ksm
     fi
     return "$?"
 }
 
 verify() {
+    retval=0
+
+    # set via /etc/modprobe.d/kvm.conf and /etc/modprobe.d/kvm.rt.tuned.conf
     if [ -f /sys/module/kvm/parameters/kvmclock_periodic_sync ]; then
-        test "$(cat /sys/module/kvm/parameters/kvmclock_periodic_sync)" = 0
-        retval=$?
+        kps=$(cat /sys/module/kvm/parameters/kvmclock_periodic_sync)
+        if [ "$kps" = "N" -o "$kps" = "0" ]; then
+            echo "  kvmclock_periodic_sync:($kps): disabled: okay"
+        else
+            echo "  kvmclock_periodic_sync:($kps): enabled: expected N(0)"
+            retval=1
+        fi
     fi
-    if [ $retval -eq 0 -a -f /sys/module/kvm_intel/parameters/ple_gap ]; then
-        test "$(cat /sys/module/kvm_intel/parameters/ple_gap)" = 0
-        retval=$?
+    if [ -f /sys/module/kvm_intel/parameters/ple_gap ]; then
+        ple_gap=$(cat /sys/module/kvm_intel/parameters/ple_gap)
+        if [ $ple_gap -eq 0 ]; then
+            echo "  ple_gap:($ple_gap): disabled: okay"
+        else
+            echo "  ple_gap:($ple_gap): enabled: expected 0"
+            retval=1
+        fi
     fi
     return $retval
 }
