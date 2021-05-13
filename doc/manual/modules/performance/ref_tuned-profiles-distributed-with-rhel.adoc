@@ -24,20 +24,36 @@ That is why the `balanced` profile can be generally a better option.
 `throughput-performance`::
 A server profile optimized for high throughput. It disables power savings mechanisms and enables `sysctl` settings that improve the throughput performance of the disk and network IO. CPU governor is set to `performance`.
 
+`accelerator-performance`::
+The `accelerator-performance` profile contains the same tuning as the `throughput-performance` profile. Additionally, it locks the CPU to low C states so that the latency is less than 100us. This improves the performance of certain accelerators, such as GPUs.
+
 `latency-performance`::
 A server profile optimized for low latency. It disables power savings mechanisms and enables `sysctl` settings that improve latency. CPU governor is set to `performance` and the CPU is locked to the low C states (by PM QoS).
++
+It changes the `energy_performance_preference` and `scaling_governor` attribute to the `performance` profile.
 
 `network-latency`::
 A profile for low latency network tuning. It is based on the `latency-performance` profile. It additionally disables transparent huge pages and NUMA balancing, and tunes several other network-related `sysctl` parameters.
++
+It inherits the `latency-performance` profile which changes the `energy_performance_preference` and `scaling_governor` attribute to the `performance` profile.
+
+`hpc-compute`::
+A profile optimized for high-performance computing. It is based on the `latency-performance` profile.
 
 `network-throughput`::
 A profile for throughput network tuning. It is based on the `throughput-performance` profile. It additionally increases kernel network buffers.
++
+It inherits either the `latency-performance` or `throughput-performance` profile, and changes the `energy_performance_preference` and `scaling_governor` attribute to the `performance` profile.
 
 `virtual-guest`::
 A profile designed for virtual guests based on the `throughput-performance` profile that, among other tasks, decreases virtual memory swappiness and increases disk readahead values. It does not disable disk barriers.
++
+It inherits the `throughput-performance` profile and changes the `energy_performance_preference` and `scaling_governor` attribute to the `performance` profile.
 
 `virtual-host`::
 A profile designed for virtual hosts based on the `throughput-performance` profile that, among other tasks, decreases virtual memory swappiness, increases disk readahead values, and enables a more aggressive value of dirty pages writeback.
++
+It inherits the `throughput-performance` profile and changes the `energy_performance_preference` and `scaling_governor` attribute to the `performance` profile.
 
 `oracle`::
 A profile optimized for Oracle databases loads based on `throughput-performance` profile. It additionally disables transparent huge pages and modifies other performance-related kernel parameters. This profile is provided by the [package]`tuned-profiles-oracle` package.
@@ -60,8 +76,30 @@ You can configure the `cpu-partitioning` profile in `/etc/tuned/cpu-partitioning
 +
 For more information on `cpu-partitioning`, see the `tuned-profiles-cpu-partitioning(7)` man page.
 
+`optimize-serial-console`::
+A profile that tunes down I/O activity to the serial console by reducing the
+printk value. This should make the serial console more responsive.
+This profile is intended to be used as an overlay on other
+profiles. For example:
++
+[subs=+quotes]
+----
+# tuned-adm profile throughput-performance optimize-serial-console
+----
+
+`mssql`::
+A profile provided for Microsoft SQL Server. It is based on the `thoguhput-performance` profile.
+
 `postgresql`::
 A profile optimized for PostgreSQL databases loads based on `throughput-performance` profile. It additionally disables transparent huge pages and modifies other performance-related kernel parameters. This profile is provided by the [package]`tuned-profiles-postgresql` package.
+
+`intel-sst`::
+A profile optimized for systems with user-defined Intel Speed Select Technology configurations. This profile is intended to be used as an overlay on other profiles. For example:
++
+[subs=+quotes]
+----
+# tuned-adm profile cpu-partitioning intel-sst
+----
 
 [discrete]
 == Real-time profiles
@@ -84,4 +122,3 @@ Provided by the [package]`tuned-profiles-nfv-host` package, which is available f
 Use in a virtualization guest configured for real-time.
 +
 Provided by the [package]`tuned-profiles-nfv-guest` package, which is available from the NFV repository.
-
