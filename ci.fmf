@@ -1,4 +1,4 @@
 discover:
     how: fmf
 execute:
-    how: beakerlib
+    how: tmt

@@ -10,3 +10,4 @@ require:
 - tuned
 duration: 5m
 extra-task: /CoreOS/tuned/Regression/bz1798183-RFE-support-post-loaded-profile
+framework: beakerlib

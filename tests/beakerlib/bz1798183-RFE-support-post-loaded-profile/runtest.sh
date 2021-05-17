@@ -173,7 +173,7 @@ rlJournalStart
         rlRun "rlServiceStart tuned"
         rlAssertEquals "Check the output of tuned-adm active" \
                        "$(tuned-adm active)" \
-                       "Current active profile: post"
+                       "Current active profile: post"$'\n'"Current post-loaded profile: post"
         rlAssertEquals "Check that dirty ratio is set correctly" \
                        "$(sysctl -n $DIRTY_RATIO)" 8
     rlPhaseEnd

@@ -7,3 +7,4 @@ duration: 5m
 relevancy: |
     distro = rhel-4, rhel-5: False
 summary: Test for BZ#1416712 (Tuned logs error message if)
+framework: beakerlib
