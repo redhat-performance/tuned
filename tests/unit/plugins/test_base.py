@@ -160,6 +160,15 @@ class PluginBaseTestCase(unittest.TestCase):
 		self.assertEqual(self._plugin._verify_value(\
 			'test_value','0x1a','0x1b',False),False)
 
+	def test_device_module_name(self):
+		device1 = DummyDevice('device1', {'name': 'device1', 'driver': 'test', 'parent': None})
+		device2 = DummyDevice('device2', {'name': 'device2', 'parent': device1, 'driver': None})
+		device3 = DummyDevice('device2', {'name': 'device2', 'parent': device2})
+
+		self.assertIsNone(self._plugin._device_module_name(device1))
+		self.assertEqual(self._plugin._device_module_name(device2), 'test')
+		self.assertIsNone(self._plugin._device_module_name(device3))
+
 	@classmethod
 	def tearDownClass(cls):
 		temp_storage_file.close()
@@ -199,6 +208,9 @@ class DummyDevice(Mapping):
 
 	def __iter__(self):
 		return self.dictionary.__iter__()
+
+	def __getattr__(self, prop):
+		return self.dictionary.__getitem__(prop)
 
 class CommandsPlugin(Plugin):
 	def __init__(self,*args,**kwargs):

@@ -157,18 +157,24 @@ Sets various powersave levels on video cards. Currently, only the Radeon cards a
 The powersave level can be specified by using the [option]`radeon_powersave` option. Supported values are: 
 +
 --
-* `default`
-* `auto`
-* `low`
-* `mid`
-* `high`
-* `dynpm`
-* `dpm-battery`
-* `dpm-balanced`
-* `dpm-perfomance`
+* For older models with radeon drm
+** `default`
+** `auto`
+** `low`
+** `mid`
+** `high`
+** `dynpm`
+** `dpm-battery`
+** `dpm-balanced`
+** `dpm-perfomance`
+
+* For newer models with amdgpu drm
+** `level-auto`
+** `level-low`
+** `level-high`
 --
 +
-For details, see link:http://www.x.org/wiki/RadeonFeature#KMS_Power_Management_Options[www.x.org]. Note that this plug-in is experimental and the option might change in future releases. 
+For details, see link:http://www.x.org/wiki/RadeonFeature#KMS_Power_Management_Options[www.x.org] for radeon drm or link:https://www.kernel.org/doc/html/latest/gpu/amdgpu.html#gpu-sysfs-power-state-interfaces[www.kernel.org] for amdgpu drm. Note that this plug-in is experimental and the option might change in future releases.
 
 `bootloader`::
 Adds options to the kernel command line. This plug-in supports only the GRUB 2 boot loader.

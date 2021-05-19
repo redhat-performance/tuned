@@ -72,6 +72,12 @@ class Plugin(object):
 		"""List of config options used by dynamic tuning. Their previous values will be automatically saved and restored."""
 		return []
 
+	@classmethod
+	def _device_module_name(self, device):
+		if device.parent:
+			return device.parent.driver
+		return None
+
 	def _get_effective_options(self, options):
 		"""Merge provided options with plugin default options."""
 		# TODO: _has_dynamic_options is a hack
