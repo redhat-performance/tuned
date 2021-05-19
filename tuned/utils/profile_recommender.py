@@ -91,11 +91,8 @@ class ProfileRecommender:
 					elif option == "chassis_type":
 						chassis_type = self._get_chassis_type()
 
-						if chassis_type:
-							if not re.match(value, chassis_type, re.IGNORECASE):
-								match = False
-						else:
-							log.debug("Ignoring 'chassis_type' in '%s', could not read DMI value." % fname)
+						if not re.match(value, chassis_type, re.IGNORECASE):
+							match = False
 					elif option == "syspurpose_role":
 						if have_syspurpose:
 							s = syspurpose.files.SyspurposeStore(
