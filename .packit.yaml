@@ -1,3 +1,4 @@
+upstream_tag_template: v{version}
 jobs:
 - job: copr_build
   trigger: pull_request
