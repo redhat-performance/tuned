@@ -1,9 +1,9 @@
 [id="tuned-profiles_{context}"]
-= Tuned profiles
+= TuneD profiles
 
-A detailed analysis of a system can be very time-consuming. *Tuned* provides a number of predefined profiles for typical use cases. You can also create, modify, and delete profiles.
+A detailed analysis of a system can be very time-consuming. *TuneD* provides a number of predefined profiles for typical use cases. You can also create, modify, and delete profiles.
 
-The profiles provided with *Tuned* are divided into the following categories:
+The profiles provided with *TuneD* are divided into the following categories:
 
 * Power-saving profiles
 * Performance-boosting profiles
@@ -32,7 +32,7 @@ During the installation, the best profile for your system is selected automatica
 [discrete]
 == Merged profiles
 
-As an experimental feature, it is possible to select more profiles at once. *Tuned* will try to merge them during the load.
+As an experimental feature, it is possible to select more profiles at once. *TuneD* will try to merge them during the load.
 
 If there are conflicts, the settings from the last specified profile takes precedence.
 
@@ -50,7 +50,7 @@ WARNING: Merging is done automatically without checking whether the resulting co
 [discrete]
 == The location of profiles
 
-*Tuned* stores profiles in the following directories:
+*TuneD* stores profiles in the following directories:
 
 [filename]`/usr/lib/tuned/`::
 Distribution-specific profiles are stored in the  directory. Each profile has its own directory. The profile consists of the main configuration file called `tuned.conf`, and optionally other files, for example helper scripts.

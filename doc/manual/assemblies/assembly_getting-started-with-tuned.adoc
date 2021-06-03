@@ -1,11 +1,11 @@
 :parent-context-of-getting-started-with-tuned: {context}
 
 [id='getting-started-with-tuned_{context}']
-= Getting started with Tuned
+= Getting started with TuneD
 
 :context: getting-started-with-tuned
 
-As a system administrator, you can use the *Tuned* application to optimize the performance profile of your system for a variety of use cases.
+As a system administrator, you can use the *TuneD* application to optimize the performance profile of your system for a variety of use cases.
 
 // .Prerequisites
 // 
@@ -38,6 +38,6 @@ include::modules/performance/proc_disabling-tuned.adoc[leveloffset=+1]
 
 * The `tuned(8)` man page
 * The `tuned-adm(8)` man page
-* The *Tuned* project website: link:https://tuned-project.org/[]
+* The *TuneD* project website: link:https://tuned-project.org/[]
 
 :context: {parent-context-of-getting-started-with-tuned}

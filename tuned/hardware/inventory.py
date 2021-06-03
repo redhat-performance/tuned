@@ -29,7 +29,7 @@ class Inventory(object):
 				self._udev_monitor.set_receive_buffer_size(buffer_size)
 			except EnvironmentError:
 				log.warn("cannot set udev monitor receive buffer size, we are probably running inside " +
-					 "container or with limited capabilites, Tuned functionality may be limited")
+					 "container or with limited capabilites, TuneD functionality may be limited")
 
 		if monitor_observer_factory is None:
 			monitor_observer_factory = _MonitorObserverFactory()

@@ -3,7 +3,7 @@
 "http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
 <policyconfig>
 
-  <vendor>Tuned</vendor>
+  <vendor>TuneD</vendor>
   <vendor_url>https://fedorahosted.org/tuned/</vendor_url>
   <icon_name>tuned</icon_name>
 
@@ -38,8 +38,8 @@
   </action>
 
   <action id="com.redhat.tuned.disable">
-    <description>Disable Tuned</description>
-    <message>Authentication is required to disable Tuned</message>
+    <description>Disable TuneD</description>
+    <message>Authentication is required to disable TuneD</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -48,8 +48,8 @@
   </action>
 
   <action id="com.redhat.tuned.is_running">
-    <description>Check whether Tuned is running</description>
-    <message>Authentication is required to check whether Tuned is running</message>
+    <description>Check whether TuneD is running</description>
+    <message>Authentication is required to check whether TuneD is running</message>
     <defaults>
       <allow_any>yes</allow_any>
       <allow_inactive>yes</allow_inactive>
@@ -58,8 +58,8 @@
   </action>
 
   <action id="com.redhat.tuned.profile_info">
-    <description>Show information about Tuned profile</description>
-    <message>Authentication is required to show information about Tuned profile</message>
+    <description>Show information about TuneD profile</description>
+    <message>Authentication is required to show information about TuneD profile</message>
     <defaults>
       <allow_any>yes</allow_any>
       <allow_inactive>yes</allow_inactive>
@@ -68,8 +68,8 @@
   </action>
 
   <action id="com.redhat.tuned.profiles">
-    <description>List Tuned profiles</description>
-    <message>Authentication is required to list Tuned profiles</message>
+    <description>List TuneD profiles</description>
+    <message>Authentication is required to list TuneD profiles</message>
     <defaults>
       <allow_any>yes</allow_any>
       <allow_inactive>yes</allow_inactive>
@@ -78,8 +78,8 @@
   </action>
 
   <action id="com.redhat.tuned.profiles2">
-    <description>List Tuned profiles</description>
-    <message>Authentication is required to list Tuned profiles</message>
+    <description>List TuneD profiles</description>
+    <message>Authentication is required to list TuneD profiles</message>
     <defaults>
       <allow_any>yes</allow_any>
       <allow_inactive>yes</allow_inactive>
@@ -88,7 +88,7 @@
   </action>
 
   <action id="com.redhat.tuned.recommend_profile">
-    <description>Show Tuned profile name which is recommended for your system</description>
+    <description>Show TuneD profile name which is recommended for your system</description>
     <message>Authentication is required to show recommended profile name</message>
     <defaults>
       <allow_any>yes</allow_any>
@@ -98,8 +98,8 @@
   </action>
 
   <action id="com.redhat.tuned.reload">
-    <description>Reload Tuned configuration</description>
-    <message>Authentication is required to reload Tuned configuration</message>
+    <description>Reload TuneD configuration</description>
+    <message>Authentication is required to reload TuneD configuration</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -108,8 +108,8 @@
   </action>
 
   <action id="com.redhat.tuned.start">
-    <description>Start Tuned daemon</description>
-    <message>Authentication is required to start Tuned daemon</message>
+    <description>Start TuneD daemon</description>
+    <message>Authentication is required to start TuneD daemon</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -118,8 +118,8 @@
   </action>
 
   <action id="com.redhat.tuned.stop">
-    <description>Stop Tuned daemon</description>
-    <message>Authentication is required to stop Tuned daemon</message>
+    <description>Stop TuneD daemon</description>
+    <message>Authentication is required to stop TuneD daemon</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -128,8 +128,8 @@
   </action>
 
   <action id="com.redhat.tuned.switch_profile">
-    <description>Switch Tuned profile</description>
-    <message>Authentication is required to switch Tuned profile</message>
+    <description>Switch TuneD profile</description>
+    <message>Authentication is required to switch TuneD profile</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -168,8 +168,8 @@
   </action>
 
   <action id="com.redhat.tuned.verify_profile">
-    <description>Verify Tuned profile</description>
-    <message>Authentication is required to verify Tuned profile</message>
+    <description>Verify TuneD profile</description>
+    <message>Authentication is required to verify TuneD profile</message>
     <defaults>
       <allow_any>yes</allow_any>
       <allow_inactive>yes</allow_inactive>
@@ -178,8 +178,8 @@
   </action>
 
   <action id="com.redhat.tuned.verify_profile_ignore_missing">
-    <description>Verify Tuned profile, ignore missing values</description>
-    <message>Authentication is required to verify Tuned profile</message>
+    <description>Verify TuneD profile, ignore missing values</description>
+    <message>Authentication is required to verify TuneD profile</message>
     <defaults>
       <allow_any>yes</allow_any>
       <allow_inactive>yes</allow_inactive>
@@ -188,8 +188,8 @@
   </action>
 
   <action id="com.redhat.tuned.get_all_plugins">
-    <description>Get plugins which Tuned daemon can acces</description>
-    <message>Authentication is required to get Tuned plugins</message>
+    <description>Get plugins which TuneD daemon can acces</description>
+    <message>Authentication is required to get TuneD plugins</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -198,8 +198,8 @@
   </action>
 
   <action id="com.redhat.tuned.get_plugin_documentation">
-    <description>Get documentation of tuned plugin</description>
-    <message>Authentication is required to get documentation of tuned plugin</message>
+    <description>Get documentation of TuneD plugin</description>
+    <message>Authentication is required to get documentation of TuneD plugin</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -208,8 +208,8 @@
   </action>
 
   <action id="com.redhat.tuned.get_plugin_hints">
-    <description>Get hints for parameters of Tuned plugin</description>
-    <message>Authentication is required to get hints for parameters of Tuned plugin</message>
+    <description>Get hints for parameters of TuneD plugin</description>
+    <message>Authentication is required to get hints for parameters of TuneD plugin</message>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>

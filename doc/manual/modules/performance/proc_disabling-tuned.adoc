@@ -1,7 +1,7 @@
 [id="disabling-tuned_{context}"]
-= Disabling Tuned
+= Disabling TuneD
 
-This procedure disables *Tuned* and resets all affected system settings to their original state before *Tuned* modified them.
+This procedure disables *TuneD* and resets all affected system settings to their original state before *TuneD* modified them.
 
 // .Prerequisites
 // 

@@ -1,9 +1,9 @@
 [id="tuned-plug-ins_{context}"]
-= Tuned plug-ins
+= TuneD plug-ins
 
-Plug-ins are modules in *Tuned* profiles that *Tuned* uses to monitor or optimize different devices on the system.
+Plug-ins are modules in *TuneD* profiles that *TuneD* uses to monitor or optimize different devices on the system.
 
-*Tuned* uses two types of plug-ins:
+*TuneD* uses two types of plug-ins:
 
 * monitoring plug-ins
 * tuning plug-ins
@@ -18,10 +18,10 @@ Monitoring plug-ins are automatically instantiated whenever their metrics are ne
 [discrete]
 == Tuning plug-ins
 
-Each tuning plug-in tunes an individual subsystem and takes several parameters that are populated from the tuned profiles. Each subsystem can have multiple devices, such as multiple CPUs or network cards, that are handled by individual instances of the tuning plug-ins. Specific settings for individual devices are also supported. 
+Each tuning plug-in tunes an individual subsystem and takes several parameters that are populated from the TuneD profiles. Each subsystem can have multiple devices, such as multiple CPUs or network cards, that are handled by individual instances of the tuning plug-ins. Specific settings for individual devices are also supported. 
 
 [discrete]
-== Syntax for plug-ins in Tuned profiles
+== Syntax for plug-ins in TuneD profiles
 
 Sections describing plug-in instances are formatted in the following way:
 
@@ -72,7 +72,7 @@ If the plug-in supports more options, they can be also specified in the plug-in 
 [discrete]
 == Short plug-in syntax
 
-If you do not need custom names for the plug-in instance and there is only one definition of the instance in your configuration file, *Tuned* supports the following short syntax:
+If you do not need custom names for the plug-in instance and there is only one definition of the instance in your configuration file, *TuneD* supports the following short syntax:
 
 [subs=quotes]
 ----
@@ -101,7 +101,7 @@ You can also disable the plug-in by specifying the [option]`enabled=false` optio
 [discrete]
 == Functionality not implemented in any plug-in
 
-*Tuned* includes the ability to run any shell command as part of enabling or disabling a tuning profile. This enables you to extend *Tuned* profiles with functionality that has not been integrated into Tuned yet.
+*TuneD* includes the ability to run any shell command as part of enabling or disabling a tuning profile. This enables you to extend *TuneD* profiles with functionality that has not been integrated into TuneD yet.
 
 You can specify arbitrary shell commands using the `script` plug-in.
 

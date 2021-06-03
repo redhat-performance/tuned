@@ -1,7 +1,7 @@
 [id="creating-new-tuned-profiles_{context}"]
-= Creating new Tuned profiles
+= Creating new TuneD profiles
 
-This procedure creates a new *Tuned* profile with custom performance rules.
+This procedure creates a new *TuneD* profile with custom performance rules.
 
 .Prerequisites
 
@@ -22,7 +22,7 @@ For example, see the configuration of the `balanced` profile:
 +
 ----
 [main]
-summary=General non-specialized tuned profile
+summary=General non-specialized TuneD profile
 
 [cpu]
 governor=conservative
@@ -45,7 +45,7 @@ alpm=medium_power
 # tuned-adm profile [replaceable]_my-profile_
 ----
 
-. Verify that the *Tuned* profile is active and the system settings are applied:
+. Verify that the *TuneD* profile is active and the system settings are applied:
 +
 [subs=+quotes]
 ----
@@ -58,7 +58,7 @@ Current active profile: [replaceable]_my-profile_
 $ tuned-adm verify
 
 Verfication succeeded, current system settings match the preset profile.
-See tuned log file ('/var/log/tuned/tuned.log') for details.
+See TuneD log file ('/var/log/tuned/tuned.log') for details.
 ----
 
 .Additional resources

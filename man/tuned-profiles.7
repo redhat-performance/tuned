@@ -19,9 +19,9 @@
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
 .\" 
-.TH TUNED_PROFILES "7" "30 Mar 2017" "Fedora Power Management SIG" "tuned"
+.TH TUNED_PROFILES "7" "30 Mar 2017" "Fedora Power Management SIG" "TuneD"
 .SH NAME
-tuned\-profiles - description of basic tuned profiles
+tuned\-profiles - description of basic TuneD profiles
 
 .SH DESCRIPTION
 These are the base profiles which are mostly shipped in the base tuned
@@ -33,14 +33,14 @@ purpose of the profile by its name or you can see full description below.
 The profiles are stored in subdirectories below \fI/usr/lib/tuned\fP. If you
 need to customize the profiles, you can copy them to \fI/etc/tuned\fP and modify
 them as you need. When loading profiles with the same name, the /etc/tuned takes
-precedence. In such case you will not lose your customized profiles  between
-tuned updates.
+precedence. In such case you will not lose your customized profiles between
+TuneD updates.
 
 The power saving profiles contain settings that are typically not enabled by
 default as they will noticeably impact the latency/performance of your system
 as opposed to the power saving mechanisms that are enabled by default. On the
 other hand the performance profiles disable the additional power saving
-mechanisms of tuned as they would negatively impact throughput or latency.
+mechanisms of TuneD as they would negatively impact throughput or latency.
 
 .SH PROFILES
 At the moment we're providing the following pre\-defined profiles:
@@ -48,7 +48,7 @@ At the moment we're providing the following pre\-defined profiles:
 .TP
 .BI "balanced"
 It is the default profile. It provides balanced power saving and performance.
-At the moment it enables CPU and disk plugins of tuned and it makes sure the
+At the moment it enables CPU and disk plugins of TuneD and it makes sure the
 conservative governor is active (if supported by the current cpufreq driver).
 It enables ALPM power saving for SATA host adapters and sets the link power
 management policy to medium_power. It also sets the CPU energy performance

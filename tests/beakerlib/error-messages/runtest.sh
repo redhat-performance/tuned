@@ -3,7 +3,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #   runtest.sh of /CoreOS/tuned/Regression/bz1416712-Tuned-logs-error-message-if
-#   Description: Test for BZ#1416712 (Tuned logs error message if)
+#   Description: Test for BZ#1416712 (TuneD logs error message if)
 #   Author: Tereza Cerna <tcerna@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

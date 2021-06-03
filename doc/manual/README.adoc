@@ -1,6 +1,6 @@
 = About this documentation
 
-This directory contains source files of Tuned documentation intended for system administrators.
+This directory contains source files of TuneD documentation intended for system administrators.
 
 == Building the source
 
@@ -18,16 +18,16 @@ The `master.adoc` file is the main entry point for the documentation. It _includ
 
 == Naming conventions
 
-Use the following naming conventions when referring to Tuned and its components in the documentation:
+Use the following naming conventions when referring to TuneD and its components in the documentation:
 
-* "the *Tuned* application", referring to the complete set of software, including executables, profiles, scripts, documentation, artwork, etc. Written as `the \*Tuned* application` in AsciiDoc, because application names are in bold text.
+* "the *TuneD* application", referring to the complete set of software, including executables, profiles, scripts, documentation, artwork, etc. Written as `the \*TuneD* application` in AsciiDoc, because application names are in bold text.
 
-* "the Tuned project", referring to the developers and contributors, the web pages, repositories, planning, etc.
+* "the TuneD project", referring to the developers and contributors, the web pages, repositories, planning, etc.
 
 * "the `tuned` service", referring to the `tuned.service` systemd unit and the `tuned` executable
 
 * "the `tuned-adm` utility", referring to the `tuned-adm` executable
 
-* "the `tuned` and `tuned-adm` commands", referring to the text typed into the terminal to run components of Tuned
+* "the `tuned` and `tuned-adm` commands", referring to the text typed into the terminal to run components of TuneD
 
 This is consistent with other naming schemes. For example, consider "the Firefox application" vs. "the `firefox` command".

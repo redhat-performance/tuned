@@ -19,7 +19,7 @@
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
 .\" 
-.TH TUNED_PROFILES_COMPAT "7" "30 Mar 2017" "Fedora Power Management SIG" "tuned"
+.TH TUNED_PROFILES_COMPAT "7" "30 Mar 2017" "Fedora Power Management SIG" "TuneD"
 .SH NAME
 tuned\-profiles\-compat - description of profiles provided for backward compatibility
 
@@ -27,7 +27,7 @@ tuned\-profiles\-compat - description of profiles provided for backward compatib
 These profiles are provided for backward compatibility with the tuned-1x.
 They are no longer maintained and may be dropped anytime in the future.
 It's not recommended to use them for purposes other than backward compatibility.
-Some of them are only aliases to base tuned profiles. Please do not use the compat
+Some of them are only aliases to base TuneD profiles. Please do not use the compat
 profiles on new installations and rather use profiles from base tuned package or
 other tuned subpackages.
 
@@ -37,23 +37,23 @@ The following profiles are considered compatibility profiles:
 .TP
 .BI "default"
 It is the lowest of the available profiles in regard to power saving and only
-enables CPU and disk plugins of tuned.
+enables CPU and disk plugins of TuneD.
 
 .TP
 .BI "desktop\-powersave"
 A power saving profile directed at desktop systems. Enables ALPM power saving
-for SATA host adapters as well as the CPU, ethernet and disk plugins of tuned.
+for SATA host adapters as well as the CPU, ethernet and disk plugins of TuneD.
 
 .TP
 .BI server\-powersave
 A power saving profile directed at server systems. Enables ALPM power saving
-for SATA host adapters, and activates the CPU and disk plugins of tuned.
+for SATA host adapters, and activates the CPU and disk plugins of TuneD.
 
 .TP
 .BI laptop\-ac\-powersave
 Medium power saving profile directed at laptops running on AC. Enables ALPM
 power saving for SATA host adapters,  WiFi power saving as well as CPU,
-ethernet and disk plugins of tuned.
+ethernet and disk plugins of TuneD.
 
 .TP
 .BI laptop\-battery\-powersave

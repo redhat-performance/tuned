@@ -1,10 +1,10 @@
-Contributing to Tuned
+Contributing to TuneD
 =====================
 
 Submitting patches
 ------------------
 
-All patches should be based on the most recent revision of Tuned, which is
+All patches should be based on the most recent revision of TuneD, which is
 available on [GitHub](https://github.com/redhat-performance/tuned).
 
 Patches should be created using `git` and the commit message should generally
@@ -48,8 +48,8 @@ consist of three parts:
    If you use `git commit -s`, `git` will add the tag for you.
 
 Every patch should represent a single logical change. On the one hand, each
-patch should be complete enough so that after applying it, the Tuned repository
-remains in a consistent state and Tuned remains, to the best of the
+patch should be complete enough so that after applying it, the TuneD repository
+remains in a consistent state and TuneD remains, to the best of the
 contributor's knowledge, completely functional (a corollary of this is that
 when making fixes to your pull request on GitHub, you should include the fixes
 in the commits where they logically belong rather than appending new commits).
@@ -59,8 +59,8 @@ separated into individual ones.
 
 Patches can either be submitted in the form of pull requests to the GitHub
 repository, sent to the power-management (at) lists.fedoraproject.org mailing
-list, or sent directly to the maintainers of the Tuned project.
+list, or sent directly to the maintainers of the TuneD project.
 
 These guidelines were inspired by the [contribution guidelines of the Linux
 Kernel](https://www.kernel.org/doc/html/latest/process/submitting-patches.html).
-You can find more rationale for Tuned's guidelines in that document.
+You can find more rationale for TuneD's guidelines in that document.

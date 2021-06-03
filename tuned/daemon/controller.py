@@ -138,7 +138,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		try:
 			self._daemon.reload_profile_config()
 		except TunedException as e:
-			log.error("Failed to reload Tuned: %s" % e)
+			log.error("Failed to reload TuneD: %s" % e)
 			return False
 		return self.start()
 

@@ -3,7 +3,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #   runtest.sh of /CoreOS/tuned/Regression/Tuned-takes-too-long-to-reload-start-when-ulimit
-#   Description: Test for BZ#1663412 (Tuned takes too long to reload/start when "ulimit)
+#   Description: Test for BZ#1663412 (TuneD takes too long to reload/start when "ulimit)
 #   Author: Robin Hack <rhack@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

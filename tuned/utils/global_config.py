@@ -30,12 +30,12 @@ class GlobalConfig():
 			self._cfg = ConfigObj(file_name, configspec = self.global_config_spec, raise_errors = True, \
 				file_error = True, list_values = False, interpolation = False)
 		except IOError as e:
-			raise TunedException("Global tuned configuration file '%s' not found." % file_name)
+			raise TunedException("Global TuneD configuration file '%s' not found." % file_name)
 		except ConfigObjError as e:
-			raise TunedException("Error parsing global tuned configuration file '%s'." % file_name)
+			raise TunedException("Error parsing global TuneD configuration file '%s'." % file_name)
 		vdt = Validator()
 		if (not self._cfg.validate(vdt, copy=True)):
-			raise TunedException("Global tuned configuration file '%s' is not valid." % file_name)
+			raise TunedException("Global TuneD configuration file '%s' is not valid." % file_name)
 
 	def get(self, key, default = None):
 		return self._cfg.get(key, default)

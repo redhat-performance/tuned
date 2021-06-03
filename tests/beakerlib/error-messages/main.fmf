@@ -1,10 +1,10 @@
 component: tuned
 contact: Robin Hack <rhack@redhat.com>
 description: |
-    Bug summary: Tuned logs error message if '/sys/class/scsi_host/host*/link_power_management_policy' file does not exists.
+    Bug summary: TuneD logs error message if '/sys/class/scsi_host/host*/link_power_management_policy' file does not exists.
     Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1416712
 duration: 5m
 relevancy: |
     distro = rhel-4, rhel-5: False
-summary: Test for BZ#1416712 (Tuned logs error message if)
+summary: Test for BZ#1416712 (TuneD logs error message if)
 framework: beakerlib

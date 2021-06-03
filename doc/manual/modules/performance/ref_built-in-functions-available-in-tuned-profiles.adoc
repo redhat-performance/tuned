@@ -1,7 +1,7 @@
 [id="built-in-functions-available-in-tuned-profiles_{context}"]
-= Built-in functions available in Tuned profiles
+= Built-in functions available in TuneD profiles
 
-The following built-in functions are available in all *Tuned* profiles:
+The following built-in functions are available in all *TuneD* profiles:
 
 `PROFILE_DIR`::
 Returns the directory path where the profile and the `tuned.conf` file are located.
@@ -25,7 +25,7 @@ Converts disk sectors to kilobytes.
 Creates a string from all passed arguments and deletes both leading and trailing white space.
 
 `virt_check`::
-Checks whether *Tuned* is running inside a virtual machine (VM) or on bare metal:
+Checks whether *TuneD* is running inside a virtual machine (VM) or on bare metal:
 +
 * Inside a VM, the function returns the first argument.
 * On bare metal, the function returns the second argument, even in case of an error.

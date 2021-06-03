@@ -261,7 +261,7 @@ class PowertopProfile:
 		return True
 
 	def generateTunedConf(self, profile, plugins):
-		print("Generating Tuned config file", os.path.join(self.output, "tuned.conf"))
+		print("Generating TuneD config file", os.path.join(self.output, "tuned.conf"))
 		f = codecs.open(os.path.join(self.output, "tuned.conf"), "w", "utf-8")
 		f.write(TUNED_CONF_PROLOG)
 		if profile is not None:
@@ -316,7 +316,7 @@ class PowertopProfile:
 		return 0
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description='Creates Tuned profile from Powertop HTML output.')
+	parser = argparse.ArgumentParser(description='Creates TuneD profile from Powertop HTML output.')
 	parser.add_argument('profile', metavar='profile_name', type=str, nargs='?', help='Name for the profile to be written.')
 	parser.add_argument('-i', '--input', metavar='input_html', type=str, help='Path to Powertop HTML report. If not given, it is generated automatically.')
 	parser.add_argument('-o', '--output', metavar='output_directory', type=str, help='Directory where the profile will be written, default is /etc/tuned/profile_name directory.')

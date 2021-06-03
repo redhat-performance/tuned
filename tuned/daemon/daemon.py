@@ -213,7 +213,7 @@ class Daemon(object):
 			# poll, otherwise the python will not have chance to update events / locks (due to GIL)
 			# and e.g. DBus control will not work. The polling interval of 1 seconds (which is
 			# the default) is still much better than 50 ms polling with unpatched interpreter.
-			# For more details see tuned rhbz#917587.
+			# For more details see TuneD rhbz#917587.
 			_sleep_cnt = self._sleep_cycles
 			while not self._cmd.wait(self._terminate, self._sleep_interval):
 				if self._dynamic_tuning:
@@ -238,18 +238,18 @@ class Daemon(object):
 			full_rollback = True
 		else:
 			# with systemd it detects system shutdown and in such case it doesn't perform
-			# full cleanup, if not shutting down it means that Tuned was explicitly
+			# full cleanup, if not shutting down it means that TuneD was explicitly
 			# stopped by user and in such case do full cleanup, without systemd never
 			# do full cleanup
 			full_rollback = False
 			if self._full_rollback_required():
 				if self._daemon:
-					log.info("terminating Tuned, rolling back all changes")
+					log.info("terminating TuneD, rolling back all changes")
 					full_rollback = True
 				else:
-					log.info("terminating Tuned in one-shot mode")
+					log.info("terminating TuneD in one-shot mode")
 			else:
-				log.info("terminating Tuned due to system shutdown / reboot")
+				log.info("terminating TuneD due to system shutdown / reboot")
 		if self._daemon:
 			self._unit_manager.stop_tuning(full_rollback)
 		self._unit_manager.destroy_all()
@@ -334,7 +334,7 @@ class Daemon(object):
 
 	def verify_profile(self, ignore_missing):
 		if not self.is_running():
-			log.error("tuned is not running")
+			log.error("TuneD is not running")
 			return False
 
 		if self._profile is None:
