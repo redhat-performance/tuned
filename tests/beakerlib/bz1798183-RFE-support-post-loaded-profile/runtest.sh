@@ -37,12 +37,14 @@ SWAPPINESS=vm.swappiness
 DIRTY_RATIO=vm.dirty_ratio
 PID_FILE=/run/tuned/tuned.pid
 SERVICE_OVERRIDE_DIR=/etc/systemd/system/tuned.service.d
+PYTHON_CHECK="python3 /usr/libexec/platform-python python2 python"
+PYTHON=python3
 
 function wait_for_tuned()
 {
     local timeout=$1
     local elapsed=0
-    while ! python3 -c 'import dbus; bus = dbus.SystemBus(); exit(0 if bus.name_has_owner("com.redhat.tuned") else 1)'; do
+    while ! $PYTHON -c 'import dbus; bus = dbus.SystemBus(); exit(0 if bus.name_has_owner("com.redhat.tuned") else 1)'; do
         sleep 1
         elapsed=$(($elapsed + 1))
         if [ "$elapsed" -ge "$timeout" ]; then
@@ -70,6 +72,7 @@ function wait_for_tuned_stop()
 rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
+        rlRun "for PYTHON in $PYTHON_CHECK; do \$PYTHON --version 2>/dev/null && break; done" 0 "Detect python"
         rlRun "rlFileBackup --clean $PROFILE_DIR"
         rlRun "cp -r parent $PROFILE_DIR"
         rlRun "cp -r parent2 $PROFILE_DIR"
@@ -108,7 +111,7 @@ rlJournalStart
         rlRun "rlServiceStart tuned"
         rlRun "echo parent2 > $ACTIVE_PROFILE"
         rlRun "echo post2 > $POST_LOADED_PROFILE"
-        timeout 25s python3 ./wait_for_signal.py &
+        timeout 25s $PYTHON ./wait_for_signal.py &
         pid=$!
         # Give the wait_for_signal script a chance to connect to the bus
         sleep 1
@@ -173,7 +176,7 @@ rlJournalStart
         rlRun "rlServiceStart tuned"
         rlAssertEquals "Check the output of tuned-adm active" \
                        "$(tuned-adm active)" \
-                       "Current active profile: post"
+                       "Current active profile: post"$'\n'"Current post-loaded profile: post"
         rlAssertEquals "Check that dirty ratio is set correctly" \
                        "$(sysctl -n $DIRTY_RATIO)" 8
     rlPhaseEnd
@@ -209,7 +212,7 @@ rlJournalStart
         rlRun "rlServiceStop tuned"
         rlRun "echo parent > $ACTIVE_PROFILE"
         rlRun "echo post > $POST_LOADED_PROFILE"
-        timeout 25s python3 ./wait_for_signal.py > output &
+        timeout 25s $PYTHON ./wait_for_signal.py > output &
         pid=$!
         # If the 'wait $pid' command below fails but everything else
         # in this phase succeeds, try adding a sleep here.
@@ -219,7 +222,7 @@ rlJournalStart
                        "$(< output)" \
                        "parent"
 
-        timeout 25s python3 ./wait_for_signal.py > output &
+        timeout 25s $PYTHON ./wait_for_signal.py > output &
         pid=$!
         rlRun "tuned-adm profile parent"
         rlRun "wait $pid"

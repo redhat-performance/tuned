@@ -2,13 +2,8 @@
 
 . /usr/lib/tuned/functions
 
-KTIMER_LOCKLESS_FILE=/sys/kernel/ktimer_lockless_check
-
 start() {
-    if [ -f $KTIMER_LOCKLESS_FILE ]; then
-        echo 1 > $KTIMER_LOCKLESS_FILE
-    fi
-    return "$?"
+    return 0
 }
 
 stop() {
@@ -16,7 +11,7 @@ stop() {
 }
 
 verify() {
-    return "$?"
+    return 0
 }
 
 process $@

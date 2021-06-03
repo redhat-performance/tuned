@@ -18,7 +18,7 @@ class DeviceMatcherUdev(device_matcher.DeviceMatcher):
 		except AttributeError:
 			items = device.items()
 
-		for key, val in list(items):
+		for key, val in sorted(list(items)):
 			properties += key + '=' + val + '\n'
 
 		return re.search(regex, properties, re.MULTILINE) is not None

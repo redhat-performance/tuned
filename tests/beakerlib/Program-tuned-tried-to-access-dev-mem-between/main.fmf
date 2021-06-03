@@ -7,3 +7,4 @@ duration: 20m
 relevancy: |
     distro = rhel-4, rhel-5, rhel-6: False
 summary: Test for BZ#1688371 (Program tuned tried to access /dev/mem between)
+framework: beakerlib
