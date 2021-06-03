@@ -72,7 +72,7 @@ function wait_for_tuned_stop()
 rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
-        rlRun "for PYTHON in $PYTHON_CHECK; do \$PYTHON --version 2>/dev/null && break; done"
+        rlRun "for PYTHON in $PYTHON_CHECK; do \$PYTHON --version 2>/dev/null && break; done" 0 "Detect python"
         rlRun "rlFileBackup --clean $PROFILE_DIR"
         rlRun "cp -r parent $PROFILE_DIR"
         rlRun "cp -r parent2 $PROFILE_DIR"
