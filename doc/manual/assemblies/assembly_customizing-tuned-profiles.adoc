@@ -5,14 +5,27 @@
 
 :context: customizing-tuned-profiles
 
+[role="_abstract"]
 You can create or modify *TuneD* profiles to optimize system performance for your intended use case.
 
 .Prerequisites
 
-* Install and enable *TuneD* as described in xref:installing-and-enabling-tuned_getting-started-with-tuned[].
+ifndef::pantheonenv[]
+* Install and enable *TuneD* as described in xref:installing-and-enabling-tuned_getting-started-with-tuned[Installing and Enabling Tuned] for details.
+endif::[]
+
+ifdef::pantheonenv[]
+* Install and enable *TuneD* as described in xref:modules/performance/proc_installing-and-enabling-tuned.adoc[Installing and Enabling Tuned] for details.
+endif::[]
 
 
 include::modules/performance/con_tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/con_the-default-tuned-profile.adoc[leveloffset=+1]
+
+include::modules/performance/con_merged-tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/con_the-location-of-tuned-profiles.adoc[leveloffset=+1]
 
 include::modules/performance/con_inheritance-between-tuned-profiles.adoc[leveloffset=+1]
 
@@ -22,7 +35,9 @@ include::modules/performance/con_tuned-plug-ins.adoc[leveloffset=+1]
 
 include::modules/performance/ref_available-tuned-plug-ins.adoc[leveloffset=+1]
 
-include::modules/performance/con_variables-and-built-in-functions-in-tuned-profiles.adoc[leveloffset=+1]
+include::modules/performance/con_variables-in-tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/con_built-in-functions-in-tuned-profiles.adoc[leveloffset=+1]
 
 include::modules/performance/ref_built-in-functions-available-in-tuned-profiles.adoc[leveloffset=+1]
 
@@ -32,11 +47,12 @@ include::modules/performance/proc_modifying-existing-tuned-profiles.adoc[levelof
 
 include::modules/performance/proc_setting-the-disk-scheduler-using-tuned.adoc[leveloffset=+1]
 
-
+ifdef::upstream[]
 [id='related-information-{context}']
 == Related information
 
 * The `tuned.conf(5)` man page
 * The *TuneD* project website: link:https://tuned-project.org/[]
+endif::[]
 
 :context: {parent-context-of-customizing-tuned-profiles}

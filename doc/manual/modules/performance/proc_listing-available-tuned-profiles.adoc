@@ -1,6 +1,8 @@
+:_module-type: PROCEDURE
 [id="listing-available-tuned-profiles_{context}"]
 = Listing available TuneD profiles
 
+[role="_abstract"]
 This procedure lists all *TuneD* profiles that are currently available on your system.
 
 //No prerequisites are needed
@@ -40,7 +42,6 @@ $ *tuned-adm active*
 Current active profile: [replaceable]_balanced_
 ----
 
+[role="_additional-resources"]
 .Additional resources
-
 * The `tuned-adm(8)` man page.
-

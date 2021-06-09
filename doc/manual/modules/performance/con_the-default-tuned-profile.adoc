@@ -1,0 +1,18 @@
+:_module-type: CONCEPT
+[id="the-default-tuned-profile_{context}"]
+= The default TuneD profile
+
+[role="_abstract"]
+During the installation, the best profile for your system is selected automatically. Currently, the default profile is selected according to the following customizable rules:
+
+[options="header",cols="2,2,3"]
+|===
+| Environment | Default profile | Goal
+| Compute nodes | `throughput-performance` | The best throughput performance
+| Virtual machines | `virtual-guest` | The best performance. If you are not interested in the best performance, you can change it to the `balanced` or `powersave` profile.
+| Other cases | `balanced` | Balanced performance and power consumption
+|===
+
+[role="_additional-resources"]
+.Additional resources
+* `tuned.conf(5)` man page.

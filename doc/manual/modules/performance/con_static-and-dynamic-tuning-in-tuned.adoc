@@ -1,6 +1,8 @@
+:_module-type: CONCEPT
 [id="static-and-dynamic-tuning-in-tuned_{context}"]
 = Static and dynamic tuning in TuneD
 
+[role="_abstract"]
 This section explains the difference between the two categories of system tuning that *TuneD* applies: _static_ and _dynamic_.
 
 // TODO: Move some of this content into a separate module ("Enabling dynamic tuning"). It seems to be necessary to (1) enable dynamic tuning globally *and* (2) manually enable it in performance-oriented profiles.
@@ -32,7 +34,7 @@ This principle is used for other plug-ins for CPU and disks as well.
 
 
 // .Additional resources
-// 
+//
 // * A bulleted list of links to other material closely related to the contents of the concept module.
 // * For more details on writing concept modules, see the link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].
 // * Use a consistent system for file names, IDs, and titles. For tips, see _Anchor Names and File Names_ in link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].

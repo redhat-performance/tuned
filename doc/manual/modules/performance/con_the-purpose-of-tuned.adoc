@@ -1,6 +1,8 @@
+:_module-type: CONCEPT
 [id="the-purpose-of-tuned_{context}"]
 = The purpose of TuneD
 
+[role="_abstract"]
 *TuneD* is a service that monitors your system and optimizes the performance under certain workloads. The core of *TuneD* are _profiles_, which tune your system for different use cases.
 
 *TuneD* is distributed with a number of predefined profiles for use cases such as:
@@ -16,7 +18,7 @@ You can also configure *TuneD* to react to changes in device usage and adjusts s
 // The TuneD tuning service can adapt the operating system to perform better under certain workloads by setting a tuning profile.
 
 // .Additional resources
-// 
+//
 // * A bulleted list of links to other material closely related to the contents of the concept module.
 // * For more details on writing concept modules, see the link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].
 // * Use a consistent system for file names, IDs, and titles. For tips, see _Anchor Names and File Names_ in link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].

@@ -1,11 +1,19 @@
+:_module-type: PROCEDURE
 [id="modifying-existing-tuned-profiles_{context}"]
 = Modifying existing TuneD profiles
 
+[role="_abstract"]
 This procedure creates a modified child profile based on an existing *TuneD* profile.
 
 .Prerequisites
 
-* The `tuned` service is installed and running. See xref:installing-and-enabling-tuned_getting-started-with-tuned[] for details.
+ifndef::pantheonenv[]
+* The `tuned` service is running. See xref:installing-and-enabling-tuned_getting-started-with-tuned[Installing and Enabling Tuned] for details.
+endif::[]
+
+ifdef::pantheonenv[]
+* The `tuned` service is running. See xref:modules/performance/proc_installing-and-enabling-tuned.adoc[Installing and Enabling Tuned] for details.
+endif::[]
 
 .Procedure
 
@@ -72,10 +80,9 @@ See TuneD log file ('/var/log/tuned/tuned.log') for details.
 // ----
 // # cp -r /usr/lib/tuned/throughput-performance /etc/tuned
 // ----
-// 
-// . Then, edit the profile in /etc/tuned according to your needs. Note that if there are two profiles of the same name, the profile located in /etc/tuned/ is loaded. The disadvantage of this approach is that if a system profile is updated after a TuneD upgrade, the changes will not be reflected in the now-outdated modified version. 
+//
+// . Then, edit the profile in /etc/tuned according to your needs. Note that if there are two profiles of the same name, the profile located in /etc/tuned/ is loaded. The disadvantage of this approach is that if a system profile is updated after a TuneD upgrade, the changes will not be reflected in the now-outdated modified version.
 
+[role="_additional-resources"]
 .Additional resources
-
-* The `tuned.conf(5)` man page
-
+* `tuned.conf(5)` man page
