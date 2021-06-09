@@ -46,14 +46,18 @@ class LocatorTestCase(unittest.TestCase):
 	def test_get_config(self):
 		config_name = self.locator.get_config("custom")
 		self.assertEqual(config_name, os.path.join(self._tmp_load_dirs[1], "custom", "tuned.conf"))
+		# none matched, none skipped
+		config_name = self.locator.get_config("non-existent")
+		self.assertIsNone(config_name)
 
 	def test_get_config_priority(self):
 		customized = self.locator.get_config("balanced")
 		self.assertEqual(customized, os.path.join(self._tmp_load_dirs[1], "balanced", "tuned.conf"))
 		system = self.locator.get_config("balanced", [customized])
 		self.assertEqual(system, os.path.join(self._tmp_load_dirs[0], "balanced", "tuned.conf"))
-		none = self.locator.get_config("balanced", [customized, system])
-		self.assertIsNone(none)
+		# none matched, but at least one skipped
+		empty = self.locator.get_config("balanced", [customized, system])
+		self.assertEqual(empty, "")
 
 	def test_ignore_nonexistent_dirs(self):
 		locator = Locator([self._tmp_load_dirs[0], "/tmp/some-dir-which-does-not-exist-for-sure"])
