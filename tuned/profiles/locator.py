@@ -24,17 +24,19 @@ class Locator(object):
 		return os.path.normpath(config_name)
 
 	def get_config(self, profile_name, skip_files=None):
+		ret = None
 		for dir_name in reversed(self._load_directories):
 			# basename is protection not to get out of the path
 			config_file = self._get_config_filename(dir_name, os.path.basename(profile_name))
 
 			if skip_files is not None and config_file in skip_files:
+				ret = ""
 				continue
 
 			if os.path.isfile(config_file):
 				return config_file
 
-		return None
+		return ret
 
 	def check_profile_name_format(self, profile_name):
 		return profile_name is not None and profile_name != "" and "/" not in profile_name

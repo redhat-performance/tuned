@@ -77,6 +77,8 @@ class Loader(object):
 	def _load_profile(self, profile_names, profiles, processed_files):
 		for name in profile_names:
 			filename = self._profile_locator.get_config(name, processed_files)
+			if filename == "":
+				continue
 			if filename is None:
 				raise InvalidProfileException("Cannot find profile '%s' in '%s'." % (name, list(reversed(self._profile_locator._load_directories))))
 			processed_files.append(filename)
