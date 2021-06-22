@@ -397,7 +397,7 @@ class NetTuningPlugin(base.Plugin):
 		if dev_params:
 			self._check_device_support(context, d, device, dev_params)
 			# replace the channel parameters based on the device support
-			if context == "channels" and (int(dev_params[next(iter(d))]) == 0 or str(dev_params[next(iter(d))]) == 'n/a'):
+			if context == "channels" and str(dev_params[next(iter(d))]) in ["n/a", "0"]:
 				d = self._replace_channels_parameters(context, self._cmd.dict2list(d), dev_params)
 
 		if not sim and len(d) != 0:
