@@ -36,6 +36,15 @@ verify() {
             retval=1
         fi
     fi
+    if [ -f /sys/module/kvm/parameters/nx_huge_pages ]; then
+        kps=$(cat /sys/module/kvm/parameters/nx_huge_pages)
+        if [ "$kps" = "N" -o "$kps" = "0" ]; then
+            echo "  kvmclock_periodic_sync:($kps): disabled: okay"
+        else
+            echo "  kvmclock_periodic_sync:($kps): enabled: expected N(0)"
+            retval=1
+        fi
+    fi
     return $retval
 }
 

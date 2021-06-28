@@ -526,18 +526,24 @@ teardown_kvm_mod_low_latency()
 setup_kvm_mod_low_latency()
 {
 	local HAS_KPS=""
+	local HAS_NX_HP=""
 	local HAS_PLE_GAP=""
 	local WANTS_KPS=""
+	local WANTS_NX_HP=""
 	local WANTS_PLE_GAP=""
 
 	modinfo -p kvm | grep -q kvmclock_periodic_sync && HAS_KPS=1
+	modinfo -p kvm | grep -q nx_huge_pages && HAS_NX_HP=1
 	modinfo -p kvm_intel | grep -q ple_gap && HAS_PLE_GAP=1
 	grep -qs kvmclock_periodic_sync "$kvm_modprobe_file" && WANTS_KPS=1
+	grep -qs nx_huge_pages "$kvm_modprobe_file" && WANTS_NX_HP=1
 	grep -qs ple_gap "$kvm_modprobe_file" && WANTS_PLE_GAP=1
 
-	if [ "$HAS_KPS" != "$WANTS_KPS" -o "$HAS_PLE_GAP" != "$WANTS_PLE_GAP" ]; then
+	if [ "$HAS_KPS" != "$WANTS_KPS" -o "$HAS_PLE_GAP" != "$WANTS_PLE_GAP" -o \
+	     "$HAS_NX_HP" != "$WANTS_NX_HP" ]; then
 		teardown_kvm_mod_low_latency
 		[ "$HAS_KPS" ] && echo "options kvm kvmclock_periodic_sync=0" > $kvm_modprobe_file
+		[ "$HAS_NX_HP" ] && echo "options kvm nx_huge_pages=0" >> $kvm_modprobe_file
 		[ "$HAS_PLE_GAP" ] && echo "options kvm_intel ple_gap=0" >> $kvm_modprobe_file
 	fi
 	return 0
