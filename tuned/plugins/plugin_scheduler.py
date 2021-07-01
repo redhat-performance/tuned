@@ -149,6 +149,10 @@ class SchedulerPlugin(base.Plugin):
 			self._daemon = global_cfg.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
 			self._sleep_interval = int(global_cfg.get(consts.CFG_SLEEP_INTERVAL, consts.CFG_DEF_SLEEP_INTERVAL))
 		self._cmd = commands()
+		# helper variable utilized for showing hint only once that the error may be caused by Secure Boot
+		self._secure_boot_hint = None
+		# paths cache for sched_ and numa_ tunings
+		self._sched_knob_paths_cache = {}
 		# default is to whitelist all and blacklist none
 		self._ps_whitelist = ".*"
 		self._ps_blacklist = ""
@@ -252,6 +256,16 @@ class SchedulerPlugin(base.Plugin):
 			"default_irq_smp_affinity": "calc",
 			"perf_mmap_pages": None,
 			"perf_process_fork": "false",
+			"sched_min_granularity_ns": None,
+			"sched_latency_ns": None,
+			"sched_wakeup_granularity_ns": None,
+			"sched_tunable_scaling": None,
+			"sched_migration_cost_ns": None,
+			"sched_nr_migrate": None,
+			"numa_balancing_scan_delay_ms": None,
+			"numa_balancing_scan_period_min_ms": None,
+			"numa_balancing_scan_period_max_ms": None,
+			"numa_balancing_scan_size_mb": None
 		}
 
 	def _sanitize_cgroup_path(self, value):
@@ -1065,3 +1079,117 @@ class SchedulerPlugin(base.Plugin):
 			# Restoring processes' affinity is done in
 			# _instance_unapply_static()
 			self._restore_all_irq_affinity()
+
+	def _get_sched_knob_path(self, prefix, namespace, knob):
+		key = "%s_%s_%s" % (prefix, namespace, knob)
+		path = self._sched_knob_paths_cache.get(key)
+		if path:
+			return path
+		path = "/proc/sys/kernel/%s_%s" % (namespace, knob)
+		if not os.path.exists(path):
+			if prefix == "":
+				path = "%s/%s" % (namespace, knob)
+			else:
+				path = "%s/%s/%s" % (prefix, namespace, knob)
+			path = "/sys/kernel/debug/%s" % path
+			if self._secure_boot_hint is None:
+				self._secure_boot_hint = True
+		self._sched_knob_paths_cache[key] = path
+		return path
+
+	def _get_sched_knob(self, prefix, namespace, knob):
+		data = self._cmd.read_file(self._get_sched_knob_path(prefix, namespace, knob), err_ret = None)
+		if data is None:
+			log.error("Error reading '%s'" % knob)
+			if self._secure_boot_hint:
+				log.error("This may not work with Secure Boot or kernel_lockdown (this hint is logged only once)")
+				self._secure_boot_hint = False
+		return data
+
+	def _set_sched_knob(self, prefix, namespace, knob, value, sim):
+		if value is None:
+			return None
+		if not sim:
+			if not self._cmd.write_to_file(self._get_sched_knob_path(prefix, namespace, knob), value):
+				log.error("Error writing value '%s' to '%s'" % (value, knob))
+		return value
+
+	@command_get("sched_min_granularity_ns")
+	def _get_sched_min_granularity_ns(self):
+		return self._get_sched_knob("", "sched", "min_granularity_ns")
+
+	@command_set("sched_min_granularity_ns")
+	def _set_sched_min_granularity_ns(self, value, sim):
+		return self._set_sched_knob("", "sched", "min_granularity_ns", value, sim)
+
+	@command_get("sched_latency_ns")
+	def _get_sched_latency_ns(self):
+		return self._get_sched_knob("", "sched", "latency_ns")
+
+	@command_set("sched_latency_ns")
+	def _set_sched_latency_ns(self, value, sim):
+		return self._set_sched_knob("", "sched", "latency_ns", value, sim)
+
+	@command_get("sched_wakeup_granularity_ns")
+	def _get_sched_wakeup_granularity_ns(self):
+		return self._get_sched_knob("", "sched", "wakeup_granularity_ns")
+
+	@command_set("sched_wakeup_granularity_ns")
+	def _set_sched_wakeup_granularity_ns(self, value, sim):
+		return self._set_sched_knob("", "sched", "wakeup_granularity_ns", value, sim)
+
+	@command_get("sched_tunable_scaling")
+	def _get_sched_tunable_scaling(self):
+		return self._get_sched_knob("", "sched", "tunable_scaling")
+
+	@command_set("sched_tunable_scaling")
+	def _set_sched_tunable_scaling(self, value, sim):
+		return self._set_sched_knob("", "sched", "tunable_scaling", value, sim)
+
+	@command_get("sched_migration_cost_ns")
+	def _get_sched_migration_cost_ns(self):
+		return self._get_sched_knob("", "sched", "migration_cost_ns")
+
+	@command_set("sched_migration_cost_ns")
+	def _set_sched_migration_cost_ns(self, value, sim):
+		return self._set_sched_knob("", "sched", "migration_cost_ns", value, sim)
+
+	@command_get("sched_nr_migrate")
+	def _get_sched_nr_migrate(self):
+		return self._get_sched_knob("", "sched", "nr_migrate")
+
+	@command_set("sched_nr_migrate")
+	def _set_sched_nr_migrate(self, value, sim):
+		return self._set_sched_knob("", "sched", "nr_migrate", value, sim)
+
+	@command_get("numa_balancing_scan_delay_ms")
+	def _get_numa_balancing_scan_delay_ms(self):
+		return self._get_sched_knob("sched", "numa_balancing", "scan_delay_ms")
+
+	@command_set("numa_balancing_scan_delay_ms")
+	def _set_numa_balancing_scan_delay_ms(self, value, sim):
+		return self._set_sched_knob("sched", "numa_balancing", "scan_delay_ms", value, sim)
+
+	@command_get("numa_balancing_scan_period_min_ms")
+	def _get_numa_balancing_scan_period_min_ms(self):
+		return self._get_sched_knob("sched", "numa_balancing", "scan_period_min_ms")
+
+	@command_set("numa_balancing_scan_period_min_ms")
+	def _set_numa_balancing_scan_period_min_ms(self, value, sim):
+		return self._set_sched_knob("sched", "numa_balancing", "scan_period_min_ms", value, sim)
+
+	@command_get("numa_balancing_scan_period_max_ms")
+	def _get_numa_balancing_scan_period_max_ms(self):
+		return self._get_sched_knob("sched", "numa_balancing", "scan_period_max_ms")
+
+	@command_set("numa_balancing_scan_period_max_ms")
+	def _set_numa_balancing_scan_period_max_ms(self, value, sim):
+		return self._set_sched_knob("sched", "numa_balancing", "scan_period_max_ms", value, sim)
+
+	@command_get("numa_balancing_scan_size_mb")
+	def _get_numa_balancing_scan_size_mb(self):
+		return self._get_sched_knob("sched", "numa_balancing", "scan_size_mb")
+
+	@command_set("numa_balancing_scan_size_mb")
+	def _set_numa_balancing_scan_size_mb(self, value, sim):
+		return self._set_sched_knob("sched", "numa_balancing", "scan_size_mb", value, sim)
