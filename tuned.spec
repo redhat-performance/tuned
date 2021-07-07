@@ -36,16 +36,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.15.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.16.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -549,6 +549,46 @@ fi
 %{_mandir}/man7/tuned-profiles-postgresql.7*
 
 %changelog
+* Wed Jul  7 2021 Jaroslav Škarvada <jskarvad@redhat.com> - 2.16.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#1936426
+  - realtime: "isolate_managed_irq=Y" should be mentioned in
+    "/etc/tuned/realtime-virtual-*-variables.conf"
+    resolves: rhbz#1817827
+  - realtime: changed tuned default to "isolcpus=domain,managed_irq,X-Y"
+    resolves: rhbz#1820626
+  - applying a profile with multiple inheritance where parents include a common
+    ancestor fails
+    resolves: rhbz#1825882
+  - failure in moving i40e IRQ threads to housekeeping CPUs from isolated CPUs
+    resolves: rhbz#1933069
+  - sort network devices before matching by regex
+    resolves: rhbz#1939970
+  - net: fixed traceback while adjusting the netdev queue count
+    resolves: rhbz#1943291
+  - net: fixed traceback if the first listed device returns netlink error
+    resolves: rhbz#1944686
+  - realtime: improve verification
+    resolves: rhbz#1947858
+  - bootloader: add support for the rpm-ostree
+    resolves: rhbz#1950164
+  - net: fixed traceback if a device channel contains n/a
+    resolves: rhbz#1974071
+  - mssql: updated the profile
+    resolves: rhbz#1942733
+  - realtime: disabled kvm.nx_huge_page kernel module option in
+    realtime-virtual-host profile
+    resolves: rhbz#1976825
+  - realtime: explicitly set 'irqaffinity=~<isolated_cpu_mask>' in kernel
+    command line
+    resolves: rhbz#1974820
+  - scheduler: added abstraction for the sched_* and numa_* variables which
+    were previously accessible through the sysctl
+    resolves: rhbz#1952687
+  - recommend: fixed wrong profile on ppc64le bare metal servers
+    resolves: rhbz#1959889
+
 * Thu Dec 17 2020 Jaroslav Škarvada <jskarvad@redhat.com> - 2.15.0-1
 - new release
   - rebased tuned to latest upstream
