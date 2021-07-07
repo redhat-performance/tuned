@@ -31,6 +31,7 @@ class BootloaderPlugin(base.Plugin):
 		instance._has_static_tuning = True
 		# controls grub2_cfg rewrites in _instance_post_static
 		self.update_grub2_cfg = False
+		self._skip_grub_config_val = False
 		self._initrd_remove_dir = False
 		self._initrd_dst_img_val = None
 		self._cmdline_val = ""
@@ -52,6 +53,7 @@ class BootloaderPlugin(base.Plugin):
 			"initrd_add_dir": None,
 			"initrd_remove_dir": None,
 			"cmdline": None,
+			"skip_grub_config": None,
 		}
 
 	@staticmethod
@@ -184,7 +186,7 @@ class BootloaderPlugin(base.Plugin):
 		return cfg_files
 
 	def _bls_enabled(self):
-		grub2_default_env = self._cmd.read_file(consts.GRUB2_DEFAULT_ENV_FILE)
+		grub2_default_env = self._cmd.read_file(consts.GRUB2_DEFAULT_ENV_FILE, no_error = True)
 		if len(grub2_default_env) <= 0:
 			log.info("cannot read '%s'" % consts.GRUB2_DEFAULT_ENV_FILE)
 			return False
@@ -220,7 +222,7 @@ class BootloaderPlugin(base.Plugin):
 		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: "", consts.BOOT_CMDLINE_KARGS_DELETED_VAR: ""})
 
 	def _instance_unapply_static(self, instance, full_rollback = False):
-		if full_rollback:
+		if full_rollback and not self._skip_grub_config_val:
 			if self._rpm_ostree:
 				log.info("removing rpm-ostree tuning previously added by Tuned")
 				self._remove_rpm_ostree_tuning()
@@ -483,20 +485,42 @@ class BootloaderPlugin(base.Plugin):
 				return None
 			cmdline_set = set(cmdline.split())
 			value_set = set(v.split())
-			cmdline_intersect = cmdline_set.intersection(value_set)
-			if cmdline_intersect == value_set:
+			missing_set = value_set - cmdline_set
+			if len(missing_set) == 0:
 				log.info(consts.STR_VERIFY_PROFILE_VALUE_OK % ("cmdline", str(value_set)))
 				return True
 			else:
-				log.error(consts.STR_VERIFY_PROFILE_VALUE_FAIL % ("cmdline", str(cmdline_intersect), str(value_set)))
+				cmdline_dict = {v.split("=", 1)[0]: v for v in cmdline_set}
+				for m in missing_set:
+					arg = m.split("=", 1)[0]
+					if not arg in cmdline_dict:
+						log.error(consts.STR_VERIFY_PROFILE_CMDLINE_FAIL_MISSING % (arg, m))
+					else:
+						log.error(consts.STR_VERIFY_PROFILE_CMDLINE_FAIL % (cmdline_dict[arg], m))
+				present_set = value_set & cmdline_set
+				log.info("expected arguments that are present in cmdline: %s"%(" ".join(present_set),))
 				return False
 		if enabling and value is not None:
 			log.info("installing additional boot command line parameters to grub2")
 			self.update_grub2_cfg = True
 			self._cmdline_val = v
 
+	@command_custom("skip_grub_config", per_device = False, priority = 10)
+	def _skip_grub_config(self, enabling, value, verify, ignore_missing):
+		if verify:
+			return None
+		if enabling and value is not None:
+			if self._cmd.get_bool(value):
+				log.info("skipping any modification of grub config")
+				self._skip_grub_config_val = True
+
 	def _instance_post_static(self, instance, enabling):
-		if enabling and self.update_grub2_cfg:
+		if enabling and self._skip_grub_config_val:
+			if len(self._initrd_val) > 0:
+				log.warn("requested changes to initrd will not be applied!")
+			if len(self._cmdline_val) > 0:
+				log.warn("requested changes to cmdline will not be applied!")
+		elif enabling and self.update_grub2_cfg:
 			if self._rpm_ostree:
 				self._rpm_ostree_update()
 			else:
