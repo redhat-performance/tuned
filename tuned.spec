@@ -67,8 +67,8 @@ BuildRequires: %{_py}, %{_py}-devel
 BuildRequires: %{_py}-mock
 %endif
 BuildRequires: %{_py}-configobj
-BuildRequires: %{_py}-decorator, %{_py}-pyudev
-Requires: %{_py}-decorator, %{_py}-pyudev, %{_py}-configobj
+BuildRequires: %{_py}-pyudev
+Requires: %{_py}-pyudev, %{_py}-configobj
 Requires: %{_py}-linux-procfs, %{_py}-perf
 %if %{without python3}
 Requires: %{_py}-schedutils

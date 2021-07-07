@@ -1,15 +1,28 @@
 from . import interfaces
-import decorator
 import dbus.service
 import dbus.mainloop.glib
 import dbus.exceptions
-import inspect
 import threading
 import signal
 import tuned.logs
 import tuned.consts as consts
+from inspect import ismethod
 from tuned.utils.polkit import polkit
 from gi.repository import GLib
+from types import FunctionType
+
+try:
+	# Python3 version
+	# getfullargspec is not present in Python2, so when we drop P2 support
+	# replace "getargspec(func)" in code with "getfullargspec(func).args"
+	from inspect import getfullargspec
+
+	def getargspec(func):
+		return getfullargspec(func).args
+except ImportError:
+	# Python2 version, drop after support stops
+	from inspect import getargspec
+
 
 log = tuned.logs.get()
 
@@ -59,15 +72,29 @@ class DBusExporter(interfaces.ExporterInterface):
 	def running(self):
 		return self._thread is not None
 
+	def _prepare_for_dbus(self, method, wrapper):
+		source = """def {name}({args}):
+					return wrapper({args})
+		""".format(name=method.__name__, args=', '.join(getargspec(method.__func__)))
+		code = compile(source, '<decorator-gen-%d>' % len(self._dbus_methods), 'exec')
+		# https://docs.python.org/3.9/library/inspect.html
+		# co_consts - tuple of constants used in the bytecode
+		# example:
+		# compile("e=2\ndef f(x):\n    return x*2\n", "X", 'exec').co_consts
+		# (2, <code object f at 0x7f8c60c65330, file "X", line 2>, None)
+		# Because we have only one object in code (our function), we can use code.co_consts[0]
+		func = FunctionType(code.co_consts[0], locals(), method.__name__)
+		return func
+
 	def export(self, method, in_signature, out_signature):
-		if not inspect.ismethod(method):
+		if not ismethod(method):
 			raise Exception("Only bound methods can be exported.")
 
 		method_name = method.__name__
 		if method_name in self._dbus_methods:
 			raise Exception("Method with this name is already exported.")
 
-		def wrapper(wrapped, owner, *args, **kwargs):
+		def wrapper(owner, *args, **kwargs):
 			action_id = consts.NAMESPACE + "." + method.__name__
 			caller = args[-1]
 			log.debug("checking authorization for for action '%s' requested by caller '%s'" % (action_id, caller))
@@ -87,23 +114,23 @@ class DBusExporter(interfaces.ExporterInterface):
 				args[-1] = ""
 			return method(*args, **kwargs)
 
-		wrapper = decorator.decorator(wrapper, method.__func__)
+		wrapper = self._prepare_for_dbus(method, wrapper)
 		wrapper = dbus.service.method(self._interface_name, in_signature, out_signature, sender_keyword = "caller")(wrapper)
 
 		self._dbus_methods[method_name] = wrapper
 
 	def signal(self, method, out_signature):
-		if not inspect.ismethod(method):
+		if not ismethod(method):
 			raise Exception("Only bound methods can be exported.")
 
 		method_name = method.__name__
 		if method_name in self._dbus_methods:
 			raise Exception("Method with this name is already exported.")
 
-		def wrapper(wrapped, owner, *args, **kwargs):
+		def wrapper(owner, *args, **kwargs):
 			return method(*args, **kwargs)
 
-		wrapper = decorator.decorator(wrapper, method.__func__)
+		wrapper = self._prepare_for_dbus(method, wrapper)
 		wrapper = dbus.service.signal(self._interface_name, out_signature)(wrapper)
 
 		self._dbus_methods[method_name] = wrapper
