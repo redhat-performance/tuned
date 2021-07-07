@@ -124,6 +124,8 @@ STR_VERIFY_PROFILE_DEVICE_VALUE_MISSING = "verify: skipped, missing: device %s: 
 STR_VERIFY_PROFILE_VALUE_MISSING = "verify: skipped, missing: '%s'"
 STR_VERIFY_PROFILE_DEVICE_VALUE_FAIL = "verify: failed: device %s: '%s' = '%s', expected '%s'"
 STR_VERIFY_PROFILE_VALUE_FAIL = "verify: failed: '%s' = '%s', expected '%s'"
+STR_VERIFY_PROFILE_CMDLINE_FAIL = "verify: failed: cmdline arg '%s', expected '%s'"
+STR_VERIFY_PROFILE_CMDLINE_FAIL_MISSING = "verify: failed: cmdline arg '%s' is missing, expected '%s'"
 STR_VERIFY_PROFILE_FAIL = "verify: failed: '%s'"
 
 # timout for tuned-adm operations in seconds
