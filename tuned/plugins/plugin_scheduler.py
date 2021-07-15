@@ -156,6 +156,7 @@ class SchedulerPlugin(base.Plugin):
 		# default is to whitelist all and blacklist none
 		self._ps_whitelist = ".*"
 		self._ps_blacklist = ""
+		self._cgroup_ps_blacklist_re = ""
 		self._cpus = perf.cpu_map()
 		self._scheduler_storage_key = self._storage_key(
 				command_name = "scheduler")
@@ -251,6 +252,7 @@ class SchedulerPlugin(base.Plugin):
 			"cgroup_mount_point_init": False,
 			"cgroup_groups_init": True,
 			"cgroup_for_isolated_cores": None,
+			"cgroup_ps_blacklist": None,
 			"ps_whitelist": None,
 			"ps_blacklist": None,
 			"default_irq_smp_affinity": "calc",
@@ -811,6 +813,14 @@ class SchedulerPlugin(base.Plugin):
 							elif event.type == perf.RECORD_EXIT:
 								self._remove_pid(instance, int(event.tid))
 
+	@command_custom("cgroup_ps_blacklist", per_device = False)
+	def _cgroup_ps_blacklist(self, enabling, value, verify, ignore_missing):
+		# currently unsupported
+		if verify:
+			return None
+		if enabling and value is not None:
+			self._cgroup_ps_blacklist_re = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
+
 	@command_custom("ps_whitelist", per_device = False)
 	def _ps_whitelist(self, enabling, value, verify, ignore_missing):
 		# currently unsupported
@@ -886,6 +896,9 @@ class SchedulerPlugin(base.Plugin):
 		if self._ps_blacklist != "":
 			psl = [v for v in psl if re.search(self._ps_blacklist,
 					self._get_stat_comm(v)) is None]
+		if self._cgroup_ps_blacklist_re != "":
+			psl = [v for v in psl if re.search(self._cgroup_ps_blacklist_re,
+					self._get_stat_cgroup(v)) is None]
 		psd = dict([(v.pid, v) for v in psl])
 		for pid in psd:
 			try:
@@ -910,6 +923,12 @@ class SchedulerPlugin(base.Plugin):
 				self._set_all_obj_affinity(
 						psd[pid]["threads"].values(),
 						affinity, True)
+
+	def _get_stat_cgroup(self, o):
+		try:
+			return o["cgroups"]
+		except (OSError, IOError, KeyError):
+			return ""
 
 	def _get_stat_comm(self, o):
 		try:
