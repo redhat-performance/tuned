@@ -965,6 +965,19 @@ class SchedulerPlugin(base.Plugin):
 
 	def _set_all_irq_affinity(self, affinity):
 		irq_original = IRQAffinities()
+
+		# default affinity
+		prev_affinity_hex = self._cmd.read_file("/proc/irq/default_smp_affinity")
+		prev_affinity = self._cmd.hex2cpulist(prev_affinity_hex)
+		if self._default_irq_smp_affinity_value == "calc":
+			_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
+		elif self._default_irq_smp_affinity_value != "ignore":
+			_affinity = self._default_irq_smp_affinity_value
+		if self._default_irq_smp_affinity_value != "ignore":
+			self._set_default_irq_affinity(_affinity)
+			irq_original.default = prev_affinity
+
+		# individual irq affinities
 		irqs = procfs.interrupts()
 		for irq in irqs.keys():
 			try:
@@ -982,27 +995,17 @@ class SchedulerPlugin(base.Plugin):
 			elif res == -2:
 				irq_original.unchangeable.append(irq)
 
-		# default affinity
-		prev_affinity_hex = self._cmd.read_file("/proc/irq/default_smp_affinity")
-		prev_affinity = self._cmd.hex2cpulist(prev_affinity_hex)
-		if self._default_irq_smp_affinity_value == "calc":
-			_affinity = self._get_intersect_affinity(prev_affinity, affinity, affinity)
-		elif self._default_irq_smp_affinity_value != "ignore":
-			_affinity = self._default_irq_smp_affinity_value
-		if self._default_irq_smp_affinity_value != "ignore":
-			self._set_default_irq_affinity(_affinity)
-			irq_original.default = prev_affinity
 		self._storage.set(self._irq_storage_key, irq_original)
 
 	def _restore_all_irq_affinity(self):
 		irq_original = self._storage.get(self._irq_storage_key, None)
 		if irq_original is None:
 			return
-		for irq, affinity in irq_original.irqs.items():
-			self._set_irq_affinity(irq, affinity, True)
 		if self._default_irq_smp_affinity_value != "ignore":
 			affinity = irq_original.default
 			self._set_default_irq_affinity(affinity)
+		for irq, affinity in irq_original.irqs.items():
+			self._set_irq_affinity(irq, affinity, True)
 		self._storage.unset(self._irq_storage_key)
 
 	def _verify_irq_affinity(self, irq_description, correct_affinity,
