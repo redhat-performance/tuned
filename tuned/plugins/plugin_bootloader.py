@@ -510,7 +510,7 @@ class BootloaderPlugin(base.Plugin):
 		if verify:
 			return None
 		if enabling and value is not None:
-			if self._cmd.get_bool(value):
+			if self._cmd.get_bool(value) == "1":
 				log.info("skipping any modification of grub config")
 				self._skip_grub_config_val = True
 
