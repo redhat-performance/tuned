@@ -1,6 +1,11 @@
 import tuned.logs
-from configobj import ConfigObj, ConfigObjError
-from validate import Validator
+try:
+	from configparser import ConfigParser, Error
+	from io import StringIO
+except ImportError:
+	# python2.7 support, remove RHEL-7 support end
+	from ConfigParser import ConfigParser, Error
+	from StringIO import StringIO
 from tuned.exceptions import TunedException
 import tuned.consts as consts
 from tuned.utils.commands import commands
@@ -11,15 +16,28 @@ log = tuned.logs.get()
 
 class GlobalConfig():
 
-	global_config_spec = ["dynamic_tuning = boolean(default=%s)" % consts.CFG_DEF_DYNAMIC_TUNING,
-		"sleep_interval = integer(default=%s)" % consts.CFG_DEF_SLEEP_INTERVAL,
-		"update_interval = integer(default=%s)" % consts.CFG_DEF_UPDATE_INTERVAL,
-		"recommend_command = boolean(default=%s)" % consts.CFG_DEF_RECOMMEND_COMMAND]
-
 	def __init__(self,config_file = consts.GLOBAL_CONFIG_FILE):
 		self._cfg = {}
 		self.load_config(file_name=config_file)
 		self._cmd = commands()
+
+	@staticmethod
+	def get_global_config_spec():
+		"""
+		Easy validation mimicking configobj
+		Returns two dicts, firts with default values (default None)
+		global_default[consts.CFG_SOMETHING] = consts.CFG_DEF_SOMETHING or None
+		second with configobj function for value type (default "get" for string, others eg getboolean, getint)
+		global_function[consts.CFG_SOMETHING] = consts.CFG_FUNC_SOMETHING or get
+		}
+		"""
+		options = [opt for opt in dir(consts)
+				   if opt.startswith("CFG_") and
+				   not opt.startswith("CFG_FUNC_") and
+				   not opt.startswith("CFG_DEF_")]
+		global_default = dict((getattr(consts, opt), getattr(consts, "CFG_DEF_" + opt[4:], None)) for opt in options)
+		global_function = dict((getattr(consts, opt), getattr(consts, "CFG_FUNC_" + opt[4:], "get")) for opt in options)
+		return global_default, global_function
 
 	def load_config(self, file_name = consts.GLOBAL_CONFIG_FILE):
 		"""
@@ -27,15 +45,26 @@ class GlobalConfig():
 		"""
 		log.debug("reading and parsing global configuration file '%s'" % file_name)
 		try:
-			self._cfg = ConfigObj(file_name, configspec = self.global_config_spec, raise_errors = True, \
-				file_error = True, list_values = False, interpolation = False)
+			config_parser = ConfigParser()
+			config_parser.optionxform = str
+			with open(file_name) as f:
+				config_parser.readfp(StringIO("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read()))
+			self._cfg, _global_config_func = self.get_global_config_spec()
+			for option in config_parser.options(consts.MAGIC_HEADER_NAME):
+				if option in self._cfg:
+					try:
+						func = getattr(config_parser, _global_config_func[option])
+						self._cfg[option] = func(consts.MAGIC_HEADER_NAME, option)
+					except Error:
+						raise TunedException("Global TuneD configuration file '%s' is not valid."
+											 % file_name)
+				else:
+					log.info("Unknown option '%s' in global config file '%s'." % (option, file_name))
+					self._cfg[option] = config_parser.get(consts.MAGIC_HEADER_NAME, option, raw=True)
 		except IOError as e:
 			raise TunedException("Global TuneD configuration file '%s' not found." % file_name)
-		except ConfigObjError as e:
+		except Error as e:
 			raise TunedException("Error parsing global TuneD configuration file '%s'." % file_name)
-		vdt = Validator()
-		if (not self._cfg.validate(vdt, copy=True)):
-			raise TunedException("Global TuneD configuration file '%s' is not valid." % file_name)
 
 	def get(self, key, default = None):
 		return self._cfg.get(key, default)

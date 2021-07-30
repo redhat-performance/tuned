@@ -3,7 +3,11 @@ import re
 import errno
 import procfs
 import subprocess
-from configobj import ConfigObj, ConfigObjError
+try:
+	from configparser import ConfigParser, Error
+except ImportError:
+	# python2.7 support, remove RHEL-7 support end
+	from ConfigParser import ConfigParser, Error
 
 try:
 	import syspurpose.files
@@ -59,11 +63,14 @@ class ProfileRecommender:
 		try:
 			if not os.path.isfile(fname):
 				return None
-			config = ConfigObj(fname, list_values = False, interpolation = False)
-			for section in list(config.keys()):
+			config = ConfigParser()
+			config.optionxform = str
+			with open(fname) as f:
+				config.readfp(f)
+			for section in config.sections():
 				match = True
-				for option in list(config[section].keys()):
-					value = config[section][option]
+				for option in config.options(section):
+					value = config.get(section, option, raw=True)
 					if value == "":
 						value = r"^$"
 					if option == "virt":
@@ -117,7 +124,7 @@ class ProfileRecommender:
 					r = re.compile(r",[^,]*$")
 					matching_profile = r.sub("", section)
 					break
-		except (IOError, OSError, ConfigObjError) as e:
+		except (IOError, OSError, Error) as e:
 			log.error("error processing '%s', %s" % (fname, e))
 		return matching_profile
 

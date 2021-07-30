@@ -66,9 +66,8 @@ BuildRequires: %{_py}, %{_py}-devel
 %if %{without python3} && ( ! 0%{?rhel} || 0%{?rhel} >= 8 )
 BuildRequires: %{_py}-mock
 %endif
-BuildRequires: %{_py}-configobj
 BuildRequires: %{_py}-pyudev
-Requires: %{_py}-pyudev, %{_py}-configobj
+Requires: %{_py}-pyudev
 Requires: %{_py}-linux-procfs, %{_py}-perf
 %if %{without python3}
 Requires: %{_py}-schedutils

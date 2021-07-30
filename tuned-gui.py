@@ -48,7 +48,7 @@ except ImportError:
 import sys
 import os
 import time
-import configobj
+import collections
 import subprocess
 
 import tuned.logs
@@ -508,8 +508,7 @@ class Base(object):
 
 	def data_to_profile_config(self):
 		name = self._gobj('entryProfileName').get_text()
-		config = configobj.ConfigObj(list_values = False,
-				interpolation = False)
+		config = collections.OrderedDict()
 
 		activated = self._gobj('comboboxIncludeProfile').get_active()
 		model = self._gobj('comboboxIncludeProfile').get_model()

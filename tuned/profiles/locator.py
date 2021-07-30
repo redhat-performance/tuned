@@ -1,6 +1,12 @@
 import os
 import tuned.consts as consts
-from configobj import ConfigObj, ConfigObjError
+try:
+	from configparser import ConfigParser, Error
+	from io import StringIO
+except ImportError:
+	# python2.7 support, remove RHEL-7 support end
+	from ConfigParser import ConfigParser, Error
+	from StringIO import StringIO
 
 class Locator(object):
 	"""
@@ -48,8 +54,12 @@ class Locator(object):
 		if config_file is None:
 			return None
 		try:
-			return ConfigObj(config_file, list_values = False, interpolation = False)
-		except (IOError, OSError, ConfigObjError) as e:
+			config = ConfigParser()
+			config.optionxform = str
+			with open(config_file) as f:
+				config.readfp(StringIO("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read()))
+			return config
+		except (IOError, OSError, Error) as e:
 			return None
 
 	# Get profile attributes (e.g. summary, description), attrs is list of requested attributes,
@@ -75,17 +85,16 @@ class Locator(object):
 		config = self.parse_config(profile_name)
 		if config is None:
 			return [False, "", "", ""]
-		if consts.PLUGIN_MAIN_UNIT_NAME in config:
-			d = config[consts.PLUGIN_MAIN_UNIT_NAME]
-		else:
-			d = dict()
+		main_unit_in_config = consts.PLUGIN_MAIN_UNIT_NAME in config.sections()
 		vals = [True, profile_name]
 		for (attr, defval) in zip(attrs, defvals):
 			if attr == "" or attr is None:
 				vals[0] = False
 				vals = vals + [""]
+			elif main_unit_in_config and attr in config.options(consts.PLUGIN_MAIN_UNIT_NAME):
+				vals = vals + [config.get(consts.PLUGIN_MAIN_UNIT_NAME, attr, raw=True)]
 			else:
-				vals = vals + [d.get(attr, defval)]
+				vals = vals + [defval]
 		return vals
 
 	def list_profiles(self):

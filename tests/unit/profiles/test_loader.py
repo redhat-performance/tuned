@@ -46,6 +46,8 @@ class LoaderTestCase(unittest.TestCase):
 			f.write('file_path=${i:PROFILE_DIR}/whatever\n')
 			f.write('script=random_name.sh\n')
 			f.write('[test_unit]\ntest_option=hello world\n')
+			f.write('devices=/dev/${variable1},/dev/${variable2}\n')
+			f.write('[variables]\nvariable1=net\nvariable2=cpu')
 
 	def setUp(self):
 		locator = profiles.Locator([self._profiles_dir])
@@ -104,6 +106,11 @@ class LoaderTestCase(unittest.TestCase):
 
 		self.assertEqual(config['test_unit']['test_option'],\
 			'hello world')
+
+	def test_variables(self):
+		config = self._loader.load(['dummy4'])
+		self.assertEqual(config.units['test_unit'].devices,\
+			'/dev/net,/dev/cpu')
 
 	@classmethod
 	def tearDownClass(cls):

@@ -16,6 +16,8 @@ DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
 LOAD_DIRECTORIES = ["/usr/lib/tuned", "/etc/tuned"]
 PERSISTENT_STORAGE_DIR = "/var/lib/tuned"
 PLUGIN_MAIN_UNIT_NAME = "main"
+# Magic section header because ConfigParser does not support "headerless" config
+MAGIC_HEADER_NAME = "this_is_some_magic_section_header_because_of_compatibility"
 RECOMMEND_DIRECTORIES = ["/usr/lib/tuned/recommend.d", "/etc/tuned/recommend.d"]
 
 TMP_FILE_SUFFIX = ".tmp"
@@ -79,6 +81,10 @@ ENV_PREFIX = "TUNED_"
 PREFIX_PROFILE_FACTORY = "System"
 PREFIX_PROFILE_USER = "User"
 
+# After adding new option to tuned-main.conf add here its name with CFG_ prefix
+# and eventually default value with CFG_DEF_ prefix (default is None)
+# and function for check with CFG_FUNC_ prefix
+# (see configobj for methods, default is get for string)
 CFG_DAEMON = "daemon"
 CFG_DYNAMIC_TUNING = "dynamic_tuning"
 CFG_SLEEP_INTERVAL = "sleep_interval"
@@ -87,25 +93,40 @@ CFG_RECOMMEND_COMMAND = "recommend_command"
 CFG_REAPPLY_SYSCTL = "reapply_sysctl"
 CFG_DEFAULT_INSTANCE_PRIORITY = "default_instance_priority"
 CFG_UDEV_BUFFER_SIZE = "udev_buffer_size"
+CFG_LOG_FILE_COUNT = "log_file_count"
+CFG_LOG_FILE_MAX_SIZE = "log_file_max_size"
 CFG_UNAME_STRING = "uname_string"
 CFG_CPUINFO_STRING = "cpuinfo_string"
 
 # no_daemon mode
 CFG_DEF_DAEMON = True
+CFG_FUNC_DAEMON = "getboolean"
 # default configuration
 CFG_DEF_DYNAMIC_TUNING = True
+CFG_FUNC_DYNAMIC_TUNING = "getboolean"
 # how long to sleep before checking for events (in seconds)
 CFG_DEF_SLEEP_INTERVAL = 1
+CFG_FUNC_SLEEP_INTERVAL = "getint"
 # update interval for dynamic tuning (in seconds)
 CFG_DEF_UPDATE_INTERVAL = 10
+CFG_FUNC_UPDATE_INTERVAL = "getint"
 # recommend command availability
 CFG_DEF_RECOMMEND_COMMAND = True
+CFG_FUNC_RECOMMEND_COMMAND = "getboolean"
 # reapply system sysctl
 CFG_DEF_REAPPLY_SYSCTL = True
+CFG_FUNC_REAPPLY_SYSCTL = "getboolean"
 # default instance priority
 CFG_DEF_DEFAULT_INSTANCE_PRIORITY = 0
+CFG_FUNC_DEFAULT_INSTANCE_PRIORITY = "getint"
 # default pyudev.Monitor buffer size
 CFG_DEF_UDEV_BUFFER_SIZE = 1024 * 1024
+# default log file count
+CFG_DEF_LOG_FILE_COUNT = 2
+CFG_FUNC_LOG_FILE_COUNT = "getint"
+# default log file max size
+CFG_DEF_LOG_FILE_MAX_SIZE = 1024 * 1024
+
 
 PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
 
