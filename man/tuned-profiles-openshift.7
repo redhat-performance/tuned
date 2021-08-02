@@ -1,7 +1,7 @@
 .\"/* 
 .\" * All rights reserved
-.\" * Copyright (C) 2009-2017 Red Hat, Inc.
-.\" * Authors: Jaroslav Škarvada
+.\" * Copyright (C) 2018-2021 Red Hat, Inc.
+.\" * Authors: Jaroslav Škarvada, Jiří Mencák
 .\" *
 .\" * This program is free software; you can redistribute it and/or
 .\" * modify it under the terms of the GNU General Public License
@@ -17,23 +17,28 @@
 .\" * along with this program; if not, write to the Free Software
 .\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .\" */
-.\" 
-.TH TUNED_PROFILES_SAP "7" "30 Mar 2017" "Fedora Power Management SIG" "TuneD"
+.\"
+.TH TUNED_PROFILES_OPENSHIFT "8" "02 Aug 2021" "Fedora Power Management SIG" "TuneD"
 .SH NAME
-tuned\-profiles\-sap - description of profiles provided for the SAP NetWeaver
+tuned\-profiles\-openshift - description of profiles provided for the OpenShift platform
 
 .SH DESCRIPTION
-These profiles provides performance optimizations for the SAP NetWeaver applications.
+These profiles are provided for the OpenShift platform.
 
 .SH PROFILES
 The following profiles are provided:
 
 .TP
-.BI "sap\-netweaver"
-A performance optimized profile for the SAP NetWeaver applications.
-It is based on throughput\-performance profile. It additionally tunes sysctl
-settings regarding shared memory, semaphores and maximum number of memory map
-areas a process may have.
+.BI "openshift"
+Parent profile containing tuning shared by OpenShift control plane and worker nodes.
+
+.TP
+.BI "openshift\-control\-plane"
+Profile optimized for OpenShift control plane.
+
+.TP
+.BI "openshift\-node"
+Profile optimized for general workloads on OpenShift worker nodes.
 
 .SH "FILES"
 .nf
@@ -44,17 +49,18 @@ areas a process may have.
 .BR tuned (8)
 .BR tuned\-adm (8)
 .BR tuned\-profiles (7)
-.BR tuned\-profiles\-atomic (7)
+.BR tuned\-profiles\-sap (7)
 .BR tuned\-profiles\-sap\-hana (7)
-.BR tuned\-profiles\-mssql (7)
 .BR tuned\-profiles\-oracle (7)
+.BR tuned\-profiles\-mssql (7)
+.BR tuned\-profiles\-atomic (7)
 .BR tuned\-profiles\-realtime (7)
 .BR tuned\-profiles\-nfv\-host (7)
 .BR tuned\-profiles\-nfv\-guest (7)
 .BR tuned\-profiles\-cpu\-partitioning (7)
 .BR tuned\-profiles\-compat (7)
 .BR tuned\-profiles\-postgresql (7)
-.BR tuned\-profiles\-openshift (7)
 .SH AUTHOR
 .nf
 Jaroslav Škarvada <jskarvad@redhat.com>
+Jiří Mencák <jmencak@redhat.com>
