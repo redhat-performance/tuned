@@ -254,6 +254,13 @@ Requires: %{name} = %{version}
 %description profiles-postgresql
 Additional tuned profile(s) targeted to PostgreSQL server loads.
 
+%package profiles-openshift
+Summary: Additional TuneD profile(s) optimized for OpenShift
+Requires: %{name} = %{version}
+
+%description profiles-openshift
+Additional TuneD profile(s) optimized for OpenShift.
+
 %prep
 %setup -q -n %{name}-%{version}%{?prerel2}
 
@@ -416,6 +423,9 @@ fi
 %exclude %{_prefix}/lib/tuned/cpu-partitioning
 %exclude %{_prefix}/lib/tuned/spectrumscale-ece
 %exclude %{_prefix}/lib/tuned/postgresql
+%exclude %{_prefix}/lib/tuned/openshift
+%exclude %{_prefix}/lib/tuned/openshift-control-plane
+%exclude %{_prefix}/lib/tuned/openshift-node
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %dir %{_sysconfdir}/tuned/recommend.d
@@ -547,6 +557,13 @@ fi
 %defattr(-,root,root,-)
 %{_prefix}/lib/tuned/postgresql
 %{_mandir}/man7/tuned-profiles-postgresql.7*
+
+%files profiles-openshift
+%defattr(-,root,root,-)
+%{_prefix}/lib/tuned/openshift
+%{_prefix}/lib/tuned/openshift-control-plane
+%{_prefix}/lib/tuned/openshift-node
+%{_mandir}/man7/tuned-profiles-openshift.7*
 
 %changelog
 * Wed Jul 21 2021 Jaroslav Škarvada <jskarvad@redhat.com> - 2.16.0-1
