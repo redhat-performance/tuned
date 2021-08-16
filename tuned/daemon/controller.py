@@ -6,6 +6,8 @@ import threading
 import tuned.consts as consts
 from tuned.utils.commands import commands
 
+import json
+
 __all__ = ["Controller"]
 
 log = tuned.logs.get()
@@ -258,17 +260,19 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			return ""
 		return self._daemon.profile_recommender.recommend()
 
-	@exports.export("", "b")
+	@exports.export("", "bs")
 	def verify_profile(self, caller = None):
 		if caller == "":
-			return False
-		return self._daemon.verify_profile(ignore_missing = False)
+			return False, None
+		ret, lg = self._daemon.verify_profile(ignore_missing = False)
+		return ret, json.dumps(lg)
 
-	@exports.export("", "b")
+	@exports.export("", "bs")
 	def verify_profile_ignore_missing(self, caller = None):
 		if caller == "":
-			return False
-		return self._daemon.verify_profile(ignore_missing = True)
+			return False, None
+		ret, lg = self._daemon.verify_profile(ignore_missing = True)
+		return ret, json.dumps(lg)
 
 	@exports.export("", "a{sa{ss}}")
 	def get_all_plugins(self, caller = None):

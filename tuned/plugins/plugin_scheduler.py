@@ -12,6 +12,7 @@ import perf
 import select
 import tuned.consts as consts
 import procfs
+from tuned.verifylog import VerifyLog
 from tuned.utils.commands import commands
 import errno
 import os
@@ -24,6 +25,7 @@ except AttributeError:
 	import schedutils
 
 log = tuned.logs.get()
+vlog = VerifyLog.get_obj()
 
 class SchedulerParams(object):
 	def __init__(self, cmd, cmdline = None, scheduler = None,
@@ -1340,6 +1342,9 @@ class SchedulerPlugin(base.Plugin):
 						correct_affinity,
 						current_affinity):
 					res = False
+				srq = "IRQ %s %s" % (irq, irqs[irq]["users"])
+				vlog.add_log("scheduler", srq, current_affinity,
+						correct_affinity, result=res)
 			except KeyError:
 				continue
 

@@ -7,6 +7,7 @@ from .exceptions import TunedAdminDBusException
 from tuned.exceptions import TunedException
 import tuned.consts as consts
 from tuned.utils.profile_recommender import ProfileRecommender
+from tuned.verifylog import VerifyLog
 import os
 import sys
 import errno
@@ -354,24 +355,38 @@ class Admin(object):
 		print(self._profile_recommender.recommend())
 		return True
 
-	def _action_dbus_verify_profile(self, ignore_missing):
+	def _action_dbus_verify_profile(self, ignore_missing, verbose=False):
+		profile_name = self._get_active_profile()
+		if (not profile_name):
+			profile_name = self.get_post_loaded_profile()
+		if (not profile_name):
+			print("No active profile set, please see "
+				"'tuned-adm profile' to select one ")
+			return self._controller.exit(False)
+
 		if ignore_missing:
-			ret = self._controller.verify_profile_ignore_missing()
+			ret, log = self._controller.verify_profile_ignore_missing()
 		else:
-			ret = self._controller.verify_profile()
+			ret, log = self._controller.verify_profile()
+
+		print("Active profile => %s" % profile_name)
+		if log and verbose:
+			ret = VerifyLog(log).display()
+
 		if ret:
 			print("Verfication succeeded, current system settings match the preset profile.")
 		else:
-			print("Verification failed, current system settings differ from the preset profile.")
-			print("You can mostly fix this by restarting the TuneD daemon, e.g.:")
-			print("  systemctl restart tuned")
-			print("or")
-			print("  service tuned restart")
-			print("Sometimes (if some plugins like bootloader are used) a reboot may be required.")
-		print("See TuneD log file ('%s') for details." % consts.LOG_FILE)
+			print("Verification failed, current system settings "
+                              "differ from the preset profile.")
+			if (not verbose):
+				print(" * Use 'tuned-adm verify --verbose' option "
+				"to know differing system settings.")
+			print(" * Sometimes (if some plugins like bootloader are "
+				"used) a reboot may be required.")
+		print(" * See TuneD log file ('%s') for details." % consts.LOG_FILE)
 		return self._controller.exit(ret)
 
-	def _action_verify_profile(self, ignore_missing):
+	def _action_verify_profile(self, ignore_missing, verbose=False):
 		print("Not supported in no_daemon mode.")
 		return False
 
