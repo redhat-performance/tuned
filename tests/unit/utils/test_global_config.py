@@ -12,7 +12,8 @@ class GlobalConfigTestCase(unittest.TestCase):
 		cls.test_dir = tempfile.mkdtemp()
 		with open(cls.test_dir + '/test_config','w') as f:
 			f.write('test_option = hello\ntest_bool = 1\ntest_size = 12MB\n'\
-				+ 'false_bool=0\n')
+				+ 'false_bool=0\n'\
+				+ consts.CFG_LOG_FILE_COUNT + " = " + str(consts.CFG_DEF_LOG_FILE_COUNT) + "1\n")
 
 		cls._global_config = global_config.GlobalConfig(\
 			cls.test_dir + '/test_config')
@@ -28,9 +29,17 @@ class GlobalConfigTestCase(unittest.TestCase):
 		self.assertEqual(self._global_config.get_size('test_size'),\
 			12*1024*1024)
 
-		self._global_config.set('test_size','bad_value')
+		self._global_config.set('test_size', 'bad_value')
 
 		self.assertIsNone(self._global_config.get_size('test_size'))
+
+	def test_default(self):
+		daemon = self._global_config.get(consts.CFG_DAEMON)
+		self.assertEqual(daemon, consts.CFG_DEF_DAEMON)
+
+		log_file_count = self._global_config.get(consts.CFG_LOG_FILE_COUNT)
+		self.assertIsNotNone(log_file_count)
+		self.assertNotEqual(log_file_count, consts.CFG_DEF_LOG_FILE_COUNT)
 
 	@classmethod
 	def tearDownClass(cls):

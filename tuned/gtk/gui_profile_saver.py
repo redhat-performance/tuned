@@ -1,7 +1,11 @@
 import os
 import sys
 import json
-from configobj import ConfigObj
+try:
+	from configparser import ConfigParser
+except ImportError:
+	# python2.7 support, remove RHEL-7 support end
+	from ConfigParser import ConfigParser
 
 
 if __name__ == "__main__":
@@ -11,13 +15,19 @@ if __name__ == "__main__":
 	if not os.path.exists(profile_dict['filename']):
 		os.makedirs(os.path.dirname(profile_dict['filename']))
 
-	profile_configobj = ConfigObj()
-	for section in profile_dict['sections']:
-		profile_configobj[section] = profile_dict['main'][section]
+	profile_configobj = ConfigParser()
+	profile_configobj.optionxform = str
+	for section, options in profile_dict['main'].items():
+		profile_configobj.add_section(section)
+		for option, value in options.items():
+			profile_configobj.set(section, option, value)
 
-	profile_configobj.filename = os.path.join('/etc','tuned',os.path.dirname(os.path.abspath(profile_dict['filename'])),'tuned.conf')
-	profile_configobj.initial_comment = profile_dict['initial_comment']
-
-	profile_configobj.write()
+	path = os.path.join('/etc','tuned',os.path.dirname(os.path.abspath(profile_dict['filename'])),'tuned.conf')
+	with open(path, 'w') as f:
+		profile_configobj.write(f)
+	with open(path, 'r+') as f:
+		content = f.read()
+		f.seek(0, 0)
+		f.write("\n".join(profile_dict['initial_comment']) + "\n" + content)
 
 	sys.exit(0)
