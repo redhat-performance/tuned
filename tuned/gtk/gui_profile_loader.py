@@ -25,13 +25,7 @@ Created on Mar 13, 2014
 '''
 
 import os
-try:
-    from configparser import ConfigParser, Error
-    from io import StringIO
-except ImportError:
-    # python2.7 support, remove RHEL-7 support end
-    from ConfigParser import ConfigParser, Error
-    from StringIO import StringIO
+from tuned.utils.config_parser import ConfigParser, Error
 import subprocess
 import json
 import sys
@@ -68,9 +62,9 @@ class GuiProfileLoader(object):
 
         if profilePath == tuned.consts.LOAD_DIRECTORIES[1]:
             file_path = profilePath + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
-            config_parser = ConfigParser()
+            config_parser = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
             config_parser.optionxform = str
-            config_parser.readfp(StringIO(config))
+            config_parser.read_string(config)
 
             config_obj = {
                 'main': collections.OrderedDict(),
@@ -90,11 +84,11 @@ class GuiProfileLoader(object):
 
     def load_profile_config(self, profile_name, path):
         conf_path = path + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
-        config = ConfigParser()
+        config = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
         config.optionxform = str
         profile_config = collections.OrderedDict()
         with open(conf_path) as f:
-            config.readfp(f)
+            config.read_file(f, conf_path)
         for s in config.sections():
             profile_config[s] = collections.OrderedDict()
             for o in config.options(s):
