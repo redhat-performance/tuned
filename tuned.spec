@@ -95,7 +95,7 @@ Recommends: kmod
 %endif
 # syspurpose
 %if 0%{?rhel} > 8
-Requires: subscription-manager
+Recommends: subscription-manager
 %else
 %if 0%{?rhel} > 7
 Requires: python3-syspurpose
