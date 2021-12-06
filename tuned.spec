@@ -95,7 +95,10 @@ Recommends: kmod
 %endif
 # syspurpose
 %if 0%{?rhel} > 8
+# not on CentOS
+%if 0%{!?centos:1}
 Requires: subscription-manager
+%endif
 %else
 %if 0%{?rhel} > 7
 Requires: python3-syspurpose
