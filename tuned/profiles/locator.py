@@ -31,6 +31,10 @@ class Locator(object):
 
 	def get_config(self, profile_name, skip_files=None):
 		ret = None
+		conditional_load = profile_name[0:1] == "-"
+		if conditional_load:
+			profile_name = profile_name[1:]
+
 		for dir_name in reversed(self._load_directories):
 			# basename is protection not to get out of the path
 			config_file = self._get_config_filename(dir_name, os.path.basename(profile_name))
@@ -41,6 +45,9 @@ class Locator(object):
 
 			if os.path.isfile(config_file):
 				return config_file
+
+		if conditional_load and ret is None:
+			ret = ""
 
 		return ret
 
