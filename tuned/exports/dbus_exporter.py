@@ -18,7 +18,7 @@ try:
 	from inspect import getfullargspec
 
 	def getargspec(func):
-		return getfullargspec(func).args
+		return getfullargspec(func)
 except ImportError:
 	# Python2 version, drop after support stops
 	from inspect import getargspec
@@ -75,7 +75,7 @@ class DBusExporter(interfaces.ExporterInterface):
 	def _prepare_for_dbus(self, method, wrapper):
 		source = """def {name}({args}):
 					return wrapper({args})
-		""".format(name=method.__name__, args=', '.join(getargspec(method.__func__)))
+		""".format(name=method.__name__, args=', '.join(getargspec(method.__func__).args))
 		code = compile(source, '<decorator-gen-%d>' % len(self._dbus_methods), 'exec')
 		# https://docs.python.org/3.9/library/inspect.html
 		# co_consts - tuple of constants used in the bytecode
