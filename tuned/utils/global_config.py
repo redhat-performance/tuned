@@ -1,10 +1,11 @@
 import tuned.logs
+from tuned.utils.config_parser import TuneDConfigParser
 try:
-	from configparser import ConfigParser, Error
+	from configparser import Error
 	from io import StringIO
 except ImportError:
 	# python2.7 support, remove RHEL-7 support end
-	from ConfigParser import ConfigParser, Error
+	from ConfigParser import Error
 	from StringIO import StringIO
 from tuned.exceptions import TunedException
 import tuned.consts as consts
@@ -18,8 +19,8 @@ class GlobalConfig():
 
 	def __init__(self,config_file = consts.GLOBAL_CONFIG_FILE):
 		self._cfg = {}
-		self.load_config(file_name=config_file)
 		self._cmd = commands()
+		self.load_config(file_name=config_file)
 
 	@staticmethod
 	def get_global_config_spec():
@@ -45,10 +46,10 @@ class GlobalConfig():
 		"""
 		log.debug("reading and parsing global configuration file '%s'" % file_name)
 		try:
-			config_parser = ConfigParser()
+			config_parser = TuneDConfigParser()
 			config_parser.optionxform = str
 			with open(file_name) as f:
-				config_parser.readfp(StringIO("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read()))
+				config_parser.read_file(StringIO("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read()))
 			self._cfg, _global_config_func = self.get_global_config_spec()
 			for option in config_parser.options(consts.MAGIC_HEADER_NAME):
 				if option in self._cfg:

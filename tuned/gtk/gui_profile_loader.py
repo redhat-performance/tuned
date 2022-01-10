@@ -25,12 +25,13 @@ Created on Mar 13, 2014
 '''
 
 import os
+from tuned.utils.config_parser import TuneDConfigParser
 try:
-    from configparser import ConfigParser, Error
+    from configparser import Error
     from io import StringIO
 except ImportError:
     # python2.7 support, remove RHEL-7 support end
-    from ConfigParser import ConfigParser, Error
+    from ConfigParser import Error
     from StringIO import StringIO
 import subprocess
 import json
@@ -68,9 +69,9 @@ class GuiProfileLoader(object):
 
         if profilePath == tuned.consts.LOAD_DIRECTORIES[1]:
             file_path = profilePath + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
-            config_parser = ConfigParser()
+            config_parser = TuneDConfigParser()
             config_parser.optionxform = str
-            config_parser.readfp(StringIO(config))
+            config_parser.read_file(StringIO(config))
 
             config_obj = {
                 'main': collections.OrderedDict(),
@@ -90,11 +91,11 @@ class GuiProfileLoader(object):
 
     def load_profile_config(self, profile_name, path):
         conf_path = path + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
-        config = ConfigParser()
+        config = TuneDConfigParser()
         config.optionxform = str
         profile_config = collections.OrderedDict()
         with open(conf_path) as f:
-            config.readfp(f)
+            config.read_file(f)
         for s in config.sections():
             profile_config[s] = collections.OrderedDict()
             for o in config.options(s):

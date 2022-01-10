@@ -1,11 +1,12 @@
 import os
 import tuned.consts as consts
+from tuned.utils.config_parser import TuneDConfigParser
 try:
-	from configparser import ConfigParser, Error
+	from configparser import Error
 	from io import StringIO
 except ImportError:
 	# python2.7 support, remove RHEL-7 support end
-	from ConfigParser import ConfigParser, Error
+	from ConfigParser import Error
 	from StringIO import StringIO
 
 class Locator(object):
@@ -61,10 +62,10 @@ class Locator(object):
 		if config_file is None:
 			return None
 		try:
-			config = ConfigParser()
+			config = TuneDConfigParser()
 			config.optionxform = str
 			with open(config_file) as f:
-				config.readfp(StringIO("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read()))
+				config.read_file(StringIO("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read()))
 			return config
 		except (IOError, OSError, Error) as e:
 			return None
