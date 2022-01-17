@@ -1,0 +1,23 @@
+:_module-type: REFERENCE
+[id="real-time-tuned-profiles-distributed-with-rhel_{context}"]
+= Real-time TuneD profiles distributed with RHEL
+
+[role="_abstract"]
+Real-time profiles are intended for systems running the real-time kernel. Without a special kernel build, they do not configure the system to be real-time. On RHEL, the profiles are available from additional repositories.
+
+The following real-time profiles are available:
+
+`realtime`::
+Use on bare-metal real-time systems.
++
+Provided by the [package]`tuned-profiles-realtime` package, which is available from the RT or NFV repositories.
+
+`realtime-virtual-host`::
+Use in a virtualization host configured for real-time.
++
+Provided by the [package]`tuned-profiles-nfv-host` package, which is available from the NFV repository.
+
+`realtime-virtual-guest`::
+Use in a virtualization guest configured for real-time.
++
+Provided by the [package]`tuned-profiles-nfv-guest` package, which is available from the NFV repository.

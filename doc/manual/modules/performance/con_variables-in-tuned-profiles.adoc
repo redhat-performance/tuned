@@ -1,0 +1,55 @@
+:_module-type: CONCEPT
+[id="variables-in-tuned-profiles_{context}"]
+= Variables in TuneD profiles
+
+[role="_abstract"]
+Variables expand at run time when a *TuneD* profile is activated.
+
+Using *TuneD* variables reduces the amount of necessary typing in *TuneD* profiles.
+
+There are no predefined variables in *TuneD* profiles. You can define your own variables by creating the `[variables]` section in a profile and using the following syntax:
+
+[subs=+quotes]
+----
+[variables]
+
+[replaceable]__variable_name__=[replaceable]__value__
+----
+
+To expand the value of a variable in a profile, use the following syntax:
+
+[subs=+quotes]
+----
+${[replaceable]__variable_name__}
+----
+
+.Isolating CPU cores using variables
+====
+In the following example, the `${isolated_cores}` variable expands to `1,2`; hence the kernel boots with the [option]`isolcpus=1,2` option:
+
+----
+[variables]
+isolated_cores=1,2
+
+[bootloader]
+cmdline=isolcpus=${isolated_cores}
+----
+
+The variables can be specified in a separate file. For example, you can add the following lines to [filename]`tuned.conf`:
+
+[subs=+quotes]
+----
+[variables]
+include=/etc/tuned/[replaceable]_my-variables.conf_
+
+[bootloader]
+cmdline=isolcpus=${isolated_cores}
+----
+
+If you add the [option]`isolated_cores=1,2` option to the [filename]`/etc/tuned/my-variables.conf` file, the kernel boots with the [option]`isolcpus=1,2` option.
+
+====
+
+[role="_additional-resources"]
+.Additional resources
+* `tuned.conf(5)` man page

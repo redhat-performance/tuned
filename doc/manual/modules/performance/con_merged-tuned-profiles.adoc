@@ -1,0 +1,23 @@
+:_module-type: CONCEPT
+[id="merged-tuned-profiles_{context}"]
+= Merged TuneD profiles
+
+[role="_abstract"]
+As an experimental feature, it is possible to select more profiles at once. *TuneD* will try to merge them during the load.
+
+If there are conflicts, the settings from the last specified profile takes precedence.
+
+.Low power consumption in a virtual guest
+====
+The following example optimizes the system to run in a virtual machine for the best performance and concurrently tunes it for low power consumption, while the low power consumption is the priority:
+
+----
+# tuned-adm profile virtual-guest powersave
+----
+====
+
+WARNING: Merging is done automatically without checking whether the resulting combination of parameters makes sense. Consequently, the feature might tune some parameters the opposite way, which might be counterproductive: for example, setting the disk for high throughput by using the `throughput-performance` profile and concurrently setting the disk spindown to the low value by the `spindown-disk` profile.
+
+[role="_additional-resources"]
+.Additional resources
+* `tuned.conf(5)` man page.
