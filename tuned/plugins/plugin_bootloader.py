@@ -526,7 +526,7 @@ class BootloaderPlugin(base.Plugin):
 			return None
 		log.info(f"processing override_grub_cmdline. value: {value} verify: {verify}")
 		if enabling and value is not None:
-			self._override_grub_cmdline = value
+			self._override_grub_cmdline = self._cmd.unquote(value)
 
 	def _instance_post_static(self, instance, enabling):
 		if enabling and self._skip_grub_config_val:
