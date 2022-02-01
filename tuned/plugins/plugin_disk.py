@@ -27,22 +27,42 @@ class DiskPlugin(hotplug.Plugin):
 	def _init_devices(self):
 		super(DiskPlugin, self)._init_devices()
 		self._devices_supported = True
+		self._use_hdparm = True
 		self._free_devices = set()
+		self._hdparm_apm_devices = set()
 		for device in self._hardware_inventory.get_devices("block"):
 			if self._device_is_supported(device):
 				self._free_devices.add(device.sys_name)
+				if self._use_hdparm and self._is_hdparm_apm_supported(device.sys_name):
+					self._hdparm_apm_devices.add(device.sys_name)
 
 		self._assigned_devices = set()
 
 	def _get_device_objects(self, devices):
 		return [self._hardware_inventory.get_device("block", x) for x in devices]
 
+	def _is_hdparm_apm_supported(self, device):
+		(rc, out, err_msg) = self._cmd.execute(["hdparm", "-C", "/dev/%s" % device], \
+				no_errors = [errno.ENOENT], return_err=True)
+		if rc == -errno.ENOENT:
+			log.warn("hdparm command not found, ignoring for other devices")
+			self._use_hdparm = False
+			return False
+		elif rc:
+			log.info("Device '%s' not supported by hdparm" % device)
+			log.debug("(rc: %s, msg: '%s')" % (rc, err_msg))
+			return False
+		elif "unknown" in out:
+			log.info("Driver for device '%s' does not support apm command" % device)
+			return False
+		return True
+
 	@classmethod
 	def _device_is_supported(cls, device):
 		return  device.device_type == "disk" and \
 			device.attributes.get("removable", None) == b"0" and \
 			(device.parent is None or \
-					device.parent.subsystem in ["scsi", "virtio", "xen"])
+					device.parent.subsystem in ["scsi", "virtio", "xen", "nvme"])
 
 	def _hardware_events_init(self):
 		self._hardware_inventory.subscribe(self, "block", self._hardware_events_callback)
@@ -142,6 +162,8 @@ class DiskPlugin(hotplug.Plugin):
 		return not "standby" in out and not "sleeping" in out
 
 	def _instance_update_dynamic(self, instance, device):
+		if not device in self._hdparm_apm_devices:
+			return
 		load = instance._load_monitor.get_device_load(device)
 		if load is None:
 			return
@@ -202,7 +224,7 @@ class DiskPlugin(hotplug.Plugin):
 		diff = [new_old[0] - new_old[1] for new_old in zip(new_load, old_load)]
 		instance._stats[device]["diff"] = diff
 
-		# adapt maximum expected load if the difference is higer
+		# adapt maximum expected load if the difference is higher
 		old_max_load = instance._stats[device]["max"]
 		max_load = [max(pair) for pair in zip(old_max_load, diff)]
 		instance._stats[device]["max"] = max_load
@@ -218,6 +240,15 @@ class DiskPlugin(hotplug.Plugin):
 				instance._idle[device][operation] += 1
 			else:
 				instance._idle[device][operation] = 0
+
+	def _instance_apply_dynamic(self, instance, device):
+		# At the moment we support dynamic tuning just for devices compatible with hdparm apm commands
+		# If in future will be added new functionality not connected to this command,
+		# it is needed to change it here
+		if device not in self._hdparm_apm_devices:
+			log.info("There is no dynamic tuning available for device '%s' at time" % device)
+		else:
+			super(DiskPlugin, self)._instance_apply_dynamic(*args, **kwargs)
 
 	def _instance_unapply_dynamic(self, instance, device):
 		pass
@@ -248,6 +279,12 @@ class DiskPlugin(hotplug.Plugin):
 
 	@command_set("apm", per_device=True)
 	def _set_apm(self, value, device, sim):
+		if device not in self._hdparm_apm_devices:
+			if not sim:
+				log.info("apm option is not supported for device '%s'" % device)
+				return None
+			else:
+				return str(value)
 		if self._apm_errcnt < consts.ERROR_THRESHOLD:
 			if not sim:
 				(rc, out) = self._cmd.execute(["hdparm", "-B", str(value), "/dev/" + device], no_errors = [errno.ENOENT])
@@ -258,6 +295,10 @@ class DiskPlugin(hotplug.Plugin):
 
 	@command_get("apm")
 	def _get_apm(self, device, ignore_missing=False):
+		if device not in self._hdparm_apm_devices:
+			if not ignore_missing:
+				log.info("apm option is not supported for device '%s'" % device)
+			return None
 		value = None
 		err = False
 		(rc, out) = self._cmd.execute(["hdparm", "-B", "/dev/" + device], no_errors = [errno.ENOENT])
@@ -278,6 +319,12 @@ class DiskPlugin(hotplug.Plugin):
 
 	@command_set("spindown", per_device=True)
 	def _set_spindown(self, value, device, sim):
+		if device not in self._hdparm_apm_devices:
+			if not sim:
+				log.info("spindown option is not supported for device '%s'" % device)
+				return None
+			else:
+				return str(value)
 		if self._spindown_errcnt < consts.ERROR_THRESHOLD:
 			if not sim:
 				(rc, out) = self._cmd.execute(["hdparm", "-S", str(value), "/dev/" + device], no_errors = [errno.ENOENT])
@@ -288,6 +335,10 @@ class DiskPlugin(hotplug.Plugin):
 
 	@command_get("spindown")
 	def _get_spindown(self, device, ignore_missing=False):
+		if device not in self._hdparm_apm_devices:
+			if not ignore_missing:
+				log.info("spindown option is not supported for device '%s'" % device)
+			return None
 		# There's no way how to get current/old spindown value, hardcoding vendor specific 253
 		return 253
 
@@ -361,6 +412,6 @@ class DiskPlugin(hotplug.Plugin):
 		value = self._cmd.read_file(sys_file, no_error=ignore_missing).strip()
 		if len(value) == 0:
 			if not ignore_missing:
-				log.info("disk_scheduler_quantum option is not supported by this HW")
+				log.info("disk_scheduler_quantum option is not supported for device '%s'" % device)
 			return None
 		return int(value)
