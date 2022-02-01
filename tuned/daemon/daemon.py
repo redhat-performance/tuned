@@ -184,7 +184,7 @@ class Daemon(object):
 		if out[:8] == "stopping":
 			return False
 		retcode, out = self._cmd.execute(["systemctl", "list-jobs"], no_errors = [0])
-		return re.search(r"\b(shutdown|reboot|halt|poweroff)\.target.*start", out) is None
+		return re.search(r"\b(shutdown|reboot|halt|poweroff)\.target.*start", out) is None and not retcode
 
 	def _thread_code(self):
 		if self._profile is None:
