@@ -98,7 +98,7 @@ Recommends: iproute
 %if 0%{?rhel} > 8
 # not on CentOS
 %if 0%{!?centos:1}
-Requires: subscription-manager
+Recommends: subscription-manager
 %endif
 %else
 %if 0%{?rhel} > 7
