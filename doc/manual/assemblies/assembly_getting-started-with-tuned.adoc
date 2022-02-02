@@ -5,10 +5,11 @@
 
 :context: getting-started-with-tuned
 
+[role="_abstract"]
 As a system administrator, you can use the *TuneD* application to optimize the performance profile of your system for a variety of use cases.
 
 // .Prerequisites
-// 
+//
 // * A bulleted list of conditions that must be satisfied before the user starts following this assembly.
 // * You can also link to other modules or assemblies the user must follow before starting this assembly.
 // * Delete the section title and bullets if the assembly has no prerequisites.
@@ -18,7 +19,15 @@ include::modules/performance/con_the-purpose-of-tuned.adoc[leveloffset=+1]
 
 include::modules/performance/con_tuned-profiles.adoc[leveloffset=+1]
 
+include::modules/performance/con_the-default-tuned-profile.adoc[leveloffset=+1]
+
+include::modules/performance/con_merged-tuned-profiles.adoc[leveloffset=+1]
+
+include::modules/performance/con_the-location-of-tuned-profiles.adoc[leveloffset=+1]
+
 include::modules/performance/ref_tuned-profiles-distributed-with-rhel.adoc[leveloffset=+1]
+
+include::modules/performance/ref_real-time-tuned-profiles-distributed-with-rhel.adoc[leveloffset=+1]
 
 include::modules/performance/con_static-and-dynamic-tuning-in-tuned.adoc[leveloffset=+1]
 
@@ -32,12 +41,13 @@ include::modules/performance/proc_setting-a-tuned-profile.adoc[leveloffset=+1]
 
 include::modules/performance/proc_disabling-tuned.adoc[leveloffset=+1]
 
-
+ifdef::upstream[]
 [id='related-information-{context}']
 == Related information
 
 * The `tuned(8)` man page
 * The `tuned-adm(8)` man page
 * The *TuneD* project website: link:https://tuned-project.org/[]
+endif::[]
 
 :context: {parent-context-of-getting-started-with-tuned}

@@ -44,7 +44,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.16.0
+Version: 2.17.0
 Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
@@ -92,10 +92,14 @@ Recommends: dmidecode
 Recommends: hdparm
 Recommends: kernel-tools
 Recommends: kmod
+Recommends: iproute
 %endif
 # syspurpose
 %if 0%{?rhel} > 8
+# not on CentOS
+%if 0%{!?centos:1}
 Recommends: subscription-manager
+%endif
 %else
 %if 0%{?rhel} > 7
 Requires: python3-syspurpose
@@ -261,7 +265,7 @@ Requires: %{name} = %{version}
 Additional TuneD profile(s) optimized for OpenShift.
 
 %prep
-%setup -q -n %{name}-%{version}%{?prerel2}
+%autosetup -p1 -n %{name}-%{version}%{?prerel2}
 
 %build
 # Docs cannot be generated on RHEL now due to missing asciidoctor dependency
@@ -384,7 +388,6 @@ fi
 
 
 %files
-%defattr(-,root,root,-)
 %exclude %{docdir}/README.utils
 %exclude %{docdir}/README.scomes
 %exclude %{docdir}/README.NFV
@@ -452,7 +455,6 @@ fi
 %{_prefix}/lib/kernel/install.d/92-tuned.install
 
 %files gtk
-%defattr(-,root,root,-)
 %{_sbindir}/tuned-gui
 %if %{with python3}
 %{python3_sitelib}/tuned/gtk
@@ -469,7 +471,6 @@ fi
 %{_libexecdir}/tuned/pmqos-static*
 
 %files utils-systemtap
-%defattr(-,root,root,-)
 %doc doc/README.utils
 %doc doc/README.scomes
 %doc COPYING
@@ -483,66 +484,54 @@ fi
 %{_mandir}/man8/scomes.*
 
 %files profiles-sap
-%defattr(-,root,root,-)
 %{_prefix}/lib/tuned/sap-netweaver
 %{_mandir}/man7/tuned-profiles-sap.7*
 
 %files profiles-sap-hana
-%defattr(-,root,root,-)
 %{_prefix}/lib/tuned/sap-hana
 %{_mandir}/man7/tuned-profiles-sap-hana.7*
 
 %files profiles-mssql
-%defattr(-,root,root,-)
 %{_prefix}/lib/tuned/mssql
 %{_mandir}/man7/tuned-profiles-mssql.7*
 
 %files profiles-oracle
-%defattr(-,root,root,-)
 %{_prefix}/lib/tuned/oracle
 %{_mandir}/man7/tuned-profiles-oracle.7*
 
 %files profiles-atomic
-%defattr(-,root,root,-)
 %{_prefix}/lib/tuned/atomic-host
 %{_prefix}/lib/tuned/atomic-guest
 %{_mandir}/man7/tuned-profiles-atomic.7*
 
 %files profiles-realtime
-%defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/tuned/realtime-variables.conf
 %{_prefix}/lib/tuned/realtime
 %{_mandir}/man7/tuned-profiles-realtime.7*
 
 %files profiles-nfv-guest
-%defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-guest-variables.conf
 %{_prefix}/lib/tuned/realtime-virtual-guest
 %{_mandir}/man7/tuned-profiles-nfv-guest.7*
 
 %files profiles-nfv-host
-%defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
 %{_prefix}/lib/tuned/realtime-virtual-host
 %{_mandir}/man7/tuned-profiles-nfv-host.7*
 
 %files profiles-nfv
-%defattr(-,root,root,-)
 %doc %{docdir}/README.NFV
 
 %files profiles-cpu-partitioning
-%defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/tuned/cpu-partitioning-variables.conf
 %{_prefix}/lib/tuned/cpu-partitioning
 %{_mandir}/man7/tuned-profiles-cpu-partitioning.7*
 
 %files profiles-spectrumscale
-%defattr(-,root,root,-)
 %{_prefix}/lib/tuned/spectrumscale-ece
 %{_mandir}/man7/tuned-profiles-spectrumscale-ece.7*
 
 %files profiles-compat
-%defattr(-,root,root,-)
 %{_prefix}/lib/tuned/default
 %{_prefix}/lib/tuned/desktop-powersave
 %{_prefix}/lib/tuned/laptop-ac-powersave
@@ -553,18 +542,34 @@ fi
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %files profiles-postgresql
-%defattr(-,root,root,-)
 %{_prefix}/lib/tuned/postgresql
 %{_mandir}/man7/tuned-profiles-postgresql.7*
 
 %files profiles-openshift
-%defattr(-,root,root,-)
 %{_prefix}/lib/tuned/openshift
 %{_prefix}/lib/tuned/openshift-control-plane
 %{_prefix}/lib/tuned/openshift-node
 %{_mandir}/man7/tuned-profiles-openshift.7*
 
 %changelog
+* Sun Jan 16 2022 Jaroslav Škarvada <jskarvad@redhat.com> - 2.17.0-1
+- new release
+  - rebased tuned to latest upstream
+    related: rhbz#2003838
+
+* Sun Jan  2 2022 Jaroslav Škarvada <jskarvad@redhat.com> - 2.17.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#2003838
+  - cpu-partitioning: fixed no_balance_cores on newer kernels
+    resolves: rhbz#1874596
+  - scheduler: allow exclude of processes from the specific cgroup(s)
+    resolves: rhbz#1980715
+  - switched to the configparser from the configobj
+    resolves: rhbz#1936386
+  - spec: do not require subscription-manager on CentOS
+    resolves: rhbz#2029405
+
 * Wed Jul 21 2021 Jaroslav Škarvada <jskarvad@redhat.com> - 2.16.0-1
 - new release
   - rebased tuned to latest upstream

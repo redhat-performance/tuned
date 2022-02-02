@@ -242,16 +242,19 @@ class CPULatencyPlugin(base.Plugin):
 				if latency is not None:
 					self.cstates_latency[name.strip()] = latency
 
-	def _get_latency_by_cstate_name(self, name):
+	def _get_latency_by_cstate_name(self, name, no_zero=False):
 		log.debug("getting latency for cstate with name '%s'" % name)
 		if self.cstates_latency is None:
 			log.debug("reading cstates latency table")
 			self._read_cstates_latency()
 		latency = self.cstates_latency.get(name, None)
+		if no_zero and latency == 0:
+			log.debug("skipping latency 0 as set by param")
+			return None
 		log.debug("cstate name mapped to latency: %s" % str(latency))
 		return latency
 
-	def _get_latency_by_cstate_id(self, lid):
+	def _get_latency_by_cstate_id(self, lid, no_zero=False):
 		log.debug("getting latency for cstate with ID '%s'" % str(lid))
 		lid = self._str2int(lid)
 		if lid is None:
@@ -259,6 +262,9 @@ class CPULatencyPlugin(base.Plugin):
 			return None
 		latency_path = cpuidle_states_path + "/%s/latency" % ("state%d" % lid)
 		latency = self._str2int(self._cmd.read_file(latency_path, err_ret = None, no_error = True))
+		if no_zero and latency == 0:
+			log.debug("skipping latency 0 as set by param")
+			return None
 		log.debug("cstate ID mapped to latency: %s" % str(latency))
 		return latency
 
@@ -272,8 +278,12 @@ class CPULatencyPlugin(base.Plugin):
 				latency = int(latency)
 				log.debug("parsed directly specified latency value: %d" % latency)
 			except ValueError:
-				if latency[0:10] == "cstate.id:":
+				if latency[0:18] == "cstate.id_no_zero:":
+					latency = self._get_latency_by_cstate_id(latency[18:], no_zero=True)
+				elif latency[0:10] == "cstate.id:":
 					latency = self._get_latency_by_cstate_id(latency[10:])
+				elif latency[0:20] == "cstate.name_no_zero:":
+					latency = self._get_latency_by_cstate_name(latency[20:], no_zero=True)
 				elif latency[0:12] == "cstate.name:":
 					latency = self._get_latency_by_cstate_name(latency[12:])
 				elif latency in ["none", "None"]:

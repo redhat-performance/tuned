@@ -1,6 +1,7 @@
 from tuned import storage, units, monitors, plugins, profiles, exports, hardware
 from tuned.exceptions import TunedException
 import tuned.logs
+import tuned.version
 from . import controller
 from . import daemon
 import signal
@@ -17,6 +18,9 @@ __all__ = ["Application"]
 
 class Application(object):
 	def __init__(self, profile_name = None, config = None):
+		# os.uname()[2] is for the python-2.7 compatibility, it's the release string
+		# like e.g. '5.15.13-100.fc34.x86_64'
+		log.info("TuneD: %s, kernel: %s" % (tuned.version.TUNED_VERSION_STR, os.uname()[2]))
 		self._dbus_exporter = None
 
 		storage_provider = storage.PickleProvider()

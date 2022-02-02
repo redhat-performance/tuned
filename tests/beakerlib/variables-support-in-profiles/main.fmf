@@ -1,0 +1,30 @@
+summary: variables support in profiles
+description: ''
+contact: rhack@redhat.com
+component:
+  - tuned
+test: ./runtest.sh
+framework: beakerlib
+require:
+  - library(tuned/basic)
+recommend:
+  - tuned
+duration: 5m
+enabled: true
+tag:
+  - FedoraReady
+  - NoRHEL4
+  - NoRHEL5
+  - TIPfail_infra
+  - TIPpass
+  - Tier1
+tier: '1'
+link:
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=1225124
+adjust:
+  - enabled: false
+    when: distro < rhel-7
+    continue: false
+extra-nitrate: TC#0496575
+extra-summary: /CoreOS/tuned/Sanity/variables-support-in-profiles
+extra-task: /CoreOS/tuned/Sanity/variables-support-in-profiles

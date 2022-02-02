@@ -1,10 +1,12 @@
+:_module-type: PROCEDURE
 [id="installing-and-enabling-tuned_{context}"]
 = Installing and enabling TuneD
 
+[role="_abstract"]
 This procedure installs and enables the *TuneD* application, installs *TuneD* profiles, and presets a default *TuneD* profile for your system.
 
 // .Prerequisites
-// 
+//
 // * A bulleted list of conditions that must be satisfied before the user starts following this assembly.
 // * You can also link to other modules or assemblies the user must follow before starting this assembly.
 // * Delete the section title and bullets if the assembly has no prerequisites.
@@ -47,6 +49,5 @@ See TuneD log file ('/var/log/tuned/tuned.log') for details.
 
 
 // .Additional resources
-// 
+//
 // * The `tuned-adm(8)` man page.
-

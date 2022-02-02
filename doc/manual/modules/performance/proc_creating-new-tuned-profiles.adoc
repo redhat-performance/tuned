@@ -1,11 +1,19 @@
+:_module-type: PROCEDURE
 [id="creating-new-tuned-profiles_{context}"]
 = Creating new TuneD profiles
 
+[role="_abstract"]
 This procedure creates a new *TuneD* profile with custom performance rules.
 
 .Prerequisites
 
-* The `tuned` service is installed and running. See xref:installing-and-enabling-tuned_getting-started-with-tuned[] for details.
+ifndef::pantheonenv[]
+* The `tuned` service is running. See xref:installing-and-enabling-tuned_getting-started-with-tuned[Installing and Enabling Tuned] for details.
+endif::[]
+
+ifdef::pantheonenv[]
+* The `tuned` service is running. See xref:modules/performance/proc_installing-and-enabling-tuned.adoc[Installing and Enabling Tuned] for details.
+endif::[]
 
 .Procedure
 
@@ -61,7 +69,6 @@ Verfication succeeded, current system settings match the preset profile.
 See TuneD log file ('/var/log/tuned/tuned.log') for details.
 ----
 
+[role="_additional-resources"]
 .Additional resources
-
-* The `tuned.conf(5)` man page
-
+* `tuned.conf(5)` man page

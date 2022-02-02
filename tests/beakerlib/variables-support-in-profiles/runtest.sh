@@ -2,9 +2,9 @@
 # vim: dict+=/usr/share/beakerlib/dictionary.vim cpt=.,w,b,u,t,i,k
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#   runtest.sh of /CoreOS/tuned/Regression/Program-tuned-tried-to-access-dev-mem-between
-#   Description: Test for BZ#1688371 (Program tuned tried to access /dev/mem between)
-#   Author: Robin Hack <rhack@redhat.com>
+#   runtest.sh of /CoreOS/tuned/Sanity/variables-support-in-profiles
+#   Description: variables support in profiles
+#   Author: Branislav Blaskovic <bblaskov@redhat.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -22,23 +22,44 @@ PACKAGE="tuned"
 rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
+        rlImport "tuned/basic"
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
-        rlServiceStop "tuned"
-        # systemd can have some issues with quick restarts sometimes
-        sleep 1
+	sleep 2
         rlServiceStart "tuned"
+	sleep 2
+        tunedProfileBackup
+        rlFileBackup "/usr/lib/tuned/balanced/tuned.conf"
+
+        echo "
+[variables]
+SWAPPINESS1 = 70
+SWAPPINESS2 = \${SWAPPINESS1}
+
+[sysctl]
+vm.swappiness = \${SWAPPINESS2}
+" >> /usr/lib/tuned/balanced/tuned.conf
+
+        rlRun "cat /usr/lib/tuned/balanced/tuned.conf"
+
+        OLD_SWAPPINESS=$(sysctl -n vm.swappiness)
+
     rlPhaseEnd
 
     rlPhaseStartTest
-        rlRun "dmesg | tee TEST_OUT"
-        rlAssertNotGrep "Program tuned tried to access /dev/mem" "TEST_OUT"
+        rlRun "tuned-adm profile balanced"
+        rlRun -s "sysctl -n vm.swappiness"
+        rlAssertGrep "70" "$rlRun_LOG"
     rlPhaseEnd
 
     rlPhaseStartCleanup
+        rlRun "sysctl vm.swappiness=$OLD_SWAPPINESS"
+        rlFileRestore
+        tunedProfileRestore
+	sleep 2
+        rlServiceRestore "tuned"
         rlRun "popd"
         rlRun "rm -r $TmpDir" 0 "Removing tmp directory"
-        rlServiceRestore "tuned"
     rlPhaseEnd
 rlJournalPrintText
 rlJournalEnd

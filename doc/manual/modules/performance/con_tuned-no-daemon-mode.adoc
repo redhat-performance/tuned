@@ -1,8 +1,10 @@
+:_module-type: CONCEPT
 [id="tuned-no-daemon-mode_{context}"]
 = TuneD no-daemon mode
 
 // TODO: Should this be a procedure? A user story? Is there a common use case?
 
+[role="_abstract"]
 You can run *TuneD* in `no-daemon` mode, which does not require any resident memory. In this mode, *TuneD* applies the settings and exits.
 
 By default, `no-daemon` mode is disabled because a lot of *TuneD* functionality is missing in this mode, including:
@@ -18,7 +20,7 @@ daemon = 0
 ----
 
 // .Additional resources
-// 
+//
 // * A bulleted list of links to other material closely related to the contents of the concept module.
 // * For more details on writing concept modules, see the link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].
 // * Use a consistent system for file names, IDs, and titles. For tips, see _Anchor Names and File Names_ in link:https://github.com/redhat-documentation/modular-docs#modular-documentation-reference-guide[Modular Documentation Reference Guide].
