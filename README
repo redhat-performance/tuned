@@ -6,10 +6,13 @@ version, please check out branch '1.0' in our Git repository.)
 How to use it
 -------------
 
+TuneD is incompatible with the cpupower and power-profiles-daemon. If you
+have these services, uninstall or disable them.
+
 In Fedora, Red Hat Enterprise Linux, and their derivates install tuned package
 (optionally tuned-utils, tuned-utils-systemtap, and tuned-profiles-compat):
 
-# yum install tuned
+# dnf install tuned
 
 After the installation, start the tuned service:
 
