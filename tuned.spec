@@ -36,16 +36,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.17.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.18.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -552,6 +552,25 @@ fi
 %{_mandir}/man7/tuned-profiles-openshift.7*
 
 %changelog
+* Wed Feb  2 2022 Jaroslav Škarvada <jskarvad@redhat.com> - 2.18.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#2003833
+  - profiles: fix improper parsing of include directive
+    resolves: rhbz#2017924
+  - disk: added support for the nvme
+    resolves: rhbz#1854816
+  - cpu: extended cstate force_latency syntax to allow skipping zero latency
+    resolves: rhbz#2002744
+  - net: added support for the txqueuelen
+    resolves: rhbz#2015044
+  - bootloader: on s390(x) remove TuneD variables from the BLS
+    resolves: rhbz#1978786
+  - daemon: don't do full rollback on systemd failure
+    resolves: rhbz#2011459
+  - spec: do not require subscription-manager on CentOS
+    resolves: rhbz#2028865
+
 * Sun Jan 16 2022 Jaroslav Škarvada <jskarvad@redhat.com> - 2.17.0-1
 - new release
   - rebased tuned to latest upstream
