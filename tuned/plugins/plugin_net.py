@@ -1,3 +1,4 @@
+import errno
 from . import base
 from .decorators import *
 import tuned.logs
@@ -20,6 +21,8 @@ class NetTuningPlugin(base.Plugin):
 		self._load_smallest = 0.05
 		self._level_steps = 6
 		self._cmd = commands()
+		self._re_ip_link_show_qlen = None
+		self._use_ip = True
 
 	def _init_devices(self):
 		self._devices_supported = True
@@ -140,6 +143,7 @@ class NetTuningPlugin(base.Plugin):
 			"pause": None,
 			"ring": None,
 			"channels": None,
+			"txqueuelen": None,
 		}
 
 	def _init_stats_and_idle(self, instance, device):
@@ -282,6 +286,64 @@ class NetTuningPlugin(base.Plugin):
 		if len(value) > 0:
 			return int(value)
 		return None
+
+	def _call_ip_link(self, args=[]):
+		if not self._use_ip:
+			return None
+		args = ["ip", "link"] + args
+		(rc, out, err_msg) = self._cmd.execute(args, no_errors=[errno.ENOENT], return_err=True)
+		if rc == -errno.ENOENT:
+			log.warn("ip command not found, ignoring for other devices")
+			self._use_ip = False
+			return None
+		elif rc:
+			log.info("Problem calling ip command")
+			log.debug("(rc: %s, msg: '%s')" % (rc, err_msg))
+			return None
+		return out
+
+	def _ip_link_show(self, device=None):
+		args = ["show"]
+		if device:
+			args.append(device)
+		return self._call_ip_link(args)
+
+	@command_set("txqueuelen", per_device=True)
+	def _set_txqueuelen(self, value, device, sim):
+		if value is None:
+			return None
+		try:
+			int(value)
+		except ValueError:
+			log.warn("txqueuelen value '%s' is not integer" % value)
+			return None
+		if not sim:
+			# there is inconsistency in "ip", where "txqueuelen" is set as it, but is shown as "qlen"
+			res = self._call_ip_link(["set", "dev", device, "txqueuelen", value])
+			if res is None:
+				log.warn("Cannot set txqueuelen for device '%s'" % device)
+				return None
+		return value
+
+	def _get_re_ip_link_show_qlen(self):
+		if self._re_ip_link_show_qlen is None:
+			self._re_ip_link_show_qlen = re.compile(r".*\s+qlen\s+(\d+)")
+		return self._re_ip_link_show_qlen
+
+	@command_get("txqueuelen")
+	def _get_txqueuelen(self, device, ignore_missing=False):
+		out = self._ip_link_show(device)
+		if out is None:
+			if not ignore_missing:
+				log.info("Cannot get 'ip link show' result for txqueuelen value for device '%s'" % device)
+			return None
+		res = self._get_re_ip_link_show_qlen().search(out)
+		if res is None:
+			# We can theoretically get device without qlen (http://linux-ip.net/gl/ip-cref/ip-cref-node17.html)
+			if not ignore_missing:
+				log.info("Cannot get txqueuelen value from 'ip link show' result for device '%s'" % device)
+			return None
+		return res.group(1)
 
 	# d is dict: {parameter: value}
 	def _check_parameters(self, context, d):

@@ -92,6 +92,7 @@ Recommends: dmidecode
 Recommends: hdparm
 Recommends: kernel-tools
 Recommends: kmod
+Recommends: iproute
 %endif
 # syspurpose
 %if 0%{?rhel} > 8
