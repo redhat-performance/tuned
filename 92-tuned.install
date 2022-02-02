@@ -19,9 +19,7 @@ LOADER_ENTRIES="$BOOT_ROOT/loader/entries"
 
 [ "$COMMAND" = "add" ] || exit 0
 
-# The zipl bootloader doesn't support variables
 ARCH=`uname -m`
-[ "${ARCH:0:4}" = "s390" ] && exit 0
 
 pushd "$LOADER_ENTRIES" &> /dev/null
 for f in `basename "$MACHINE_ID"`-*.conf; do
@@ -33,8 +31,18 @@ for f in `basename "$MACHINE_ID"`-*.conf; do
   if [[ "$f" =~ \w*-[0-9a-f]{7,}-.*-.*.conf ]]; then
     continue
   fi
-  grep -q '^\s*options\s\+.*\$tuned_params' "$f" || sed -i '/^\s*options\s\+/ s/\(.*\)/\1 \$tuned_params/' "$f"
-  grep -q '^\s*initrd\s\+.*\$tuned_initrd' "$f" || sed -i '/^\s*initrd\s\+/ s/\(.*\)/\1 \$tuned_initrd/' "$f"
+
+  if [ "${ARCH:0:4}" = "s390" ]; then
+    # On s390(x), the zipl bootloader doesn't support variables,
+    # unpatch TuneD variables which could be there from the previous TuneD
+    # versions
+    grep -q '^\s*options\s\+.*\$tuned_params' "$f" && sed -i '/^\s*options\s\+/ s/\s\+\$tuned_params\b//g' "$f"
+    grep -q '^\s*initrd\s\+.*\$tuned_initrd' "$f" && sed -i '/^\s*initrd\s\+/ s/\s\+\$tuned_initrd\b//g' "$f"
+  else
+    # Not on s390(x), add TuneD variables if they are not there
+    grep -q '^\s*options\s\+.*\$tuned_params' "$f" || sed -i '/^\s*options\s\+/ s/\(.*\)/\1 \$tuned_params/' "$f"
+    grep -q '^\s*initrd\s\+.*\$tuned_initrd' "$f" || sed -i '/^\s*initrd\s\+/ s/\(.*\)/\1 \$tuned_initrd/' "$f"
+  fi
 done
 popd &> /dev/null
 
