@@ -75,7 +75,7 @@ class GuiProfileLoader(object):
             config_obj = {
                 'main': collections.OrderedDict(),
                 'filename': file_path,
-                'initial_comment': ('#', 'tuned configuration', '#')
+                'initial_comment': ('#', '# tuned configuration', '#')
             }
             for s in config_parser.sections():
                 config_obj['main'][s] = collections.OrderedDict()
@@ -137,10 +137,8 @@ class GuiProfileLoader(object):
         config = {
             'main': collections.OrderedDict(),
             'filename': path + '/' + tuned.consts.PROFILE_FILE,
-            'initial_comment': ('#', 'tuned configuration', '#')
+            'initial_comment': ('#', '# tuned configuration', '#')
         }
-        config['filename'] = path + '/' + tuned.consts.PROFILE_FILE
-        config['initial_comment'] = ('#', 'tuned configuration', '#')
 
         try:
             config['main']['main'] = profile.options
@@ -176,7 +174,7 @@ class GuiProfileLoader(object):
         config = {
             'main': collections.OrderedDict(),
             'filename': path + '/' + tuned.consts.PROFILE_FILE,
-            'initial_comment': ('#', 'tuned configuration', '#')
+            'initial_comment': ('#', '# tuned configuration', '#')
         }
         try:
             config['main']['main'] = profile.options
@@ -231,7 +229,7 @@ class GuiProfileLoader(object):
         return not self.is_profile_removable(profile_name)
 
     def _save_profile(self, config):
-        ec = subprocess.call(['pkexec', sys.executable, tuned.gtk.gui_profile_saver.__file__ , json.dumps(config.__dict__)])
+        ec = subprocess.call(['pkexec', sys.executable, tuned.gtk.gui_profile_saver.__file__ , json.dumps(config)])
         if (ec != 0):
             raise managerException.ManagerException(
                 'Error while saving profile file "%s"' % (config.filename))
