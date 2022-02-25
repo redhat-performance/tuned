@@ -660,8 +660,9 @@ class SchedulerPlugin(base.Plugin):
 			sched = dict([(pid, (cmd, option, scheduler, priority, affinity, regex))
 					for pid, cmd in processes])
 			sched_all.update(sched)
-			regex = str(regex).replace("(", r"\(")
-			regex = regex.replace(")", r"\)")
+			# make any contained regexes non-capturing: replace "(" with "(?:",
+			# unless the "(" is preceded by "\" or followed by "?"
+			regex = re.sub(r"(?<!\\)\((?!\?)", "(?:", str(regex))
 			instance._sched_lookup[regex] = [scheduler, priority, affinity]
 		for pid, (cmd, option, scheduler, priority, affinity, regex) \
 				in sched_all.items():
