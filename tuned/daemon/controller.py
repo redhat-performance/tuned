@@ -258,6 +258,12 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			return ""
 		return self._daemon.profile_recommender.recommend()
 
+	@exports.export("", "ss")
+	def recommend_profile_with_debug(self, caller = None):
+		if caller == "":
+			return "", ""
+		return self._daemon.profile_recommender.recommend_with_debug()
+
 	@exports.export("", "b")
 	def verify_profile(self, caller = None):
 		if caller == "":

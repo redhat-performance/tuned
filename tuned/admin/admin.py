@@ -31,7 +31,7 @@ class Admin(object):
 		self._controller = None
 		self._log_token = None
 		self._log_level = log_level
-		self._profile_recommender = ProfileRecommender()
+		self._profile_recommender = ProfileRecommender(is_service=False)
 		if self._dbus:
 			self._controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_INTERFACE, consts.DBUS_OBJECT, debug)
 			try:
@@ -347,11 +347,24 @@ class Admin(object):
 		return self._set_profile(profile_name, False)
 
 	def _action_dbus_recommend_profile(self):
-		print(self._controller.recommend_profile())
+		if self._debug:
+			profile, debug = self._controller.recommend_profile_with_debug()
+			print(debug)
+		else:
+			profile = self._controller.recommend_profile()
+		if profile == "":
+			self._error("Cannot talk to TuneD daemon via DBus. Are you running admin without root privileges? Fallback on local implementation.")
+			raise TunedAdminDBusException
+		print(profile)
 		return self._controller.exit(True)
 
 	def _action_recommend_profile(self):
-		print(self._profile_recommender.recommend())
+		if self._debug:
+			profile, debug = self._profile_recommender.recommend_with_debug()
+			print(debug)
+		else:
+			profile = self._profile_recommender.recommend()
+		print(profile)
 		return True
 
 	def _action_dbus_verify_profile(self, ignore_missing):

@@ -17,6 +17,7 @@ __all__ = ["get"]
 
 root_logger = None
 
+log_handlers_loggers = {}
 log_handlers = {}
 log_handlers_lock = threading.Lock()
 
@@ -33,7 +34,9 @@ def _random_string(length):
 		res += r.choice(chars)
 	return res
 
-def log_capture_start(log_level):
+def log_capture_start(log_level, logger=None):
+	if logger is None:
+		logger = root_logger
 	with log_handlers_lock:
 		for i in range(10):
 			token = _random_string(16)
@@ -47,23 +50,27 @@ def log_capture_start(log_level):
 		formatter = logging.Formatter(
 				"%(levelname)-8s %(name)s: %(message)s")
 		handler.setFormatter(formatter)
-		root_logger.addHandler(handler)
+		logger.addHandler(handler)
 		log_handler = LogHandler(handler, stream)
 		log_handlers[token] = log_handler
-		root_logger.debug("Added log handler %s." % token)
+		log_handlers_loggers[token] = logger
+		if logger == root_logger:
+			logger.debug("Added log handler %s." % token)
 		return token
 
 def log_capture_finish(token):
 	with log_handlers_lock:
 		try:
 			log_handler = log_handlers[token]
+			logger = log_handlers_loggers[token]
 		except KeyError:
 			return None
 		content = log_handler.stream.getvalue()
 		log_handler.stream.close()
-		root_logger.removeHandler(log_handler.handler)
+		logger.removeHandler(log_handler.handler)
 		del log_handlers[token]
-		root_logger.debug("Removed log handler %s." % token)
+		del log_handlers_loggers[token]
+		logger.debug("Removed log handler %s." % token)
 		return content
 
 def get():
@@ -72,7 +79,12 @@ def get():
 		root_logger = logging.getLogger("tuned")
 
 	calling_module = inspect.currentframe().f_back
-	name = calling_module.f_locals["__name__"]
+	if "__name__" in calling_module.f_locals:
+		name = calling_module.f_locals["__name__"]
+	elif "self" in calling_module.f_locals:
+		name = calling_module.f_locals['self'].__module__
+	else:
+		name = ""
 	if name == "__main__":
 		name = "tuned"
 		return root_logger

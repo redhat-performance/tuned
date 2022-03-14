@@ -131,6 +131,9 @@ class DBusController(object):
 	def recommend_profile(self):
 		return self._call("recommend_profile")
 
+	def recommend_profile_with_debug(self):
+		return self._call("recommend_profile_with_debug")
+
 	def verify_profile(self):
 		return self._call("verify_profile")
 

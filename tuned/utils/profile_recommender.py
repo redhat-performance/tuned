@@ -3,6 +3,7 @@ import re
 import errno
 import procfs
 import subprocess
+import logging
 try:
 	from configparser import ConfigParser, Error
 except ImportError:
@@ -23,10 +24,31 @@ log = tuned.logs.get()
 
 class ProfileRecommender:
 
-	def __init__(self, is_hardcoded = False):
+	def __init__(self, is_hardcoded = False, is_service = True):
 		self._is_hardcoded = is_hardcoded
 		self._commands = commands()
 		self._chassis_type = None
+		self._debug = False
+		self._debug_log = None
+		self._is_service = is_service
+
+	def _print_log(self, log_level, message):
+		if self._debug:
+			self._debug_log.log(log_level, message)
+		if self._is_service:
+			log.log(log_level, message)
+	
+	def recommend_with_debug(self):
+		if not self._debug_log:
+			self._debug_log = tuned.logs.TunedLogger("recommend")
+			self._debug_log.setLevel(logging.DEBUG)
+			self._debug_log.remove_all_handlers()
+		token = tuned.logs.log_capture_start(logging.DEBUG, self._debug_log)
+		self._debug = True
+		profile = self.recommend()
+		self._debug = False
+		debug = tuned.logs.log_capture_finish(token)
+		return profile, debug
 
 	def recommend(self):
 		profile = consts.DEFAULT_PROFILE
@@ -35,7 +57,7 @@ class ProfileRecommender:
 
 		has_root = os.geteuid() == 0
 		if not has_root:
-			log.warning("Profile recommender is running without root privileges. Profiles with virt recommendation condition will be omitted.")
+			self._print_log(logging.WARN, "Profile recommender is running without root privileges. Profiles with virt recommendation condition will be omitted.")
 		matching = self.process_config(consts.RECOMMEND_CONF_FILE,
 									   has_root=has_root)
 		if matching is not None:
@@ -68,6 +90,7 @@ class ProfileRecommender:
 			with open(fname) as f:
 				config.readfp(f)
 			for section in config.sections():
+				self._print_log(logging.DEBUG, "Checking recommendation for profile '%s'" % section)
 				match = True
 				for option in config.options(section):
 					value = config.get(section, option, raw=True)
@@ -75,30 +98,47 @@ class ProfileRecommender:
 						value = r"^$"
 					if option == "virt":
 						if not has_root:
+							self._print_log(logging.DEBUG, "virt option without root, skipping")
 							match = False
 							break
-						if not re.match(value,
-								self._commands.execute(["virt-what"])[1], re.S):
+						output = self._commands.execute(["virt-what"])[1]
+						if re.match(value, output, re.S):
+							self._print_log(logging.DEBUG, "virt option '%s' matches 'virt-what' command output '%s'" % (value, output))
+						else:
+							self._print_log(logging.DEBUG, "virt option '%s' does not match 'virt-what' command output '%s'" % (value, output))
 							match = False
 					elif option == "system":
-						if not re.match(value,
-								self._commands.read_file(
-								consts.SYSTEM_RELEASE_FILE,
-								no_error = True), re.S):
+						output = self._commands.read_file(consts.SYSTEM_RELEASE_FILE, no_error = True)
+						if re.match(value, output, re.S):
+							self._print_log(logging.DEBUG, "system option '%s' matches content '%s' of '%s' file" %
+											(value, output.strip(), consts.SYSTEM_RELEASE_FILE))
+						else:
+							self._print_log(logging.DEBUG, "system option '%s' does not match content '%s' of '%s' file" %
+											(value, output.strip(), consts.SYSTEM_RELEASE_FILE))
 							match = False
 					elif option[0] == "/":
-						if not os.path.exists(option) or not re.match(value,
+						if os.path.exists(option) or not re.match(value,
 								self._commands.read_file(option), re.S):
+							self._print_log(logging.DEBUG, "File option '%s' matches content of '%s' file" % (value, option))
+						else:
+							self._print_log(logging.DEBUG, "File option '%s' does not match content of '%s' file" % (value, option))
 							match = False
 					elif option[0:7] == "process":
 						ps = procfs.pidstats()
 						ps.reload_threads()
-						if len(ps.find_by_regex(re.compile(value))) == 0:
+						output = ps.find_by_regex(re.compile(value))
+						if len(output) == 0:
+							self._print_log(logging.DEBUG, "No process matching option '%s' found" % value)
 							match = False
+						else:
+							self._print_log(logging.DEBUG, "%s processes matching option '%s' found" % (len(output), value))
 					elif option == "chassis_type":
 						chassis_type = self._get_chassis_type()
 
-						if not re.match(value, chassis_type, re.IGNORECASE):
+						if re.match(value, chassis_type, re.IGNORECASE):
+							self._print_log(logging.DEBUG, "chassis_type option '%s' matches chassis type '%s'" % (value, chassis_type))
+						else:
+							self._print_log(logging.DEBUG, "chassis_type option '%s' does not match chassis type '%s'" % (value, chassis_type))
 							match = False
 					elif option == "syspurpose_role":
 						if have_syspurpose:
@@ -113,7 +153,10 @@ class ProfileRecommender:
 								if hasattr(e, "errno") and e.errno != errno.ENOENT:
 									log.error("Failed to load the syspurpose\
 										file: %s" % e)
-							if re.match(value, role, re.IGNORECASE) is None:
+							if re.match(value, role, re.IGNORECASE):
+								self._print_log(logging.DEBUG, "syspurpose_role option '%s' matches role '%s'" % (value, role))
+							else:
+								self._print_log(logging.DEBUG, "syspurpose_role option '%s' does not match role '%s'" % (value, role))
 								match = False
 						else:
 							log.error("Failed to process 'syspurpose_role' in '%s'\
@@ -123,6 +166,7 @@ class ProfileRecommender:
 					# remove the ",.*" suffix
 					r = re.compile(r",[^,]*$")
 					matching_profile = r.sub("", section)
+					self._print_log(logging.DEBUG, "All options matched for profile '%s' from section '%s', applying" % (matching_profile, section))
 					break
 		except (IOError, OSError, Error) as e:
 			log.error("error processing '%s', %s" % (fname, e))
