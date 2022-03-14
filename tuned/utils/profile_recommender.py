@@ -68,6 +68,7 @@ class ProfileRecommender:
 			with open(fname) as f:
 				config.readfp(f)
 			for section in config.sections():
+				log.debug("Checking recommendation for profile '%s'" % section)
 				match = True
 				for option in config.options(section):
 					value = config.get(section, option, raw=True)
@@ -77,28 +78,44 @@ class ProfileRecommender:
 						if not has_root:
 							match = False
 							break
-						if not re.match(value,
-								self._commands.execute(["virt-what"])[1], re.S):
+						output = self._commands.execute(["virt-what"])[1]
+						if re.match(value, output, re.S):
+							log.debug("virt option '%s' matches 'virt-what' command output '%s'" % (value, output))
+						else:
+							log.debug("virt option '%s' does not match 'virt-what' command output '%s'" % (value, output))
 							match = False
 					elif option == "system":
-						if not re.match(value,
-								self._commands.read_file(
-								consts.SYSTEM_RELEASE_FILE,
-								no_error = True), re.S):
+						output = self._commands.read_file(consts.SYSTEM_RELEASE_FILE, no_error = True)
+						if re.match(value, output, re.S):
+							log.debug("system option '%s' matches content '%s' of '%s' file" %
+											(value, output.strip(), consts.SYSTEM_RELEASE_FILE))
+						else:
+							log.debug("system option '%s' does not match content '%s' of '%s' file" %
+											(value, output.strip(), consts.SYSTEM_RELEASE_FILE))
 							match = False
 					elif option[0] == "/":
-						if not os.path.exists(option) or not re.match(value,
+						if os.path.exists(option) or not re.match(value,
 								self._commands.read_file(option), re.S):
+							log.debug("File option '%s' matches content of '%s' file" % (value, option))
+						else:
+							log.debug("File option '%s' does not match content of '%s' file" % (value, option))
 							match = False
 					elif option[0:7] == "process":
 						ps = procfs.pidstats()
 						ps.reload_threads()
-						if len(ps.find_by_regex(re.compile(value))) == 0:
+						output = ps.find_by_regex(re.compile(value))
+						if len(output) == 0:
+							log.debug("No process matching option '%s' found" % value)
 							match = False
+						else:
+							log.debug("%s processes matching option '%s' found" % (len(output), value))
 					elif option == "chassis_type":
 						chassis_type = self._get_chassis_type()
 
-						if not re.match(value, chassis_type, re.IGNORECASE):
+						if re.match(value, chassis_type, re.IGNORECASE):
+							log.debug("chassis_type option '%s' matches chassis type '%s'" % (value, chassis_type))
+						else:
+							log.debug("chassis_type option '%s' does not match chassis type '%s'" % (value, chassis_type))
 							match = False
 					elif option == "syspurpose_role":
 						if have_syspurpose:
@@ -113,7 +130,10 @@ class ProfileRecommender:
 								if hasattr(e, "errno") and e.errno != errno.ENOENT:
 									log.error("Failed to load the syspurpose\
 										file: %s" % e)
-							if re.match(value, role, re.IGNORECASE) is None:
+							if re.match(value, role, re.IGNORECASE):
+								log.debug("syspurpose_role option '%s' matches role '%s'" % (value, role))
+							else:
+								log.debug("syspurpose_role option '%s' does not match role '%s'" % (value, role))
 								match = False
 						else:
 							log.error("Failed to process 'syspurpose_role' in '%s'\
@@ -123,6 +143,7 @@ class ProfileRecommender:
 					# remove the ",.*" suffix
 					r = re.compile(r",[^,]*$")
 					matching_profile = r.sub("", section)
+					log.debug("All options matched for profile '%s' from section '%s', applying" % (matching_profile, section))
 					break
 		except (IOError, OSError, Error) as e:
 			log.error("error processing '%s', %s" % (fname, e))
