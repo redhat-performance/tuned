@@ -8,3 +8,5 @@ relevancy: |
     distro < rhel-7.3: False
 summary: Check functionality of tuned-adm tool.
 framework: beakerlib
+require:
+  - library(tuned/basic)

@@ -23,30 +23,32 @@ rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
         rlImport "tuned/basic"
+        tunedDisableSystemdRateLimitingStart
         rlServiceStart "tuned"
         tunedProfileBackup
     rlPhaseEnd
 
     rlPhaseStartTest "Test of profile balanced"
-	rlRun "cat /usr/lib/tuned/balanced/tuned.conf | grep alpm="
-    	echo > /var/log/tuned/tuned.log
-	rlRun "tuned-adm profile balanced"
-	rlRun "tuned-adm active | grep balanced"
-	rlRun "cat /var/log/tuned/tuned.log | grep -v 'ERROR    tuned.utils.commands: Reading /sys/class/scsi_host/host0/link_power_management_policy'"
-	rlRun "cat /var/log/tuned/tuned.log | grep -v 'WARNING  tuned.plugins.plugin_scsi_host: ALPM control file'"
+        rlRun "cat /usr/lib/tuned/balanced/tuned.conf | grep alpm="
+        echo > /var/log/tuned/tuned.log
+        rlRun "tuned-adm profile balanced"
+        rlRun "tuned-adm active | grep balanced"
+        rlRun "cat /var/log/tuned/tuned.log | grep -v 'ERROR    tuned.utils.commands: Reading /sys/class/scsi_host/host0/link_power_management_policy'"
+        rlRun "cat /var/log/tuned/tuned.log | grep -v 'WARNING  tuned.plugins.plugin_scsi_host: ALPM control file'"
     rlPhaseEnd
 
     rlPhaseStartTest "Test of profile powersave"
-    	rlRun "cat /usr/lib/tuned/powersave/tuned.conf | grep alpm="
-	echo > /var/log/tuned/tuned.log
-	rlRun "tuned-adm profile powersave"
-	rlRun "tuned-adm active | grep powersave"
-	rlRun "cat /var/log/tuned/tuned.log | grep -v 'ERROR    tuned.utils.commands: Reading /sys/class/scsi_host/host0/link_power_management_policy'"
-	rlRun "cat /var/log/tuned/tuned.log | grep -v 'WARNING  tuned.plugins.plugin_scsi_host: ALPM control file'"
+        rlRun "cat /usr/lib/tuned/powersave/tuned.conf | grep alpm="
+        echo > /var/log/tuned/tuned.log
+        rlRun "tuned-adm profile powersave"
+        rlRun "tuned-adm active | grep powersave"
+        rlRun "cat /var/log/tuned/tuned.log | grep -v 'ERROR    tuned.utils.commands: Reading /sys/class/scsi_host/host0/link_power_management_policy'"
+        rlRun "cat /var/log/tuned/tuned.log | grep -v 'WARNING  tuned.plugins.plugin_scsi_host: ALPM control file'"
     rlPhaseEnd
 
     rlPhaseStartCleanup
-    	tunedProfileRestore
+        tunedDisableSystemdRateLimitingEnd
+        tunedProfileRestore
     rlPhaseEnd
 rlJournalPrintText
 rlJournalEnd

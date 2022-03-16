@@ -8,3 +8,5 @@ relevancy: |
     distro = rhel-4, rhel-5: False
 summary: Test for BZ#1416712 (TuneD logs error message if)
 framework: beakerlib
+require:
+  - library(tuned/basic)

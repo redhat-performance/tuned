@@ -22,11 +22,8 @@ PACKAGE="tuned"
 rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
-        rlFileBackup --clean /etc/systemd/system.conf.d
-        rlRun "mkdir -p /etc/systemd/system.conf.d"
-        rlRun "echo -e '[Manager]\nDefaultStartLimitInterval=0' > /etc/systemd/system.conf.d/tuned.conf" 0 "Disable systemd rate limiting"
-        rlRun "systemctl daemon-reload"
         rlImport "tuned/basic"
+        rlRun "tunedDisableSystemdRateLimitingStart"
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
         rlServiceStart "tuned"
@@ -56,6 +53,7 @@ vm.swappiness = \${SWAPPINESS2}
 
     rlPhaseStartCleanup
         rlRun "sysctl vm.swappiness=$OLD_SWAPPINESS"
+        tunedDisableSystemdRateLimitingEnd
         rlFileRestore
         tunedProfileRestore
         rlServiceRestore "tuned"
