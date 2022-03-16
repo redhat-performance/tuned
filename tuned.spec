@@ -62,8 +62,8 @@ Requires(postun): systemd
 BuildRequires: make
 BuildRequires: %{_py}, %{_py}-devel
 # BuildRequires for 'make test'
-# python-mock is needed for python-2.7, but it's not available on RHEL-7
-%if %{without python3} && ( ! 0%{?rhel} || 0%{?rhel} >= 8 )
+# python-mock is needed for python-2.7, but it's not available on RHEL-7, only in the EPEL
+%if %{without python3} && ( ! 0%{?rhel} || 0%{?rhel} >= 8 || 0%{?epel})
 BuildRequires: %{_py}-mock
 %endif
 BuildRequires: %{_py}-pyudev
@@ -301,10 +301,9 @@ touch %{buildroot}%{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 # validate desktop file
 desktop-file-validate %{buildroot}%{_datadir}/applications/tuned-gui.desktop
 
-# Run tests on RHEL > 7 or non RHEL
-# We cannot run tests on RHEL-7 because there is no python-mock package and
+# On RHEL-7 EPEL is needed, because there is no python-mock package and
 # python-2.7 doesn't have mock built-in
-%if 0%{?rhel} > 7 || ! 0%{?rhel}
+%if 0%{?rhel} >= 8 || 0%{?epel} || ! 0%{?rhel}
 %check
 make test %{make_python_arg}
 %endif
