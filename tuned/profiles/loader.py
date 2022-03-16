@@ -1,10 +1,6 @@
 import tuned.profiles.profile
 import tuned.profiles.variables
-try:
-	from configparser import ConfigParser, Error
-except ImportError:
-	# python2.7 support, remove RHEL-7 support end
-	from ConfigParser import ConfigParser, Error
+from tuned.utils.config_parser import ConfigParser, Error
 import tuned.consts as consts
 import os.path
 import collections
@@ -100,10 +96,10 @@ class Loader(object):
 
 	def _load_config_data(self, file_name):
 		try:
-			config_obj = ConfigParser()
+			config_obj = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
 			config_obj.optionxform=str
 			with open(file_name) as f:
-				config_obj.readfp(f)
+				config_obj.read_file(f, file_name)
 		except Error as e:
 			raise InvalidProfileException("Cannot parse '%s'." % file_name, e)
 

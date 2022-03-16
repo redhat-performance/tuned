@@ -3,11 +3,7 @@ import re
 import errno
 import procfs
 import subprocess
-try:
-	from configparser import ConfigParser, Error
-except ImportError:
-	# python2.7 support, remove RHEL-7 support end
-	from ConfigParser import ConfigParser, Error
+from tuned.utils.config_parser import ConfigParser, Error
 
 try:
 	import syspurpose.files
@@ -63,10 +59,10 @@ class ProfileRecommender:
 		try:
 			if not os.path.isfile(fname):
 				return None
-			config = ConfigParser()
+			config = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
 			config.optionxform = str
 			with open(fname) as f:
-				config.readfp(f)
+				config.read_file(f, fname)
 			for section in config.sections():
 				match = True
 				for option in config.options(section):

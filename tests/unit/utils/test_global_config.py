@@ -11,7 +11,9 @@ class GlobalConfigTestCase(unittest.TestCase):
 	def setUpClass(cls):
 		cls.test_dir = tempfile.mkdtemp()
 		with open(cls.test_dir + '/test_config','w') as f:
-			f.write('test_option = hello\ntest_bool = 1\ntest_size = 12MB\n'\
+			f.write('test_option = hello #this is comment\ntest_bool = 1\ntest_size = 12MB\n'\
+				+ '/sys/bus/pci/devices/0000:00:02.0/power/control=auto\n'\
+				+ '/sys/bus/pci/devices/0000:04:00.0/power/control=auto\n'\
 				+ 'false_bool=0\n'\
 				+ consts.CFG_LOG_FILE_COUNT + " = " + str(consts.CFG_DEF_LOG_FILE_COUNT) + "1\n")
 
@@ -20,6 +22,7 @@ class GlobalConfigTestCase(unittest.TestCase):
 
 	def test_get(self):
 		self.assertEqual(self._global_config.get('test_option'), 'hello')
+		self.assertEqual(self._global_config.get('/sys/bus/pci/devices/0000:00:02.0/power/control'), 'auto')
 
 	def test_get_bool(self):
 		self.assertTrue(self._global_config.get_bool('test_bool'))

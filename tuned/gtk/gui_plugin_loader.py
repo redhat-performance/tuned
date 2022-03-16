@@ -28,13 +28,7 @@ import importlib
 
 import tuned.consts as consts
 import tuned.logs
-try:
-    from configparser import ConfigParser, Error
-    from io import StringIO
-except ImportError:
-    # python2.7 support, remove RHEL-7 support end
-    from ConfigParser import ConfigParser, Error
-    from StringIO import StringIO
+from tuned.utils.config_parser import ConfigParser, Error
 from tuned.exceptions import TunedException
 from tuned.utils.global_config import GlobalConfig
 
@@ -82,10 +76,10 @@ class GuiPluginLoader():
         """
 
         try:
-            config_parser = ConfigParser()
+            config_parser = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
             config_parser.optionxform = str
             with open(file_name) as f:
-                config_parser.readfp(StringIO("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read()))
+                config_parser.read_string("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read(), file_name)
             config, functions = GlobalConfig.get_global_config_spec()
             for option in config_parser.options(consts.MAGIC_HEADER_NAME):
                 if option in config:

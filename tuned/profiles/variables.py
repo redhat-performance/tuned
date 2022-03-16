@@ -4,13 +4,7 @@ import tuned.logs
 from .functions import functions as functions
 import tuned.consts as consts
 from tuned.utils.commands import commands
-try:
-	from configparser import ConfigParser, Error
-	from io import StringIO
-except ImportError:
-	# python2.7 support, remove RHEL-7 support end
-	from ConfigParser import ConfigParser, Error
-	from StringIO import StringIO
+from tuned.utils.config_parser import ConfigParser, Error
 
 log = tuned.logs.get()
 
@@ -51,10 +45,10 @@ class Variables():
 			log.error("unable to find variables_file: '%s'" % filename)
 			return
 		try:
-			config = ConfigParser()
+			config = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), allow_no_value=True)
 			config.optionxform = str
 			with open(filename) as f:
-				config.readfp(StringIO("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read()))
+				config.read_string("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read(), filename)
 		except Error:
 			log.error("error parsing variables_file: '%s'" % filename)
 			return
