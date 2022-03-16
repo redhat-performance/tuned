@@ -232,7 +232,7 @@ class GuiProfileLoader(object):
         ec = subprocess.call(['pkexec', sys.executable, tuned.gtk.gui_profile_saver.__file__ , json.dumps(config)])
         if (ec != 0):
             raise managerException.ManagerException(
-                'Error while saving profile file "%s"' % (config.filename))
+                'Error while saving profile file "%s"' % (config['filename']))
 
     def _delete_profile(self, profile_name):
         ec = subprocess.call(['pkexec', sys.executable, tuned.gtk.gui_profile_deleter.__file__ , profile_name])
