@@ -80,7 +80,7 @@ class VideoPlugin(base.Plugin):
 	@command_get("radeon_powersave")
 	def _get_radeon_powersave(self, device, ignore_missing = False):
 		sys_files = self._radeon_powersave_files(device)
-		method = self._cmd.read_file(sys_files["method"], no_error=ignore_missing).strip()
+		method = self._cmd.read_file(sys_files["method"], no_error=True).strip()
 		if method == "profile":
 			return self._cmd.read_file(sys_files["profile"]).strip()
 		elif method == "dynpm":
@@ -88,4 +88,6 @@ class VideoPlugin(base.Plugin):
 		elif method == "dpm":
 			return "dpm-" + self._cmd.read_file(sys_files["dpm_state"]).strip()
 		else:
+			if not ignore_missing:
+				log.warn("radeon_powersave is not supported on '%s'" % device)
 			return None
