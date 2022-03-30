@@ -96,11 +96,11 @@ def _apply_system_sysctl():
 			if fname not in files:
 				files[fname] = d
 
+	_apply_sysctl_config_file("/etc/sysctl.conf")
 	for fname in sorted(files.keys()):
 		d = files[fname]
 		path = "%s/%s" % (d, fname)
 		_apply_sysctl_config_file(path)
-	_apply_sysctl_config_file("/etc/sysctl.conf")
 
 def _apply_sysctl_config_file(path):
 	log.debug("Applying sysctl settings from file %s" % path)
