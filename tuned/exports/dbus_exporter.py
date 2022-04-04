@@ -99,20 +99,21 @@ class DBusExporter(interfaces.ExporterInterface):
 			caller = args[-1]
 			log.debug("checking authorization for for action '%s' requested by caller '%s'" % (action_id, caller))
 			ret = self._polkit.check_authorization(caller, action_id)
+			args_copy = args
 			if ret == 1:
 					log.debug("action '%s' requested by caller '%s' was successfully authorized by polkit" % (action_id, caller))
 			elif ret == 2:
 					log.warn("polkit error, but action '%s' requested by caller '%s' was successfully authorized by fallback method" % (action_id, caller))
 			elif ret == 0:
 					log.info("action '%s' requested by caller '%s' wasn't authorized, ignoring the request" % (action_id, caller))
-					args[-1] = ""
+					args_copy = list(args[:-1]) + [""]
 			elif ret == -1:
 				log.warn("polkit error and action '%s' requested by caller '%s' wasn't authorized by fallback method, ignoring the request" % (action_id, caller))
-				args[-1] = ""
+				args_copy = list(args[:-1]) + [""]
 			else:
 				log.error("polkit error and unable to use fallback method to authorize action '%s' requested by caller '%s', ignoring the request" % (action_id, caller))
-				args[-1] = ""
-			return method(*args, **kwargs)
+				args_copy = list(args[:-1]) + [""]
+			return method(*args_copy, **kwargs)
 
 		wrapper = self._prepare_for_dbus(method, wrapper)
 		wrapper = dbus.service.method(self._interface_name, in_signature, out_signature, sender_keyword = "caller")(wrapper)
