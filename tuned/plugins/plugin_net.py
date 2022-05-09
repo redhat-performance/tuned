@@ -21,7 +21,7 @@ class NetTuningPlugin(base.Plugin):
 		self._load_smallest = 0.05
 		self._level_steps = 6
 		self._cmd = commands()
-		self._re_ip_link_show_qlen = None
+		self._re_ip_link_show = {}
 		self._use_ip = True
 
 	def _init_devices(self):
@@ -144,6 +144,7 @@ class NetTuningPlugin(base.Plugin):
 			"ring": None,
 			"channels": None,
 			"txqueuelen": None,
+			"mtu": None,
 		}
 
 	def _init_stats_and_idle(self, instance, device):
@@ -325,10 +326,13 @@ class NetTuningPlugin(base.Plugin):
 				return None
 		return value
 
-	def _get_re_ip_link_show_qlen(self):
-		if self._re_ip_link_show_qlen is None:
-			self._re_ip_link_show_qlen = re.compile(r".*\s+qlen\s+(\d+)")
-		return self._re_ip_link_show_qlen
+	def _get_re_ip_link_show(self, arg):
+		"""
+		Return regex for int arg value from "ip link show" command
+		"""
+		if arg not in self._re_ip_link_show:
+			self._re_ip_link_show[arg] = re.compile(r".*\s+%s\s+(\d+)" % arg)
+		return self._re_ip_link_show[arg]
 
 	@command_get("txqueuelen")
 	def _get_txqueuelen(self, device, ignore_missing=False):
@@ -337,11 +341,42 @@ class NetTuningPlugin(base.Plugin):
 			if not ignore_missing:
 				log.info("Cannot get 'ip link show' result for txqueuelen value for device '%s'" % device)
 			return None
-		res = self._get_re_ip_link_show_qlen().search(out)
+		res = self._get_re_ip_link_show("qlen").search(out)
 		if res is None:
 			# We can theoretically get device without qlen (http://linux-ip.net/gl/ip-cref/ip-cref-node17.html)
 			if not ignore_missing:
 				log.info("Cannot get txqueuelen value from 'ip link show' result for device '%s'" % device)
+			return None
+		return res.group(1)
+
+	@command_set("mtu", per_device=True)
+	def _set_mtu(self, value, device, sim):
+		if value is None:
+			return None
+		try:
+			int(value)
+		except ValueError:
+			log.warn("mtu value '%s' is not integer" % value)
+			return None
+		if not sim:
+			res = self._call_ip_link(["set", "dev", device, "mtu", value])
+			if res is None:
+				log.warn("Cannot set mtu for device '%s'" % device)
+				return None
+		return value
+
+	@command_get("mtu")
+	def _get_mtu(self, device, ignore_missing=False):
+		out = self._ip_link_show(device)
+		if out is None:
+			if not ignore_missing:
+				log.info("Cannot get 'ip link show' result for mtu value for device '%s'" % device)
+			return None
+		res = self._get_re_ip_link_show("mtu").search(out)
+		if res is None:
+			# mtu value should be always present, but it's better to have a test
+			if not ignore_missing:
+				log.info("Cannot get mtu value from 'ip link show' result for device '%s'" % device)
 			return None
 		return res.group(1)
 
