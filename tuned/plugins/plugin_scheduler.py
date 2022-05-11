@@ -242,7 +242,8 @@ class SchedulerPlugin(base.Plugin):
 				instance._runtime_tuning = False
 
 	def _instance_cleanup(self, instance):
-		pass
+		for fd in instance._evlist.get_pollfd():
+			os.close(fd.name)
 
 	@classmethod
 	def _get_config_options(cls):
