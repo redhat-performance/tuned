@@ -15,9 +15,21 @@ SYSCTL_CONFIG_DIRS = [ "/run/sysctl.d",
 		"/etc/sysctl.d" ]
 
 class SysctlPlugin(base.Plugin):
-	"""
-	Plugin for applying custom sysctl options.
-	"""
+        """
+        This plugin is used for applying custom `sysctl` settings and should only be used to change 
+        system settings that are not covered by other plugins available in *Tuned*. If the settings
+        are covered by other *Tuned* plugins, please use those plugins instead.
+        
+        The syntax for this plugin is `variable=value`, where _variable_ is the same as the variable 
+        name provided by the `sysctl` utility.
+
+        Example usage in a *Tuned* profile:
+        
+        ```
+        [sysctl]
+        kernel.sched_min_granularity_ns=3000000
+        ```
+        """
 
 	def __init__(self, *args, **kwargs):
 		super(SysctlPlugin, self).__init__(*args, **kwargs)
