@@ -24,7 +24,7 @@
 tuned\-adm - command line tool for switching between different tuning profiles
 .SH SYNOPSIS
 .B tuned\-adm 
-.RB [ list " | " active " | " "profile \fI[profile]\fP..." " | " off " | " verify " | " recommend ]
+.RB [ list " | " active " | " "profile \fI[profile]\fP..." " | " "profile_info \fI[profile]\fP..." " | " off " | " verify " | " recommend ]
 
 .SH DESCRIPTION
 This command line utility allows you to switch between user definable tuning
@@ -72,6 +72,10 @@ profile given is not valid, the command gracefully exits without
 performing any operation.
 
 .TP
+.BI "profile_info " [PROFILE_NAME] ...
+Show information/description of given profile or current profile if no profile is specified.
+
+.TP
 .B verify
 Verifies current profile against system settings. Outputs information whether
 system settings match current profile or not (e.g. somebody modified
@@ -95,6 +99,14 @@ is evaluated first. If no match is found, the files in the
 name in both directories, the one from \fI/etc/tuned/recommend.d\fP is used)
 and the files are evaluated in alphabetical order. The first matching
 entry is used.
+
+.TP
+.B auto_profile
+Enable automatic profile selection mode, switch to the recommended profile.
+
+.TP
+.B profile_mode
+Show current profile selection mode.
 
 .TP
 .B off
