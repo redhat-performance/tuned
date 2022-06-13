@@ -9,6 +9,9 @@ import tuned.consts as consts
 
 log = tuned.logs.get()
 
+FLAG_RELOAD = "r"  # reload module if present
+FLAG_FORCE = "f"  # force saving options even when module is not present and lower log level if module is not present
+
 class ModulesPlugin(base.Plugin):
 	"""
 	Plugin for applying custom kernel modules options.
@@ -18,6 +21,7 @@ class ModulesPlugin(base.Plugin):
 		super(ModulesPlugin, self).__init__(*args, **kwargs)
 		self._has_dynamic_options = True
 		self._cmd = commands()
+		self._line_regex = None
 
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
@@ -39,30 +43,50 @@ class ModulesPlugin(base.Plugin):
 			if retcode != 0:
 				log.warn("cannot insert/reinsert module '%s', reboot is required: %s" % (module, out.strip()))
 
+	def _get_line_regex(self):
+		if self._line_regex is None:
+			self._line_regex = re.compile(r'^(?:\s*\+(\w+)\s*,?)?(.*)$')
+		return self._line_regex
+
+	def _parse_flags_and_options(self, value):
+		value = self._variables.expand(value)
+		res = self._get_line_regex().match(value).groups('')
+		return set(res[0]), res[1].strip()
+
 	def _instance_apply_static(self, instance):
 		self._clear_modprobe_file()
 		s = ""
 		retcode = 0
 		skip_check = False
 		reload_list = []
+		write_options = True
 		for option, value in list(instance._modules.items()):
 			module = self._variables.expand(option)
-			v = self._variables.expand(value)
+			flags, module_options = self._parse_flags_and_options(value)
 			if not skip_check:
-				retcode, out = self._cmd.execute(["modinfo", module])
+				write_options = True  # if skip_check is set, always write options
+				retcode, out, _ = self._cmd.execute(["modinfo", module], return_err=True)
 				if retcode < 0:
 					skip_check = True
 					log.warn("'modinfo' command not found, not checking kernel modules")
 				elif retcode > 0:
-					log.error("kernel module '%s' not found, skipping it" % module)
-			if skip_check or retcode == 0:
-				if len(v) > 1 and v[0:2] == "+r":
-					v = re.sub(r"^\s*\+r\s*,?\s*", "", v)
-					reload_list.append(module)
-				if len(v) > 0:
-					s += "options " + module + " " + v + "\n"
+					if FLAG_FORCE in flags:
+						log.info("kernel module '%s' not found, but will save options '%s' because of flag"
+								 % (module, module_options))
+					else:
+						log.error("kernel module '%s' not found, skipping it" % module)
+						write_options = False  # module not present, not writing options
+
+			if write_options:
+				if len(module_options) > 0:
+					s += "options " + module + " " + module_options + "\n"
 				else:
 					log.debug("module '%s' doesn't have any option specified, not writing it to modprobe.d" % module)
+
+			# reload module FLAG_RELOAD in flags and modinfo is not present or ended successfully
+			if FLAG_RELOAD in flags and (skip_check or retcode == 0):
+				reload_list.append(module)
+
 		self._cmd.write_to_file(consts.MODULES_FILE, s)
 		l = len(reload_list)
 		if l > 0:
@@ -80,15 +104,14 @@ class ModulesPlugin(base.Plugin):
 		r = re.compile(r"\s+")
 		for option, value in list(instance._modules.items()):
 			module = self._variables.expand(option)
-			v = self._variables.expand(value)
-			v = re.sub(r"^\s*\+r\s*,?\s*", "", v)
 			mpath = "/sys/module/%s" % module
 			if not os.path.exists(mpath):
 				ret = False
 				log.error(consts.STR_VERIFY_PROFILE_FAIL % "module '%s' is not loaded" % module)
 			else:
 				log.info(consts.STR_VERIFY_PROFILE_OK % "module '%s' is loaded" % module)
-				l = r.split(v)
+				module_options = self._parse_flags_and_options()[1]
+				l = r.split(module_options)
 				for item in l:
 					arg = item.split("=")
 					if len(arg) != 2:
