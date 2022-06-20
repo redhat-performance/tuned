@@ -248,7 +248,7 @@ class DiskPlugin(hotplug.Plugin):
 		if device not in self._hdparm_apm_devices:
 			log.info("There is no dynamic tuning available for device '%s' at time" % device)
 		else:
-			super(DiskPlugin, self)._instance_apply_dynamic(*args, **kwargs)
+			super(DiskPlugin, self)._instance_apply_dynamic(instance, device)
 
 	def _instance_unapply_dynamic(self, instance, device):
 		pass
