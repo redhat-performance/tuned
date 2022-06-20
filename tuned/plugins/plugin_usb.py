@@ -8,7 +8,23 @@ log = tuned.logs.get()
 
 class USBPlugin(base.Plugin):
 	"""
-	Plugin for tuning various options of USB subsystem.
+	`usb`::
+	
+	Sets autosuspend timeout of USB devices to the value specified by the
+	[option]`autosuspend` option in seconds. If the [option]`devices`
+	option is specified, the [option]`autosuspend` option applies to only
+	the USB devices specified, otherwise it applies to all USB devices.
+	+
+	The value `0` means that autosuspend is disabled.
+	+
+	.To turn off USB autosuspend for USB devices `1-1` and `1-2`
+	====
+	----
+	[usb]
+	devices=1-1,1-2
+	autosuspend=0
+	----
+	====
 	"""
 
 	def _init_devices(self):

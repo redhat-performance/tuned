@@ -8,7 +8,23 @@ log = tuned.logs.get()
 
 class EeePCSHEPlugin(base.Plugin):
 	"""
-	Plugin for tuning FSB (front side bus) speed on Asus EEE PCs with SHE (Super Hybrid Engine) support.
+	`eeepc_she`::
+	
+	Dynamically sets the front-side bus (FSB) speed according to the
+	CPU load. This feature can be found on some netbooks and is also
+	known as the Asus Super Hybrid Engine. If the CPU load is lower or
+	equal to the value specified by the [option]`load_threshold_powersave`
+	option, the plug-in sets the FSB speed to the value specified by the
+	[option]`she_powersave` option. If the CPU load is higher or
+	equal to the value specified by the [option]`load_threshold_normal`
+	option, it sets the FSB speed to the value specified by the
+	[option]`she_normal` option. Static tuning is not supported and the
+	plug-in is transparently disabled if the hardware support for this
+	feature is not detected.
+	
+	NOTE: For details about the FSB frequencies and corresponding values, see
+	link:https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-platform-eeepc-laptop[the kernel documentation].
+	The provided defaults should work for most users.
 	"""
 
 	def __init__(self, *args, **kwargs):

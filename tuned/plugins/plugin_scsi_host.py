@@ -11,7 +11,24 @@ log = tuned.logs.get()
 
 class SCSIHostPlugin(hotplug.Plugin):
 	"""
-	Plugin for tuning options of SCSI hosts.
+	`scsi_host`::
+	
+	Tunes options for SCSI hosts.
+	+
+	The plug-in sets Aggressive Link Power Management (ALPM) to the value specified
+	by the [option]`alpm` option. The option takes one of three values:
+	`min_power`, `medium_power` and `max_performance`.
+	+
+	NOTE: ALPM is only available on SATA controllers that use the Advanced
+	Host Controller Interface (AHCI).
+	+
+	.ALPM setting when extended periods of idle time are expected
+	====
+	----
+	[scsi_host]
+	alpm=min_power
+	----
+	====
 	"""
 
 	def __init__(self, *args, **kwargs):

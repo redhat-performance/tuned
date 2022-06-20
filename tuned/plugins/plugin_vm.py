@@ -12,7 +12,25 @@ cmd = commands()
 
 class VMPlugin(base.Plugin):
 	"""
-	Plugin for tuning memory management.
+	`vm`::
+	
+	Enables or disables transparent huge pages depending on value of the
+	[option]`transparent_hugepages` option. The option can have one of three
+	possible values `always`, `madvise` and `never`.
+	+
+	.Disable transparent hugepages
+	====
+	----
+	[vm]
+	transparent_hugepages=never
+	----
+	====
+	+
+	The [option]`transparent_hugepage.defrag` option specifies the
+	defragmentation policy. Possible values for this option are `always`,
+	`defer`, `defer+madvise`, `madvise` and `never`. For a detailed
+	explanation of these values refer to
+	link:https://www.kernel.org/doc/Documentation/vm/transhuge.txt[Transparent Hugepage Support].
 	"""
 
 	@classmethod
@@ -48,7 +66,7 @@ class VMPlugin(base.Plugin):
 		cmdline = cmd.read_file("/proc/cmdline", no_error = True)
 		if cmdline.find("transparent_hugepage=") > 0:
 			if not sim:
-				log.info("transparent_hugepage is already set in kernel boot cmdline, ingoring value from profile")
+				log.info("transparent_hugepage is already set in kernel boot cmdline, ignoring value from profile")
 			return None
 
 		sys_file = os.path.join(self._thp_path(), "enabled")

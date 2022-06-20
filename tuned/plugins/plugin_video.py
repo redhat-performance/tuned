@@ -9,7 +9,36 @@ log = tuned.logs.get()
 
 class VideoPlugin(base.Plugin):
 	"""
-	Plugin for tuning powersave options for some graphic cards.
+	`video`::
+	
+	Sets various powersave levels on video cards. Currently, only the
+	Radeon cards are supported. The powersave level can be specified
+	by using the [option]`radeon_powersave` option. Supported values are:
+	+
+	--
+	* `default`
+	* `auto`
+	* `low`
+	* `mid`
+	* `high`
+	* `dynpm`
+	* `dpm-battery`
+	* `dpm-balanced`
+	* `dpm-perfomance`
+	--
+	+
+	For additional detail, see
+	link:https://www.x.org/wiki/RadeonFeature/#kmspowermanagementoptions[KMS Power Management Options].
+	+
+	NOTE: This plug-in is experimental and the option might change in future releases.
+	+
+	.To set the powersave level for the Radeon video card to high
+	====
+	----
+	[video]
+	radeon_powersave=high
+	----
+	====
 	"""
 
 	def _init_devices(self):
