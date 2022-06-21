@@ -89,10 +89,11 @@ Requires: virt-what, ethtool, gawk
 Requires: util-linux, dbus, polkit
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
 Recommends: dmidecode
-Recommends: hdparm
+# i686 excluded
 Recommends: kernel-tools
-Recommends: kmod
-Recommends: iproute
+Requires: hdparm
+Requires: kmod
+Requires: iproute
 %endif
 # syspurpose
 %if 0%{?rhel} > 8
