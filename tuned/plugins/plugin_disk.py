@@ -11,7 +11,78 @@ log = tuned.logs.get()
 
 class DiskPlugin(hotplug.Plugin):
 	"""
-	Plugin for tuning options of disks.
+	`disk`::
+	
+	Plug-in for tuning various block device options. This plug-in can also
+	dynamically change the advanced power management and spindown timeout
+	setting for a drive according to the current drive utilization. The
+	dynamic tuning is controlled by the [option]`dynamic` and the global
+	[option]`dynamic_tuning` option in `tuned-main.conf`.
+	+
+	The disk plug-in operates on all supported block devices unless a
+	comma separated list of [option]`devices` is passed to it.
+	+
+	.Operate only on the sda block device
+	====
+	----
+	[disk]
+	# Comma separated list of devices, all devices if commented out.
+	devices=sda
+	----
+	====
+	+
+	The [option]`elevator` option sets the Linux I/O scheduler.
+	+
+	.Use the bfq I/O scheduler on xvda block device
+	====
+	----
+	[disk]
+	device=xvda
+	elevator=bfq
+	----
+	====
+	+
+	The [option]`scheduler_quantum` option only applies to the CFQ I/O
+	scheduler. It defines the number of I/O requests that CFQ sends to
+	one device at one time, essentially limiting queue depth. The default
+	value is 8 requests. The device being used may support greater queue
+	depth, but increasing the value of quantum will also increase latency,
+	especially for large sequential write work loads.
+	+
+	The [option]`apm` option sets the Advanced Power Management feature
+	on drives that support it. It corresponds to using the `-B` option of
+	the `hdparm` utility. The [option]`spindown` option puts the drive
+	into idle (low-power) mode, and also sets the standby (spindown)
+	timeout for the drive. It corresponds to using `-S` option of the
+	`hdparm` utility.
+	+
+	.Use a medium-agressive power management with spindown
+	====
+	----
+	[disk]
+	apm=128
+	spindown=6
+	----
+	====
+	+
+	The [option]`readahead` option controls how much extra data the
+	operating system reads from disk when performing sequential
+	I/O operations. Increasing the `readahead` value might improve
+	performance in application environments where sequential reading of
+	large files takes place. The default unit for readahead is KiB. This
+	can be adjusted to sectors by specifying the suffix 's'. If the
+	suffix is specified, there must be at least one space between the
+	number and suffix (for example, `readahead=8192 s`).
+	+
+	.Set the `readahead` to 4MB unless already set to a higher value
+	====
+	----
+	[disk]
+	readahead=>4096
+	----
+	====
+	The disk readahead value can be multiplied by the constant
+	specified by the [option]`readahead_multiply` option.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -248,7 +319,7 @@ class DiskPlugin(hotplug.Plugin):
 		if device not in self._hdparm_apm_devices:
 			log.info("There is no dynamic tuning available for device '%s' at time" % device)
 		else:
-			super(DiskPlugin, self)._instance_apply_dynamic(*args, **kwargs)
+			super(DiskPlugin, self)._instance_apply_dynamic(instance, device)
 
 	def _instance_unapply_dynamic(self, instance, device):
 		pass

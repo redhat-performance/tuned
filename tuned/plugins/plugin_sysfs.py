@@ -11,7 +11,26 @@ log = tuned.logs.get()
 
 class SysfsPlugin(base.Plugin):
 	"""
-	Plugin for applying custom sysfs options, using specific plugins is preferred.
+	`sysfs`::
+	
+	Sets various `sysfs` settings specified by the plug-in options.
+	+
+	The syntax is `_name_=_value_`, where
+	`_name_` is the `sysfs` path to use and `_value_` is
+	the value to write. The `sysfs` path supports the shell-style
+	wildcard characters (see `man 7 glob` for additional detail).
+	+
+	Use this plugin in case you need to change some settings that are
+	not covered by other plug-ins. Prefer specific plug-ins if they
+	cover the required settings.
+	+
+	.Ignore corrected errors and associated scans that cause latency spikes
+	====
+	----
+	[sysfs]
+	/sys/devices/system/machinecheck/machinecheck*/ignore_ce=1
+	----
+	====
 	"""
 
 	# TODO: resolve possible conflicts with sysctl settings from other plugins

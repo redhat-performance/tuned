@@ -16,7 +16,132 @@ cpuidle_states_path = "/sys/devices/system/cpu/cpu0/cpuidle"
 
 class CPULatencyPlugin(base.Plugin):
 	"""
-	Plugin for tuning CPU options. Powersaving, governor, required latency, etc.
+	`cpu`::
+	
+	Sets the CPU governor to the value specified by the [option]`governor`
+	option and dynamically changes the Power Management Quality of
+	Service (PM QoS) CPU Direct Memory Access (DMA) latency according
+	to the CPU load.
+	
+	`governor`:::
+	The [option]`governor` option of the 'cpu' plug-in supports specifying
+	CPU governors. Multiple governors are separated using '|'. The '|'
+	character is meant to represent a logical 'or' operator. Note that the
+	same syntax is used for the [option]`energy_perf_bias` option. *TuneD*
+	will set the first governor that is available on the system.
+	+    
+	For example, with the following profile, *TuneD* will set the 'ondemand'
+	governor, if it is available. If it is not available, but the 'powersave'
+	governor is available, 'powersave' will be set. If neither of them are
+	available, the governor will not be changed.
+	+
+	.Specifying a CPU governor
+	====
+	----
+	[cpu]
+	governor=ondemand|powersave
+	----
+	====
+	
+	`sampling_down_factor`:::
+	The sampling rate determines how frequently the governor checks
+	to tune the CPU. The [option]`sampling_down_factor` is a tunable
+	that multiplies the sampling rate when the CPU is at its highest
+	clock frequency thereby delaying load evaluation and improving
+	performance. Allowed values for sampling_down_factor are 1 to 100000.
+	+
+	.The recommended setting for jitter reduction
+	====
+	----
+	[cpu]
+	sampling_down_factor = 100
+	----
+	====
+	
+	`energy_perf_bias`:::
+	[option]`energy_perf_bias` supports managing energy
+	vs. performance policy via x86 Model Specific Registers using the
+	`x86_energy_perf_policy` tool. Multiple alternative Energy Performance
+	Bias (EPB) values are supported. The alternative values are separated
+	using the '|' character. The following EPB values are supported
+	starting with kernel 4.13: "performance", "balance-performance",
+	"normal", "balance-power" and "power".
+	+
+	.Specifying alternative Energy Performance Bias values
+	====
+	----
+	[cpu]
+	energy_perf_bias=powersave|power
+	----
+	
+	*TuneD* will try to set EPB to 'powersave'. If that fails, it will
+	try to set it to 'power'.
+	====
+	
+	`latency_low, latency_high, load_threshold`:::
+	+
+	If the CPU load is lower than the value specified by
+	the[option]`load_threshold` option, the latency is set to the value
+	specified either by the [option]`latency_high` option or by the
+	[option]`latency_low` option.
+	+
+	`force_latency`:::
+	You can also force the latency to a specific value and prevent it from
+	dynamically changing further. To do so, set the [option]`force_latency`
+	option to the required latency value.
+	+
+	The maximum latency value can be specified in several ways:
+	+
+	 * by a numerical value in microseconds (for example, `force_latency=10`)
+	 * as the kernel CPU idle level ID of the maximum C-state allowed
+	   (for example, force_latency = cstate.id:1)
+	 * as a case sensitive name of the maximum C-state allowed
+	   (for example, force_latency = cstate.name:C1)
+	 * by using 'None' as a fallback value to prevent errors when alternative
+	   C-state IDs/names do not exist. When 'None' is used in the alternatives
+	   pipeline, all the alternatives that follow 'None' are ignored.
+	+
+	It is also possible to specify multiple fallback values separated by '|' as
+	the C-state names and/or IDs may not be available on some systems.
+	+
+	.Specifying fallback C-state values
+	====
+	----
+	[cpu]
+	force_latency=cstate.name:C6|cstate.id:4|10
+	----
+	This configuration tries to obtain and set the latency of C-state named C6.
+	If the C-state C6 does not exist, kernel CPU idle level ID 4 (state4) latency
+	is searched for in sysfs. Finally, if the state4 directory in sysfs is not found,
+	the last latency fallback value is `10` us. The value is encoded and written into
+	the kernel's PM QoS file `/dev/cpu_dma_latency`.
+	====
+	+
+	.Specifying fallback C-state values using 'None'.
+	====
+	----
+	[cpu]
+	force_latency=cstate.name:XYZ|None
+	----
+	In this case, if C-state with the name `XYZ` does not exist
+	[option]`force_latency`, no latency value will be written into the
+	kernel's PM QoS file, and no errors will be reported due to the
+	presence of 'None'.
+	====
+	
+	`min_perf_pct, max_perf_pct, no_turbo`:::
+	These options set the internals of the Intel P-State driver exposed via the kernel's
+	`sysfs` interface.
+	+
+	.Adjusting the configuration of the Intel P-State driver
+	====
+	----
+	[cpu]
+	min_perf_pct=100
+	----
+	Limit the minimum P-State that will be requested by the driver. It states
+	it as a percentage of the max (non-turbo) performance level.
+	====
 	"""
 
 	def __init__(self, *args, **kwargs):

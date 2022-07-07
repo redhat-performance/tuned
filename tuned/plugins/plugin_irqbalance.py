@@ -10,7 +10,23 @@ log = tuned.logs.get()
 
 class IrqbalancePlugin(base.Plugin):
 	"""
-	Plugin for irqbalance settings management.
+	`irqbalance`::
+	
+	Plug-in for irqbalance settings management. The plug-in
+	configures CPUs which should be skipped when rebalancing IRQs in
+	`/etc/sysconfig/irqbalance`. It then restarts irqbalance if and
+	only if it was previously running.
+	+
+	The banned/skipped CPUs are specified as a CPU list via the
+	[option]`banned_cpus` option.
+	+
+	.Skip CPUs 2,4 and 9-13 when rebalancing IRQs
+	====
+	----
+	[irqbalance]
+	banned_cpus=2,4,9-13
+	----
+	====
 	"""
 
 	def __init__(self, *args, **kwargs):
