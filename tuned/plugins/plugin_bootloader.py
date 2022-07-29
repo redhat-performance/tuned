@@ -690,6 +690,8 @@ class BootloaderPlugin(base.Plugin):
 				log.warn("requested changes to initrd will not be applied!")
 			if len(self._cmdline_val) > 0:
 				log.warn("requested changes to cmdline will not be applied!")
+			# ensure that the desired cmdline is always written to BOOT_CMDLINE_FILE (/etc/tuned/bootcmdline)
+			self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : self._cmdline_val, consts.BOOT_CMDLINE_INITRD_ADD_VAR : self._initrd_val})
 		elif enabling and self.update_grub2_cfg:
 			if self._rpm_ostree:
 				self._rpm_ostree_update()
