@@ -36,16 +36,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.18.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.19.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -552,6 +552,21 @@ fi
 %{_mandir}/man7/tuned-profiles-openshift.7*
 
 %changelog
+* Tue Aug  9 2022 Jaroslav Škarvada <jskarvad@redhat.com> - 2.19.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#2057609
+  - fixed parsing of inline comments
+    resolves: rhbz#2060138
+  - added support for quotes in isolated_cores specification
+    resolves: rhbz#1891036
+  - spec: reduced weak dependencies
+    resolves: rhbz#2093841
+  - recommend: do not ignore syspurpose_role if there is no syspurpose
+    resolves: rhbz#2030580
+  - added support for initial autosetup of isolated_cores
+    resolves: rhbz#2093847
+
 * Wed Feb  9 2022 Jaroslav Škarvada <jskarvad@redhat.com> - 2.18.0-1
 - new release
   - rebased tuned to latest upstream
