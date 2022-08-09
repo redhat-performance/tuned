@@ -331,13 +331,16 @@ class BootloaderPlugin(base.Plugin):
 			if val is None or val == "":
 				continue
 			op = val[0]
+			op1 = val[1:2]
 			vals = val[1:].strip()
-			if op == "+" and vals != "":
-				cmdline += " " + vals
-			elif op == "-" and vals != "":
-				for p in vals.split():
-					regex = re.escape(p)
-					cmdline = re.sub(r"(\A|\s)" + regex + r"(?=\Z|\s)", r"", cmdline)
+			if op == "+" or (op == "\\" and op1 in ["\\", "+", "-"]):
+				if vals != "":
+					cmdline += " " + vals
+			elif op == "-":
+				if vals != "":
+					for p in vals.split():
+						regex = re.escape(p)
+						cmdline = re.sub(r"(\A|\s)" + regex + r"(?=\Z|\s)", r"", cmdline)
 			else:
 				cmdline += " " + val
 		cmdline = cmdline.strip()
@@ -477,7 +480,7 @@ class BootloaderPlugin(base.Plugin):
 			grub2_cfg_new = grub2_cfg
 			patch_initial = False
 			for opt in d:
-				(grub2_cfg_new, nsubs) = re.subn(r"\b(set\s+" + opt + "\s*=).*$", r"\1" + "\"" + d[opt] + "\"", grub2_cfg_new, flags = re.MULTILINE)
+				(grub2_cfg_new, nsubs) = re.subn(r"\b(set\s+" + opt + "\s*=).*$", r"\1" + "\"" + self._cmd.escape(d[opt]) + "\"", grub2_cfg_new, flags = re.MULTILINE)
 				if nsubs < 1 or re.search(r"\$" + opt, grub2_cfg, flags = re.MULTILINE) is None:
 					patch_initial = True
 

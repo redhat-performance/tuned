@@ -192,7 +192,7 @@ class commands:
 						data += "\n"
 					data += "%s=\"%s\"\n" % (o, v)
 			else:
-				data = re.sub(r"\b(" + o + r"\s*=).*$", r"\1" + "\"" + v + "\"", data, flags = re.MULTILINE)
+				data = re.sub(r"\b(" + o + r"\s*=).*$", r"\1" + "\"" + self.escape(v) + "\"", data, flags = re.MULTILINE)
 
 		return self.write_to_file(f, data)
 
