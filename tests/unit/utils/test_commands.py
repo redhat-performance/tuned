@@ -187,9 +187,17 @@ class CommandsTestCase(unittest.TestCase):
 	def test_cpulist_unpack(self):
 		cpus = '4-8,^6,0xf00,,!10-11'
 		self.assertEqual(self._commands.cpulist_unpack(cpus),[4,5,7,8,9])
+		cpus = '\'\'"4-8,^6\'"'
+		self.assertEqual(self._commands.cpulist_unpack(cpus, None),[])
+		cpus = '\'\'"4-8,^6\'"'
+		self.assertEqual(self._commands.cpulist_unpack(cpus),[4,5,7,8])
+		cpus = '"4-8\',^6\'"'
+		self.assertEqual(self._commands.cpulist_unpack(cpus),[])
 		cpus = '1,2,3-x'
 		self.assertEqual(self._commands.cpulist_unpack(cpus),[])
 		cpus = '1,2,!3-x'
+		self.assertEqual(self._commands.cpulist_unpack(cpus),[])
+		cpus = {"1": "1"}
 		self.assertEqual(self._commands.cpulist_unpack(cpus),[])
 
 	def test_cpulist_pack(self):
