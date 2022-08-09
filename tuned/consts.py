@@ -66,6 +66,9 @@ SYSTEMD_CPUAFFINITY_VAR = "CPUAffinity"
 # irqbalance plugin configuration
 IRQBALANCE_SYSCONFIG_FILE = "/etc/sysconfig/irqbalance"
 
+# built-in functions configuration
+SYSFS_CPUS_PATH = "/sys/devices/system/cpu"
+
 # number of backups
 LOG_FILE_COUNT = 2
 LOG_FILE_MAXBYTES = 100*1000
