@@ -12,8 +12,6 @@ _tuned_adm()
 		COMPREPLY=( $(compgen -W "$(command find /usr/lib/tuned /etc/tuned -mindepth 1 -maxdepth 1 -type d -printf "%f\n")" -- "$cur" ) )
 	elif [[ "$cword" -eq 2 && "$prev" == "profile_info" ]]; then
                 COMPREPLY=( $(compgen -W "$(command find /usr/lib/tuned /etc/tuned -mindepth 1 -maxdepth 1 -type d -printf "%f\n")" -- "$cur" ) )
-	elif [[ "$cword" -eq 2 && "$prev" == "list" ]]; then
-                COMPREPLY=( $(compgen -W "profiles plugins" -- "$cur" ) )
 	else
 		COMPREPLY=()
 	fi
