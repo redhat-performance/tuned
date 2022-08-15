@@ -1,22 +1,21 @@
+srpm_build_deps: []
 upstream_tag_template: v{version}
 jobs:
 - job: copr_build
   trigger: pull_request
-  metadata:
-    targets:
-    - fedora-all
-    - epel-7-x86_64
-    - epel-8-x86_64
-    - centos-stream-9-x86_64
+  targets:
+  - fedora-all
+  - epel-7-x86_64
+  - epel-8-x86_64
+  - centos-stream-9-x86_64
 - job: tests
   trigger: pull_request
-  metadata:
-    targets:
-    - fedora-all
-    - epel-7-x86_64
-    - epel-8-x86_64
-    - centos-stream-9-x86_64
+  targets:
+  - fedora-all
+  - epel-7-x86_64
+  - epel-8-x86_64
+  - centos-stream-9-x86_64
 
-synced_files:
+files_to_sync:
 - tuned.spec
 - .packit.yaml
