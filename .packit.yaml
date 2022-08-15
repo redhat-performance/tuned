@@ -1,3 +1,4 @@
+srpm_build_deps: []
 upstream_tag_template: v{version}
 jobs:
 - job: copr_build
