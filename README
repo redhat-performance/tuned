@@ -30,11 +30,11 @@ on the machine (X11, physical tty, but no SSH).
 
 To see the current active profile, run:
 
-$ tuned-adm active
+# tuned-adm active
 
 To list all available profiles, run:
 
-$ tuned-adm list
+# tuned-adm list
 
 To switch to a different profile, run:
 
@@ -58,7 +58,7 @@ profiles targeted to the best performance or the balanced profile if unsure.
 Available tunings
 -----------------
 
-We are currenlty working on many new tuning features. Some are described in
+We are currently working on many new tuning features. Some are described in
 the manual pages, some are yet undocumented.
 
 
