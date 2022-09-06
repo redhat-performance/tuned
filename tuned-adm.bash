@@ -8,7 +8,7 @@ _tuned_adm()
 
 	if [[ "$cword" -eq 1 ]]; then
 		COMPREPLY=( $(compgen -W "$commands" -- "$cur" ) )
-	elif [[ "$cword" -eq 2 && "$prev" == "profile" ]]; then
+	elif [[ "$cword" -eq 2 && ("$prev" == "profile" || "$prev" == "profile_info") ]]; then
 		COMPREPLY=( $(compgen -W "$(command find /usr/lib/tuned /etc/tuned -mindepth 1 -maxdepth 1 -type d -printf "%f\n")" -- "$cur" ) )
 	else
 		COMPREPLY=()
