@@ -930,7 +930,7 @@ class SchedulerPlugin(base.Plugin):
 				and len(vals) == 5]
 		sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
 		sched_all = dict()
-		# for runtime tunning
+		# for runtime tuning
 		instance._sched_lookup = {}
 		for option, (rule_prio, scheduler, priority, affinity, regex) \
 				in sched_cfg:
