@@ -5,6 +5,8 @@ from tuned.exceptions import TunedException
 import threading
 import tuned.consts as consts
 from tuned.utils.commands import commands
+import os
+import shutil
 
 __all__ = ["Controller"]
 
