@@ -41,6 +41,7 @@ if __name__ == "__main__":
 	parser.add_argument("--log", "-l", nargs = "?", const = consts.LOG_FILE, help = "log to file, default file: " + consts.LOG_FILE)
 	parser.add_argument("--pid", "-P", nargs = "?", const = consts.PID_FILE, help = "write PID file, default file: " + consts.PID_FILE)
 	parser.add_argument("--no-dbus", action = "store_true", help = "do not attach to DBus")
+	parser.add_argument("--no-socket", action = "store_true", help = "do not attach to socket")
 	parser.add_argument("--profile", "-p", action = "store", type=str, metavar = "name", help = "tuning profile to be activated")
 	parser.add_argument('--version', "-v", action = "version", version = "%%(prog)s %s.%s.%s" % (ver.TUNED_VERSION_MAJOR, ver.TUNED_VERSION_MINOR, ver.TUNED_VERSION_PATCH))
 	args = parser.parse_args(sys.argv[1:])
@@ -67,12 +68,24 @@ if __name__ == "__main__":
 
 		app = tuned.daemon.Application(args.profile, config)
 
-		# no daemon mode doesn't need DBus
-		if not config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+		# no daemon mode doesn't need DBus or if disabled in config
+		if not config.get(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON) \
+				or not config.get_bool(consts.CFG_ENABLE_DBUS, consts.CFG_DEF_ENABLE_DBUS):
 			args.no_dbus = True
+
+		# no daemon mode doesn't need sockets or if disabled in config
+		if not config.get(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON) \
+				or not config.get_bool(consts.CFG_ENABLE_UNIX_SOCKET, consts.CFG_DEF_ENABLE_UNIX_SOCKET):
+			args.no_socket = True
 
 		if not args.no_dbus:
 			app.attach_to_dbus(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
+
+		if not args.no_socket:
+			app.attach_to_unix_socket()
+
+		if not args.no_dbus or not args.no_socket:
+			app.register_controller()
 
 		# always write PID file
 		if args.pid is None:

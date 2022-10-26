@@ -43,6 +43,16 @@ class ExportsController(tuned.patterns.Singleton):
 			kwargs = method.signal_params[1]
 			exporter.signal(method, *args, **kwargs)
 
+	def send_signal(self, signal, *args, **kwargs):
+		"""Register signal to all exporters."""
+		for exporter in self._exporters:
+			exporter.send_signal(signal, *args, **kwargs)
+
+	def period_check(self):
+		"""Allows to perform checks on exporters without special thread."""
+		for exporter in self._exporters:
+			exporter.period_check()
+
 	def _initialize_exports(self):
 		if self._exports_initialized:
 			return

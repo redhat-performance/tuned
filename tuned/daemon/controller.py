@@ -61,8 +61,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if daemon:
 			self._terminate.clear()
 			# we have to pass some timeout, otherwise signals will not work
-			while not self._cmd.wait(self._terminate, 10):
-				pass
+			while not self._cmd.wait(self._terminate, 1):
+				exports.period_check()
 
 		log.info("terminating controller")
 		self.stop()
@@ -308,6 +308,23 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if caller == "":
 			return False
 		return self._daemon.get_plugin_hints(str(plugin_name))
+
+	@exports.export("s", "b")
+	def register_socket_signal_path(self, path, caller = None):
+		"""Allows to dynamically add sockets to send signals to
+
+		Parameters:
+		path -- path to socket to register for sending signals
+
+		Return:
+		bool -- True on success
+		"""
+		if caller == "":
+			return False
+		if self._daemon._application and self._daemon._application._unix_socket_exporter:
+			self._daemon._application._unix_socket_exporter.register_signal_path(path)
+			return True
+		return False
 
 	# devices - devices to migrate from other instances, string of form "dev1,dev2,dev3,..."
 	#	or "cpulist:CPULIST", where CPULIST is e.g. "0-3,6,8-9"
