@@ -13,6 +13,7 @@ import errno
 import time
 import threading
 import logging
+import shutil
 
 class Admin(object):
 	def __init__(self, dbus = True, debug = False, asynco = False,
