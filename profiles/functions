@@ -218,7 +218,7 @@ CPUSPEED_SAVE_FILE="${STORAGE}/cpuspeed${STORAGE_SUFFIX}"
 CPUSPEED_ORIG_GOV="${STORAGE}/cpuspeed-governor-%s${STORAGE_SUFFIX}"
 CPUSPEED_STARTED="${STORAGE}/cpuspeed-started"
 CPUSPEED_CFG="/etc/sysconfig/cpuspeed"
-CPUSPEED_INIT="/etc/init.d/cpuspeed"
+CPUSPEED_INIT="/etc/rc.d/init.d/cpuspeed"
 # do not use cpuspeed
 CPUSPEED_USE="0"
 CPUS="$(ls -d1 /sys/devices/system/cpu/cpu* | sed 's;^.*/;;' |  grep "cpu[0-9]\+")"

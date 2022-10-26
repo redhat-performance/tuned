@@ -24,7 +24,7 @@ TUNED_OPT1=--log
 TUNED_OPT2=--pid
 TUNED_OPT3=--daemon
 
-SCRIPTNAME=/etc/init.d/$NAME
+SCRIPTNAME=/etc/rc.d/init.d/$NAME
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
