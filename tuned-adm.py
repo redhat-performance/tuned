@@ -83,6 +83,10 @@ if __name__ == "__main__":
 	parser_profile_info.set_defaults(action="profile_info")
 	parser_profile_info.add_argument("profile", metavar="profile", type=str, nargs="?", default="", help="profile name, current profile if not specified")
 
+        parser_profile_delete = subparsers.add_parser("delete", help="delete a profile")
+        parser_profile_delete.set_defaults(action="profile_delete")
+        parser_profile_delete.add_argument("profile", metavar="profile", type=str, nargs="?", default="", help="profile name, only choose the user profile")
+
 	if config.get(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND):
 		parser_off = subparsers.add_parser("recommend", help="recommend profile")
 		parser_off.set_defaults(action="recommend_profile")

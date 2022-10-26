@@ -178,6 +178,28 @@ class Admin(object):
 				return False
 		return self._print_profile_info(profile, self._profiles_locator.get_profile_attrs(profile, [consts.PROFILE_ATTR_SUMMARY, consts.PROFILE_ATTR_DESCRIPTION], ["", ""]))
 
+        def _action_profile_delete(self, profile = ""):
+                if profile == "":
+                        print("No set profile to delete.")
+                        return False
+                try:
+                        profile_list = os.listdir(consts.USER_PROFILE_DIR)
+                        if profile not in profile_list:
+                                print("File '%s' does not exists." % profile)
+                                return False
+                        else:
+                                shutil.rmtree(os.path.join(consts.USER_PROFILE_DIR, profile))
+
+                except TunedException as e:
+                        self._error(str(e))
+                        return False
+                return True
+
+        def _dbus_action_profile_delete(self, profile = ""):
+                if profile != "":
+                        ret = self._controller.profile_delete(profile)
+                        res = True
+                return self._controller.exit(res)
 	def _print_profile_name(self, profile_name):
 		if profile_name is None:
 			print("No current active profile.")
