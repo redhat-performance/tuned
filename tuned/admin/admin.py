@@ -190,6 +190,7 @@ class Admin(object):
                                 return False
                         else:
                                 shutil.rmtree(os.path.join(consts.USER_PROFILE_DIR, profile))
+				print("Profile '%s' delete successfully" % profile)
 
                 except TunedException as e:
                         self._error(str(e))
@@ -199,8 +200,8 @@ class Admin(object):
         def _dbus_action_profile_delete(self, profile = ""):
                 if profile != "":
                         ret = self._controller.profile_delete(profile)
-                        res = True
-                return self._controller.exit(res)
+                return self._controller.exit(ret)
+		
 	def _print_profile_name(self, profile_name):
 		if profile_name is None:
 			print("No current active profile.")
