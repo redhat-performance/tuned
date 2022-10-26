@@ -268,6 +268,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
                                 return False
                         else:
                                 shutil.rmtree(os.path.join(consts.USER_PROFILE_DIR, profile))
+				print("Profile '%s' delete successfully" % profile)
 
                 except TunedException as e:
                         self._error(str(e))
