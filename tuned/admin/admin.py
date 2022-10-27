@@ -153,8 +153,7 @@ class Admin(object):
 	def _dbus_action_profile_delete(self, profile = ""):
 		if profile != "":
 			ret = self._controller.profile_delete(profile)
-			res = True
-		return self._controller.exit(res)
+		return self._controller.exit(ret)
 
 	def _dbus_get_post_loaded_profile(self):
 		profile_name = self._controller.post_loaded_profile()
