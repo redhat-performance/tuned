@@ -356,7 +356,7 @@ class Base(object):
 		try:
 			if self._get_active_profile_name() == profile:
 				self.error_dialog('You can not remove active profile',
-								  'Please deactivate profile by choosind another!'
+								  'Please deactivate profile by choosing another!'
 								  )
 				return
 			if profile is None:
