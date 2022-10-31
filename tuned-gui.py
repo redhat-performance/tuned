@@ -206,7 +206,7 @@ class Base(object):
 
 	def is_tuned_connection_ok(self):
 		"""
-		Result True, False depends on if tuned daemon is running. If its not runing this method try to start tuned.
+		Result True, False depends on if tuned daemon is running. If its not running this method try to start tuned.
 		"""
 
 		try:
