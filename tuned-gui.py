@@ -363,7 +363,7 @@ class Base(object):
 				self.error_dialog('No profile selected!', '')
 				return
 			if self._gobj('windowProfileEditor').is_active():
-				self.error_dialog('You are ediding '
+				self.error_dialog('You are editing '
 								  + self.editing_profile_name
 								  + ' profile.',
 								  'Please close edit window and try again.'
