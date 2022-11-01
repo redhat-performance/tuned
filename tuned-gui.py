@@ -50,6 +50,7 @@ import os
 import time
 import collections
 import subprocess
+import re
 
 import tuned.logs
 import tuned.consts as consts
@@ -508,6 +509,9 @@ class Base(object):
 
 	def data_to_profile_config(self):
 		name = self._gobj('entryProfileName').get_text()
+		if re.match("[A-Za-z0-9_]+", name) is None:
+			self.error_dialog('Find unexpected characters', 'Only \"a-z\", \"A-Z\", \"0-9\" and \"_\" are supported')
+			return
 		config = collections.OrderedDict()
 
 		activated = self._gobj('comboboxIncludeProfile').get_active()
