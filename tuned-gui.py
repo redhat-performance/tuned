@@ -587,6 +587,7 @@ class Base(object):
 							'create copy',
 							'cancel'
 							).run():
+					self.editing_profile_name = None
 					return
 
 				copied_profile = self.manager.get_profile(
@@ -603,6 +604,7 @@ class Base(object):
 							'open copy',
 							'cancel'
 							).run():
+					self.editing_profile_name = None
 					return
 				copied_profile = self.manager.get_profile(
 					self.editing_profile_name + '-modified')
