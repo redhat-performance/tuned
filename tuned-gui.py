@@ -346,6 +346,7 @@ class Base(object):
 
 	def on_delete_event(self, window, data):
 		window.hide()
+		self.editing_profile_name = None
 		return True
 
 	def _get_active_profile_name(self):
@@ -362,7 +363,7 @@ class Base(object):
 			if profile is None:
 				self.error_dialog('No profile selected!', '')
 				return
-			if self._gobj('windowProfileEditor').is_active():
+			if self.editing_profile_name is not None:
 				self.error_dialog('You are ediding '
 								  + self.editing_profile_name
 								  + ' profile.',
