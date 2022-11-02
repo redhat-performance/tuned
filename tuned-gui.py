@@ -385,6 +385,7 @@ class Base(object):
 			self.error_dialog('Profile can not be remove', ex.__str__())
 
 	def execute_cancel_window_profile_editor(self, button):
+		self.editing_profile_name = None
 		self._gobj('windowProfileEditor').hide()
 
 	def execute_cancel_window_profile_editor_raw(self, button):
@@ -451,6 +452,7 @@ class Base(object):
 
 		self.error_dialog('Profile Editor will be closed.',
 						  'for next updates reopen profile.')
+		self.editing_profile_name = None
 		self._gobj('windowProfileEditor').hide()
 		self._gobj('windowProfileEditorRaw').hide()
 
@@ -505,6 +507,7 @@ class Base(object):
 		else:
 			prefix = consts.PREFIX_PROFILE_USER
 		self.treestore_profiles.append([prof.name, prefix])
+		self.editing_profile_name = None
 		self._gobj('windowProfileEditor').hide()
 
 	def data_to_profile_config(self):
