@@ -254,7 +254,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			profile_name = self.active_profile()
 		return tuple(self._daemon.profile_loader.profile_locator.get_profile_attrs(profile_name, [consts.PROFILE_ATTR_SUMMARY, consts.PROFILE_ATTR_DESCRIPTION], [""]))
 
-	@exports.export("s", "(bsss)")
+	@exports.export("s", "b")
 	def profile_delete(self, profile, caller = None):
 		if caller == "":
 			return ""
