@@ -32,7 +32,7 @@ class polkit():
 			try:
 				uid = self._bus.get_unix_user(sender)
 			except dbus.exceptions.DBusException as e:
-				log.error("error using falback authorization method: %s" % e)
+				log.error("error using fallback authorization method: %s" % e)
 				return -2
 			if uid == 0:
 				return 2

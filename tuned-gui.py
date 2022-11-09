@@ -236,7 +236,7 @@ class Base(object):
 		This add rows to object listbox_summary_of_active_profile.
 		Row consist of grid. Inside grid on first possition is label, second possition is vertical grid.
 		label = name of plugin
-		verical grid consist of labels where are stored values for plugin option and value.
+		vertical grid consist of labels where are stored values for plugin option and value.
 
 		This method is emited after change profile and on startup of app.
 		"""
