@@ -1,4 +1,4 @@
-from . import base
+from . import hotplug
 from .decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
@@ -10,7 +10,7 @@ import glob
 log = tuned.logs.get()
 cmd = commands()
 
-class AudioPlugin(base.Plugin):
+class AudioPlugin(hotplug.Plugin):
 	"""
 	`audio`::
 	

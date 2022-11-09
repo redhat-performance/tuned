@@ -1,5 +1,5 @@
 import errno
-from . import base
+from . import hotplug
 from .decorators import *
 import tuned.logs
 from tuned.utils.nettool import ethcard
@@ -11,7 +11,7 @@ log = tuned.logs.get()
 
 WOL_VALUES = "pumbagsd"
 
-class NetTuningPlugin(base.Plugin):
+class NetTuningPlugin(hotplug.Plugin):
 	"""
 	`net`::
 	
