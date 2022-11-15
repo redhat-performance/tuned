@@ -279,7 +279,7 @@ class Admin(object):
 	def _action_dbus_profile(self, profiles):
 		if len(profiles) == 0:
 			return self._action_dbus_list()
-		profile_name = " ".join(profiles)
+		profile_name = " ".join(set(profiles))
 		if profile_name == "":
 			return self._controller.exit(False)
 		self._daemon_action_finished.clear()
@@ -321,7 +321,7 @@ class Admin(object):
 	def _action_profile(self, profiles):
 		if len(profiles) == 0:
 			return self._action_list_profiles()
-		profile_name = " ".join(profiles)
+		profile_name = " ".join(set(profiles))
 		if profile_name == "":
 			return False
 		return self._set_profile(profile_name, True)
