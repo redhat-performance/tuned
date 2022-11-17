@@ -176,6 +176,8 @@ install: install-dirs
 		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-virtual-host-variables.conf
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning/cpu-partitioning-variables.conf \
 		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-variables.conf
+	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning-powersave/cpu-partitioning-powersave-variables.conf \
+		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-powersave-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_RECOMMEND_DIR)/50-tuned.conf
 
 	# bash completion

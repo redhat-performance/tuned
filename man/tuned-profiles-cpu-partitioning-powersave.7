@@ -1,0 +1,67 @@
+.\"/*
+.\" * All rights reserved
+.\" * Copyright (C) 2022 Red Hat, Inc.
+.\" * Authors: Christophe Fontaine
+.\" *
+.\" * This program is free software; you can redistribute it and/or
+.\" * modify it under the terms of the GNU General Public License
+.\" * as published by the Free Software Foundation; either version 2
+.\" * of the License, or (at your option) any later version.
+.\" *
+.\" * This program is distributed in the hope that it will be useful,
+.\" * but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" * GNU General Public License for more details.
+.\" *
+.\" * You should have received a copy of the GNU General Public License
+.\" * along with this program; if not, write to the Free Software
+.\" * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+.\" */
+.\"
+.TH TUNED_PROFILES_CPU_PARTITIONING "7" "22 Nov 2022" "TuneD"
+.SH NAME
+tuned\-profiles\-cpu\-partitioning\-powersave - Partition CPUs into isolated and housekeeping with C-States enabled
+
+.SH DESCRIPTION
+The cpu\-partitioning\-powersave profile is similar to cpu\-partitioning profile,
+but gives more flexibility on the C-States configuration.
+
+.SH CONFIGURATION
+The cpu-partitioning-powersave profile is configured by editing the
+.I /etc/tuned/cpu-partitioning-powersave-variables.conf
+file. There are three configuration options:
+
+.TP
+.B isolated_cores=<CPU\-LIST>
+List of CPUs to isolate. This option is mandatory. Any CPUs not in this list
+is automatically considered a housekeeping CPU.
+.TP
+.B no_balance_cores=<CPU\-LIST>
+List of CPUs not be considered by the kernel when doing system wide
+process load\-balancing. Usually, this list should be the same as
+isolated_cores=. This option is optional.
+.TP
+.B max_power_state=<MAX_CSTATE>
+Maximum c-state the cores are allowed to enter. Can be expressed as it's name (C1E)
+or minimum wake-up latency, in micro-seconds.
+This parameter is provided as-is to `force_latency`.
+Default is set to "cstate.name:C1|10" to behave as cpu\-partitioning profile.
+
+
+.SH IMPORTANT NOTES
+
+.IP *
+Same recommendations as tuned\-profiles\-cpu\-partitioning (7) apply.
+
+.SH "FILES"
+.nf
+.I /etc/tuned/cpu\-partitioning\-variables.conf
+.I /etc/tuned/tuned\-main.conf
+
+.SH "SEE ALSO"
+.BR tuned (8)
+.BR tuned\-adm (8)
+.BR tuned\-profiles\-cpu\-partitioning (7)
+.SH AUTHOR
+.nf
+Christophe Fontaine <cfontain@redhat.com>
