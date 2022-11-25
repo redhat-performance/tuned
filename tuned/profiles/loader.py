@@ -100,7 +100,7 @@ class Loader(object):
 			config_obj.optionxform=str
 			with open(file_name) as f:
 				config_obj.read_file(f, file_name)
-		except Error as e:
+		except Error.__bases__ as e:
 			raise InvalidProfileException("Cannot parse '%s'." % file_name, e)
 
 		config = collections.OrderedDict()
