@@ -55,7 +55,7 @@ class Locator(object):
 		if config_file is None:
 			return None
 		try:
-			config = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), allow_no_value=True)
+			config = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), allow_no_value=True, strict=False)
 			config.optionxform = str
 			with open(config_file) as f:
 				config.read_string("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read())
