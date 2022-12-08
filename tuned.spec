@@ -406,6 +406,7 @@ fi
 %exclude %{_sysconfdir}/tuned/realtime-virtual-guest-variables.conf
 %exclude %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
 %exclude %{_sysconfdir}/tuned/cpu-partitioning-variables.conf
+%exclude %{_sysconfdir}/tuned/cpu-partitioning-powersave-variables.conf
 %exclude %{_prefix}/lib/tuned/default
 %exclude %{_prefix}/lib/tuned/desktop-powersave
 %exclude %{_prefix}/lib/tuned/laptop-ac-powersave
@@ -423,6 +424,7 @@ fi
 %exclude %{_prefix}/lib/tuned/realtime-virtual-guest
 %exclude %{_prefix}/lib/tuned/realtime-virtual-host
 %exclude %{_prefix}/lib/tuned/cpu-partitioning
+%exclude %{_prefix}/lib/tuned/cpu-partitioning-powersave
 %exclude %{_prefix}/lib/tuned/spectrumscale-ece
 %exclude %{_prefix}/lib/tuned/postgresql
 %exclude %{_prefix}/lib/tuned/openshift
@@ -524,8 +526,11 @@ fi
 
 %files profiles-cpu-partitioning
 %config(noreplace) %{_sysconfdir}/tuned/cpu-partitioning-variables.conf
+%config(noreplace) %{_sysconfdir}/tuned/cpu-partitioning-powersave-variables.conf
 %{_prefix}/lib/tuned/cpu-partitioning
+%{_prefix}/lib/tuned/cpu-partitioning-powersave
 %{_mandir}/man7/tuned-profiles-cpu-partitioning.7*
+%{_mandir}/man7/tuned-profiles-cpu-partitioning-powersave.7*
 
 %files profiles-spectrumscale
 %{_prefix}/lib/tuned/spectrumscale-ece
