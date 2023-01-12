@@ -40,7 +40,7 @@ ifeq ($(PYTHON),python2)
 PYLINT = pylint-2
 endif
 SHEBANG_REWRITE_REGEX= '1s|^\#!/usr/bin/\<python3\>|\#!$(PYTHON)|'
-PYTHON_SITELIB = $(shell $(PYTHON) -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib());')
+PYTHON_SITELIB = $(shell $(PYTHON) -c 'from sysconfig import get_path; print(get_path("purelib"));')
 ifeq ($(PYTHON_SITELIB),)
 $(error Failed to determine python library directory)
 endif
