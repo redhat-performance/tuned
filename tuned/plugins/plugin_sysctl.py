@@ -84,7 +84,7 @@ class SysctlPlugin(base.Plugin):
 
 		if self._global_cfg.get_bool(consts.CFG_REAPPLY_SYSCTL, consts.CFG_DEF_REAPPLY_SYSCTL):
 			log.info("reapplying system sysctl")
-			_apply_system_sysctl()
+			_apply_system_sysctl(instance._sysctl)
 
 	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret = True
@@ -103,7 +103,7 @@ class SysctlPlugin(base.Plugin):
 			_write_sysctl(option, value)
 
 
-def _apply_system_sysctl():
+def _apply_system_sysctl(instance_sysctl):
 	files = {}
 	for d in SYSCTL_CONFIG_DIRS:
 		try:
@@ -119,15 +119,15 @@ def _apply_system_sysctl():
 	for fname in sorted(files.keys()):
 		d = files[fname]
 		path = "%s/%s" % (d, fname)
-		_apply_sysctl_config_file(path)
-	_apply_sysctl_config_file("/etc/sysctl.conf")
+		_apply_sysctl_config_file(path, instance_sysctl)
+	_apply_sysctl_config_file("/etc/sysctl.conf", instance_sysctl)
 
-def _apply_sysctl_config_file(path):
+def _apply_sysctl_config_file(path, instance_sysctl):
 	log.debug("Applying sysctl settings from file %s" % path)
 	try:
 		with open(path, "r") as f:
 			for lineno, line in enumerate(f, 1):
-				_apply_sysctl_config_line(path, lineno, line)
+				_apply_sysctl_config_line(path, lineno, line, instance_sysctl)
 		log.debug("Finished applying sysctl settings from file %s"
 				% path)
 	except (OSError, IOError) as e:
@@ -135,7 +135,7 @@ def _apply_sysctl_config_file(path):
 			log.error("Error reading sysctl settings from file %s: %s"
 					% (path, str(e)))
 
-def _apply_sysctl_config_line(path, lineno, line):
+def _apply_sysctl_config_line(path, lineno, line, instance_sysctl):
 	line = line.strip()
 	if len(line) == 0 or line[0] == "#" or line[0] == ";":
 		return
@@ -151,6 +151,10 @@ def _apply_sysctl_config_line(path, lineno, line):
 				% (path, lineno))
 		return
 	value = value.strip()
+	if option in instance_sysctl:
+		log.info("Overriding sysctl parameter '%s' from '%s' to '%s'"
+				% (option, instance_sysctl[option], value))
+
 	_write_sysctl(option, value, ignore_missing = True)
 
 def _get_sysctl_path(option):
