@@ -509,8 +509,8 @@ class Base(object):
 
 	def data_to_profile_config(self):
 		name = self._gobj('entryProfileName').get_text()
-		if re.match("[A-Za-z0-9_]+", name) is None:
-			self.error_dialog('Find unexpected characters', 'Only \"a-z\", \"A-Z\", \"0-9\" and \"_\" are supported')
+		if re.match("[A-Za-z0-9_]+$", name) is None:
+			self.error_dialog('Found unexpected characters', 'Only \"a-z\", \"A-Z\", \"0-9\" and \"_\" are supported')
 			return
 		config = collections.OrderedDict()
 
