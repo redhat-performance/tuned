@@ -346,6 +346,7 @@ class Base(object):
 
 	def on_delete_event(self, window, data):
 		window.hide()
+		self.editing_profile_name = None
 		return True
 
 	def _get_active_profile_name(self):
@@ -362,7 +363,7 @@ class Base(object):
 			if profile is None:
 				self.error_dialog('No profile selected!', '')
 				return
-			if self._gobj('windowProfileEditor').is_active():
+			if self.editing_profile_name is not None:
 				self.error_dialog('You are ediding '
 								  + self.editing_profile_name
 								  + ' profile.',
@@ -384,6 +385,7 @@ class Base(object):
 			self.error_dialog('Profile can not be remove', ex.__str__())
 
 	def execute_cancel_window_profile_editor(self, button):
+		self.editing_profile_name = None
 		self._gobj('windowProfileEditor').hide()
 
 	def execute_cancel_window_profile_editor_raw(self, button):
@@ -450,6 +452,7 @@ class Base(object):
 
 		self.error_dialog('Profile Editor will be closed.',
 						  'for next updates reopen profile.')
+		self.editing_profile_name = None
 		self._gobj('windowProfileEditor').hide()
 		self._gobj('windowProfileEditorRaw').hide()
 
@@ -504,6 +507,7 @@ class Base(object):
 		else:
 			prefix = consts.PREFIX_PROFILE_USER
 		self.treestore_profiles.append([prof.name, prefix])
+		self.editing_profile_name = None
 		self._gobj('windowProfileEditor').hide()
 
 	def data_to_profile_config(self):
@@ -583,6 +587,7 @@ class Base(object):
 							'create copy',
 							'cancel'
 							).run():
+					self.editing_profile_name = None
 					return
 
 				copied_profile = self.manager.get_profile(
@@ -599,6 +604,7 @@ class Base(object):
 							'open copy',
 							'cancel'
 							).run():
+					self.editing_profile_name = None
 					return
 				copied_profile = self.manager.get_profile(
 					self.editing_profile_name + '-modified')
