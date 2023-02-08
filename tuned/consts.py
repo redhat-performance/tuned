@@ -107,6 +107,7 @@ CFG_UNIX_SOCKET_SIGNAL_PATHS = "unix_socket_signal_paths"
 CFG_UNIX_SOCKET_OWNERSHIP = "unix_socket_ownership"
 CFG_UNIX_SOCKET_PERMISIONS = "unix_socket_permissions"
 CFG_UNIX_SOCKET_CONNECTIONS_BACKLOG = "connections_backlog"
+CFG_CPU_EPP_FLAG = "hwp_epp"
 
 # no_daemon mode
 CFG_DEF_DAEMON = True
