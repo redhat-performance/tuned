@@ -163,6 +163,27 @@ class CPULatencyPlugin(hotplug.Plugin):
 	Limit the minimum P-State that will be requested by the driver. It states
 	it as a percentage of the max (non-turbo) performance level.
 	====
+	+
+	`pm_qos_resume_latency_us`:::
+	This option allow to set specific latency for all cpus or specific ones.
+	====
+	----
+	[cpu]
+	pm_qos_resume_latency_us=n/a
+	----
+	Special value that disables C-states completely.
+	====
+	----
+	[cpu]
+	pm_qos_resume_latency_us=0
+	----
+	Allows all C-states.
+	====
+	----
+	[cpu]
+	pm_qos_resume_latency_us=100
+	----
+	Allows any C-state with a resume latency less than value.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -209,6 +230,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			"min_perf_pct"         : None,
 			"max_perf_pct"         : None,
 			"no_turbo"             : None,
+			"pm_qos_resume_latency_us": None,
 			"energy_performance_preference" : None,
 		}
 
@@ -293,7 +315,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 				self._has_pm_qos = False
 			self._latency = None
 
-			if instance.options["force_latency"] is None:
+			if instance.options["force_latency"] is None and instance.options["pm_qos_resume_latency_us"] is None:
 				instance._load_monitor = self._monitors_repository.create("load", None)
 				instance._has_dynamic_tuning = True
 			else:
@@ -666,6 +688,36 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 		return energy_perf_bias
 
+	def _pm_qos_resume_latency_us_path(self, device):
+		return "/sys/devices/system/cpu/%s/power/pm_qos_resume_latency_us" % device
+
+	@command_set("pm_qos_resume_latency_us", per_device=True)
+	def _set_pm_qos_resume_latency_us(self, pm_qos_resume_latency_us, device, sim):
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
+		try:
+			latency = int(pm_qos_resume_latency_us)
+			log.debug("parsed directly specified latency value: %d" % latency)
+			if latency < 0:
+				raise ValueError
+		except ValueError:
+			if pm_qos_resume_latency_us == "n/a":
+				latency = pm_qos_resume_latency_us
+			else:
+				log.warning("Invalid latency specified: '%s'" % str(pm_qos_resume_latency_us))
+				return None
+		if not sim:
+			self._cmd.write_to_file(self._pm_qos_resume_latency_us_path(device), latency)
+		return latency
+
+	@command_get("pm_qos_resume_latency_us")
+	def _get_pm_qos_resume_latency_us(self, device, ignore_missing=False):
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
+		return self._cmd.read_file(self._pm_qos_resume_latency_us_path(device), no_error=ignore_missing).strip()
+
 	@command_set("energy_performance_preference", per_device=True)
 	def _set_energy_performance_preference(self, energy_performance_preference, device, sim):
 		if not self._is_cpu_online(device):
@@ -703,4 +755,3 @@ class CPULatencyPlugin(hotplug.Plugin):
 		else:
 			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without the intel_pstate driver.")
 		return None
-
