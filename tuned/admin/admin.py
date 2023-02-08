@@ -13,6 +13,7 @@ import errno
 import time
 import threading
 import logging
+import shutil
 
 class Admin(object):
 	def __init__(self, dbus = True, debug = False, asynco = False,
@@ -130,6 +131,29 @@ class Admin(object):
 		if manual is None:
 			manual = profile is not None
 		return consts.ACTIVE_PROFILE_MANUAL if manual else consts.ACTIVE_PROFILE_AUTO
+
+	def _action_profile_delete(self, profile = ""):
+		if profile == "":
+			print("No set profile to delete.")
+			return False
+		try:
+			profile_list = os.listdir(consts.USER_PROFILE_DIR)
+			if profile not in profile_list:
+				print("File '%s' does not exists." % profile)
+				return False
+			else:
+				shutil.rmtree(os.path.join(consts.USER_PROFILE_DIR, profile))
+				print("Profile '%s' delete successfully" % profile)
+			
+		except TunedException as e:
+			self._error(str(e))
+			return False
+		return True
+
+	def _dbus_action_profile_delete(self, profile = ""):
+		if profile != "":
+			ret = self._controller.profile_delete(profile)
+		return self._controller.exit(ret)
 
 	def _dbus_get_post_loaded_profile(self):
 		profile_name = self._controller.post_loaded_profile()

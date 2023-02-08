@@ -19,6 +19,7 @@ PLUGIN_MAIN_UNIT_NAME = "main"
 # Magic section header because ConfigParser does not support "headerless" config
 MAGIC_HEADER_NAME = "this_is_some_magic_section_header_because_of_compatibility"
 RECOMMEND_DIRECTORIES = ["/usr/lib/tuned/recommend.d", "/etc/tuned/recommend.d"]
+USER_PROFILE_DIR = "/etc/tuned"
 
 TMP_FILE_SUFFIX = ".tmp"
 # max. number of consecutive errors to give up
