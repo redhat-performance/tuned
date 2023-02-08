@@ -80,7 +80,7 @@ class GuiProfileLoader(object):
         else:
             raise managerException.ManagerException(profile_name
                     + ' profile is stored in ' + profilePath
-                    + ' and can not be storet do this location')
+                    + ' and can not be stored to this location')
 
     def load_profile_config(self, profile_name, path):
         conf_path = path + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
