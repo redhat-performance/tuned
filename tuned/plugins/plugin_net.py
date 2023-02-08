@@ -1,5 +1,5 @@
 import errno
-from . import base
+from . import hotplug
 from .decorators import *
 import tuned.logs
 from tuned.utils.nettool import ethcard
@@ -11,7 +11,7 @@ log = tuned.logs.get()
 
 WOL_VALUES = "pumbagsd"
 
-class NetTuningPlugin(base.Plugin):
+class NetTuningPlugin(hotplug.Plugin):
 	"""
 	`net`::
 	
@@ -323,7 +323,7 @@ class NetTuningPlugin(base.Plugin):
 		# 0.6 is just a magical constant (empirical value): Typical workload on netcard won't exceed
 		# that and if it does, then the code is smart enough to adapt it.
 		# 1024 * 1024 as for MB -> B
-		# speed / 7  Mb -> MB
+		# speed / 8  Mb -> MB
 		return (int) (0.6 * 1024 * 1024 * speed / 8)
 
 	# parse features/coalesce config parameters (those defined in profile configuration)

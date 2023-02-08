@@ -1,4 +1,4 @@
-from . import base
+from . import hotplug
 from .decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
@@ -14,7 +14,7 @@ log = tuned.logs.get()
 
 cpuidle_states_path = "/sys/devices/system/cpu/cpu0/cpuidle"
 
-class CPULatencyPlugin(base.Plugin):
+class CPULatencyPlugin(hotplug.Plugin):
 	"""
 	`cpu`::
 	
@@ -65,7 +65,8 @@ class CPULatencyPlugin(base.Plugin):
 	Bias (EPB) values are supported. The alternative values are separated
 	using the '|' character. The following EPB values are supported
 	starting with kernel 4.13: "performance", "balance-performance",
-	"normal", "balance-power" and "power".
+	"normal", "balance-power" and "power". On newer processors is value
+	writen straight to file (see rhbz#2095829)
 	+
 	.Specifying alternative Energy Performance Bias values
 	====
@@ -75,6 +76,26 @@ class CPULatencyPlugin(base.Plugin):
 	----
 	
 	*TuneD* will try to set EPB to 'powersave'. If that fails, it will
+	try to set it to 'power'.
+	====
+	
+	`energy_performance_preference`:::
+	[option]`energy_performance_preference` supports managing energy
+	vs. performance hints on some newer Intel processors. Multiple alternative
+	Energy Performance Preferences (EPP) values are supported. The alternative
+	values are separated using the '|' character. Available values can be found
+	in `energy_performance_available_preferences` file in `CPUFreq` policy
+	directory in `sysfs`.
+	in
+	+
+	.Specifying alternative Energy Performance Hints values
+	====
+	----
+	[cpu]
+	energy_performance_preference=balance_power|power
+	----
+	
+	*TuneD* will try to set EPP to 'balance_power'. If that fails, it will
 	try to set it to 'power'.
 	====
 	
@@ -182,6 +203,8 @@ class CPULatencyPlugin(base.Plugin):
 		self._governors_map = {}
 		self._cmd = commands()
 
+		self._flags = None
+
 	def _init_devices(self):
 		self._devices_supported = True
 		self._free_devices = set()
@@ -208,6 +231,7 @@ class CPULatencyPlugin(base.Plugin):
 			"max_perf_pct"         : None,
 			"no_turbo"             : None,
 			"pm_qos_resume_latency_us": None,
+			"energy_performance_preference" : None,
 		}
 
 	def _check_arch(self):
@@ -255,6 +279,11 @@ class CPULatencyPlugin(base.Plugin):
 		self._has_intel_pstate = os.path.exists("/sys/devices/system/cpu/intel_pstate")
 		if self._has_intel_pstate:
 			log.info("intel_pstate detected")
+
+	def _get_cpuinfo_flags(self):
+		if self._flags is None:
+			self._flags = procfs.cpuinfo().tags.get("flags", [])
+		return self._flags
 
 	def _is_cpu_online(self, device):
 		sd = str(device)
@@ -550,15 +579,43 @@ class CPULatencyPlugin(base.Plugin):
 				return_err = True)
 		return (retcode, err_msg)
 
+	def _intel_preference_path(self, cpu_id, available = False):
+		return "/sys/devices/system/cpu/cpufreq/policy%s/energy_performance_%s" % (cpu_id, "available_preferences" if available else "preference")
+
+	def _energy_perf_bias_path(self, cpu_id):
+		return "/sys/devices/system/cpu/cpu%s/power/energy_perf_bias" % cpu_id
+
 	@command_set("energy_perf_bias", per_device=True)
 	def _set_energy_perf_bias(self, energy_perf_bias, device, sim):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
-		if self._has_energy_perf_bias:
+		cpu_id = device.lstrip("cpu")
+		vals = energy_perf_bias.split('|')
+
+		# It should be writen straight to sysfs energy_perf_bias file if requested on newer processors
+		# see rhbz#2095829
+		if consts.CFG_CPU_EPP_FLAG in self._get_cpuinfo_flags():
+			energy_perf_bias_path = self._energy_perf_bias_path(cpu_id)
+			if os.path.exists(energy_perf_bias_path):
+				if not sim:
+					for val in vals:
+						val = val.strip()
+						if self._cmd.write_to_file(energy_perf_bias_path, val):
+							log.info("energy_perf_bias successfully set to '%s' on cpu '%s'"
+									 % (val, device))
+							break
+					else:
+						log.error("Failed to set energy_perf_bias on cpu '%s'. Is the value in the profile correct?"
+								  % device)
+					
+				return str(energy_perf_bias)
+			else:
+				log.error("Failed to set energy_perf_bias on cpu '%s' because energy_perf_bias file does not exist."
+						  % device)
+				return None
+		elif self._has_energy_perf_bias:
 			if not sim:
-				cpu_id = device.lstrip("cpu")
-				vals = energy_perf_bias.split('|')
 				for val in vals:
 					val = val.strip()
 					log.debug("Trying to set energy_perf_bias to '%s' on cpu '%s'"
@@ -612,8 +669,12 @@ class CPULatencyPlugin(base.Plugin):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
-		if self._has_energy_perf_bias:
-			cpu_id = device.lstrip("cpu")
+		cpu_id = device.lstrip("cpu")
+		if consts.CFG_CPU_EPP_FLAG in self._get_cpuinfo_flags():
+			energy_perf_bias_path = self._energy_perf_bias_path(cpu_id)
+			if os.path.exists(energy_perf_bias_path):
+				energy_perf_bias = self._energy_perf_policy_to_human_v2(self._cmd.read_file(energy_perf_bias_path))
+		elif self._has_energy_perf_bias:
 			retcode, lines = self._cmd.execute(["x86_energy_perf_policy", "-c", cpu_id, "-r"])
 			if retcode == 0:
 				for line in lines.splitlines():
@@ -656,3 +717,41 @@ class CPULatencyPlugin(base.Plugin):
 			log.debug("%s is not online, skipping" % device)
 			return None
 		return self._cmd.read_file(self._pm_qos_resume_latency_us_path(device), no_error=ignore_missing).strip()
+
+	@command_set("energy_performance_preference", per_device=True)
+	def _set_energy_performance_preference(self, energy_performance_preference, device, sim):
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
+		cpu_id = device.lstrip("cpu")
+		if os.path.exists(self._intel_preference_path(cpu_id, True)):
+			vals = energy_performance_preference.split('|')
+			if not sim:
+				avail_vals = set(self._cmd.read_file(self._intel_preference_path(cpu_id, True)).split())
+				for val in vals:
+					if val in avail_vals:
+						self._cmd.write_to_file(self._intel_preference_path(cpu_id), val)
+						log.info("Setting energy_performance_preference value '%s' for cpu '%s'" % (val, device))
+						break
+					else:
+						log.warn("energy_performance_preference value '%s' unavailable for cpu '%s'" % (val, device))
+				else:
+					log.error("Failed to set energy_performance_preference on cpu '%s'. Is the value in the profile correct?"
+							  % device)
+			return str(energy_performance_preference)
+		else:
+			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without the intel_pstate driver.")
+		return None
+
+	@command_get("energy_performance_preference")
+	def _get_energy_performance_preference(self, device, ignore_missing=False):
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
+		cpu_id = device.lstrip("cpu")
+		# intel_pstate CPU scaling driver
+		if os.path.exists(self._intel_preference_path(cpu_id, True)):
+			return self._cmd.read_file(self._intel_preference_path(cpu_id)).strip()
+		else:
+			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without the intel_pstate driver.")
+		return None

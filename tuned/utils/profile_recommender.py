@@ -60,7 +60,7 @@ class ProfileRecommender:
 		try:
 			if not os.path.isfile(fname):
 				return None
-			config = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
+			config = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), strict=False)
 			config.optionxform = str
 			with open(fname) as f:
 				config.read_file(f, fname)

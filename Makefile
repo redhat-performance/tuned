@@ -23,11 +23,12 @@ else
 	GIT_PSUFFIX = .$(GIT_SUFFIX)
 	RPM_VERSION = $(NAME)-$(VERSION)-1$(GIT_PSUFFIX)
 endif
+PKG_CONFIG = pkg-config
 UNITDIR_FALLBACK = /usr/lib/systemd/system
-UNITDIR_DETECT = $(shell pkg-config systemd --variable systemdsystemunitdir || rpm --eval '%{_unitdir}' 2>/dev/null || echo $(UNITDIR_FALLBACK))
+UNITDIR_DETECT = $(shell $(PKG_CONFIG) systemd --variable systemdsystemunitdir || rpm --eval '%{_unitdir}' 2>/dev/null || echo $(UNITDIR_FALLBACK))
 UNITDIR = $(UNITDIR_DETECT:%{_unitdir}=$(UNITDIR_FALLBACK))
 TMPFILESDIR_FALLBACK = /usr/lib/tmpfiles.d
-TMPFILESDIR_DETECT = $(shell pkg-config systemd --variable tmpfilesdir || rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo $(TMPFILESDIR_FALLBACK))
+TMPFILESDIR_DETECT = $(shell $(PKG_CONFIG) systemd --variable tmpfilesdir || rpm --eval '%{_tmpfilesdir}' 2>/dev/null || echo $(TMPFILESDIR_FALLBACK))
 TMPFILESDIR = $(TMPFILESDIR_DETECT:%{_tmpfilesdir}=$(TMPFILESDIR_FALLBACK))
 VERSIONED_NAME = $(NAME)-$(VERSION)$(PRERELEASE)$(GIT_PSUFFIX)
 
@@ -40,7 +41,7 @@ ifeq ($(PYTHON),python2)
 PYLINT = pylint-2
 endif
 SHEBANG_REWRITE_REGEX= '1s|^\#!/usr/bin/\<python3\>|\#!$(PYTHON)|'
-PYTHON_SITELIB = $(shell $(PYTHON) -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib());')
+PYTHON_SITELIB = $(shell $(PYTHON) -c 'from sysconfig import get_path; print(get_path("purelib"));')
 ifeq ($(PYTHON_SITELIB),)
 $(error Failed to determine python library directory)
 endif
@@ -176,6 +177,8 @@ install: install-dirs
 		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-virtual-host-variables.conf
 	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning/cpu-partitioning-variables.conf \
 		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-variables.conf
+	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning-powersave/cpu-partitioning-powersave-variables.conf \
+		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-powersave-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_RECOMMEND_DIR)/50-tuned.conf
 
 	# bash completion

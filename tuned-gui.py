@@ -206,7 +206,7 @@ class Base(object):
 
 	def is_tuned_connection_ok(self):
 		"""
-		Result True, False depends on if tuned daemon is running. If its not runing this method try to start tuned.
+		Result True, False depends on if tuned daemon is running. If its not running this method try to start tuned.
 		"""
 
 		try:
@@ -236,7 +236,7 @@ class Base(object):
 		This add rows to object listbox_summary_of_active_profile.
 		Row consist of grid. Inside grid on first possition is label, second possition is vertical grid.
 		label = name of plugin
-		verical grid consist of labels where are stored values for plugin option and value.
+		vertical grid consist of labels where are stored values for plugin option and value.
 
 		This method is emited after change profile and on startup of app.
 		"""
@@ -356,14 +356,14 @@ class Base(object):
 		try:
 			if self._get_active_profile_name() == profile:
 				self.error_dialog('You can not remove active profile',
-								  'Please deactivate profile by choosind another!'
+								  'Please deactivate profile by choosing another!'
 								  )
 				return
 			if profile is None:
 				self.error_dialog('No profile selected!', '')
 				return
 			if self._gobj('windowProfileEditor').is_active():
-				self.error_dialog('You are ediding '
+				self.error_dialog('You are editing '
 								  + self.editing_profile_name
 								  + ' profile.',
 								  'Please close edit window and try again.'

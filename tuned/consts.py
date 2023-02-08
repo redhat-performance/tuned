@@ -100,6 +100,7 @@ CFG_LOG_FILE_COUNT = "log_file_count"
 CFG_LOG_FILE_MAX_SIZE = "log_file_max_size"
 CFG_UNAME_STRING = "uname_string"
 CFG_CPUINFO_STRING = "cpuinfo_string"
+CFG_CPU_EPP_FLAG = "hwp_epp"
 
 # no_daemon mode
 CFG_DEF_DAEMON = True
