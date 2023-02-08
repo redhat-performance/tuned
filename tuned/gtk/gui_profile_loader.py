@@ -62,7 +62,7 @@ class GuiProfileLoader(object):
 
         if profilePath == tuned.consts.LOAD_DIRECTORIES[1]:
             file_path = profilePath + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
-            config_parser = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
+            config_parser = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), strict=False)
             config_parser.optionxform = str
             config_parser.read_string(config)
 
@@ -84,7 +84,7 @@ class GuiProfileLoader(object):
 
     def load_profile_config(self, profile_name, path):
         conf_path = path + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
-        config = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
+        config = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), strict=False)
         config.optionxform = str
         profile_config = collections.OrderedDict()
         with open(conf_path) as f:

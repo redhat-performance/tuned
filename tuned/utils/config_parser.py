@@ -21,7 +21,7 @@ else:
 
 	class ConfigParser(cp.ConfigParser):
 
-		def __init__(self, delimiters=None, inline_comment_prefixes=None, strict=True, *args, **kwargs):
+		def __init__(self, delimiters=None, inline_comment_prefixes=None, *args, **kwargs):
 			delims = "".join(list(delimiters))
 			# REs taken from the python-2.7 ConfigParser
 			self.OPTCRE = re.compile(

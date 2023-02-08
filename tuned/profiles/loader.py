@@ -96,7 +96,7 @@ class Loader(object):
 
 	def _load_config_data(self, file_name):
 		try:
-			config_obj = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
+			config_obj = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), strict=False)
 			config_obj.optionxform=str
 			with open(file_name) as f:
 				config_obj.read_file(f, file_name)

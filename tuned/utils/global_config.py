@@ -39,7 +39,7 @@ class GlobalConfig():
 		"""
 		log.debug("reading and parsing global configuration file '%s'" % file_name)
 		try:
-			config_parser = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
+			config_parser = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), strict=False)
 			config_parser.optionxform = str
 			with open(file_name) as f:
 				config_parser.read_string("[" + consts.MAGIC_HEADER_NAME + "]\n" + f.read(), file_name)

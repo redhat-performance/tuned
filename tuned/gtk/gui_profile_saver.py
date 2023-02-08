@@ -11,7 +11,7 @@ if __name__ == "__main__":
 	if not os.path.exists(profile_dict['filename']):
 		os.makedirs(os.path.dirname(profile_dict['filename']))
 
-	profile_configobj = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'))
+	profile_configobj = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), strict=False)
 	profile_configobj.optionxform = str
 	for section, options in profile_dict['main'].items():
 		profile_configobj.add_section(section)
