@@ -1,6 +1,7 @@
 from . import interfaces
 from . import controller
 from . import dbus_exporter as dbus
+from . import unix_socket_exporter as unix_socket
 
 def export(*args, **kwargs):
 	"""Decorator, use to mark exportable methods."""
@@ -28,6 +29,10 @@ def register_object(instance):
 	ctl = controller.ExportsController.get_instance()
 	return ctl.register_object(instance)
 
+def send_signal(*args, **kwargs):
+	ctl = controller.ExportsController.get_instance()
+	return ctl.send_signal(*args, **kwargs)
+
 def start():
 	ctl = controller.ExportsController.get_instance()
 	return ctl.start()
@@ -35,3 +40,7 @@ def start():
 def stop():
 	ctl = controller.ExportsController.get_instance()
 	return ctl.stop()
+
+def period_check():
+	ctl = controller.ExportsController.get_instance()
+	return ctl.period_check()

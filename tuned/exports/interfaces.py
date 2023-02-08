@@ -19,3 +19,6 @@ class ExporterInterface(object):
 
 	def stop(self):
 		raise NotImplementedError()
+
+	def period_check(self):
+		pass

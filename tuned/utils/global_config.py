@@ -68,6 +68,15 @@ class GlobalConfig():
 			return True
 		return False
 
+	def get_int(self, key, default = 0):
+		i = self._cfg.get(key, default)
+		if i:
+			if isinstance(i, int):
+				return i
+			else:
+				return int(i, 0)
+		return default
+
 	def set(self, key, value):
 		self._cfg[key] = value
 

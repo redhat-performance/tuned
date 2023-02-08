@@ -100,6 +100,13 @@ CFG_LOG_FILE_COUNT = "log_file_count"
 CFG_LOG_FILE_MAX_SIZE = "log_file_max_size"
 CFG_UNAME_STRING = "uname_string"
 CFG_CPUINFO_STRING = "cpuinfo_string"
+CFG_ENABLE_DBUS = "enable_dbus"
+CFG_ENABLE_UNIX_SOCKET = "enable_unix_socket"
+CFG_UNIX_SOCKET_PATH = "unix_socket_path"
+CFG_UNIX_SOCKET_SIGNAL_PATHS = "unix_socket_signal_paths"
+CFG_UNIX_SOCKET_OWNERSHIP = "unix_socket_ownership"
+CFG_UNIX_SOCKET_PERMISIONS = "unix_socket_permissions"
+CFG_UNIX_SOCKET_CONNECTIONS_BACKLOG = "connections_backlog"
 CFG_CPU_EPP_FLAG = "hwp_epp"
 
 # no_daemon mode
@@ -130,7 +137,24 @@ CFG_DEF_LOG_FILE_COUNT = 2
 CFG_FUNC_LOG_FILE_COUNT = "getint"
 # default log file max size
 CFG_DEF_LOG_FILE_MAX_SIZE = 1024 * 1024
-
+# default listening on dbus
+CFG_DEF_ENABLE_DBUS = True
+CFG_FUNC_ENABLE_DBUS = "getboolean"
+# default listening on unix socket
+# as it is not used commonly disabled by default
+CFG_DEF_ENABLE_UNIX_SOCKET = False
+CFG_FUNC_ENABLE_UNIX_SOCKET = "getboolean"
+# default unix socket path
+CFG_DEF_UNIX_SOCKET_PATH = "/run/tuned/tuned.sock"
+CFG_DEF_UNIX_SOCKET_SIGNAL_PATHS = ""
+# default unix socket ownership
+# (uid and gid, python2 does not support names out of box, -1 leaves default)
+CFG_DEF_UNIX_SOCKET_OWNERSHIP = "-1 -1"
+# default unix socket permissions
+CFG_DEF_UNIX_SOCKET_PERMISIONS = "0o600"
+# default unix socket conections backlog
+CFG_DEF_UNIX_SOCKET_CONNECTIONS_BACKLOG = "1024"
+CFG_FUNC_UNIX_SOCKET_CONNECTIONS_BACKLOG = "getint"
 
 PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
 
@@ -138,7 +162,7 @@ PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
 PROFILE_ATTR_SUMMARY = "summary"
 PROFILE_ATTR_DESCRIPTION = "description"
 
-DBUS_SIGNAL_PROFILE_CHANGED = "profile_changed"
+SIGNAL_PROFILE_CHANGED = "profile_changed"
 
 STR_HINT_REBOOT = "you need to reboot for changes to take effect"
 

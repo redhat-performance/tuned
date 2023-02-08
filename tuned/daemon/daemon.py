@@ -173,8 +173,8 @@ class Daemon(object):
 	# send notification when profile is changed (everything is setup) or if error occured
 	# result: True - OK, False - error occured
 	def _notify_profile_changed(self, profile_names, result, errstr):
-		if self._application is not None and self._application._dbus_exporter is not None:
-			self._application._dbus_exporter.send_signal(consts.DBUS_SIGNAL_PROFILE_CHANGED, profile_names, result, errstr)
+		if self._application is not None:
+			exports.send_signal(consts.SIGNAL_PROFILE_CHANGED, profile_names, result, errstr)
 		return errstr
 
 	def _full_rollback_required(self):
