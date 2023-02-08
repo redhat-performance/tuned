@@ -36,16 +36,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.19.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.20.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -557,6 +557,36 @@ fi
 %{_mandir}/man7/tuned-profiles-openshift.7*
 
 %changelog
+* Wed Feb  8 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 2.20.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#2133815
+  - systemd: relax polkit requirement
+    resolves: rhbz#2065591
+  - sysvinit: fixed path
+    resolves: rhbz#2118301
+  - plugin_cpu: added support for pm_qos_resume_latency_us
+    resolves: rhbz#2118786
+  - do not exit on duplicate config lines
+    resolves: rhbz#2071418
+  - profiles: new cpu-partitioning-powersave profile
+  - profiles: new profile for AWS EC2
+    resolves: rhbz#1935848
+  - API: add support for moving devices between instances
+    resolves: rhbz#2113925
+  - D-Bus: send tracebacks through D-Bus only in debug mode
+    resolves: rhbz#2159680
+  - Makefile: added fix for python-3.12
+    resolves: rhbz#2154801
+  - throughput-performance: set net.core.somaxconn to at least 2048
+    resolves: rhbz#1998310
+  - plugin_scheduler: do not leak FDs from the perf
+    resolves: rhbz#2080227
+  - plugin_cpu: added support for intel_pstate scaling driver
+    resolves: rhbz#2095829
+  - added support for the API access through the Unix Domain Socket
+    resolves: rhbz#2113900
+
 * Fri Aug 19 2022 Jaroslav Škarvada <jskarvad@redhat.com> - 2.19.0-1
 - new release
   - rebased tuned to latest upstream
