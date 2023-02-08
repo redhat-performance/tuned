@@ -4,7 +4,7 @@
 <policyconfig>
 
   <vendor>TuneD</vendor>
-  <vendor_url>https://fedorahosted.org/tuned/</vendor_url>
+  <vendor_url>https://tuned-project.org/</vendor_url>
   <icon_name>tuned</icon_name>
 
   <action id="com.redhat.tuned.active_profile">
