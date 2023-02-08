@@ -308,3 +308,42 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if caller == "":
 			return False
 		return self._daemon.get_plugin_hints(str(plugin_name))
+
+	# devices - devices to migrate from other instances, string of form "dev1,dev2,dev3,..."
+	#	or "cpulist:CPULIST", where CPULIST is e.g. "0-3,6,8-9"
+	# instance_name - instance where to migrate devices
+	@exports.export("ss", "(bs)")
+	def instance_acquire_devices(self, devices, instance_name, caller = None):
+		if caller == "":
+			return (False, "Unauthorized")
+		found = False
+		for instance_target in self._daemon._unit_manager.instances:
+			if instance_target.name == instance_name:
+				log.debug("Found instance '%s'." % instance_target.name)
+				found = True
+				break
+		if not found:
+			rets = "Instance '%s' not found" % instance_name
+			log.error(rets)
+			return (False, rets)
+		devs = set(self._cmd.devstr2devs(devices))
+		log.debug("Instance '%s' trying to acquire devices '%s'." % (instance_target.name, str(devs)))
+		for instance in self._daemon._unit_manager.instances:
+			devs_moving = instance.processed_devices & devs
+			if len(devs_moving):
+				devs -= devs_moving
+				log.info("Moving devices '%s' from instance '%s' to instance '%s'." % (str(devs_moving),
+					instance.name, instance_target.name))
+				if (instance.plugin.name != instance_target.plugin.name):
+					rets = "Target instance '%s' is of type '%s', but devices '%s' are currently handled by " \
+						"instance '%s' which is of type '%s'." % (instance_target.name,
+						instance_target.plugin.name, str(devs_moving), instance.name, instance.plugin.name)
+					log.error(rets)
+					return (False, rets)
+				instance.plugin._remove_devices_nocheck(instance, devs_moving)
+				instance_target.plugin._add_devices_nocheck(instance_target, devs_moving)
+		if (len(devs)):
+			rets = "Ignoring devices not handled by any instance '%s'." % str(devs)
+			log.info(rets)
+			return (False, rets)
+		return (True, "OK")

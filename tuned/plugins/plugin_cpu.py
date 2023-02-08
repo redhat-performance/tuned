@@ -1,4 +1,4 @@
-from . import base
+from . import hotplug
 from .decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
@@ -14,7 +14,7 @@ log = tuned.logs.get()
 
 cpuidle_states_path = "/sys/devices/system/cpu/cpu0/cpuidle"
 
-class CPULatencyPlugin(base.Plugin):
+class CPULatencyPlugin(hotplug.Plugin):
 	"""
 	`cpu`::
 	

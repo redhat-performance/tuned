@@ -414,8 +414,20 @@ class commands:
 			m |= pow(2, v)
 		return m
 
-	def cpulist2string(self, l):
-		return ",".join(str(v) for v in l)
+	def cpulist2string(self, l, prefix = ""):
+		return ",".join((prefix + str(v)) for v in l)
+
+	# Converts string s consisting of "dev1,dev2,dev3,..." to list ["dev1", "dev2, "dev3", ...],
+	# whitespaces are ignored, cpu lists are supported with the prefix "cpulist:", e.g.
+	# "cpulist:0-2,4" is converted to ["cpu0", "cpu1", "cpu2", "cpu4"]. If device name starts
+	# with "cpulist:" write it as "cpulist:cpulist:". Escape commas in name with the "\,".
+	def devstr2devs(self, s):
+		if s[0:8].lower() == "cpulist:":
+			s = s[8:]
+			if s[0:8].lower() != "cpulist:":
+				return [("cpu" + str(v)) for v in self.cpulist_unpack(s)]
+		l = re.split(r"\s*(?<!\\),\s*", s)
+		return [str(v).replace("\,", ",") for v in l]
 
 	# Do not make balancing on patched Python 2 interpreter (rhbz#1028122).
 	# It means less CPU usage on patchet interpreter. On non-patched interpreter
