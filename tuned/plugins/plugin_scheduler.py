@@ -446,6 +446,7 @@ class SchedulerPlugin(base.Plugin):
 				command_name = "scheduler")
 		self._irq_storage_key = self._storage_key(
 				command_name = "irq")
+		self._evlist = None
 		try:
 			self._scheduler_utils = SchedulerUtils()
 		except AttributeError:
@@ -526,8 +527,9 @@ class SchedulerPlugin(base.Plugin):
 				instance._runtime_tuning = False
 
 	def _instance_cleanup(self, instance):
-		for fd in instance._evlist.get_pollfd():
-			os.close(fd.name)
+		if self._evlist:
+			for fd in instance._evlist.get_pollfd():
+				os.close(fd.name)
 
 	@classmethod
 	def _get_config_options(cls):
