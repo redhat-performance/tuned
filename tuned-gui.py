@@ -362,7 +362,7 @@ class Base(object):
 			if profile is None:
 				self.error_dialog('No profile selected!', '')
 				return
-			if self._gobj('windowProfileEditor').is_active():
+			if self._gobj('windowProfileEditor').is_visible():
 				self.error_dialog('You are editing '
 								  + self.editing_profile_name
 								  + ' profile.',
