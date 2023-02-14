@@ -132,7 +132,7 @@ class DBusExporter(interfaces.ExporterInterface):
 		def wrapper(owner, *args, **kwargs):
 			action_id = consts.NAMESPACE + "." + method.__name__
 			caller = args[-1]
-			log.debug("checking authorization for for action '%s' requested by caller '%s'" % (action_id, caller))
+			log.debug("checking authorization for action '%s' requested by caller '%s'" % (action_id, caller))
 			ret = self._polkit.check_authorization(caller, action_id)
 			args_copy = args
 			if ret == 1:

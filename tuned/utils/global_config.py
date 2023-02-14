@@ -19,7 +19,7 @@ class GlobalConfig():
 	def get_global_config_spec():
 		"""
 		Easy validation mimicking configobj
-		Returns two dicts, firts with default values (default None)
+		Returns two dicts, first with default values (default None)
 		global_default[consts.CFG_SOMETHING] = consts.CFG_DEF_SOMETHING or None
 		second with configobj function for value type (default "get" for string, others eg getboolean, getint)
 		global_function[consts.CFG_SOMETHING] = consts.CFG_FUNC_SOMETHING or get
