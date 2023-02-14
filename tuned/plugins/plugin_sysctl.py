@@ -151,7 +151,7 @@ def _apply_sysctl_config_line(path, lineno, line, instance_sysctl):
 				% (path, lineno))
 		return
 	value = value.strip()
-	if option in instance_sysctl:
+	if option in instance_sysctl and instance_sysctl[option] != value:
 		log.info("Overriding sysctl parameter '%s' from '%s' to '%s'"
 				% (option, instance_sysctl[option], value))
 
