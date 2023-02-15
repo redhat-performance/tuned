@@ -249,7 +249,7 @@ class Admin(object):
 				self._error("Cannot enable the tuning.")
 				ret = False
 		else:
-			self._error(msg)
+			self._error("Unable to switch profile: %s" % msg)
 		return ret
 
 	def _action_dbus_wait_profile(self, profile_name):
