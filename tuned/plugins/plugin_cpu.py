@@ -196,6 +196,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._is_amd = False
 		self._has_energy_perf_bias = False
 		self._has_intel_pstate = False
+		self._has_pm_qos_resume_latency_us = None
 
 		self._min_perf_pct_save = None
 		self._max_perf_pct_save = None
@@ -691,6 +692,13 @@ class CPULatencyPlugin(hotplug.Plugin):
 	def _pm_qos_resume_latency_us_path(self, device):
 		return "/sys/devices/system/cpu/%s/power/pm_qos_resume_latency_us" % device
 
+	def _check_pm_qos_resume_latency_us(self, device):
+		if self._has_pm_qos_resume_latency_us is None:
+			self._has_pm_qos_resume_latency_us = os.path.exists(self._pm_qos_resume_latency_us_path(device))
+			if not self._has_pm_qos_resume_latency_us:
+				log.info("Option 'pm_qos_resume_latency_us' is not supported on current hardware.")
+		return self._has_pm_qos_resume_latency_us
+
 	@command_set("pm_qos_resume_latency_us", per_device=True)
 	def _set_pm_qos_resume_latency_us(self, pm_qos_resume_latency_us, device, sim):
 		if not self._is_cpu_online(device):
@@ -707,6 +715,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 			else:
 				log.warning("Invalid latency specified: '%s'" % str(pm_qos_resume_latency_us))
 				return None
+		if not self._check_pm_qos_resume_latency_us(device):
+			return None
 		if not sim:
 			self._cmd.write_to_file(self._pm_qos_resume_latency_us_path(device), latency)
 		return latency
@@ -715,6 +725,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 	def _get_pm_qos_resume_latency_us(self, device, ignore_missing=False):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
+			return None
+		if not self._check_pm_qos_resume_latency_us(device):
 			return None
 		return self._cmd.read_file(self._pm_qos_resume_latency_us_path(device), no_error=ignore_missing).strip()
 
