@@ -23,8 +23,8 @@
 tuned\-profiles\-cpu\-partitioning - Partition CPUs into isolated and housekeeping.
 
 .SH DESCRIPTION
-The cpu\-partitioning profile partitions the system CPUs into isolated and
-housekeeping CPUs. This profile is intended to be used for latency\-sensitive
+The cpu\-partitioning* profiles partition the system CPUs into isolated and
+housekeeping CPUs. These profiles are intended for latency\-sensitive
 workloads.
 
 An isolated CPU incurs reduced jitter and reduced interruptions by the
@@ -42,9 +42,21 @@ run all daemons, shell processes, kernel threads, interruption handlers
 and work that can be dispatched from isolated CPUs such as disk I/O,
 RCU work, timers, etc.
 
+.SH PROFILES
+The following profiles are provided:
+
+.TP
+.BI "cpu\-partitioning"
+Profile partitioning the system CPUs into isolated and housekeeping CPUs.
+
+.TP
+.BI "cpu\-partitioning\-powersave"
+Profile similar to the cpu\-partitioning profile, but with more flexibility
+on the C\-states configuration.
+
 .SH CONFIGURATION
-The cpu-partitioning profile is configured by editing the
-.I /etc/tuned/cpu-partitioning-variables.conf
+The cpu\-partitioning profile is configured by editing the
+.I /etc/tuned/cpu\-partitioning\-variables.conf
 file. There are two configuration options:
 
 .TP
@@ -57,26 +69,39 @@ List of CPUs not be considered by the kernel when doing system wide
 process load\-balancing. Usually, this list should be the same as
 isolated_cores=. This option is optional.
 
+.LP
+The cpu\-partitioning\-powersave profile is configured by editing the
+.I /etc/tuned/cpu\-partitioning\-powersave\-variables.conf
+file. It supports the same options as the cpu\-partitioning profile and
+one additional option:
+
+.TP
+.B max_power_state=<MAX_CSTATE>
+Maximum c-state the cores are allowed to enter. Can be expressed as it's name (C1E)
+or minimum wake-up latency, in micro-seconds.
+This parameter is provided as-is to `force_latency`.
+Default is set to "cstate.name:C1|10" to behave as cpu\-partitioning profile.
+
 .SH IMPORTANT NOTES
 
 .IP * 2
-The system should be rebooted after applying the cpu\-partitioning profile
+The system should be rebooted after applying the cpu\-partitioning* profiles
 for the first time or changing its configuration
 .IP *
-The cpu\-partitioning profile can be used in bare\-metal and virtual machines
+The cpu\-partitioning* profiles can be used in bare\-metal and virtual machines
 .IP *
-When using the cpu\-partitioning profile in bare\-metal, it is strongly
+When using the cpu\-partitioning* profiles in bare\-metal, it is strongly
 recommended to "mask" the ksm and ksmtuned services in systemd (if they are
 installed). This can be done with the following command:
 
     # systemctl mask ksm ksmtuned
 .IP *
-The cpu\-partitioning profile does not use the kernel's isolcpus= feature
+The cpu\-partitioning* profiles do not use the kernel's isolcpus= feature
 .IP *
 On a NUMA system, it is recommended to have at least one housekeeping CPU
 per NUMA node
 .IP *
-The cpu\-partitioning profile does not support isolating the L3 cache. This
+The cpu\-partitioning* profiles do not support isolating the L3 cache. This
 means that a housekeeping CPU can still thrash cache entries pertaining to
 isolated CPUs. It is recommended to use cache isolation technologies to remedy
 this problem, such as Intel's Cache Allocation Technology
@@ -87,24 +112,34 @@ Please, consult the nohz_full documentation in the kernel to learn more
 .IP *
 The Linux real\-time project has put together a document on the best
 practices for writing real\-time applications. Even though the
-cpu\-partitioning profile does not guarantee real\-time response time, much
+cpu\-partitioning* profiles do not guarantee real\-time response time, much
 of the techniques for writing real\-time applications also apply for
-applications intended to run under the cpu\-partitioning profile. Please,
+applications intended to run under the cpu\-partitioning* profiles. Please,
 refer to this document at
 .I https://rt.wiki.kernel.org
 
 .SH "FILES"
 .nf
 .I /etc/tuned/cpu\-partitioning\-variables.conf
+.I /etc/tuned/cpu\-partitioning\-powersave\-variables.conf
 .I /etc/tuned/tuned\-main.conf
 
 .SH "SEE ALSO"
 .BR tuned (8)
 .BR tuned\-adm (8)
 .BR tuned\-profiles (7)
+.BR tuned\-profiles\-atomic (7)
+.BR tuned\-profiles\-sap (7)
+.BR tuned\-profiles\-sap\-hana (7)
+.BR tuned\-profiles\-mssql (7)
+.BR tuned\-profiles\-oracle (7)
 .BR tuned\-profiles\-realtime (7)
 .BR tuned\-profiles\-nfv\-host (7)
 .BR tuned\-profiles\-nfv\-guest (7)
+.BR tuned\-profiles\-compat (7)
+.BR tuned\-profiles\-postgresql (7)
+.BR tuned\-profiles\-openshift (7)
+.BR tuned\-profiles\-spectrumscale\-ece (7)
 .SH AUTHOR
 .nf
 Jaroslav Škarvada <jskarvad@redhat.com>

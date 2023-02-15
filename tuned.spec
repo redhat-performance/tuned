@@ -530,7 +530,6 @@ fi
 %{_prefix}/lib/tuned/cpu-partitioning
 %{_prefix}/lib/tuned/cpu-partitioning-powersave
 %{_mandir}/man7/tuned-profiles-cpu-partitioning.7*
-%{_mandir}/man7/tuned-profiles-cpu-partitioning-powersave.7*
 
 %files profiles-spectrumscale
 %{_prefix}/lib/tuned/spectrumscale-ece
