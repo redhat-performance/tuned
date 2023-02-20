@@ -17,6 +17,9 @@ class check_net_queue_count(base.Function):
 			return None
 		if args[0].isdigit():
 			return args[0]
+		# Check for none to get rid of WARN log
+		if args[0].lower() == "none":
+			return None
 		(ret, out) = self._cmd.execute(["nproc"])
 		log.warn("net-dev queue count is not correctly specified, setting it to HK CPUs %s" % (out))
 		return out
