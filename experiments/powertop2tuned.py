@@ -41,7 +41,7 @@ except ImportError:
 	from htmlentitydefs import name2codepoint
 
 
-SCRIPT_SH = """#!/bin/sh
+SCRIPT_SH = """#!/bin/bash
 
 . /usr/lib/tuned/functions
 
