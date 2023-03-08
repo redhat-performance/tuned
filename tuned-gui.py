@@ -834,6 +834,7 @@ class Base(object):
 
 	def _build_about_dialog(self):
 		self.about_dialog = Gtk.AboutDialog.new()
+		self.about_dialog.set_logo_icon_name(NAME)
 		self.about_dialog.set_name(NAME)
 		self.about_dialog.set_version(VERSION)
 		self.about_dialog.set_license(LICENSE)
