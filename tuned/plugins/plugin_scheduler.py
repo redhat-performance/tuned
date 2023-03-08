@@ -527,7 +527,7 @@ class SchedulerPlugin(base.Plugin):
 				instance._runtime_tuning = False
 
 	def _instance_cleanup(self, instance):
-		if self._evlist:
+		if instance._evlist:
 			for fd in instance._evlist.get_pollfd():
 				os.close(fd.name)
 
