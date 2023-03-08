@@ -71,7 +71,7 @@ Current active profile: [replaceable]_selected-profile_
 ----
 $ tuned-adm verify
 
-Verfication succeeded, current system settings match the preset profile.
+Verification succeeded, current system settings match the preset profile.
 See TuneD log file ('/var/log/tuned/tuned.log') for details.
 ----
 

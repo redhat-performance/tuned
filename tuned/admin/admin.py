@@ -360,7 +360,7 @@ class Admin(object):
 		else:
 			ret = self._controller.verify_profile()
 		if ret:
-			print("Verfication succeeded, current system settings match the preset profile.")
+			print("Verification succeeded, current system settings match the preset profile.")
 		else:
 			print("Verification failed, current system settings differ from the preset profile.")
 			print("You can mostly fix this by restarting the TuneD daemon, e.g.:")

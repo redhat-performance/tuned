@@ -339,7 +339,7 @@ class Daemon(object):
 			log.error("profile is not applied")
 			return False
 
-		# using deamon, the main loop mustn't exit before our completion
+		# using daemon, the main loop mustn't exit before our completion
 		self._not_used.clear()
 		log.info("verifying profile(s): %s" % self._profile.name)
 		ret = self._unit_manager.verify_tuning(ignore_missing)
