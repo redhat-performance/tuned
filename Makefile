@@ -191,7 +191,7 @@ install: install-dirs
 	install -Dpm 0644 tuned.service $(DESTDIR)$(UNITDIR)/tuned.service
 
 	# dbus configuration
-	install -Dpm 0644 dbus.conf $(DESTDIR)$(SYSCONFDIR)/dbus-1/system.d/com.redhat.tuned.conf
+	install -Dpm 0644 dbus.conf $(DESTDIR)$(DATADIR)/dbus-1/system.d/com.redhat.tuned.conf
 
 	# grub template
 	install -Dpm 0755 00_tuned $(DESTDIR)$(SYSCONFDIR)/grub.d/00_tuned
