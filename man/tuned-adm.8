@@ -23,8 +23,8 @@
 .SH NAME
 tuned\-adm - command line tool for switching between different tuning profiles
 .SH SYNOPSIS
-.B tuned\-adm 
-.RB [ list " | " active " | " "profile \fI[profile]\fP..." " | " "profile_info \fI[profile]\fP..." " | " off " | "auto_profile" | "profile_mode" | " verify " | " recommend ]
+.B tuned\-adm
+.RB [ list " | " active " | " "profile \fI[profile]\fP..." " | " "profile_info \fI[profile]\fP..." " | " off " | " auto_profile " | " profile_mode " | " "verify \fI[\-i | \-\-ignore\-missing]\fP" " | " recommend ]
 
 .SH DESCRIPTION
 This command line utility allows you to switch between user definable tuning
@@ -76,11 +76,13 @@ performing any operation.
 Show information/description of given profile or current profile if no profile is specified.
 
 .TP
-.B verify
+.B "verify " \fI[\-i | \-\-ignore\-missing]\fP
 Verifies current profile against system settings. Outputs information whether
 system settings match current profile or not (e.g. somebody modified
 a sysfs/sysctl value by hand). Detailed information about what is checked, what
-value is set and what value is expected can be found in the log.
+value is set and what value is expected can be found in the log. With the
+\fI\-i\fP or \fI\-\-ignore\-missing\fP it does not treat missing tuning
+(tuning unsupported by the platform) as error.
 
 .TP
 .B recommend
