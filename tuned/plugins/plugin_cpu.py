@@ -184,6 +184,13 @@ class CPULatencyPlugin(hotplug.Plugin):
 	pm_qos_resume_latency_us=100
 	----
 	Allows any C-state with a resume latency less than value.
+	[cpu]
+	uncore_max_delta_mhz=0
+	----
+	Limit the maximum uncore frequency that hardware will use. This value is in
+	Mega Hertz units. This value specifies an offset from the default uncore maximum
+	frequency. For example, the value of 200 means that maximum uncore frequency
+	will be capped to the default uncore maximum frequency minus 200 MHz.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -198,6 +205,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._has_intel_pstate = False
 		self._has_pm_qos_resume_latency_us = None
 
+		self._uncore_max_delta_mhz_save = None
 		self._min_perf_pct_save = None
 		self._max_perf_pct_save = None
 		self._no_turbo_save = None
@@ -228,6 +236,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			"governor"             : None,
 			"sampling_down_factor" : None,
 			"energy_perf_bias"     : None,
+			"uncore_max_delta_mhz" : None,
 			"min_perf_pct"         : None,
 			"max_perf_pct"         : None,
 			"no_turbo"             : None,
@@ -359,6 +368,10 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if not instance._first_instance:
 			return
 
+		uncore_max_delta_mhz = self._variables.expand(
+			instance.options["uncore_max_delta_mhz"])
+		if uncore_max_delta_mhz is not None:
+			self._set_uncore_max_delta_mhz(uncore_max_delta_mhz)
 		force_latency_value = self._variables.expand(
 			instance.options["force_latency"])
 		if force_latency_value is not None:
@@ -380,7 +393,13 @@ class CPULatencyPlugin(hotplug.Plugin):
 	def _instance_unapply_static(self, instance, full_rollback = False):
 		super(CPULatencyPlugin, self)._instance_unapply_static(instance, full_rollback)
 
-		if instance._first_instance and self._has_intel_pstate:
+		if not instance._first_instance:
+			return
+
+		if self._uncore_max_delta_mhz_save is not None:
+			self._unset_uncore_max_delta_mhz()
+
+		if self._has_intel_pstate:
 			self._set_intel_pstate_attr("min_perf_pct", self._min_perf_pct_save)
 			self._set_intel_pstate_attr("max_perf_pct", self._max_perf_pct_save)
 			self._set_intel_pstate_attr("no_turbo", self._no_turbo_save)
@@ -407,6 +426,46 @@ class CPULatencyPlugin(hotplug.Plugin):
 			return int(s)
 		except (ValueError, TypeError):
 			return None
+
+	def _get_uncore_data(self):
+		out, files = dict(), ['initial_max_freq_khz', 'max_freq_khz']
+		dir = '/sys/devices/system/cpu/intel_uncore_frequency'
+		for dirname, dirnames, filenames in os.walk(dir):
+			pkg, ignore = dict(), False
+			for file in files:
+				if file not in filenames:
+					ignore = True
+					break
+				fpath = os.path.join(dirname, file)
+				data = self._cmd.read_file(fpath, err_ret=None, no_error=True)
+				try:
+					value = int(data.strip())
+				except:
+					ignore = True
+					break
+				pkg[file] = {'path': fpath, 'value': value}
+			if not ignore:
+				out[os.path.basename(dirname)] = pkg
+		return out
+
+	def _set_uncore_max_delta_mhz(self, delta):
+		self._uncore_max_delta_mhz_save = self._get_uncore_data()
+		for n in self._uncore_max_delta_mhz_save:
+			pkg = self._uncore_max_delta_mhz_save[n]
+			ival = pkg['initial_max_freq_khz']['value']
+			nval = ival - (int(delta) * 1000)
+			file = pkg['max_freq_khz']['path']
+			self._cmd.write_to_file(file, nval)
+			log.info('Set uncore_max_delta_mhz = %s for %s' % (delta, n))
+
+	def _unset_uncore_max_delta_mhz(self):
+		for n in self._uncore_max_delta_mhz_save:
+			pkg = self._uncore_max_delta_mhz_save[n]
+			file = pkg['max_freq_khz']['path']
+			value = pkg['max_freq_khz']['value']
+			if os.path.exists(file):
+				self._cmd.write_to_file(file, value)
+				log.info('Unset uncore_max_delta_mhz for %s' % n)
 
 	def _read_cstates_latency(self):
 		self.cstates_latency = {}
