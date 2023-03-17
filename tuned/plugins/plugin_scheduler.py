@@ -465,6 +465,7 @@ class SchedulerPlugin(base.Plugin):
 		return int(2 ** math.ceil(math.log(mp, 2)))
 
 	def _instance_init(self, instance):
+		instance._evlist = None
 		instance._has_dynamic_tuning = False
 		instance._has_static_tuning = True
 		# this is hack, runtime_tuning should be covered by dynamic_tuning configuration
