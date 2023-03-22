@@ -65,6 +65,7 @@ class SysctlPlugin(base.Plugin):
 		self._storage.unset(storage_key)
 
 	def _instance_apply_static(self, instance):
+		system_sysctl = _read_system_sysctl()
 		for option, value in list(instance._sysctl.items()):
 			original_value = _read_sysctl(option)
 			if original_value is None:
@@ -84,7 +85,12 @@ class SysctlPlugin(base.Plugin):
 
 		if self._global_cfg.get_bool(consts.CFG_REAPPLY_SYSCTL, consts.CFG_DEF_REAPPLY_SYSCTL):
 			log.info("reapplying system sysctl")
-			_apply_system_sysctl(instance._sysctl)
+			for option, value in list(system_sysctl.items()):
+				if option in instance._sysctl and instance._sysctl[option] != value:
+					log.info("Overriding sysctl parameter '%s' from '%s' to '%s'"
+							% (option, instance._sysctl[option], value))
+				_write_sysctl(option, value, ignore_missing = True)
+
 
 	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret = True
@@ -103,7 +109,8 @@ class SysctlPlugin(base.Plugin):
 			_write_sysctl(option, value)
 
 
-def _apply_system_sysctl(instance_sysctl):
+def _read_system_sysctl():
+	sysctls = {}
 	files = {}
 	for d in SYSCTL_CONFIG_DIRS:
 		try:
@@ -119,23 +126,28 @@ def _apply_system_sysctl(instance_sysctl):
 	for fname in sorted(files.keys()):
 		d = files[fname]
 		path = "%s/%s" % (d, fname)
-		_apply_sysctl_config_file(path, instance_sysctl)
-	_apply_sysctl_config_file("/etc/sysctl.conf", instance_sysctl)
+		sysctls.update(_read_sysctl_config_file(path))
+	sysctls.update(_read_sysctl_config_file("/etc/sysctl.conf"))
+	return sysctls
 
-def _apply_sysctl_config_file(path, instance_sysctl):
-	log.debug("Applying sysctl settings from file %s" % path)
+def _read_sysctl_config_file(path):
+	log.debug("Reading sysctl settings from file %s" % path)
+	sysctls = {}
 	try:
 		with open(path, "r") as f:
 			for lineno, line in enumerate(f, 1):
-				_apply_sysctl_config_line(path, lineno, line, instance_sysctl)
-		log.debug("Finished applying sysctl settings from file %s"
+				sysctl_line = _read_sysctl_config_line(path, lineno, line)
+				if sysctl_line is not None:
+					sysctls[sysctl_line[0]] = sysctl_line[1]
+		log.debug("Finished reading sysctl settings from file %s"
 				% path)
 	except (OSError, IOError) as e:
 		if e.errno != errno.ENOENT:
 			log.error("Error reading sysctl settings from file %s: %s"
 					% (path, str(e)))
+	return sysctls
 
-def _apply_sysctl_config_line(path, lineno, line, instance_sysctl):
+def _read_sysctl_config_line(path, lineno, line):
 	line = line.strip()
 	if len(line) == 0 or line[0] == "#" or line[0] == ";":
 		return
@@ -150,12 +162,7 @@ def _apply_sysctl_config_line(path, lineno, line, instance_sysctl):
 		log.error("Syntax error in file %s, line %d"
 				% (path, lineno))
 		return
-	value = value.strip()
-	if option in instance_sysctl and instance_sysctl[option] != value:
-		log.info("Overriding sysctl parameter '%s' from '%s' to '%s'"
-				% (option, instance_sysctl[option], value))
-
-	_write_sysctl(option, value, ignore_missing = True)
+	return (option, value.strip())
 
 def _get_sysctl_path(option):
 	return "/proc/sys/%s" % option.replace(".", "/")
