@@ -93,6 +93,7 @@ CFG_DYNAMIC_TUNING = "dynamic_tuning"
 CFG_SLEEP_INTERVAL = "sleep_interval"
 CFG_UPDATE_INTERVAL = "update_interval"
 CFG_RECOMMEND_COMMAND = "recommend_command"
+CFG_PROTECT_SYSCTL = "protect_sysctl"
 CFG_REAPPLY_SYSCTL = "reapply_sysctl"
 CFG_DEFAULT_INSTANCE_PRIORITY = "default_instance_priority"
 CFG_UDEV_BUFFER_SIZE = "udev_buffer_size"
@@ -124,8 +125,11 @@ CFG_FUNC_UPDATE_INTERVAL = "getint"
 # recommend command availability
 CFG_DEF_RECOMMEND_COMMAND = True
 CFG_FUNC_RECOMMEND_COMMAND = "getboolean"
+# protect system sysctl
+CFG_DEF_PROTECT_SYSCTL = True
+CFG_FUNC_PROTECT_SYSCTL = "getboolean"
 # reapply system sysctl
-CFG_DEF_REAPPLY_SYSCTL = True
+CFG_DEF_REAPPLY_SYSCTL = False
 CFG_FUNC_REAPPLY_SYSCTL = "getboolean"
 # default instance priority
 CFG_DEF_DEFAULT_INSTANCE_PRIORITY = 0

@@ -66,7 +66,13 @@ class SysctlPlugin(base.Plugin):
 
 	def _instance_apply_static(self, instance):
 		system_sysctl = _read_system_sysctl()
+		protect_sysctl = self._global_cfg.get_bool(consts.CFG_PROTECT_SYSCTL, consts.CFG_DEF_PROTECT_SYSCTL)
+
 		for option, value in list(instance._sysctl.items()):
+			if protect_sysctl and option in system_sysctl:
+				log.info("sysctl '%s' will not be set to '%s', is set to '%s' in sysctl.conf(5)/sysctl.d(5)"
+						% (option, value, system_sysctl[option]))
+				continue
 			original_value = _read_sysctl(option)
 			if original_value is None:
 				log.error("sysctl option %s will not be set, failed to read the original value."
