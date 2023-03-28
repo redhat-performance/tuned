@@ -1,0 +1,30 @@
+summary: Test for BZ#2071418 (TuneD exits on duplicate config lines (new)
+description: |
+    Bug summary: TuneD exits on duplicate config lines (new ConfigParser implementation)
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=2071418
+enabled: true
+link:
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=2071418
+tag:
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+  - Tier1
+adjust:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7
+    continue: false
+contact: something else <rhack@redhat.com>
+component:
+  - tuned
+framework: beakerlib
+require:
+  - library(tuned/basic)
+recommend:
+  - tuned
+duration: 5m
+extra-nitrate: TC#0614594
+extra-summary: /CoreOS/tuned/Regression/bz2071418-TuneD-exits-on-duplicate-config-lines-new
+extra-task: /CoreOS/tuned/Regression/bz2071418-TuneD-exits-on-duplicate-config-lines-new
+id: 5d6ed632-88cd-4f46-aeef-98ef09fcbab5
