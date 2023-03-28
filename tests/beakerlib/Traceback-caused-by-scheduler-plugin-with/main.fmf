@@ -1,0 +1,30 @@
+summary: Test for BZ#2179362 (Traceback caused by scheduler plugin with)
+description: |
+    Bug summary: Traceback caused by scheduler plugin with runtime=0
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=2179362
+enabled: true
+link:
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=2179362
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=2179364
+tag:
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+adjust:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7
+    continue: false
+contact: Robin Hack <rhack@redhat.com>
+component:
+  - tuned
+framework: beakerlib
+require:
+  - library(tuned/basic)
+recommend:
+  - tuned
+duration: 10m
+extra-nitrate: TC#0615117
+extra-summary: /CoreOS/tuned/Regression/Traceback-caused-by-scheduler-plugin-with
+extra-task: /CoreOS/tuned/Regression/Traceback-caused-by-scheduler-plugin-with
+id: 12f842cb-4a75-4e52-80fe-79d297ac5b02
