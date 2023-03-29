@@ -1,0 +1,34 @@
+summary: Test for BZ#2113900 (Expose TuneD API to the Unix Domain Socket)
+description: |
+    Bug summary: Expose TuneD API to the Unix Domain Socket
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=2113900
+enabled: true
+link:
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=2113900
+tag:
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+  - Tier1
+tier: '1'
+adjust:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7, rhel-8
+    continue: false
+contact: Robin Hack <rhack@redhat.com>
+component:
+  - tuned
+framework: beakerlib
+require:
+  - library(tuned/basic)
+recommend:
+  - tuned
+  - nmap-ncat
+duration: 10m
+extra-nitrate: TC#0614859
+extra-summary: /CoreOS/tuned/Regression/Expose-TuneD-API-to-the-Unix-Domain-Socket
+extra-task: /CoreOS/tuned/Regression/Expose-TuneD-API-to-the-Unix-Domain-Socket
+extra-hardware: |
+    hostrequire = <cpu><cores op=">=" value="4"/></cpu>
+id: b29d3505-f888-400f-8e7b-26449b301a6d
