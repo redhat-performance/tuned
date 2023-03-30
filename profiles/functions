@@ -229,7 +229,7 @@ set_cpu_governor() {
 	governor=$1
 
 	# always patch cpuspeed configuration if exists, if it doesn't exist and is enabled,
-	# explictly disable it with hint
+	# explicitly disable it with hint
 	if [ -e $CPUSPEED_INIT ]; then
 		if [ ! -e $CPUSPEED_SAVE_FILE -a -e $CPUSPEED_CFG ]; then
 			cp -p $CPUSPEED_CFG $CPUSPEED_SAVE_FILE
