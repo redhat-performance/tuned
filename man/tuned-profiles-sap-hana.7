@@ -37,6 +37,13 @@ energy performance bias is set to performance. It also disables transparent
 hugepages, locks CPU to the low C states (by PM QoS) and tunes sysctl regarding
 semaphores.
 
+.TP
+.BI "sap\-hana\-kvm\-guest"
+A performance optimized profile for the SAP HANA application when running as
+virtual guest on KVM. It loads the cpuidle-haltpoll driver to ensure lower
+latencies (at the cost of a higher power consumption).
+The clocksource is set to TSC, skew_tick is enabled.
+
 .SH "FILES"
 .nf
 .I /etc/tuned/*
