@@ -415,6 +415,7 @@ fi
 %exclude %{_prefix}/lib/tuned/spindown-disk
 %exclude %{_prefix}/lib/tuned/sap-netweaver
 %exclude %{_prefix}/lib/tuned/sap-hana
+%exclude %{_prefix}/lib/tuned/sap-hana-kvm-guest
 %exclude %{_prefix}/lib/tuned/mssql
 %exclude %{_prefix}/lib/tuned/oracle
 %exclude %{_prefix}/lib/tuned/atomic-host
@@ -490,6 +491,7 @@ fi
 
 %files profiles-sap-hana
 %{_prefix}/lib/tuned/sap-hana
+%{_prefix}/lib/tuned/sap-hana-kvm-guest
 %{_mandir}/man7/tuned-profiles-sap-hana.7*
 
 %files profiles-mssql
