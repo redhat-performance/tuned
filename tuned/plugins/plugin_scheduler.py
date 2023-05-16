@@ -882,7 +882,7 @@ class SchedulerPlugin(base.Plugin):
 			if orig_affinity != "ERR":
 				self._cgroups_original_affinity[cgroup] = orig_affinity
 			else:
-				log.err("Refusing to set affinity of cgroup '%s', reading original affinity failed" % cgroup)
+				log.error("Refusing to set affinity of cgroup '%s', reading original affinity failed" % cgroup)
 				return
 		if not self._cmd.write_to_file(path, affinity, no_error = True):
 			log.error("Unable to set affinity '%s' for cgroup '%s'" % (affinity, cgroup))
