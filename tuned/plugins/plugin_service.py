@@ -313,7 +313,7 @@ class ServicePlugin(base.Plugin):
 				ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
 		for name, value in list(instance._services_original.items()):
 			if value.cfg_file:
 				self._init_handler.cfg_uninstall(name, value.cfg_file)

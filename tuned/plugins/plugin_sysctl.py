@@ -98,7 +98,7 @@ class SysctlPlugin(base.Plugin):
 					ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
 		for option, value in list(instance._sysctl_original.items()):
 			_write_sysctl(option, value)
 

@@ -212,7 +212,7 @@ class Plugin(object):
 	def _instance_post_static(self, instance, enabling):
 		pass
 
-	def _call_device_script(self, instance, script, op, devices, full_rollback = False):
+	def _call_device_script(self, instance, script, op, devices, full_rollback = consts.ROLLBACK_SOFT):
 		if script is None:
 			return None
 		if len(devices) == 0:
@@ -228,7 +228,7 @@ class Plugin(object):
 			environ = os.environ
 			environ.update(self._variables.get_env())
 			arguments = [op]
-			if full_rollback:
+			if full_rollback == consts.ROLLBACK_FULL:
 				arguments.append("full_rollback")
 			arguments.append(dev)
 			log.info("calling script '%s' with arguments '%s'" % (script, str(arguments)))
@@ -298,10 +298,13 @@ class Plugin(object):
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_update_dynamic, instance.processed_devices.copy())
 
-	def instance_unapply_tuning(self, instance, full_rollback = False):
+	def instance_unapply_tuning(self, instance, full_rollback = consts.ROLLBACK_SOFT):
 		"""
 		Remove all tunings applied by the plugin instance.
 		"""
+		if full_rollback == consts.ROLLBACK_NOT_ON_EXIT:
+			return
+
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._run_for_each_device(instance, self._instance_unapply_dynamic, instance.processed_devices)
 		if instance.has_static_tuning:
@@ -325,7 +328,7 @@ class Plugin(object):
 			ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
 		self._cleanup_all_device_commands(instance,
 				instance.processed_devices)
 		self._cleanup_all_non_device_commands(instance)

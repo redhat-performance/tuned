@@ -111,8 +111,8 @@ class SystemdPlugin(base.Plugin):
 				conf = self._add_keyval(conf, consts.SYSTEMD_CPUAFFINITY_VAR, cpu_affinity_saved)
 			self._write_systemd_system_conf(conf)
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
-		if full_rollback:
+	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
+		if full_rollback == consts.ROLLBACK_FULL:
 			log.info("removing '%s' systemd tuning previously added by TuneD" % consts.SYSTEMD_CPUAFFINITY_VAR)
 			self._remove_systemd_tuning()
 			log.console("you may need to manualy run 'dracut -f' to update the systemd configuration in initrd image")
