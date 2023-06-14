@@ -1,3 +1,5 @@
+import tuned.consts as consts
+
 class Instance(object):
 	"""
 	"""
@@ -83,7 +85,7 @@ class Instance(object):
 	def update_tuning(self):
 		self._plugin.instance_update_tuning(self)
 
-	def unapply_tuning(self, full_rollback = False):
+	def unapply_tuning(self, full_rollback = consts.ROLLBACK_SOFT):
 		self._plugin.instance_unapply_tuning(self, full_rollback)
 
 	def destroy(self):

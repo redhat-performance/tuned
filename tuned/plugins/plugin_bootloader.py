@@ -391,8 +391,8 @@ class BootloaderPlugin(base.Plugin):
 		self._rpm_ostree_kargs(append=self._options_to_dict(deleted), delete=self._options_to_dict(appended))
 		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: "", consts.BOOT_CMDLINE_KARGS_DELETED_VAR: ""})
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
-		if full_rollback and not self._skip_grub_config_val:
+	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
+		if full_rollback == consts.ROLLBACK_FULL and not self._skip_grub_config_val:
 			if self._rpm_ostree:
 				log.info("removing rpm-ostree tuning previously added by Tuned")
 				self._remove_rpm_ostree_tuning()

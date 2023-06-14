@@ -4,6 +4,7 @@ import re
 import os.path
 from .decorators import *
 import tuned.logs
+import tuned.consts as consts
 from subprocess import *
 from tuned.utils.commands import commands
 
@@ -71,7 +72,7 @@ class SysfsPlugin(base.Plugin):
 						ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
 		for key, value in list(instance._sysfs_original.items()):
 			self._write_sysfs(key, value)
 

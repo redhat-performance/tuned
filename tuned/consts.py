@@ -79,6 +79,9 @@ SYSTEM_RELEASE_FILE = "/etc/system-release-cpe"
 FUNCTION_PREFIX = "function_"
 # prefix for exported environment variables when calling scripts
 ENV_PREFIX = "TUNED_"
+ROLLBACK_NOT_ON_EXIT = 0
+ROLLBACK_SOFT = 1
+ROLLBACK_FULL = 2
 
 # tuned-gui
 PREFIX_PROFILE_FACTORY = "System"
@@ -108,6 +111,7 @@ CFG_UNIX_SOCKET_OWNERSHIP = "unix_socket_ownership"
 CFG_UNIX_SOCKET_PERMISIONS = "unix_socket_permissions"
 CFG_UNIX_SOCKET_CONNECTIONS_BACKLOG = "connections_backlog"
 CFG_CPU_EPP_FLAG = "hwp_epp"
+CFG_ROLLBACK = "rollback"
 
 # no_daemon mode
 CFG_DEF_DAEMON = True
@@ -155,6 +159,8 @@ CFG_DEF_UNIX_SOCKET_PERMISIONS = "0o600"
 # default unix socket conections backlog
 CFG_DEF_UNIX_SOCKET_CONNECTIONS_BACKLOG = "1024"
 CFG_FUNC_UNIX_SOCKET_CONNECTIONS_BACKLOG = "getint"
+# default rollback strategy
+CFG_DEF_ROLLBACK = "auto"
 
 PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
 

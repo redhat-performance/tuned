@@ -1003,7 +1003,7 @@ class SchedulerPlugin(base.Plugin):
 		for cg in self._cgroups:
 			self._cgroup_cleanup_tasks_one(cg)
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
 		super(SchedulerPlugin, self)._instance_unapply_static(instance, full_rollback)
 		if self._daemon and instance._runtime_tuning:
 			instance._terminate.set()

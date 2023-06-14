@@ -377,7 +377,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			self._no_turbo_save = self._getset_intel_pstate_attr(
 				"no_turbo", new_value)
 
-	def _instance_unapply_static(self, instance, full_rollback = False):
+	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
 		super(CPULatencyPlugin, self)._instance_unapply_static(instance, full_rollback)
 
 		if instance._first_instance and self._has_intel_pstate:
