@@ -161,16 +161,16 @@ class Manager(object):
 			self._try_call("update_tuning", None,
 					instance.update_tuning)
 
-	# full_rollback is a helper telling plugins whether soft or full
+	# rollback parameter is a helper telling plugins whether soft or full
 	# rollback is needed, e.g. for bootloader plugin we need grub.cfg
 	# tuning to persist across reboots and restarts of the daemon, so in
-	# this case the full_rollback is usually set to consts.ROLLBACK_SOFT,
+	# this case the rollback is usually set to consts.ROLLBACK_SOFT,
 	# but we also need to clean it all up when TuneD is disabled or the
-	# profile is changed. In this case the full_rollback is set to
+	# profile is changed. In this case the rollback is set to
 	# consts.ROLLBACK_FULL. In practice it means to remove all temporal
 	# or helper files, unpatch third party config files, etc.
-	def stop_tuning(self, full_rollback = consts.ROLLBACK_SOFT):
+	def stop_tuning(self, rollback = consts.ROLLBACK_SOFT):
 		self._hardware_inventory.stop_processing_events()
 		for instance in reversed(self._instances):
 			self._try_call("stop_tuning", None,
-					instance.unapply_tuning, full_rollback)
+					instance.unapply_tuning, rollback)
