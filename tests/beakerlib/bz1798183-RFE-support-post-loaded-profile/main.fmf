@@ -7,7 +7,8 @@ contact:
 component:
 - tuned
 require:
-- tuned
+  - tuned
+  - library(tuned/basic)
 duration: 5m
 extra-task: /CoreOS/tuned/Regression/bz1798183-RFE-support-post-loaded-profile
 framework: beakerlib

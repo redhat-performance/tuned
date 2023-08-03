@@ -22,6 +22,8 @@ PACKAGE="tuned"
 rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
+        rlImport "tuned/basic"
+        tunedDisableSystemdRateLimitingStart
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
         rlServiceStop "tuned"
@@ -41,6 +43,11 @@ rlJournalStart
         rlRun "popd"
         rlRun "rm -r $TmpDir" 0 "Removing tmp directory"
 
+        killall tuned
+        rlRun "sleep 3"
+        killall tuned
+
+        tunedDisableSystemdRateLimitingEnd
         rlFileRestore
         rlServiceRestore "tuned"
     rlPhaseEnd

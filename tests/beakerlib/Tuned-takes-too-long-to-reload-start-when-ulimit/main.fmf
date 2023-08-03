@@ -8,3 +8,8 @@ relevancy: |
     distro = rhel-4, rhel-5, rhel-6: False
 summary: Test for BZ#1663412 (TuneD takes too long to reload/start when \"ulimit)
 framework: beakerlib
+require:
+  - library(tuned/basic)
+recommend:
+  - psmisc
+  - tuned

@@ -25,6 +25,7 @@ rlJournalStart
         rlAssertRpm $PACKAGE
         rlImport "tuned/basic"
         tunedProfileBackup
+        tunedDisableSystemdRateLimitingStart
     rlPhaseEnd
 
     rlPhaseStartTest "Test tuned-adm LIST"
@@ -82,6 +83,7 @@ rlJournalStart
     rlPhaseEnd
 
     rlPhaseStartCleanup
+        tunedDisableSystemdRateLimitingEnd
         tunedProfileRestore
         rlServiceRestore "tuned"
     rlPhaseEnd

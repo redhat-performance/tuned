@@ -24,6 +24,9 @@ rlJournalStart
         rlAssertRpm $PACKAGE
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
+        rlImport "tuned/basic"
+
+        tunedDisableSystemdRateLimitingStart
         rlServiceStop "tuned"
         # systemd can have some issues with quick restarts sometimes
         sleep 1
@@ -36,6 +39,7 @@ rlJournalStart
     rlPhaseEnd
 
     rlPhaseStartCleanup
+        tunedDisableSystemdRateLimitingEnd
         rlRun "popd"
         rlRun "rm -r $TmpDir" 0 "Removing tmp directory"
         rlServiceRestore "tuned"

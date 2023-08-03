@@ -61,6 +61,8 @@ function wait_for_tuned_stop()
 rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
+        rlImport "tuned/basic"
+        tunedDisableSystemdRateLimitingStart
         rlRun "for PYTHON in $PYTHON_CHECK; do \$PYTHON --version 2>/dev/null && break; done" 0 "Detect python"
         rlRun "rlFileBackup --clean $PROFILE_DIR"
         rlRun "cp -r parent $PROFILE_DIR"
@@ -259,6 +261,7 @@ rlJournalStart
     rlPhaseEnd
 
     rlPhaseStartCleanup
+        tunedDisableSystemdRateLimitingEnd
         rlRun "popd"
         rlRun "rm -r $TmpDir" 0 "Removing tmp directory"
         rlRun "rlFileRestore"
