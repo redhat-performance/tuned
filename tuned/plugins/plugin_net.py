@@ -329,6 +329,8 @@ class NetTuningPlugin(hotplug.Plugin):
 	# parse features/coalesce config parameters (those defined in profile configuration)
 	# context is for error message
 	def _parse_config_parameters(self, value, context):
+		# expand config variables
+		value = self._variables.expand(value)
 		# split supporting various dellimeters
 		v = str(re.sub(r"(:\s*)|(\s+)|(\s*;\s*)|(\s*,\s*)", " ", value)).split()
 		lv = len(v)
