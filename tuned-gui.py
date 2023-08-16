@@ -249,7 +249,10 @@ class Base(object):
 				self.manager.get_profile(self.controller.active_profile())
 		else:
 			self.active_profile = None
-		self._gobj('summaryProfileName').set_text(self.active_profile.name)
+                try:
+                        self._gobj('summaryProfileName').set_text(self.active_profile.name)
+                except:
+                        self.error_dialog('No active profile set', '')
 		try:
 			self._gobj('summaryIncludedProfileName').set_text(self.active_profile.options['include'
 					])
@@ -445,7 +448,7 @@ class Base(object):
 			self.manager.set_raw_profile(profile_name,
 				text_buffer.get_text(start, end, True))
 		except Exception:
-			self.error_dialog('Error while parsing raw configuration')
+			self.error_dialog('Error while parsing raw configuration', '')
 			return
 
 		self.error_dialog('Profile Editor will be closed.',
