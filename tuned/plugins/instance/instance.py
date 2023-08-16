@@ -85,8 +85,8 @@ class Instance(object):
 	def update_tuning(self):
 		self._plugin.instance_update_tuning(self)
 
-	def unapply_tuning(self, full_rollback = consts.ROLLBACK_SOFT):
-		self._plugin.instance_unapply_tuning(self, full_rollback)
+	def unapply_tuning(self, rollback = consts.ROLLBACK_SOFT):
+		self._plugin.instance_unapply_tuning(self, rollback)
 
 	def destroy(self):
 		self.unapply_tuning()

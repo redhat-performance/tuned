@@ -72,7 +72,7 @@ class SysfsPlugin(base.Plugin):
 						ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
+	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):
 		for key, value in list(instance._sysfs_original.items()):
 			self._write_sysfs(key, value)
 
