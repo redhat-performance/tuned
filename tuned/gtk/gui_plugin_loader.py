@@ -53,7 +53,7 @@ class GuiPluginLoader():
         self._prefix = 'plugin_'
         self._sufix = '.py'
         self._dbus_controller = DBusController(consts.DBUS_BUS,
-			consts.DBUS_INTERFACE, consts.DBUS_OBJECT
+                        consts.DBUS_INTERFACE, consts.DBUS_OBJECT
             )
         self._get_plugins()
 
