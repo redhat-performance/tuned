@@ -70,6 +70,12 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def terminate(self):
 		self._terminate.set()
 
+	def sighup(self):
+		if not self._daemon._sighup_processing.is_set():
+			self._daemon._sighup_processing.set()
+			if not self.reload():
+				self._daemon._sighup_processing.clear()
+
 	@exports.signal("sbs")
 	def profile_changed(self, profile_name, result, errstr):
 		pass

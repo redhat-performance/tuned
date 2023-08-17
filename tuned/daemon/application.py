@@ -67,7 +67,7 @@ class Application(object):
 		signal.signal(signal_number, handler_wrapper)
 
 	def _init_signals(self):
-		self._handle_signal(signal.SIGHUP, self._controller.reload)
+		self._handle_signal(signal.SIGHUP, self._controller.sighup)
 		self._handle_signal(signal.SIGINT, self._controller.terminate)
 		self._handle_signal(signal.SIGTERM, self._controller.terminate)
 

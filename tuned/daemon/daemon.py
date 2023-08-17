@@ -59,6 +59,8 @@ class Daemon(object):
 		self._terminate_profile_switch = threading.Event()
 		# Flag which is set if there is no operation in progress
 		self._not_used = threading.Event()
+		# Flag which is set if SIGHUP is being processed
+		self._sighup_processing = threading.Event()
 		self._not_used.set()
 		self._profile_applied = threading.Event()
 
@@ -203,6 +205,7 @@ class Daemon(object):
 			exports.start()
 		profile_names = " ".join(self._active_profiles)
 		self._notify_profile_changed(profile_names, True, "OK")
+		self._sighup_processing.clear()
 
 		if self._daemon:
 			# In python 2 interpreter with applied patch for rhbz#917709 we need to periodically
