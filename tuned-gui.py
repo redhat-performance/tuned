@@ -249,10 +249,10 @@ class Base(object):
 				self.manager.get_profile(self.controller.active_profile())
 		else:
 			self.active_profile = None
-                try:
-                        self._gobj('summaryProfileName').set_text(self.active_profile.name)
-                except:
-                        self.error_dialog('No active profile set', '')
+		try:
+			self._gobj('summaryProfileName').set_text(self.active_profile.name)
+		except:
+			self.error_dialog('No active profile set', '')
 		try:
 			self._gobj('summaryIncludedProfileName').set_text(self.active_profile.options['include'
 					])
