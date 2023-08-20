@@ -36,16 +36,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.20.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.21.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -557,6 +557,21 @@ fi
 %{_mandir}/man7/tuned-profiles-openshift.7*
 
 %changelog
+* Sun Aug 20 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 2.21.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: rhbz#2182117
+  - plugin_scheduler: fix perf fd leaks
+    resolves: rhbz#2173938
+  - allow skipping rollback when restarting TuneD or switching profile
+    resolves: rhbz#2203142
+  - function_calc_isolated_cores: no errors for offline CPUs
+    resolves: rhbz#2217015
+  - sap-hana: new profile sap-hana-kvm-guest
+    resolves: rhbz#2173740
+  - serialized SIGHUP handler to prevent possible bootcmdline corruption
+    resolves: rhbz#2215298
+
 * Fri Feb 17 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 2.20.0-1
 - new release
   - rebased tuned to latest upstream
