@@ -122,10 +122,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 				return False
 		return self._daemon.start()
 
-	@exports.export("", "b")
-	def stop(self, caller = None, profile_switch = False):
-		if caller == "":
-			return False
+	def _stop(self, profile_switch = False):
 		if not self._daemon.is_running():
 			res = True
 		else:
@@ -134,11 +131,17 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		return res
 
 	@exports.export("", "b")
+	def stop(self, caller = None):
+		if caller == "":
+			return False
+		return self._stop(profile_switch = False)
+
+	@exports.export("", "b")
 	def reload(self, caller = None):
 		if caller == "":
 			return False
 		if self._daemon.is_running():
-			stop_ok = self.stop(profile_switch = True)
+			stop_ok = self._stop(profile_switch = True)
 			if not stop_ok:
 				return False
 		try:
