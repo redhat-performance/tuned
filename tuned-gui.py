@@ -695,7 +695,7 @@ class Base(object):
 
 	def execute_switch_tuned(self, switch, data):
 		"""
-		Suported switch_tuned_start_stop and switch_tuned_startup_start_stop.
+		Supported switch_tuned_start_stop and switch_tuned_startup_start_stop.
 		"""
 
 		if switch == self._gobj('switchTunedStartStop'):

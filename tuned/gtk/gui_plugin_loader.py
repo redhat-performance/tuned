@@ -40,7 +40,7 @@ __all__ = ['GuiPluginLoader']
 class GuiPluginLoader():
 
     '''
-    Class for scan, import and load actual avaible plugins.
+    Class for scan, import and load actual variable plugins.
     '''
 
     def __init__(self):
