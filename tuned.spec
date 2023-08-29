@@ -36,8 +36,8 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-%global prerelease rc
-%global prereleasenum 1
+#%%global prerelease rc
+#%%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
@@ -45,7 +45,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.21.0
-Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPLv2+
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -557,6 +557,13 @@ fi
 %{_mandir}/man7/tuned-profiles-openshift.7*
 
 %changelog
+* Tue Aug 29 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 2.21.0-1
+- new release
+  - rebased tuned to latest upstream
+    related: rhbz#2182117
+  - api: fixed stop method not to require any parameter
+    resolves: rhbz#2235637
+
 * Sun Aug 20 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 2.21.0-0.1.rc1
 - new release
   - rebased tuned to latest upstream
