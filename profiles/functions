@@ -566,7 +566,7 @@ disable_ksm()
 			die "failed to create $KSM_MASK_FILE"
 		fi
 		# Do not run any systemctl commands if $KSM_SERVICES units do not exist
-		systemctl cat -- $KSM_SERVICES &> /dev/null || return
+		systemctl cat -- $KSM_SERVICES &> /dev/null || return 0
 		systemctl --now --quiet mask $KSM_SERVICES
 		# Unmerge all shared pages
 		test -f $KSM_RUN_PATH && echo 2 > $KSM_RUN_PATH
@@ -578,7 +578,7 @@ enable_ksm()
 {
 	if [ -f $KSM_MASK_FILE ]; then
 		# Do not run any systemctl commands if $KSM_SERVICES units do not exist
-		systemctl cat -- $KSM_SERVICES &> /dev/null || return
+		systemctl cat -- $KSM_SERVICES &> /dev/null || return 0
 		if systemctl --quiet unmask $KSM_SERVICES; then
 			rm -f $KSM_MASK_FILE
 		fi
