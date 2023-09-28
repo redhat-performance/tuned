@@ -240,15 +240,15 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._arch = platform.machine()
 
 		if self._arch in intel_archs:
-                        # Possible other x86 vendors (from arch/x86/kernel/cpu/*):
-                        # "CentaurHauls", "CyrixInstead", "Geode by NSC", "HygonGenuine", "GenuineTMx86",
-                        # "TransmetaCPU", "UMC UMC UMC"
+			# Possible other x86 vendors (from arch/x86/kernel/cpu/*):
+			# "CentaurHauls", "CyrixInstead", "Geode by NSC", "HygonGenuine", "GenuineTMx86",
+			# "TransmetaCPU", "UMC UMC UMC"
 			cpu = procfs.cpuinfo()
 			vendor = cpu.tags.get("vendor_id")
 			if vendor == "GenuineIntel":
-			        self._is_intel = True
+				self._is_intel = True
 			elif vendor == "AuthenticAMD" or vendor == "HygonGenuine":
-			        self._is_amd = True
+				self._is_amd = True
 			else:
 				# We always assign Intel, unless we know better
 				self._is_intel = True
