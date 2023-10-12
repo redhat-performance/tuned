@@ -80,7 +80,7 @@ class Functions():
 				self._esc = False
 			self._cnt += 1
 		if len(self._stack):
-			log.error("invalid varialbe syntax, non pair '{' in: '%s'" % s)
+			log.error("invalid variable syntax, non pair '{' in: '%s'" % s)
 		return self._str
 
 	def expand(self, s):
