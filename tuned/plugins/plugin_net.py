@@ -158,6 +158,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		self._cmd = commands()
 		self._re_ip_link_show = {}
 		self._use_ip = True
+		self._nf_conntrack_loaded = None
 
 	def _init_devices(self):
 		self._devices_supported = True
@@ -405,6 +406,14 @@ class NetTuningPlugin(hotplug.Plugin):
 			pass
 		return value
 
+	def _check_nf_conntrack_loaded(self):
+		if self._nf_conntrack_loaded is None:
+			_, out, _ = self._cmd.execute("lsmod | grep nf_conntrack", return_err=True)
+			self._nf_conntrack_loaded = out != ""
+			if not self._nf_conntrack_loaded:
+				log.warn("Module 'nf_conntrack' needed by 'nf_conntrack_hashsize' option in net plugin is not loaded. Load it and try again.")
+		return self._nf_conntrack_loaded
+
 	@command_set("nf_conntrack_hashsize")
 	def _set_nf_conntrack_hashsize(self, value, sim):
 		if value is None:
@@ -413,7 +422,8 @@ class NetTuningPlugin(hotplug.Plugin):
 		hashsize = int(value)
 		if hashsize >= 0:
 			if not sim:
-				self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize)
+				if not self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize):
+					self._check_nf_conntrack_loaded()
 			return hashsize
 		else:
 			return None
@@ -423,6 +433,8 @@ class NetTuningPlugin(hotplug.Plugin):
 		value = self._cmd.read_file(self._nf_conntrack_hashsize_path())
 		if len(value) > 0:
 			return int(value)
+		else:
+			self._check_nf_conntrack_loaded()
 		return None
 
 	def _call_ip_link(self, args=[]):
