@@ -235,13 +235,13 @@ class commands:
 				err_out = err[:-1]
 				if len(err_out) == 0:
 					err_out = out[:-1]
-				err_msg = "Executing %s error: %s" % (args[0], err_out)
+				err_msg = "Executing '%s' error: %s" % (' '.join(args), err_out)
 				if not return_err:
 					self._error(err_msg)
 		except (OSError, IOError) as e:
 			retcode = -e.errno if e.errno is not None else -1
 			if not abs(retcode) in no_errors and not 0 in no_errors:
-				err_msg = "Executing %s error: %s" % (args[0], e)
+				err_msg = "Executing '%s' error: %s" % (' '.join(args), e)
 				if not return_err:
 					self._error(err_msg)
 		if return_err:
