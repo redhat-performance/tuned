@@ -215,6 +215,27 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 		self._assigned_devices = set()
 
+	def assign_free_devices(self, instance):
+        	if not self._devices_supported:
+        		return
+
+        	if (instance._options["cores"] is not None):
+        		cores_list = set(self._cmd.cpulist_unpack(instance._options["cores"]))
+        		cores = self._cmd.cpulist2string(cores_list, "cpu")
+        		to_assign = self._get_matching_devices(instance, set(cores.split(',')))
+        	else:
+        		to_assign = self._get_matching_devices(instance, self._free_devices)
+        	instance.active = len(to_assign) > 0
+        	if not instance.active:
+        		log.warn("instance %s: no matching devices available" % instance.name)
+        	else:
+        		name = instance.name
+        		if instance.name != self.name:
+        			name += " (%s)" % self.name
+        		instance.assigned_devices.update(to_assign)  # cannot use |=
+        		self._assigned_devices |= to_assign
+        		self._free_devices -= to_assign
+
 	def _get_device_objects(self, devices):
 		return [self._hardware_inventory.get_device("cpu", x) for x in devices]
 
@@ -233,6 +254,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			"no_turbo"             : None,
 			"pm_qos_resume_latency_us": None,
 			"energy_performance_preference" : None,
+			"cores" : None,
 		}
 
 	def _check_arch(self):
