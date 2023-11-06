@@ -46,7 +46,7 @@ Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.21.0
 Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
-License: GPLv2+
+License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
 BuildArch: noarch
