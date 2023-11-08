@@ -523,3 +523,12 @@ class commands:
 					f.write(profile_name + "\n")
 		except (OSError,IOError) as e:
 			raise TunedException("Failed to save the active post-loaded profile: %s" % e.strerror)
+
+	# Translates characters in 'text' from 'source_chars' to 'dest_chars'
+	def tr(self, text, source_chars, dest_chars):
+		try:
+			trans = str.maketrans(source_chars, dest_chars)
+		except AttributeError:
+			import string
+			trans = string.maketrans(source_chars, dest_chars)
+		return text.translate(trans)

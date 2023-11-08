@@ -157,7 +157,11 @@ class SysctlPlugin(base.Plugin):
 		self._write_sysctl(option, value, ignore_missing = True)
 
 	def _get_sysctl_path(self, option):
-		return "/proc/sys/%s" % option.replace(".", "/")
+		# The sysctl name in sysctl tool and in /proc/sys differs.
+		# All dots (.) in sysctl name are represented by /proc/sys
+		# directories and all slashes in the name (/) are converted
+		# to dots (.) in the /proc/sys filenames.
+		return "/proc/sys/%s" % self._cmd.tr(option, "./", "/.")
 
 	def _read_sysctl(self, option):
 		path = self._get_sysctl_path(option)
