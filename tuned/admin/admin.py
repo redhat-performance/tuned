@@ -439,3 +439,13 @@ class Admin(object):
 	def _action_list_plugins(self, verbose=False):
 		print("Not supported in no_daemon mode.")
 		return False
+
+	def _action_dbus_instance_acquire_devices(self, devices, instance):
+		(ret, msg) = self._controller.instance_acquire_devices(devices, instance)
+		if not ret:
+			self._error("Unable to acquire devices: %s" % msg)
+		return self._controller.exit(ret)
+
+	def _action_instance_acquire_devices(self, devices, instance):
+		print("Not supported in no_daemon mode.")
+		return False
