@@ -218,6 +218,30 @@ class CPULatencyPlugin(hotplug.Plugin):
 	def _get_device_objects(self, devices):
 		return [self._hardware_inventory.get_device("cpu", x) for x in devices]
 
+	#method overriding of assign_free_devices method from base.py to use cores option
+	def assign_free_devices(self, instance):
+		log.debug("In over written method %s" % instance.name)
+		if not self._devices_supported:
+			return
+
+		if instance._options["cores"] is not None:
+			cores = set(self._cmd.cpulist_unpack(instance._options["cores"]))
+			cores_list = self._cmd.cpulist2string(cores, "cpu")
+			to_assign = self._get_matching_devices(instance, set(cores_list.split(',')))
+		else:
+			to_assign = self._get_matching_devices(instance, self._free_devices)
+		instance.active = len(to_assign) > 0
+		if not instance.active:
+			log.warn("instance %s: no matching devices available" % instance.name)
+		else:
+			name = instance.name
+			if instance.name != self.name:
+				name += " (%s)" % self.name
+			log.info("instance %s: assigning devices %s" % (name, ", ".join(to_assign)))
+			instance.assigned_devices.update(to_assign) # cannot use |=
+			self._assigned_devices |= to_assign
+			self._free_devices -= to_assign
+
 	@classmethod
 	def _get_config_options(self):
 		return {
@@ -233,6 +257,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			"no_turbo"             : None,
 			"pm_qos_resume_latency_us": None,
 			"energy_performance_preference" : None,
+                        "cores" : None,
 		}
 
 	def _check_arch(self):
@@ -306,9 +331,10 @@ class CPULatencyPlugin(hotplug.Plugin):
 		instance._has_static_tuning = True
 		instance._has_dynamic_tuning = False
 
-		# only the first instance of the plugin can control the latency
-		if list(self._instances.values())[0] == instance:
-			instance._first_instance = True
+		# As below instructions will be same for multiple instances, apply them only once
+		# only one instance of the plugin is enough to control the latency.
+		if list(self._instances.values())[0][0] == instance:
+			instance._has_instance = True
 			try:
 				self._cpu_latency_fd = os.open(consts.PATH_CPU_DMA_LATENCY, os.O_WRONLY)
 			except OSError:
@@ -324,8 +350,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 			self._check_arch()
 		else:
-			instance._first_instance = False
-			log.info("Latency settings from non-first CPU plugin instance '%s' will be ignored." % instance.name)
+			instance._has_instance = False
 
 		try:
 			instance._first_device = list(instance.assigned_devices)[0]
@@ -333,11 +358,13 @@ class CPULatencyPlugin(hotplug.Plugin):
 			instance._first_device = None
 
 	def _instance_cleanup(self, instance):
-		if instance._first_instance:
+		if instance._has_instance:
 			if self._has_pm_qos:
 				os.close(self._cpu_latency_fd)
 			if instance._load_monitor is not None:
 				self._monitors_repository.delete(instance._load_monitor)
+			# set self._has_instance to False to avoid cleanup multiple times
+			instance._has_instance = False
 
 	def _get_intel_pstate_attr(self, attr):
 		return self._cmd.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None).strip()
@@ -355,9 +382,6 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 	def _instance_apply_static(self, instance):
 		super(CPULatencyPlugin, self)._instance_apply_static(instance)
-
-		if not instance._first_instance:
-			return
 
 		force_latency_value = self._variables.expand(
 			instance.options["force_latency"])
@@ -380,7 +404,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):
 		super(CPULatencyPlugin, self)._instance_unapply_static(instance, rollback)
 
-		if instance._first_instance and self._has_intel_pstate:
+		if self._has_intel_pstate:
 			self._set_intel_pstate_attr("min_perf_pct", self._min_perf_pct_save)
 			self._set_intel_pstate_attr("max_perf_pct", self._max_perf_pct_save)
 			self._set_intel_pstate_attr("no_turbo", self._no_turbo_save)
@@ -389,7 +413,6 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._instance_update_dynamic(instance, device)
 
 	def _instance_update_dynamic(self, instance, device):
-		assert(instance._first_instance)
 		if device != instance._first_device:
 			return
 

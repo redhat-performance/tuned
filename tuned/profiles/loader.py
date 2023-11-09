@@ -52,7 +52,18 @@ class Loader(object):
 		self._load_profile(profile_names, profiles, processed_files)
 
 		if len(profiles) > 1:
-			final_profile = self._profile_merger.merge(profiles)
+			join_profile = False
+
+			for profile in profiles:
+				for unit_name,unit in profile.units.items():
+					if(profile.units[unit_name].merge_type =='join'):
+                                                join_profile = True
+                                                break
+
+			if join_profile == True:
+				final_profile = self._profile_merger.join(profiles)
+			else:
+				final_profile = self._profile_merger.merge(profiles)
 		else:
 			final_profile = profiles[0]
 
@@ -67,12 +78,21 @@ class Loader(object):
 
 	def _expand_vars_in_devices(self, profile):
 		for unit in profile.units:
-			profile.units[unit].devices = self._variables.expand(profile.units[unit].devices)
+			if type(profile.units[unit]) == list:
+                                for sub_unit in range(len(profile.units[unit])):
+                                        profile.units[unit][sub_unit].devices = self._variables.expand(profile.units[unit][sub_unit].devices)
+			else:
+                                profile.units[unit].devices = self._variables.expand(profile.units[unit].devices)
 
 	def _expand_vars_in_regexes(self, profile):
 		for unit in profile.units:
-			profile.units[unit].cpuinfo_regex = self._variables.expand(profile.units[unit].cpuinfo_regex)
-			profile.units[unit].uname_regex = self._variables.expand(profile.units[unit].uname_regex)
+			if type(profile.units[unit]) == list:
+				for sub_unit in range(len(profile.units[unit])):
+                                        profile.units[unit][sub_unit].cpuinfo_regex = self._variables.expand(profile.units[unit][sub_unit].cpuinfo_regex)
+                                        profile.units[unit][sub_unit].uname_regex = self._variables.expand(profile.units[unit][sub_unit].uname_regex)
+			else:
+                                profile.units[unit].cpuinfo_regex = self._variables.expand(profile.units[unit].cpuinfo_regex)
+                                profile.units[unit].uname_regex = self._variables.expand(profile.units[unit].uname_regex)
 
 	def _load_profile(self, profile_names, profiles, processed_files):
 		for name in profile_names:
@@ -106,12 +126,16 @@ class Loader(object):
 		config = collections.OrderedDict()
 		dir_name = os.path.dirname(file_name)
 		for section in list(config_obj.sections()):
-			config[section] = collections.OrderedDict()
+			split_section = section.split(':')
+			final_section = split_section[0]
+			config[final_section] = collections.OrderedDict()
+			if len(split_section) > 1:
+                                config[final_section]["merge_type"] = split_section[1]
 			for option in config_obj.options(section):
-				config[section][option] = config_obj.get(section, option, raw=True)
-				config[section][option] = self._expand_profile_dir(dir_name, config[section][option])
-			if config[section].get("script") is not None:
-				script_path = os.path.join(dir_name, config[section]["script"])
-				config[section]["script"] = [os.path.normpath(script_path)]
+				config[final_section][option] = config_obj.get(section, option, raw=True)
+				config[final_section][option] = self._expand_profile_dir(dir_name, config[final_section][option])
+			if config[final_section].get("script") is not None:
+				script_path = os.path.join(dir_name, config[final_section]["script"])
+				config[final_section]["script"] = [os.path.normpath(script_path)]
 
 		return config
