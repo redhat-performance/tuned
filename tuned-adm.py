@@ -97,6 +97,11 @@ if __name__ == "__main__":
 	parser_profile_mode = subparsers.add_parser("profile_mode", help="show current profile selection mode")
 	parser_profile_mode.set_defaults(action="profile_mode")
 
+	parser_instance_acquire_devices = subparsers.add_parser("instance_acquire_devices", help="acquire devices from other instances and assign them to the given instance")
+	parser_instance_acquire_devices.set_defaults(action="instance_acquire_devices")
+	parser_instance_acquire_devices.add_argument("devices", metavar="devices", type=str, help="comma-separated list of device names; may use the cpulist syntax if prefixed with 'cpulist:'")
+	parser_instance_acquire_devices.add_argument("instance", metavar="instance", type=str, help="name of the plugin instance which should acquire the devices")
+
 	args = parser.parse_args(sys.argv[1:])
 
 	options = vars(args)
