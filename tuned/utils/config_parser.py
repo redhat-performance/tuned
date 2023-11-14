@@ -25,19 +25,19 @@ else:
 			delims = "".join(list(delimiters))
 			# REs taken from the python-2.7 ConfigParser
 			self.OPTCRE = re.compile(
-				r'(?P<option>[^' + delims + '\s][^' + delims + ']*)'
-				r'\s*(?P<vi>[' + delims + '])\s*'
+				r'(?P<option>[^' + delims + r'\s][^' + delims + ']*)'
+				r'\s*(?P<vi>[' + delims + r'])\s*'
 				r'(?P<value>.*)$'
 			)
 			self.OPTCRE_NV = re.compile(
-				r'(?P<option>[^' + delims + '\s][^' + delims + ']*)'
+				r'(?P<option>[^' + delims + r'\s][^' + delims + ']*)'
 				r'\s*(?:'
-				r'(?P<vi>[' + delims + '])\s*'
+				r'(?P<vi>[' + delims + r'])\s*'
 				r'(?P<value>.*))?$'
 			)
 			cp.ConfigParser.__init__(self, *args, **kwargs)
 			self._inline_comment_prefixes = inline_comment_prefixes or []
-			self._re = re.compile("\s+(%s).*" % ")|(".join(list(self._inline_comment_prefixes)))
+			self._re = re.compile(r"\s+(%s).*" % ")|(".join(list(self._inline_comment_prefixes)))
 
 		def read_string(self, string, source="<string>"):
 			sfile = StringIO(string)

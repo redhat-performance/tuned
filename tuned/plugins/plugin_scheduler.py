@@ -135,7 +135,7 @@ class SchedulerUtilsSchedutils(SchedulerUtils):
 		return schedutils.get_priority_max(sched)
 
 class SchedulerPlugin(base.Plugin):
-	"""
+	r"""
 	`scheduler`::
 	
 	Allows tuning of scheduling priorities, process/thread/IRQ
