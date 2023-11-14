@@ -373,3 +373,47 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			log.info(rets)
 			return (False, rets)
 		return (True, "OK")
+
+	@exports.export("s", "(bsa(ss))")
+	def get_instances(self, plugin_name, caller = None):
+		"""Return a list of active instances of a plugin or all active instances
+
+		Parameters:
+		plugin_name -- name of the plugin or an empty string
+
+		Return:
+		bool -- True on success
+		string -- error message or "OK"
+		list of string pairs -- [(instance_name, plugin_name)]
+		"""
+		if caller == "":
+			return (False, "Unauthorized", [])
+		if plugin_name != "" and plugin_name not in self.get_all_plugins().keys():
+			rets = "Plugin '%s' does not exist" % plugin_name
+			log.error(rets)
+			return (False, rets, [])
+		instances = filter(lambda instance: instance.active, self._daemon._unit_manager.instances)
+		if plugin_name != "":
+			instances = filter(lambda instance: instance.plugin.name == plugin_name, instances)
+		return (True, "OK", list(map(lambda instance: (instance.name, instance.plugin.name), instances)))
+
+	@exports.export("s", "(bsas)")
+	def instance_get_devices(self, instance_name, caller = None):
+		"""Return a list of devices assigned to an instance
+
+		Parameters:
+		instance_name -- name of the instance
+
+		Return:
+		bool -- True on success
+		string -- error message or "OK"
+		list of strings -- device names
+		"""
+		if caller == "":
+			return (False, "Unauthorized", [])
+		for instance in self._daemon._unit_manager.instances:
+			if instance.name == instance_name:
+				return (True, "OK", sorted(list(instance.processed_devices)))
+		rets = "Instance '%s' not found" % instance_name
+		log.error(rets)
+		return (False, rets, [])
