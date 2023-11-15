@@ -373,7 +373,7 @@ class BootloaderPlugin(base.Plugin):
 			log.info("cannot find grub.cfg to patch")
 			return
 		for f in self._grub2_cfg_file_names:
-			self._cmd.add_modify_option_in_file(f, {"set\s+" + consts.GRUB2_TUNED_VAR : "", "set\s+" + consts.GRUB2_TUNED_INITRD_VAR : ""}, add = False)
+			self._cmd.add_modify_option_in_file(f, {r"set\s+" + consts.GRUB2_TUNED_VAR : "", r"set\s+" + consts.GRUB2_TUNED_INITRD_VAR : ""}, add = False)
 		if self._initrd_dst_img_val is not None:
 			log.info("removing initrd image '%s'" % self._initrd_dst_img_val)
 			self._cmd.unlink(self._initrd_dst_img_val)
@@ -403,9 +403,9 @@ class BootloaderPlugin(base.Plugin):
 
 	def _grub2_cfg_unpatch(self, grub2_cfg):
 		log.debug("unpatching grub.cfg")
-		cfg = re.sub(r"^\s*set\s+" + consts.GRUB2_TUNED_VAR + "\s*=.*\n", "", grub2_cfg, flags = re.MULTILINE)
+		cfg = re.sub(r"^\s*set\s+" + consts.GRUB2_TUNED_VAR + "\\s*=.*\n", "", grub2_cfg, flags = re.MULTILINE)
 		grub2_cfg = re.sub(r" *\$" + consts.GRUB2_TUNED_VAR, "", cfg, flags = re.MULTILINE)
-		cfg = re.sub(r"^\s*set\s+" + consts.GRUB2_TUNED_INITRD_VAR + "\s*=.*\n", "", grub2_cfg, flags = re.MULTILINE)
+		cfg = re.sub(r"^\s*set\s+" + consts.GRUB2_TUNED_INITRD_VAR + "\\s*=.*\n", "", grub2_cfg, flags = re.MULTILINE)
 		grub2_cfg = re.sub(r" *\$" + consts.GRUB2_TUNED_INITRD_VAR, "", cfg, flags = re.MULTILINE)
 		cfg = re.sub(consts.GRUB2_TEMPLATE_HEADER_BEGIN + r"\n", "", grub2_cfg, flags = re.MULTILINE)
 		return re.sub(consts.GRUB2_TEMPLATE_HEADER_END + r"\n+", "", cfg, flags = re.MULTILINE)
@@ -480,7 +480,7 @@ class BootloaderPlugin(base.Plugin):
 			grub2_cfg_new = grub2_cfg
 			patch_initial = False
 			for opt in d:
-				(grub2_cfg_new, nsubs) = re.subn(r"\b(set\s+" + opt + "\s*=).*$", r"\1" + "\"" + self._cmd.escape(d[opt]) + "\"", grub2_cfg_new, flags = re.MULTILINE)
+				(grub2_cfg_new, nsubs) = re.subn(r"\b(set\s+" + opt + r"\s*=).*$", r"\1" + "\"" + self._cmd.escape(d[opt]) + "\"", grub2_cfg_new, flags = re.MULTILINE)
 				if nsubs < 1 or re.search(r"\$" + opt, grub2_cfg, flags = re.MULTILINE) is None:
 					patch_initial = True
 

@@ -349,7 +349,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		# (rhbz#1225375)
 		value = self._cmd.multiple_re_replace({
 			"Adaptive RX:": "adaptive-rx:",
-			"\s+TX:": "\nadaptive-tx:",
+			"\\s+TX:": "\nadaptive-tx:",
 			"rx-frame-low:": "rx-frames-low:",
 			"rx-frame-high:": "rx-frames-high:",
 			"tx-frame-low:": "tx-frames-low:",
@@ -368,7 +368,7 @@ class NetTuningPlugin(hotplug.Plugin):
 			"receive-hashing:": "rxhash:",
 		}, value)
 		# remove empty lines, remove fixed parameters (those with "[fixed]")
-		vl = [v for v in value.split('\n') if len(str(v)) > 0 and not re.search("\[fixed\]$", str(v))]
+		vl = [v for v in value.split('\n') if len(str(v)) > 0 and not re.search(r"\[fixed\]$", str(v))]
 		if len(vl) < 2:
 			return None
 		# skip first line (device name), split to key/value,

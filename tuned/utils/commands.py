@@ -29,7 +29,7 @@ class commands:
 		return {"Y":"1", "YES":"1", "T":"1", "TRUE":"1", "N":"0", "NO":"0", "F":"0", "FALSE":"0"}.get(v, value)
 
 	def remove_ws(self, s):
-		return re.sub('\s+', ' ', str(s)).strip()
+		return re.sub(r'\s+', ' ', str(s)).strip()
 
 	def unquote(self, v):
 		return re.sub("^\"(.*)\"$", r"\1", v)
@@ -427,7 +427,7 @@ class commands:
 			if s[0:8].lower() != "cpulist:":
 				return [("cpu" + str(v)) for v in self.cpulist_unpack(s)]
 		l = re.split(r"\s*(?<!\\),\s*", s)
-		return [str(v).replace("\,", ",") for v in l]
+		return [str(v).replace(r"\,", ",") for v in l]
 
 	# Do not make balancing on patched Python 2 interpreter (rhbz#1028122).
 	# It means less CPU usage on patchet interpreter. On non-patched interpreter

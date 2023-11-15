@@ -46,7 +46,7 @@ class Functions():
 		sl = re.split(r'(?<!\\):', self._str[_from:self._cnt])
 		if sl[0] != "${f":
 			return
-		sl = [str(v).replace("\:", ":") for v in sl]
+		sl = [str(v).replace(r"\:", ":") for v in sl]
 		if not re.match(r'\w+$', sl[1]):
 			log.error("invalid function name '%s'" % sl[1])
 			return
