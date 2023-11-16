@@ -81,7 +81,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 	
 	`energy_performance_preference`:::
 	[option]`energy_performance_preference` supports managing energy
-	vs. performance hints on some newer Intel processors. Multiple alternative
+	vs. performance hints on newer Intel and AMD processors with active P-State
+	CPU scaling drivers (intel_pstate or amd-pstate). Multiple alternative
 	Energy Performance Preferences (EPP) values are supported. The alternative
 	values are separated using the '|' character. Available values can be found
 	in `energy_performance_available_preferences` file in `CPUFreq` policy
@@ -196,6 +197,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._is_amd = False
 		self._has_energy_perf_bias = False
 		self._has_intel_pstate = False
+		self._has_amd_pstate = False
 		self._has_pm_qos_resume_latency_us = None
 
 		self._min_perf_pct_save = None
@@ -256,11 +258,15 @@ class CPULatencyPlugin(hotplug.Plugin):
 		else:
 			log.info("We are running on %s (non x86)" % self._arch)
 
-		if self._is_intel is True:
+		if self._is_intel:
 			# Check for x86_energy_perf_policy, ignore if not available / supported
 			self._check_energy_perf_bias()
 			# Check for intel_pstate
 			self._check_intel_pstate()
+
+		if self._is_amd:
+			# Check for amd-pstate
+			self._check_amd_pstate()
 
 	def _check_energy_perf_bias(self):
 		self._has_energy_perf_bias = False
@@ -280,6 +286,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._has_intel_pstate = os.path.exists("/sys/devices/system/cpu/intel_pstate")
 		if self._has_intel_pstate:
 			log.info("intel_pstate detected")
+
+	def _check_amd_pstate(self):
+		self._has_amd_pstate = os.path.exists("/sys/devices/system/cpu/amd_pstate")
+		if self._has_amd_pstate:
+			log.info("amd-pstate detected")
 
 	def _get_cpuinfo_flags(self):
 		if self._flags is None:
@@ -580,7 +591,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 				return_err = True)
 		return (retcode, err_msg)
 
-	def _intel_preference_path(self, cpu_id, available = False):
+	def _pstate_preference_path(self, cpu_id, available = False):
 		return "/sys/devices/system/cpu/cpufreq/policy%s/energy_performance_%s" % (cpu_id, "available_preferences" if available else "preference")
 
 	def _energy_perf_bias_path(self, cpu_id):
@@ -736,13 +747,13 @@ class CPULatencyPlugin(hotplug.Plugin):
 			log.debug("%s is not online, skipping" % device)
 			return None
 		cpu_id = device.lstrip("cpu")
-		if os.path.exists(self._intel_preference_path(cpu_id, True)):
+		if os.path.exists(self._pstate_preference_path(cpu_id, True)):
 			vals = energy_performance_preference.split('|')
 			if not sim:
-				avail_vals = set(self._cmd.read_file(self._intel_preference_path(cpu_id, True)).split())
+				avail_vals = set(self._cmd.read_file(self._pstate_preference_path(cpu_id, True)).split())
 				for val in vals:
 					if val in avail_vals:
-						self._cmd.write_to_file(self._intel_preference_path(cpu_id), val)
+						self._cmd.write_to_file(self._pstate_preference_path(cpu_id), val)
 						log.info("Setting energy_performance_preference value '%s' for cpu '%s'" % (val, device))
 						break
 					else:
@@ -752,7 +763,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 							  % device)
 			return str(energy_performance_preference)
 		else:
-			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without the intel_pstate driver.")
+			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without a P-state driver.")
 		return None
 
 	@command_get("energy_performance_preference")
@@ -761,9 +772,9 @@ class CPULatencyPlugin(hotplug.Plugin):
 			log.debug("%s is not online, skipping" % device)
 			return None
 		cpu_id = device.lstrip("cpu")
-		# intel_pstate CPU scaling driver
-		if os.path.exists(self._intel_preference_path(cpu_id, True)):
-			return self._cmd.read_file(self._intel_preference_path(cpu_id)).strip()
+		# read the EPP hint used by the intel_pstate and amd-pstate CPU scaling drivers
+		if os.path.exists(self._pstate_preference_path(cpu_id, True)):
+			return self._cmd.read_file(self._pstate_preference_path(cpu_id)).strip()
 		else:
-			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without the intel_pstate driver.")
+			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without a P-state driver.")
 		return None
