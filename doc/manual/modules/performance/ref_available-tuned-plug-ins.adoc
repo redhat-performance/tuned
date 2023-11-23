@@ -215,3 +215,27 @@ cmdline=isolcpus=2
 
 ====
 --
+
+`acpi`::
+
+Configures the ACPI driver.
++
+The only currently supported option is
+[option]`platform_profile`, which sets the ACPI
+platform profile sysfs attribute,
+a generic power/performance preference API for other drivers.
+Multiple profiles can be specified, separated by `|`.
+The first available profile is selected.
++
+--
+.Selecting a platform profile
+====
+----
+[acpi]
+platform_profile=low-power|quiet
+----
+Using this option, *TuneD* will try to set the platform profile
+to `low-power`. If that fails (e.g, because the system does not
+support the profile), it will try to set it to `quiet`.
+====
+--

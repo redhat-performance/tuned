@@ -66,6 +66,9 @@ SYSTEMD_CPUAFFINITY_VAR = "CPUAffinity"
 # irqbalance plugin configuration
 IRQBALANCE_SYSCONFIG_FILE = "/etc/sysconfig/irqbalance"
 
+# acpi plugin configuration
+ACPI_DIR = "/sys/firmware/acpi"
+
 # built-in functions configuration
 SYSFS_CPUS_PATH = "/sys/devices/system/cpu"
 
