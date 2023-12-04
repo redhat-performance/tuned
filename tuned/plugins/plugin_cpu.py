@@ -14,6 +14,11 @@ log = tuned.logs.get()
 
 cpuidle_states_path = "/sys/devices/system/cpu/cpu0/cpuidle"
 
+class Die:
+	def __init__(self):
+		self.cpus = set()
+		self.new_values = dict()
+
 class CPULatencyPlugin(hotplug.Plugin):
 	"""
 	`cpu`::
@@ -185,6 +190,10 @@ class CPULatencyPlugin(hotplug.Plugin):
 	pm_qos_resume_latency_us=100
 	----
 	Allows any C-state with a resume latency less than value.
+	[cpu]
+	uncore_max_freq_khz=0
+	----
+	Set the maximum uncore frequency that hardware will use.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -199,14 +208,63 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._has_intel_pstate = False
 		self._has_amd_pstate = False
 		self._has_pm_qos_resume_latency_us = None
+		self._has_topology = False
 
+		self._uncore_max_delta_khz_save = None
 		self._min_perf_pct_save = None
 		self._max_perf_pct_save = None
 		self._no_turbo_save = None
 		self._governors_map = {}
 		self._cmd = commands()
 
+		self._topology = dict()
+		self._topology_config_wrong = False
+
 		self._flags = None
+
+	def _cpu_get_package_die_id(self, device):
+		dir = '/sys/devices/system/cpu/%s/topology/' % device
+		if not os.path.exists(dir):
+			return (-1, -1)
+		die_id = self._str2int(self._cmd.read_file(dir + "/die_id"))
+		package_id = self._str2int(self._cmd.read_file(dir + "/physical_package_id"))
+		return (package_id, die_id)
+
+	def _init_topology(self):
+		for device in self._free_devices:
+			package_id, die_id = self._cpu_get_package_die_id(device)
+			if package_id == -1:
+				return
+
+			if package_id not in self._topology:
+				self._topology[package_id] = dict()
+			if die_id not in self._topology[package_id]:
+				self._topology[package_id][die_id] = Die()
+
+			self._topology[package_id][die_id].cpus |= {device}
+		self._has_topology = True
+
+	def _check_topology(self):
+		if not self._has_topology:
+			return
+
+		# All assigned devices has to be part of the same die's
+		assigned_devices = self._assigned_devices
+		while len(assigned_devices) > 0:
+			device = assigned_devices.pop()
+			assigned_devices.add(device)
+
+			package_id, die_id = self._cpu_get_package_die_id(device)
+			if package_id == -1:
+				self._topology_config_wrong = True
+				return
+
+			cpus = self._topology[package_id][die_id].cpus
+			if len(cpus - assigned_devices) > 0:
+				self._topology_config_wrong = True
+				return
+
+			assigned_devices -= cpus
 
 	def _init_devices(self):
 		self._devices_supported = True
@@ -216,6 +274,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			self._free_devices.add(device.sys_name)
 
 		self._assigned_devices = set()
+		self._init_topology()
 
 	def _get_device_objects(self, devices):
 		return [self._hardware_inventory.get_device("cpu", x) for x in devices]
@@ -230,6 +289,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			"governor"             : None,
 			"sampling_down_factor" : None,
 			"energy_perf_bias"     : None,
+			"uncore_max_freq_khz"  : None,
 			"min_perf_pct"         : None,
 			"max_perf_pct"         : None,
 			"no_turbo"             : None,
@@ -342,6 +402,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 			instance._first_device = list(instance.assigned_devices)[0]
 		except IndexError:
 			instance._first_device = None
+
+		self._check_topology()
 
 	def _instance_cleanup(self, instance):
 		if instance._first_instance:
@@ -581,6 +643,57 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if not os.path.exists(path):
 			return None
 		return self._cmd.read_file(path).strip()
+
+	@command_set("uncore_max_freq_khz", per_device=True)
+	def _set_uncore_max_freq_khz(self, uncore_max_freq_khz, device, sim):
+		if not self._has_topology or self._topology_config_wrong:
+			return None
+
+		package_id, die_id = self._cpu_get_package_die_id(device)
+		if package_id == -1:
+			return None
+
+		die = self._topology[package_id][die_id]
+		die.new_values[device] = uncore_max_freq_khz
+
+		# Update the sysfs file only when cpus on die are set
+		if (len(die.new_values) != len(die.cpus)):
+			return uncore_max_freq_khz
+		die.new_values = dict()
+
+		dir = '/sys/devices/system/cpu/intel_uncore_frequency/package_%02d_die_%02d/' % (package_id, die_id)
+		file = dir + 'max_freq_khz'
+		if not os.path.exists(file):
+			log.error("Failed to set uncore_max_freq_khz because % file does not exist." % file)
+			return None
+
+		initial_min_freq_khz = self._str2int(self._cmd.read_file(dir + '/initial_min_freq_khz'))
+		initial_max_freq_khz = self._str2int(self._cmd.read_file(dir + '/initial_max_freq_khz'))
+		max_freq_khz = self._str2int(uncore_max_freq_khz)
+		if initial_min_freq_khz is None or initial_max_freq_khz is None or max_freq_khz is None:
+			return None
+
+		if max_freq_khz < initial_min_freq_khz or max_freq_khz > initial_max_freq_khz:
+			log.error("Failed to set uncore_max_freq_khz, value not in range (%d, %d)" % (initial_max_freq_khz, initial_max_freq_khz))
+			return None
+
+		self._cmd.write_to_file(file, max_freq_khz)
+		log.info('Set %s for %s' % (max_freq_khz, file))
+
+		return uncore_max_freq_khz
+
+	@command_get("uncore_max_freq_khz")
+	def _get_uncore_max_freq_khz(self, device, ignore_missing=False):
+		package_id, die_id = self._cpu_get_package_die_id(device)
+		if package_id == -1:
+			return None
+
+		file = '/sys/devices/system/cpu/intel_uncore_frequency/package_%02d_die_%02d/max_freq_khz' % (package_id , die_id)
+		if not os.path.exists(file):
+			return None
+
+		uncore_max_freq_khz = self._cmd.read_file(file)
+		return uncore_max_freq_khz
 
 	def _try_set_energy_perf_bias(self, cpu_id, value):
 		(retcode, out, err_msg) = self._cmd.execute(
