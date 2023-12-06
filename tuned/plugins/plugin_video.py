@@ -3,6 +3,7 @@ from .decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
 import os
+import errno
 import re
 
 log = tuned.logs.get()
@@ -76,7 +77,7 @@ class VideoPlugin(base.Plugin):
 		}
 
 	@command_set("radeon_powersave", per_device=True)
-	def _set_radeon_powersave(self, value, device, sim):
+	def _set_radeon_powersave(self, value, device, sim, remove):
 		sys_files = self._radeon_powersave_files(device)
 		va = str(re.sub(r"(\s*:\s*)|(\s+)|(\s*;\s*)|(\s*,\s*)", " ", value)).split()
 		if not os.path.exists(sys_files["method"]):
@@ -86,20 +87,25 @@ class VideoPlugin(base.Plugin):
 		for v in va:
 			if v in ["default", "auto", "low", "mid", "high"]:
 				if not sim:
-					if (self._cmd.write_to_file(sys_files["method"], "profile") and
-						self._cmd.write_to_file(sys_files["profile"], v)):
-						return v
+					if (self._cmd.write_to_file(sys_files["method"], "profile", \
+						no_error = [errno.ENOENT] if remove else False) and
+						self._cmd.write_to_file(sys_files["profile"], v, \
+							no_error = [errno.ENOENT] if remove else False)):
+								return v
 			elif v == "dynpm":
 				if not sim:
-					if (self._cmd.write_to_file(sys_files["method"], "dynpm")):
-						return "dynpm"
+					if (self._cmd.write_to_file(sys_files["method"], "dynpm", \
+						no_error = [errno.ENOENT] if remove else False)):
+							return "dynpm"
 			# new DPM profiles, recommended to use if supported
 			elif v in ["dpm-battery", "dpm-balanced", "dpm-performance"]:
 				if not sim:
 					state = v[len("dpm-"):]
-					if (self._cmd.write_to_file(sys_files["method"], "dpm") and
-						self._cmd.write_to_file(sys_files["dpm_state"], state)):
-						return v
+					if (self._cmd.write_to_file(sys_files["method"], "dpm", \
+						no_error = [errno.ENOENT] if remove else False) and
+						self._cmd.write_to_file(sys_files["dpm_state"], state, \
+							no_error = [errno.ENOENT] if remove else False)):
+								return v
 			else:
 				if not sim:
 					log.warn("Invalid option for radeon_powersave.")

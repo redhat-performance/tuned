@@ -3,6 +3,7 @@ from .decorators import *
 import tuned.logs
 
 import os
+import errno
 import struct
 import glob
 from tuned.utils.commands import commands
@@ -57,7 +58,7 @@ class VMPlugin(base.Plugin):
 		return path
 
 	@command_set("transparent_hugepages")
-	def _set_transparent_hugepages(self, value, sim):
+	def _set_transparent_hugepages(self, value, sim, remove):
 		if value not in ["always", "never", "madvise"]:
 			if not sim:
 				log.warn("Incorrect 'transparent_hugepages' value '%s'." % str(value))
@@ -72,7 +73,8 @@ class VMPlugin(base.Plugin):
 		sys_file = os.path.join(self._thp_path(), "enabled")
 		if os.path.exists(sys_file):
 			if not sim:
-				cmd.write_to_file(sys_file, value)
+				cmd.write_to_file(sys_file, value, \
+					no_error = [errno.ENOENT] if remove else False)
 			return value
 		else:
 			if not sim:
@@ -81,8 +83,8 @@ class VMPlugin(base.Plugin):
 
         # just an alias to transparent_hugepages
 	@command_set("transparent_hugepage")
-	def _set_transparent_hugepage(self, value, sim):
-		self._set_transparent_hugepages(value, sim)
+	def _set_transparent_hugepage(self, value, sim, remove):
+		self._set_transparent_hugepages(value, sim, remove)
 
 	@command_get("transparent_hugepages")
 	def _get_transparent_hugepages(self):
@@ -98,11 +100,12 @@ class VMPlugin(base.Plugin):
 		return self._get_transparent_hugepages()
 
 	@command_set("transparent_hugepage.defrag")
-	def _set_transparent_hugepage_defrag(self, value, sim):
+	def _set_transparent_hugepage_defrag(self, value, sim, remove):
 		sys_file = os.path.join(self._thp_path(), "defrag")
 		if os.path.exists(sys_file):
 			if not sim:
-				cmd.write_to_file(sys_file, value)
+				cmd.write_to_file(sys_file, value, \
+					no_error = [errno.ENOENT] if remove else False)
 			return value
 		else:
 			if not sim:

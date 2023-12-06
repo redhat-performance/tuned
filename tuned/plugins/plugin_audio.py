@@ -4,6 +4,7 @@ import tuned.logs
 from tuned.utils.commands import commands
 
 import os
+import errno
 import struct
 import glob
 
@@ -73,7 +74,7 @@ class AudioPlugin(hotplug.Plugin):
 		return "/sys/module/%s/parameters/power_save_controller" % device
 
 	@command_set("timeout", per_device = True)
-	def _set_timeout(self, value, device, sim):
+	def _set_timeout(self, value, device, sim, remove):
 		try:
 			timeout = int(value)
 		except ValueError:
@@ -82,7 +83,8 @@ class AudioPlugin(hotplug.Plugin):
 		if timeout >= 0:
 			sys_file = self._timeout_path(device)
 			if not sim:
-				cmd.write_to_file(sys_file, "%d" % timeout)
+				cmd.write_to_file(sys_file, "%d" % timeout, \
+					no_error = [errno.ENOENT] if remove else False)
 			return timeout
 		else:
 			return None
@@ -96,12 +98,13 @@ class AudioPlugin(hotplug.Plugin):
 		return None
 
 	@command_set("reset_controller", per_device = True)
-	def _set_reset_controller(self, value, device, sim):
+	def _set_reset_controller(self, value, device, sim, remove):
 		v = cmd.get_bool(value)
 		sys_file = self._reset_controller_path(device)
 		if os.path.exists(sys_file):
 			if not sim:
-				cmd.write_to_file(sys_file, v)
+				cmd.write_to_file(sys_file, v, \
+					no_error = [errno.ENOENT] if remove else False)
 			return v
 		return None
 

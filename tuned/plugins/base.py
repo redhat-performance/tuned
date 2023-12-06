@@ -506,7 +506,7 @@ class Plugin(object):
 		else:
 			new_value = self._check_and_save_value(instance, command, device, new_value)
 			if new_value is not None:
-				command["set"](new_value, device, sim = False)
+				command["set"](new_value, device, sim = False, remove = False)
 
 	def _execute_non_device_command(self, instance, command, new_value):
 		if command["custom"] is not None:
@@ -514,7 +514,7 @@ class Plugin(object):
 		else:
 			new_value = self._check_and_save_value(instance, command, None, new_value)
 			if new_value is not None:
-				command["set"](new_value, sim = False)
+				command["set"](new_value, sim = False, remove = False)
 
 	def _norm_value(self, value):
 		v = self._cmd.unquote(str(value))
@@ -576,7 +576,7 @@ class Plugin(object):
 		new_value = self._process_assignment_modifiers(new_value, current_value)
 		if new_value is None:
 			return None
-		new_value = command["set"](new_value, device, True)
+		new_value = command["set"](new_value, device, True, False)
 		return self._verify_value(command["name"], new_value, current_value, ignore_missing, device)
 
 	def _verify_non_device_command(self, instance, command, new_value, ignore_missing):
@@ -586,7 +586,7 @@ class Plugin(object):
 		new_value = self._process_assignment_modifiers(new_value, current_value)
 		if new_value is None:
 			return None
-		new_value = command["set"](new_value, True)
+		new_value = command["set"](new_value, True, False)
 		return self._verify_value(command["name"], new_value, current_value, ignore_missing)
 
 	def _cleanup_all_non_device_commands(self, instance):
@@ -594,19 +594,19 @@ class Plugin(object):
 			if (instance.options.get(command["name"], None) is not None) or (command["name"] in self._options_used_by_dynamic):
 				self._cleanup_non_device_command(instance, command)
 
-	def _cleanup_all_device_commands(self, instance, devices):
+	def _cleanup_all_device_commands(self, instance, devices, remove = False):
 		for command in reversed([command for command in list(self._commands.values()) if command["per_device"]]):
 			if (instance.options.get(command["name"], None) is not None) or (command["name"] in self._options_used_by_dynamic):
 				for device in devices:
-					self._cleanup_device_command(instance, command, device)
+					self._cleanup_device_command(instance, command, device, remove)
 
-	def _cleanup_device_command(self, instance, command, device):
+	def _cleanup_device_command(self, instance, command, device, remove = False):
 		if command["custom"] is not None:
 			command["custom"](False, None, device, False, False)
 		else:
 			old_value = self._storage_get(instance, command, device)
 			if old_value is not None:
-				command["set"](old_value, device, sim = False)
+				command["set"](old_value, device, sim = False, remove = remove)
 			self._storage_unset(instance, command, device)
 
 	def _cleanup_non_device_command(self, instance, command):
@@ -615,5 +615,5 @@ class Plugin(object):
 		else:
 			old_value = self._storage_get(instance, command)
 			if old_value is not None:
-				command["set"](old_value, sim = False)
+				command["set"](old_value, sim = False, remove = False)
 			self._storage_unset(instance, command)

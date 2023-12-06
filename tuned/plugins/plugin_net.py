@@ -380,7 +380,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return "/sys/module/nf_conntrack/parameters/hashsize"
 
 	@command_set("wake_on_lan", per_device=True)
-	def _set_wake_on_lan(self, value, device, sim):
+	def _set_wake_on_lan(self, value, device, sim, remove):
 		if value is None:
 			return None
 
@@ -406,14 +406,15 @@ class NetTuningPlugin(hotplug.Plugin):
 		return value
 
 	@command_set("nf_conntrack_hashsize")
-	def _set_nf_conntrack_hashsize(self, value, sim):
+	def _set_nf_conntrack_hashsize(self, value, sim, remove):
 		if value is None:
 			return None
 
 		hashsize = int(value)
 		if hashsize >= 0:
 			if not sim:
-				self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize)
+				self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize, \
+					no_error = [errno.ENOENT] if remove else False)
 			return hashsize
 		else:
 			return None
@@ -447,7 +448,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return self._call_ip_link(args)
 
 	@command_set("txqueuelen", per_device=True)
-	def _set_txqueuelen(self, value, device, sim):
+	def _set_txqueuelen(self, value, device, sim, remove):
 		if value is None:
 			return None
 		try:
@@ -487,7 +488,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return res.group(1)
 
 	@command_set("mtu", per_device=True)
-	def _set_mtu(self, value, device, sim):
+	def _set_mtu(self, value, device, sim, remove):
 		if value is None:
 			return None
 		try:
