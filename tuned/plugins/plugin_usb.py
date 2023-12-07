@@ -3,6 +3,7 @@ from .decorators import *
 import tuned.logs
 from tuned.utils.commands import commands
 import glob
+import errno
 
 log = tuned.logs.get()
 
@@ -57,7 +58,7 @@ class USBPlugin(base.Plugin):
 		return "/sys/bus/usb/devices/%s/power/autosuspend" % device
 
 	@command_set("autosuspend", per_device=True)
-	def _set_autosuspend(self, value, device, sim):
+	def _set_autosuspend(self, value, device, sim, remove):
 		enable = self._option_bool(value)
 		if enable is None:
 			return None
@@ -65,7 +66,8 @@ class USBPlugin(base.Plugin):
 		val = "1" if enable else "0"
 		if not sim:
 			sys_file = self._autosuspend_sysfile(device)
-			self._cmd.write_to_file(sys_file, val)
+			self._cmd.write_to_file(sys_file, val, \
+				no_error = [errno.ENOENT] if remove else False)
 		return val
 
 	@command_get("autosuspend")

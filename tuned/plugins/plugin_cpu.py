@@ -5,6 +5,7 @@ from tuned.utils.commands import commands
 import tuned.consts as consts
 
 import os
+import errno
 import struct
 import errno
 import platform
@@ -500,7 +501,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).strip().split()
 
 	@command_set("governor", per_device=True)
-	def _set_governor(self, governors, device, sim):
+	def _set_governor(self, governors, device, sim, remove):
 		if not self._check_cpu_can_change_governor(device):
 			return None
 		governors = str(governors)
@@ -517,7 +518,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 					log.info("setting governor '%s' on cpu '%s'"
 							% (governor, device))
 					self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor"
-							% device, governor)
+							% device, governor, no_error = [errno.ENOENT] if remove else False)
 				break
 			elif not sim:
 				log.debug("Ignoring governor '%s' on cpu '%s', it is not supported"
@@ -546,7 +547,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return "/sys/devices/system/cpu/cpufreq/%s/sampling_down_factor" % governor
 
 	@command_set("sampling_down_factor", per_device = True, priority = 10)
-	def _set_sampling_down_factor(self, sampling_down_factor, device, sim):
+	def _set_sampling_down_factor(self, sampling_down_factor, device, sim, remove):
 		val = None
 
 		# hack to clear governors map when the profile starts unloading
@@ -569,7 +570,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			val = str(sampling_down_factor)
 			if not sim:
 				log.info("setting sampling_down_factor to '%s' for governor '%s'" % (val, governor))
-				self._cmd.write_to_file(path, val)
+				self._cmd.write_to_file(path, val, no_error = [errno.ENOENT] if remove else False)
 		return val
 
 	@command_get("sampling_down_factor")
@@ -598,7 +599,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return "/sys/devices/system/cpu/cpu%s/power/energy_perf_bias" % cpu_id
 
 	@command_set("energy_perf_bias", per_device=True)
-	def _set_energy_perf_bias(self, energy_perf_bias, device, sim):
+	def _set_energy_perf_bias(self, energy_perf_bias, device, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -613,10 +614,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 				if not sim:
 					for val in vals:
 						val = val.strip()
-						if self._cmd.write_to_file(energy_perf_bias_path, val):
-							log.info("energy_perf_bias successfully set to '%s' on cpu '%s'"
-									 % (val, device))
-							break
+						if self._cmd.write_to_file(energy_perf_bias_path, val, \
+							no_error = [errno.ENOENT] if remove else False):
+								log.info("energy_perf_bias successfully set to '%s' on cpu '%s'"
+										 % (val, device))
+								break
 					else:
 						log.error("Failed to set energy_perf_bias on cpu '%s'. Is the value in the profile correct?"
 								  % device)
@@ -711,7 +713,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._has_pm_qos_resume_latency_us
 
 	@command_set("pm_qos_resume_latency_us", per_device=True)
-	def _set_pm_qos_resume_latency_us(self, pm_qos_resume_latency_us, device, sim):
+	def _set_pm_qos_resume_latency_us(self, pm_qos_resume_latency_us, device, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -729,7 +731,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if not self._check_pm_qos_resume_latency_us(device):
 			return None
 		if not sim:
-			self._cmd.write_to_file(self._pm_qos_resume_latency_us_path(device), latency)
+			self._cmd.write_to_file(self._pm_qos_resume_latency_us_path(device), latency, \
+				no_error = [errno.ENOENT] if remove else False)
 		return latency
 
 	@command_get("pm_qos_resume_latency_us")
@@ -742,7 +745,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._cmd.read_file(self._pm_qos_resume_latency_us_path(device), no_error=ignore_missing).strip()
 
 	@command_set("energy_performance_preference", per_device=True)
-	def _set_energy_performance_preference(self, energy_performance_preference, device, sim):
+	def _set_energy_performance_preference(self, energy_performance_preference, device, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -753,7 +756,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 				avail_vals = set(self._cmd.read_file(self._pstate_preference_path(cpu_id, True)).split())
 				for val in vals:
 					if val in avail_vals:
-						self._cmd.write_to_file(self._pstate_preference_path(cpu_id), val)
+						self._cmd.write_to_file(self._pstate_preference_path(cpu_id), val, \
+							no_error = [errno.ENOENT] if remove else False)
 						log.info("Setting energy_performance_preference value '%s' for cpu '%s'" % (val, device))
 						break
 					else:

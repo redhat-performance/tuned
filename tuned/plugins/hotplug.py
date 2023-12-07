@@ -109,4 +109,4 @@ class Plugin(base.Plugin):
 	def _removed_device_unapply_tuning(self, instance, device_name):
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._instance_unapply_dynamic(instance, device_name)
-		self._cleanup_all_device_commands(instance, [device_name])
+		self._cleanup_all_device_commands(instance, [device_name], remove = True)

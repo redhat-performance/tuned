@@ -91,6 +91,17 @@ class commands:
 		return None
 
 	def write_to_file(self, f, data, makedir = False, no_error = False):
+		"""Write data to a file.
+
+		Parameters:
+		f -- filename where to write
+		data -- data to write
+		makedir -- if True and the path doesn't exist, it will be created
+		no_error -- if True errors are silenced, it can be also list of ignored errnos
+
+		Return:
+		bool -- True on success
+		"""
 		self._debug("Writing to file: '%s' < '%s'" % (f, data))
 		if makedir:
 			d = os.path.dirname(f)
@@ -103,10 +114,11 @@ class commands:
 			fd.write(str(data))
 			fd.close()
 			rc = True
-		except (OSError,IOError) as e:
+		except (OSError, IOError) as e:
 			rc = False
-			if not no_error:
-				self._error("Writing to file '%s' error: '%s'" % (f, e))
+			if isinstance(no_error, bool) and not no_error or \
+				isinstance(no_error, list) and e.errno not in no_error:
+					self._error("Writing to file '%s' error: '%s'" % (f, e))
 		return rc
 
 	def read_file(self, f, err_ret = "", no_error = False):

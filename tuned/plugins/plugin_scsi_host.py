@@ -86,13 +86,14 @@ class SCSIHostPlugin(hotplug.Plugin):
 		return os.path.join("/sys/class/scsi_host/", str(device), "link_power_management_policy")
 
 	@command_set("alpm", per_device = True)
-	def _set_alpm(self, policy, device, sim):
+	def _set_alpm(self, policy, device, sim, remove):
 		if policy is None:
 			return None
 		policy_file = self._get_alpm_policy_file(device)
 		if not sim:
 			if os.path.exists(policy_file):
-				self._cmd.write_to_file(policy_file, policy)
+				self._cmd.write_to_file(policy_file, policy, \
+					no_error = [errno.ENOENT] if remove else False)
 			else:
 				log.info("ALPM control file ('%s') not found, skipping ALPM setting for '%s'" % (policy_file, str(device)))
 				return None
