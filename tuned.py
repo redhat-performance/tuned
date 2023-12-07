@@ -79,7 +79,7 @@ if __name__ == "__main__":
 			args.no_socket = True
 
 		if not args.no_dbus:
-			app.attach_to_dbus(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE)
+			app.attach_to_dbus(consts.DBUS_BUS, consts.DBUS_OBJECT, consts.DBUS_INTERFACE, consts.NAMESPACE)
 
 		if not args.no_socket:
 			app.attach_to_unix_socket()
