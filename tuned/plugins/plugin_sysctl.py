@@ -150,10 +150,11 @@ class SysctlPlugin(base.Plugin):
 					% (path, lineno))
 			return
 		value = value.strip()
-		if option in instance_sysctl and instance_sysctl[option] != value:
-			log.info("Overriding sysctl parameter '%s' from '%s' to '%s'"
-					% (option, instance_sysctl[option], value))
-
+		if option in instance_sysctl:
+			instance_value = self._variables.expand(instance_sysctl[option])
+			if instance_value != value:
+				log.info("Overriding sysctl parameter '%s' from '%s' to '%s'"
+						% (option, instance_value, value))
 		self._write_sysctl(option, value, ignore_missing = True)
 
 	def _get_sysctl_path(self, option):
