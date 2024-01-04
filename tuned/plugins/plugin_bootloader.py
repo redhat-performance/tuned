@@ -304,6 +304,10 @@ class BootloaderPlugin(base.Plugin):
 			kargs.setdefault(k, []).extend(val)
 			appended[k] = val
 
+		if append_params == delete_params:
+			log.info("skipping rpm-ostree kargs - append == deleting (%s)" % append_params)
+			return kargs, appended, deleted
+
 		log.info("rpm-ostree kargs - appending: '%s'; deleting: '%s'" % (append_params, delete_params))
 		(rc, _, err) = self._cmd.execute(['rpm-ostree', 'kargs'] +
 										 ['--append=%s' % v for v in append_params] +
