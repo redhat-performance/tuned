@@ -163,6 +163,15 @@ class DBusController(object):
 		"""
 		return self._call("get_plugin_hints", plugin_name)
 
+	def instance_acquire_devices(self, devices, instance):
+		return self._call("instance_acquire_devices", devices, instance)
+
+	def get_instances(self, plugin_name):
+		return self._call("get_instances", plugin_name)
+
+	def instance_get_devices(self, instance):
+		return self._call("instance_get_devices", instance)
+
 	def exit(self, ret):
 		self.set_action(None)
 		self._ret = ret

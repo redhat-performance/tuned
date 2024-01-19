@@ -97,6 +97,19 @@ if __name__ == "__main__":
 	parser_profile_mode = subparsers.add_parser("profile_mode", help="show current profile selection mode")
 	parser_profile_mode.set_defaults(action="profile_mode")
 
+	parser_instance_acquire_devices = subparsers.add_parser("instance_acquire_devices", help="acquire devices from other instances and assign them to the given instance")
+	parser_instance_acquire_devices.set_defaults(action="instance_acquire_devices")
+	parser_instance_acquire_devices.add_argument("devices", metavar="devices", type=str, help="comma-separated list of device names; may use the cpulist syntax if prefixed with 'cpulist:'")
+	parser_instance_acquire_devices.add_argument("instance", metavar="instance", type=str, help="name of the plugin instance which should acquire the devices")
+
+	parser_get_instances = subparsers.add_parser("get_instances", help="list active instances of a given plugin or all active instances if no plugin is specified")
+	parser_get_instances.set_defaults(action="get_instances")
+	parser_get_instances.add_argument("plugin_name", metavar="plugin_name", type=str, nargs="?", default="", help="name of the plugin to restrict the list of instances to")
+
+	parser_instance_get_devices = subparsers.add_parser("instance_get_devices", help="list devices assigned to a given instance")
+	parser_instance_get_devices.set_defaults(action="instance_get_devices")
+	parser_instance_get_devices.add_argument("instance", metavar="instance", type=str, help="name of the plugin instance")
+
 	args = parser.parse_args(sys.argv[1:])
 
 	options = vars(args)

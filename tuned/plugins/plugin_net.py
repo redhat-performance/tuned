@@ -329,6 +329,8 @@ class NetTuningPlugin(hotplug.Plugin):
 	# parse features/coalesce config parameters (those defined in profile configuration)
 	# context is for error message
 	def _parse_config_parameters(self, value, context):
+		# expand config variables
+		value = self._variables.expand(value)
 		# split supporting various dellimeters
 		v = str(re.sub(r"(:\s*)|(\s+)|(\s*;\s*)|(\s*,\s*)", " ", value)).split()
 		lv = len(v)
@@ -347,7 +349,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		# (rhbz#1225375)
 		value = self._cmd.multiple_re_replace({
 			"Adaptive RX:": "adaptive-rx:",
-			"\s+TX:": "\nadaptive-tx:",
+			"\\s+TX:": "\nadaptive-tx:",
 			"rx-frame-low:": "rx-frames-low:",
 			"rx-frame-high:": "rx-frames-high:",
 			"tx-frame-low:": "tx-frames-low:",
@@ -366,7 +368,7 @@ class NetTuningPlugin(hotplug.Plugin):
 			"receive-hashing:": "rxhash:",
 		}, value)
 		# remove empty lines, remove fixed parameters (those with "[fixed]")
-		vl = [v for v in value.split('\n') if len(str(v)) > 0 and not re.search("\[fixed\]$", str(v))]
+		vl = [v for v in value.split('\n') if len(str(v)) > 0 and not re.search(r"\[fixed\]$", str(v))]
 		if len(vl) < 2:
 			return None
 		# skip first line (device name), split to key/value,
@@ -378,7 +380,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return "/sys/module/nf_conntrack/parameters/hashsize"
 
 	@command_set("wake_on_lan", per_device=True)
-	def _set_wake_on_lan(self, value, device, sim):
+	def _set_wake_on_lan(self, value, device, sim, remove):
 		if value is None:
 			return None
 
@@ -404,14 +406,15 @@ class NetTuningPlugin(hotplug.Plugin):
 		return value
 
 	@command_set("nf_conntrack_hashsize")
-	def _set_nf_conntrack_hashsize(self, value, sim):
+	def _set_nf_conntrack_hashsize(self, value, sim, remove):
 		if value is None:
 			return None
 
 		hashsize = int(value)
 		if hashsize >= 0:
 			if not sim:
-				self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize)
+				self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize, \
+					no_error = [errno.ENOENT] if remove else False)
 			return hashsize
 		else:
 			return None
@@ -445,7 +448,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return self._call_ip_link(args)
 
 	@command_set("txqueuelen", per_device=True)
-	def _set_txqueuelen(self, value, device, sim):
+	def _set_txqueuelen(self, value, device, sim, remove):
 		if value is None:
 			return None
 		try:
@@ -485,7 +488,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return res.group(1)
 
 	@command_set("mtu", per_device=True)
-	def _set_mtu(self, value, device, sim):
+	def _set_mtu(self, value, device, sim, remove):
 		if value is None:
 			return None
 		try:

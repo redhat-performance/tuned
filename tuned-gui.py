@@ -41,7 +41,7 @@ except ValueError:
         "to be installed.")
 
 try:
-    from gi.repository import Gtk, GObject
+    from gi.repository import Gtk, GObject, GLib
 except ImportError:
     raise ImportError("Gtk3 backend requires pygobject to be installed.")
 
@@ -116,8 +116,8 @@ class Base(object):
 		self.builder = Gtk.Builder()
 		try:
 			self.builder.add_from_file(GLADEUI)
-		except GObject.GError as e:
-			print("Error loading '%s'" % GLADEUI, file=sys.stderr)
+		except GLib.GError as e:
+			print("Error loading '%s', error: '%s'" % (GLADEUI, e), file=sys.stderr)
 			sys.exit(1)
 
 		#
@@ -249,14 +249,14 @@ class Base(object):
 				self.manager.get_profile(self.controller.active_profile())
 		else:
 			self.active_profile = None
-		self._gobj('summaryProfileName').set_text(self.active_profile.name)
+		try:
+			self._gobj('summaryProfileName').set_text(self.active_profile.name)
+		except AttributeError:
+			self.error_dialog('No active profile set', '')
 		try:
 			self._gobj('summaryIncludedProfileName').set_text(self.active_profile.options['include'
 					])
-		except:
-
-			# keyerror probably
-
+		except (AttributeError, KeyError):
 			self._gobj('summaryIncludedProfileName').set_text('None')
 
 		row = Gtk.ListBoxRow()
@@ -275,32 +275,33 @@ class Base(object):
 		self._gobj('listboxSummaryOfActiveProfile').add(sep)
 		sep.show()
 
-		for u in self.active_profile.units:
-			row = Gtk.ListBoxRow()
-			hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,
-						   spacing=0)
-			hbox.set_homogeneous(True)
-			row.add(hbox)
-			label = Gtk.Label()
-			label.set_markup(u)
-			label.set_justify(Gtk.Justification.LEFT)
-			hbox.pack_start(label, False, True, 1)
+		if self.active_profile:
+			for u in self.active_profile.units:
+				row = Gtk.ListBoxRow()
+				hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,
+							spacing=0)
+				hbox.set_homogeneous(True)
+				row.add(hbox)
+				label = Gtk.Label()
+				label.set_markup(u)
+				label.set_justify(Gtk.Justification.LEFT)
+				hbox.pack_start(label, False, True, 1)
 
-			grid = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,
-						   spacing=0)
-			grid.set_homogeneous(True)
-			for o in self.active_profile.units[u].options:
-				label_option = Gtk.Label()
-				label_option.set_markup(o + ' = ' + '<b>'
-						+ self.active_profile.units[u].options[o]
-						+ '</b>')
-				grid.pack_start(label_option, False, True, 0)
+				grid = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,
+							spacing=0)
+				grid.set_homogeneous(True)
+				for o in self.active_profile.units[u].options:
+					label_option = Gtk.Label()
+					label_option.set_markup(o + ' = ' + '<b>'
+							+ self.active_profile.units[u].options[o]
+							+ '</b>')
+					grid.pack_start(label_option, False, True, 0)
 
-			hbox.pack_start(grid, False, True, 0)
-			self._gobj('listboxSummaryOfActiveProfile').add(row)
-			separator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
-			self._gobj('listboxSummaryOfActiveProfile').add(separator)
-			separator.show()
+				hbox.pack_start(grid, False, True, 0)
+				self._gobj('listboxSummaryOfActiveProfile').add(row)
+				separator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
+				self._gobj('listboxSummaryOfActiveProfile').add(separator)
+				separator.show()
 
 		self._gobj('listboxSummaryOfActiveProfile').show_all()
 
@@ -411,8 +412,8 @@ class Base(object):
 					self._gobj('notebookPlugins').append_page_menu(
 							self.treeview_for_data(
 								config_options, plugin),
-							Gtk.Label(plugin),
-							Gtk.Label(plugin)
+							Gtk.Label(label = plugin),
+							Gtk.Label(label = plugin)
 							)
 
 					self._gobj('notebookPlugins').show_all()
@@ -445,7 +446,7 @@ class Base(object):
 			self.manager.set_raw_profile(profile_name,
 				text_buffer.get_text(start, end, True))
 		except Exception:
-			self.error_dialog('Error while parsing raw configuration')
+			self.error_dialog('Error while parsing raw configuration', '')
 			return
 
 		self.error_dialog('Profile Editor will be closed.',
@@ -629,7 +630,7 @@ class Base(object):
 
 		for (name, unit) in list(profile.units.items()):
 			self._gobj('notebookPlugins').append_page_menu(self.treeview_for_data(unit.options, unit.name),
-					Gtk.Label(unit.name), Gtk.Label(unit.name))
+					Gtk.Label(label = unit.name), Gtk.Label(label = unit.name))
 		self._gobj('notebookPlugins').show_all()
 		self._gobj('windowProfileEditor').show()
 
@@ -639,11 +640,11 @@ class Base(object):
 		"""
 
 		treestore = Gtk.ListStore(GObject.TYPE_STRING,
-								  GObject.TYPE_STRING)
+								GObject.TYPE_STRING)
 
 		for (option, value) in list(data.items()):
 			treestore.append([str(value), option])
-		treeview = Gtk.TreeView(treestore)
+		treeview = Gtk.TreeView(model = treestore)
 		renderer = Gtk.CellRendererText()
 		column_option = Gtk.TreeViewColumn('Option', renderer, text=0)
 		column_value = Gtk.TreeViewColumn('Value', renderer, text=1)
@@ -694,7 +695,7 @@ class Base(object):
 
 	def execute_switch_tuned(self, switch, data):
 		"""
-		Suported switch_tuned_start_stop and switch_tuned_startup_start_stop.
+		Supported switch_tuned_start_stop and switch_tuned_startup_start_stop.
 		"""
 
 		if switch == self._gobj('switchTunedStartStop'):
@@ -798,8 +799,8 @@ class Base(object):
 
 		if event.button == 3:
 			popup = Gtk.Menu()
-			popup.append(Gtk.MenuItem('add'))
-			popup.append(Gtk.MenuItem('delete'))
+			popup.append(Gtk.MenuItem(label = 'add'))
+			popup.append(Gtk.MenuItem(label = 'delete'))
 			time = event.time
 			self._gobj('menuAddPluginValue').popup(
 				None,
@@ -817,6 +818,70 @@ class Base(object):
 			if liststore_item[1] == item:
 				return True
 		return False
+
+	def add_plugin_value_to_treeview(self, action):
+		notebook_plugins = self._gobj('notebookPlugins')
+		current_plugin = \
+			notebook_plugins.get_tab_label(notebook_plugins.get_nth_page(notebook_plugins.get_current_page())).get_text()
+		current_plugin_options = \
+			self.plugin_loader.plugins.get(current_plugin)
+		curent_plugin_values_model = \
+			notebook_plugins.get_nth_page(notebook_plugins.get_current_page()).get_model()
+
+		treestore_plugins_values = Gtk.ListStore(GObject.TYPE_STRING)
+
+		for (vl_name, vl_val) in current_plugin_options.items():
+			if not self.liststore_contains_item(curent_plugin_values_model,
+					vl_name):
+				treestore_plugins_values.append([vl_name])
+
+		dialog_add_plugin_value = \
+			self.builder.get_object('dialogAddPluginValue')
+		dialog_add_plugin_value.connect('destroy', lambda d: \
+				dialog_add_plugin_value.hide())
+		combobox = self.builder.get_object('comboboxPluginsValues')
+		combobox.set_model(treestore_plugins_values)
+
+		response = dialog_add_plugin_value.run()
+		dialog_add_plugin_value.hide()
+
+		if response == 1:
+			active = combobox.get_active_text()
+			curent_plugin_values_model.append([current_plugin_options.get(active),
+					active])
+			return True
+		return False
+
+	def add_custom_plugin_value_to_treeview(self, action):
+		notebook_plugins = self._gobj('notebookPlugins')
+		curent_plugin_values_model = \
+			notebook_plugins.get_nth_page(notebook_plugins.get_current_page()).get_model()
+
+		dialog_add_custom_plugin_value = \
+			self.builder.get_object('dialogAddCustomPluginValue')
+		text = self.builder.get_object('entry2')
+		dialog_add_custom_plugin_value.connect('destroy', lambda d: \
+				dialog_add_custom_plugin_value.hide())
+
+		response = dialog_add_custom_plugin_value.run()
+		dialog_add_custom_plugin_value.hide()
+
+		if response == 1:
+			curent_plugin_values_model.append(['', text.get_text()])
+			return True
+		return False
+
+	def delete_plugin_value_to_treeview(self, action):
+		notebook_plugins = self._gobj('notebookPlugins')
+		curent_plugin_values_tree = \
+			notebook_plugins.get_nth_page(notebook_plugins.get_current_page())
+
+		(model, iter) = \
+			curent_plugin_values_tree.get_selection().get_selected()
+		if model is None or iter is None:
+			return False
+		model.remove(iter)
+		return True
 
 	def _start_tuned(self):
 		self._su_execute(['service', 'tuned', 'start'])

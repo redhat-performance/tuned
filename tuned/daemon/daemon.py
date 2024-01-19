@@ -59,6 +59,8 @@ class Daemon(object):
 		self._terminate_profile_switch = threading.Event()
 		# Flag which is set if there is no operation in progress
 		self._not_used = threading.Event()
+		# Flag which is set if SIGHUP is being processed
+		self._sighup_processing = threading.Event()
 		self._not_used.set()
 		self._profile_applied = threading.Event()
 
@@ -203,6 +205,7 @@ class Daemon(object):
 			exports.start()
 		profile_names = " ".join(self._active_profiles)
 		self._notify_profile_changed(profile_names, True, "OK")
+		self._sighup_processing.clear()
 
 		if self._daemon:
 			# In python 2 interpreter with applied patch for rhbz#917709 we need to periodically
@@ -231,7 +234,7 @@ class Daemon(object):
 
 		# if terminating due to profile switch
 		if self._terminate_profile_switch.is_set():
-			full_rollback = consts.ROLLBACK_FULL
+			rollback = consts.ROLLBACK_FULL
 		else:
 			# Assume only soft rollback is needed. Soft rollback means reverting all
 			# non-persistent tunings applied by a plugin instance. In contrast to full
@@ -241,21 +244,21 @@ class Daemon(object):
 			# perform full cleanup. If the system is not shutting down, it means that TuneD
 			# was explicitly stopped by the user and in such case do the full cleanup. On
 			# systems without systemd, full cleanup is never performed.
-			full_rollback = consts.ROLLBACK_SOFT
+			rollback = consts.ROLLBACK_SOFT
 			if not self._full_rollback_required():
 				log.info("terminating TuneD due to system shutdown / reboot")
 			elif self._rollback == "not_on_exit":
 				# no rollback on TuneD exit whatsoever
-				full_rollback = consts.ROLLBACK_NOT_ON_EXIT
+				rollback = consts.ROLLBACK_NONE
 				log.info("terminating TuneD and not rolling back any changes due to '%s' option in '%s'" % (consts.CFG_ROLLBACK, consts.GLOBAL_CONFIG_FILE))
 			else:
 				if self._daemon:
 					log.info("terminating TuneD, rolling back all changes")
-					full_rollback = consts.ROLLBACK_FULL
+					rollback = consts.ROLLBACK_FULL
 				else:
 					log.info("terminating TuneD in one-shot mode")
 		if self._daemon:
-			self._unit_manager.stop_tuning(full_rollback)
+			self._unit_manager.stop_tuning(rollback)
 		self._unit_manager.destroy_all()
 
 	def _save_active_profile(self, profile_names, manual):

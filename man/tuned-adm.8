@@ -24,7 +24,7 @@
 tuned\-adm - command line tool for switching between different tuning profiles
 .SH SYNOPSIS
 .B tuned\-adm
-.RB [ list " | " active " | " "profile \fI[profile]\fP..." " | " "profile_info \fI[profile]\fP..." " | " off " | " auto_profile " | " profile_mode " | " "verify \fI[\-i | \-\-ignore\-missing]\fP" " | " recommend ]
+.RB [ list " | " active " | " "profile \fI[profile]\fP..." " | " "profile_info \fI[profile]\fP..." " | " off " | " auto_profile " | " profile_mode " | " "verify \fI[\-i | \-\-ignore\-missing]\fP" " | " recommend " | " "instance_acquire_devices \fIdevices\fP \fIinstance\fP" " | " "get_instances \fI[plugin]\fP" " | " "instance_get_devices \fIinstance\fP" ]
 
 .SH DESCRIPTION
 This command line utility allows you to switch between user definable tuning
@@ -109,6 +109,23 @@ Enable automatic profile selection mode, switch to the recommended profile.
 .TP
 .B profile_mode
 Show current profile selection mode.
+
+.TP
+.B "instance_acquire_devices \fIdevices\fP \fIinstance\fP"
+Move all provided \fIdevices\fP under the given plugin \fIinstance\fP. The plugin
+instance is identified using its name from the TuneD profile.
+
+The devices are specified using a comma-separated list. When moving a set of CPUs,
+it is possible to use the cpulist syntax by including the 'cpulist:' prefix.
+For instance, 'cpulist:0,2-4' will move the devices cpu0, cpu1, cpu2, and cpu4.
+
+.TP
+.B "get_instances \fI[plugin]\fP"
+List active instances of a given plugin or all active instances if no plugin is specified.
+
+.TP
+.B "instance_get_devices \fIinstance\fP"
+List devices currently assigned to a given instance.
 
 .TP
 .B off

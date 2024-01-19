@@ -335,10 +335,11 @@ class DiskPlugin(hotplug.Plugin):
 		return self._sysfs_path(device, "queue/scheduler")
 
 	@command_set("elevator", per_device=True)
-	def _set_elevator(self, value, device, sim):
+	def _set_elevator(self, value, device, sim, remove):
 		sys_file = self._elevator_file(device)
 		if not sim:
-			self._cmd.write_to_file(sys_file, value)
+			self._cmd.write_to_file(sys_file, value, \
+				no_error = [errno.ENOENT] if remove else False)
 		return value
 
 	@command_get("elevator")
@@ -349,7 +350,7 @@ class DiskPlugin(hotplug.Plugin):
 		return self._cmd.get_active_option(self._cmd.read_file(sys_file, no_error=ignore_missing))
 
 	@command_set("apm", per_device=True)
-	def _set_apm(self, value, device, sim):
+	def _set_apm(self, value, device, sim, remove):
 		if device not in self._hdparm_apm_devices:
 			if not sim:
 				log.info("apm option is not supported for device '%s'" % device)
@@ -389,7 +390,7 @@ class DiskPlugin(hotplug.Plugin):
 		return value
 
 	@command_set("spindown", per_device=True)
-	def _set_spindown(self, value, device, sim):
+	def _set_spindown(self, value, device, sim, remove):
 		if device not in self._hdparm_apm_devices:
 			if not sim:
 				log.info("spindown option is not supported for device '%s'" % device)
@@ -428,14 +429,15 @@ class DiskPlugin(hotplug.Plugin):
 		return v
 
 	@command_set("readahead", per_device=True)
-	def _set_readahead(self, value, device, sim):
+	def _set_readahead(self, value, device, sim, remove):
 		sys_file = self._readahead_file(device)
 		val = self._parse_ra(value)
 		if val is None:
 			log.error("Invalid readahead value '%s' for device '%s'" % (value, device))
 		else:
 			if not sim:
-				self._cmd.write_to_file(sys_file, "%d" % val)
+				self._cmd.write_to_file(sys_file, "%d" % val, \
+					no_error = [errno.ENOENT] if remove else False)
 		return val
 
 	@command_get("readahead")
@@ -471,10 +473,11 @@ class DiskPlugin(hotplug.Plugin):
 		return self._sysfs_path(device, "queue/iosched/quantum")
 
 	@command_set("scheduler_quantum", per_device=True)
-	def _set_scheduler_quantum(self, value, device, sim):
+	def _set_scheduler_quantum(self, value, device, sim, remove):
 		sys_file = self._scheduler_quantum_file(device)
 		if not sim:
-			self._cmd.write_to_file(sys_file, "%d" % int(value))
+			self._cmd.write_to_file(sys_file, "%d" % int(value), \
+				no_error = [errno.ENOENT] if remove else False)
 		return value
 
 	@command_get("scheduler_quantum")

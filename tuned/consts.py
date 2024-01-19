@@ -79,7 +79,7 @@ SYSTEM_RELEASE_FILE = "/etc/system-release-cpe"
 FUNCTION_PREFIX = "function_"
 # prefix for exported environment variables when calling scripts
 ENV_PREFIX = "TUNED_"
-ROLLBACK_NOT_ON_EXIT = 0
+ROLLBACK_NONE = 0
 ROLLBACK_SOFT = 1
 ROLLBACK_FULL = 2
 

@@ -29,7 +29,7 @@ class commands:
 		return {"Y":"1", "YES":"1", "T":"1", "TRUE":"1", "N":"0", "NO":"0", "F":"0", "FALSE":"0"}.get(v, value)
 
 	def remove_ws(self, s):
-		return re.sub('\s+', ' ', str(s)).strip()
+		return re.sub(r'\s+', ' ', str(s)).strip()
 
 	def unquote(self, v):
 		return re.sub("^\"(.*)\"$", r"\1", v)
@@ -91,6 +91,17 @@ class commands:
 		return None
 
 	def write_to_file(self, f, data, makedir = False, no_error = False):
+		"""Write data to a file.
+
+		Parameters:
+		f -- filename where to write
+		data -- data to write
+		makedir -- if True and the path doesn't exist, it will be created
+		no_error -- if True errors are silenced, it can be also list of ignored errnos
+
+		Return:
+		bool -- True on success
+		"""
 		self._debug("Writing to file: '%s' < '%s'" % (f, data))
 		if makedir:
 			d = os.path.dirname(f)
@@ -103,10 +114,11 @@ class commands:
 			fd.write(str(data))
 			fd.close()
 			rc = True
-		except (OSError,IOError) as e:
+		except (OSError, IOError) as e:
 			rc = False
-			if not no_error:
-				self._error("Writing to file '%s' error: '%s'" % (f, e))
+			if isinstance(no_error, bool) and not no_error or \
+				isinstance(no_error, list) and e.errno not in no_error:
+					self._error("Writing to file '%s' error: '%s'" % (f, e))
 		return rc
 
 	def read_file(self, f, err_ret = "", no_error = False):
@@ -235,13 +247,13 @@ class commands:
 				err_out = err[:-1]
 				if len(err_out) == 0:
 					err_out = out[:-1]
-				err_msg = "Executing %s error: %s" % (args[0], err_out)
+				err_msg = "Executing '%s' error: %s" % (' '.join(args), err_out)
 				if not return_err:
 					self._error(err_msg)
 		except (OSError, IOError) as e:
 			retcode = -e.errno if e.errno is not None else -1
 			if not abs(retcode) in no_errors and not 0 in no_errors:
-				err_msg = "Executing %s error: %s" % (args[0], e)
+				err_msg = "Executing '%s' error: %s" % (' '.join(args), e)
 				if not return_err:
 					self._error(err_msg)
 		if return_err:
@@ -427,7 +439,7 @@ class commands:
 			if s[0:8].lower() != "cpulist:":
 				return [("cpu" + str(v)) for v in self.cpulist_unpack(s)]
 		l = re.split(r"\s*(?<!\\),\s*", s)
-		return [str(v).replace("\,", ",") for v in l]
+		return [str(v).replace(r"\,", ",") for v in l]
 
 	# Do not make balancing on patched Python 2 interpreter (rhbz#1028122).
 	# It means less CPU usage on patchet interpreter. On non-patched interpreter
@@ -523,3 +535,12 @@ class commands:
 					f.write(profile_name + "\n")
 		except (OSError,IOError) as e:
 			raise TunedException("Failed to save the active post-loaded profile: %s" % e.strerror)
+
+	# Translates characters in 'text' from 'source_chars' to 'dest_chars'
+	def tr(self, text, source_chars, dest_chars):
+		try:
+			trans = str.maketrans(source_chars, dest_chars)
+		except AttributeError:
+			import string
+			trans = string.maketrans(source_chars, dest_chars)
+		return text.translate(trans)

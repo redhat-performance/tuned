@@ -211,7 +211,7 @@ class CommandsPlugin(Plugin):
 		return {'size':'S','device_setting':'101'}
 
 	@decorators.command_set('size')
-	def _set_size(self, new_size, sim):
+	def _set_size(self, new_size, sim, remove):
 		self._size = new_size
 		return new_size
 
@@ -220,7 +220,7 @@ class CommandsPlugin(Plugin):
 		return self._size
 
 	@decorators.command_set('device_setting',per_device = True)
-	def _set_device_setting(self,value,device,sim):
+	def _set_device_setting(self,value,device,sim,remove):
 		device.setting = value
 		return device.setting
 

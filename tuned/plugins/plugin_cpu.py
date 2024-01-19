@@ -5,6 +5,7 @@ from tuned.utils.commands import commands
 import tuned.consts as consts
 
 import os
+import errno
 import struct
 import errno
 import platform
@@ -81,7 +82,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 	
 	`energy_performance_preference`:::
 	[option]`energy_performance_preference` supports managing energy
-	vs. performance hints on some newer Intel processors. Multiple alternative
+	vs. performance hints on newer Intel and AMD processors with active P-State
+	CPU scaling drivers (intel_pstate or amd-pstate). Multiple alternative
 	Energy Performance Preferences (EPP) values are supported. The alternative
 	values are separated using the '|' character. Available values can be found
 	in `energy_performance_available_preferences` file in `CPUFreq` policy
@@ -196,6 +198,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._is_amd = False
 		self._has_energy_perf_bias = False
 		self._has_intel_pstate = False
+		self._has_amd_pstate = False
 		self._has_pm_qos_resume_latency_us = None
 
 		self._min_perf_pct_save = None
@@ -240,15 +243,15 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._arch = platform.machine()
 
 		if self._arch in intel_archs:
-                        # Possible other x86 vendors (from arch/x86/kernel/cpu/*):
-                        # "CentaurHauls", "CyrixInstead", "Geode by NSC", "HygonGenuine", "GenuineTMx86",
-                        # "TransmetaCPU", "UMC UMC UMC"
+			# Possible other x86 vendors (from arch/x86/kernel/cpu/*):
+			# "CentaurHauls", "CyrixInstead", "Geode by NSC", "HygonGenuine", "GenuineTMx86",
+			# "TransmetaCPU", "UMC UMC UMC"
 			cpu = procfs.cpuinfo()
 			vendor = cpu.tags.get("vendor_id")
 			if vendor == "GenuineIntel":
-			        self._is_intel = True
+				self._is_intel = True
 			elif vendor == "AuthenticAMD" or vendor == "HygonGenuine":
-			        self._is_amd = True
+				self._is_amd = True
 			else:
 				# We always assign Intel, unless we know better
 				self._is_intel = True
@@ -256,11 +259,15 @@ class CPULatencyPlugin(hotplug.Plugin):
 		else:
 			log.info("We are running on %s (non x86)" % self._arch)
 
-		if self._is_intel is True:
+		if self._is_intel:
 			# Check for x86_energy_perf_policy, ignore if not available / supported
 			self._check_energy_perf_bias()
 			# Check for intel_pstate
 			self._check_intel_pstate()
+
+		if self._is_amd:
+			# Check for amd-pstate
+			self._check_amd_pstate()
 
 	def _check_energy_perf_bias(self):
 		self._has_energy_perf_bias = False
@@ -280,6 +287,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._has_intel_pstate = os.path.exists("/sys/devices/system/cpu/intel_pstate")
 		if self._has_intel_pstate:
 			log.info("intel_pstate detected")
+
+	def _check_amd_pstate(self):
+		self._has_amd_pstate = os.path.exists("/sys/devices/system/cpu/amd_pstate")
+		if self._has_amd_pstate:
+			log.info("amd-pstate detected")
 
 	def _get_cpuinfo_flags(self):
 		if self._flags is None:
@@ -377,8 +389,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 			self._no_turbo_save = self._getset_intel_pstate_attr(
 				"no_turbo", new_value)
 
-	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
-		super(CPULatencyPlugin, self)._instance_unapply_static(instance, full_rollback)
+	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):
+		super(CPULatencyPlugin, self)._instance_unapply_static(instance, rollback)
 
 		if instance._first_instance and self._has_intel_pstate:
 			self._set_intel_pstate_attr("min_perf_pct", self._min_perf_pct_save)
@@ -489,7 +501,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).strip().split()
 
 	@command_set("governor", per_device=True)
-	def _set_governor(self, governors, device, sim):
+	def _set_governor(self, governors, device, sim, remove):
 		if not self._check_cpu_can_change_governor(device):
 			return None
 		governors = str(governors)
@@ -506,7 +518,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 					log.info("setting governor '%s' on cpu '%s'"
 							% (governor, device))
 					self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor"
-							% device, governor)
+							% device, governor, no_error = [errno.ENOENT] if remove else False)
 				break
 			elif not sim:
 				log.debug("Ignoring governor '%s' on cpu '%s', it is not supported"
@@ -535,7 +547,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return "/sys/devices/system/cpu/cpufreq/%s/sampling_down_factor" % governor
 
 	@command_set("sampling_down_factor", per_device = True, priority = 10)
-	def _set_sampling_down_factor(self, sampling_down_factor, device, sim):
+	def _set_sampling_down_factor(self, sampling_down_factor, device, sim, remove):
 		val = None
 
 		# hack to clear governors map when the profile starts unloading
@@ -558,7 +570,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			val = str(sampling_down_factor)
 			if not sim:
 				log.info("setting sampling_down_factor to '%s' for governor '%s'" % (val, governor))
-				self._cmd.write_to_file(path, val)
+				self._cmd.write_to_file(path, val, no_error = [errno.ENOENT] if remove else False)
 		return val
 
 	@command_get("sampling_down_factor")
@@ -580,14 +592,14 @@ class CPULatencyPlugin(hotplug.Plugin):
 				return_err = True)
 		return (retcode, err_msg)
 
-	def _intel_preference_path(self, cpu_id, available = False):
+	def _pstate_preference_path(self, cpu_id, available = False):
 		return "/sys/devices/system/cpu/cpufreq/policy%s/energy_performance_%s" % (cpu_id, "available_preferences" if available else "preference")
 
 	def _energy_perf_bias_path(self, cpu_id):
 		return "/sys/devices/system/cpu/cpu%s/power/energy_perf_bias" % cpu_id
 
 	@command_set("energy_perf_bias", per_device=True)
-	def _set_energy_perf_bias(self, energy_perf_bias, device, sim):
+	def _set_energy_perf_bias(self, energy_perf_bias, device, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -602,10 +614,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 				if not sim:
 					for val in vals:
 						val = val.strip()
-						if self._cmd.write_to_file(energy_perf_bias_path, val):
-							log.info("energy_perf_bias successfully set to '%s' on cpu '%s'"
-									 % (val, device))
-							break
+						if self._cmd.write_to_file(energy_perf_bias_path, val, \
+							no_error = [errno.ENOENT] if remove else False):
+								log.info("energy_perf_bias successfully set to '%s' on cpu '%s'"
+										 % (val, device))
+								break
 					else:
 						log.error("Failed to set energy_perf_bias on cpu '%s'. Is the value in the profile correct?"
 								  % device)
@@ -700,7 +713,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._has_pm_qos_resume_latency_us
 
 	@command_set("pm_qos_resume_latency_us", per_device=True)
-	def _set_pm_qos_resume_latency_us(self, pm_qos_resume_latency_us, device, sim):
+	def _set_pm_qos_resume_latency_us(self, pm_qos_resume_latency_us, device, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -718,7 +731,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if not self._check_pm_qos_resume_latency_us(device):
 			return None
 		if not sim:
-			self._cmd.write_to_file(self._pm_qos_resume_latency_us_path(device), latency)
+			self._cmd.write_to_file(self._pm_qos_resume_latency_us_path(device), latency, \
+				no_error = [errno.ENOENT] if remove else False)
 		return latency
 
 	@command_get("pm_qos_resume_latency_us")
@@ -731,18 +745,19 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._cmd.read_file(self._pm_qos_resume_latency_us_path(device), no_error=ignore_missing).strip()
 
 	@command_set("energy_performance_preference", per_device=True)
-	def _set_energy_performance_preference(self, energy_performance_preference, device, sim):
+	def _set_energy_performance_preference(self, energy_performance_preference, device, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
 		cpu_id = device.lstrip("cpu")
-		if os.path.exists(self._intel_preference_path(cpu_id, True)):
+		if os.path.exists(self._pstate_preference_path(cpu_id, True)):
 			vals = energy_performance_preference.split('|')
 			if not sim:
-				avail_vals = set(self._cmd.read_file(self._intel_preference_path(cpu_id, True)).split())
+				avail_vals = set(self._cmd.read_file(self._pstate_preference_path(cpu_id, True)).split())
 				for val in vals:
 					if val in avail_vals:
-						self._cmd.write_to_file(self._intel_preference_path(cpu_id), val)
+						self._cmd.write_to_file(self._pstate_preference_path(cpu_id), val, \
+							no_error = [errno.ENOENT] if remove else False)
 						log.info("Setting energy_performance_preference value '%s' for cpu '%s'" % (val, device))
 						break
 					else:
@@ -752,7 +767,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 							  % device)
 			return str(energy_performance_preference)
 		else:
-			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without the intel_pstate driver.")
+			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without a P-state driver.")
 		return None
 
 	@command_get("energy_performance_preference")
@@ -761,9 +776,9 @@ class CPULatencyPlugin(hotplug.Plugin):
 			log.debug("%s is not online, skipping" % device)
 			return None
 		cpu_id = device.lstrip("cpu")
-		# intel_pstate CPU scaling driver
-		if os.path.exists(self._intel_preference_path(cpu_id, True)):
-			return self._cmd.read_file(self._intel_preference_path(cpu_id)).strip()
+		# read the EPP hint used by the intel_pstate and amd-pstate CPU scaling drivers
+		if os.path.exists(self._pstate_preference_path(cpu_id, True)):
+			return self._cmd.read_file(self._pstate_preference_path(cpu_id)).strip()
 		else:
-			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without the intel_pstate driver.")
+			log.debug("energy_performance_available_preferences file missing, which can happen if the system is booted without a P-state driver.")
 		return None

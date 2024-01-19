@@ -113,9 +113,9 @@ class ScriptPlugin(base.Plugin):
 			ret = False
 		return ret
 
-	def _instance_unapply_static(self, instance, full_rollback = consts.ROLLBACK_SOFT):
+	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):
 		args = ["stop"]
-		if full_rollback == consts.ROLLBACK_FULL:
+		if rollback == consts.ROLLBACK_FULL:
 			args = args + ["full_rollback"]
 		self._call_scripts(reversed(instance._scripts), args)
-		super(ScriptPlugin, self)._instance_unapply_static(instance, full_rollback)
+		super(ScriptPlugin, self)._instance_unapply_static(instance, rollback)

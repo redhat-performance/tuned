@@ -70,6 +70,12 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def terminate(self):
 		self._terminate.set()
 
+	def sighup(self):
+		if not self._daemon._sighup_processing.is_set():
+			self._daemon._sighup_processing.set()
+			if not self.reload():
+				self._daemon._sighup_processing.clear()
+
 	@exports.signal("sbs")
 	def profile_changed(self, profile_name, result, errstr):
 		pass
@@ -116,10 +122,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 				return False
 		return self._daemon.start()
 
-	@exports.export("", "b")
-	def stop(self, caller = None, profile_switch = False):
-		if caller == "":
-			return False
+	def _stop(self, profile_switch = False):
 		if not self._daemon.is_running():
 			res = True
 		else:
@@ -128,11 +131,17 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		return res
 
 	@exports.export("", "b")
+	def stop(self, caller = None):
+		if caller == "":
+			return False
+		return self._stop(profile_switch = False)
+
+	@exports.export("", "b")
 	def reload(self, caller = None):
 		if caller == "":
 			return False
 		if self._daemon.is_running():
-			stop_ok = self.stop(profile_switch = True)
+			stop_ok = self._stop(profile_switch = True)
 			if not stop_ok:
 				return False
 		try:
@@ -364,3 +373,47 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			log.info(rets)
 			return (False, rets)
 		return (True, "OK")
+
+	@exports.export("s", "(bsa(ss))")
+	def get_instances(self, plugin_name, caller = None):
+		"""Return a list of active instances of a plugin or all active instances
+
+		Parameters:
+		plugin_name -- name of the plugin or an empty string
+
+		Return:
+		bool -- True on success
+		string -- error message or "OK"
+		list of string pairs -- [(instance_name, plugin_name)]
+		"""
+		if caller == "":
+			return (False, "Unauthorized", [])
+		if plugin_name != "" and plugin_name not in self.get_all_plugins().keys():
+			rets = "Plugin '%s' does not exist" % plugin_name
+			log.error(rets)
+			return (False, rets, [])
+		instances = filter(lambda instance: instance.active, self._daemon._unit_manager.instances)
+		if plugin_name != "":
+			instances = filter(lambda instance: instance.plugin.name == plugin_name, instances)
+		return (True, "OK", list(map(lambda instance: (instance.name, instance.plugin.name), instances)))
+
+	@exports.export("s", "(bsas)")
+	def instance_get_devices(self, instance_name, caller = None):
+		"""Return a list of devices assigned to an instance
+
+		Parameters:
+		instance_name -- name of the instance
+
+		Return:
+		bool -- True on success
+		string -- error message or "OK"
+		list of strings -- device names
+		"""
+		if caller == "":
+			return (False, "Unauthorized", [])
+		for instance in self._daemon._unit_manager.instances:
+			if instance.name == instance_name:
+				return (True, "OK", sorted(list(instance.processed_devices)))
+		rets = "Instance '%s' not found" % instance_name
+		log.error(rets)
+		return (False, rets, [])

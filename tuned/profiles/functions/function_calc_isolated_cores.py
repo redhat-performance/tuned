@@ -32,7 +32,12 @@ class calc_isolated_cores(base.Function):
 		for cpu in glob.iglob(os.path.join(consts.SYSFS_CPUS_PATH, "cpu*")):
 			cpuid = os.path.basename(cpu)[3:]
 			if cpuid.isdecimal():
-				socket = self._cmd.read_file(os.path.join(cpu, "topology/physical_package_id")).strip()
+				physical_package_id = os.path.join(cpu, "topology/physical_package_id")
+				# Show no errors when the physical_package_id file does not exist -- the CPU may be offline.
+				if not os.path.exists(physical_package_id):
+					log.debug("file '%s' does not exist, cpu%s offline?" % (physical_package_id, cpuid))
+					continue
+				socket = self._cmd.read_file(physical_package_id).strip()
 				if socket.isdecimal():
 					topo[socket] = topo.get(socket, []) + [cpuid]
 

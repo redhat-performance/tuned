@@ -227,4 +227,24 @@
     </defaults>
   </action>
 
+  <action id="com.redhat.tuned.get_instances">
+    <description>Get list of active TuneD plugin instances</description>
+    <message>Authentication is required to get list of active TuneD plugin instances</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="com.redhat.tuned.instance_get_devices">
+    <description>Get list of devices assigned to the instance</description>
+    <message>Authentication is required to get list of devices assigned to the instance</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
 </policyconfig>

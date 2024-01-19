@@ -40,7 +40,7 @@ __all__ = ['GuiPluginLoader']
 class GuiPluginLoader():
 
     '''
-    Class for scan, import and load actual avaible plugins.
+    Class for scan, import and load actual variable plugins.
     '''
 
     def __init__(self):
@@ -53,7 +53,7 @@ class GuiPluginLoader():
         self._prefix = 'plugin_'
         self._sufix = '.py'
         self._dbus_controller = DBusController(consts.DBUS_BUS,
-			consts.DBUS_INTERFACE, consts.DBUS_OBJECT
+                        consts.DBUS_INTERFACE, consts.DBUS_OBJECT
             )
         self._get_plugins()
 

@@ -1,4 +1,5 @@
 import os
+import errno
 from . import base
 from .decorators import *
 import tuned.logs
@@ -63,13 +64,14 @@ class SelinuxPlugin(base.Plugin):
 		pass
 
 	@command_set("avc_cache_threshold")
-	def _set_avc_cache_threshold(self, value, sim):
+	def _set_avc_cache_threshold(self, value, sim, remove):
 		if value is None:
 			return None
 		threshold = int(value)
 		if threshold >= 0:
 			if not sim:
-				self._cmd.write_to_file(self._cache_threshold_path, threshold)
+				self._cmd.write_to_file(self._cache_threshold_path, threshold, \
+					no_error = [errno.ENOENT] if remove else False)
 			return threshold
 		else:
 			return None
