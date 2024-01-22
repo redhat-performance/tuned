@@ -458,7 +458,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return latency
 
 	# returns (latency, skip), skip means we want to skip latency settings
-	def _parse_latency(self, latency):
+	def _parse_latency(self, latency, allow_na=False):
 		self.cstates_latency = None
 		latencies = str(latency).split("|")
 		log.debug("parsing latency")
@@ -478,6 +478,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 				elif latency in ["none", "None"]:
 					log.debug("latency 'none' specified")
 					return None, True
+				elif allow_na and latency == "n/a":
+					pass
 				else:
 					latency = None
 					log.debug("invalid latency specified: '%s'" % str(latency))
@@ -717,18 +719,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
-		try:
-			latency = int(pm_qos_resume_latency_us)
-			log.debug("parsed directly specified latency value: %d" % latency)
-			if latency < 0:
-				raise ValueError
-		except ValueError:
-			if pm_qos_resume_latency_us == "n/a":
-				latency = pm_qos_resume_latency_us
-			else:
-				log.warning("Invalid latency specified: '%s'" % str(pm_qos_resume_latency_us))
-				return None
-		if not self._check_pm_qos_resume_latency_us(device):
+		latency, skip = self._parse_latency(pm_qos_resume_latency_us, allow_na=True)
+		if skip or not self._check_pm_qos_resume_latency_us(device):
+			return None
+		if latency is None or (latency != "n/a" and latency < 0):
+			log.warning("Failed to set pm_qos_resume_latency_us on cpu '%s'. Is the value in the profile correct?" % device)
 			return None
 		if not sim:
 			self._cmd.write_to_file(self._pm_qos_resume_latency_us_path(device), latency, \
