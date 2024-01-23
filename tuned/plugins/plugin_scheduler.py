@@ -169,6 +169,12 @@ class SchedulerPlugin(base.Plugin):
 	Isolate CPUs 2-4 while ignoring processes and threads matching
 	`ps_blacklist` regular expressions.
 	====
+	The [option]`irq_process` option controls whether the scheduler plugin
+	applies the `isolated_cores` parameter to IRQ affinities. The default
+	value is `true`, which means that the scheduler plugin will move all
+	possible IRQs away from the isolated cores. When `irq_process` is set
+	to `false`, the plugin will not change any IRQ affinities.
+	====
 	The [option]`default_irq_smp_affinity` option controls the values
 	*TuneD* writes to `/proc/irq/default_smp_affinity`. The file specifies
 	default affinity mask that applies to all non-active IRQs. Once an
@@ -444,6 +450,7 @@ class SchedulerPlugin(base.Plugin):
 		self._cpus = perf.cpu_map()
 		self._scheduler_storage_key = self._storage_key(
 				command_name = "scheduler")
+		self._irq_process = True
 		self._irq_storage_key = self._storage_key(
 				command_name = "irq")
 		self._evlist = None
@@ -543,6 +550,7 @@ class SchedulerPlugin(base.Plugin):
 			"cgroup_ps_blacklist": None,
 			"ps_whitelist": None,
 			"ps_blacklist": None,
+			"irq_process": True,
 			"default_irq_smp_affinity": "calc",
 			"perf_mmap_pages": None,
 			"perf_process_fork": "false",
@@ -1126,6 +1134,14 @@ class SchedulerPlugin(base.Plugin):
 		if enabling and value is not None:
 			self._ps_blacklist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
+	@command_custom("irq_process", per_device = False)
+	def _irq_process(self, enabling, value, verify, ignore_missing):
+		# currently unsupported
+		if verify:
+			return None
+		if enabling and value is not None:
+			self._irq_process = self._cmd.get_bool(value) == "1"
+
 	@command_custom("default_irq_smp_affinity", per_device = False)
 	def _default_irq_smp_affinity(self, enabling, value, verify, ignore_missing):
 		# currently unsupported
@@ -1374,7 +1390,9 @@ class SchedulerPlugin(base.Plugin):
 			return None
 		# currently only IRQ affinity verification is supported
 		if verify:
-			return self._verify_all_irq_affinity(affinity, ignore_missing)
+			if self._irq_process:
+				return self._verify_all_irq_affinity(affinity, ignore_missing)
+			return True
 		elif enabling:
 			if self._cgroup:
 				self._cgroup_set_affinity()
@@ -1382,11 +1400,13 @@ class SchedulerPlugin(base.Plugin):
 			else:
 				ps_affinity = affinity
 			self._set_ps_affinity(ps_affinity)
-			self._set_all_irq_affinity(affinity)
+			if self._irq_process:
+				self._set_all_irq_affinity(affinity)
 		else:
 			# Restoring processes' affinity is done in
 			# _instance_unapply_static()
-			self._restore_all_irq_affinity()
+			if self._irq_process:
+				self._restore_all_irq_affinity()
 
 	def _get_sched_knob_path(self, prefix, namespace, knob):
 		key = "%s_%s_%s" % (prefix, namespace, knob)
