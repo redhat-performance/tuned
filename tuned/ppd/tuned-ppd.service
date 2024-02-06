@@ -1,0 +1,14 @@
+[Unit]
+Description=PPD-to-TuneD API Translation Daemon
+Requires=tuned.service
+After=tuned.service
+Before=multi-user.target display-manager.target
+
+[Service]
+Type=dbus
+PIDFile=/run/tuned/tuned-ppd.pid
+BusName=net.hadess.PowerProfiles
+ExecStart=/usr/sbin/tuned-ppd
+
+[Install]
+WantedBy=graphical.target

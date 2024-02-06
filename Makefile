@@ -223,6 +223,14 @@ install: install-dirs
 	install -dD $(DESTDIR)$(DATADIR)/applications
 	desktop-file-install --dir=$(DESTDIR)$(DATADIR)/applications tuned-gui.desktop
 
+install-ppd: install
+	$(call install_python_script,tuned-ppd.py,$(DESTDIR)/usr/sbin/tuned-ppd)
+	install -Dpm 0644 tuned/ppd/tuned-ppd.service $(DESTDIR)$(UNITDIR)/tuned-ppd.service
+	install -Dpm 0644 tuned/ppd/tuned-ppd.dbus.service $(DESTDIR)$(DATADIR)/dbus-1/system-services/net.hadess.PowerProfiles.service
+	install -Dpm 0644 tuned/ppd/dbus.conf $(DESTDIR)$(DATADIR)/dbus-1/system.d/net.hadess.PowerProfiles.conf
+	install -Dpm 0644 tuned/ppd/tuned-ppd.policy $(DESTDIR)$(DATADIR)/polkit-1/actions/net.hadess.PowerProfiles.policy
+	install -Dpm 0644 tuned/ppd/ppd.conf $(DESTDIR)$(SYSCONFDIR)/tuned/ppd.conf
+
 clean: clean-html
 	find -name "*.pyc" | xargs rm -f
 	rm -rf $(VERSIONED_NAME) rpm-build-dir
