@@ -71,11 +71,11 @@ class Application(object):
 		self._handle_signal(signal.SIGINT, self._controller.terminate)
 		self._handle_signal(signal.SIGTERM, self._controller.terminate)
 
-	def attach_to_dbus(self, bus_name, object_name, interface_name):
+	def attach_to_dbus(self, bus_name, object_name, interface_name, namespace):
 		if self._dbus_exporter is not None:
 			raise TunedException("DBus interface is already initialized.")
 
-		self._dbus_exporter = exports.dbus.DBusExporter(bus_name, interface_name, object_name)
+		self._dbus_exporter = exports.dbus.DBusExporter(bus_name, interface_name, object_name, namespace)
 		exports.register_exporter(self._dbus_exporter)
 
 	def attach_to_unix_socket(self):

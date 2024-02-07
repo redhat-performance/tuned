@@ -264,6 +264,17 @@ Requires: %{name} = %{version}
 %description profiles-openshift
 Additional TuneD profile(s) optimized for OpenShift.
 
+%package ppd
+Summary: PPD compatibility daemon
+Requires: %{name} = %{version}
+# The compatibility daemon is swappable for power-profiles-daemon
+Provides: ppd-service
+Conflicts: ppd-service
+
+%description ppd
+An API translation daemon that allows applications to easily transition
+to TuneD from power-profiles-daemon (PPD).
+
 %prep
 %autosetup -p1 -n %{name}-%{version}%{?prerel2}
 
@@ -276,6 +287,7 @@ make html %{make_python_arg}
 
 %install
 make install DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
+make install-ppd DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
 %if 0%{?rhel}
 sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
 %endif
@@ -555,6 +567,14 @@ fi
 %{_prefix}/lib/tuned/openshift-control-plane
 %{_prefix}/lib/tuned/openshift-node
 %{_mandir}/man7/tuned-profiles-openshift.7*
+
+%files ppd
+%{_sbindir}/tuned-ppd
+%{_unitdir}/tuned-ppd.service
+%{_datadir}/dbus-1/system-services/net.hadess.PowerProfiles.service
+%{_datadir}/dbus-1/system.d/net.hadess.PowerProfiles.conf
+%{_datadir}/polkit-1/actions/net.hadess.PowerProfiles.policy
+%config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
 * Tue Aug 29 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 2.21.0-1

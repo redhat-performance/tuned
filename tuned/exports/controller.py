@@ -29,6 +29,14 @@ class ExportsController(tuned.patterns.Singleton):
 		"""Check if method was marked with @exports.signal wrapper."""
 		return inspect.ismethod(method) and hasattr(method, "signal_params")
 
+	def _is_exportable_getter(self, method):
+		"""Check if method was marked with @exports.get_property wrapper."""
+		return inspect.ismethod(method) and hasattr(method, "property_get_params")
+
+	def _is_exportable_setter(self, method):
+		"""Check if method was marked with @exports.set_property wrapper."""
+		return inspect.ismethod(method) and hasattr(method, "property_set_params")
+
 	def _export_method(self, method):
 		"""Register method to all exporters."""
 		for exporter in self._exporters:
@@ -43,10 +51,28 @@ class ExportsController(tuned.patterns.Singleton):
 			kwargs = method.signal_params[1]
 			exporter.signal(method, *args, **kwargs)
 
+	def _export_getter(self, method):
+		"""Register property getter to all exporters."""
+		for exporter in self._exporters:
+			args = method.property_get_params[0]
+			kwargs = method.property_get_params[1]
+			exporter.property_getter(method, *args, **kwargs)
+
+	def _export_setter(self, method):
+		"""Register property setter to all exporters."""
+		for exporter in self._exporters:
+			args = method.property_set_params[0]
+			kwargs = method.property_set_params[1]
+			exporter.property_setter(method, *args, **kwargs)
+
 	def send_signal(self, signal, *args, **kwargs):
 		"""Register signal to all exporters."""
 		for exporter in self._exporters:
 			exporter.send_signal(signal, *args, **kwargs)
+
+	def property_changed(self, *args, **kwargs):
+		for exporter in self._exporters:
+			exporter.property_changed(*args, **kwargs)
 
 	def period_check(self):
 		"""Allows to perform checks on exporters without special thread."""
@@ -62,6 +88,10 @@ class ExportsController(tuned.patterns.Singleton):
 				self._export_method(method)
 			for name, method in inspect.getmembers(instance, self._is_exportable_signal):
 				self._export_signal(method)
+			for name, method in inspect.getmembers(instance, self._is_exportable_getter):
+				self._export_getter(method)
+			for name, method in inspect.getmembers(instance, self._is_exportable_setter):
+				self._export_setter(method)
 
 		self._exports_initialized = True
 

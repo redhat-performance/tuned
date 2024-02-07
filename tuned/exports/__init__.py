@@ -1,6 +1,7 @@
 from . import interfaces
 from . import controller
 from . import dbus_exporter as dbus
+from . import dbus_exporter_with_properties as dbus_with_properties
 from . import unix_socket_exporter as unix_socket
 
 def export(*args, **kwargs):
@@ -16,6 +17,24 @@ def signal(*args, **kwargs):
 		method.signal_params = [ args, kwargs ]
 		return method
 	return wrapper
+
+def property_setter(*args, **kwargs):
+	"""Decorator, use to mark setters of exportable properties."""
+	def wrapper(method):
+		method.property_set_params = [ args, kwargs ]
+		return method
+	return wrapper
+
+def property_getter(*args, **kwargs):
+	"""Decorator, use to mark getters of exportable properties."""
+	def wrapper(method):
+		method.property_get_params = [ args, kwargs ]
+		return method
+	return wrapper
+
+def property_changed(*args, **kwargs):
+	ctl = controller.ExportsController.get_instance()
+	return ctl.property_changed(*args, **kwargs)
 
 def register_exporter(instance):
 	if not isinstance(instance, interfaces.ExporterInterface):

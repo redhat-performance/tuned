@@ -63,7 +63,7 @@ class DBusExporter(interfaces.ExporterInterface):
 	to an object we dynamically construct.
 	"""
 
-	def __init__(self, bus_name, interface_name, object_name):
+	def __init__(self, bus_name, interface_name, object_name, namespace):
 		# Monkey patching of the D-Bus library _method_reply_error() to reply
 		# tracebacks via D-Bus only if in the debug mode. It doesn't seem there is a
 		# more simple way how to cover all possible exceptions that could occur in
@@ -82,6 +82,7 @@ class DBusExporter(interfaces.ExporterInterface):
 		self._bus_name = bus_name
 		self._interface_name = interface_name
 		self._object_name = object_name
+		self._namespace = namespace
 		self._thread = None
 		self._bus_object = None
 		self._polkit = polkit()
@@ -130,7 +131,7 @@ class DBusExporter(interfaces.ExporterInterface):
 			raise Exception("Method with this name is already exported.")
 
 		def wrapper(owner, *args, **kwargs):
-			action_id = consts.NAMESPACE + "." + method.__name__
+			action_id = self._namespace + "." + method.__name__
 			caller = args[-1]
 			log.debug("checking authorization for action '%s' requested by caller '%s'" % (action_id, caller))
 			ret = self._polkit.check_authorization(caller, action_id)
