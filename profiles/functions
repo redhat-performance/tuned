@@ -356,13 +356,16 @@ _wifi_set_power_level() {
 	# 6    disable power savings
 	level=$1
 
+	# do not report errors on systems with no wireless
+	[ -e /proc/net/wireless ] || return 0
+
 	# apply the settings using iwpriv
 	ifaces=$(cat /proc/net/wireless | grep -v '|' | sed 's@^ *\([^:]*\):.*@\1@')
 	for iface in $ifaces; do
 		iwpriv $iface set_power $level
 	done
 
-	# some adapters may relay on sysfs
+	# some adapters may rely on sysfs
 	for i in /sys/bus/pci/devices/*/power_level; do
 		(echo $level > $i) &> /dev/null
 	done
