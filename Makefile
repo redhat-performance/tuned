@@ -66,7 +66,7 @@ release-cp: release-dir
 	cp -a tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
 		tuned-adm.bash dbus.conf recommend.conf tuned-main.conf 00_tuned \
 		92-tuned.install bootcmdline modules.conf com.redhat.tuned.policy \
-		tuned-gui.py tuned-gui.glade \
+		tuned-gui.py tuned-gui.glade tuned-ppd.py \
 		tuned-gui.desktop $(VERSIONED_NAME)
 	cp -a doc experiments libexec man profiles systemtap tuned contrib icons \
 		tests $(VERSIONED_NAME)
