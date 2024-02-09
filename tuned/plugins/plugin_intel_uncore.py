@@ -59,9 +59,6 @@ class IntelUncorePlugin(hotplug.Plugin):
 	def _instance_cleanup(self, instance):
 		pass
 
-	def _device_module_name(self, device):
-		return "intel_uncore_frequency"
-
 	def _get(self, dev_dir, file):
 		sysfs_file = SYSFS_DIR + dev_dir + "/" + file
 		value = cmd.read_file(sysfs_file)
@@ -100,11 +97,11 @@ class IntelUncorePlugin(hotplug.Plugin):
 
 		if min_or_max == IS_MAX:
 			if freq_khz < min_freq_khz:
-				log.error("%s max_freq_khz %d value below min_freq_khz %d" % (device, freq_khz, min_freq_khz))
+				log.error("%s: max_freq_khz %d value below min_freq_khz %d" % (device, freq_khz, min_freq_khz))
 				return None
 
 			if freq_khz > initial_max_freq_khz:
-				log.info("%s: max_freq_khz %d above initial_max_freq_khz - capped to %d" % (device, freq_khz, initial_max_freq_khz))
+				log.info("%s: max_freq_khz %d value above initial_max_freq_khz - capped to %d" % (device, freq_khz, initial_max_freq_khz))
 				freq_khz = initial_max_freq_khz
 
 		elif min_or_max == IS_MIN:
@@ -113,7 +110,7 @@ class IntelUncorePlugin(hotplug.Plugin):
 				return None
 
 			if freq_khz < initial_min_freq_khz:
-				log.info("%s: min_freq_khz %d below initial_max_freq_khz - capped to %d" % (device, freq_khz, initial_min_freq_khz))
+				log.info("%s: min_freq_khz %d value below initial_max_freq_khz - capped to %d" % (device, freq_khz, initial_min_freq_khz))
 				freq_khz = initial_min_freq_khz
 
 		else:
@@ -122,7 +119,7 @@ class IntelUncorePlugin(hotplug.Plugin):
 		return freq_khz
 
 	@command_set("max_freq_khz", per_device = True)
-	def _set_max_freq_khz(self, value, device, sim):
+	def _set_max_freq_khz(self, value, device, sim, remove):
 		max_freq_khz = self._validate_value(device, IS_MAX, value)
 		if max_freq_khz is None:
 			return None
@@ -148,7 +145,7 @@ class IntelUncorePlugin(hotplug.Plugin):
 		return max_freq_khz
 
 	@command_set("min_freq_khz", per_device = True)
-	def _set_min_freq_khz(self, value, device, sim):
+	def _set_min_freq_khz(self, value, device, sim, remove):
 		min_freq_khz = self._validate_value(device, IS_MIN, value)
 		if min_freq_khz is None:
 			return None
