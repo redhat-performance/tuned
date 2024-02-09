@@ -36,16 +36,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.21.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.22.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -577,6 +577,34 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Fri Feb  9 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.22.0-0.1.rc1
+- new release
+  - rebased tuned to latest upstream
+    resolves: RHEL-17121
+  - print all arguments of failing commands in error messages
+    resolves: RHEL-3689
+  - plugin_sysctl: added support for sysctl names with slash
+    resolves: RHEL-3707
+  - tuned-adm: added support for moving devices between plugin instances
+    resolves: RHEL-15141
+  - api: added methods for retrieval of plugin instances and devices
+    resolves: RHEL-15137
+  - plugin_cpu: amd-pstate mentioned instead of just intel_pstate
+    resolves: RHEL-16469
+  - hotplug: do not report ENOENT errors on device remove
+    resolves: RHEL-11342
+  - plugin_sysctl: expand variables when reporting overrides
+    resolves: RHEL-18972
+  - plugin_acpi: new plugin which handles ACPI platform_profile
+    resolves: RHEL-16966
+  - plugin_bootloader: skip calling rpm-ostree kargs in no-op case
+    resolves: RHEL-20767
+  - plugin_cpu: support cstate settings of pm_qos_resume_latency_us
+    resolves: RHEL-21129
+  - scheduler: add option for ignoring IRQs affinity
+    resolves: RHEL-21923
+  - plugin_intel_uncore: new plugin for uncore setting
+
 * Tue Aug 29 2023 Jaroslav Škarvada <jskarvad@redhat.com> - 2.21.0-1
 - new release
   - rebased tuned to latest upstream
