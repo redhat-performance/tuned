@@ -461,7 +461,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 	def _parse_latency(self, latency, allow_na=False):
 		self.cstates_latency = None
 		latencies = str(latency).split("|")
-		log.debug("parsing latency")
+		log.debug("parsing latency '%s', allow_na '%s'" % (latency, allow_na))
 		for latency in latencies:
 			try:
 				latency = int(latency)
@@ -479,10 +479,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 					log.debug("latency 'none' specified")
 					return None, True
 				elif allow_na and latency == "n/a":
+					log.debug("latency 'n/a' specified")
 					pass
 				else:
-					latency = None
 					log.debug("invalid latency specified: '%s'" % str(latency))
+					latency = None
 			if latency is not None:
 				break
 		return latency, False
@@ -723,7 +724,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if skip or not self._check_pm_qos_resume_latency_us(device):
 			return None
 		if latency is None or (latency != "n/a" and latency < 0):
-			log.warning("Failed to set pm_qos_resume_latency_us on cpu '%s'. Is the value in the profile correct?" % device)
+			log.warning("Invalid pm_qos_resume_latency_us specified: '%s', cpu: '%s'." % (pm_qos_resume_latency_us, device))
 			return None
 		if not sim:
 			self._cmd.write_to_file(self._pm_qos_resume_latency_us_path(device), latency, \
