@@ -288,9 +288,6 @@ make html %{make_python_arg}
 %install
 make install DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
 make install-ppd DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
-%if 0%{?rhel}
-sed -i 's/\(dynamic_tuning[ \t]*=[ \t]*\).*/\10/' %{buildroot}%{_sysconfdir}/tuned/tuned-main.conf
-%endif
 
 %if ! 0%{?rhel}
 # manual
