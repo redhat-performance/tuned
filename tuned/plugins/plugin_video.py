@@ -115,6 +115,9 @@ class VideoPlugin(base.Plugin):
 	@command_get("radeon_powersave")
 	def _get_radeon_powersave(self, device, ignore_missing = False):
 		sys_files = self._files(device)
+		if not os.path.exists(sys_files["method"]):
+			log.debug("radeon_powersave is not supported on '%s'" % device)
+			return None
 		method = self._cmd.read_file(sys_files["method"], no_error=ignore_missing).strip()
 		if method == "profile":
 			return self._cmd.read_file(sys_files["profile"]).strip()
