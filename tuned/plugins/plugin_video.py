@@ -69,7 +69,7 @@ class VideoPlugin(base.Plugin):
 	def _instance_cleanup(self, instance):
 		pass
 
-	def _radeon_powersave_files(self, device):
+	def _files(self, device):
 		return {
 			"method" : "/sys/class/drm/%s/device/power_method" % device,
 			"profile": "/sys/class/drm/%s/device/power_profile" % device,
@@ -78,7 +78,7 @@ class VideoPlugin(base.Plugin):
 
 	@command_set("radeon_powersave", per_device=True)
 	def _set_radeon_powersave(self, value, device, sim, remove):
-		sys_files = self._radeon_powersave_files(device)
+		sys_files = self._files(device)
 		va = str(re.sub(r"(\s*:\s*)|(\s+)|(\s*;\s*)|(\s*,\s*)", " ", value)).split()
 		if not os.path.exists(sys_files["method"]):
 			if not sim:
@@ -114,7 +114,7 @@ class VideoPlugin(base.Plugin):
 
 	@command_get("radeon_powersave")
 	def _get_radeon_powersave(self, device, ignore_missing = False):
-		sys_files = self._radeon_powersave_files(device)
+		sys_files = self._files(device)
 		method = self._cmd.read_file(sys_files["method"], no_error=ignore_missing).strip()
 		if method == "profile":
 			return self._cmd.read_file(sys_files["profile"]).strip()
