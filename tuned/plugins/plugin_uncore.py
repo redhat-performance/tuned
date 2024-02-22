@@ -14,19 +14,22 @@ SYSFS_DIR = "/sys/devices/system/cpu/intel_uncore_frequency/"
 IS_MIN = 0
 IS_MAX = 1
 
-class IntelUncorePlugin(hotplug.Plugin):
+class UncorePlugin(hotplug.Plugin):
 	"""
-	`intel_uncore`::
+	`uncore`::
 
 	`max_freq_khz, min_freq_khz`:::
 	Limit the maximum and minumum uncore frequency.
+
+	Those options are Intel specific and correspond directly to `sysfs` files
+	exposed by Intel uncore frequency driver.
 	====
 	----
-	[intel_uncore]
+	[uncore]
 	max_freq_khz=4000000
 	----
 	Using this options *TuneD* will limit maximum frequency of all uncore units
-	in the system to 4 GHz
+	on the Intel system to 4 GHz.
 	====
 	"""
 
