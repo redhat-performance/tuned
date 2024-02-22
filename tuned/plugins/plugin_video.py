@@ -82,7 +82,7 @@ class VideoPlugin(base.Plugin):
 		va = str(re.sub(r"(\s*:\s*)|(\s+)|(\s*;\s*)|(\s*,\s*)", " ", value)).split()
 		if not os.path.exists(sys_files["method"]):
 			if not sim:
-				log.warn("radeon_powersave is not supported on '%s'" % device)
+				log.debug("radeon_powersave is not supported on '%s'" % device)
 				return None
 		for v in va:
 			if v in ["default", "auto", "low", "mid", "high"]:
