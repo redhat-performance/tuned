@@ -1,10 +1,12 @@
 import tuned.consts as consts
 from . import base
 import tuned.logs
+from tuned.verifylog import VerifyLog
 import os
 from subprocess import Popen, PIPE
 
 log = tuned.logs.get()
+vlog = VerifyLog.get_obj()
 
 class ScriptPlugin(base.Plugin):
 	"""
@@ -107,10 +109,13 @@ class ScriptPlugin(base.Plugin):
 		if ignore_missing:
 			args += ["ignore_missing"]
 		if self._call_scripts(instance._scripts, args) == True:
-			log.info(consts.STR_VERIFY_PROFILE_OK % instance._scripts)
+			msg = consts.STR_VERIFY_PROFILE_OK % instance._scripts
+			log.info(msg)
 		else:
-			log.error(consts.STR_VERIFY_PROFILE_FAIL % instance._scripts)
+			msg = consts.STR_VERIFY_PROFILE_FAIL % instance._scripts
+			log.error(msg)
 			ret = False
+		vlog.add_log(instance.name, "scripts", msg, result=ret)
 		return ret
 
 	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):

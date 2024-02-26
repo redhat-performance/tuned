@@ -2,12 +2,15 @@ import re
 import tuned.consts as consts
 import tuned.profiles.variables
 import tuned.logs
+from tuned.verifylog import VerifyLog
 import collections
 from tuned.utils.commands import commands
 import os
 from subprocess import Popen, PIPE
 
 log = tuned.logs.get()
+vlog = VerifyLog.get_obj()
+dlog = []   # device verification log
 
 class Plugin(object):
 	"""
@@ -454,6 +457,7 @@ class Plugin(object):
 
 	def _verify_all_device_commands(self, instance, devices, ignore_missing):
 		ret = True
+		global dlog
 		for command in [command for command in list(self._commands.values()) if command["per_device"]]:
 			new_value = instance.options.get(command["name"], None)
 			if new_value is None:
@@ -461,6 +465,9 @@ class Plugin(object):
 			for device in devices:
 				if self._verify_device_command(instance, command, device, new_value, ignore_missing) == False:
 					ret = False
+			vlog.add_log(instance.name, command["name"],
+					expected=new_value, devices=dlog)
+			dlog = []
 		return ret
 
 	def _process_assignment_modifiers(self, new_value, current_value):
@@ -522,18 +529,20 @@ class Plugin(object):
 			return re.sub(r'^\s*(0+,?)+', "", v)
 		return v
 
-	def _verify_value(self, name, new_value, current_value, ignore_missing, device = None):
+	def _verify_value(self, name, new_value, current_value, ignore_missing, device=None, iname=""):
 		if new_value is None:
 			return None
+
+		global dlog
 		ret = False
 		if current_value is None and ignore_missing:
 			if device is None:
 				log.info(consts.STR_VERIFY_PROFILE_VALUE_MISSING % name)
 			else:
 				log.info(consts.STR_VERIFY_PROFILE_DEVICE_VALUE_MISSING % (device, name))
-			return True
+			ret = True
 
-		if current_value is not None:
+		elif current_value is not None:
 			current_value = self._norm_value(current_value)
 			new_value = self._norm_value(new_value)
 			try:
@@ -550,8 +559,18 @@ class Plugin(object):
 							ret = val == current_value
 							if ret:
 								break
-		self._log_verification_result(name, ret, new_value,
-				current_value, device = device)
+			self._log_verification_result(name, ret, new_value,
+					current_value, device = device)
+
+		if (device is not None):
+			# For device commands vlog.add_log() is called from
+			# _verify_all_device_commands() function, after
+			# iterating over all devices.
+			#
+			dlog.append({device: {"current": current_value, "result": ret}})
+		elif (iname is not ""):
+			vlog.add_log(iname, name, current_value, new_value, result=ret)
+
 		return ret
 
 	def _log_verification_result(self, name, success, new_value,

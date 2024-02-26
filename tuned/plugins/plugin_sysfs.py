@@ -68,7 +68,7 @@ class SysfsPlugin(base.Plugin):
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
 					curr_val = self._read_sysfs(f)
-					if self._verify_value(f, v, curr_val, ignore_missing) == False:
+					if self._verify_value(f, v, curr_val, ignore_missing, iname=instance.name) == False:
 						ret = False
 		return ret
 

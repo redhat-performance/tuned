@@ -89,7 +89,8 @@ if __name__ == "__main__":
 
 	parser_verify = subparsers.add_parser("verify", help="verify profile")
 	parser_verify.set_defaults(action="verify_profile")
-	parser_verify.add_argument("--ignore-missing", "-i", action="store_true", help="do not treat missing/non-supported tunings as errors")
+	parser_verify.add_argument("-i", "--ignore-missing", action="store_true", help="do not treat missing/non-supported tunings as errors")
+	parser_verify.add_argument("-v", "--verbose", action="store_true", help="show verification results")
 
 	parser_auto_profile = subparsers.add_parser("auto_profile", help="enable automatic profile selection mode, switch to the recommended profile")
 	parser_auto_profile.set_defaults(action="auto_profile")
