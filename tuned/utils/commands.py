@@ -208,12 +208,12 @@ class commands:
 
 		return self.write_to_file(f, data)
 
-	# calcualtes md5sum of file 'f'
+	# calcualates md5sum of file 'f'
 	def md5sum(self, f):
 		data = self.read_file(f)
 		return hashlib.md5(str(data).encode("utf-8")).hexdigest()
 
-	# calcualtes sha256sum of file 'f'
+	# calcualates sha256sum of file 'f'
 	def sha256sum(self, f):
 		data = self.read_file(f)
 		return hashlib.sha256(str(data).encode("utf-8")).hexdigest()
@@ -442,7 +442,7 @@ class commands:
 		return [str(v).replace(r"\,", ",") for v in l]
 
 	# Do not make balancing on patched Python 2 interpreter (rhbz#1028122).
-	# It means less CPU usage on patchet interpreter. On non-patched interpreter
+	# It means less CPU usage on patched interpreter. On non-patched interpreter
 	# it is not allowed to sleep longer than 50 ms.
 	def wait(self, terminate, time):
 		try:
