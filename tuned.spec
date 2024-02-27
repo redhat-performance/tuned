@@ -1308,7 +1308,7 @@ fi
     resolves: rhbz#1144858
   - improved error handling of switch_profile
     resolves: rhbz#1068699
-  - tuned-adm: active: detect whether tuned deamon is running
+  - tuned-adm: active: detect whether tuned daemon is running
     related: rhbz#1068699
   - removed active_profile from RPM verification
     resolves: rhbz#1104126
