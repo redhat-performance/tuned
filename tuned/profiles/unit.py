@@ -6,11 +6,12 @@ class Unit(object):
 	Unit description.
 	"""
 
-	__slots__ = [ "_name", "_type", "_enabled", "_replace", "_drop", "_devices", "_devices_udev_regex", \
+	__slots__ = [ "_name", "_priority", "_type", "_enabled", "_replace", "_drop", "_devices", "_devices_udev_regex", \
 		"_cpuinfo_regex", "_uname_regex", "_script_pre", "_script_post", "_options" ]
 
 	def __init__(self, name, config):
 		self._name = name
+		self._priority = config.pop("priority", None)
 		self._type = config.pop("type", self._name)
 		self._enabled = config.pop("enabled", True) in [True, "True", "true", 1, "1"]
 		self._replace = config.pop("replace", False) in [True, "True", "true", 1, "1"]
@@ -28,6 +29,14 @@ class Unit(object):
 	@property
 	def name(self):
 		return self._name
+
+	@property
+	def priority(self):
+		return self._priority
+
+	@priority.setter
+	def priority(self, value):
+		self._priority = value
 
 	@property
 	def type(self):
