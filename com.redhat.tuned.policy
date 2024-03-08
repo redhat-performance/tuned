@@ -247,4 +247,24 @@
     </defaults>
   </action>
 
+  <action id="com.redhat.tuned.instance_create">
+    <description>Create new plugin instance</description>
+    <message>Authentication is required to create a new plugin instance</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="com.redhat.tuned.instance_destroy">
+    <description>Delete a plugin instance</description>
+    <message>Authentication is required to destroy the instance</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
 </policyconfig>
