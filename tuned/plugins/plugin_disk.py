@@ -180,23 +180,22 @@ class DiskPlugin(hotplug.Plugin):
 		self._apm_errcnt = 0
 		self._spindown_errcnt = 0
 
-		if self._option_bool(instance.options["dynamic"]):
-			instance._has_dynamic_tuning = True
-			instance._load_monitor = \
-					self._monitors_repository.create(
-					"disk", instance.assigned_devices)
-			instance._device_idle = {}
-			instance._stats = {}
-			instance._idle = {}
-			instance._spindown_change_delayed = {}
-		else:
-			instance._has_dynamic_tuning = False
-			instance._load_monitor = None
+		instance._load_monitor = None
+		instance._has_dynamic_tuning = self._option_bool(instance.options["dynamic"])
 
 	def _instance_cleanup(self, instance):
 		if instance._load_monitor is not None:
 			self._monitors_repository.delete(instance._load_monitor)
 			instance._load_monitor = None
+
+	def _instance_init_dynamic(self, instance):
+		super(DiskPlugin, self)._instance_init_dynamic(instance)
+		instance._device_idle = {}
+		instance._stats = {}
+		instance._idle = {}
+		instance._spindown_change_delayed = {}
+		instance._load_monitor = self._monitors_repository.create(
+						"disk", instance.assigned_devices)
 
 	def _update_errcnt(self, rc, spindown):
 		if spindown:

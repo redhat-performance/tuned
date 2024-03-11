@@ -49,12 +49,16 @@ class EeePCSHEPlugin(base.Plugin):
 		instance._has_static_tuning = False
 		instance._has_dynamic_tuning = True
 		instance._she_mode = None
-		instance._load_monitor = self._monitors_repository.create("load", None)
+		instance._load_monitor = None
 
 	def _instance_cleanup(self, instance):
 		if instance._load_monitor is not None:
 			self._monitors_repository.delete(instance._load_monitor)
 			instance._load_monitor = None
+
+	def _instance_init_dynamic(self, instance):
+		super(EeePCSHEPlugin, self)._instance_init_dynamic(instance)
+		instance._load_monitor = self._monitors_repository.create("load", None)
 
 	def _instance_update_dynamic(self, instance, device):
 		load = instance._load_monitor.get_load()["system"]

@@ -317,6 +317,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
 		instance._has_dynamic_tuning = False
+		instance._load_monitor = None
 
 		# only the first instance of the plugin can control the latency
 		if list(self._instances.values())[0] == instance:
@@ -329,10 +330,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			self._latency = None
 
 			if instance.options["force_latency"] is None and instance.options["pm_qos_resume_latency_us"] is None:
-				instance._load_monitor = self._monitors_repository.create("load", None)
 				instance._has_dynamic_tuning = True
-			else:
-				instance._load_monitor = None
 
 			self._check_arch()
 		else:
@@ -350,6 +348,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 				os.close(self._cpu_latency_fd)
 			if instance._load_monitor is not None:
 				self._monitors_repository.delete(instance._load_monitor)
+
+	def _instance_init_dynamic(self, instance):
+		super(CPULatencyPlugin, self)._instance_init_dynamic(instance)
+		if instance._first_instance:
+			instance._load_monitor = self._monitors_repository.create("load", None)
 
 	def _get_intel_pstate_attr(self, attr):
 		return self._cmd.read_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, None).strip()
