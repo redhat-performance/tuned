@@ -263,6 +263,7 @@ class Plugin(object):
 			self._call_device_script(instance, instance.script_post,
 					"apply", instance.assigned_devices)
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
+			self._instance_init_dynamic(instance)
 			self._run_for_each_device(instance, self._instance_apply_dynamic, instance.assigned_devices)
 		instance.processed_devices.update(instance.assigned_devices)
 		instance.assigned_devices.clear()
@@ -332,6 +333,9 @@ class Plugin(object):
 		self._cleanup_all_device_commands(instance,
 				instance.processed_devices)
 		self._cleanup_all_non_device_commands(instance)
+
+	def _instance_init_dynamic(self, instance):
+		pass
 
 	def _instance_apply_dynamic(self, instance, device):
 		for option in [opt for opt in self._options_used_by_dynamic if self._storage_get(instance, self._commands[opt], device) is None]:

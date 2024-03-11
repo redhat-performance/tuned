@@ -176,21 +176,21 @@ class NetTuningPlugin(hotplug.Plugin):
 
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
-		if self._option_bool(instance.options["dynamic"]):
-			instance._has_dynamic_tuning = True
-			instance._load_monitor = self._monitors_repository.create("net", instance.assigned_devices)
-			instance._idle = {}
-			instance._stats = {}
-		else:
-			instance._has_dynamic_tuning = False
-			instance._load_monitor = None
-			instance._idle = None
-			instance._stats = None
+		instance._load_monitor = None
+		instance._idle = None
+		instance._stats = None
+		instance._has_dynamic_tuning = self._option_bool(instance.options["dynamic"])
 
 	def _instance_cleanup(self, instance):
 		if instance._load_monitor is not None:
 			self._monitors_repository.delete(instance._load_monitor)
 			instance._load_monitor = None
+
+	def _instance_init_dynamic(self, instance):
+		super(NetTuningPlugin, self)._instance_init_dynamic(instance)
+		instance._idle = {}
+		instance._stats = {}
+		instance._load_monitor = self._monitors_repository.create("net", instance.assigned_devices)
 
 	def _instance_apply_dynamic(self, instance, device):
 		self._instance_update_dynamic(instance, device)
