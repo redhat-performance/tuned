@@ -2,6 +2,9 @@ import tuned.monitors
 import os
 import re
 from tuned.utils.nettool import ethcard
+from tuned.utils.commands import commands
+
+cmd = commands()
 
 class NetMonitor(tuned.monitors.Monitor):
 
@@ -30,8 +33,7 @@ class NetMonitor(tuned.monitors.Monitor):
 	def _updateStat(cls, dev):
 		files = ["rx_bytes", "rx_packets", "tx_bytes", "tx_packets"]
 		for i,f in enumerate(files):
-			with open("/sys/class/net/" + dev + "/statistics/" + f) as statfile:
-				cls._load[dev][i] = statfile.read().strip()
+			cls._load[dev][i] = cmd.read_file("/sys/class/net/" + dev + "/statistics/" + f, err_ret = "0").strip()
 
 	@classmethod
 	def update(cls):
