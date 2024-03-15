@@ -5,6 +5,7 @@ from tuned.exceptions import TunedException
 import threading
 import tuned.consts as consts
 from tuned.utils.commands import commands
+from tuned.plugins import hotplug
 
 __all__ = ["Controller"]
 
@@ -350,6 +351,10 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 				break
 		if not found:
 			rets = "Instance '%s' not found" % instance_name
+			log.error(rets)
+			return (False, rets)
+		if not isinstance(instance_target.plugin, hotplug.Plugin):
+			rets = "Plugin '%s' does not support hotplugging or dynamic instances." % instance_target.plugin.name
 			log.error(rets)
 			return (False, rets)
 		devs = set(self._cmd.devstr2devs(devices))
