@@ -63,19 +63,35 @@ class Manager(object):
 	def create(self, instances_config):
 		instance_info_list = []
 		for instance_name, instance_info in list(instances_config.items()):
-			if not instance_info.enabled:
-				log.debug("skipping disabled instance '%s'" % instance_name)
-				continue
-			if not self._unit_matches_cpuinfo(instance_info):
-				log.debug("skipping instance '%s', cpuinfo does not match" % instance_name)
-				continue
-			if not self._unit_matches_uname(instance_info):
-				log.debug("skipping instance '%s', uname does not match" % instance_name)
-				continue
+			if type(instance_info) == list:
+                                for sub_instance in instance_info:
+                                        if not sub_instance.enabled:
+                                                log.debug("skipping disabled instance '%s'" % instance_name)
+                                                continue
+                                        if not self._unit_matches_cpuinfo(sub_instance):
+                                                log.debug("skipping instance '%s', cpuinfo does not match" % instance_name)
+                                                continue
+                                        if not self._unit_matches_uname(sub_instance):
+                                                log.debug("skipping instance '%s', uname does not match" % instance_name)
+                                                continue
 
-			instance_info.options.setdefault("priority", self._def_instance_priority)
-			instance_info.options["priority"] = int(instance_info.options["priority"])
-			instance_info_list.append(instance_info)
+                                        sub_instance.options.setdefault("priority", self._def_instance_priority)
+                                        sub_instance.options["priority"] = int(sub_instance.options["priority"])
+                                        instance_info_list.append(sub_instance)
+			else:
+				if not instance_info.enabled:
+					log.debug("skipping disabled instance '%s'" % instance_name)
+					continue
+				if not self._unit_matches_cpuinfo(instance_info):
+					log.debug("skipping instance '%s', cpuinfo does not match" % instance_name)
+					continue
+				if not self._unit_matches_uname(instance_info):
+					log.debug("skipping instance '%s', uname does not match" % instance_name)
+					continue
+
+				instance_info.options.setdefault("priority", self._def_instance_priority)
+				instance_info.options["priority"] = int(instance_info.options["priority"])
+				instance_info_list.append(instance_info)
 
 		instance_info_list.sort(key=lambda x: x.options["priority"])
 		plugins_by_name = collections.OrderedDict()

@@ -7,7 +7,7 @@ class Unit(object):
 	"""
 
 	__slots__ = [ "_name", "_type", "_enabled", "_replace", "_drop", "_devices", "_devices_udev_regex", \
-		"_cpuinfo_regex", "_uname_regex", "_script_pre", "_script_post", "_options" ]
+		"_cpuinfo_regex", "_uname_regex", "_script_pre", "_script_post", "_merge_type", "_options" ]
 
 	def __init__(self, name, config):
 		self._name = name
@@ -23,6 +23,7 @@ class Unit(object):
 		self._uname_regex = config.pop("uname_regex", None)
 		self._script_pre = config.pop("script_pre", None)
 		self._script_post = config.pop("script_post", None)
+		self._merge_type = config.pop("merge_type", "apply")
 		self._options = collections.OrderedDict(config)
 
 	@property
@@ -104,6 +105,14 @@ class Unit(object):
 	@script_post.setter
 	def script_post(self, value):
 		self._script_post = value
+
+	@property
+	def merge_type(self):
+		return self._merge_type
+
+	@merge_type.setter
+	def merge_type(self, value):
+		self._merge_type = value
 
 	@property
 	def options(self):

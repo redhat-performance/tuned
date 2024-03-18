@@ -95,13 +95,15 @@ class Plugin(object):
 
 	def create_instance(self, name, devices_expression, devices_udev_regex, script_pre, script_post, options):
 		"""Create new instance of the plugin and seize the devices."""
-		if name in self._instances:
-			raise Exception("Plugin instance with name '%s' already exists." % name)
 
 		effective_options = self._get_effective_options(options)
 		instance = self._instance_factory.create(self, name, devices_expression, devices_udev_regex, \
 			script_pre, script_post, effective_options)
-		self._instances[name] = instance
+
+		if name in self._instances:
+			self._instances[name].append(instance)
+		else:
+			self._instances[name] = [instance]
 
 		return instance
 
@@ -112,9 +114,13 @@ class Plugin(object):
 		if instance.name not in self._instances:
 			raise Exception("Plugin instance '%s' was already destroyed." % instance)
 
-		instance = self._instances[instance.name]
+		if type(self._instances[instance.name]) == list:
+			instance = self._instances[instance.name][0]
+		else:
+			instance = self._instances[instance.name]
 		self._destroy_instance(instance)
-		del self._instances[instance.name]
+		if self._instances[instance.name] == []:
+			del self._instances[instance.name]
 
 	def initialize_instance(self, instance):
 		"""Initialize an instance."""
@@ -123,7 +129,7 @@ class Plugin(object):
 
 	def destroy_instances(self):
 		"""Destroy all instances."""
-		for instance in list(self._instances.values()):
+		for instance in sum(list(self._instances.values()), []):
 			log.debug("destroying instance %s (%s)" % (instance.name, self.name))
 			self._destroy_instance(instance)
 		self._instances.clear()
