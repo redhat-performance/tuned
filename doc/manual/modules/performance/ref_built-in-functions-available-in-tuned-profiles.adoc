@@ -55,3 +55,6 @@ Unpacks a CPU list in the form of `1-3,4` to `1,2,3,4`.
 
 `cpulist_pack`::
 Packs a CPU list in the form of `1,2,3,5` to `1-3,5`.
+
+`intel_recommended_pstate`::
+Returns recommended intel_pstate CPUFreq driver mode based on processor generation.
