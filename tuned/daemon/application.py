@@ -50,7 +50,7 @@ class Application(object):
 
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()
-		profile_locator = profiles.Locator(consts.LOAD_DIRECTORIES)
+		profile_locator = profiles.Locator(self.config.get_list(consts.CFG_PROFILE_DIRS, consts.CFG_DEF_PROFILE_DIRS))
 		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger, self.config, self.variables)
 
 		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, self.config, self)

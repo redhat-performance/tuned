@@ -130,7 +130,7 @@ class Base(object):
 			return
 
 		self.manager = tuned.gtk.gui_profile_loader.GuiProfileLoader(
-			tuned.consts.LOAD_DIRECTORIES)
+			self.config.get_list(consts.CFG_PROFILE_DIRS, consts.CFG_DEF_PROFILE_DIRS))
 
 		self.plugin_loader = tuned.gtk.gui_plugin_loader.GuiPluginLoader()
 
@@ -373,8 +373,8 @@ class Base(object):
 
 			try:
 				self.manager.remove_profile(profile, is_admin=self.is_admin)
-			except ManagerException:
-				self.error_dialog('failed to authorize', '')
+			except ManagerException as ex:
+				self.error_dialog('Removing profile failed', ex.__str__())
 				return
 
 			for item in self.treestore_profiles:
@@ -591,8 +591,8 @@ class Base(object):
 				copied_profile.name = self.editing_profile_name + '-modified'
 				try:
 					self.manager.save_profile(copied_profile)
-				except ManagerException:
-					self.error_dialog('failed to authorize', '')
+				except ManagerException as ex:
+					self.error_dialog('Error saving profile', ex.__str__())
 					return
 			else:
 				if not TunedDialog('System profile can not be modified '
