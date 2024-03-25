@@ -83,7 +83,7 @@ class Application(object):
 			raise TunedException("Unix socket interface is already initialized.")
 
 		self._unix_socket_exporter = exports.unix_socket.UnixSocketExporter(self.config.get(consts.CFG_UNIX_SOCKET_PATH),
-																			self.config.get(consts.CFG_UNIX_SOCKET_SIGNAL_PATHS),
+																			self.config.get_list(consts.CFG_UNIX_SOCKET_SIGNAL_PATHS),
 																			self.config.get(consts.CFG_UNIX_SOCKET_OWNERSHIP),
 																			self.config.get_int(consts.CFG_UNIX_SOCKET_PERMISIONS),
 																			self.config.get_int(consts.CFG_UNIX_SOCKET_CONNECTIONS_BACKLOG))
