@@ -246,7 +246,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 			# Possible other x86 vendors (from arch/x86/kernel/cpu/*):
 			# "CentaurHauls", "CyrixInstead", "Geode by NSC", "HygonGenuine", "GenuineTMx86",
 			# "TransmetaCPU", "UMC UMC UMC"
-			cpu = procfs.cpuinfo()
+			try:
+				cpu = procfs.cpuinfo()
+			except AttributeError as error:
+				log.error("Unable to detect CPU: %s" % error)
+				return
 			vendor = cpu.tags.get("vendor_id")
 			if vendor == "GenuineIntel":
 				self._is_intel = True
@@ -295,7 +299,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 	def _get_cpuinfo_flags(self):
 		if self._flags is None:
-			self._flags = procfs.cpuinfo().tags.get("flags", [])
+			try:
+				self._flags = procfs.cpuinfo().tags.get("flags", [])
+			except AttributeError as error:
+				log.error("failed to read flags: %s" % error)
+				return []
 		return self._flags
 
 	def _is_cpu_online(self, device):
