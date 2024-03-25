@@ -73,14 +73,15 @@ class Manager(object):
 				log.debug("skipping instance '%s', uname does not match" % instance_name)
 				continue
 
-			instance_info.options.setdefault("priority", self._def_instance_priority)
-			instance_info.options["priority"] = int(instance_info.options["priority"])
+			if instance_info.priority is None:
+				instance_info.priority = int(self._def_instance_priority)
+			else:
+				instance_info.priority = int(instance_info.priority)
 			instance_info_list.append(instance_info)
 
-		instance_info_list.sort(key=lambda x: x.options["priority"])
+		instance_info_list.sort(key=lambda x: x.priority)
 		plugins_by_name = collections.OrderedDict()
 		for instance_info in instance_info_list:
-			instance_info.options.pop("priority")
 			plugins_by_name[instance_info.type] = None
 
 		for plugin_name, none in list(plugins_by_name.items()):
@@ -102,7 +103,8 @@ class Manager(object):
 			if plugin is None:
 				continue
 			log.debug("creating '%s' (%s)" % (instance_info.name, instance_info.type))
-			new_instance = plugin.create_instance(instance_info.name, instance_info.devices, instance_info.devices_udev_regex, \
+			new_instance = plugin.create_instance(instance_info.name, instance_info.priority, \
+				instance_info.devices, instance_info.devices_udev_regex, \
 				instance_info.script_pre, instance_info.script_post, instance_info.options)
 			instances.append(new_instance)
 		for instance in instances:

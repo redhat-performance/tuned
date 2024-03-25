@@ -4,7 +4,7 @@ class Instance(object):
 	"""
 	"""
 
-	def __init__(self, plugin, name, devices_expression, devices_udev_regex, script_pre, script_post, options):
+	def __init__(self, plugin, name, priority, devices_expression, devices_udev_regex, script_pre, script_post, options):
 		self._plugin = plugin
 		self._name = name
 		self._devices_expression = devices_expression
@@ -14,6 +14,7 @@ class Instance(object):
 		self._options = options
 
 		self._active = True
+		self._priority = priority
 		self._has_static_tuning = False
 		self._has_dynamic_tuning = False
 		self._assigned_devices = set()
@@ -37,6 +38,10 @@ class Instance(object):
 	@active.setter
 	def active(self, value):
 		self._active = value
+
+	@property
+	def priority(self):
+		return self._priority
 
 	@property
 	def devices_expression(self):
