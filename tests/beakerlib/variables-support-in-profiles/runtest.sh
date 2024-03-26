@@ -18,6 +18,7 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="tuned"
+PROFILE_DIR="/usr/lib/tuned/profiles"
 
 rlJournalStart
     rlPhaseStartSetup
@@ -28,7 +29,7 @@ rlJournalStart
         rlRun "pushd $TmpDir"
         rlServiceStart "tuned"
         tunedProfileBackup
-        rlFileBackup "/usr/lib/tuned/balanced/tuned.conf"
+        rlFileBackup "$PROFILE_DIR/balanced/tuned.conf"
 
         echo "
 [variables]
@@ -37,9 +38,9 @@ SWAPPINESS2 = \${SWAPPINESS1}
 
 [sysctl]
 vm.swappiness = \${SWAPPINESS2}
-" >> /usr/lib/tuned/balanced/tuned.conf
+" >> "$PROFILE_DIR/balanced/tuned.conf"
 
-        rlRun "cat /usr/lib/tuned/balanced/tuned.conf"
+        rlRun "cat $PROFILE_DIR/balanced/tuned.conf"
 
         OLD_SWAPPINESS=$(sysctl -n vm.swappiness)
 

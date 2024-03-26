@@ -18,6 +18,7 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="tuned"
+PROFILE_DIR="/usr/lib/tuned/profiles"
 
 rlJournalStart
     rlPhaseStartSetup
@@ -29,7 +30,7 @@ rlJournalStart
     rlPhaseEnd
 
     rlPhaseStartTest "Test of profile balanced"
-        rlRun "cat /usr/lib/tuned/balanced/tuned.conf | grep alpm="
+        rlRun "cat $PROFILE_DIR/balanced/tuned.conf | grep alpm="
         echo > /var/log/tuned/tuned.log
         rlRun "tuned-adm profile balanced"
         rlRun "tuned-adm active | grep balanced"
@@ -38,7 +39,7 @@ rlJournalStart
     rlPhaseEnd
 
     rlPhaseStartTest "Test of profile powersave"
-        rlRun "cat /usr/lib/tuned/powersave/tuned.conf | grep alpm="
+        rlRun "cat $PROFILE_DIR/powersave/tuned.conf | grep alpm="
         echo > /var/log/tuned/tuned.log
         rlRun "tuned-adm profile powersave"
         rlRun "tuned-adm active | grep powersave"
