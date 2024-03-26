@@ -30,9 +30,9 @@ performance optimizations but there are also profiles targeted to
 low power consumption, low latency and others. You can mostly deduce the
 purpose of the profile by its name or you can see full description below.
 
-The profiles are stored in subdirectories below \fI/usr/lib/tuned\fP. If you
-need to customize the profiles, you can copy them to \fI/etc/tuned\fP and modify
-them as you need. When loading profiles with the same name, the /etc/tuned takes
+The profiles are stored in subdirectories below \fI/usr/lib/tuned/profiles/\fP. If you
+need to customize the profiles, you can copy them to \fI/etc/tuned/profiles/\fP and modify
+them as you need. When loading profiles with the same name, \fI/etc/tuned/profiles/\fP takes
 precedence. In such case you will not lose your customized profiles between
 TuneD updates.
 
@@ -143,8 +143,8 @@ throughput\-performance profile.
 
 .SH "FILES"
 .nf
-.I /etc/tuned/*
-.I /usr/lib/tuned/*
+.I /etc/tuned/profiles/*
+.I /usr/lib/tuned/profiles/*
 
 .SH "SEE ALSO"
 .BR tuned (8)

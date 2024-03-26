@@ -13,7 +13,7 @@ DBUS_INTERFACE = "com.redhat.tuned.control"
 DBUS_OBJECT = "/Tuned"
 DEFAULT_PROFILE = "balanced"
 DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
-SYSTEM_PROFILE_DIR = "/usr/lib/tuned"
+SYSTEM_PROFILE_DIR = "/usr/lib/tuned/profiles"
 PERSISTENT_STORAGE_DIR = "/var/lib/tuned"
 PLUGIN_MAIN_UNIT_NAME = "main"
 # Magic section header because ConfigParser does not support "headerless" config
@@ -173,7 +173,7 @@ CFG_FUNC_UNIX_SOCKET_CONNECTIONS_BACKLOG = "getint"
 # default rollback strategy
 CFG_DEF_ROLLBACK = "auto"
 # default profile directories
-CFG_DEF_PROFILE_DIRS = [SYSTEM_PROFILE_DIR, "/etc/tuned"]
+CFG_DEF_PROFILE_DIRS = [SYSTEM_PROFILE_DIR, "/etc/tuned/profiles"]
 
 PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
 

@@ -46,7 +46,7 @@ ifeq ($(PYTHON_SITELIB),)
 $(error Failed to determine python library directory)
 endif
 KERNELINSTALLHOOKDIR = /usr/lib/kernel/install.d
-TUNED_PROFILESDIR = /usr/lib/tuned
+TUNED_PROFILESDIR = /usr/lib/tuned/profiles
 TUNED_RECOMMEND_DIR = $(TUNED_PROFILESDIR)/recommend.d
 TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/tuned/recommend.d
 BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
@@ -134,6 +134,7 @@ install-dirs:
 	mkdir -p $(DESTDIR)/run/tuned
 	mkdir -p $(DESTDIR)$(DOCDIR)
 	mkdir -p $(DESTDIR)$(SYSCONFDIR)
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/tuned/profiles
 	mkdir -p $(DESTDIR)$(TUNED_RECOMMEND_DIR)
 	mkdir -p $(DESTDIR)$(TUNED_USER_RECOMMEND_DIR)
 

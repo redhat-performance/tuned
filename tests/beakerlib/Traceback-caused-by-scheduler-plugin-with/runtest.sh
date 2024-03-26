@@ -18,6 +18,7 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="tuned"
+PROFILE_DIR="/etc/tuned/profiles"
 
 rlJournalStart
     rlPhaseStartSetup
@@ -31,7 +32,7 @@ rlJournalStart
 	rlFileBackup "/etc/tuned/active_profile"
         rlFileBackup "/etc/tuned/profile_mode"
 
-        rlRun "mkdir /etc/tuned/test-profile"
+        rlRun "mkdir $PROFILE_DIR/test-profile"
         rlServiceStart "tuned"
         sleep 1
 	rlFileBackup "/var/log/tuned/tuned.log"
@@ -39,7 +40,7 @@ rlJournalStart
     rlPhaseEnd
 
     rlPhaseStartTest
-	rlRun "pushd /etc/tuned/test-profile"
+	rlRun "pushd $PROFILE_DIR/test-profile"
 	cat << EOF > tuned.conf
 [scheduler]
 runtime=0
@@ -67,7 +68,7 @@ EOF
 	rlFileRestore
 
         rlServiceRestore "tuned"
-	rlRun "rm -rf /etc/tuned/test-profile"
+	rlRun "rm -rf $PROFILE_DIR/test-profile"
     rlPhaseEnd
 
 rlJournalPrintText
