@@ -1,3 +1,4 @@
+import re
 import tuned.logs
 from tuned.utils.config_parser import ConfigParser, Error
 from tuned.exceptions import TunedException
@@ -76,6 +77,14 @@ class GlobalConfig():
 			else:
 				return int(i, 0)
 		return default
+
+	def get_list(self, key, default = []):
+		value = self._cfg.get(key, default)
+		if isinstance(value, list):
+			return value
+		if value.strip() == "":
+			return []
+		return [x.strip() for x in re.split(r",|;", value)]
 
 	def set(self, key, value):
 		self._cfg[key] = value

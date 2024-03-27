@@ -15,15 +15,15 @@ import threading
 import logging
 
 class Admin(object):
-	def __init__(self, dbus = True, debug = False, asynco = False,
-			timeout = consts.ADMIN_TIMEOUT,
+	def __init__(self, profile_dirs, dbus = True, debug = False,
+			asynco = False, timeout = consts.ADMIN_TIMEOUT,
 			log_level = logging.ERROR):
 		self._dbus = dbus
 		self._debug = debug
 		self._async = asynco
 		self._timeout = timeout
 		self._cmd = commands(debug)
-		self._profiles_locator = profiles_locator(consts.LOAD_DIRECTORIES)
+		self._profiles_locator = profiles_locator(profile_dirs)
 		self._daemon_action_finished = threading.Event()
 		self._daemon_action_profile = ""
 		self._daemon_action_result = True
