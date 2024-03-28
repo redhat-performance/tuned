@@ -124,10 +124,11 @@ if __name__ == "__main__":
 	log_level = options.pop("loglevel")
 	result = False
 
+	profile_dirs = config.get_list(consts.CFG_PROFILE_DIRS, consts.CFG_DEF_PROFILE_DIRS)
 	dbus = config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
 
 	try:
-		admin = tuned.admin.Admin(dbus, debug, asynco, timeout, log_level)
+		admin = tuned.admin.Admin(profile_dirs, dbus, debug, asynco, timeout, log_level)
 
 		result = admin.action(action_name, **options)
 	except:
