@@ -60,7 +60,7 @@ class GuiProfileLoader(object):
 
         profilePath = self._locate_profile_path(profile_name)
 
-        if profilePath == tuned.consts.LOAD_DIRECTORIES[1]:
+        if profilePath != tuned.consts.SYSTEM_PROFILE_DIR:
             file_path = profilePath + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
             config_parser = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), strict=False)
             config_parser.optionxform = str
@@ -127,7 +127,15 @@ class GuiProfileLoader(object):
         self._load_all_profiles()
 
     def save_profile(self, profile):
-        path = tuned.consts.LOAD_DIRECTORIES[1] + '/' + profile.name
+        # save the new profile to a non-system directory with the highest priority
+        path = None
+        for d in reversed(self.directories):
+            if d != tuned.consts.SYSTEM_PROFILE_DIR:
+                path = os.path.join(d, profile.name)
+                break
+        if path is None:
+            raise managerException.ManagerException('Cannot save profile to a system directory')
+
         config = {
             'main': collections.OrderedDict(),
             'filename': path + '/' + tuned.consts.PROFILE_FILE,
@@ -160,7 +168,7 @@ class GuiProfileLoader(object):
             raise managerException.ManagerException('Profile: '
                     + old_profile_name + ' is not in profiles')
 
-        path = tuned.consts.LOAD_DIRECTORIES[1] + '/' + profile.name
+        path = os.path.join(self._locate_profile_path(old_profile_name), profile.name)
 
         if old_profile_name != profile.name:
             self.remove_profile(old_profile_name, is_admin=is_admin)
@@ -207,20 +215,11 @@ class GuiProfileLoader(object):
                     + ' profile is stored in ' + profile_path)
 
     def is_profile_removable(self, profile_name):
-
-        #  profile is in /etc/profile
-
-        profile_path = self._locate_profile_path(profile_name)
-        if profile_path == tuned.consts.LOAD_DIRECTORIES[1]:
-            return True
-        else:
-            return False
+        return not self.is_profile_factory(profile_name)
 
     def is_profile_factory(self, profile_name):
-
-        #  profile is in /usr/lib/tuned
-
-        return not self.is_profile_removable(profile_name)
+        profile_path = self._locate_profile_path(profile_name)
+        return profile_path == tuned.consts.SYSTEM_PROFILE_DIR
 
     def _save_profile(self, config):
         ec = subprocess.call(['pkexec', sys.executable, tuned.gtk.gui_profile_saver.__file__ , json.dumps(config)])

@@ -30,7 +30,7 @@ class UnixSocketExporter(interfaces.ExporterInterface):
 
 		self._socket_path = socket_path
 		self._socket_object = None
-		self._socket_signal_paths = re.split(r",;", signal_paths) if signal_paths else []
+		self._socket_signal_paths = signal_paths
 		self._socket_signal_objects = []
 		self._ownership = [-1, -1]
 		if ownership:

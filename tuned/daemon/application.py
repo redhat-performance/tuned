@@ -50,7 +50,7 @@ class Application(object):
 
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()
-		profile_locator = profiles.Locator(consts.LOAD_DIRECTORIES)
+		profile_locator = profiles.Locator(self.config.get_list(consts.CFG_PROFILE_DIRS, consts.CFG_DEF_PROFILE_DIRS))
 		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger, self.config, self.variables)
 
 		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, self.config, self)
@@ -83,7 +83,7 @@ class Application(object):
 			raise TunedException("Unix socket interface is already initialized.")
 
 		self._unix_socket_exporter = exports.unix_socket.UnixSocketExporter(self.config.get(consts.CFG_UNIX_SOCKET_PATH),
-																			self.config.get(consts.CFG_UNIX_SOCKET_SIGNAL_PATHS),
+																			self.config.get_list(consts.CFG_UNIX_SOCKET_SIGNAL_PATHS),
 																			self.config.get(consts.CFG_UNIX_SOCKET_OWNERSHIP),
 																			self.config.get_int(consts.CFG_UNIX_SOCKET_PERMISIONS),
 																			self.config.get_int(consts.CFG_UNIX_SOCKET_CONNECTIONS_BACKLOG))
