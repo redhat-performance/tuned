@@ -325,7 +325,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			try:
 				self._cpu_latency_fd = os.open(consts.PATH_CPU_DMA_LATENCY, os.O_WRONLY)
 			except OSError:
-				log.error("Unable to open '%s', disabling PM_QoS control" % consts.PATH_CPU_DMA_LATENCY)
+				log.info("Unable to open '%s', disabling PM_QoS control" % consts.PATH_CPU_DMA_LATENCY)
 				self._has_pm_qos = False
 			self._latency = None
 
