@@ -90,7 +90,7 @@ class commands:
 			return list(d.values())[mo.lastindex - 1]
 		return None
 
-	def write_to_file(self, f, data, makedir = False, no_error = False):
+	def write_to_file(self, f, data, makedir = False, no_error = False, ignore_same = False):
 		"""Write data to a file.
 
 		Parameters:
@@ -98,6 +98,7 @@ class commands:
 		data -- data to write
 		makedir -- if True and the path doesn't exist, it will be created
 		no_error -- if True errors are silenced, it can be also list of ignored errnos
+		ignore_same -- if True and the write would not change the file, it is skipped
 
 		Return:
 		bool -- True on success
@@ -110,6 +111,9 @@ class commands:
 		try:
 			if makedir:
 				os.makedirs(d)
+			if ignore_same and self.read_file(f, no_error=True).strip() == str(data):
+				self._debug("Skipping the write to file '%s', the content would not change" % f)
+				return True
 			fd = open(f, "w")
 			fd.write(str(data))
 			fd.close()
