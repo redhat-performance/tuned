@@ -359,7 +359,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 	def _set_intel_pstate_attr(self, attr, val):
 		if val is not None:
-			self._cmd.write_to_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, val)
+			self._cmd.write_to_file("/sys/devices/system/cpu/intel_pstate/%s" % attr, val, ignore_same=True)
 
 	def _getset_intel_pstate_attr(self, attr, value):
 		if value is None:
@@ -524,7 +524,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 					log.info("setting governor '%s' on cpu '%s'"
 							% (governor, device))
 					self._cmd.write_to_file("/sys/devices/system/cpu/%s/cpufreq/scaling_governor"
-							% device, governor, no_error = [errno.ENOENT] if remove else False)
+							% device, governor, no_error = [errno.ENOENT] if remove else False, ignore_same=True)
 				break
 			elif not sim:
 				log.debug("Ignoring governor '%s' on cpu '%s', it is not supported"
@@ -621,7 +621,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 					for val in vals:
 						val = val.strip()
 						if self._cmd.write_to_file(energy_perf_bias_path, val, \
-							no_error = [errno.ENOENT] if remove else False):
+							no_error = [errno.ENOENT] if remove else False, ignore_same=True):
 								log.info("energy_perf_bias successfully set to '%s' on cpu '%s'"
 										 % (val, device))
 								break
@@ -756,7 +756,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 				for val in vals:
 					if val in avail_vals:
 						self._cmd.write_to_file(self._pstate_preference_path(cpu_id), val, \
-							no_error = [errno.ENOENT] if remove else False)
+							no_error = [errno.ENOENT] if remove else False, ignore_same=True)
 						log.info("Setting energy_performance_preference value '%s' for cpu '%s'" % (val, device))
 						break
 					else:

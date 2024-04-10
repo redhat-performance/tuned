@@ -180,4 +180,4 @@ class SysctlPlugin(base.Plugin):
 		if os.path.basename(path) in DEPRECATED_SYSCTL_OPTIONS:
 			log.error("Refusing to set deprecated sysctl option %s" % option)
 			return False
-		return self._cmd.write_to_file(path, value, no_error=[errno.ENOENT] if ignore_missing else False)
+		return self._cmd.write_to_file(path, value, no_error=[errno.ENOENT] if ignore_missing else False, ignore_same=True)
