@@ -32,13 +32,16 @@ class Admin(object):
 		self._log_token = None
 		self._log_level = log_level
 		self._profile_recommender = ProfileRecommender()
-		if self._dbus:
-			self._controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_INTERFACE, consts.DBUS_OBJECT, debug)
-			try:
-				self._controller.set_signal_handler(consts.SIGNAL_PROFILE_CHANGED, self._signal_profile_changed_cb)
-			except TunedAdminDBusException as e:
-				self._error(e)
-				self._dbus = False
+		self._dbus_working = self._init_dbus() if self._dbus else False
+
+	def _init_dbus(self):
+		self._controller = tuned.admin.DBusController(consts.DBUS_BUS, consts.DBUS_INTERFACE, consts.DBUS_OBJECT, self._debug)
+		try:
+			self._controller.set_signal_handler(consts.SIGNAL_PROFILE_CHANGED, self._signal_profile_changed_cb)
+			return True
+		except TunedAdminDBusException as e:
+			self._error(e)
+			return False
 
 	def _error(self, message):
 		print(message, file=sys.stderr)
@@ -70,14 +73,14 @@ class Admin(object):
 		try:
 			action_dbus = getattr(self, "_action_dbus_" + action_name)
 		except AttributeError as e:
-			self._dbus = False
+			self._dbus_working = False
 		try:
 			action = getattr(self, "_action_" + action_name)
 		except AttributeError as e:
-			if not self._dbus:
+			if not self._dbus_working:
 				self._error(str(e) + ", action '%s' is not implemented" % action_name)
 				return False
-		if self._dbus:
+		if self._dbus_working:
 			try:
 				self._controller.set_on_exit_action(
 						self._log_capture_finish)
@@ -85,9 +88,9 @@ class Admin(object):
 				res = self._controller.run()
 			except TunedAdminDBusException as e:
 				self._error(e)
-				self._dbus = False
+				self._dbus_working = False
 
-		if not self._dbus:
+		if not self._dbus_working:
 			res = action(*args, **kwargs)
 		return res
 
@@ -299,16 +302,20 @@ class Admin(object):
 	def _restart_tuned(self):
 		print("Trying to (re)start tuned...")
 		(ret, msg) = self._cmd.execute(["service", "tuned", "restart"])
-		if ret == 0:
-			print("TuneD (re)started, changes applied.")
-		else:
-			print("TuneD (re)start failed, you need to (re)start TuneD by hand for changes to apply.")
+		if ret != 0:
+			raise TunedException("TuneD (re)start failed, you need to (re)start TuneD by hand.")
+		print("TuneD (re)started.")
 
 	def _set_profile(self, profile_name, manual):
 		if profile_name in self._profiles_locator.get_known_names():
 			try:
+				if self._dbus:
+					self._restart_tuned()
+					if self._init_dbus():
+						return self._action_dbus_profile([profile_name])
 				self._cmd.save_active_profile(profile_name, manual)
 				self._restart_tuned()
+				print("TuneD is not active on the DBus, not checking whether the profile was successfully applied.")
 				return True
 			except TunedException as e:
 				self._error(str(e))
