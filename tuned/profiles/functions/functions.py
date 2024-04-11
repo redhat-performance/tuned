@@ -56,6 +56,7 @@ class Functions():
 			log.error("function '%s' not implemented" % sl[1])
 			return
 		s = f.execute(sl[2:])
+		log.debug("${f:%s} expands to: '%s'" % (":".join(sl[1:]), s))
 		if s is None:
 			return
 		self._sub(_from, self._cnt, s)
