@@ -124,9 +124,9 @@ class commands:
 	def read_file(self, f, err_ret = "", no_error = False):
 		old_value = err_ret
 		try:
-			f = open(f, "r")
-			old_value = f.read()
-			f.close()
+			fd = open(f, "r")
+			old_value = fd.read()
+			fd.close()
 		except (OSError,IOError) as e:
 			if not no_error:
 				self._error("Error when reading file '%s': '%s'" % (f, e))
