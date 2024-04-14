@@ -279,6 +279,12 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			return False
 		return self._daemon.verify_profile(ignore_missing = True)
 
+	@exports.export("", "(bs)")
+	def dump_profile(self, caller = None):
+		if caller == "":
+			return False
+		return self._daemon.dump_profile()
+
 	@exports.export("", "a{sa{ss}}")
 	def get_all_plugins(self, caller = None):
 		"""Return dictionary with accesible plugins

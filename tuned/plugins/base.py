@@ -290,6 +290,27 @@ class Plugin(object):
 		else:
 			return None
 
+	def instance_dump_tuning(self, instance):
+		"""
+		Dump tuning if the plugin instance is active.
+		"""
+		if not instance.active:
+			return ""
+
+		s = "[%s]\n" % instance.name
+		s += "type = %s\n" % self.name
+		if instance._devices_expression:
+			s += "devices = %s\n" % instance._devices_expression
+		if instance._devices_udev_regex:
+			s += "devices_udev_regex = %s\n" % instance._devices_udev_regex
+		if instance._script_pre:
+			s += "script_pre = %s\n" % instance._script_pre
+		if instance._script_post:
+			s += "script_post = %s\n" % instance._script_post
+		for option, val in instance._options.items():
+			s += "%s = %s\n" % (option, val)
+		return s
+
 	def instance_update_tuning(self, instance):
 		"""
 		Apply dynamic tuning if the plugin instance is active.

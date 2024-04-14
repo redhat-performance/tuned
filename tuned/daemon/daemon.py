@@ -360,6 +360,30 @@ class Daemon(object):
 		self._not_used.set()
 		return ret
 
+	def dump_profile(self):
+		if not self.is_running():
+			s = "TuneD is not running"
+			log.error(s)
+			return (False, s)
+
+		if self._profile is None:
+			s = "no profile is set"
+			log.error(s)
+			return (False, s)
+
+		if not self._profile_applied.is_set():
+			s = "profile is not applied"
+			log.error(s)
+			return (False, s)
+
+		# using daemon, the main loop mustn't exit before our completion
+		self._not_used.clear()
+		log.info("dumping profile(s): %s" % self._profile.name)
+		s = self._unit_manager.dump_tuning()
+		# main loop is allowed to exit
+		self._not_used.set()
+		return (True, s)
+
 	# profile_switch is helper telling plugins whether the stop is due to profile switch
 	def stop(self, profile_switch = False):
 		if not self.is_running():

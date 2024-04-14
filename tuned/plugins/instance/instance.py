@@ -82,6 +82,9 @@ class Instance(object):
 	def verify_tuning(self, ignore_missing):
 		return self._plugin.instance_verify_tuning(self, ignore_missing)
 
+	def dump_tuning(self):
+		return self._plugin.instance_dump_tuning(self)
+
 	def update_tuning(self):
 		self._plugin.instance_update_tuning(self)
 
