@@ -45,6 +45,10 @@ class EeePCSHEPlugin(base.Plugin):
 		return True
 
 	@classmethod
+	def uses_periodic_tuning(cls):
+		return True
+
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"load_threshold_normal"    : 0.6,

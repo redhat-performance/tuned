@@ -103,6 +103,10 @@ class DiskPlugin(hotplug.Plugin):
 	def supports_dynamic_tuning(cls):
 		return True
 
+	@classmethod
+	def uses_periodic_tuning(cls):
+		return True
+
 	def _init_devices(self):
 		super(DiskPlugin, self)._init_devices()
 		self._devices_supported = True

@@ -61,6 +61,10 @@ class Plugin(object):
 	def supports_dynamic_tuning(cls):
 		raise NotImplementedError()
 
+	@classmethod
+	def uses_periodic_tuning(cls):
+		raise NotImplementedError()
+
 	#
 	# Plugin configuration manipulation and helpers.
 	#
@@ -310,7 +314,7 @@ class Plugin(object):
 		"""
 		if not instance.active:
 			return
-		if instance.dynamic_tuning_enabled:
+		if instance.dynamic_tuning_enabled and self.uses_periodic_tuning():
 			self._run_for_each_device(instance, self._instance_update_dynamic, instance.processed_devices.copy())
 
 	def instance_unapply_tuning(self, instance, rollback = consts.ROLLBACK_SOFT):
@@ -322,6 +326,7 @@ class Plugin(object):
 
 		if instance.dynamic_tuning_enabled:
 			self._run_for_each_device(instance, self._instance_unapply_dynamic, instance.processed_devices)
+			self._instance_deinit_dynamic(instance)
 		if instance.static_tuning_enabled:
 			self._call_device_script(instance, instance.script_post,
 					"unapply", instance.processed_devices,
@@ -351,11 +356,14 @@ class Plugin(object):
 	def _instance_init_dynamic(self, instance):
 		pass
 
+	def _instance_deinit_dynamic(self, instance):
+		pass
+
 	def _instance_apply_dynamic(self, instance, device):
 		for option in [opt for opt in self._options_used_by_dynamic if self._storage_get(instance, self._commands[opt], device) is None]:
 			self._check_and_save_value(instance, self._commands[option], device)
-
-		self._instance_update_dynamic(instance, device)
+		if self.uses_periodic_tuning():
+			self._instance_update_dynamic(instance, device)
 
 	def _instance_unapply_dynamic(self, instance, device):
 		pass

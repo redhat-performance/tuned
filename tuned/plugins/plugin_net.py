@@ -167,6 +167,10 @@ class NetTuningPlugin(hotplug.Plugin):
 	def supports_dynamic_tuning(cls):
 		return True
 
+	@classmethod
+	def uses_periodic_tuning(cls):
+		return True
+
 	def _init_devices(self):
 		self._devices_supported = True
 		self._free_devices = set()
