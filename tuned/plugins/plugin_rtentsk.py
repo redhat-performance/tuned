@@ -17,13 +17,19 @@ class RTENTSKPlugin(base.Plugin):
         socket ourselves the static key is kept enabled).
 	"""
 
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
+		super(RTENTSKPlugin, self)._instance_init(instance)
 
 		# SO_TIMESTAMP nor SOF_TIMESTAMPING_OPT_TX_SWHW is defined by
 		# the socket class
-
 		SO_TIMESTAMP = 29 # see include/uapi/asm-generic/socket.h
 		#define SO_TIMESTAMP 0x4012 # parisc!
 		SOF_TIMESTAMPING_OPT_TX_SWHW = (1<<14) # see include/uapi/linux/net_tstamp.h

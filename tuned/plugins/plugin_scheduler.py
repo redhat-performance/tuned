@@ -459,6 +459,14 @@ class SchedulerPlugin(base.Plugin):
 		except AttributeError:
 			self._scheduler_utils = SchedulerUtilsSchedutils()
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	def _calc_mmap_pages(self, mmap_pages):
 		if mmap_pages is None:
 			return None
@@ -472,9 +480,8 @@ class SchedulerPlugin(base.Plugin):
 		return int(2 ** math.ceil(math.log(mp, 2)))
 
 	def _instance_init(self, instance):
+		super(SchedulerPlugin, self)._instance_init(instance)
 		instance._evlist = None
-		instance._has_dynamic_tuning = False
-		instance._has_static_tuning = True
 		# this is hack, runtime_tuning should be covered by dynamic_tuning configuration
 		# TODO: add per plugin dynamic tuning configuration and use dynamic_tuning configuration
 		# instead of runtime_tuning

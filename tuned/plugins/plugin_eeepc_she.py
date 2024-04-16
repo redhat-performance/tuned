@@ -37,6 +37,14 @@ class EeePCSHEPlugin(base.Plugin):
 		super(EeePCSHEPlugin, self).__init__(*args, **kwargs)
 
 	@classmethod
+	def supports_static_tuning(cls):
+		return False
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return True
+
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"load_threshold_normal"    : 0.6,
@@ -46,8 +54,7 @@ class EeePCSHEPlugin(base.Plugin):
 		}
 
 	def _instance_init(self, instance):
-		instance._has_static_tuning = False
-		instance._has_dynamic_tuning = True
+		super(EeePCSHEPlugin, self)._instance_init(instance)
 		instance._she_mode = None
 		instance._load_monitor = None
 

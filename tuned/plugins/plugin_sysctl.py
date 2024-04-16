@@ -44,10 +44,16 @@ class SysctlPlugin(base.Plugin):
 		self._has_dynamic_options = True
 		self._cmd = commands()
 
-	def _instance_init(self, instance):
-		instance._has_dynamic_tuning = False
-		instance._has_static_tuning = True
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
 
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
+	def _instance_init(self, instance):
+		super(SysctlPlugin, self)._instance_init(instance)
 		# FIXME: do we want to do this here?
 		# recover original values in case of crash
 		storage_key = self._storage_key(instance.name)

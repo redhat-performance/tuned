@@ -49,9 +49,17 @@ class Plugin(object):
 			self._init_devices()
 			self._devices_inited = True
 
-	@property
-	def name(self):
-		return self.__class__.__module__.split(".")[-1].split("_", 1)[1]
+	@classmethod
+	def name(cls):
+		return cls.__module__.split(".")[-1].split("_", 1)[1]
+
+	@classmethod
+	def supports_static_tuning(cls):
+		raise NotImplementedError()
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		raise NotImplementedError()
 
 	#
 	# Plugin configuration manipulation and helpers.
@@ -74,8 +82,10 @@ class Plugin(object):
 
 	def _get_effective_options(self, options):
 		"""Merge provided options with plugin default options."""
-		# TODO: _has_dynamic_options is a hack
 		effective = self._get_config_options().copy()
+		if self.supports_dynamic_tuning():
+			effective["dynamic"] = True
+		# TODO: _has_dynamic_options is a hack
 		for key in options:
 			if key in effective or self._has_dynamic_options:
 				effective[key] = options[key]
@@ -119,13 +129,13 @@ class Plugin(object):
 
 	def initialize_instance(self, instance):
 		"""Initialize an instance."""
-		log.debug("initializing instance %s (%s)" % (instance.name, self.name))
+		log.debug("initializing instance %s (%s)" % (instance.name, self.name()))
 		self._instance_init(instance)
 
 	def destroy_instances(self):
 		"""Destroy all instances."""
 		for instance in list(self._instances.values()):
-			log.debug("destroying instance %s (%s)" % (instance.name, self.name))
+			log.debug("destroying instance %s (%s)" % (instance.name, self.name()))
 			self._destroy_instance(instance)
 		self._instances.clear()
 
@@ -134,10 +144,13 @@ class Plugin(object):
 		self._instance_cleanup(instance)
 
 	def _instance_init(self, instance):
-		raise NotImplementedError()
+		instance._static_tuning_enabled = self.supports_static_tuning()
+		instance._dynamic_tuning_enabled = self.supports_dynamic_tuning() \
+			and self.__class__ in self._global_cfg.get(consts.CFG_DYNAMIC_PLUGINS) \
+			and self._option_bool(instance.options["dynamic"])
 
 	def _instance_cleanup(self, instance):
-		raise NotImplementedError()
+		pass
 
 	#
 	# Devices handling
@@ -159,7 +172,7 @@ class Plugin(object):
 		else:
 			udev_devices = self._get_device_objects(devices)
 			if udev_devices is None:
-				log.error("Plugin '%s' does not support the 'devices_udev_regex' option", self.name)
+				log.error("Plugin '%s' does not support the 'devices_udev_regex' option", self.name())
 				return set()
 			udev_devices = self._device_matcher_udev.match_list(instance.devices_udev_regex, udev_devices)
 			return set([x.sys_name for x in udev_devices])
@@ -175,8 +188,8 @@ class Plugin(object):
 			log.warn("instance %s: no matching devices available" % instance.name)
 		else:
 			name = instance.name
-			if instance.name != self.name:
-				name += " (%s)" % self.name
+			if instance.name != self.name():
+				name += " (%s)" % self.name()
 			log.info("instance %s: assigning devices %s" % (name, ", ".join(to_assign)))
 			instance.assigned_devices.update(to_assign) # cannot use |=
 			self._assigned_devices |= to_assign
@@ -255,7 +268,7 @@ class Plugin(object):
 		if not instance.active:
 			return
 
-		if instance.has_static_tuning:
+		if instance.static_tuning_enabled:
 			self._call_device_script(instance, instance.script_pre,
 					"apply", instance.assigned_devices)
 			self._instance_pre_static(instance, True)
@@ -263,7 +276,7 @@ class Plugin(object):
 			self._instance_post_static(instance, True)
 			self._call_device_script(instance, instance.script_post,
 					"apply", instance.assigned_devices)
-		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
+		if instance.dynamic_tuning_enabled:
 			self._instance_init_dynamic(instance)
 			self._run_for_each_device(instance, self._instance_apply_dynamic, instance.assigned_devices)
 		instance.processed_devices.update(instance.assigned_devices)
@@ -280,7 +293,7 @@ class Plugin(object):
 			log.error("BUG: Some devices have not been tuned: %s"
 					% ", ".join(instance.assigned_devices))
 		devices = instance.processed_devices.copy()
-		if instance.has_static_tuning:
+		if instance.static_tuning_enabled:
 			if self._call_device_script(instance, instance.script_pre, "verify", devices) == False:
 				return False
 			if self._instance_verify_static(instance, ignore_missing, devices) == False:
@@ -297,7 +310,7 @@ class Plugin(object):
 		"""
 		if not instance.active:
 			return
-		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
+		if instance.dynamic_tuning_enabled:
 			self._run_for_each_device(instance, self._instance_update_dynamic, instance.processed_devices.copy())
 
 	def instance_unapply_tuning(self, instance, rollback = consts.ROLLBACK_SOFT):
@@ -307,9 +320,9 @@ class Plugin(object):
 		if rollback == consts.ROLLBACK_NONE:
 			return
 
-		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
+		if instance.dynamic_tuning_enabled:
 			self._run_for_each_device(instance, self._instance_unapply_dynamic, instance.processed_devices)
-		if instance.has_static_tuning:
+		if instance.static_tuning_enabled:
 			self._call_device_script(instance, instance.script_post,
 					"unapply", instance.processed_devices,
 					rollback = rollback)
@@ -345,7 +358,7 @@ class Plugin(object):
 		self._instance_update_dynamic(instance, device)
 
 	def _instance_unapply_dynamic(self, instance, device):
-		raise NotImplementedError()
+		pass
 
 	def _instance_update_dynamic(self, instance, device):
 		raise NotImplementedError()

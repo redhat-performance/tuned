@@ -37,6 +37,14 @@ class AudioPlugin(hotplug.Plugin):
 	====
 	"""
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	def _init_devices(self):
 		self._devices_supported = True
 		self._assigned_devices = set()
@@ -46,13 +54,6 @@ class AudioPlugin(hotplug.Plugin):
 			module_name = self._device_module_name(device)
 			if module_name in ["snd_hda_intel", "snd_ac97_codec"]:
 				self._free_devices.add(module_name)
-
-	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	def _device_module_name(self, device):
 		try:

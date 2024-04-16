@@ -193,9 +193,16 @@ class BootloaderPlugin(base.Plugin):
 		super(BootloaderPlugin, self).__init__(*args, **kwargs)
 		self._cmd = commands()
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	def _instance_init(self, instance):
-		instance._has_dynamic_tuning = False
-		instance._has_static_tuning = True
+		super(BootloaderPlugin, self)._instance_init(instance)
 		# controls grub2_cfg rewrites in _instance_post_static
 		self.update_grub2_cfg = False
 		self._skip_grub_config_val = False
@@ -207,9 +214,6 @@ class BootloaderPlugin(base.Plugin):
 		self._bls = self._bls_enabled()
 
 		self._rpm_ostree = self._rpm_ostree_status() is not None
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	@classmethod
 	def _get_config_options(cls):
