@@ -273,7 +273,7 @@ class SchedulerPlugin(base.Plugin):
 	processes are not processed by the scheduler plug-in.
 	+
 	The CPU overhead of the scheduler plugin can be mitigated by using
-	the scheduler [option]`runtime` option and setting it to `0`. This
+	the scheduler [option]`dynamic` option and setting it to `0`. This
 	will completely disable the dynamic scheduler functionality and the
 	perf events will not be monitored and acted upon. The disadvantage
 	ot this approach is the procees/thread tuning will be done only at
@@ -283,7 +283,7 @@ class SchedulerPlugin(base.Plugin):
 	====
 	----
 	[scheduler]
-	runtime=0
+	dynamic=0
 	isolated_cores=1,3
 	----
 	====
@@ -465,6 +465,10 @@ class SchedulerPlugin(base.Plugin):
 
 	@classmethod
 	def supports_dynamic_tuning(cls):
+		return True
+
+	@classmethod
+	def uses_periodic_tuning(cls):
 		return False
 
 	def _calc_mmap_pages(self, mmap_pages):
@@ -482,10 +486,6 @@ class SchedulerPlugin(base.Plugin):
 	def _instance_init(self, instance):
 		super(SchedulerPlugin, self)._instance_init(instance)
 		instance._evlist = None
-		# this is hack, runtime_tuning should be covered by dynamic_tuning configuration
-		# TODO: add per plugin dynamic tuning configuration and use dynamic_tuning configuration
-		# instead of runtime_tuning
-		instance._runtime_tuning = True
 
 		# FIXME: do we want to do this here?
 		# recover original values in case of crash
@@ -510,41 +510,43 @@ class SchedulerPlugin(base.Plugin):
 		instance._scheduler = instance.options
 
 		perf_mmap_pages_raw = self._variables.expand(instance.options["perf_mmap_pages"])
-		perf_mmap_pages = self._calc_mmap_pages(perf_mmap_pages_raw)
-		if perf_mmap_pages == 0:
+		instance._perf_mmap_pages = self._calc_mmap_pages(perf_mmap_pages_raw)
+		if instance._perf_mmap_pages == 0:
 			log.error("Invalid 'perf_mmap_pages' value specified: '%s', using default kernel value" % perf_mmap_pages_raw)
-			perf_mmap_pages = None
-		if perf_mmap_pages is not None and str(perf_mmap_pages) != perf_mmap_pages_raw:
+			instance._perf_mmap_pages = None
+		if instance._perf_mmap_pages is not None and str(instance._perf_mmap_pages) != perf_mmap_pages_raw:
 			log.info("'perf_mmap_pages' value has to be power of two, specified: '%s', using: '%d'" %
-				(perf_mmap_pages_raw, perf_mmap_pages))
+				(perf_mmap_pages_raw, instance._perf_mmap_pages))
 		for k in instance._scheduler:
 			instance._scheduler[k] = self._variables.expand(instance._scheduler[k])
-		if self._cmd.get_bool(instance._scheduler.get("runtime", 1)) == "0":
-			instance._runtime_tuning = False
-		instance._terminate = threading.Event()
-		if self._daemon and instance._runtime_tuning:
-			try:
-				instance._threads = perf.thread_map()
-				evsel = perf.evsel(type = perf.TYPE_SOFTWARE,
-					config = perf.COUNT_SW_DUMMY,
-					task = 1, comm = 1, mmap = 0, freq = 0,
-					wakeup_events = 1, watermark = 1,
-					sample_type = perf.SAMPLE_TID | perf.SAMPLE_CPU)
-				evsel.open(cpus = self._cpus, threads = instance._threads)
-				instance._evlist = perf.evlist(self._cpus, instance._threads)
-				instance._evlist.add(evsel)
-				if perf_mmap_pages is None:
-					instance._evlist.mmap()
-				else:
-					instance._evlist.mmap(pages = perf_mmap_pages)
-			# no perf
-			except:
-				instance._runtime_tuning = False
 
 	def _instance_cleanup(self, instance):
 		if instance._evlist:
 			for fd in instance._evlist.get_pollfd():
 				os.close(fd.name)
+
+	def _instance_init_dynamic(self, instance):
+		super(SchedulerPlugin, self)._instance_init_dynamic(instance)
+		instance._terminate = threading.Event()
+		try:
+			instance._threads = perf.thread_map()
+			evsel = perf.evsel(type = perf.TYPE_SOFTWARE,
+				config = perf.COUNT_SW_DUMMY,
+				task = 1, comm = 1, mmap = 0, freq = 0,
+				wakeup_events = 1, watermark = 1,
+				sample_type = perf.SAMPLE_TID | perf.SAMPLE_CPU)
+			evsel.open(cpus = self._cpus, threads = instance._threads)
+			instance._evlist = perf.evlist(self._cpus, instance._threads)
+			instance._evlist.add(evsel)
+			if instance._perf_mmap_pages is None:
+				instance._evlist.mmap()
+			else:
+				instance._evlist.mmap(pages = instance._perf_mmap_pages)
+			instance._thread = threading.Thread(target = self._thread_code, args = [instance])
+			instance._thread.start()
+		# no perf
+		except Exception:
+			instance._dynamic_tuning_enabled = False
 
 	@classmethod
 	def _get_config_options(cls):
@@ -949,7 +951,7 @@ class SchedulerPlugin(base.Plugin):
 				and len(vals) == 5]
 		sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
 		sched_all = dict()
-		# for runtime tuning
+		# for dynamic tuning
 		instance._sched_lookup = {}
 		for option, (rule_prio, scheduler, priority, affinity, regex) \
 				in sched_cfg:
@@ -973,9 +975,6 @@ class SchedulerPlugin(base.Plugin):
 					priority, affinity)
 		self._storage.set(self._scheduler_storage_key,
 				self._scheduler_original)
-		if self._daemon and instance._runtime_tuning:
-			instance._thread = threading.Thread(target = self._thread_code, args = [instance])
-			instance._thread.start()
 
 	def _restore_ps_affinity(self):
 		try:
@@ -1020,9 +1019,6 @@ class SchedulerPlugin(base.Plugin):
 
 	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):
 		super(SchedulerPlugin, self)._instance_unapply_static(instance, rollback)
-		if self._daemon and instance._runtime_tuning:
-			instance._terminate.set()
-			instance._thread.join()
 		self._restore_ps_affinity()
 		self._cgroup_restore_affinity()
 		self._cgroup_cleanup_tasks()
@@ -1030,6 +1026,10 @@ class SchedulerPlugin(base.Plugin):
 			self._cgroup_finalize_groups()
 		if self._cgroup_mount_point_init:
 			self._cgroup_finalize()
+
+	def _instance_deinit_dynamic(self, instance):
+		instance._terminate.set()
+		instance._thread.join()
 
 	def _cgroup_verify_affinity_one(self, cgroup, affinity):
 		log.debug("Verifying cgroup '%s' affinity" % cgroup)
