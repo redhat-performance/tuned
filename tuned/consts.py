@@ -50,7 +50,19 @@ BLS_ENTRIES_PATH = "/boot/loader/entries"
 CGROUP_CLEANUP_TASKS_RETRY = 10
 PROCFS_MOUNT_POINT = "/proc"
 DEF_CGROUP_MOUNT_POINT = "/sys/fs/cgroup/cpuset"
+DEF_CGROUP_THREADS_FILE = "tasks"
+# convention mounting point for cgroup2 if both versions are used
+DEF_CGROUP2_MOUNT_POINT_UNIFIED = "/sys/fs/cgroup/unified"
+DEF_CGROUP2_MOUNT_POINT = "/sys/fs/cgroup"
+DEF_CGROUP2_THREADS_FILE = "cgroup.threads"
+DEF_CGROUP2_PROCS_FILE = "cgroup.procs"
+DEF_CGROUP2_TYPE_FILE = "cgroup.type"
+DEF_CGROUP2_AVAILABLE_CONTROLLERS_FILE = "cgroup.controllers"
+DEF_CGROUP2_ENABLED_CONTROLLERS_FILE = "cgroup.subtree_control"
 DEF_CGROUP_MODE = 0o770
+
+DEF_SUPPORTED_FS_FILE = "/proc/filesystems"
+DEF_MOUNTED_FS_FILE = "/etc/mtab"
 
 # service plugin configuration
 SERVICE_SYSTEMD_CFG_PATH = "/etc/systemd/system/%s.service.d"
