@@ -88,7 +88,7 @@ class ProfileHoldManager(object):
         self._controller.switch_profile(new_profile)
 
     def clear(self):
-        for cookie in self._holds:
+        for cookie in list(self._holds.keys()):
             self._cancel(cookie)
 
 
