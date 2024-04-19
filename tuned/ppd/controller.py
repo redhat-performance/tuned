@@ -105,12 +105,10 @@ class Controller(exports.interfaces.ExportableInterface):
 
     def _check_performance_degraded(self):
         performance_degraded = PerformanceDegraded.NONE
-        if os.path.exists(NO_TURBO_PATH):
-            if int(self._cmd.read_file(NO_TURBO_PATH)) == 1:
-                performance_degraded = PerformanceDegraded.HIGH_OPERATING_TEMPERATURE
-        if os.path.exists(LAP_MODE_PATH):
-            if int(self._cmd.read_file(LAP_MODE_PATH)) == 1:
-                performance_degraded = PerformanceDegraded.LAP_DETECTED
+        if os.path.exists(NO_TURBO_PATH) and self._cmd.read_file(NO_TURBO_PATH).strip() == "1":
+            performance_degraded = PerformanceDegraded.HIGH_OPERATING_TEMPERATURE
+        if os.path.exists(LAP_MODE_PATH) and self._cmd.read_file(LAP_MODE_PATH).strip() == "1":
+            performance_degraded = PerformanceDegraded.LAP_DETECTED
         if performance_degraded != self._performance_degraded:
             log.info("Performance degraded: %s" % performance_degraded)
             self._performance_degraded = performance_degraded
