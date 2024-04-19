@@ -135,6 +135,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
     def load_config(self):
         self._config = PPDConfig(PPD_CONFIG_FILE)
+        log.debug("Setting base profile to %s" % self._config.default_profile)
         self._base_profile = self._config.default_profile
         self.switch_profile(self._config.default_profile)
 
@@ -172,6 +173,7 @@ class Controller(exports.interfaces.ExportableInterface):
     def set_active_profile(self, profile):
         if profile not in self._config.ppd_to_tuned:
             raise dbus.exceptions.DBusException("Invalid profile '%s'" % profile)
+        log.debug("Setting base profile to %s" % profile)
         self._base_profile = profile
         self._profile_holds.clear()
         self.switch_profile(profile)
