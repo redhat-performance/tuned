@@ -124,7 +124,7 @@ class ModulesPlugin(base.Plugin):
 				log.info(consts.STR_VERIFY_PROFILE_OK % "module '%s' is loaded" % module)
 				l = r.split(v)
 				for item in l:
-					arg = item.split("=")
+					arg = item.split("=", 1)
 					if len(arg) != 2:
 						log.warn("unrecognized module option for module '%s': %s" % (module, item))
 					else:
