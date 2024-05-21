@@ -50,13 +50,13 @@ class PluginBaseTestCase(unittest.TestCase):
 
 	def test_create_instance(self):
 		instance = self._plugin.create_instance(\
-			'first_instance','test','test','test','test',\
+			'first_instance',0,'test','test','test','test',\
 			{'default_option1':'default_value2'})
 		self.assertIsNotNone(instance)
 
 	def test_destroy_instance(self):
 		instance = self._plugin.create_instance(\
-			'first_instance','test','test','test','test',\
+			'first_instance',0,'test','test','test','test',\
 			{'default_option1':'default_value2'})
 		instance.plugin.init_devices()
 
@@ -66,7 +66,7 @@ class PluginBaseTestCase(unittest.TestCase):
 	def test_get_matching_devices(self):
 		""" without udev regex """
 		instance = self._plugin.create_instance(\
-			'first_instance','right_device*',None,'test','test',\
+			'first_instance',0,'right_device*',None,'test','test',\
 			{'default_option1':'default_value2'})
 
 		self.assertEqual(self._plugin._get_matching_devices(\
@@ -75,7 +75,7 @@ class PluginBaseTestCase(unittest.TestCase):
 
 		""" with udev regex """
 		instance = self._plugin.create_instance(\
-			'second_instance','right_device*','device[1-2]','test','test',\
+			'second_instance',0,'right_device*','device[1-2]','test','test',\
 			{'default_option1':'default_value2'})
 
 		device1 = DummyDevice('device1',{'name':'device1'})
@@ -104,7 +104,7 @@ class PluginBaseTestCase(unittest.TestCase):
 				plugin_instance_factory,None,None)
 
 	def test_execute_all_non_device_commands(self):
-		instance = self._commands_plugin.create_instance('test_instance','',\
+		instance = self._commands_plugin.create_instance('test_instance',0,'',\
 			'','','',{'size':'XXL'})
 
 		self._commands_plugin._execute_all_non_device_commands(instance)
@@ -112,7 +112,7 @@ class PluginBaseTestCase(unittest.TestCase):
 		self.assertEqual(self._commands_plugin._size,'XXL')
 
 	def test_execute_all_device_commands(self):
-		instance = self._commands_plugin.create_instance('test_instance','',\
+		instance = self._commands_plugin.create_instance('test_instance',0,'',\
 			'','','',{'device_setting':'010'})
 
 		device1 = DummyDevice('device1',{})
@@ -133,7 +133,7 @@ class PluginBaseTestCase(unittest.TestCase):
 			'<100','200'),'100')
 
 	def test_get_current_value(self):
-		instance = self._commands_plugin.create_instance('test_instance','',\
+		instance = self._commands_plugin.create_instance('test_instance',0,'',\
 			'','','',{})
 
 		command = [com for com in self._commands_plugin._commands.values()\

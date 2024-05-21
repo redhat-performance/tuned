@@ -5,6 +5,7 @@ from tuned.exceptions import TunedException
 import threading
 import tuned.consts as consts
 from tuned.utils.commands import commands
+from tuned.plugins import hotplug
 
 __all__ = ["Controller"]
 
@@ -352,6 +353,10 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			rets = "Instance '%s' not found" % instance_name
 			log.error(rets)
 			return (False, rets)
+		if not isinstance(instance_target.plugin, hotplug.Plugin):
+			rets = "Plugin '%s' does not support hotplugging or dynamic instances." % instance_target.plugin.name
+			log.error(rets)
+			return (False, rets)
 		devs = set(self._cmd.devstr2devs(devices))
 		log.debug("Instance '%s' trying to acquire devices '%s'." % (instance_target.name, str(devs)))
 		for instance in self._daemon._unit_manager.instances:
@@ -417,3 +422,100 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		rets = "Instance '%s' not found" % instance_name
 		log.error(rets)
 		return (False, rets, [])
+
+	@exports.export("ssa{ss}", "(bs)")
+	def instance_create(self, plugin_name, instance_name, options, caller = None):
+		"""Dynamically create a plugin instance
+
+		Parameters:
+		plugin_name -- name of the plugin
+		instance_name -- name of the new instance
+		dict of string-string -- options for the new instance
+
+		Return:
+		bool -- True on success
+		string -- error message or "OK"
+		"""
+		if caller == "":
+			return (False, "Unauthorized")
+		plugins = {p.name: p for p in self._daemon._unit_manager.plugins}
+		if not plugin_name in plugins.keys():
+			rets = "Plugin '%s' not found" % plugin_name
+			log.error(rets)
+			return (False, rets)
+		plugin = plugins[plugin_name]
+		if not isinstance(plugin, hotplug.Plugin):
+			rets = "Plugin '%s' does not support hotplugging or dynamic instances." % plugin.name
+			log.error(rets)
+			return (False, rets)
+		devices = options.pop("devices", None)
+		devices_udev_regex = options.pop("devices_udev_regex", None)
+		script_pre = options.pop("script_pre", None)
+		script_post = options.pop("script_post", None)
+		priority = int(options.pop("priority", self._daemon._unit_manager._def_instance_priority))
+		try:
+			instance = plugin.create_instance(instance_name, priority, devices, devices_udev_regex, script_pre, script_post, options)
+			plugin.initialize_instance(instance)
+			self._daemon._unit_manager.instances.append(instance)
+		except Exception as e:
+			rets = "Error creating instance '%s': %s" % (instance_name, str(e))
+			log.error(rets)
+			return (False, rets)
+		log.info("Created dynamic instance '%s' of plugin '%s'" % (instance_name, plugin_name))
+
+		plugin.assign_free_devices(instance)
+		plugin.instance_apply_tuning(instance)
+		# transfer matching devices from other instances, if the priority of the new
+		# instance is equal or higher (equal or lower priority value)
+		for other_instance in self._daemon._unit_manager.instances:
+			if (other_instance == instance or
+				other_instance.plugin != plugin or
+				instance.priority > other_instance.priority):
+				continue
+			devs_moving = plugin._get_matching_devices(instance, other_instance.processed_devices)
+			if len(devs_moving):
+				log.info("Moving devices '%s' from instance '%s' to instance '%s'." % (str(devs_moving),
+					other_instance.name, instance.name))
+				plugin._remove_devices_nocheck(other_instance, devs_moving)
+				plugin._add_devices_nocheck(instance, devs_moving)
+		return (True, "OK")
+
+	@exports.export("s", "(bs)")
+	def instance_destroy(self, instance_name, caller = None):
+		"""Destroy a dynamically created plugin instance
+
+		Parameters:
+		instance_name -- name of the new instance
+
+		Return:
+		bool -- True on success
+		string -- error message or "OK"
+		"""
+		if caller == "":
+			return (False, "Unauthorized")
+		try:
+			instance = [i for i in self._daemon._unit_manager.instances if i.name == instance_name][0]
+		except IndexError:
+			rets = "Instance '%s' not found" % instance_name
+			log.error(rets)
+			return (False, rets)
+		plugin = instance.plugin
+		if not isinstance(plugin, hotplug.Plugin):
+			rets = "Plugin '%s' does not support hotplugging or dynamic instances." % plugin.name
+			log.error(rets)
+			return (False, rets)
+		devices = instance.processed_devices.copy()
+		try:
+			plugin._remove_devices_nocheck(instance, devices)
+			self._daemon._unit_manager.instances.remove(instance)
+			plugin.instance_unapply_tuning(instance)
+			plugin.destroy_instance(instance)
+		except Exception as e:
+			rets = "Error deleting instance '%s': %s" % (instance_name, str(e))
+			log.error(rets)
+			return (False, rets)
+		log.info("Deleted instance '%s'" % instance_name)
+		for device in devices:
+			# _add_device() will find a suitable plugin instance
+			plugin._add_device(device)
+		return (True, "OK")
