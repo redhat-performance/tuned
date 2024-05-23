@@ -13,6 +13,9 @@ DRIVER = "tuned"
 NO_TURBO_PATH = "/sys/devices/system/cpu/intel_pstate/no_turbo"
 LAP_MODE_PATH = "/sys/bus/platform/devices/thinkpad_acpi/dytc_lapmode"
 
+UPOWER_DBUS_NAME = "org.freedesktop.UPower"
+UPOWER_DBUS_PATH = "/org/freedesktop/UPower"
+UPOWER_DBUS_INTERFACE = "org.freedesktop.UPower"
 
 class PerformanceDegraded(StrEnum):
     NONE = ""
@@ -101,7 +104,24 @@ class Controller(exports.interfaces.ExportableInterface):
         self._performance_degraded = PerformanceDegraded.NONE
         self._cmd = commands()
         self._terminate = threading.Event()
+        self._on_battery = False
         self.load_config()
+
+    def upower_changed(self, interface, changed, invalidated):
+        properties = dbus.Interface(self.proxy, dbus.PROPERTIES_IFACE)
+        self._on_battery = bool(properties.Get(UPOWER_DBUS_INTERFACE, "OnBattery"))
+        tuned_profile = self._config.ppd_to_tuned_battery[self._base_profile] if self._on_battery else self._config.ppd_to_tuned[self._base_profile]
+        log.info("Switching to profile '%s' due to battery %s" % (tuned_profile, self._on_battery))
+        self._tuned_interface.switch_profile(tuned_profile)
+
+    def setup_battery_signaling(self):
+        try:
+            bus = dbus.SystemBus()
+            self.proxy = bus.get_object(UPOWER_DBUS_NAME, UPOWER_DBUS_PATH)
+            self.proxy.connect_to_signal("PropertiesChanged", self.upower_changed)
+            self.upower_changed(None, None, None)
+        except dbus.exceptions.DBusException as error:
+            log.debug(error)
 
     def _check_performance_degraded(self):
         performance_degraded = PerformanceDegraded.NONE
@@ -137,11 +157,13 @@ class Controller(exports.interfaces.ExportableInterface):
         self._config = PPDConfig(PPD_CONFIG_FILE)
         self._base_profile = self._config.default_profile
         self.switch_profile(self._config.default_profile)
+        if self._config.battery_detection:
+            self.setup_battery_signaling()
 
     def switch_profile(self, profile):
         if self.active_profile() == profile:
             return
-        tuned_profile = self._config.ppd_to_tuned[profile]
+        tuned_profile = self._config.ppd_to_tuned_battery[profile] if self._on_battery else self._config.ppd_to_tuned[profile]
         log.info("Switching to profile '%s'" % tuned_profile)
         self._tuned_interface.switch_profile(tuned_profile)
         exports.property_changed("ActiveProfile", profile)
