@@ -64,7 +64,7 @@ $ tuned-adm active
 +
 [subs=+quotes]
 ----
-# mkdir /etc/tuned/[replaceable]__my-profile__
+# mkdir /etc/tuned/profiles/[replaceable]__my-profile__
 ----
 
 . Find the system unique identifier of the selected block device:
@@ -83,7 +83,7 @@ ID_SERIAL_SHORT=_20120501030900000_
 The command in the this example will return all values identified as a World Wide Name (WWN) or serial number associated with the specified block device. Although it is preferred to use a WWN, the WWN is not always available for a given device and any values returned by the example command are acceptable to use as the _device system unique ID_.
 ====
 
-. Create the `/etc/tuned/_my-profile_/tuned.conf` configuration file. In the file, set the following options:
+. Create the `/etc/tuned/profiles/[replaceable]_my-profile_/tuned.conf` configuration file. In the file, set the following options:
 
 .. Optional: Include an existing profile:
 +
