@@ -125,7 +125,8 @@ if __name__ == "__main__":
 	result = False
 
 	profile_dirs = config.get_list(consts.CFG_PROFILE_DIRS, consts.CFG_DEF_PROFILE_DIRS)
-	dbus = config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
+	daemon = config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
+	dbus = daemon and config.get_bool(consts.CFG_ENABLE_DBUS, consts.CFG_DEF_ENABLE_DBUS)
 
 	try:
 		admin = tuned.admin.Admin(profile_dirs, dbus, debug, asynco, timeout, log_level)
