@@ -447,7 +447,7 @@ class commands:
 	def wait(self, terminate, time):
 		try:
 			return terminate.wait(time, False)
-		except:
+		except TypeError as e:
 			return terminate.wait(time)
 
 	def get_size(self, s):
