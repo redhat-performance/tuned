@@ -72,10 +72,16 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		self._terminate.set()
 
 	def sighup(self):
-		if not self._daemon._sighup_processing.is_set():
-			self._daemon._sighup_processing.set()
-			if not self.reload():
-				self._daemon._sighup_processing.clear()
+		if self._daemon._sighup_processing.is_set():
+			self._daemon._sighup_pending.set()
+		else:
+			do_reload = True
+			while do_reload:
+				self._daemon._sighup_processing.set()
+				self._daemon._sighup_pending.clear()
+				if not self.reload():
+					self._daemon._sighup_processing.clear()
+				do_reload = self._daemon._sighup_pending.is_set()
 
 	@exports.signal("sbs")
 	def profile_changed(self, profile_name, result, errstr):

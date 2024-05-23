@@ -61,6 +61,8 @@ class Daemon(object):
 		self._not_used = threading.Event()
 		# Flag which is set if SIGHUP is being processed
 		self._sighup_processing = threading.Event()
+		# Flag which is set if there is unprocessed SIGHUP pending
+		self._sighup_pending = threading.Event()
 		self._not_used.set()
 		self._profile_applied = threading.Event()
 
