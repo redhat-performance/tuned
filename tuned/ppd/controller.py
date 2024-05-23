@@ -91,7 +91,7 @@ class ProfileHoldManager(object):
         self._controller.switch_profile(new_profile)
 
     def clear(self):
-        for cookie in self._holds:
+        for cookie in list(self._holds.keys()):
             self._cancel(cookie)
 
 
@@ -125,12 +125,10 @@ class Controller(exports.interfaces.ExportableInterface):
 
     def _check_performance_degraded(self):
         performance_degraded = PerformanceDegraded.NONE
-        if os.path.exists(NO_TURBO_PATH):
-            if int(self._cmd.read_file(NO_TURBO_PATH)) == 1:
-                performance_degraded = PerformanceDegraded.HIGH_OPERATING_TEMPERATURE
-        if os.path.exists(LAP_MODE_PATH):
-            if int(self._cmd.read_file(LAP_MODE_PATH)) == 1:
-                performance_degraded = PerformanceDegraded.LAP_DETECTED
+        if os.path.exists(NO_TURBO_PATH) and self._cmd.read_file(NO_TURBO_PATH).strip() == "1":
+            performance_degraded = PerformanceDegraded.HIGH_OPERATING_TEMPERATURE
+        if os.path.exists(LAP_MODE_PATH) and self._cmd.read_file(LAP_MODE_PATH).strip() == "1":
+            performance_degraded = PerformanceDegraded.LAP_DETECTED
         if performance_degraded != self._performance_degraded:
             log.info("Performance degraded: %s" % performance_degraded)
             self._performance_degraded = performance_degraded
@@ -155,6 +153,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
     def load_config(self):
         self._config = PPDConfig(PPD_CONFIG_FILE)
+        log.debug("Setting base profile to %s" % self._config.default_profile)
         self._base_profile = self._config.default_profile
         self.switch_profile(self._config.default_profile)
         if self._config.battery_detection:
@@ -194,6 +193,7 @@ class Controller(exports.interfaces.ExportableInterface):
     def set_active_profile(self, profile):
         if profile not in self._config.ppd_to_tuned:
             raise dbus.exceptions.DBusException("Invalid profile '%s'" % profile)
+        log.debug("Setting base profile to %s" % profile)
         self._base_profile = profile
         self._profile_holds.clear()
         self.switch_profile(profile)
