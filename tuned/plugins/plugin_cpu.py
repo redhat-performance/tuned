@@ -196,7 +196,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 		self._is_x86 = False
 		self._is_intel = False
 		self._is_amd = False
-		self._has_energy_perf_bias = False
+		self._has_hwp_epp = False
+		self._has_energy_perf_policy_and_bias = False
 		self._has_intel_pstate = False
 		self._has_amd_pstate = False
 		self._has_pm_qos_resume_latency_us = None
@@ -259,9 +260,13 @@ class CPULatencyPlugin(hotplug.Plugin):
 		else:
 			log.info("We are running on %s (non x86)" % self._arch)
 
+		self._has_hwp_epp = consts.CFG_CPU_EPP_FLAG in self._get_cpuinfo_flags()
+
 		if self._is_intel:
-			# Check for x86_energy_perf_policy, ignore if not available / supported
-			self._check_energy_perf_bias()
+			# When hwp_epp is not supported, we check for EPB via x86_energy_perf_policy.
+			# When it is supported, EPB should be accessible via sysfs.
+			if not self._has_hwp_epp:
+				self._check_energy_perf_policy_and_bias()
 			# Check for intel_pstate
 			self._check_intel_pstate()
 
@@ -269,15 +274,15 @@ class CPULatencyPlugin(hotplug.Plugin):
 			# Check for amd-pstate
 			self._check_amd_pstate()
 
-	def _check_energy_perf_bias(self):
-		self._has_energy_perf_bias = False
+	def _check_energy_perf_policy_and_bias(self):
+		"""Check for EPB via x86_energy_perf_policy, warn if the tool is not available or EPB unsupported."""
 		retcode_unsupported = 1
 		retcode, out = self._cmd.execute(["x86_energy_perf_policy", "-r"], no_errors = [errno.ENOENT, retcode_unsupported])
 		# With recent versions of the tool, a zero exit code is
 		# returned even if EPB is not supported. The output is empty
 		# in that case, however.
 		if retcode == 0 and out != "":
-			self._has_energy_perf_bias = True
+			self._has_energy_perf_policy_and_bias = True
 		elif retcode < 0:
 			log.warning("unable to run x86_energy_perf_policy tool, ignoring CPU energy performance bias, is the tool installed?")
 		else:
@@ -614,7 +619,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 		# It should be writen straight to sysfs energy_perf_bias file if requested on newer processors
 		# see rhbz#2095829
-		if consts.CFG_CPU_EPP_FLAG in self._get_cpuinfo_flags():
+		if self._has_hwp_epp:
 			energy_perf_bias_path = self._energy_perf_bias_path(cpu_id)
 			if os.path.exists(energy_perf_bias_path):
 				if not sim:
@@ -634,7 +639,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 				log.error("Failed to set energy_perf_bias on cpu '%s' because energy_perf_bias file does not exist."
 						  % device)
 				return None
-		elif self._has_energy_perf_bias:
+		elif self._has_energy_perf_policy_and_bias:
 			if not sim:
 				for val in vals:
 					val = val.strip()
@@ -690,11 +695,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 			log.debug("%s is not online, skipping" % device)
 			return None
 		cpu_id = device.lstrip("cpu")
-		if consts.CFG_CPU_EPP_FLAG in self._get_cpuinfo_flags():
+		if self._has_hwp_epp:
 			energy_perf_bias_path = self._energy_perf_bias_path(cpu_id)
 			if os.path.exists(energy_perf_bias_path):
 				energy_perf_bias = self._energy_perf_policy_to_human_v2(self._cmd.read_file(energy_perf_bias_path))
-		elif self._has_energy_perf_bias:
+		elif self._has_energy_perf_policy_and_bias:
 			retcode, lines = self._cmd.execute(["x86_energy_perf_policy", "-c", cpu_id, "-r"])
 			if retcode == 0:
 				for line in lines.splitlines():
