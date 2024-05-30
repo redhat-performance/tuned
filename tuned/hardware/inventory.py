@@ -54,6 +54,14 @@ class Inventory(object):
 		if not device.subsystem in self._subscriptions:
 			return
 
+		retry = consts.HOTPLUG_WAIT_FOR_DEV_INIT_RETRIES
+		while not device.is_initialized and retry > 0:
+			log.debug("Device '%s' is uninitialized, waiting '%.2f' seconds for its initialization." % (device, consts.HOTPLUG_WAIT_FOR_DEV_INIT_DELAY))
+			time.sleep(consts.HOTPLUG_WAIT_FOR_DEV_INIT_DELAY)
+			retry =- 1
+		if not device.is_initialized:
+			log.warn("Unsuccessfully waited for device '%s' initialization, continuing with uninitialized device, problems may occur." % device)
+
 		for (plugin, callback) in self._subscriptions[device.subsystem]:
 			try:
 				callback(event, device)
