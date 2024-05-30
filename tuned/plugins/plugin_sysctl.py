@@ -166,45 +166,18 @@ class SysctlPlugin(base.Plugin):
 
 	def _read_sysctl(self, option):
 		path = self._get_sysctl_path(option)
-		try:
-			with open(path, "r") as f:
-				line = ""
-				for i, line in enumerate(f):
-					if i > 0:
-						log.error("Failed to read sysctl parameter '%s', multi-line values are unsupported"
-								% option)
-						return None
-				value = line.strip()
-			log.debug("Value of sysctl parameter '%s' is '%s'"
-					% (option, value))
-			return value
-		except (OSError, IOError) as e:
-			if e.errno == errno.ENOENT:
-				log.error("Failed to read sysctl parameter '%s', the parameter does not exist"
-						% option)
-			else:
-				log.error("Failed to read sysctl parameter '%s': %s"
-						% (option, str(e)))
+		content = self._cmd.read_file(path, err_ret=None)
+		if content is None:
 			return None
+		content = content.strip()
+		if len(content.split("\n")) > 1:
+			log.error("Failed to read sysctl parameter '%s', multi-line values are unsupported" % option)
+			return None
+		return content
 
 	def _write_sysctl(self, option, value, ignore_missing = False):
 		path = self._get_sysctl_path(option)
 		if os.path.basename(path) in DEPRECATED_SYSCTL_OPTIONS:
-			log.error("Refusing to set deprecated sysctl option %s"
-					% option)
+			log.error("Refusing to set deprecated sysctl option %s" % option)
 			return False
-		try:
-			log.debug("Setting sysctl parameter '%s' to '%s'"
-					% (option, value))
-			with open(path, "w") as f:
-				f.write(value)
-			return True
-		except (OSError, IOError) as e:
-			if e.errno == errno.ENOENT:
-				log_func = log.debug if ignore_missing else log.error
-				log_func("Failed to set sysctl parameter '%s' to '%s', the parameter does not exist"
-						% (option, value))
-			else:
-				log.error("Failed to set sysctl parameter '%s' to '%s': %s"
-						% (option, value, str(e)))
-			return False
+		return self._cmd.write_to_file(path, value, no_error=[errno.ENOENT] if ignore_missing else False, ignore_same=True)

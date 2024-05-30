@@ -87,4 +87,4 @@ class SysfsPlugin(base.Plugin):
 			return None
 
 	def _write_sysfs(self, sysfs_file, value):
-		return self._cmd.write_to_file(sysfs_file, value)
+		return self._cmd.write_to_file(sysfs_file, value, ignore_same=True)
