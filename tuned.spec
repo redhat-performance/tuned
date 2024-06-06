@@ -44,7 +44,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.22.1
+Version: 2.23.0
 Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
@@ -583,6 +583,26 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Thu Jun  6 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.23.0-1
+- new release
+  - migrated profiles to /etc/tuned/profiles/ and /usr/lib/tuned/profiles/
+  - added an option to configure profile directories
+    resolves: RHEL-26157
+  - daemon: buffer sighup signal
+    resolves: RHEL-31180
+  - api: added commands to dynamically create/destroy instances
+  - functions: added 'intel_recommended_pstate'
+  - functions: added 'log' which helps with debugging
+  - plugins: added plugin_irq
+  - plugin_net: do not read monitors if dynamic tuning is disabled
+    resolves: RHEL-28757
+  - plugin_video: added support for amdgpu `panel_power_savings` attribute
+  - plugin_cpu: check that writes are necessary if they may cause redundant IPIs
+    resolves: RHEL-25613
+  - sap-netweaver: increased vm.max_map_count
+    resolves: RHEL-31757
+  - tuned-ppd: Detect battery change events
+
 * Thu Feb 22 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.22.1-1
 - new release
   - rebased tuned to latest upstream
