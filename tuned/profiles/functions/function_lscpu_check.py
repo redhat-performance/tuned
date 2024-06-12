@@ -21,7 +21,8 @@ class lscpu_check(base.Function):
 	def execute(self, args):
 		if not super(lscpu_check, self).execute(args):
 			return None
-		lscpu = self._cmd.execute("lscpu")
+		# Stdout is the 2nd result from the execute call
+		_, lscpu = self._cmd.execute("lscpu")
 		for i in range(0, len(args), 2):
 			if i + 1 < len(args):
 				if re.search(args[i], lscpu, re.MULTILINE):
