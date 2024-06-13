@@ -212,6 +212,24 @@ The following is an example of a custom profile that adds the [option]`isolcpus=
 [bootloader]
 cmdline=isolcpus=2
 ----
+====
+.Overriding the default tuned_initrd location
+====
+In some cases, such as during multi-stage installs, the booted initramfs from /proc/cmdline is not the same location as the tuned_initrd. This can lead to a failure during boot when Read Only Memory is removed from the system.
+
+To override the default behavior of the *TuneD*  bootloader plugin and point to a specific grub parition for tuned, include the following lines in the [filename]`tuned.conf` file:
+
+----
+[bootloader]
+override_grub_cmdline=(hd1,gpt2)
+----
+
+If the grub config switches to a `/boot/` partition directly and [filename]`tuned_initrd.img` (controlled by [option]`initrd_dst_img`) is located at [folder]`/boot/tuned_initrd.img` folder, include the following lines in the [filename]`tuned.conf` file:
+
+----
+[bootloader]
+override_grub_cmdline=/
+----
 
 ====
 --
