@@ -387,7 +387,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		# see man ethtool for possible wol values, 0 added as an alias for 'd'
 		value = re.sub(r"0", "d", str(value));
 		if not re.match(r"^[" + WOL_VALUES + r"]+$", value):
-			log.warn("Incorrect 'wake_on_lan' value.")
+			log.warning("Incorrect 'wake_on_lan' value.")
 			return None
 
 		if not sim:
@@ -432,7 +432,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		args = ["ip", "link"] + args
 		(rc, out, err_msg) = self._cmd.execute(args, no_errors=[errno.ENOENT], return_err=True)
 		if rc == -errno.ENOENT:
-			log.warn("ip command not found, ignoring for other devices")
+			log.warning("ip command not found, ignoring for other devices")
 			self._use_ip = False
 			return None
 		elif rc:
@@ -454,13 +454,13 @@ class NetTuningPlugin(hotplug.Plugin):
 		try:
 			int(value)
 		except ValueError:
-			log.warn("txqueuelen value '%s' is not integer" % value)
+			log.warning("txqueuelen value '%s' is not integer" % value)
 			return None
 		if not sim:
 			# there is inconsistency in "ip", where "txqueuelen" is set as it, but is shown as "qlen"
 			res = self._call_ip_link(["set", "dev", device, "txqueuelen", value])
 			if res is None:
-				log.warn("Cannot set txqueuelen for device '%s'" % device)
+				log.warning("Cannot set txqueuelen for device '%s'" % device)
 				return None
 		return value
 
@@ -494,12 +494,12 @@ class NetTuningPlugin(hotplug.Plugin):
 		try:
 			int(value)
 		except ValueError:
-			log.warn("mtu value '%s' is not integer" % value)
+			log.warning("mtu value '%s' is not integer" % value)
 			return None
 		if not sim:
 			res = self._call_ip_link(["set", "dev", device, "mtu", value])
 			if res is None:
-				log.warn("Cannot set mtu for device '%s'" % device)
+				log.warning("Cannot set mtu for device '%s'" % device)
 				return None
 		return value
 

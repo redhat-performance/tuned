@@ -18,5 +18,5 @@ class check_net_queue_count(base.Function):
 		if args[0].isdigit():
 			return args[0]
 		(ret, out) = self._cmd.execute(["nproc"])
-		log.warn("net-dev queue count is not correctly specified, setting it to HK CPUs %s" % (out))
+		log.warning("net-dev queue count is not correctly specified, setting it to HK CPUs %s" % (out))
 		return out

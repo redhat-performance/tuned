@@ -61,7 +61,7 @@ class VMPlugin(base.Plugin):
 	def _set_transparent_hugepages(self, value, sim, remove):
 		if value not in ["always", "never", "madvise"]:
 			if not sim:
-				log.warn("Incorrect 'transparent_hugepages' value '%s'." % str(value))
+				log.warning("Incorrect 'transparent_hugepages' value '%s'." % str(value))
 			return None
 
 		cmdline = cmd.read_file("/proc/cmdline", no_error = True)
@@ -78,7 +78,7 @@ class VMPlugin(base.Plugin):
 			return value
 		else:
 			if not sim:
-				log.warn("Option 'transparent_hugepages' is not supported on current hardware.")
+				log.warning("Option 'transparent_hugepages' is not supported on current hardware.")
 			return None
 
         # just an alias to transparent_hugepages
@@ -109,7 +109,7 @@ class VMPlugin(base.Plugin):
 			return value
 		else:
 			if not sim:
-				log.warn("Option 'transparent_hugepage.defrag' is not supported on current hardware.")
+				log.warning("Option 'transparent_hugepage.defrag' is not supported on current hardware.")
 			return None
 
 	@command_get("transparent_hugepage.defrag")

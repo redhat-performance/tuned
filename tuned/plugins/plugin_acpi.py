@@ -69,7 +69,7 @@ class ACPIPlugin(base.Plugin):
 					self._cmd.write_to_file(self._platform_profile_path(), profile, \
 						no_error=[errno.ENOENT] if remove else False)
 				return profile
-			log.warn("Requested platform_profile '%s' unavailable" % profile)
+			log.warning("Requested platform_profile '%s' unavailable" % profile)
 		log.error("Failed to set platform_profile. Is the value in the profile correct?")
 		return None
 

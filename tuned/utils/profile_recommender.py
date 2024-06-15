@@ -148,7 +148,7 @@ class ProfileRecommender:
 		except IndexError:
 			log.error("Unknown chassis type id read from dmi sysfs: %d" % chassis_type_id)
 		except (OSError, IOError) as e:
-			log.warn("error accessing dmi sysfs file: %s" % e)
+			log.warning("error accessing dmi sysfs file: %s" % e)
 
 		if self._chassis_type:
 			log.debug("chassis type - %s" % self._chassis_type)
@@ -167,7 +167,7 @@ class ProfileRecommender:
 			else:
 				self._chassis_type = dmi_output.strip().decode()
 		except (OSError, IOError) as e:
-			log.warn("error executing dmidecode tool : %s" % e)
+			log.warning("error executing dmidecode tool : %s" % e)
 
 		if not self._chassis_type:
 			log.debug("could not determine chassis type.")

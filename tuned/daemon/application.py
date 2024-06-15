@@ -211,7 +211,7 @@ class Application(object):
 		if daemon:
 			self.config.set(consts.CFG_DAEMON, True)
 		if not self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
-			log.warn("Using one shot no daemon mode, most of the functionality will be not available, it can be changed in global config")
+			log.warning("Using one shot no daemon mode, most of the functionality will be not available, it can be changed in global config")
 		result = self._controller.run()
 		if self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
 			exports.stop()

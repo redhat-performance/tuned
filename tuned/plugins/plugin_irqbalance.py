@@ -52,7 +52,7 @@ class IrqbalancePlugin(base.Plugin):
 				return f.read()
 		except IOError as e:
 			if e.errno == errno.ENOENT:
-				log.warn("irqbalance sysconfig file is missing. Is irqbalance installed?")
+				log.warning("irqbalance sysconfig file is missing. Is irqbalance installed?")
 			else:
 				log.error("Failed to read irqbalance sysconfig file: %s" % e)
 			return None
@@ -83,7 +83,7 @@ class IrqbalancePlugin(base.Plugin):
 			["systemctl", "try-restart", "irqbalance"],
 			no_errors=[5])
 		if retcode != 0:
-			log.warn("Failed to restart irqbalance. Is it installed?")
+			log.warning("Failed to restart irqbalance. Is it installed?")
 
 	def _set_banned_cpus(self, banned_cpumask):
 		content = self._read_irqbalance_sysconfig()
