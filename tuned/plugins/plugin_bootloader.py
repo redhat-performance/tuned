@@ -251,7 +251,7 @@ class BootloaderPlugin(base.Plugin):
 			return None
 		splited = out.split()
 		if len(splited) < 2 or splited[0] != "State:":
-			log.warn("Exceptional format of rpm-ostree status result:\n%s" % out)
+			log.warning("Exceptional format of rpm-ostree status result:\n%s" % out)
 			return None
 		return splited[1]
 
@@ -328,7 +328,7 @@ class BootloaderPlugin(base.Plugin):
 			elif key in effective:
 				effective[key] = options[key]
 			else:
-				log.warn("Unknown option '%s' for plugin '%s'." % (key, self.__class__.__name__))
+				log.warning("Unknown option '%s' for plugin '%s'." % (key, self.__class__.__name__))
 		cmdline = ""
 		for key in cmdline_keys:
 			val = options[key]
@@ -524,7 +524,7 @@ class BootloaderPlugin(base.Plugin):
 		l = ["%s=%s" % (str(option), str(value)) for option, value in d.items()]
 		(rc, out) = self._cmd.execute(["grub2-editenv", "-", "set"] + l)
 		if rc != 0:
-			log.warn("cannot update grubenv: '%s'" % out)
+			log.warning("cannot update grubenv: '%s'" % out)
 			return False
 		return True
 
@@ -535,7 +535,7 @@ class BootloaderPlugin(base.Plugin):
 		log.debug("running kernel update hook '%s' to patch BLS entries" % consts.KERNEL_UPDATE_HOOK_FILE)
 		(rc, out) = self._cmd.execute([consts.KERNEL_UPDATE_HOOK_FILE, "add"], env = {"KERNEL_INSTALL_MACHINE_ID" : machine_id})
 		if rc != 0:
-			log.warn("cannot patch BLS entries: '%s'" % out)
+			log.warning("cannot patch BLS entries: '%s'" % out)
 			return False
 		return True
 
@@ -556,10 +556,10 @@ class BootloaderPlugin(base.Plugin):
 
 	def _install_initrd(self, img):
 		if self._rpm_ostree:
-			log.warn("Detected rpm-ostree which doesn't support initrd overlays.")
+			log.warning("Detected rpm-ostree which doesn't support initrd overlays.")
 			return False
 		if self._check_petitboot():
-			log.warn("Detected Petitboot which doesn't support initrd overlays. The initrd overlay will be ignored by bootloader.")
+			log.warning("Detected Petitboot which doesn't support initrd overlays. The initrd overlay will be ignored by bootloader.")
 		log.info("installing initrd image as '%s'" % self._initrd_dst_img_val)
 		img_name = os.path.basename(self._initrd_dst_img_val)
 		if not self._cmd.copy(img, self._initrd_dst_img_val):
@@ -691,9 +691,9 @@ class BootloaderPlugin(base.Plugin):
 	def _instance_post_static(self, instance, enabling):
 		if enabling and self._skip_grub_config_val:
 			if len(self._initrd_val) > 0:
-				log.warn("requested changes to initrd will not be applied!")
+				log.warning("requested changes to initrd will not be applied!")
 			if len(self._cmdline_val) > 0:
-				log.warn("requested changes to cmdline will not be applied!")
+				log.warning("requested changes to cmdline will not be applied!")
 			# ensure that the desired cmdline is always written to BOOT_CMDLINE_FILE (/etc/tuned/bootcmdline)
 			self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : self._cmdline_val, consts.BOOT_CMDLINE_INITRD_ADD_VAR : self._initrd_val})
 		elif enabling and self.update_grub2_cfg:

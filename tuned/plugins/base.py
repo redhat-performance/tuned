@@ -80,7 +80,7 @@ class Plugin(object):
 			if key in effective or self._has_dynamic_options:
 				effective[key] = options[key]
 			else:
-				log.warn("Unknown option '%s' for plugin '%s'." % (key, self.__class__.__name__))
+				log.warning("Unknown option '%s' for plugin '%s'." % (key, self.__class__.__name__))
 		return effective
 
 	def _option_bool(self, value):
@@ -172,7 +172,7 @@ class Plugin(object):
 		to_assign = self._get_matching_devices(instance, self._free_devices)
 		instance.active = len(to_assign) > 0
 		if not instance.active:
-			log.warn("instance %s: no matching devices available" % instance.name)
+			log.warning("instance %s: no matching devices available" % instance.name)
 		else:
 			name = instance.name
 			if instance.name != self.name:
@@ -217,7 +217,7 @@ class Plugin(object):
 		if script is None:
 			return None
 		if len(devices) == 0:
-			log.warn("Instance '%s': no device to call script '%s' for." % (instance.name, script))
+			log.warning("Instance '%s': no device to call script '%s' for." % (instance.name, script))
 			return None
 		if not script.startswith("/"):
 			log.error("Relative paths cannot be used in script_pre or script_post. " \
@@ -489,7 +489,7 @@ class Plugin(object):
 					else:
 						return None
 			except ValueError:
-				log.warn("cannot compare new value '%s' with current value '%s' by operator '%s', using '%s' directly as new value" % (val, current_value, op, new_value))
+				log.warning("cannot compare new value '%s' with current value '%s' by operator '%s', using '%s' directly as new value" % (val, current_value, op, new_value))
 		return new_value
 
 	def _get_current_value(self, command, device = None, ignore_missing=False):

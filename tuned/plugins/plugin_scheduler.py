@@ -660,7 +660,7 @@ class SchedulerPlugin(base.Plugin):
 					log.debug("Affinity of kernel thread with PID %d cannot be changed, the task's affinity mask is fixed."
 							% pid)
 				else:
-					log.warn("Affinity of task with PID %d cannot be changed, the task's affinity mask is fixed."
+					log.warning("Affinity of task with PID %d cannot be changed, the task's affinity mask is fixed."
 							% pid)
 				return 0
 			else:
@@ -1003,7 +1003,7 @@ class SchedulerPlugin(base.Plugin):
 					self._cmd.write_to_file("%s/%s" % (self._cgroup_mount_point, "tasks"), l, no_error = True)
 			cnt -= 1
 		if cnt == 0:
-			log.warn("Unable to cleanup tasks from cgroup '%s'" % cgroup)
+			log.warning("Unable to cleanup tasks from cgroup '%s'" % cgroup)
 
 	def _cgroup_cleanup_tasks(self):
 		if self._cgroup is not None and not self._cgroup in self._cgroups:

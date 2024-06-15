@@ -65,13 +65,13 @@ class ModulesPlugin(base.Plugin):
 		for module in modules:
 			retcode, out = self._cmd.execute(["modprobe", "-r", module])
 			if retcode < 0:
-				log.warn("'modprobe' command not found, cannot reload kernel modules, reboot is required")
+				log.warning("'modprobe' command not found, cannot reload kernel modules, reboot is required")
 				return
 			elif retcode > 0:
 				log.debug("cannot remove kernel module '%s': %s" % (module, out.strip()))
 			retcode, out = self._cmd.execute(["modprobe", module])
 			if retcode != 0:
-				log.warn("cannot insert/reinsert module '%s', reboot is required: %s" % (module, out.strip()))
+				log.warning("cannot insert/reinsert module '%s', reboot is required: %s" % (module, out.strip()))
 
 	def _instance_apply_static(self, instance):
 		self._clear_modprobe_file()
@@ -86,7 +86,7 @@ class ModulesPlugin(base.Plugin):
 				retcode, out = self._cmd.execute(["modinfo", module])
 				if retcode < 0:
 					skip_check = True
-					log.warn("'modinfo' command not found, not checking kernel modules")
+					log.warning("'modinfo' command not found, not checking kernel modules")
 				elif retcode > 0:
 					log.error("kernel module '%s' not found, skipping it" % module)
 			if skip_check or retcode == 0:
@@ -126,7 +126,7 @@ class ModulesPlugin(base.Plugin):
 				for item in l:
 					arg = item.split("=", 1)
 					if len(arg) != 2:
-						log.warn("unrecognized module option for module '%s': %s" % (module, item))
+						log.warning("unrecognized module option for module '%s': %s" % (module, item))
 					else:
 						if self._verify_value(arg[0], arg[1],
 							self._cmd.read_file(mpath + "/parameters/" + self._unquote_path(arg[0]), err_ret = None, no_error = True),

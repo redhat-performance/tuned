@@ -142,7 +142,7 @@ class VideoPlugin(base.Plugin):
 								return v
 			else:
 				if not sim:
-					log.warn("Invalid option for radeon_powersave.")
+					log.warning("Invalid option for radeon_powersave.")
 				return None
 		return None
 
@@ -168,12 +168,12 @@ class VideoPlugin(base.Plugin):
 		try:
 			value = int(value, 10)
 		except ValueError:
-			log.warn("Invalid value %s for panel_power_savings" % value)
+			log.warning("Invalid value %s for panel_power_savings" % value)
 			return None
 		if value in range(0, 5):
 			return self.apply_panel_power_saving_target(device, value, sim)
 		else:
-			log.warn("Invalid value %s for panel_power_savings" % value)
+			log.warning("Invalid value %s for panel_power_savings" % value)
 		return None
 
 	@command_get("panel_power_savings")

@@ -178,7 +178,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		finally:
 			if was_running:
 				if reapply:
-					log.warn("Applying previously applied (possibly out-dated) profile '%s'." % profile_name)
+					log.warning("Applying previously applied (possibly out-dated) profile '%s'." % profile_name)
 				elif not success:
 					log.info("Applying previously applied profile.")
 				self._daemon.start()

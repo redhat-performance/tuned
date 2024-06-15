@@ -535,7 +535,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 				log.debug("Ignoring governor '%s' on cpu '%s', it is not supported"
 						% (governor, device))
 		else:
-			log.warn("None of the scaling governors is supported: %s"
+			log.warning("None of the scaling governors is supported: %s"
 					% ", ".join(governors))
 			governor = None
 		return governor
@@ -765,7 +765,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 						log.info("Setting energy_performance_preference value '%s' for cpu '%s'" % (val, device))
 						break
 					else:
-						log.warn("energy_performance_preference value '%s' unavailable for cpu '%s'" % (val, device))
+						log.warning("energy_performance_preference value '%s' unavailable for cpu '%s'" % (val, device))
 				else:
 					log.error("Failed to set energy_performance_preference on cpu '%s'. Is the value in the profile correct?"
 							  % device)
