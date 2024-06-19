@@ -46,8 +46,9 @@ ifeq ($(PYTHON_SITELIB),)
 $(error Failed to determine python library directory)
 endif
 KERNELINSTALLHOOKDIR = /usr/lib/kernel/install.d
-TUNED_PROFILES_DIR = /usr/lib/tuned/profiles
-TUNED_RECOMMEND_DIR = $(TUNED_PROFILES_DIR)/recommend.d
+TUNED_SYSTEM_DIR = /usr/lib/tuned
+TUNED_PROFILES_DIR = $(TUNED_SYSTEM_DIR)/profiles
+TUNED_RECOMMEND_DIR = $(TUNED_SYSTEM_DIR)/recommend.d
 TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/tuned/recommend.d
 BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
 
@@ -181,6 +182,9 @@ install: install-dirs
 	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/cpu-partitioning-powersave/cpu-partitioning-powersave-variables.conf \
 		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-powersave-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_RECOMMEND_DIR)/50-tuned.conf
+
+	# bash functions used by profile scripts
+	install -Dpm 0644 functions $(DESTDIR)$(TUNED_SYSTEM_DIR)
 
 	# bash completion
 	install -Dpm 0644 tuned-adm.bash $(DESTDIR)$(BASH_COMPLETIONS)/tuned-adm
