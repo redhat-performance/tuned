@@ -46,8 +46,9 @@ ifeq ($(PYTHON_SITELIB),)
 $(error Failed to determine python library directory)
 endif
 KERNELINSTALLHOOKDIR = /usr/lib/kernel/install.d
-TUNED_PROFILESDIR = /usr/lib/tuned/profiles
-TUNED_RECOMMEND_DIR = $(TUNED_PROFILESDIR)/recommend.d
+TUNED_SYSTEM_DIR = /usr/lib/tuned
+TUNED_PROFILES_DIR = $(TUNED_SYSTEM_DIR)/profiles
+TUNED_RECOMMEND_DIR = $(TUNED_SYSTEM_DIR)/recommend.d
 TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/tuned/recommend.d
 BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
 
@@ -128,7 +129,7 @@ clean-html:
 
 install-dirs:
 	mkdir -p $(DESTDIR)$(PYTHON_SITELIB)
-	mkdir -p $(DESTDIR)$(TUNED_PROFILESDIR)
+	mkdir -p $(DESTDIR)$(TUNED_PROFILES_DIR)
 	mkdir -p $(DESTDIR)/var/lib/tuned
 	mkdir -p $(DESTDIR)/var/log/tuned
 	mkdir -p $(DESTDIR)/run/tuned
@@ -169,18 +170,21 @@ install: install-dirs
 	install -Dpm 0644 modules.conf $(DESTDIR)$(SYSCONFDIR)/modprobe.d/tuned.conf
 
 	# profiles & system config
-	cp -a profiles/* $(DESTDIR)$(TUNED_PROFILESDIR)/
-	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime/realtime-variables.conf \
+	cp -a profiles/* $(DESTDIR)$(TUNED_PROFILES_DIR)/
+	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/realtime/realtime-variables.conf \
 		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-variables.conf
-	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime-virtual-guest/realtime-virtual-guest-variables.conf \
+	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/realtime-virtual-guest/realtime-virtual-guest-variables.conf \
 		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-virtual-guest-variables.conf
-	mv $(DESTDIR)$(TUNED_PROFILESDIR)/realtime-virtual-host/realtime-virtual-host-variables.conf \
+	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/realtime-virtual-host/realtime-virtual-host-variables.conf \
 		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-virtual-host-variables.conf
-	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning/cpu-partitioning-variables.conf \
+	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/cpu-partitioning/cpu-partitioning-variables.conf \
 		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-variables.conf
-	mv $(DESTDIR)$(TUNED_PROFILESDIR)/cpu-partitioning-powersave/cpu-partitioning-powersave-variables.conf \
+	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/cpu-partitioning-powersave/cpu-partitioning-powersave-variables.conf \
 		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-powersave-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_RECOMMEND_DIR)/50-tuned.conf
+
+	# bash functions used by profile scripts
+	install -Dpm 0644 functions $(DESTDIR)$(TUNED_SYSTEM_DIR)
 
 	# bash completion
 	install -Dpm 0644 tuned-adm.bash $(DESTDIR)$(BASH_COMPLETIONS)/tuned-adm
