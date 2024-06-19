@@ -95,6 +95,18 @@ class DiskPlugin(hotplug.Plugin):
 		self._load_smallest = 0.01
 		self._cmd = commands()
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return True
+
+	@classmethod
+	def uses_periodic_tuning(cls):
+		return True
+
 	def _init_devices(self):
 		super(DiskPlugin, self)._init_devices()
 		self._devices_supported = True
@@ -162,7 +174,6 @@ class DiskPlugin(hotplug.Plugin):
 	@classmethod
 	def _get_config_options(cls):
 		return {
-			"dynamic"            : True, # FIXME: do we want this default?
 			"elevator"           : None,
 			"apm"                : None,
 			"spindown"           : None,
@@ -179,13 +190,10 @@ class DiskPlugin(hotplug.Plugin):
 		]
 
 	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-
+		super(DiskPlugin, self)._instance_init(instance)
 		self._apm_errcnt = 0
 		self._spindown_errcnt = 0
-
 		instance._load_monitor = None
-		instance._has_dynamic_tuning = self._option_bool(instance.options["dynamic"])
 
 	def _instance_cleanup(self, instance):
 		if instance._load_monitor is not None:
@@ -323,9 +331,6 @@ class DiskPlugin(hotplug.Plugin):
 			log.info("There is no dynamic tuning available for device '%s' at time" % device)
 		else:
 			super(DiskPlugin, self)._instance_apply_dynamic(instance, device)
-
-	def _instance_unapply_dynamic(self, instance, device):
-		pass
 
 	def _sysfs_path(self, device, suffix, prefix = "/sys/block/"):
 		if "/" in device:

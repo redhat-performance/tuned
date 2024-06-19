@@ -21,6 +21,14 @@ class MountsPlugin(base.Plugin):
 	"""
 
 	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
+	@classmethod
 	def _generate_mountpoint_topology(cls):
 		"""
 		Gets the information about disks, partitions and mountpoints. Stores information about used filesystem and
@@ -67,13 +75,6 @@ class MountsPlugin(base.Plugin):
 		return {
 			"disable_barriers": None,
 		}
-
-	def _instance_init(self, instance):
-		instance._has_dynamic_tuning = False
-		instance._has_static_tuning = True
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	def _get_device_cache_type(self, device):
 		"""

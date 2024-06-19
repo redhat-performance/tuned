@@ -159,6 +159,18 @@ class NetTuningPlugin(hotplug.Plugin):
 		self._re_ip_link_show = {}
 		self._use_ip = True
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return True
+
+	@classmethod
+	def uses_periodic_tuning(cls):
+		return True
+
 	def _init_devices(self):
 		self._devices_supported = True
 		self._free_devices = set()
@@ -175,11 +187,10 @@ class NetTuningPlugin(hotplug.Plugin):
 		return [self._hardware_inventory.get_device("net", x) for x in devices]
 
 	def _instance_init(self, instance):
-		instance._has_static_tuning = True
+		super(NetTuningPlugin, self)._instance_init(instance)
 		instance._load_monitor = None
 		instance._idle = None
 		instance._stats = None
-		instance._has_dynamic_tuning = self._option_bool(instance.options["dynamic"])
 
 	def _instance_cleanup(self, instance):
 		if instance._load_monitor is not None:
@@ -270,7 +281,6 @@ class NetTuningPlugin(hotplug.Plugin):
 	@classmethod
 	def _get_config_options(cls):
 		return {
-			"dynamic": True,
 			"wake_on_lan": None,
 			"nf_conntrack_hashsize": None,
 			"features": None,

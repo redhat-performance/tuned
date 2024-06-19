@@ -39,12 +39,13 @@ class SystemdPlugin(base.Plugin):
 		super(SystemdPlugin, self).__init__(*args, **kwargs)
 		self._cmd = commands()
 
-	def _instance_init(self, instance):
-		instance._has_dynamic_tuning = False
-		instance._has_static_tuning = True
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
 
-	def _instance_cleanup(self, instance):
-		pass
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
 
 	@classmethod
 	def _get_config_options(cls):

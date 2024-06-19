@@ -48,8 +48,13 @@ class VideoPlugin(base.Plugin):
 	but will trade off color accuracy.
 	"""
 
-	def __init__(self, *args, **kwargs):
-		super(VideoPlugin, self).__init__(*args, **kwargs)
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
 
 	def _init_devices(self):
 		self._devices_supported = True
@@ -73,13 +78,6 @@ class VideoPlugin(base.Plugin):
 			"radeon_powersave" : None,
 			"panel_power_savings": None,
 		}
-
-	def _instance_init(self, instance):
-		instance._has_dynamic_tuning = False
-		instance._has_static_tuning = True
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	def _files(self, device):
 		return {

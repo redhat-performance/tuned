@@ -28,6 +28,14 @@ class USBPlugin(base.Plugin):
 	====
 	"""
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	def _init_devices(self):
 		self._devices_supported = True
 		self._free_devices = set()
@@ -46,13 +54,6 @@ class USBPlugin(base.Plugin):
 		return {
 			"autosuspend" : None,
 		}
-
-	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	def _autosuspend_sysfile(self, device):
 		return "/sys/bus/usb/devices/%s/power/autosuspend" % device

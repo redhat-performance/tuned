@@ -36,6 +36,14 @@ class SCSIHostPlugin(hotplug.Plugin):
 
 		self._cmd = commands()
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	def _init_devices(self):
 		super(SCSIHostPlugin, self)._init_devices()
 		self._devices_supported = True
@@ -74,13 +82,6 @@ class SCSIHostPlugin(hotplug.Plugin):
 		return {
 			"alpm"               : None,
 		}
-
-	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	def _get_alpm_policy_file(self, device):
 		return os.path.join("/sys/class/scsi_host/", str(device), "link_power_management_policy")

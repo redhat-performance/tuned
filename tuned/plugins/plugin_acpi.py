@@ -33,19 +33,18 @@ class ACPIPlugin(base.Plugin):
 	====
 	--
 	"""
-	def __init__(self, *args, **kwargs):
-		super(ACPIPlugin, self).__init__(*args, **kwargs)
+
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
 
 	@classmethod
 	def _get_config_options(cls):
 		return {"platform_profile": None}
-
-	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	@classmethod
 	def _platform_profile_choices_path(cls):

@@ -35,19 +35,20 @@ class VMPlugin(base.Plugin):
 	"""
 
 	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
+	@classmethod
 	def _get_config_options(self):
 		return {
 			"transparent_hugepages" : None,
 			"transparent_hugepage" : None,
 			"transparent_hugepage.defrag" : None,
 		}
-
-	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	@classmethod
 	def _thp_path(self):

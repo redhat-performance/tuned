@@ -41,15 +41,19 @@ class SysfsPlugin(base.Plugin):
 		self._has_dynamic_options = True
 		self._cmd = commands()
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	def _instance_init(self, instance):
-		instance._has_dynamic_tuning = False
-		instance._has_static_tuning = True
+		super(SysfsPlugin, self)._instance_init(instance)
 
 		instance._sysfs = dict([(os.path.normpath(key_value[0]), key_value[1]) for key_value in list(instance.options.items())])
 		instance._sysfs_original = {}
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	def _instance_apply_static(self, instance):
 		for key, value in list(instance._sysfs.items()):

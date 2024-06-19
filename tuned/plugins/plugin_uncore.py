@@ -33,6 +33,14 @@ class UncorePlugin(hotplug.Plugin):
 	====
 	"""
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	def _init_devices(self):
 		self._devices_supported = True
 		self._assigned_devices = set()
@@ -54,13 +62,6 @@ class UncorePlugin(hotplug.Plugin):
 			self._free_devices.add(d)
 
 		log.debug("devices: %s", str(self._free_devices))
-
-	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	def _get(self, dev_dir, file):
 		sysfs_file = SYSFS_DIR + dev_dir + "/" + file

@@ -53,13 +53,17 @@ class ModulesPlugin(base.Plugin):
 		self._has_dynamic_options = True
 		self._cmd = commands()
 
-	def _instance_init(self, instance):
-		instance._has_dynamic_tuning = False
-		instance._has_static_tuning = True
-		instance._modules = instance.options
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
 
-	def _instance_cleanup(self, instance):
-		pass
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
+	def _instance_init(self, instance):
+		super(ModulesPlugin, self)._instance_init(instance)
+		instance._modules = instance.options
 
 	def _reload_modules(self, modules):
 		for module in modules:

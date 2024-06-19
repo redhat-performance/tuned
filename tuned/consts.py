@@ -103,6 +103,7 @@ PPD_CONFIG_FILE = "/etc/tuned/ppd.conf"
 # (see configobj for methods, default is get for string)
 CFG_DAEMON = "daemon"
 CFG_DYNAMIC_TUNING = "dynamic_tuning"
+CFG_DYNAMIC_PLUGINS = "dynamic_plugins"
 CFG_SLEEP_INTERVAL = "sleep_interval"
 CFG_UPDATE_INTERVAL = "update_interval"
 CFG_RECOMMEND_COMMAND = "recommend_command"

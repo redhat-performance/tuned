@@ -297,7 +297,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			return False
 		plugins = {}
 		for plugin_class in self._daemon.get_all_plugins():
-			plugin_name = plugin_class.__module__.split(".")[-1].split("_", 1)[1]
+			plugin_name = plugin_class.name()
 			conf_options = plugin_class._get_config_options()
 			plugins[plugin_name] = {}
 			for key, val in conf_options.items():
@@ -371,10 +371,10 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 				devs -= devs_moving
 				log.info("Moving devices '%s' from instance '%s' to instance '%s'." % (str(devs_moving),
 					instance.name, instance_target.name))
-				if (instance.plugin.name != instance_target.plugin.name):
+				if (instance.plugin.name() != instance_target.plugin.name()):
 					rets = "Target instance '%s' is of type '%s', but devices '%s' are currently handled by " \
 						"instance '%s' which is of type '%s'." % (instance_target.name,
-						instance_target.plugin.name, str(devs_moving), instance.name, instance.plugin.name)
+						instance_target.plugin.name(), str(devs_moving), instance.name, instance.plugin.name())
 					log.error(rets)
 					return (False, rets)
 				instance.plugin._remove_devices_nocheck(instance, devs_moving)
@@ -405,8 +405,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			return (False, rets, [])
 		instances = filter(lambda instance: instance.active, self._daemon._unit_manager.instances)
 		if plugin_name != "":
-			instances = filter(lambda instance: instance.plugin.name == plugin_name, instances)
-		return (True, "OK", list(map(lambda instance: (instance.name, instance.plugin.name), instances)))
+			instances = filter(lambda instance: instance.plugin.name() == plugin_name, instances)
+		return (True, "OK", list(map(lambda instance: (instance.name, instance.plugin.name()), instances)))
 
 	@exports.export("s", "(bsas)")
 	def instance_get_devices(self, instance_name, caller = None):

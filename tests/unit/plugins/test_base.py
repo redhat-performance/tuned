@@ -170,6 +170,14 @@ class DummyPlugin(Plugin):
 		self.cleaned_instances = []
 
 	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
+	@classmethod
 	def _get_config_options(self):
 		return {'default_option1':'default_value1',\
 			'default_option2':'default_value2'}
@@ -204,6 +212,14 @@ class CommandsPlugin(Plugin):
 	def __init__(self,*args,**kwargs):
 		super(CommandsPlugin,self).__init__(*args,**kwargs)
 		self._size = 'S'
+
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
 
 	@classmethod
 	def _get_config_options(self):

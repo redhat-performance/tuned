@@ -43,7 +43,7 @@ rlJournalStart
 	rlRun "pushd $PROFILE_DIR/test-profile"
 	cat << EOF > tuned.conf
 [scheduler]
-runtime=0
+dynamic=0
 EOF
 	rlRun "popd"
 

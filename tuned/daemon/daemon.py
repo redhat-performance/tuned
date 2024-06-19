@@ -19,27 +19,28 @@ class Daemon(object):
 		self._daemon = consts.CFG_DEF_DAEMON
 		self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
 		self._update_interval = int(consts.CFG_DEF_UPDATE_INTERVAL)
-		self._dynamic_tuning = consts.CFG_DEF_DYNAMIC_TUNING
 		self._recommend_command = True
 		self._rollback = consts.CFG_DEF_ROLLBACK
+		dynamic_plugins = []
 		if config is not None:
 			self._daemon = config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
 			self._sleep_interval = int(config.get(consts.CFG_SLEEP_INTERVAL, consts.CFG_DEF_SLEEP_INTERVAL))
 			self._update_interval = int(config.get(consts.CFG_UPDATE_INTERVAL, consts.CFG_DEF_UPDATE_INTERVAL))
-			self._dynamic_tuning = config.get_bool(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING)
 			self._recommend_command = config.get_bool(consts.CFG_RECOMMEND_COMMAND, consts.CFG_DEF_RECOMMEND_COMMAND)
 			self._rollback = config.get(consts.CFG_ROLLBACK, consts.CFG_DEF_ROLLBACK)
+			dynamic_plugins = config.get(consts.CFG_DYNAMIC_PLUGINS, [])
 		self._application = application
+		self._periodic_tuning = any(plugin.uses_periodic_tuning() for plugin in dynamic_plugins)
 		if self._sleep_interval <= 0:
 			self._sleep_interval = int(consts.CFG_DEF_SLEEP_INTERVAL)
 		if self._update_interval == 0:
-			self._dynamic_tuning = False
+			self._periodic_tuning = False
 		elif self._update_interval < self._sleep_interval:
 			self._update_interval = self._sleep_interval
 		self._sleep_cycles = self._update_interval // self._sleep_interval
-		log.info("using sleep interval of %d second(s)" % self._sleep_interval)
-		if self._dynamic_tuning:
-			log.info("dynamic tuning is enabled (can be overridden by plugins)")
+		if self._periodic_tuning:
+			log.info("using sleep interval of %d second(s)" % self._sleep_interval)
+			log.info("periodic tuning is enabled")
 			log.info("using update interval of %d second(s) (%d times of the sleep interval)" % (self._sleep_cycles * self._sleep_interval, self._sleep_cycles))
 
 		self._profile_recommender = ProfileRecommender(is_hardcoded = not self._recommend_command)
@@ -217,7 +218,7 @@ class Daemon(object):
 			# For more details see TuneD rhbz#917587.
 			_sleep_cnt = self._sleep_cycles
 			while not self._cmd.wait(self._terminate, self._sleep_interval):
-				if self._dynamic_tuning:
+				if self._periodic_tuning:
 					_sleep_cnt -= 1
 					if _sleep_cnt <= 0:
 						_sleep_cnt = self._sleep_cycles
