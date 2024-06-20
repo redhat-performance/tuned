@@ -8,7 +8,7 @@ Before=multi-user.target display-manager.target
 Type=dbus
 PIDFile=/run/tuned/tuned-ppd.pid
 BusName=net.hadess.PowerProfiles
-ExecStart=/usr/sbin/tuned-ppd
+ExecStart=/usr/sbin/tuned-ppd -l
 
 [Install]
 WantedBy=graphical.target
