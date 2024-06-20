@@ -181,21 +181,40 @@ The powersave level can be specified by using the [option]`radeon_powersave` opt
 For details, see link:http://www.x.org/wiki/RadeonFeature#KMS_Power_Management_Options[www.x.org]. Note that this plug-in is experimental and the option might change in future releases.
 
 `bootloader`::
-Adds options to the kernel command line. This plug-in supports only the GRUB 2 boot loader.
+Adds options to the kernel command line. This plug-in supports the GRUB 2 boot loader and the Boot Loader Specification (BLS).
++
+NOTE: *Tuned* will not remove or replace kernel command line parameters added via other methods like *grubby*. *Tuned* will only be able manage kernel command line parameters added via *Tuned*. Please refer to your platform bootloader documentation about how to identify and manage kernel command line parameters set outside of *Tuned*.
 +
 Customized non-standard location of the GRUB 2 configuration file can be specified by the [option]`grub2_cfg_file` option.
 +
 The kernel options are added to the current GRUB configuration and its templates. The system needs to be rebooted for the kernel options to take effect.
 +
-Switching to another profile or manually stopping the `tuned` service removes the additional options. If you shut down or reboot the system, the kernel options persist in the [filename]`grub.cfg` file.
+Switching to another profile or manually stopping the `tuned` service removes the additional options. If you shut down or reboot the system, the kernel options persist in the [filename]`grub.cfg` file and grub environment files.
 +
 The kernel options can be specified by the following syntax:
 +
-[subs=+quotes]
+[subs="+quotes,+macros"]
 ----
-cmdline=[replaceable]_arg1_ [replaceable]_arg2_ ... [replaceable]_argN_
++cmdline+[replaceable]_suffix_=[replaceable]_arg1_ [replaceable]_arg2_ ... [replaceable]_argN_
 ----
 +
+Or with an alternative, but equivalent syntax:
++
+[subs="+quotes,+macros"]
+----
++cmdline+[replaceable]_suffix_=+[replaceable]_arg1_ [replaceable]_arg2_ ... [replaceable]_argN_
+----
++
+Where [replaceable]_suffix_ can be arbitrary (even empty) alphanumeric string which should be unique across all loaded profiles. Good practice is to use the profile name as the [replaceable]_suffix_ (e.g. [option]`cmdline_my_profile`). If there are multiple [option]`cmdline` options with the same suffix (e.g. in the parent profiles), then during the profile load/merge the value which was assigned the last time wins (this is the same as with any other plugin options). Finaly, the kernel command line is constructed by concatenation of the all resulting [option]`cmdline` options.
++
+It is also possible to remove kernel options by the following syntax:
++
+[subs="+quotes,+macros"]
+----
++cmdline+[replaceable]_suffix_=-[replaceable]_arg1_ [replaceable]_arg2_ ... [replaceable]_argN_
+----
++
+Such kernel options will be removed (instead of concatenated) during the final kernel command line construction.
 --
 .Modifying the kernel command line
 ====
@@ -203,16 +222,53 @@ For example, to add the [option]`quiet` kernel option to a *TuneD* profile, incl
 
 ----
 [bootloader]
-cmdline=quiet
+cmdline_my_profile=+quiet
 ----
 
-The following is an example of a custom profile that adds the [option]`isolcpus=2` option to the kernel command line:
+An example of a custom profile `my_profile` that adds the [option]`isolcpus=2` option to the kernel command line:
 
 ----
 [bootloader]
-cmdline=isolcpus=2
+cmdline_my_profile=isolcpus=2
 ----
 
+An example of a custom profile `my_profile` that removes the [option]`rhgb quiet` options from the kernel command line (if previously added by *Tuned*):
+
+----
+[bootloader]
+cmdline_my_profile=-rhgb quiet
+----
+====
+.Modifying the kernel command line, example with inheritance
+====
+For example, to add the [option]`rhgb quiet` kernel options to a *Tuned* profile `profile_1`:
+
+----
+[bootloader]
+cmdline_profile_1=+rhgb quiet
+----
+
+In the child profile `profile_2` drop the [option]`quiet` option from the kernel command line:
+
+----
+[main]
+include=profile_1
+
+[bootloader]
+cmdline_profile_2=-quiet
+----
+
+The final kernel command line will be [option]`rhgb`. In case the same [option]`cmdline` suffix as in the `profile_1` is used:
+
+----
+[main]
+include=profile_1
+
+[bootloader]
+cmdline_profile_1=-quiet
+----
+
+It will result in the empty kernel command line because the merge happens at first and the [option]`cmdline_profile_1` gets redefined to just [option]`-quiet` and there is nothing to remove in the final kernel command line processing.
 ====
 --
 
