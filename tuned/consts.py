@@ -215,3 +215,8 @@ CAPTURE_LOG_LEVELS = {
 		"console": LOG_LEVEL_CONSOLE,
 		"none": None,
 		}
+
+# number of retries when waiting for device initialization
+HOTPLUG_WAIT_FOR_DEV_INIT_RETRIES = 100
+# how long to wait for device initialization in seconds during retry
+HOTPLUG_WAIT_FOR_DEV_INIT_DELAY = 0.1
