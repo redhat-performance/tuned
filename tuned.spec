@@ -406,6 +406,14 @@ fi
 /usr/sbin/chkconfig --del ktune &>/dev/null || :
 
 
+%triggerun ppd -- power-profiles-daemon
+# if swapping power-profiles-daemon for tuned-ppd, check whether it is active
+if systemctl is-active --quiet power-profiles-daemon; then
+  mkdir -p %{_localstatedir}/lib/rpm-state/tuned
+  touch %{_localstatedir}/lib/rpm-state/tuned/ppd-active
+fi
+
+
 %posttrans
 # conditional support for grub2, grub2 is not available on all architectures
 # and tuned is noarch package, thus the following hack is needed
@@ -413,6 +421,15 @@ if [ -d %{_sysconfdir}/grub.d ]; then
   cp -a %{_datadir}/tuned/grub2/00_tuned %{_sysconfdir}/grub.d/00_tuned
   selinuxenabled &>/dev/null && \
     restorecon %{_sysconfdir}/grub.d/00_tuned &>/dev/null || :
+fi
+
+
+%posttrans ppd
+# if power-profiles-daemon was active before installing tuned-ppd,
+# start tuned-ppd right away
+if [ -f %{_localstatedir}/lib/rpm-state/tuned/ppd-active ]; then
+  systemctl start tuned-ppd
+  rm -rf %{_localstatedir}/lib/rpm-state/tuned
 fi
 
 
