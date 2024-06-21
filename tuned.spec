@@ -338,6 +338,11 @@ for f in %{_sysconfdir}/tuned/*; do
 done
 %endif
 
+
+%post ppd
+%systemd_post tuned-ppd.service
+
+
 %preun
 %systemd_preun tuned.service
 if [ "$1" == 0 ]; then
@@ -346,6 +351,10 @@ if [ "$1" == 0 ]; then
 # clear temporal storage
   rm -f /run/tuned/*
 fi
+
+
+%preun ppd
+%systemd_preun tuned-ppd.service
 
 
 %postun
@@ -385,6 +394,10 @@ if [ "$1" == 0 ]; then
     done
   fi
 fi
+
+
+%postun ppd
+%systemd_postun_with_restart tuned-ppd.service
 
 
 %triggerun -- tuned < 2.0-0
