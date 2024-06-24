@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     handle_signal(signal.SIGINT, controller.terminate)
     handle_signal(signal.SIGTERM, controller.terminate)
-    handle_signal(signal.SIGHUP, controller.load_config)
+    handle_signal(signal.SIGHUP, controller.initialize)
 
     dbus_exporter = exports.dbus_with_properties.DBusExporterWithProperties(
         consts.PPD_DBUS_BUS, consts.PPD_DBUS_INTERFACE, consts.PPD_DBUS_OBJECT, consts.PPD_NAMESPACE

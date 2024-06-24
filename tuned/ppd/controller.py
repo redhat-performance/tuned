@@ -101,12 +101,9 @@ class Controller(exports.interfaces.ExportableInterface):
         super(Controller, self).__init__()
         self._bus = bus
         self._tuned_interface = tuned_interface
-        self._profile_holds = ProfileHoldManager(self)
-        self._performance_degraded = PerformanceDegraded.NONE
         self._cmd = commands()
         self._terminate = threading.Event()
-        self._on_battery = False
-        self.load_config()
+        self.initialize()
 
     def upower_changed(self, interface, changed, invalidated):
         properties = dbus.Interface(self.proxy, dbus.PROPERTIES_IFACE)
@@ -135,6 +132,17 @@ class Controller(exports.interfaces.ExportableInterface):
             self._performance_degraded = performance_degraded
             exports.property_changed("PerformanceDegraded", performance_degraded)
 
+    def initialize(self):
+        self._profile_holds = ProfileHoldManager(self)
+        self._performance_degraded = PerformanceDegraded.NONE
+        self._config = PPDConfig(PPD_CONFIG_FILE)
+        active_profile = self.active_profile()
+        self._base_profile = active_profile if active_profile != UNKNOWN_PROFILE else self._config.default_profile
+        self.switch_profile(self._base_profile)
+        self._on_battery = False
+        if self._config.battery_detection:
+            self.setup_battery_signaling()
+
     def run(self):
         exports.start()
         while not self._cmd.wait(self._terminate, 1):
@@ -151,14 +159,6 @@ class Controller(exports.interfaces.ExportableInterface):
 
     def terminate(self):
         self._terminate.set()
-
-    def load_config(self):
-        self._config = PPDConfig(PPD_CONFIG_FILE)
-        log.debug("Setting base profile to %s" % self._config.default_profile)
-        self._base_profile = self._config.default_profile
-        self.switch_profile(self._config.default_profile)
-        if self._config.battery_detection:
-            self.setup_battery_signaling()
 
     def switch_profile(self, profile):
         if self.active_profile() == profile:
