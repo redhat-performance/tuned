@@ -64,7 +64,7 @@ class AudioPlugin(hotplug.Plugin):
 	def _get_config_options(cls):
 		return {
 			"timeout":          0,
-			"reset_controller": False,
+			"reset_controller": True,
 		}
 
 	def _timeout_path(self, device):
