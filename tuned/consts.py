@@ -76,6 +76,7 @@ SYSFS_CPUS_PATH = "/sys/devices/system/cpu"
 LOG_FILE_COUNT = 2
 LOG_FILE_MAXBYTES = 100*1000
 LOG_FILE = "/var/log/tuned/tuned.log"
+PPD_LOG_FILE = "/var/log/tuned/tuned-ppd.log"
 PID_FILE = "/run/tuned/tuned.pid"
 SYSTEM_RELEASE_FILE = "/etc/system-release-cpe"
 # prefix for functions plugins
