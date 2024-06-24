@@ -12,6 +12,7 @@ log = logs.get()
 DRIVER = "tuned"
 NO_TURBO_PATH = "/sys/devices/system/cpu/intel_pstate/no_turbo"
 LAP_MODE_PATH = "/sys/bus/platform/devices/thinkpad_acpi/dytc_lapmode"
+UNKNOWN_PROFILE = "unknown"
 
 UPOWER_DBUS_NAME = "org.freedesktop.UPower"
 UPOWER_DBUS_PATH = "/org/freedesktop/UPower"
@@ -169,7 +170,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
     def active_profile(self):
         tuned_profile = self._tuned_interface.active_profile()
-        return self._config.tuned_to_ppd.get(tuned_profile, "unknown")
+        return self._config.tuned_to_ppd.get(tuned_profile, UNKNOWN_PROFILE)
 
     @exports.export("sss", "u")
     def HoldProfile(self, profile, reason, app_id, caller):
