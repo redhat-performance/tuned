@@ -108,8 +108,8 @@ class Controller(exports.interfaces.ExportableInterface):
     def upower_changed(self, interface, changed, invalidated):
         properties = dbus.Interface(self.proxy, dbus.PROPERTIES_IFACE)
         self._on_battery = bool(properties.Get(UPOWER_DBUS_INTERFACE, "OnBattery"))
+        log.info("Battery status: " + ("DC (battery)" if self._on_battery else "AC (charging)"))
         tuned_profile = self._config.ppd_to_tuned_battery[self._base_profile] if self._on_battery else self._config.ppd_to_tuned[self._base_profile]
-        log.info("Switching to profile '%s' due to battery %s" % (tuned_profile, self._on_battery))
         self._tuned_interface.switch_profile(tuned_profile)
 
     def setup_battery_signaling(self):
