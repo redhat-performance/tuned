@@ -24,7 +24,7 @@ rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
         rlImport "tuned/basic"
-        rlRun "tunedDisableSystemdRateLimitingStart"
+        tunedDisableSystemdRateLimitingStart
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
         rlServiceStart "tuned"
