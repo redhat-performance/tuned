@@ -28,10 +28,6 @@ class Application(object):
 		storage_factory = storage.Factory(storage_provider)
 
 		self.config = GlobalConfig() if config is None else config
-		if self.config.get_bool(consts.CFG_DYNAMIC_TUNING):
-			log.info("dynamic tuning is enabled (can be overridden in plugins)")
-		else:
-			log.info("dynamic tuning is globally disabled")
 
 		monitors_repository = monitors.Repository()
 		udev_buffer_size = self.config.get_size("udev_buffer_size", consts.CFG_DEF_UDEV_BUFFER_SIZE)
@@ -53,6 +49,8 @@ class Application(object):
 		profile_locator = profiles.Locator(self.config.get_list(consts.CFG_PROFILE_DIRS, consts.CFG_DEF_PROFILE_DIRS))
 		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger, self.config, self.variables)
 
+		self._configure_dynamic_tuning(plugins_repository)
+
 		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, self.config, self)
 		self._controller = controller.Controller(self._daemon, self.config)
 
@@ -70,6 +68,35 @@ class Application(object):
 		self._handle_signal(signal.SIGHUP, self._controller.sighup)
 		self._handle_signal(signal.SIGINT, self._controller.terminate)
 		self._handle_signal(signal.SIGTERM, self._controller.terminate)
+
+	def _configure_dynamic_tuning(self, plugins_repository):
+		# First check if the global `dynamic_tuning` option is set to False,
+		# disabling dynamic tuning for all plugins
+		if not self.config.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
+			log.info("dynamic tuning is globally disabled")
+			self.config.set(consts.CFG_DYNAMIC_PLUGINS, [])
+			return
+		# If the global `dynamic_tuning` is True, check the `dynamic_plugins` option, which
+		# restricts the dynamic tuning to selected plugins only (if present)
+		all_plugins = {p.name(): p for p in plugins_repository.load_all_plugins()}
+		all_dynamic_plugins = {name: p for name, p in all_plugins.items() if p.supports_dynamic_tuning()}
+		# If it's not present, we enable dynamic tuning where possible
+		if self.config.get(consts.CFG_DYNAMIC_PLUGINS) is None:
+			self.config.set(consts.CFG_DYNAMIC_PLUGINS, all_dynamic_plugins.values())
+			log.info("dynamic tuning is enabled for all plugins which support it")
+			return
+		# Otherwise only to the specified plugins
+		enabled_dynamic_plugins = {}
+		for name in self.config.get_list(consts.CFG_DYNAMIC_PLUGINS):
+			if name not in all_plugins:
+				log.warn("Configuring dynamic tuning: Plugin '%s' does not exist" % name)
+				continue
+			if name not in all_dynamic_plugins:
+				log.warn("Configuring dynamic tuning: Plugin '%s' does not support dynamic tuning" % name)
+				continue
+			enabled_dynamic_plugins[name] = all_plugins[name]
+		self.config.set(consts.CFG_DYNAMIC_PLUGINS, enabled_dynamic_plugins.values())
+		log.info("dynamic tuning is enabled for plugins: %s" % ", ".join(enabled_dynamic_plugins.keys()))
 
 	def attach_to_dbus(self, bus_name, object_name, interface_name, namespace):
 		if self._dbus_exporter is not None:

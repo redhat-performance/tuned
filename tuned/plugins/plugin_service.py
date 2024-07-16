@@ -215,6 +215,14 @@ class ServicePlugin(base.Plugin):
 		self._has_dynamic_options = True
 		self._init_handler = self._detect_init_system()
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	def _check_cmd(self, command):
 		(retcode, out) = cmd.execute(command, no_errors = [0])
 		return retcode == 0
@@ -254,16 +262,12 @@ class ServicePlugin(base.Plugin):
 		return service
 
 	def _instance_init(self, instance):
-		instance._has_dynamic_tuning = False
-		instance._has_static_tuning = True
+		super(ServicePlugin, self)._instance_init(instance)
 
 		self._services = collections.OrderedDict([(option[8:], self._parse_service_options(option[8:], 
 			self._variables.expand(value))) for option, value in instance.options.items()
 			if option[:8] == "service." and len(option) > 8])
 		instance._services_original = {}
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	def _process_service(self, name, start, enable, runlevel):
 		if start:

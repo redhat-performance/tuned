@@ -59,6 +59,14 @@ class IrqPlugin(hotplug.Plugin):
 		super(IrqPlugin, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
 		self._irqs = {}
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
 	#
 	# plugin-level methods: devices and plugin options
 	#
@@ -91,9 +99,6 @@ class IrqPlugin(hotplug.Plugin):
 	# instance-level methods: implement the Instance interface
 	#
 	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
-
 		affinity = instance.options.get("affinity")
 		affinity_list = self._cmd.cpulist_unpack(affinity)
 		if len(affinity.strip()) == 0:
@@ -111,8 +116,6 @@ class IrqPlugin(hotplug.Plugin):
 					% (mode, instance.name))
 			instance.options["mode"] = "set"
 
-	def _instance_cleanup(self, instance):
-		pass
 
 	def _instance_apply_static(self, instance):
 		log.debug("Applying IRQ affinities (%s)" % instance.name)

@@ -15,8 +15,8 @@ class Instance(object):
 
 		self._active = True
 		self._priority = priority
-		self._has_static_tuning = False
-		self._has_dynamic_tuning = False
+		self._static_tuning_enabled = False
+		self._dynamic_tuning_enabled = False
 		self._assigned_devices = set()
 		self._processed_devices = set()
 
@@ -72,12 +72,12 @@ class Instance(object):
 		return self._options
 
 	@property
-	def has_static_tuning(self):
-		return self._has_static_tuning
+	def static_tuning_enabled(self):
+		return self._static_tuning_enabled
 
 	@property
-	def has_dynamic_tuning(self):
-		return self._has_dynamic_tuning
+	def dynamic_tuning_enabled(self):
+		return self._dynamic_tuning_enabled
 
 	# methods
 

@@ -210,6 +210,18 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 		self._flags = None
 
+	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return True
+
+	@classmethod
+	def uses_periodic_tuning(cls):
+		return True
+
 	def _init_devices(self):
 		self._devices_supported = True
 		self._free_devices = set()
@@ -320,8 +332,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return True
 
 	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
+		super(CPULatencyPlugin, self)._instance_init(instance)
 		instance._load_monitor = None
 
 		# only the first instance of the plugin can control the latency
@@ -334,12 +345,13 @@ class CPULatencyPlugin(hotplug.Plugin):
 				self._has_pm_qos = False
 			self._latency = None
 
-			if instance.options["force_latency"] is None and instance.options["pm_qos_resume_latency_us"] is None:
-				instance._has_dynamic_tuning = True
+			if not instance.options["force_latency"] is None or not instance.options["pm_qos_resume_latency_us"] is None:
+				instance._dynamic_tuning_enabled = False
 
 			self._check_arch()
 		else:
 			instance._first_instance = False
+			instance._dynamic_tuning_enabled = False
 			log.info("Latency settings from non-first CPU plugin instance '%s' will be ignored." % instance.name)
 
 		try:
@@ -418,9 +430,6 @@ class CPULatencyPlugin(hotplug.Plugin):
 			self._set_latency(instance.options["latency_high"])
 		else:
 			self._set_latency(instance.options["latency_low"])
-
-	def _instance_unapply_dynamic(self, instance, device):
-		pass
 
 	def _str2int(self, s):
 		try:

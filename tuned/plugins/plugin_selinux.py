@@ -34,6 +34,14 @@ class SelinuxPlugin(base.Plugin):
 	"""
 
 	@classmethod
+	def supports_static_tuning(cls):
+		return True
+
+	@classmethod
+	def supports_dynamic_tuning(cls):
+		return False
+
+	@classmethod
 	def _get_selinux_path(self):
 		path = "/sys/fs/selinux"
 		if not os.path.exists(path):
@@ -55,13 +63,6 @@ class SelinuxPlugin(base.Plugin):
 		return {
 			"avc_cache_threshold" : None,
 		}
-
-	def _instance_init(self, instance):
-		instance._has_static_tuning = True
-		instance._has_dynamic_tuning = False
-
-	def _instance_cleanup(self, instance):
-		pass
 
 	@command_set("avc_cache_threshold")
 	def _set_avc_cache_threshold(self, value, sim, remove):
