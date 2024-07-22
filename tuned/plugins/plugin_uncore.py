@@ -19,17 +19,25 @@ class UncorePlugin(hotplug.Plugin):
 	`uncore`::
 
 	`max_freq_khz, min_freq_khz`:::
-	Limit the maximum and minumum uncore frequency.
+	Limit the maximum and minimum uncore frequency.
 
 	Those options are Intel specific and correspond directly to `sysfs` files
-	exposed by Intel uncore frequency driver.
+	exposed by Intel uncore frequency driver. Values can be specified as kHz
+	or as percent of configurable range.
 	====
 	----
-	[uncore]
+	[uncore10]
+	type=uncore
+	devices=uncore10
 	max_freq_khz=4000000
+
+	[uncore_all]
+	type=uncore
+	max_freq_khz=90%
 	----
 	Using this options *TuneD* will limit maximum frequency of all uncore units
-	on the Intel system to 4 GHz.
+	on the Intel system to 90% of the allowable range. Except uncore10 which
+	maximum frequency limit will be set to 4 GHz.
 	====
 	"""
 
@@ -75,6 +83,17 @@ class UncorePlugin(hotplug.Plugin):
 			return value
 		return None
 
+	def _get_all(self, device):
+		try:
+			initial_max_freq_khz = self._get(device, "initial_max_freq_khz")
+			initial_min_freq_khz = self._get(device, "initial_min_freq_khz")
+			max_freq_khz = self._get(device, "max_freq_khz")
+			min_freq_khz = self._get(device, "min_freq_khz")
+		except (OSError, IOError):
+			log.error("fail to read uncore frequency values")
+			return None
+		return (initial_max_freq_khz, initial_min_freq_khz, max_freq_khz, min_freq_khz)
+
 	@classmethod
 	def _get_config_options(cls):
 		return {
@@ -82,21 +101,17 @@ class UncorePlugin(hotplug.Plugin):
 			"min_freq_khz": None,
 		}
 
-	def _validate_value(self, device, min_or_max, value):
+	def _validate_khz_value(self, device, min_or_max, value):
 		try:
 			freq_khz = int(value)
 		except ValueError:
 			log.error("value '%s' is not integer" % value)
 			return None
 
-		try:
-			initial_max_freq_khz = self._get(device, "initial_max_freq_khz")
-			initial_min_freq_khz = self._get(device, "initial_min_freq_khz")
-			max_freq_khz = self._get(device, "max_freq_khz")
-			min_freq_khz = self._get(device, "min_freq_khz")
-		except (OSError, IOError):
-			log.error("fail to read inital uncore frequency values")
+		values = self._get_all(device)
+		if values is None:
 			return None
+		(initial_max_freq_khz, initial_min_freq_khz, max_freq_khz, min_freq_khz) = values
 
 		if min_or_max == IS_MAX:
 			if freq_khz < min_freq_khz:
@@ -120,6 +135,36 @@ class UncorePlugin(hotplug.Plugin):
 			return None
 
 		return freq_khz
+
+	def _validate_percent_value(self, value):
+		try:
+			pct = int(value)
+		except ValueError:
+			log.error("value '%s' is not integer" % value)
+			return None
+
+		if pct < 0 or pct > 100:
+			log.error("percent value '%s' is not within [0..100] range" % value)
+			return None
+
+		return pct
+
+	def _validate_value(self, device, min_or_max, value):
+		if isinstance(value, str) and value[-1] == "%":
+			pct = self._validate_percent_value(value.rstrip("%"))
+			if pct is None:
+				return None
+
+			values = self._get_all(device)
+			if values is None:
+				return None
+			(initial_max_freq_khz, initial_min_freq_khz, _, _) = values
+
+			khz = initial_min_freq_khz + int(pct * (initial_max_freq_khz - initial_min_freq_khz) / 100)
+		else:
+			khz = value
+
+		return self._validate_khz_value(device, min_or_max, khz)
 
 	@command_set("max_freq_khz", per_device = True)
 	def _set_max_freq_khz(self, value, device, sim, remove):
