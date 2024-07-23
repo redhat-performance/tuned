@@ -12,6 +12,7 @@ log = logs.get()
 DRIVER = "tuned"
 NO_TURBO_PATH = "/sys/devices/system/cpu/intel_pstate/no_turbo"
 LAP_MODE_PATH = "/sys/bus/platform/devices/thinkpad_acpi/dytc_lapmode"
+UNKNOWN_PROFILE = "unknown"
 
 UPOWER_DBUS_NAME = "org.freedesktop.UPower"
 UPOWER_DBUS_PATH = "/org/freedesktop/UPower"
@@ -100,18 +101,15 @@ class Controller(exports.interfaces.ExportableInterface):
         super(Controller, self).__init__()
         self._bus = bus
         self._tuned_interface = tuned_interface
-        self._profile_holds = ProfileHoldManager(self)
-        self._performance_degraded = PerformanceDegraded.NONE
         self._cmd = commands()
         self._terminate = threading.Event()
-        self._on_battery = False
-        self.load_config()
+        self.initialize()
 
     def upower_changed(self, interface, changed, invalidated):
         properties = dbus.Interface(self.proxy, dbus.PROPERTIES_IFACE)
         self._on_battery = bool(properties.Get(UPOWER_DBUS_INTERFACE, "OnBattery"))
+        log.info("Battery status: " + ("DC (battery)" if self._on_battery else "AC (charging)"))
         tuned_profile = self._config.ppd_to_tuned_battery[self._base_profile] if self._on_battery else self._config.ppd_to_tuned[self._base_profile]
-        log.info("Switching to profile '%s' due to battery %s" % (tuned_profile, self._on_battery))
         self._tuned_interface.switch_profile(tuned_profile)
 
     def setup_battery_signaling(self):
@@ -134,6 +132,17 @@ class Controller(exports.interfaces.ExportableInterface):
             self._performance_degraded = performance_degraded
             exports.property_changed("PerformanceDegraded", performance_degraded)
 
+    def initialize(self):
+        self._profile_holds = ProfileHoldManager(self)
+        self._performance_degraded = PerformanceDegraded.NONE
+        self._config = PPDConfig(PPD_CONFIG_FILE)
+        active_profile = self.active_profile()
+        self._base_profile = active_profile if active_profile != UNKNOWN_PROFILE else self._config.default_profile
+        self.switch_profile(self._base_profile)
+        self._on_battery = False
+        if self._config.battery_detection:
+            self.setup_battery_signaling()
+
     def run(self):
         exports.start()
         while not self._cmd.wait(self._terminate, 1):
@@ -151,14 +160,6 @@ class Controller(exports.interfaces.ExportableInterface):
     def terminate(self):
         self._terminate.set()
 
-    def load_config(self):
-        self._config = PPDConfig(PPD_CONFIG_FILE)
-        log.debug("Setting base profile to %s" % self._config.default_profile)
-        self._base_profile = self._config.default_profile
-        self.switch_profile(self._config.default_profile)
-        if self._config.battery_detection:
-            self.setup_battery_signaling()
-
     def switch_profile(self, profile):
         if self.active_profile() == profile:
             return
@@ -169,7 +170,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
     def active_profile(self):
         tuned_profile = self._tuned_interface.active_profile()
-        return self._config.tuned_to_ppd.get(tuned_profile, "unknown")
+        return self._config.tuned_to_ppd.get(tuned_profile, UNKNOWN_PROFILE)
 
     @exports.export("sss", "u")
     def HoldProfile(self, profile, reason, app_id, caller):

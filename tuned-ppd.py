@@ -3,8 +3,10 @@ import sys
 import os
 import dbus
 import signal
+import argparse
+import logging
 from dbus.mainloop.glib import DBusGMainLoop
-from tuned import exports
+from tuned import exports, logs
 from tuned.ppd import controller
 import tuned.consts as consts
 
@@ -16,6 +18,25 @@ def handle_signal(signal_number, handler):
     signal.signal(signal_number, handler_wrapper)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="PPD compatibility daemon.")
+    parser.add_argument("--debug", "-D", action="store_true", help="log debugging messages")
+    parser.add_argument(
+        "--log",
+        "-l",
+        nargs="?",
+        const=consts.PPD_LOG_FILE,
+        help="log to a file, default is " + consts.PPD_LOG_FILE,
+    )
+    args = parser.parse_args()
+
+    log = logs.get()
+
+    if args.debug:
+        log.setLevel(logging.DEBUG)
+
+    if args.log:
+        log.switch_to_file(args.log)
+
     if os.geteuid() != 0:
         print("Superuser permissions are required to run the daemon.", file=sys.stderr)
         sys.exit(1)
@@ -33,7 +54,7 @@ if __name__ == "__main__":
 
     handle_signal(signal.SIGINT, controller.terminate)
     handle_signal(signal.SIGTERM, controller.terminate)
-    handle_signal(signal.SIGHUP, controller.load_config)
+    handle_signal(signal.SIGHUP, controller.initialize)
 
     dbus_exporter = exports.dbus_with_properties.DBusExporterWithProperties(
         consts.PPD_DBUS_BUS, consts.PPD_DBUS_INTERFACE, consts.PPD_DBUS_OBJECT, consts.PPD_NAMESPACE

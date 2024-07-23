@@ -338,6 +338,11 @@ for f in %{_sysconfdir}/tuned/*; do
 done
 %endif
 
+
+%post ppd
+%systemd_post tuned-ppd.service
+
+
 %preun
 %systemd_preun tuned.service
 if [ "$1" == 0 ]; then
@@ -346,6 +351,10 @@ if [ "$1" == 0 ]; then
 # clear temporal storage
   rm -f /run/tuned/*
 fi
+
+
+%preun ppd
+%systemd_preun tuned-ppd.service
 
 
 %postun
@@ -387,10 +396,22 @@ if [ "$1" == 0 ]; then
 fi
 
 
+%postun ppd
+%systemd_postun_with_restart tuned-ppd.service
+
+
 %triggerun -- tuned < 2.0-0
 # remove ktune from old tuned, now part of tuned
 /usr/sbin/service ktune stop &>/dev/null || :
 /usr/sbin/chkconfig --del ktune &>/dev/null || :
+
+
+%triggerun ppd -- power-profiles-daemon
+# if swapping power-profiles-daemon for tuned-ppd, check whether it is active
+if systemctl is-active --quiet power-profiles-daemon; then
+  mkdir -p %{_localstatedir}/lib/rpm-state/tuned
+  touch %{_localstatedir}/lib/rpm-state/tuned/ppd-active
+fi
 
 
 %posttrans
@@ -400,6 +421,15 @@ if [ -d %{_sysconfdir}/grub.d ]; then
   cp -a %{_datadir}/tuned/grub2/00_tuned %{_sysconfdir}/grub.d/00_tuned
   selinuxenabled &>/dev/null && \
     restorecon %{_sysconfdir}/grub.d/00_tuned &>/dev/null || :
+fi
+
+
+%posttrans ppd
+# if power-profiles-daemon was active before installing tuned-ppd,
+# start tuned-ppd right away
+if [ -f %{_localstatedir}/lib/rpm-state/tuned/ppd-active ]; then
+  systemctl start tuned-ppd
+  rm -rf %{_localstatedir}/lib/rpm-state/tuned
 fi
 
 
