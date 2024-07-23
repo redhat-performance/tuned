@@ -50,6 +50,7 @@ rlJournalStart
     rlPhaseStartCleanup
         tunedDisableSystemdRateLimitingEnd
         tunedProfileRestore
+        rlServiceRestore "tuned"
     rlPhaseEnd
 rlJournalPrintText
 rlJournalEnd
