@@ -186,6 +186,10 @@ class CPULatencyPlugin(hotplug.Plugin):
 	pm_qos_resume_latency_us=100
 	----
 	Allows any C-state with a resume latency less than value.
+	[cpu]
+	boost=1
+	----
+	CPU is allowed to boost above nominal frequencies for short periods of time.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -237,6 +241,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			"no_turbo"             : None,
 			"pm_qos_resume_latency_us": None,
 			"energy_performance_preference" : None,
+			"boost": None,
 		}
 
 	def _check_arch(self):
@@ -603,6 +608,9 @@ class CPULatencyPlugin(hotplug.Plugin):
 				return_err = True)
 		return (retcode, err_msg)
 
+	def _pstate_boost_path(self, cpu_id):
+		return "/sys/devices/system/cpu/cpufreq/policy%s/boost" % cpu_id
+
 	def _pstate_preference_path(self, cpu_id, available = False):
 		return "/sys/devices/system/cpu/cpufreq/policy%s/energy_performance_%s" % (cpu_id, "available_preferences" if available else "preference")
 
@@ -747,6 +755,37 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if not self._check_pm_qos_resume_latency_us(device):
 			return None
 		return self._cmd.read_file(self._pm_qos_resume_latency_us_path(device), no_error=ignore_missing).strip()
+
+	@command_set("boost", per_device=True)
+	def _set_boost(self, boost, device, sim, remove):
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
+		cpu_id = device.lstrip("cpu")
+		if os.path.exists(self._pstate_boost_path(cpu_id)):
+			if not sim:
+				if boost == "0" or boost == "1":
+					self._cmd.write_to_file(self._pstate_boost_path(cpu_id), boost, \
+						no_error = [errno.ENOENT] if remove else False, ignore_same=True)
+					log.info("Setting boost value '%s' for cpu '%s'" % (boost, device))
+				else:
+					log.error("Failed to set boost on cpu '%s'. Is the value in the profile correct?" % device)
+			return str(boost)
+		else:
+			log.debug("boost file missing, which can happen on pre 6.11 kernels.")
+		return None
+
+	@command_get("boost")
+	def _get_boost(self, device, ignore_missing=False):
+		if not self._is_cpu_online(device):
+			log.debug("%s is not online, skipping" % device)
+			return None
+		cpu_id = device.lstrip("cpu")
+		if os.path.exists(self._pstate_boost_path(cpu_id)):
+			return self._cmd.read_file(self._pstate_boost_path(cpu_id)).strip()
+		else:
+			log.debug("boost file missing, which can happen on pre 6.11 kernels.")
+		return None
 
 	@command_set("energy_performance_preference", per_device=True)
 	def _set_energy_performance_preference(self, energy_performance_preference, device, sim, remove):
