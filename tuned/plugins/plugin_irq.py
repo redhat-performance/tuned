@@ -94,7 +94,7 @@ class IrqPlugin(hotplug.Plugin):
 		instance._has_static_tuning = True
 		instance._has_dynamic_tuning = False
 
-		affinity = instance.options.get("affinity")
+		affinity = self._variables.expand(instance.options.get("affinity"))
 		affinity_list = self._cmd.cpulist_unpack(affinity)
 		if len(affinity.strip()) == 0:
 			# empty affinity in profile -> assume it's intentional
@@ -105,7 +105,7 @@ class IrqPlugin(hotplug.Plugin):
 			log.error("Instance '%s' with invalid affinity '%s'. Deactivating." % (instance.name, affinity))
 			instance._active = False
 
-		mode = instance.options.get("mode")
+		mode = self._variables.expand(instance.options.get("mode"))
 		if mode not in ["set", "intersect"]:
 			log.error("Invalid operating mode '%s' for instance '%s'. Using the default 'set' instead."
 					% (mode, instance.name))
