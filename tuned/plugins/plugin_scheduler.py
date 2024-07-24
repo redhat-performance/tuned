@@ -644,40 +644,34 @@ class SchedulerPlugin(base.Plugin):
 	def _is_kthread(self, process):
 		return process["stat"]["flags"] & procfs.pidstat.PF_KTHREAD != 0
 
-	# Return codes:
-	# 0 - Affinity is fixed
-	# 1 - Affinity is changeable
-	# -1 - Task vanished
-	# -2 - Error
-	def _affinity_changeable(self, pid):
+	# Returns True if we can ignore a failed affinity change of
+	# a process with the given PID and therefore not report it as an error.
+	def _ignore_set_affinity_error(self, pid):
 		try:
 			process = procfs.process(pid)
+			if process["stat"]["state"] == "Z":
+				log.debug("Affinity of zombie task with PID %d could not be changed."
+						% pid)
+				return True
 			if process["stat"].is_bound_to_cpu():
-				if process["stat"]["state"] == "Z":
-					log.debug("Affinity of zombie task with PID %d cannot be changed, the task's affinity mask is fixed."
-							% pid)
-				elif self._is_kthread(process):
+				if self._is_kthread(process):
 					log.debug("Affinity of kernel thread with PID %d cannot be changed, the task's affinity mask is fixed."
 							% pid)
 				else:
 					log.warning("Affinity of task with PID %d cannot be changed, the task's affinity mask is fixed."
 							% pid)
-				return 0
-			else:
-				return 1
+				return True
 		except (OSError, IOError) as e:
 			if e.errno == errno.ENOENT or e.errno == errno.ESRCH:
 				log.debug("Failed to get task info for PID %d, the task vanished."
 						% pid)
-				return -1
-			else:
-				log.error("Failed to get task info for PID %d: %s"
-						% (pid, e))
-				return -2
+				return True
+			log.error("Failed to get task info for PID %d: %s"
+					% (pid, e))
 		except (AttributeError, KeyError) as e:
 			log.error("Failed to get task info for PID %d: %s"
 					% (pid, e))
-			return -2
+		return False
 
 	def _store_orig_process_rt(self, pid, scheduler, priority):
 		try:
@@ -1174,19 +1168,12 @@ class SchedulerPlugin(base.Plugin):
 		log.debug("Setting CPU affinity of PID %d to '%s'." % (pid, affinity))
 		try:
 			self._scheduler_utils.set_affinity(pid, affinity)
-			return True
 		# Workaround for old python-schedutils (pre-0.4) which
 		# incorrectly raised SystemError instead of OSError
 		except (SystemError, OSError) as e:
-			if hasattr(e, "errno") and e.errno == errno.ESRCH:
-				log.debug("Failed to set affinity of PID %d, the task vanished."
-						% pid)
-			else:
-				res = self._affinity_changeable(pid)
-				if res == 1 or res == -2:
-					log.error("Failed to set affinity of PID %d to '%s': %s"
-							% (pid, affinity, e))
-			return False
+			if not self._ignore_set_affinity_error(pid):
+				log.error("Failed to set affinity of PID %d to '%s': %s"
+						% (pid, affinity, e))
 
 	# returns intersection of affinity1 with affinity2, if intersection is empty it returns affinity3
 	def _get_intersect_affinity(self, affinity1, affinity2, affinity3):
