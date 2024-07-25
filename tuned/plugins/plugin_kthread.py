@@ -132,6 +132,8 @@ class KthreadPlugin(hotplug.Plugin):
 
 	def cleanup(self):
 		super(KthreadPlugin, self).cleanup()
+		# workaround for #662: shut down the monitor thread
+		self._perf_monitor_shutdown()
 		self._perf_shutdown()
 
 	#
@@ -142,6 +144,8 @@ class KthreadPlugin(hotplug.Plugin):
 		self._free_devices = set()
 		self._assigned_devices = set()
 		self._kthread_scan(initial=True)
+		# workaround for #662: always run the monitor thread
+		self._perf_monitor_start()
 
 	@classmethod
 	def _get_config_options(cls):
@@ -265,19 +269,23 @@ class KthreadPlugin(hotplug.Plugin):
 				matching_devices.add(device)
 		return matching_devices
 
-	def _instance_apply_static(self, instance):
-		if self._instance_count == 0:
-			# scan for kthreads that have appeared since plugin initialization
-			self._kthread_scan(initial=False)
-			self._perf_monitor_start()
-		self._instance_count += 1
-		super(KthreadPlugin, self)._instance_apply_static(instance)
+	# workaround for #662:
+	# calls to our _instance_[un]apply_static() are unreliable, so we can't
+	# use them to count active instances and start/stop the monitor thread
+	# on demand (https://github.com/redhat-performance/tuned/issues/662)
+	#def _instance_apply_static(self, instance):
+	#	if self._instance_count == 0:
+	#		# scan for kthreads that have appeared since plugin initialization
+	#		self._kthread_scan(initial=False)
+	#		self._perf_monitor_start()
+	#	self._instance_count += 1
+	#	super(KthreadPlugin, self)._instance_apply_static(instance)
 
-	def _instance_unapply_static(self, instance, rollback):
-		super(KthreadPlugin, self)._instance_unapply_static(instance, rollback)
-		self._instance_count -= 1
-		if self._instance_count == 0:
-			self._perf_monitor_shutdown()
+	#def _instance_unapply_static(self, instance, rollback):
+	#	super(KthreadPlugin, self)._instance_unapply_static(instance, rollback)
+	#	self._instance_count -= 1
+	#	if self._instance_count == 0:
+	#		self._perf_monitor_shutdown()
 
 	#
 	# internal bookkeeping (self._kthreads)
