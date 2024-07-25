@@ -36,16 +36,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.23.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.24.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -613,6 +613,20 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Thu Jul 25 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.24.0-0.1.rc1
+- new release
+  - hotplug: wait for device initialization
+    resolves: RHEL-39468
+  - functions: added 'package2cpus' and 'packages2uncores' matchers
+  - functions: added 'lscpu' to list CPU details
+  - plugin_uncore: allow to configure frequency limits using percent
+  - amd-pstate: added support for controlling core performance boost
+  - plugin_scheduler: adjusted error logging in _set_affinity
+    resolves: RHEL-46560
+  - plugin_audio: enabled controller reset to fix suspend with NVIDIA
+  - plugin_irq: fixed expansion of variables
+  - plugin_irqbalance: switched to IRQBALANCE_BANNED_CPULIST
+
 * Thu Jun  6 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.23.0-1
 - new release
   - migrated profiles to /etc/tuned/profiles/ and /usr/lib/tuned/profiles/
