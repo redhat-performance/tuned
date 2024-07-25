@@ -66,13 +66,13 @@ class IrqbalancePlugin(base.Plugin):
 			log.error("Failed to write irqbalance sysconfig file: %s" % e)
 			return False
 
-	def _write_banned_cpus(self, sysconfig, banned_cpumask):
-		return sysconfig + "IRQBALANCE_BANNED_CPUS=%s\n" % banned_cpumask
+	def _write_banned_cpus(self, sysconfig, banned_cpulist_string):
+		return sysconfig + "IRQBALANCE_BANNED_CPULIST=%s\n" % banned_cpulist_string
 
 	def _clear_banned_cpus(self, sysconfig):
 		lines = []
 		for line in sysconfig.split("\n"):
-			if not re.match(r"\s*IRQBALANCE_BANNED_CPUS=", line):
+			if not re.match(r"\s*IRQBALANCE_BANNED_CPULIST=", line):
 				lines.append(line)
 		return "\n".join(lines)
 
@@ -85,12 +85,12 @@ class IrqbalancePlugin(base.Plugin):
 		if retcode != 0:
 			log.warning("Failed to restart irqbalance. Is it installed?")
 
-	def _set_banned_cpus(self, banned_cpumask):
+	def _set_banned_cpus(self, banned_cpulist_string):
 		content = self._read_irqbalance_sysconfig()
 		if content is None:
 			return
 		content = self._clear_banned_cpus(content)
-		content = self._write_banned_cpus(content, banned_cpumask)
+		content = self._write_banned_cpus(content, banned_cpulist_string)
 		if self._write_irqbalance_sysconfig(content):
 			self._restart_irqbalance()
 
@@ -104,23 +104,23 @@ class IrqbalancePlugin(base.Plugin):
 
 	@command_custom("banned_cpus", per_device=False)
 	def _banned_cpus(self, enabling, value, verify, ignore_missing):
-		banned_cpumask = None
+		banned_cpulist_string = None
 		if value is not None:
 			banned = set(self._cmd.cpulist_unpack(value))
 			present = set(self._cpus)
 			if banned.issubset(present):
-				banned_cpumask = self._cmd.cpulist2hex(list(banned))
+				banned_cpulist_string = self._cmd.cpulist2string(self._cmd.cpulist_pack(value))
 			else:
 				str_cpus = ",".join([str(x) for x in self._cpus])
 				log.error("Invalid banned_cpus specified, '%s' does not match available cores '%s'"
 					  % (value, str_cpus))
 
-		if (enabling or verify) and banned_cpumask is None:
+		if (enabling or verify) and banned_cpulist_string is None:
 			return None
 		if verify:
 			# Verification is currently not supported
 			return None
 		elif enabling:
-			self._set_banned_cpus(banned_cpumask)
+			self._set_banned_cpus(banned_cpulist_string)
 		else:
 			self._restore_banned_cpus()
