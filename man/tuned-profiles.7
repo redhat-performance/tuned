@@ -58,6 +58,13 @@ system contains supported Radeon graphics card (with enabled KMS) it
 configures it to automatic power saving.
 
 .TP
+.BI "balanced\-battery"
+Profile mainly used by tuned\-ppd if balanced profile is requested and
+machine runs on battery. It's based on the balanced profile. It additionaly
+sets energy_performance_preference to balance_power, enables amd\-pstate
+core performance boost, and enables video panel_power_savings.
+
+.TP
 .BI "powersave"
 Maximal power saving, at the moment it enables USB autosuspend (in case
 environment variable USB_AUTOSUSPEND is set to 1), enables ALPM power saving
