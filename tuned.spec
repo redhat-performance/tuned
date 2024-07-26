@@ -1,5 +1,11 @@
 %bcond_with snapshot
 
+%if 0%{?rhel} && 0%{?rhel} < 10
+%global profiles_path %{_prefix}/lib/tuned
+%else
+%global profiles_path %{_prefix}/lib/tuned/profiles
+%endif
+
 %if 0%{?fedora}
 %if 0%{?fedora} > 27
 %bcond_without python3
@@ -7,9 +13,16 @@
 %bcond_with python3
 %endif
 %else
-%if 0%{?rhel} && 0%{?rhel} < 8
+
+# ! 0%{?fedora}
+%if 0%{?rhel}
+%if 0%{?rhel} < 8
 %bcond_with python3
 %else
+%bcond_without python3
+%endif
+%else
+# ! 0%{?rhel}
 %bcond_without python3
 %endif
 %endif
@@ -286,7 +299,8 @@ make html %{make_python_arg}
 %endif
 
 %install
-make install DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
+make install DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg} \
+  TUNED_PROFILES_DIR=%{profiles_path}
 make install-ppd DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
 
 %if ! 0%{?rhel}
@@ -453,30 +467,30 @@ fi
 %exclude %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
 %exclude %{_sysconfdir}/tuned/cpu-partitioning-variables.conf
 %exclude %{_sysconfdir}/tuned/cpu-partitioning-powersave-variables.conf
-%exclude %{_prefix}/lib/tuned/profiles/default
-%exclude %{_prefix}/lib/tuned/profiles/desktop-powersave
-%exclude %{_prefix}/lib/tuned/profiles/laptop-ac-powersave
-%exclude %{_prefix}/lib/tuned/profiles/server-powersave
-%exclude %{_prefix}/lib/tuned/profiles/laptop-battery-powersave
-%exclude %{_prefix}/lib/tuned/profiles/enterprise-storage
-%exclude %{_prefix}/lib/tuned/profiles/spindown-disk
-%exclude %{_prefix}/lib/tuned/profiles/sap-netweaver
-%exclude %{_prefix}/lib/tuned/profiles/sap-hana
-%exclude %{_prefix}/lib/tuned/profiles/sap-hana-kvm-guest
-%exclude %{_prefix}/lib/tuned/profiles/mssql
-%exclude %{_prefix}/lib/tuned/profiles/oracle
-%exclude %{_prefix}/lib/tuned/profiles/atomic-host
-%exclude %{_prefix}/lib/tuned/profiles/atomic-guest
-%exclude %{_prefix}/lib/tuned/profiles/realtime
-%exclude %{_prefix}/lib/tuned/profiles/realtime-virtual-guest
-%exclude %{_prefix}/lib/tuned/profiles/realtime-virtual-host
-%exclude %{_prefix}/lib/tuned/profiles/cpu-partitioning
-%exclude %{_prefix}/lib/tuned/profiles/cpu-partitioning-powersave
-%exclude %{_prefix}/lib/tuned/profiles/spectrumscale-ece
-%exclude %{_prefix}/lib/tuned/profiles/postgresql
-%exclude %{_prefix}/lib/tuned/profiles/openshift
-%exclude %{_prefix}/lib/tuned/profiles/openshift-control-plane
-%exclude %{_prefix}/lib/tuned/profiles/openshift-node
+%exclude %{profiles_path}/default
+%exclude %{profiles_path}/desktop-powersave
+%exclude %{profiles_path}/laptop-ac-powersave
+%exclude %{profiles_path}/server-powersave
+%exclude %{profiles_path}/laptop-battery-powersave
+%exclude %{profiles_path}/enterprise-storage
+%exclude %{profiles_path}/spindown-disk
+%exclude %{profiles_path}/sap-netweaver
+%exclude %{profiles_path}/sap-hana
+%exclude %{profiles_path}/sap-hana-kvm-guest
+%exclude %{profiles_path}/mssql
+%exclude %{profiles_path}/oracle
+%exclude %{profiles_path}/atomic-host
+%exclude %{profiles_path}/atomic-guest
+%exclude %{profiles_path}/realtime
+%exclude %{profiles_path}/realtime-virtual-guest
+%exclude %{profiles_path}/realtime-virtual-host
+%exclude %{profiles_path}/cpu-partitioning
+%exclude %{profiles_path}/cpu-partitioning-powersave
+%exclude %{profiles_path}/spectrumscale-ece
+%exclude %{profiles_path}/postgresql
+%exclude %{profiles_path}/openshift
+%exclude %{profiles_path}/openshift-control-plane
+%exclude %{profiles_path}/openshift-node
 %{_prefix}/lib/tuned
 %dir %{_sysconfdir}/tuned
 %dir %{_sysconfdir}/tuned/recommend.d
@@ -534,40 +548,40 @@ fi
 %{_mandir}/man8/scomes.*
 
 %files profiles-sap
-%{_prefix}/lib/tuned/profiles/sap-netweaver
+%{profiles_path}/sap-netweaver
 %{_mandir}/man7/tuned-profiles-sap.7*
 
 %files profiles-sap-hana
-%{_prefix}/lib/tuned/profiles/sap-hana
-%{_prefix}/lib/tuned/profiles/sap-hana-kvm-guest
+%{profiles_path}/sap-hana
+%{profiles_path}/sap-hana-kvm-guest
 %{_mandir}/man7/tuned-profiles-sap-hana.7*
 
 %files profiles-mssql
-%{_prefix}/lib/tuned/profiles/mssql
+%{profiles_path}/mssql
 %{_mandir}/man7/tuned-profiles-mssql.7*
 
 %files profiles-oracle
-%{_prefix}/lib/tuned/profiles/oracle
+%{profiles_path}/oracle
 %{_mandir}/man7/tuned-profiles-oracle.7*
 
 %files profiles-atomic
-%{_prefix}/lib/tuned/profiles/atomic-host
-%{_prefix}/lib/tuned/profiles/atomic-guest
+%{profiles_path}/atomic-host
+%{profiles_path}/atomic-guest
 %{_mandir}/man7/tuned-profiles-atomic.7*
 
 %files profiles-realtime
 %config(noreplace) %{_sysconfdir}/tuned/realtime-variables.conf
-%{_prefix}/lib/tuned/profiles/realtime
+%{profiles_path}/realtime
 %{_mandir}/man7/tuned-profiles-realtime.7*
 
 %files profiles-nfv-guest
 %config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-guest-variables.conf
-%{_prefix}/lib/tuned/profiles/realtime-virtual-guest
+%{profiles_path}/realtime-virtual-guest
 %{_mandir}/man7/tuned-profiles-nfv-guest.7*
 
 %files profiles-nfv-host
 %config(noreplace) %{_sysconfdir}/tuned/realtime-virtual-host-variables.conf
-%{_prefix}/lib/tuned/profiles/realtime-virtual-host
+%{profiles_path}/realtime-virtual-host
 %{_mandir}/man7/tuned-profiles-nfv-host.7*
 
 %files profiles-nfv
@@ -576,32 +590,32 @@ fi
 %files profiles-cpu-partitioning
 %config(noreplace) %{_sysconfdir}/tuned/cpu-partitioning-variables.conf
 %config(noreplace) %{_sysconfdir}/tuned/cpu-partitioning-powersave-variables.conf
-%{_prefix}/lib/tuned/profiles/cpu-partitioning
-%{_prefix}/lib/tuned/profiles/cpu-partitioning-powersave
+%{profiles_path}/cpu-partitioning
+%{profiles_path}/cpu-partitioning-powersave
 %{_mandir}/man7/tuned-profiles-cpu-partitioning.7*
 
 %files profiles-spectrumscale
-%{_prefix}/lib/tuned/profiles/spectrumscale-ece
+%{profiles_path}/spectrumscale-ece
 %{_mandir}/man7/tuned-profiles-spectrumscale-ece.7*
 
 %files profiles-compat
-%{_prefix}/lib/tuned/profiles/default
-%{_prefix}/lib/tuned/profiles/desktop-powersave
-%{_prefix}/lib/tuned/profiles/laptop-ac-powersave
-%{_prefix}/lib/tuned/profiles/server-powersave
-%{_prefix}/lib/tuned/profiles/laptop-battery-powersave
-%{_prefix}/lib/tuned/profiles/enterprise-storage
-%{_prefix}/lib/tuned/profiles/spindown-disk
+%{profiles_path}/default
+%{profiles_path}/desktop-powersave
+%{profiles_path}/laptop-ac-powersave
+%{profiles_path}/server-powersave
+%{profiles_path}/laptop-battery-powersave
+%{profiles_path}/enterprise-storage
+%{profiles_path}/spindown-disk
 %{_mandir}/man7/tuned-profiles-compat.7*
 
 %files profiles-postgresql
-%{_prefix}/lib/tuned/profiles/postgresql
+%{profiles_path}/postgresql
 %{_mandir}/man7/tuned-profiles-postgresql.7*
 
 %files profiles-openshift
-%{_prefix}/lib/tuned/profiles/openshift
-%{_prefix}/lib/tuned/profiles/openshift-control-plane
-%{_prefix}/lib/tuned/profiles/openshift-node
+%{profiles_path}/openshift
+%{profiles_path}/openshift-control-plane
+%{profiles_path}/openshift-node
 %{_mandir}/man7/tuned-profiles-openshift.7*
 
 %files ppd
