@@ -60,7 +60,7 @@ class GuiProfileLoader(object):
 
         profilePath = self._locate_profile_path(profile_name)
 
-        if profilePath != tuned.consts.SYSTEM_PROFILE_DIR:
+        if profilePath != tuned.consts.SYSTEM_PROFILES_DIR:
             file_path = profilePath + '/' + profile_name + '/' + tuned.consts.PROFILE_FILE
             config_parser = ConfigParser(delimiters=('='), inline_comment_prefixes=('#'), strict=False)
             config_parser.optionxform = str
@@ -130,7 +130,7 @@ class GuiProfileLoader(object):
         # save the new profile to a non-system directory with the highest priority
         path = None
         for d in reversed(self.directories):
-            if d != tuned.consts.SYSTEM_PROFILE_DIR:
+            if d != tuned.consts.SYSTEM_PROFILES_DIR:
                 path = os.path.join(d, profile.name)
                 break
         if path is None:
@@ -219,7 +219,7 @@ class GuiProfileLoader(object):
 
     def is_profile_factory(self, profile_name):
         profile_path = self._locate_profile_path(profile_name)
-        return profile_path == tuned.consts.SYSTEM_PROFILE_DIR
+        return profile_path == tuned.consts.SYSTEM_PROFILES_DIR
 
     def _save_profile(self, config):
         ec = subprocess.call(['pkexec', sys.executable, tuned.gtk.gui_profile_saver.__file__ , json.dumps(config)])

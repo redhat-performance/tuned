@@ -47,9 +47,11 @@ $(error Failed to determine python library directory)
 endif
 KERNELINSTALLHOOKDIR = /usr/lib/kernel/install.d
 TUNED_SYSTEM_DIR = /usr/lib/tuned
-TUNED_PROFILES_DIR = $(TUNED_SYSTEM_DIR)/profiles
+TUNED_SYSTEM_PROFILES_DIR = $(TUNED_SYSTEM_DIR)/profiles
+TUNED_CFG_DIR = $(SYSCONFDIR)/tuned
+TUNED_USER_PROFILES_DIR = $(TUNED_CFG_DIR)/profiles
 TUNED_RECOMMEND_DIR = $(TUNED_SYSTEM_DIR)/recommend.d
-TUNED_USER_RECOMMEND_DIR = $(SYSCONFDIR)/tuned/recommend.d
+TUNED_USER_RECOMMEND_DIR = $(TUNED_CFG_DIR)/recommend.d
 BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
 
 copy_executable = install -Dm 0755 $(1) $(2)
@@ -129,13 +131,13 @@ clean-html:
 
 install-dirs:
 	mkdir -p $(DESTDIR)$(PYTHON_SITELIB)
-	mkdir -p $(DESTDIR)$(TUNED_PROFILES_DIR)
+	mkdir -p $(DESTDIR)$(TUNED_SYSTEM_PROFILES_DIR)
 	mkdir -p $(DESTDIR)/var/lib/tuned
 	mkdir -p $(DESTDIR)/var/log/tuned
 	mkdir -p $(DESTDIR)/run/tuned
 	mkdir -p $(DESTDIR)$(DOCDIR)
 	mkdir -p $(DESTDIR)$(SYSCONFDIR)
-	mkdir -p $(DESTDIR)$(SYSCONFDIR)/tuned/profiles
+	mkdir -p $(DESTDIR)$(TUNED_USER_PROFILES_DIR)
 	mkdir -p $(DESTDIR)$(TUNED_RECOMMEND_DIR)
 	mkdir -p $(DESTDIR)$(TUNED_USER_RECOMMEND_DIR)
 
@@ -161,26 +163,36 @@ install: install-dirs
 		 experiments/powertop2tuned.py, $(DESTDIR)/usr/bin/powertop2tuned)
 
 	# configuration files
-	install -Dpm 0644 tuned-main.conf $(DESTDIR)$(SYSCONFDIR)/tuned/tuned-main.conf
+	# Update default profiles location, in the configuration and in the code
+	sed '/^\s*#\?\s*profile_dirs\s*=\s*/ s|\(profile_dirs\s*=\s*\).*$$|\1$(TUNED_SYSTEM_PROFILES_DIR),$(TUNED_USER_PROFILES_DIR)|' \
+		tuned-main.conf > tuned-main.conf.tmp
+	touch -r tuned-main.conf tuned-main.conf.tmp
+	sed -i '/^\s*USER_PROFILES_DIR\s*=\s*/ s|\(USER_PROFILES_DIR\s*=\s*\).*$$|\1"$(TUNED_USER_PROFILES_DIR)"|' \
+		$(DESTDIR)$(PYTHON_SITELIB)/tuned/consts.py
+	sed -i '/^\s*SYSTEM_PROFILES_DIR\s*=\s*/ s|\(SYSTEM_PROFILES_DIR\s*=\s*\).*$$|\1"$(TUNED_SYSTEM_PROFILES_DIR)"|' \
+		$(DESTDIR)$(PYTHON_SITELIB)/tuned/consts.py
+	install -Dpm 0644 tuned-main.conf.tmp $(DESTDIR)$(TUNED_CFG_DIR)/tuned-main.conf
+	rm -f tuned-main.conf.tmp
+
 	# None profile in the moment, autodetection will be used
-	echo -n > $(DESTDIR)$(SYSCONFDIR)/tuned/active_profile
-	echo -n > $(DESTDIR)$(SYSCONFDIR)/tuned/profile_mode
-	echo -n > $(DESTDIR)$(SYSCONFDIR)/tuned/post_loaded_profile
-	install -Dpm 0644 bootcmdline $(DESTDIR)$(SYSCONFDIR)/tuned/bootcmdline
+	echo -n > $(DESTDIR)$(TUNED_CFG_DIR)/active_profile
+	echo -n > $(DESTDIR)$(TUNED_CFG_DIR)/profile_mode
+	echo -n > $(DESTDIR)$(TUNED_CFG_DIR)/post_loaded_profile
+	install -Dpm 0644 bootcmdline $(DESTDIR)$(TUNED_CFG_DIR)/bootcmdline
 	install -Dpm 0644 modules.conf $(DESTDIR)$(SYSCONFDIR)/modprobe.d/tuned.conf
 
 	# profiles & system config
-	cp -a profiles/* $(DESTDIR)$(TUNED_PROFILES_DIR)/
-	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/realtime/realtime-variables.conf \
-		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-variables.conf
-	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/realtime-virtual-guest/realtime-virtual-guest-variables.conf \
-		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-virtual-guest-variables.conf
-	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/realtime-virtual-host/realtime-virtual-host-variables.conf \
-		$(DESTDIR)$(SYSCONFDIR)/tuned/realtime-virtual-host-variables.conf
-	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/cpu-partitioning/cpu-partitioning-variables.conf \
-		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-variables.conf
-	mv $(DESTDIR)$(TUNED_PROFILES_DIR)/cpu-partitioning-powersave/cpu-partitioning-powersave-variables.conf \
-		$(DESTDIR)$(SYSCONFDIR)/tuned/cpu-partitioning-powersave-variables.conf
+	cp -a profiles/* $(DESTDIR)$(TUNED_SYSTEM_PROFILES_DIR)/
+	mv $(DESTDIR)$(TUNED_SYSTEM_PROFILES_DIR)/realtime/realtime-variables.conf \
+		$(DESTDIR)$(TUNED_CFG_DIR)/realtime-variables.conf
+	mv $(DESTDIR)$(TUNED_SYSTEM_PROFILES_DIR)/realtime-virtual-guest/realtime-virtual-guest-variables.conf \
+		$(DESTDIR)$(TUNED_CFG_DIR)/realtime-virtual-guest-variables.conf
+	mv $(DESTDIR)$(TUNED_SYSTEM_PROFILES_DIR)/realtime-virtual-host/realtime-virtual-host-variables.conf \
+		$(DESTDIR)$(TUNED_CFG_DIR)/realtime-virtual-host-variables.conf
+	mv $(DESTDIR)$(TUNED_SYSTEM_PROFILES_DIR)/cpu-partitioning/cpu-partitioning-variables.conf \
+		$(DESTDIR)$(TUNED_CFG_DIR)/cpu-partitioning-variables.conf
+	mv $(DESTDIR)$(TUNED_SYSTEM_PROFILES_DIR)/cpu-partitioning-powersave/cpu-partitioning-powersave-variables.conf \
+		$(DESTDIR)$(TUNED_CFG_DIR)/cpu-partitioning-powersave-variables.conf
 	install -pm 0644 recommend.conf $(DESTDIR)$(TUNED_RECOMMEND_DIR)/50-tuned.conf
 
 	# bash functions used by profile scripts
@@ -228,7 +240,7 @@ install: install-dirs
 	install -dD $(DESTDIR)$(DATADIR)/applications
 	desktop-file-install --dir=$(DESTDIR)$(DATADIR)/applications tuned-gui.desktop
 
-install-ppd: install
+install-ppd:
 	$(call install_python_script,tuned-ppd.py,$(DESTDIR)/usr/sbin/tuned-ppd)
 	install -Dpm 0644 tuned/ppd/tuned-ppd.service $(DESTDIR)$(UNITDIR)/tuned-ppd.service
 	install -Dpm 0644 tuned/ppd/tuned-ppd.dbus.service $(DESTDIR)$(DATADIR)/dbus-1/system-services/net.hadess.PowerProfiles.service

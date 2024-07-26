@@ -18,7 +18,6 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="tuned"
-PROFILE_DIR="/etc/tuned/profiles"
 
 rlJournalStart
     rlPhaseStartSetup
@@ -29,33 +28,36 @@ rlJournalStart
         rlServiceStart "tuned"
         rlImport "tuned/basic"
         tunedProfileBackup
-	rlFileBackup "/etc/tuned/active_profile"
+        rlFileBackup "/etc/tuned/active_profile"
         rlFileBackup "/etc/tuned/profile_mode"
 
-        rlRun "mkdir $PROFILE_DIR/test-profile"
-        rlServiceStart "tuned"
+        PROFILE_DIR=$(tunedGetProfilesBaseDir)
+
+        rlRun "mkdir -p ${PROFILE_DIR}/test-profile"
+        rlServiceStop "tuned"
         sleep 1
-	rlFileBackup "/var/log/tuned/tuned.log"
-	rlRun "rm -rf /var/log/tuned/tuned.log"
+        rlFileBackup "/var/log/tuned/tuned.log"
+        rlRun "rm -rf /var/log/tuned/tuned.log"
+        rlServiceStart "tuned"
     rlPhaseEnd
 
     rlPhaseStartTest
-	rlRun "pushd $PROFILE_DIR/test-profile"
-	cat << EOF > tuned.conf
+        rlRun "pushd $PROFILE_DIR/test-profile"
+        cat << EOF > tuned.conf
 [scheduler]
 runtime=0
 EOF
-	rlRun "popd"
+        rlRun "popd"
 
-	rlRun "tuned-adm profile test-profile"
+        rlRun "tuned-adm profile test-profile"
         rlServiceStop "tuned"
-	sleep 3
+        sleep 3
         rlServiceStart "tuned"
-	sleep 3
+        sleep 3
         rlServiceStop "tuned"
 
-	rlAssertNotGrep "Traceback" "/var/log/tuned/tuned.log"
-	rlAssertNotGrep "object has no attribute '_evlist'" "/var/log/tuned/tuned.log"
+        rlAssertNotGrep "Traceback" "/var/log/tuned/tuned.log"
+        rlAssertNotGrep "object has no attribute '_evlist'" "/var/log/tuned/tuned.log"
     rlPhaseEnd
 
     rlPhaseStartCleanup
@@ -65,10 +67,10 @@ EOF
 
         tunedProfileRestore
         rlServiceStop "tuned"
-	rlFileRestore
+        rlFileRestore
 
         rlServiceRestore "tuned"
-	rlRun "rm -rf $PROFILE_DIR/test-profile"
+        rlRun "rm -rf $PROFILE_DIR/test-profile"
     rlPhaseEnd
 
 rlJournalPrintText

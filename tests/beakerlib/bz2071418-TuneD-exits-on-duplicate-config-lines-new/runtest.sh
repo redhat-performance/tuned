@@ -18,7 +18,6 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="tuned"
-PROFILE_DIR=/etc/tuned/profiles
 
 rlJournalStart
     rlPhaseStartSetup
@@ -29,7 +28,9 @@ rlJournalStart
         rlServiceStart "tuned"
         tunedProfileBackup
 
-        rlRun "mkdir $PROFILE_DIR/test-profile"
+        PROFILE_DIR=$(tunedGetProfilesBaseDir)
+
+        rlRun "mkdir -p $PROFILE_DIR/test-profile"
         rlRun "pushd $PROFILE_DIR/test-profile"
         cat << EOF > tuned.conf
 [sysctl]
@@ -53,8 +54,8 @@ EOF
 
         rlAssertGrep "test-profile" "/etc/tuned/active_profile"
 
-	# last value from config is used
-	rlAssertGrep "16384$"  /sys/fs/selinux/avc/cache_threshold
+        # last value from config is used
+        rlAssertGrep "16384$"  /sys/fs/selinux/avc/cache_threshold
     rlPhaseEnd
 
     rlPhaseStartCleanup
