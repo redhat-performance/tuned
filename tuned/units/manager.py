@@ -135,7 +135,7 @@ class Manager(object):
 		for plugin in self._plugins:
 			log.debug("cleaning plugin '%s'" % plugin.name)
 			self._try_call("destroy_all", None, plugin.cleanup)
-
+		self._plugins_repository.plugins.clear()
 		del self._plugins[:]
 		del self._instances[:]
 
