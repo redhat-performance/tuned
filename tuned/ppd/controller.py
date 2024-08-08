@@ -140,19 +140,22 @@ class Controller(exports.interfaces.ExportableInterface):
     def _set_tuned_profile(self, tuned_profile):
         active_tuned_profile = self._tuned_interface.active_profile()
         if active_tuned_profile == tuned_profile:
-            return
+            return True
         log.info("Setting TuneD profile to '%s'" % tuned_profile)
-        self._tuned_interface.switch_profile(tuned_profile)
+        ok, error_msg = self._tuned_interface.switch_profile(tuned_profile)
+        if not ok:
+            log.error(str(error_msg))
+        return bool(ok)
 
     def initialize(self):
         self._active_profile = None
         self._profile_holds = ProfileHoldManager(self)
         self._performance_degraded = PerformanceDegraded.NONE
         self._on_battery = False
-        self._config = PPDConfig(PPD_CONFIG_FILE)
+        self._config = PPDConfig(PPD_CONFIG_FILE, self._tuned_interface)
         self._base_profile = self._load_base_profile() or self._config.default_profile
-        self._save_base_profile(self._base_profile)
         self.switch_profile(self._base_profile)
+        self._save_base_profile(self._base_profile)
         if self._config.battery_detection:
             self.setup_battery_signaling()
 
@@ -174,10 +177,12 @@ class Controller(exports.interfaces.ExportableInterface):
         self._terminate.set()
 
     def switch_profile(self, profile):
-        self._set_tuned_profile(self._config.ppd_to_tuned.get(profile, self._on_battery))
+        if not self._set_tuned_profile(self._config.ppd_to_tuned.get(profile, self._on_battery)):
+            return False
         if self._active_profile != profile:
             exports.property_changed("ActiveProfile", profile)
             self._active_profile = profile
+        return True
 
     def _check_active_profile(self, err_ret=UNKNOWN_PROFILE):
         active_tuned_profile = self._tuned_interface.active_profile()
@@ -212,10 +217,11 @@ class Controller(exports.interfaces.ExportableInterface):
         if profile not in self._config.ppd_to_tuned.keys():
             raise dbus.exceptions.DBusException("Invalid profile '%s'" % profile)
         log.debug("Setting base profile to %s" % profile)
+        self._profile_holds.clear()
+        if not self.switch_profile(profile):
+            raise dbus.exceptions.DBusException("Error setting profile %s'" % profile)
         self._base_profile = profile
         self._save_base_profile(profile)
-        self._profile_holds.clear()
-        self.switch_profile(profile)
 
     @exports.property_getter("ActiveProfile")
     def get_active_profile(self):
