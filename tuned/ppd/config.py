@@ -27,7 +27,8 @@ class ProfileMap:
 
 
 class PPDConfig:
-    def __init__(self, config_file):
+    def __init__(self, config_file, tuned_interface):
+        self._tuned_interface = tuned_interface
         self.load_from_file(config_file)
 
     @property
@@ -56,9 +57,6 @@ class PPDConfig:
             raise TunedException("Missing profiles section in the configuration file '%s'" % config_file)
         profile_dict_ac = dict(cfg[PROFILES_SECTION])
 
-        if not all(isinstance(mapped_profile, str) for mapped_profile in profile_dict_ac.values()):
-            raise TunedException("Invalid profile mapping in the configuration file '%s'" % config_file)
-
         if PPD_POWER_SAVER not in profile_dict_ac:
             raise TunedException("Missing power-saver profile in the configuration file '%s'" % config_file)
 
@@ -70,18 +68,21 @@ class PPDConfig:
 
         self._default_profile = cfg[MAIN_SECTION][DEFAULT_PROFILE_OPTION]
         if self._default_profile not in profile_dict_ac:
-            raise TunedException("Unknown default profile '%s'" % self._default_profile)
+            raise TunedException("Default profile '%s' missing in the profile mapping" % self._default_profile)
 
-        if BATTERY_DETECTION_OPTION not in cfg[MAIN_SECTION]:
-            raise TunedException("Missing battery detection option in the configuration file '%s'" % config_file)
+        self._battery_detection = cfg.getboolean(MAIN_SECTION, BATTERY_DETECTION_OPTION, fallback=BATTERY_SECTION in cfg)
 
-        self._battery_detection = cfg.getboolean(MAIN_SECTION, BATTERY_DETECTION_OPTION)
+        if self._battery_detection and BATTERY_SECTION not in cfg:
+            raise TunedException("Missing battery section in the configuration file '%s'" % config_file)
 
-        if self._battery_detection:
-            if BATTERY_SECTION not in cfg:
-                raise TunedException("Missing battery section in the configuration file '%s'" % config_file)
-            profile_dict_dc = dict(cfg[BATTERY_SECTION])
-        else:
-            profile_dict_dc = {}
+        profile_dict_dc = dict(cfg[BATTERY_SECTION]) if self._battery_detection else {}
+
+        unknown_tuned_profiles = (set(profile_dict_ac.values()) | set(profile_dict_dc.values())) - set(self._tuned_interface.profiles())
+        if unknown_tuned_profiles:
+            raise TunedException("Unknown TuneD profiles in the configuration file: " + ", ".join(unknown_tuned_profiles))
+
+        unknown_battery_profiles = set(profile_dict_dc.keys()) - set(profile_dict_ac.keys())
+        if unknown_battery_profiles:
+            raise TunedException("Unknown PPD profiles in the battery section: " + ", ".join(unknown_battery_profiles))
 
         self._ppd_to_tuned = ProfileMap(profile_dict_ac, profile_dict_dc)
