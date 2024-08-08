@@ -174,14 +174,14 @@ class Controller(exports.interfaces.ExportableInterface):
         self._terminate.set()
 
     def switch_profile(self, profile):
-        self._set_tuned_profile(self._config.ppd_to_tuned_battery[profile] if self._on_battery else self._config.ppd_to_tuned[profile])
+        self._set_tuned_profile(self._config.ppd_to_tuned.get(profile, self._on_battery))
         if self._active_profile != profile:
             exports.property_changed("ActiveProfile", profile)
             self._active_profile = profile
 
     def _check_active_profile(self, err_ret=UNKNOWN_PROFILE):
         active_tuned_profile = self._tuned_interface.active_profile()
-        expected_tuned_profile = self._config.ppd_to_tuned_battery[self._active_profile] if self._on_battery else self._config.ppd_to_tuned[self._active_profile]
+        expected_tuned_profile = self._config.ppd_to_tuned.get(self._active_profile, self._on_battery)
         if active_tuned_profile != expected_tuned_profile:
             log.warning("Active profile check failed. The active PPD profile is '%s' and the expected TuneD profile was '%s'. "
                         "The active TuneD profile ('%s') was likely set by a different program."
@@ -209,7 +209,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
     @exports.property_setter("ActiveProfile")
     def set_active_profile(self, profile):
-        if profile not in self._config.ppd_to_tuned:
+        if profile not in self._config.ppd_to_tuned.keys():
             raise dbus.exceptions.DBusException("Invalid profile '%s'" % profile)
         log.debug("Setting base profile to %s" % profile)
         self._base_profile = profile
