@@ -29,10 +29,6 @@ class PPDConfig:
         return self._ppd_to_tuned
 
     @property
-    def tuned_to_ppd(self):
-        return self._tuned_to_ppd
-
-    @property
     def ppd_to_tuned_battery(self):
         return self._ppd_to_tuned_battery
 
@@ -55,7 +51,6 @@ class PPDConfig:
 
         if len(set(self._ppd_to_tuned.values())) != len(self._ppd_to_tuned):
             raise TunedException("Duplicate profile mapping in the configuration file '%s'" % config_file)
-        self._tuned_to_ppd = {v: k for k, v in self._ppd_to_tuned.items()}
 
         if PPD_POWER_SAVER not in self._ppd_to_tuned:
             raise TunedException("Missing power-saver profile in the configuration file '%s'" % config_file)
@@ -77,9 +72,6 @@ class PPDConfig:
         if self._battery_detection:
             if BATTERY_SECTION not in cfg:
                 raise TunedException("Missing battery section in the configuration file '%s'" % config_file)
-            for k, _v in dict(cfg[PROFILES_SECTION]).items():
-                if k in cfg[BATTERY_SECTION].keys():
-                    self._tuned_to_ppd = self._tuned_to_ppd | {cfg[BATTERY_SECTION][k]:k}
             for k, v in dict(cfg[BATTERY_SECTION]).items():
                 if k in cfg[PROFILES_SECTION].keys():
                     self._ppd_to_tuned_battery = self._ppd_to_tuned_battery | {k:v}
