@@ -77,7 +77,7 @@ class ProfileHoldManager(object):
         log.info("Adding hold '%s': profile '%s' by application '%s'" % (cookie, profile, app_id))
         self._holds[cookie] = ProfileHold(profile, reason, app_id, watch)
         exports.property_changed("ActiveProfileHolds", self.as_dbus_array())
-        self._controller.switch_profile(profile)
+        self._controller.switch_profile(self._effective_hold_profile())
         return cookie
 
     def has(self, cookie):
