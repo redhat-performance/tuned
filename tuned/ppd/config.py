@@ -13,37 +13,62 @@ BATTERY_DETECTION_OPTION = "battery_detection"
 
 
 class ProfileMap:
+    """
+    Mapping of PPD profiles to TuneD profiles.
+    """
     def __init__(self, ac_map, dc_map):
         self._ac_map = ac_map
         self._dc_map = dc_map
 
     def get(self, profile, on_battery):
+        """
+        Returns a TuneD profile corresponding to the given
+        PPD profile and power supply status.
+        """
         if on_battery and profile in self._dc_map:
             return self._dc_map[profile]
         return self._ac_map[profile]
 
     def keys(self):
+        """
+        Returns the supported PPD keys.
+        """
         return self._ac_map.keys()
 
 
 class PPDConfig:
+    """
+    Configuration for the tuned-ppd daemon.
+    """
     def __init__(self, config_file, tuned_interface):
         self._tuned_interface = tuned_interface
         self.load_from_file(config_file)
 
     @property
     def battery_detection(self):
+        """
+        Whether battery detection is enabled.
+        """
         return self._battery_detection
 
     @property
     def default_profile(self):
+        """
+        Default PPD profile to set during initialization.
+        """
         return self._default_profile
 
     @property
     def ppd_to_tuned(self):
+        """
+        Mapping of PPD profiles to TuneD profiles.
+        """
         return self._ppd_to_tuned
 
     def load_from_file(self, config_file):
+        """
+        Loads the configuration from the provided file.
+        """
         cfg = ConfigParser()
 
         if not os.path.isfile(config_file):
