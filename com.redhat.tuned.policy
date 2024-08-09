@@ -177,6 +177,16 @@
     </defaults>
   </action>
 
+  <action id="com.redhat.tuned.dump_profile">
+    <description>Dump TuneD profile</description>
+    <message>Authentication is required to dump TuneD profile</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
   <action id="com.redhat.tuned.verify_profile_ignore_missing">
     <description>Verify TuneD profile, ignore missing values</description>
     <message>Authentication is required to verify TuneD profile</message>
