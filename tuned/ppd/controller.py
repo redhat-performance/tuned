@@ -138,8 +138,8 @@ class Controller(exports.interfaces.ExportableInterface):
         self._config = PPDConfig(PPD_CONFIG_FILE)
         active_profile = self.active_profile()
         self._base_profile = active_profile if active_profile != UNKNOWN_PROFILE else self._config.default_profile
-        self.switch_profile(self._base_profile)
         self._on_battery = False
+        self.switch_profile(self._base_profile)
         if self._config.battery_detection:
             self.setup_battery_signaling()
 
