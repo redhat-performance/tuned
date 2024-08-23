@@ -214,13 +214,7 @@ restore_disk_scheduler_quantum() {
 # CPU tuning
 #
 
-CPUSPEED_SAVE_FILE="${STORAGE}/cpuspeed${STORAGE_SUFFIX}"
 CPUSPEED_ORIG_GOV="${STORAGE}/cpuspeed-governor-%s${STORAGE_SUFFIX}"
-CPUSPEED_STARTED="${STORAGE}/cpuspeed-started"
-CPUSPEED_CFG="/etc/sysconfig/cpuspeed"
-CPUSPEED_INIT="/etc/rc.d/init.d/cpuspeed"
-# do not use cpuspeed
-CPUSPEED_USE="0"
 CPUS="$(ls -d1 /sys/devices/system/cpu/cpu* | sed 's;^.*/;;' |  grep "cpu[0-9]\+")"
 
 # set CPU governor setting and store the old settings
@@ -228,32 +222,8 @@ CPUS="$(ls -d1 /sys/devices/system/cpu/cpu* | sed 's;^.*/;;' |  grep "cpu[0-9]\+
 set_cpu_governor() {
 	governor=$1
 
-	# always patch cpuspeed configuration if exists, if it doesn't exist and is enabled,
-	# explicitly disable it with hint
-	if [ -e $CPUSPEED_INIT ]; then
-		if [ ! -e $CPUSPEED_SAVE_FILE -a -e $CPUSPEED_CFG ]; then
-			cp -p $CPUSPEED_CFG $CPUSPEED_SAVE_FILE
-			sed -e 's/^GOVERNOR=.*/GOVERNOR='$governor'/g' $CPUSPEED_SAVE_FILE > $CPUSPEED_CFG
-		fi
-	else
-		if [ "$CPUSPEED_USE" = "1" ]; then
-			echo >&2
-			echo "Suggestion: install 'cpuspeed' package to get best tuning results." >&2
-			echo "Falling back to sysfs control." >&2
-			echo >&2
-		fi
-
-		CPUSPEED_USE="0"
-	fi
-
-	if [ "$CPUSPEED_USE" = "1" ]; then
-		service cpuspeed status &> /dev/null
-		[ $? -eq 3 ] && touch $CPUSPEED_STARTED || rm -f $CPUSPEED_STARTED
-
-		service cpuspeed restart &> /dev/null
-
 	# direct change using sysfs
-	elif [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then
+	if [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then
 
 		for cpu in $CPUS; do
 			gov_file=/sys/devices/system/cpu/$cpu/cpufreq/scaling_governor
@@ -270,27 +240,7 @@ set_cpu_governor() {
 # re-enable previous CPU governor settings
 # usage: restore_cpu_governor
 restore_cpu_governor() {
-	if [ -e $CPUSPEED_INIT ]; then
-		if [ -e $CPUSPEED_SAVE_FILE ]; then
-			cp -fp $CPUSPEED_SAVE_FILE $CPUSPEED_CFG
-			rm -f $CPUSPEED_SAVE_FILE
-		fi
-
-		if [ "$CPUSPEED_USE" = "1" ]; then
-			if [ -e $CPUSPEED_STARTED ]; then
-				service cpuspeed stop &> /dev/null
-			else
-				service cpuspeed restart &> /dev/null
-			fi
-		fi
-		if [ -e $CPUSPEED_STARTED ]; then
-			rm -f $CPUSPEED_STARTED
-		fi
-	else
-		CPUSPEED_USE="0"
-	fi
-
-	if [ "$CPUSPEED_USE" != "1" -a -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then
+	if [ -e /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then
 		for cpu in $CPUS; do
 			cpufreq_dir=/sys/devices/system/cpu/$cpu/cpufreq
 			save_file=$(printf $CPUSPEED_ORIG_GOV $cpu)
