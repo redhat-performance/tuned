@@ -135,7 +135,7 @@ class SystemdHandler(InitHandler):
 			return
 		dirpath = consts.SERVICE_SYSTEMD_CFG_PATH % name
 		try:
-			os.makedirs(dirpath, consts.DEF_SERVICE_CFG_DIR_MODE)
+			os.makedirs(dirpath, consts.DEF_SERVICE_CFG_DIR_MODE, exist_ok=True)
 		except OSError as e:
 			log.error("Unable to create directory '%s': %s" % (dirpath, e))
 			return
