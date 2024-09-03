@@ -6,6 +6,7 @@ Before=multi-user.target display-manager.target
 
 [Service]
 Type=dbus
+BusName=org.freedesktop.UPower.PowerProfiles
 BusName=net.hadess.PowerProfiles
 ExecStart=/usr/sbin/tuned-ppd -l
 

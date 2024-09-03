@@ -56,10 +56,10 @@ if __name__ == "__main__":
     handle_signal(signal.SIGTERM, controller.terminate)
     handle_signal(signal.SIGHUP, controller.initialize)
 
-    dbus_exporter = exports.dbus_with_properties.DBusExporterWithProperties(
-        consts.PPD_DBUS_BUS, consts.PPD_DBUS_INTERFACE, consts.PPD_DBUS_OBJECT, consts.PPD_NAMESPACE
-    )
+    for name_dict in consts.PPD_DBUS_NAMES:
+        dbus_exporter = exports.dbus_with_properties.DBusExporterWithProperties(
+            name_dict["bus"], name_dict["interface"], name_dict["object"], name_dict["namespace"])
+        exports.register_exporter(dbus_exporter)
 
-    exports.register_exporter(dbus_exporter)
     exports.register_object(controller)
     controller.run()
