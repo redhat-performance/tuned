@@ -190,6 +190,22 @@ class CPULatencyPlugin(hotplug.Plugin):
 	boost=1
 	----
 	CPU is allowed to boost above nominal frequencies for short periods of time.
+	+
+	`offline`:::
+	When set, this option causes *TuneD* to offline all CPUs of the current plugin
+	instance. To use it, define multiple instances of the `cpu` plugin, each with
+	its own list of `devices`.
+	====
+	----
+	[cpu_online]
+	type=cpu
+	devices=${f:cpulist2devs:0-2}
+	[cpu_offline]
+	type=cpu
+	devices=${f:cpulist2devs:3}
+	offline=true
+	----
+	====
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -229,6 +245,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 	@classmethod
 	def _get_config_options(self):
 		return {
+			"offline"              : False,
 			"load_threshold"       : 0.2,
 			"latency_low"          : 100,
 			"latency_high"         : 1000,
@@ -329,9 +346,12 @@ class CPULatencyPlugin(hotplug.Plugin):
 		instance._has_dynamic_tuning = False
 		instance._load_monitor = None
 
+		instance._reenable_cpus = self._storage_get(instance, {"name": "offline"}) or []
+
 		# only the first instance of the plugin can control the latency
 		if list(self._instances.values())[0] == instance:
 			instance._first_instance = True
+
 			try:
 				self._cpu_latency_fd = os.open(consts.PATH_CPU_DMA_LATENCY, os.O_WRONLY)
 			except OSError:
@@ -381,6 +401,21 @@ class CPULatencyPlugin(hotplug.Plugin):
 	def _instance_apply_static(self, instance):
 		super(CPULatencyPlugin, self)._instance_apply_static(instance)
 
+		if self._option_bool(instance.options["offline"]):
+			log.info("disabling CPUs %s" % str(instance.assigned_devices))
+			for cpu in instance.assigned_devices:
+				if cpu == "cpu0":
+					log.error("cannot take CPU 0 offline")
+					continue
+				online_file = "/sys/devices/system/cpu/%s/online" % cpu
+				if not os.path.exists(online_file):
+					log.error("failed to take CPU %s offline, is hotplugging supported?" % cpu)
+					continue
+				self._cmd.write_to_file(online_file, "0")
+				instance._reenable_cpus.append(cpu)
+			instance._reenable_cpus = sorted(list(set(instance._reenable_cpus)))
+			self._storage_set(instance, {"name": "offline"}, instance._reenable_cpus)
+
 		if not instance._first_instance:
 			return
 
@@ -405,10 +440,34 @@ class CPULatencyPlugin(hotplug.Plugin):
 	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):
 		super(CPULatencyPlugin, self)._instance_unapply_static(instance, rollback)
 
+		if len(instance._reenable_cpus) > 0:
+			log.info("re-enabling CPUs: %s" % str(instance._reenable_cpus))
+			for c in instance._reenable_cpus:
+				self._cmd.write_to_file("/sys/devices/system/cpu/%s/online" % c, "1")
+			instance._reenable_cpus = []
+			self._storage_set(instance, {"name": "offline"}, instance._reenable_cpus)
+
 		if instance._first_instance and self._has_intel_pstate:
 			self._set_intel_pstate_attr("min_perf_pct", self._min_perf_pct_save)
 			self._set_intel_pstate_attr("max_perf_pct", self._max_perf_pct_save)
 			self._set_intel_pstate_attr("no_turbo", self._no_turbo_save)
+
+	def _instance_verify_static(self, instance, ignore_missing, devices):
+		ret1 = super(CPULatencyPlugin, self)._instance_verify_static(instance, ignore_missing, devices)
+		ret2 = True
+		if self._option_bool(instance.options["offline"]):
+			cpus_offline = []
+			for cpu in instance.processed_devices:
+				online_file = "/sys/devices/system/cpu/%s/online" % cpu
+				if os.path.exists(online_file) and self._cmd.read_file(online_file).strip() == "0":
+					cpus_offline.append(cpu)
+			cpus_still_online = sorted(list(set(instance.processed_devices) - set(cpus_offline)))
+			if len(cpus_still_online) == 0:
+				log.info(consts.STR_VERIFY_PROFILE_OK % ("CPUs are offline: %s" % str(cpus_offline)))
+			else:
+				log.error(consts.STR_VERIFY_PROFILE_FAIL % ("CPUs should be offline, but are not: %s" % str(cpus_still_online)))
+				ret2 = False
+		return ret1 and ret2
 
 	def _instance_apply_dynamic(self, instance, device):
 		self._instance_update_dynamic(instance, device)
@@ -515,6 +574,10 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 	def _get_available_governors(self, device):
 		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).strip().split()
+
+	@command_custom("offline", per_device=False)
+	def _offline(self, enabling, value, verify, ignore_missing):
+		return None
 
 	@command_set("governor", per_device=True)
 	def _set_governor(self, governors, device, sim, remove):
