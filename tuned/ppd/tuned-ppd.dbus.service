@@ -1,5 +1,5 @@
 [D-BUS Service]
-Name=net.hadess.PowerProfiles
+Name=?name?
 Exec=/bin/false
 User=root
 SystemdService=tuned-ppd.service
