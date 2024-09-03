@@ -195,7 +195,6 @@ Additional tuned profile(s) targeted to Atomic host and guest.
 %package profiles-realtime
 Summary: Additional tuned profile(s) targeted to realtime
 Requires: %{name} = %{version}
-Requires: tuna
 
 %description profiles-realtime
 Additional tuned profile(s) targeted to realtime.
@@ -204,7 +203,6 @@ Additional tuned profile(s) targeted to realtime.
 Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV) guest
 Requires: %{name} = %{version}
 Requires: %{name}-profiles-realtime = %{version}
-Requires: tuna
 
 %description profiles-nfv-guest
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV) guest.
@@ -213,7 +211,6 @@ Additional tuned profile(s) targeted to Network Function Virtualization (NFV) gu
 Summary: Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host
 Requires: %{name} = %{version}
 Requires: %{name}-profiles-realtime = %{version}
-Requires: tuna
 
 %description profiles-nfv-host
 Additional tuned profile(s) targeted to Network Function Virtualization (NFV) host.
