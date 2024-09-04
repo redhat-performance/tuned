@@ -1,98 +1,98 @@
 import tuned.consts as consts
 
 class Instance(object):
-	"""
-	"""
+    """
+    """
 
-	def __init__(self, plugin, name, priority, devices_expression, devices_udev_regex, script_pre, script_post, options):
-		self._plugin = plugin
-		self._name = name
-		self._devices_expression = devices_expression
-		self._devices_udev_regex = devices_udev_regex
-		self._script_pre = script_pre
-		self._script_post = script_post
-		self._options = options
+    def __init__(self, plugin, name, priority, devices_expression, devices_udev_regex, script_pre, script_post, options):
+        self._plugin = plugin
+        self._name = name
+        self._devices_expression = devices_expression
+        self._devices_udev_regex = devices_udev_regex
+        self._script_pre = script_pre
+        self._script_post = script_post
+        self._options = options
 
-		self._active = True
-		self._priority = priority
-		self._has_static_tuning = False
-		self._has_dynamic_tuning = False
-		self._assigned_devices = set()
-		self._processed_devices = set()
+        self._active = True
+        self._priority = priority
+        self._has_static_tuning = False
+        self._has_dynamic_tuning = False
+        self._assigned_devices = set()
+        self._processed_devices = set()
 
-	# properties
+    # properties
 
-	@property
-	def plugin(self):
-		return self._plugin
+    @property
+    def plugin(self):
+        return self._plugin
 
-	@property
-	def name(self):
-		return self._name
+    @property
+    def name(self):
+        return self._name
 
-	@property
-	def active(self):
-		"""The instance performs some tuning (otherwise it is suspended)."""
-		return self._active
+    @property
+    def active(self):
+        """The instance performs some tuning (otherwise it is suspended)."""
+        return self._active
 
-	@active.setter
-	def active(self, value):
-		self._active = value
+    @active.setter
+    def active(self, value):
+        self._active = value
 
-	@property
-	def priority(self):
-		return self._priority
+    @property
+    def priority(self):
+        return self._priority
 
-	@property
-	def devices_expression(self):
-		return self._devices_expression
+    @property
+    def devices_expression(self):
+        return self._devices_expression
 
-	@property
-	def assigned_devices(self):
-		return self._assigned_devices
+    @property
+    def assigned_devices(self):
+        return self._assigned_devices
 
-	@property
-	def processed_devices(self):
-		return self._processed_devices
+    @property
+    def processed_devices(self):
+        return self._processed_devices
 
-	@property
-	def devices_udev_regex(self):
-		return self._devices_udev_regex
+    @property
+    def devices_udev_regex(self):
+        return self._devices_udev_regex
 
-	@property
-	def script_pre(self):
-		return self._script_pre
+    @property
+    def script_pre(self):
+        return self._script_pre
 
-	@property
-	def script_post(self):
-		return self._script_post
+    @property
+    def script_post(self):
+        return self._script_post
 
-	@property
-	def options(self):
-		return self._options
+    @property
+    def options(self):
+        return self._options
 
-	@property
-	def has_static_tuning(self):
-		return self._has_static_tuning
+    @property
+    def has_static_tuning(self):
+        return self._has_static_tuning
 
-	@property
-	def has_dynamic_tuning(self):
-		return self._has_dynamic_tuning
+    @property
+    def has_dynamic_tuning(self):
+        return self._has_dynamic_tuning
 
-	# methods
+    # methods
 
-	def apply_tuning(self):
-		self._plugin.instance_apply_tuning(self)
+    def apply_tuning(self):
+        self._plugin.instance_apply_tuning(self)
 
-	def verify_tuning(self, ignore_missing):
-		return self._plugin.instance_verify_tuning(self, ignore_missing)
+    def verify_tuning(self, ignore_missing):
+        return self._plugin.instance_verify_tuning(self, ignore_missing)
 
-	def update_tuning(self):
-		self._plugin.instance_update_tuning(self)
+    def update_tuning(self):
+        self._plugin.instance_update_tuning(self)
 
-	def unapply_tuning(self, rollback = consts.ROLLBACK_SOFT):
-		self._plugin.instance_unapply_tuning(self, rollback)
+    def unapply_tuning(self, rollback = consts.ROLLBACK_SOFT):
+        self._plugin.instance_unapply_tuning(self, rollback)
 
-	def destroy(self):
-		self.unapply_tuning()
-		self._plugin.destroy_instance(self)
+    def destroy(self):
+        self.unapply_tuning()
+        self._plugin.destroy_instance(self)

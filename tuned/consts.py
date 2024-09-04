@@ -209,13 +209,13 @@ LOG_LEVEL_CONSOLE = 60
 LOG_LEVEL_CONSOLE_NAME = "CONSOLE"
 CAPTURE_LOG_LEVEL = "console"
 CAPTURE_LOG_LEVELS = {
-		"debug": logging.DEBUG,
-		"info": logging.INFO,
-		"warn": logging.WARN,
-		"error": logging.ERROR,
-		"console": LOG_LEVEL_CONSOLE,
-		"none": None,
-		}
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warn": logging.WARN,
+        "error": logging.ERROR,
+        "console": LOG_LEVEL_CONSOLE,
+        "none": None,
+        }
 
 # number of retries when waiting for device initialization
 HOTPLUG_WAIT_FOR_DEV_INIT_RETRIES = 100
