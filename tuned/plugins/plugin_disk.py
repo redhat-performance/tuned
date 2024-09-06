@@ -132,9 +132,15 @@ class DiskPlugin(hotplug.Plugin):
 		self._hdparm_apm_device_support[device] = True
 		return True
 
+	@staticmethod
+	def _is_loop_device(device):
+		LOOP_DEVICE_MAJOR = 7
+		return os.major(device.device_number) == LOOP_DEVICE_MAJOR
+
 	@classmethod
 	def _device_is_supported(cls, device):
 		return  device.device_type == "disk" and \
+			not cls._is_loop_device(device) and \
 			device.attributes.get("removable", None) == b"0" and \
 			(device.parent is None or \
 					device.parent.subsystem in ["scsi", "virtio", "xen", "nvme"])
