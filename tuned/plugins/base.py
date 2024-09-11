@@ -460,7 +460,7 @@ class Plugin(object):
 	def _verify_all_device_commands(self, instance, devices, ignore_missing):
 		ret = True
 		for command in [command for command in list(self._commands.values()) if command["per_device"]]:
-			new_value = instance.options.get(command["name"], None)
+			new_value = self._variables.expand(instance.options.get(command["name"], None))
 			if new_value is None:
 				continue
 			for device in devices:
