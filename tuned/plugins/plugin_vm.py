@@ -13,9 +13,15 @@ cmd = commands()
 
 class VMPlugin(base.Plugin):
 	"""
-	Enables or disables transparent huge pages depending on value of the
-	[option]`transparent_hugepages` option. The option can have one of three
-	possible values `always`, `madvise` and `never`.
+	Tunes selected sysctl options in `/proc/sys/vm`, currently
+	[option]`dirty_ratio`, [option]`dirty_background_ratio`,
+	[option]`dirty_bytes`, and [option]`dirty_background_bytes`.
+	See https://docs.kernel.org/admin-guide/sysctl/vm.html for detailed
+	documentation of these options.
+
+	Additionaly enables or disables transparent huge pages depending on
+	the value of the [option]`transparent_hugepages` option. The option
+	can have one of three possible values: `always`, `madvise` and `never`.
 
 	.Disable transparent hugepages
 	====
