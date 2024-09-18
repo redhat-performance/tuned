@@ -98,6 +98,7 @@ PPD_DBUS_OBJECT = "/net/hadess/PowerProfiles"
 PPD_DBUS_INTERFACE = PPD_DBUS_BUS
 PPD_CONFIG_FILE = "/etc/tuned/ppd.conf"
 PPD_BASE_PROFILE_FILE = "/etc/tuned/ppd_base_profile"
+PPD_API_COMPATIBILITY = "0.23"
 
 # After adding new option to tuned-main.conf add here its name with CFG_ prefix
 # and eventually default value with CFG_DEF_ prefix (default is None)

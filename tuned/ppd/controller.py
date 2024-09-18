@@ -1,6 +1,6 @@
 from tuned import exports, logs
 from tuned.utils.commands import commands
-from tuned.consts import PPD_CONFIG_FILE, PPD_BASE_PROFILE_FILE
+from tuned.consts import PPD_CONFIG_FILE, PPD_BASE_PROFILE_FILE, PPD_API_COMPATIBILITY
 from tuned.ppd.config import PPDConfig, PPD_PERFORMANCE, PPD_POWER_SAVER
 from enum import StrEnum
 import threading
@@ -360,3 +360,7 @@ class Controller(exports.interfaces.ExportableInterface):
         Returns a DBus array of active profile holds.
         """
         return self._profile_holds.as_dbus_array()
+
+    @exports.property_getter("Version")
+    def version(self):
+        return PPD_API_COMPATIBILITY
