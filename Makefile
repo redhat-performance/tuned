@@ -228,7 +228,7 @@ install: install-dirs
 	install -dD $(DESTDIR)$(DATADIR)/applications
 	desktop-file-install --dir=$(DESTDIR)$(DATADIR)/applications tuned-gui.desktop
 
-install-ppd: install
+install-ppd:
 	$(call install_python_script,tuned-ppd.py,$(DESTDIR)/usr/sbin/tuned-ppd)
 	install -Dpm 0644 tuned/ppd/tuned-ppd.service $(DESTDIR)$(UNITDIR)/tuned-ppd.service
 	install -Dpm 0644 tuned/ppd/tuned-ppd.dbus.service $(DESTDIR)$(DATADIR)/dbus-1/system-services/net.hadess.PowerProfiles.service
