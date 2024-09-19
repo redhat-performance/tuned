@@ -548,3 +548,6 @@ class commands:
 			import string
 			trans = string.maketrans(source_chars, dest_chars)
 		return text.translate(trans)
+
+	def getconf(self, variable):
+		return check_output(["getconf", variable]).decode().strip()

@@ -56,7 +56,13 @@ Sets autosuspend timeout of USB devices to the value specified by the [option]`a
 The value `0` means that autosuspend is disabled.
 
 `vm`::
-Enables or disables transparent huge pages depending on the Boolean value of the [option]`transparent_hugepages` option.
+Tunes selected sysctl options in `/proc/sys/vm`, currently
+[option]`dirty_ratio`, [option]`dirty_background_ratio`,
+[option]`dirty_bytes`, and [option]`dirty_background_bytes`.
+For details of these options, see link:https://docs.kernel.org/admin-guide/sysctl/vm.html[docs.kernel.org].
++
+Additionaly enables or disables transparent huge pages depending on
+the value of the [option]`transparent_hugepages` option.
 +
 Valid values of the [option]`transparent_hugepages` option are:
 +
