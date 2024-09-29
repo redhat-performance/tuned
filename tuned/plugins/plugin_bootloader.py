@@ -205,6 +205,7 @@ class BootloaderPlugin(base.Plugin):
 		self._initrd_val = ""
 		self._grub2_cfg_file_names = self._get_grub2_cfg_files()
 		self._bls = self._bls_enabled()
+		self._override_grub_cmdline = None
 
 		self._rpm_ostree = self._rpm_ostree_status() is not None
 
@@ -221,6 +222,7 @@ class BootloaderPlugin(base.Plugin):
 			"initrd_remove_dir": None,
 			"cmdline": None,
 			"skip_grub_config": None,
+			"override_grub_cmdline": None,
 		}
 
 	@staticmethod
@@ -565,6 +567,10 @@ class BootloaderPlugin(base.Plugin):
 		if not self._cmd.copy(img, self._initrd_dst_img_val):
 			return False
 		self.update_grub2_cfg = True
+		if self._override_grub_cmdline:
+			self._initrd_val = os.path.join(self._override_grub_cmdline, img_name) 
+			log.info(f"Detected override set for grub commandline. Setting initrd_val to: {self._initrd_val}")
+			return True
 		curr_cmdline = self._cmd.read_file("/proc/cmdline").rstrip()
 		initrd_grubpath = "/"
 		lc = len(curr_cmdline)
@@ -687,6 +693,14 @@ class BootloaderPlugin(base.Plugin):
 			if self._cmd.get_bool(value) == "1":
 				log.info("skipping any modification of grub config")
 				self._skip_grub_config_val = True
+
+	@command_custom("override_grub_cmdline", per_device = False, priority = 5)
+	def _override_grub_cmdline(self, enabling, value, verify, ignore_missing):
+		if verify:
+			return None
+		log.info(f"processing override_grub_cmdline. value: {value} verify: {verify}")
+		if enabling and value is not None:
+			self._override_grub_cmdline = self._cmd.unquote(value)
 
 	def _instance_post_static(self, instance, enabling):
 		if enabling and self._skip_grub_config_val:
