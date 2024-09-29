@@ -649,17 +649,17 @@ class BootloaderPlugin(base.Plugin):
 	@command_custom("cmdline", per_device = False, priority = 10)
 	def _cmdline(self, enabling, value, verify, ignore_missing):
 		v = self._variables.expand(self._cmd.unquote(value))
+		if self._rpm_ostree:
+			rpm_ostree_kargs = self._rpm_ostree_kargs()[0]
+			cmdline = self._dict_to_options(rpm_ostree_kargs)
+		else:
+			cmdline = self._cmd.read_file("/proc/cmdline")
+		cmdline_set = set(cmdline.split())
+		value_set = set(v.split())
+		missing_set = value_set - cmdline_set
 		if verify:
-			if self._rpm_ostree:
-				rpm_ostree_kargs = self._rpm_ostree_kargs()[0]
-				cmdline = self._dict_to_options(rpm_ostree_kargs)
-			else:
-				cmdline = self._cmd.read_file("/proc/cmdline")
 			if len(cmdline) == 0:
 				return None
-			cmdline_set = set(cmdline.split())
-			value_set = set(v.split())
-			missing_set = value_set - cmdline_set
 			if len(missing_set) == 0:
 				log.info(consts.STR_VERIFY_PROFILE_VALUE_OK % ("cmdline", str(value_set)))
 				return True
@@ -676,8 +676,12 @@ class BootloaderPlugin(base.Plugin):
 				return False
 		if enabling and value is not None:
 			log.info("installing additional boot command line parameters to grub2")
-			self.update_grub2_cfg = True
-			self._cmdline_val = v
+			if len(missing_set) == 0:
+				log.info("not change boot command line parameters present in cmdline already: %s"%(v))
+				self.update_grub2_cfg = False
+			else:
+				self.update_grub2_cfg = True
+				self._cmdline_val = " ".join(missing_set)
 
 	@command_custom("skip_grub_config", per_device = False, priority = 10)
 	def _skip_grub_config(self, enabling, value, verify, ignore_missing):
