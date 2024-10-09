@@ -10,20 +10,18 @@ log = tuned.logs.get()
 
 class SelinuxPlugin(base.Plugin):
 	"""
-	`selinux`::
-	
 	Plug-in for tuning SELinux options.
-	+
+
 	SELinux decisions, such as allowing or denying access, are
 	cached. This cache is known as the Access Vector Cache (AVC). When
 	using these cached decisions, SELinux policy rules need to be checked
 	less, which increases performance. The [option]`avc_cache_threshold`
 	option allows adjusting the maximum number of AVC entries.
-	+
+
 	NOTE: Prior to changing the default value, evaluate the system
 	performance with care. Increasing the value could potentially
 	decrease the performance by making AVC slow.
-	+
+
 	.Increase the AVC cache threshold for hosts with containers.
 	====
 	----
