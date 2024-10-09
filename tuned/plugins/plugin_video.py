@@ -10,14 +10,11 @@ log = tuned.logs.get()
 
 class VideoPlugin(base.Plugin):
 	"""
-	`video`::
-
 	Sets various power saving features on video cards.
 	Radeon cards are supported.
 	The powersave level can be specified
 	by using the [option]`radeon_powersave` option. Supported values are:
-	+
-	--
+
 	* `default`
 	* `auto`
 	* `low`
@@ -27,14 +24,13 @@ class VideoPlugin(base.Plugin):
 	* `dpm-battery`
 	* `dpm-balanced`
 	* `dpm-perfomance`
-	--
-	+
+
 	For additional detail, see
 	link:https://www.x.org/wiki/RadeonFeature/#kmspowermanagementoptions[KMS Power Management Options].
-	+
+
 	NOTE: This plug-in is experimental and the option might change in future releases.
-	+
-	.To set the powersave level for the Radeon video card to high
+
+	.Setting powersave level for the Radeon video card to high
 	====
 	----
 	[video]

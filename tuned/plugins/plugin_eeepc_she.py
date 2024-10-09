@@ -8,8 +8,6 @@ log = tuned.logs.get()
 
 class EeePCSHEPlugin(base.Plugin):
 	"""
-	`eeepc_she`::
-	
 	Dynamically sets the front-side bus (FSB) speed according to the
 	CPU load. This feature can be found on some netbooks and is also
 	known as the Asus Super Hybrid Engine. If the CPU load is lower or

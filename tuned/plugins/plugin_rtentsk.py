@@ -10,11 +10,11 @@ log = tuned.logs.get()
 
 class RTENTSKPlugin(base.Plugin):
 	"""
-	`rtentsk`::
+	A plug-in for avoiding inter-processor interrupts caused by enabling
+	or disabling static keys.
 	
-	Plugin for avoiding interruptions due to static key IPIs due
-        to opening socket with timestamping enabled (by opening a
-        socket ourselves the static key is kept enabled).
+	The plug-in has no options; when included, **TuneD** will keep an open
+	socket with timestamping enabled, thus keeping the static key enabled.
 	"""
 
 	def _instance_init(self, instance):
