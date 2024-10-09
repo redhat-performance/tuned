@@ -16,14 +16,13 @@ IS_MAX = 1
 
 class UncorePlugin(hotplug.Plugin):
 	"""
-	`uncore`::
+	An Intel-specific plug-in for limiting the maximum and minimum uncore frequency.
 
-	`max_freq_khz, min_freq_khz`:::
-	Limit the maximum and minimum uncore frequency.
+	The options [option]`max_freq_khz`, [option]`min_freq_khz` correspond to
+	`sysfs` files exposed by Intel uncore frequency driver. Their values can be
+	specified in kHz or as a percentage of their configurable range.
 
-	Those options are Intel specific and correspond directly to `sysfs` files
-	exposed by Intel uncore frequency driver. Values can be specified as kHz
-	or as percent of configurable range.
+	.Limiting maximum uncore frequency
 	====
 	----
 	[uncore10]

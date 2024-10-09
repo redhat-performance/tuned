@@ -11,16 +11,14 @@ log = tuned.logs.get()
 
 class ModulesPlugin(base.Plugin):
 	"""
-	`modules`::
-	
 	Plug-in for applying custom kernel modules options.
-	+
+
 	This plug-in can set parameters to kernel modules. It creates
 	`/etc/modprobe.d/tuned.conf` file. The syntax is
 	`_module_=_option1=value1 option2=value2..._` where `_module_` is
 	the module name and `_optionx=valuex_` are module options which may
 	or may not be present.
-	+
+
 	.Load module `netrom` with module parameter `nr_ndevs=2`
 	====
 	----
@@ -28,9 +26,10 @@ class ModulesPlugin(base.Plugin):
 	netrom=nr_ndevs=2
 	----
 	====
+
 	Modules can also be forced to load/reload by using an additional
 	`+r` option prefix.
-	+
+
 	.(Re)load module `netrom` with module parameter `nr_ndevs=2`
 	====
 	----
@@ -38,11 +37,12 @@ class ModulesPlugin(base.Plugin):
 	netrom=+r nr_ndevs=2
 	----
 	====
+
 	The `+r` switch will also cause *TuneD* to try and remove `netrom`
 	module (if loaded) and try and (re)insert it with the specified
 	parameters. The `+r` can be followed by an optional comma (`+r,`)
 	for better readability.
-	+
+
 	When using `+r` the module will be loaded immediately by the *TuneD*
 	daemon itself rather than waiting for the OS to load it with the
 	specified parameters.
