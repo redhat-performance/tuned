@@ -166,6 +166,7 @@ install: install-dirs
 	echo -n > $(DESTDIR)$(SYSCONFDIR)/tuned/active_profile
 	echo -n > $(DESTDIR)$(SYSCONFDIR)/tuned/profile_mode
 	echo -n > $(DESTDIR)$(SYSCONFDIR)/tuned/post_loaded_profile
+	echo -n > $(DESTDIR)$(SYSCONFDIR)/tuned/ppd_base_profile
 	install -Dpm 0644 bootcmdline $(DESTDIR)$(SYSCONFDIR)/tuned/bootcmdline
 	install -Dpm 0644 modules.conf $(DESTDIR)$(SYSCONFDIR)/modprobe.d/tuned.conf
 
