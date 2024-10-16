@@ -18,18 +18,20 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="tuned"
-PROFILE_DIR="/usr/lib/tuned/profiles"
 
 rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
         rlImport "tuned/basic"
+
+        PROFILE_DIR=$(tunedGetProfilesBaseDir)
+
+        rlRun "mkdir -p $PROFILE_DIR/balanced"
+
         tunedDisableSystemdRateLimitingStart
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
         rlServiceStart "tuned"
-        tunedProfileBackup
-        rlFileBackup "$PROFILE_DIR/balanced/tuned.conf"
 
         echo "
 [variables]
@@ -55,8 +57,9 @@ vm.swappiness = \${SWAPPINESS2}
     rlPhaseStartCleanup
         rlRun "sysctl vm.swappiness=$OLD_SWAPPINESS"
         tunedDisableSystemdRateLimitingEnd
-        rlFileRestore
         tunedProfileRestore
+        rlRun "rm -f ${PROFILE_DIR}/balanced/*"
+        rlRun "rmdir ${PROFILE_DIR}/balanced"
         rlServiceRestore "tuned"
         rlRun "systemctl daemon-reload"
         rlRun "popd"

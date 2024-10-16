@@ -18,12 +18,15 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="tuned"
-PROFILE_DIR="/usr/lib/tuned/profiles"
 
 rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
         rlImport "tuned/basic"
+
+        PROFILE_DIR=$(tunedGetSystemProfilesBaseDir)
+
+        rlFileBackup "/var/log/tuned/tuned.log"
         tunedDisableSystemdRateLimitingStart
         rlServiceStart "tuned"
         tunedProfileBackup
@@ -50,6 +53,7 @@ rlJournalStart
     rlPhaseStartCleanup
         tunedDisableSystemdRateLimitingEnd
         tunedProfileRestore
+        rlFileRestore
         rlServiceRestore "tuned"
     rlPhaseEnd
 rlJournalPrintText

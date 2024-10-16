@@ -18,11 +18,10 @@
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 PACKAGE="tuned"
-SYSCONF_DIR=/etc/tuned
-PROFILE_DIR=$SYSCONF_DIR/profiles
-ACTIVE_PROFILE=$SYSCONF_DIR/active_profile
-PROFILE_MODE=$SYSCONF_DIR/profile_mode
-POST_LOADED_PROFILE=$SYSCONF_DIR/post_loaded_profile
+SYSCONF_DIR="/etc/tuned"
+ACTIVE_PROFILE=/etc/tuned/active_profile
+POST_LOADED_PROFILE="/etc/tuned/post_loaded_profile"
+PROFILE_MODE=/etc/tuned/profile_mode
 SWAPPINESS=vm.swappiness
 DIRTY_RATIO=vm.dirty_ratio
 PID_FILE=/run/tuned/tuned.pid
@@ -62,9 +61,12 @@ function wait_for_tuned_stop()
 rlJournalStart
     rlPhaseStartSetup
         rlAssertRpm $PACKAGE
+
         rlImport "tuned/basic"
         tunedDisableSystemdRateLimitingStart
         rlRun "for PYTHON in $PYTHON_CHECK; do \$PYTHON --version 2>/dev/null && break; done" 0 "Detect python"
+        PROFILE_DIR=$(tunedGetProfilesBaseDir)
+
         rlRun "rlFileBackup --clean $SYSCONF_DIR"
         rlRun "cp -r parent $PROFILE_DIR"
         rlRun "cp -r parent2 $PROFILE_DIR"
