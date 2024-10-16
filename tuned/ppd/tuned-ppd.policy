@@ -6,7 +6,17 @@
   <vendor>TuneD</vendor>
   <vendor_url>https://tuned-project.org/</vendor_url>
 
-  <action id="?name?.HoldProfile">
+  <action id="?name?.switch-profile">
+    <description>Switch power profile</description>
+    <message>Authentication is required to switch power profiles.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="?name?.hold-profile">
     <description>Hold power profile</description>
     <message>Authentication is required to hold power profiles.</message>
     <defaults>
@@ -16,7 +26,7 @@
     </defaults>
   </action>
   
-  <action id="?name?.ReleaseProfile">
+  <action id="?name?.release-profile">
     <description>Release power profile</description>
     <message>Authentication is required to release power profiles.</message>
     <defaults>
