@@ -34,7 +34,7 @@ def check_positive(value):
 	except ValueError:
 		val = -1
 	if val <= 0:
-		raise argparse.ArgumentTypeError("%s has to be >= 0" % value)
+		raise argparse.ArgumentTypeError("%s has to be > 0" % value)
 	return val
 
 def check_log_level(value):
