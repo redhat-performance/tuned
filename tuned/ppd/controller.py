@@ -172,7 +172,7 @@ class Controller(exports.interfaces.ExportableInterface):
         tuned_profile = self._tuned_interface.active_profile()
         return self._config.tuned_to_ppd.get(tuned_profile, UNKNOWN_PROFILE)
 
-    @exports.export("sss", "u")
+    @exports.export("sss", "u", "hold-profile")
     def HoldProfile(self, profile, reason, app_id, caller):
         if profile != PPD_POWER_SAVER and profile != PPD_PERFORMANCE:
             raise dbus.exceptions.DBusException(
@@ -180,7 +180,7 @@ class Controller(exports.interfaces.ExportableInterface):
             )
         return self._profile_holds.add(profile, reason, app_id, caller)
 
-    @exports.export("u", "")
+    @exports.export("u", "", "release-profile")
     def ReleaseProfile(self, cookie, caller):
         if not self._profile_holds.has(cookie):
             raise dbus.exceptions.DBusException("No active hold for cookie '%s'" % cookie)
@@ -190,8 +190,8 @@ class Controller(exports.interfaces.ExportableInterface):
     def ProfileReleased(self, cookie):
         pass
 
-    @exports.property_setter("ActiveProfile")
-    def set_active_profile(self, profile):
+    @exports.property_setter("ActiveProfile", "switch-profile")
+    def set_active_profile(self, profile, caller):
         if profile not in self._config.ppd_to_tuned:
             raise dbus.exceptions.DBusException("Invalid profile '%s'" % profile)
         log.debug("Setting base profile to %s" % profile)
@@ -200,24 +200,24 @@ class Controller(exports.interfaces.ExportableInterface):
         self.switch_profile(profile)
 
     @exports.property_getter("ActiveProfile")
-    def get_active_profile(self):
+    def get_active_profile(self, caller):
         return self.active_profile()
 
     @exports.property_getter("Profiles")
-    def get_profiles(self):
+    def get_profiles(self, caller):
         return dbus.Array(
             [{"Profile": profile, "Driver": DRIVER} for profile in self._config.ppd_to_tuned.keys()],
             signature="a{sv}",
         )
 
     @exports.property_getter("Actions")
-    def get_actions(self):
+    def get_actions(self, caller):
         return dbus.Array([], signature="s")
 
     @exports.property_getter("PerformanceDegraded")
-    def get_performance_degraded(self):
+    def get_performance_degraded(self, caller):
         return self._performance_degraded
 
     @exports.property_getter("ActiveProfileHolds")
-    def get_active_profile_holds(self):
+    def get_active_profile_holds(self, caller):
         return self._profile_holds.as_dbus_array()
