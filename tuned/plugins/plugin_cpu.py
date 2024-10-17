@@ -17,8 +17,6 @@ cpuidle_states_path = "/sys/devices/system/cpu/cpu0/cpuidle"
 
 class CPULatencyPlugin(hotplug.Plugin):
 	"""
-	`cpu`::
-	
 	Sets the CPU governor to the value specified by the [option]`governor`
 	option and dynamically changes the Power Management Quality of
 	Service (PM QoS) CPU Direct Memory Access (DMA) latency according
@@ -30,11 +28,6 @@ class CPULatencyPlugin(hotplug.Plugin):
 	character is meant to represent a logical 'or' operator. Note that the
 	same syntax is used for the [option]`energy_perf_bias` option. *TuneD*
 	will set the first governor that is available on the system.
-	+    
-	For example, with the following profile, *TuneD* will set the 'ondemand'
-	governor, if it is available. If it is not available, but the 'powersave'
-	governor is available, 'powersave' will be set. If neither of them are
-	available, the governor will not be changed.
 	+
 	.Specifying a CPU governor
 	====
@@ -42,6 +35,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 	[cpu]
 	governor=ondemand|powersave
 	----
+
+	*TuneD* will set the 'ondemand'
+	governor, if it is available. If it is not available, but the 'powersave'
+	governor is available, 'powersave' will be set. If neither of them are
+	available, the governor will not be changed.
 	====
 	
 	`sampling_down_factor`:::
@@ -104,10 +102,10 @@ class CPULatencyPlugin(hotplug.Plugin):
 	`latency_low, latency_high, load_threshold`:::
 	+
 	If the CPU load is lower than the value specified by
-	the[option]`load_threshold` option, the latency is set to the value
+	the [option]`load_threshold` option, the latency is set to the value
 	specified either by the [option]`latency_high` option or by the
 	[option]`latency_low` option.
-	+
+
 	`force_latency`:::
 	You can also force the latency to a specific value and prevent it from
 	dynamically changing further. To do so, set the [option]`force_latency`
@@ -115,14 +113,16 @@ class CPULatencyPlugin(hotplug.Plugin):
 	+
 	The maximum latency value can be specified in several ways:
 	+
-	 * by a numerical value in microseconds (for example, `force_latency=10`)
-	 * as the kernel CPU idle level ID of the maximum C-state allowed
-	   (for example, force_latency = cstate.id:1)
-	 * as a case sensitive name of the maximum C-state allowed
-	   (for example, force_latency = cstate.name:C1)
-	 * by using 'None' as a fallback value to prevent errors when alternative
-	   C-state IDs/names do not exist. When 'None' is used in the alternatives
-	   pipeline, all the alternatives that follow 'None' are ignored.
+	--
+	* by a numerical value in microseconds (for example, `force_latency=10`)
+	* as the kernel CPU idle level ID of the maximum C-state allowed
+	  (for example, force_latency = cstate.id:1)
+	* as a case sensitive name of the maximum C-state allowed
+	  (for example, force_latency = cstate.name:C1)
+	* by using 'None' as a fallback value to prevent errors when alternative
+	  C-state IDs/names do not exist. When 'None' is used in the alternatives
+	  pipeline, all the alternatives that follow 'None' are ignored.
+	--
 	+
 	It is also possible to specify multiple fallback values separated by '|' as
 	the C-state names and/or IDs may not be available on some systems.
@@ -146,8 +146,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 	[cpu]
 	force_latency=cstate.name:XYZ|None
 	----
-	In this case, if C-state with the name `XYZ` does not exist
-	[option]`force_latency`, no latency value will be written into the
+	In this case, if C-state with the name `XYZ` does not exist,
+	no latency value will be written into the
 	kernel's PM QoS file, and no errors will be reported due to the
 	presence of 'None'.
 	====
@@ -165,31 +165,40 @@ class CPULatencyPlugin(hotplug.Plugin):
 	Limit the minimum P-State that will be requested by the driver. It states
 	it as a percentage of the max (non-turbo) performance level.
 	====
-	+
+
 	`pm_qos_resume_latency_us`:::
 	This option allow to set specific latency for all cpus or specific ones.
+	+
+	.Configuring resume latency
 	====
 	----
 	[cpu]
 	pm_qos_resume_latency_us=n/a
 	----
 	Special value that disables C-states completely.
-	====
 	----
 	[cpu]
 	pm_qos_resume_latency_us=0
 	----
 	Allows all C-states.
-	====
 	----
 	[cpu]
 	pm_qos_resume_latency_us=100
 	----
-	Allows any C-state with a resume latency less than value.
+	Allows any C-state with a resume latency less than 100.
+	====
+
+	`boost`:::
+	The [option]`boost` option allows the CPU to boost above nominal
+	frequencies for shorts periods of time.
+	+
+	.Allowing CPU boost
+	====
+	----
 	[cpu]
 	boost=1
 	----
-	CPU is allowed to boost above nominal frequencies for short periods of time.
+	====
 	"""
 
 	def __init__(self, *args, **kwargs):

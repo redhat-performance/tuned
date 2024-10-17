@@ -1,0 +1,6 @@
+:_module-type: REFERENCE
+[id="available-tuned-plug-ins_{context}"]
+= Available TuneD plug-ins
+
+[role="_abstract"]
+This section lists all monitoring and tuning plug-ins currently available in *TuneD*.

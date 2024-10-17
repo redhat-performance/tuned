@@ -11,13 +11,12 @@ cmd = commands()
 
 class MountsPlugin(base.Plugin):
 	"""
-	`mounts`::
-	
 	Enables or disables barriers for mounts according to the value of the
-	[option]`disable_barriers` option. The [option]`disable_barriers`
-	option has an optional value `force` which disables barriers even
-	on mountpoints with write back caches. Note that only extended file
-	systems (ext) are supported by this plug-in.
+	boolean option [option]`disable_barriers`. The option additionally allows
+	the special value `force`, which disables barriers even on mountpoints with
+	write back caches.
+
+	NOTE: Only extended file systems (ext) are supported by this plug-in.
 	"""
 
 	@classmethod
