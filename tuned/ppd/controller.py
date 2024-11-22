@@ -2,7 +2,7 @@ from tuned import exports, logs
 from tuned.utils.commands import commands
 from tuned.consts import PPD_CONFIG_FILE
 from tuned.ppd.config import PPDConfig, PPD_PERFORMANCE, PPD_POWER_SAVER
-from enum import StrEnum
+from enum import Enum
 import threading
 import dbus
 import os
@@ -18,7 +18,7 @@ UPOWER_DBUS_NAME = "org.freedesktop.UPower"
 UPOWER_DBUS_PATH = "/org/freedesktop/UPower"
 UPOWER_DBUS_INTERFACE = "org.freedesktop.UPower"
 
-class PerformanceDegraded(StrEnum):
+class PerformanceDegraded(Enum):
     NONE = ""
     LAP_DETECTED = "lap-detected"
     HIGH_OPERATING_TEMPERATURE = "high-operating-temperature"
@@ -128,9 +128,9 @@ class Controller(exports.interfaces.ExportableInterface):
         if os.path.exists(LAP_MODE_PATH) and self._cmd.read_file(LAP_MODE_PATH).strip() == "1":
             performance_degraded = PerformanceDegraded.LAP_DETECTED
         if performance_degraded != self._performance_degraded:
-            log.info("Performance degraded: %s" % performance_degraded)
+            log.info("Performance degraded: %s" % performance_degraded.value)
             self._performance_degraded = performance_degraded
-            exports.property_changed("PerformanceDegraded", performance_degraded)
+            exports.property_changed("PerformanceDegraded", performance_degraded.value)
 
     def initialize(self):
         self._profile_holds = ProfileHoldManager(self)
@@ -216,7 +216,7 @@ class Controller(exports.interfaces.ExportableInterface):
 
     @exports.property_getter("PerformanceDegraded")
     def get_performance_degraded(self):
-        return self._performance_degraded
+        return self._performance_degraded.value
 
     @exports.property_getter("ActiveProfileHolds")
     def get_active_profile_holds(self):
