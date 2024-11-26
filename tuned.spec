@@ -279,6 +279,7 @@ Additional TuneD profile(s) optimized for OpenShift.
 %package ppd
 Summary: PPD compatibility daemon
 Requires: %{name} = %{version}
+Obsoletes: power-profiles-daemon < 0.23
 # The compatibility daemon is swappable for power-profiles-daemon
 Provides: ppd-service
 Conflicts: ppd-service
