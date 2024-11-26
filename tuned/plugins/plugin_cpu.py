@@ -397,8 +397,8 @@ class CPULatencyPlugin(hotplug.Plugin):
 				instance.options["max_perf_pct"])
 			self._max_perf_pct_save = self._getset_intel_pstate_attr(
 				"max_perf_pct", new_value)
-			new_value = self._variables.expand(
-				instance.options["no_turbo"])
+			new_value = self._cmd.get_bool(self._variables.expand(
+				instance.options["no_turbo"]))
 			self._no_turbo_save = self._getset_intel_pstate_attr(
 				"no_turbo", new_value)
 
