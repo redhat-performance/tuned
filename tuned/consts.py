@@ -1,4 +1,8 @@
 import logging
+import string
+
+NAMES_ALLOWED_CHARS = string.ascii_letters + string.digits + " !@'+-.,/:;_$&*()%<=>?#[]{|}^~" + '"'
+NAMES_MAX_LENGTH = 4096
 
 GLOBAL_CONFIG_FILE = "/etc/tuned/tuned-main.conf"
 ACTIVE_PROFILE_FILE = "/etc/tuned/active_profile"

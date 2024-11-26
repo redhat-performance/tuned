@@ -59,7 +59,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.24.0
+Version: 2.24.1
 Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
@@ -631,6 +631,14 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Tue Nov 26 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.24.1-1
+- new release
+  - fixed privileged execution of arbitrary scripts by active local user
+    resolves: CVE-2024-52336
+  - added sanity checks for API methods parameters
+    resolves: CVE-2024-52337
+  - tuned-ppd: fixed controller init to correctly set _on_battery
+
 * Wed Aug  7 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.24.0-1
 - new release
   - clear plugin repository when stopping tuning

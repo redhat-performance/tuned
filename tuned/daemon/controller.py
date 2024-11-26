@@ -189,6 +189,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def switch_profile(self, profile_name, caller = None):
 		if caller == "":
 			return (False, "Unauthorized")
+		if not self._cmd.is_valid_name(profile_name):
+			return (False, "Invalid profile_name")
 		return self._switch_profile(profile_name, True)
 
 	@exports.export("", "(bs)")
@@ -262,8 +264,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 	@exports.export("s", "(bsss)")
 	def profile_info(self, profile_name, caller = None):
-		if caller == "":
-			return tuple(False, "", "", "")
+		if caller == "" or not self._cmd.is_valid_name(profile_name):
+			return (False, "", "", "")
 		if profile_name is None or profile_name == "":
 			profile_name = self.active_profile()
 		return tuple(self._daemon.profile_loader.profile_locator.get_profile_attrs(profile_name, [consts.PROFILE_ATTR_SUMMARY, consts.PROFILE_ATTR_DESCRIPTION], [""]))
@@ -294,7 +296,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		dictionary -- {plugin_name: {parameter_name: default_value}}
 		"""
 		if caller == "":
-			return False
+			return {}
 		plugins = {}
 		for plugin_class in self._daemon.get_all_plugins():
 			plugin_name = plugin_class.__module__.split(".")[-1].split("_", 1)[1]
@@ -307,8 +309,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	@exports.export("s","s")
 	def get_plugin_documentation(self, plugin_name, caller = None):
 		"""Return docstring of plugin's class"""
-		if caller == "":
-			return False
+		if caller == "" or not self._cmd.is_valid_name(plugin_name):
+			return ""
 		return self._daemon.get_plugin_documentation(str(plugin_name))
 
 	@exports.export("s","a{ss}")
@@ -321,8 +323,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		Return:
 		dictionary -- {parameter_name: hint}
 		"""
-		if caller == "":
-			return False
+		if caller == "" or not self._cmd.is_valid_name(plugin_name):
+			return {}
 		return self._daemon.get_plugin_hints(str(plugin_name))
 
 	@exports.export("s", "b")
@@ -335,7 +337,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		Return:
 		bool -- True on success
 		"""
-		if caller == "":
+		if caller == "" or not self._cmd.is_valid_name(path):
 			return False
 		if self._daemon._application and self._daemon._application._unix_socket_exporter:
 			self._daemon._application._unix_socket_exporter.register_signal_path(path)
@@ -349,6 +351,10 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 	def instance_acquire_devices(self, devices, instance_name, caller = None):
 		if caller == "":
 			return (False, "Unauthorized")
+		if not self._cmd.is_valid_name(devices):
+			return (False, "Invalid devices")
+		if not self._cmd.is_valid_name(instance_name):
+			return (False, "Invalid instance_name")
 		found = False
 		for instance_target in self._daemon._unit_manager.instances:
 			if instance_target.name == instance_name:
@@ -399,6 +405,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		"""
 		if caller == "":
 			return (False, "Unauthorized", [])
+		if not self._cmd.is_valid_name(plugin_name):
+			return (False, "Invalid plugin_name", [])
 		if plugin_name != "" and plugin_name not in self.get_all_plugins().keys():
 			rets = "Plugin '%s' does not exist" % plugin_name
 			log.error(rets)
@@ -422,6 +430,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		"""
 		if caller == "":
 			return (False, "Unauthorized", [])
+		if not self._cmd.is_valid_name(instance_name):
+			return (False, "Invalid instance_name", [])
 		for instance in self._daemon._unit_manager.instances:
 			if instance.name == instance_name:
 				return (True, "OK", sorted(list(instance.processed_devices)))
@@ -444,6 +454,13 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		"""
 		if caller == "":
 			return (False, "Unauthorized")
+		if not self._cmd.is_valid_name(plugin_name):
+			return (False, "Invalid plugin_name")
+		if not self._cmd.is_valid_name(instance_name):
+			return (False, "Invalid instance_name")
+		for (key, value) in options.items():
+			if not self._cmd.is_valid_name(key) or not self._cmd.is_valid_name(value):
+				return (False, "Invalid options")
 		plugins = {p.name: p for p in self._daemon._unit_manager.plugins}
 		if not plugin_name in plugins.keys():
 			rets = "Plugin '%s' not found" % plugin_name
@@ -499,6 +516,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		"""
 		if caller == "":
 			return (False, "Unauthorized")
+		if not self._cmd.is_valid_name(instance_name):
+			return (False, "Invalid instance_name")
 		try:
 			instance = [i for i in self._daemon._unit_manager.instances if i.name == instance_name][0]
 		except IndexError:

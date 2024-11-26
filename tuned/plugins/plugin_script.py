@@ -75,6 +75,10 @@ class ScriptPlugin(base.Plugin):
 		for script in scripts:
 			environ = os.environ
 			environ.update(self._variables.get_env())
+			if not self._safe_script_path(script):
+				log.error("Paths outside of the profile directories cannot be used in the script, " \
+					+ "ignoring script: '%s'." % script)
+				continue
 			log.info("calling script '%s' with arguments '%s'" % (script, str(arguments)))
 			log.debug("using environment '%s'" % str(list(environ.items())))
 			try:
