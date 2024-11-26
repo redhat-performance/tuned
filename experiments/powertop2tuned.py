@@ -39,6 +39,7 @@ try:
 except ImportError:
 	from HTMLParser import HTMLParser
 	from htmlentitydefs import name2codepoint
+import tuned.consts as consts
 
 
 SCRIPT_SH = """#!/bin/bash
@@ -319,7 +320,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Creates TuneD profile from Powertop HTML output.')
 	parser.add_argument('profile', metavar='profile_name', type=str, nargs='?', help='Name for the profile to be written.')
 	parser.add_argument('-i', '--input', metavar='input_html', type=str, help='Path to Powertop HTML report. If not given, it is generated automatically.')
-	parser.add_argument('-o', '--output', metavar='output_directory', type=str, help='Directory where the profile will be written, default is /etc/tuned/profile_name directory.')
+	parser.add_argument('-o', '--output', metavar='output_directory', type=str, help='Directory where the profile will be written, default is %s/profile_name directory.' % consts.USER_PROFILES_DIR)
 	parser.add_argument('-n', '--new-profile', action='store_true', help='Creates new profile, otherwise it merges (include) your current profile.')
 	parser.add_argument('-m', '--merge-profile', action = 'store', help = 'Merges (includes) the specified profile (can be suppressed by -n option).')
 	parser.add_argument('-f', '--force', action='store_true', help='Overwrites the output directory if it already exists.')
@@ -333,7 +334,7 @@ if __name__ == "__main__":
 		sys.exit(-1)
 
 	if not args['output']:
-		args['output'] = "/etc/tuned"
+		args['output'] = consts.USER_PROFILES_DIR
 
 	if args['profile']:
 		args['output'] = os.path.join(args['output'], args['profile'])
