@@ -3,6 +3,7 @@ from tuned.utils.commands import commands
 from tuned.consts import PPD_CONFIG_FILE
 from tuned.ppd.config import PPDConfig, PPD_PERFORMANCE, PPD_POWER_SAVER
 from enum import StrEnum
+from random import Random
 import threading
 import dbus
 import os
@@ -25,10 +26,11 @@ class PerformanceDegraded(StrEnum):
 
 
 class ProfileHold(object):
-    def __init__(self, profile, reason, app_id, watch):
+    def __init__(self, profile, reason, app_id, caller, watch):
         self.profile = profile
         self.reason = reason
         self.app_id = app_id
+        self.caller = caller
         self.watch = watch
 
     def as_dict(self):
@@ -42,7 +44,7 @@ class ProfileHold(object):
 class ProfileHoldManager(object):
     def __init__(self, controller):
         self._holds = {}
-        self._cookie_counter = 0
+        self._cookie_generator = Random()
         self._controller = controller
 
     def _callback(self, cookie, app_id):
@@ -71,11 +73,12 @@ class ProfileHoldManager(object):
         return dbus.Array([hold.as_dict() for hold in self._holds.values()], signature="a{sv}")
 
     def add(self, profile, reason, app_id, caller):
-        cookie = self._cookie_counter
-        self._cookie_counter += 1
+        cookie = 0
+        while cookie == 0 or cookie in self._holds:
+            cookie = self._cookie_generator.randint(0, 2**32-1)
         watch = self._controller.bus.watch_name_owner(caller, self._callback(cookie, app_id))
         log.info("Adding hold '%s': profile '%s' by application '%s'" % (cookie, profile, app_id))
-        self._holds[cookie] = ProfileHold(profile, reason, app_id, watch)
+        self._holds[cookie] = ProfileHold(profile, reason, app_id, caller, watch)
         exports.property_changed("ActiveProfileHolds", self.as_dbus_array())
         self._controller.switch_profile(profile)
         return cookie
@@ -94,6 +97,9 @@ class ProfileHoldManager(object):
     def clear(self):
         for cookie in list(self._holds.keys()):
             self._cancel(cookie)
+
+    def check_caller(self, cookie, caller):
+        return cookie in self._holds and self._holds[cookie].caller == caller
 
 
 class Controller(exports.interfaces.ExportableInterface):
@@ -184,6 +190,8 @@ class Controller(exports.interfaces.ExportableInterface):
     def ReleaseProfile(self, cookie, caller):
         if not self._profile_holds.has(cookie):
             raise dbus.exceptions.DBusException("No active hold for cookie '%s'" % cookie)
+        if not self._profile_holds.check_caller(cookie, caller):
+            raise dbus.exceptions.DBusException("Cannot release a profile hold inititated by another process.")
         self._profile_holds.remove(cookie)
 
     @exports.signal("u")
