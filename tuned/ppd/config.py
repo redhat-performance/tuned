@@ -3,6 +3,7 @@ from tuned.exceptions import TunedException
 import os
 
 PPD_POWER_SAVER = "power-saver"
+PPD_BALANCED = "balanced"
 PPD_PERFORMANCE = "performance"
 
 MAIN_SECTION = "main"
@@ -92,13 +93,17 @@ class PPDConfig:
         if PPD_POWER_SAVER not in profile_dict_ac:
             raise TunedException("Missing power-saver profile in the configuration file '%s'" % config_file)
 
+        if PPD_BALANCED not in profile_dict_ac:
+            raise TunedException("Missing balanced profile in the configuration file '%s'" % config_file)
+
         if PPD_PERFORMANCE not in profile_dict_ac:
             raise TunedException("Missing performance profile in the configuration file '%s'" % config_file)
 
         if MAIN_SECTION not in cfg or DEFAULT_PROFILE_OPTION not in cfg[MAIN_SECTION]:
-            raise TunedException("Missing default profile in the configuration file '%s'" % config_file)
+            self._default_profile = PPD_BALANCED
+        else:
+            self._default_profile = cfg[MAIN_SECTION][DEFAULT_PROFILE_OPTION]
 
-        self._default_profile = cfg[MAIN_SECTION][DEFAULT_PROFILE_OPTION]
         if self._default_profile not in profile_dict_ac:
             raise TunedException("Default profile '%s' missing in the profile mapping" % self._default_profile)
 
