@@ -122,7 +122,28 @@ class DBusExporter(interfaces.ExporterInterface):
 		func = FunctionType(code.co_consts[0], locals(), method.__name__)
 		return func
 
-	def export(self, method, in_signature, out_signature):
+	def _polkit_auth(self, action_name, *args):
+		action_id = self._namespace + "." + action_name
+		caller = args[-1]
+		log.debug("checking authorization for action '%s' requested by caller '%s'" % (action_id, caller))
+		ret = self._polkit.check_authorization(caller, action_id)
+		args_copy = args
+		if ret == 1:
+			log.debug("action '%s' requested by caller '%s' was successfully authorized by polkit" % (action_id, caller))
+		elif ret == 2:
+			log.warning("polkit error, but action '%s' requested by caller '%s' was successfully authorized by fallback method" % (action_id, caller))
+		elif ret == 0:
+			log.info("action '%s' requested by caller '%s' wasn't authorized, ignoring the request" % (action_id, caller))
+			args_copy = list(args[:-1]) + [""]
+		elif ret == -1:
+			log.warning("polkit error and action '%s' requested by caller '%s' wasn't authorized by fallback method, ignoring the request" % (action_id, caller))
+			args_copy = list(args[:-1]) + [""]
+		else:
+			log.error("polkit error and unable to use fallback method to authorize action '%s' requested by caller '%s', ignoring the request" % (action_id, caller))
+			args_copy = list(args[:-1]) + [""]
+		return args_copy
+
+	def export(self, method, in_signature, out_signature, action_name=None):
 		if not ismethod(method):
 			raise Exception("Only bound methods can be exported.")
 
@@ -130,28 +151,11 @@ class DBusExporter(interfaces.ExporterInterface):
 		if method_name in self._dbus_methods:
 			raise Exception("Method with this name is already exported.")
 
-		def wrapper(owner, *args, **kwargs):
-			action_id = self._namespace + "." + method.__name__
-			caller = args[-1]
-			log.debug("checking authorization for action '%s' requested by caller '%s'" % (action_id, caller))
-			ret = self._polkit.check_authorization(caller, action_id)
-			args_copy = args
-			if ret == 1:
-					log.debug("action '%s' requested by caller '%s' was successfully authorized by polkit" % (action_id, caller))
-			elif ret == 2:
-					log.warning("polkit error, but action '%s' requested by caller '%s' was successfully authorized by fallback method" % (action_id, caller))
-			elif ret == 0:
-					log.info("action '%s' requested by caller '%s' wasn't authorized, ignoring the request" % (action_id, caller))
-					args_copy = list(args[:-1]) + [""]
-			elif ret == -1:
-				log.warning("polkit error and action '%s' requested by caller '%s' wasn't authorized by fallback method, ignoring the request" % (action_id, caller))
-				args_copy = list(args[:-1]) + [""]
-			else:
-				log.error("polkit error and unable to use fallback method to authorize action '%s' requested by caller '%s', ignoring the request" % (action_id, caller))
-				args_copy = list(args[:-1]) + [""]
-			return method(*args_copy, **kwargs)
+		action_name = action_name or method_name
+		def auth_wrapper(owner, *args, **kwargs):
+			return method(*self._polkit_auth(action_name, *args), **kwargs)
 
-		wrapper = self._prepare_for_dbus(method, wrapper)
+		wrapper = self._prepare_for_dbus(method, auth_wrapper)
 		wrapper = dbus.service.method(self._interface_name, in_signature, out_signature, sender_keyword = "caller")(wrapper)
 
 		self._dbus_methods[method_name] = wrapper
