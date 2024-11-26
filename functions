@@ -520,6 +520,11 @@ setup_kvm_mod_low_latency()
 	local WANTS_NX_HP=""
 	local WANTS_PLE_GAP=""
 
+        if ! modinfo kvm >/dev/null; then
+            teardown_kvm_mod_low_latency
+            return 0
+        fi
+
 	modinfo -p kvm | grep -q kvmclock_periodic_sync && HAS_KPS=1
 	modinfo -p kvm | grep -q nx_huge_pages && HAS_NX_HP=1
 	modinfo -p kvm_intel | grep -q ple_gap && HAS_PLE_GAP=1
