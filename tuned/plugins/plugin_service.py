@@ -170,35 +170,33 @@ class SystemdHandler(InitHandler):
 
 class ServicePlugin(base.Plugin):
 	"""
-	`service`::
-	
 	Plug-in for handling sysvinit, sysv-rc, openrc and systemd services.
-	+
+
 	The syntax is as follows:
-	+
+
 	[subs="+quotes,+macros"]
 	----
 	[service]
 	service.__service_name__=__commands__[,file:__file__]
 	----
-	+
+
 	Supported service-handling `_commands_` are `start`, `stop`, `enable`
 	and `disable`. The optional `file:__file__` directive installs an overlay
 	configuration file `__file__`. Multiple commands must be comma (`,`)
 	or semicolon (`;`) separated. If the directives conflict, the last
 	one is used.
-	+
+
 	The service plugin supports configuration overlays only for systemd.
 	In other init systems, this directive is ignored. The configuration
 	overlay files are copied to `/etc/systemd/system/__service_name__.service.d/`
 	directories. Upon profile unloading, the directory is removed if it is empty.
-	+
+
 	With systemd, the `start` command is implemented by `restart` in order
 	to allow loading of the service configuration file overlay.
-	+
+
 	NOTE: With non-systemd init systems, the plug-in operates on the
 	current runlevel only.
-	+
+
 	.Start and enable the `sendmail` service with an overlay file
 	====
 	----

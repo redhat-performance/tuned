@@ -13,14 +13,13 @@ WOL_VALUES = "pumbagsd"
 
 class NetTuningPlugin(hotplug.Plugin):
 	"""
-	`net`::
-	
 	Configures network driver, hardware and Netfilter settings.
 	Dynamic change of the interface speed according to the interface
 	utilization is also supported. The dynamic tuning is controlled by
 	the [option]`dynamic` and the global [option]`dynamic_tuning`
 	option in `tuned-main.conf`.
-	+
+
+	`wake_on_lan`:::
 	The [option]`wake_on_lan` option sets wake-on-lan to the specified
 	value as when using the `ethtool` utility.
 	+
@@ -32,7 +31,8 @@ class NetTuningPlugin(hotplug.Plugin):
 	wake_on_lan=g
 	----
 	====
-	+
+
+	`coalesce`:::
 	The [option]`coalesce` option allows changing coalescing settings
 	for the specified network devices. The syntax is:
 	+
@@ -40,10 +40,11 @@ class NetTuningPlugin(hotplug.Plugin):
 	----
 	coalesce=__param1__ __value1__ __param2__ __value2__ ... __paramN__ __valueN__
 	----
+	+
 	Note that not all the coalescing parameters are supported by all
 	network cards. For the list of coalescing parameters of your network
 	device, use `ethtool -c device`.
-	+	
+	+
 	.Setting coalescing parameters rx/tx-usecs for all network devices
 	====
 	----
@@ -51,7 +52,8 @@ class NetTuningPlugin(hotplug.Plugin):
 	coalesce=rx-usecs 3 tx-usecs 16
 	----
 	====
-	+
+
+	`features`:::
 	The [option]`features` option allows changing 
 	the offload parameters and other features for the specified
 	network devices. To query the features of your network device,
@@ -65,6 +67,8 @@ class NetTuningPlugin(hotplug.Plugin):
 	features=tx off gso off gro off
 	----
 	====
+
+	`pause`:::
 	The [option]`pause` option allows changing the pause parameters for
 	the specified network devices. To query the pause parameters of your
 	network device, use `ethtool -a device`. The syntax of the option
@@ -77,12 +81,13 @@ class NetTuningPlugin(hotplug.Plugin):
 	pause=autoneg off
 	----
 	====
-	+
+
+	`ring`:::
 	The [option]`ring` option allows changing the rx/tx ring parameters
 	for the specified network devices. To query the ring parameters of your
 	network device, use `ethtool -g device`. The syntax of the option
 	is the same as the [option]`coalesce` option.
-	+	
+	+
 	.Change the number of ring entries for the Rx/Tx rings to 1024/512 respectively
 	=====
 	-----
@@ -90,7 +95,8 @@ class NetTuningPlugin(hotplug.Plugin):
 	ring=rx 1024 tx 512
 	-----
 	=====
-	+
+
+	`channels`:::
 	The [option]`channels` option allows changing the numbers of channels
 	for the specified network device. A channel is an IRQ and the set
 	of queues that can trigger that IRQ. To query the channels parameters of your
@@ -104,12 +110,13 @@ class NetTuningPlugin(hotplug.Plugin):
 	channels=combined 16
 	-----
 	=====
-	+   
+	+
 	A network device either supports rx/tx or combined queue
 	mode. The [option]`channels` option automatically adjusts the
 	parameters based on the mode supported by the device as long as a
 	valid configuration is requested.
-	+
+
+	`nf_conntrack_hashsize`:::
 	The [option]`nf_conntrack_hashsize` option sets the size of the hash
 	table which stores lists of conntrack entries by writing to
 	`/sys/module/nf_conntrack/parameters/hashsize`.
@@ -121,7 +128,8 @@ class NetTuningPlugin(hotplug.Plugin):
 	nf_conntrack_hashsize=131072
 	----
 	====
-	+
+
+	`txqueuelen`:::
 	The [option]`txqueuelen` option allows changing txqueuelen (the length
 	of the transmit queue). It uses `ip` utility that is in package	iproute
 	recommended for TuneD, so the package needs to be installed for its correct
@@ -135,7 +143,8 @@ class NetTuningPlugin(hotplug.Plugin):
 	txqueuelen=5000
 	----
 	====
-	+
+
+	`mtu`:::
 	The [option]`mtu` option allows changing MTU (Maximum Transmission Unit).
 	It uses `ip` utility that is in package	iproute recommended for TuneD, so
 	the package needs to be installed for its correct functionality. To query

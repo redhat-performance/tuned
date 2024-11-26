@@ -16,20 +16,18 @@ SYSCTL_CONFIG_DIRS = [ "/run/sysctl.d",
 
 class SysctlPlugin(base.Plugin):
 	"""
-	`sysctl`::
-	
 	Sets various kernel parameters at runtime.
-	+
+
 	This plug-in is used for applying custom `sysctl` settings and should
 	only be used to change system settings that are not covered by other
 	*TuneD* plug-ins. If the settings are covered by other *TuneD* plug-ins,
 	use those plug-ins instead.
-	+
+
 	The syntax for this plug-in is
 	`_key_=_value_`, where
 	`_key_` is the same as the key name provided by the
 	`sysctl` utility.
-	+
+
 	.Adjusting the kernel runtime kernel.sched_min_granularity_ns value
 	====
 	----
