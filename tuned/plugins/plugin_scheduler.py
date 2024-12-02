@@ -8,7 +8,12 @@ import tuned.logs
 import re
 from subprocess import *
 import threading
-import perf
+# perf is optional
+try:
+	import perf
+except ModuleNotFoundError:
+# if perf is unavailable, it will be disabled later
+	pass
 import select
 import tuned.consts as consts
 import procfs
@@ -449,7 +454,15 @@ class SchedulerPlugin(base.Plugin):
 		self._ps_whitelist = ".*"
 		self._ps_blacklist = ""
 		self._cgroup_ps_blacklist_re = ""
-		self._cpus = perf.cpu_map()
+		# perf is optional, if unavailable, it will be disabled later
+		try:
+			self._cpus = perf.cpu_map()
+		except (NameError, AttributeError):
+			cpus = self._cmd.read_file(consts.SYSFS_CPUS_PRESENT_PATH)
+			# it's different type than perf.cpu_map(), but without perf we use it as iterable
+			# which should be compatible, fallback to single core CPU if sysfs is unavailable
+			self._cpus = self._cmd.cpulist_unpack(cpus) if cpus else [ 0 ]
+
 		self._scheduler_storage_key = self._storage_key(
 				command_name = "scheduler")
 		self._irq_process = True
@@ -534,6 +547,8 @@ class SchedulerPlugin(base.Plugin):
 					instance._evlist.mmap(pages = perf_mmap_pages)
 			# no perf
 			except:
+				log.warning("python-perf unavailable, disabling perf support and " \
+					"runtime tuning, you can try to (re)install python(3)-perf package")
 				instance._runtime_tuning = False
 
 	def _instance_cleanup(self, instance):

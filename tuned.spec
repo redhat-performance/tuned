@@ -83,7 +83,7 @@ BuildRequires: %{_py}-mock
 %endif
 BuildRequires: %{_py}-pyudev
 Requires: %{_py}-pyudev
-Requires: %{_py}-linux-procfs, %{_py}-perf
+Requires: %{_py}-linux-procfs
 Requires: %{_py}-inotify
 %if %{without python3}
 Requires: %{_py}-schedutils
@@ -93,9 +93,6 @@ Requires: %{_py}-schedutils
 # BuildRequires for 'make test'
 BuildRequires: python3-dbus, python3-gobject-base
 Requires: python3-dbus, python3-gobject-base
-%if 0%{?fedora} > 22 || 0%{?rhel} > 7
-Recommends: dmidecode
-%endif
 %else
 # BuildRequires for 'make test'
 BuildRequires: dbus-python, pygobject3-base
@@ -105,11 +102,15 @@ Requires: virt-what, ethtool, gawk
 Requires: util-linux, dbus, polkit
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
 Recommends: dmidecode
+# https://src.fedoraproject.org/rpms/tuned/pull-request/8
+Recommends: %{_py}-perf
 # i686 excluded
 Recommends: kernel-tools
 Requires: hdparm
 Requires: kmod
 Requires: iproute
+%else
+Requires: %{_py}-perf
 %endif
 # syspurpose
 %if 0%{?rhel} > 8
