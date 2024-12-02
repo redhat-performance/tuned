@@ -103,21 +103,29 @@ class Controller(exports.interfaces.ExportableInterface):
         self._tuned_interface = tuned_interface
         self._cmd = commands()
         self._terminate = threading.Event()
+        self._battery_handler = None
+        self._on_battery = False
         self.initialize()
 
-    def upower_changed(self, interface, changed, invalidated):
-        properties = dbus.Interface(self.proxy, dbus.PROPERTIES_IFACE)
-        self._on_battery = bool(properties.Get(UPOWER_DBUS_INTERFACE, "OnBattery"))
-        log.info("Battery status: " + ("DC (battery)" if self._on_battery else "AC (charging)"))
+    def _upower_changed(self, interface, changed, invalidated):
+        self._on_battery = bool(self._upower_properties.Get(UPOWER_DBUS_INTERFACE, "OnBattery"))
+        log.info("Battery status changed: " + ("DC (battery)" if self._on_battery else "AC (charging)"))
         tuned_profile = self._config.ppd_to_tuned_battery[self._base_profile] if self._on_battery else self._config.ppd_to_tuned[self._base_profile]
-        self._tuned_interface.switch_profile(tuned_profile)
+        self.switch_profile(tuned_profile)
 
-    def setup_battery_signaling(self):
+    def _setup_battery_signaling(self):
+        self._on_battery = False
+        if not self._config.battery_detection:
+            if self._battery_handler is not None:
+                self._battery_handler.remove()
+                self._battery_handler = None
+            return
         try:
-            bus = dbus.SystemBus()
-            self.proxy = bus.get_object(UPOWER_DBUS_NAME, UPOWER_DBUS_PATH)
-            self.proxy.connect_to_signal("PropertiesChanged", self.upower_changed)
-            self.upower_changed(None, None, None)
+            if self._battery_handler is None:
+                upower_proxy = self._bus.get_object(UPOWER_DBUS_NAME, UPOWER_DBUS_PATH)
+                self._upower_properties = dbus.Interface(upower_proxy, dbus.PROPERTIES_IFACE)
+                self._battery_handler = upower_proxy.connect_to_signal("PropertiesChanged", self._upower_changed)
+            self._on_battery = bool(self._upower_properties.Get(UPOWER_DBUS_INTERFACE, "OnBattery"))
         except dbus.exceptions.DBusException as error:
             log.debug(error)
 
@@ -136,12 +144,10 @@ class Controller(exports.interfaces.ExportableInterface):
         self._profile_holds = ProfileHoldManager(self)
         self._performance_degraded = PerformanceDegraded.NONE
         self._config = PPDConfig(PPD_CONFIG_FILE)
+        self._setup_battery_signaling()
         active_profile = self.active_profile()
         self._base_profile = active_profile if active_profile != UNKNOWN_PROFILE else self._config.default_profile
-        self._on_battery = False
         self.switch_profile(self._base_profile)
-        if self._config.battery_detection:
-            self.setup_battery_signaling()
 
     def run(self):
         exports.start()
