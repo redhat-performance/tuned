@@ -77,6 +77,9 @@ ACPI_DIR = "/sys/firmware/acpi"
 # built-in functions configuration
 SYSFS_CPUS_PATH = "/sys/devices/system/cpu"
 
+# present CPUs
+SYSFS_CPUS_PRESENT_PATH = "%s/present" % SYSFS_CPUS_PATH
+
 # number of backups
 LOG_FILE_COUNT = 2
 LOG_FILE_MAXBYTES = 100*1000
