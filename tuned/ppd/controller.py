@@ -3,6 +3,7 @@ from tuned.utils.commands import commands
 from tuned.consts import PPD_CONFIG_FILE, PPD_BASE_PROFILE_FILE, PPD_API_COMPATIBILITY
 from tuned.ppd.config import PPDConfig, PPD_PERFORMANCE, PPD_POWER_SAVER
 from enum import StrEnum
+import pyinotify
 import threading
 import dbus
 import os
@@ -25,6 +26,21 @@ class PerformanceDegraded(StrEnum):
     NONE = ""
     LAP_DETECTED = "lap-detected"
     HIGH_OPERATING_TEMPERATURE = "high-operating-temperature"
+
+
+class PerformanceDegradedEventHandler(pyinotify.ProcessEvent):
+    """
+    Event handler for checking performance degradation.
+    """
+    def __init__(self, controller, path):
+        super(PerformanceDegradedEventHandler, self).__init__()
+        self._controller = controller
+        self._path = path
+
+    def process_IN_MODIFY(self, event):
+        if event.pathname != self._path:
+            return
+        self._controller.check_performance_degraded()
 
 
 class ProfileHold(object):
@@ -149,6 +165,11 @@ class Controller(exports.interfaces.ExportableInterface):
         self._terminate = threading.Event()
         self._battery_handler = None
         self._on_battery = False
+        self._watch_manager = pyinotify.WatchManager()
+        self._notifier = pyinotify.ThreadedNotifier(self._watch_manager)
+        self._inotify_watches = {}
+        self._no_turbo_supported = os.path.isfile(NO_TURBO_PATH)
+        self._lap_mode_supported = os.path.isfile(LAP_MODE_PATH)
         self._tuned_interface.connect_to_signal("profile_changed", self._tuned_profile_changed)
         self.initialize()
 
@@ -199,7 +220,21 @@ class Controller(exports.interfaces.ExportableInterface):
         except dbus.exceptions.DBusException as error:
             log.debug(error)
 
-    def _check_performance_degraded(self):
+    def _setup_inotify(self):
+        """
+        Sets up inotify file watches.
+        """
+        self._watch_manager.rm_watch(list(self._inotify_watches.values()))
+        if self._no_turbo_supported:
+            self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(NO_TURBO_PATH),
+                                                                   mask=pyinotify.IN_MODIFY,
+                                                                   proc_fun=PerformanceDegradedEventHandler(NO_TURBO_PATH, self))
+        if self._lap_mode_supported:
+            self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(LAP_MODE_PATH),
+                                                                   mask=pyinotify.IN_MODIFY,
+                                                                   proc_fun=PerformanceDegradedEventHandler(LAP_MODE_PATH, self))
+
+    def check_performance_degraded(self):
         """
         Checks the current performance degradation status and sends a signal if it changed.
         """
@@ -245,19 +280,24 @@ class Controller(exports.interfaces.ExportableInterface):
         self._active_profile = None
         self._profile_holds = ProfileHoldManager(self)
         self._performance_degraded = PerformanceDegraded.NONE
+        self.check_performance_degraded()
         self._config = PPDConfig(PPD_CONFIG_FILE, self._tuned_interface)
         self._setup_battery_signaling()
         self._base_profile = self._load_base_profile() or self._config.default_profile
         self.switch_profile(self._base_profile)
         self._save_base_profile(self._base_profile)
+        self._setup_inotify()
 
     def run(self):
         """
         Exports the DBus interface and runs the main daemon loop.
         """
         exports.start()
+        self._notifier.start()
         while not self._cmd.wait(self._terminate, 1):
-            self._check_performance_degraded()
+            pass
+        self._watch_manager.rm_watch(list(self._inotify_watches.values()))
+        self._notifier.stop()
         exports.stop()
 
     @property
