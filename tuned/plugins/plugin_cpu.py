@@ -798,7 +798,13 @@ class CPULatencyPlugin(hotplug.Plugin):
 			if not sim:
 				avail_vals = set(self._cmd.read_file(self._pstate_preference_path(cpu_id, True)).split())
 				for val in vals:
-					if val in avail_vals:
+					try:
+						val = int(val)
+						valid = 0 <= val < 256
+						val = str(val)
+					except ValueError:
+						valid = val in avail_vals
+					if valid:
 						self._cmd.write_to_file(self._pstate_preference_path(cpu_id), val, \
 							no_error = [errno.ENOENT] if remove else False, ignore_same=True)
 						log.info("Setting energy_performance_preference value '%s' for cpu '%s'" % (val, device))
