@@ -1,12 +1,14 @@
 from tuned import exports, logs
 from tuned.utils.commands import commands
 from tuned.consts import PPD_CONFIG_FILE, PPD_BASE_PROFILE_FILE, PPD_API_COMPATIBILITY
-from tuned.ppd.config import PPDConfig, PPD_PERFORMANCE, PPD_POWER_SAVER
+from tuned.ppd.config import PPDConfig, PPD_PERFORMANCE, PPD_BALANCED, PPD_POWER_SAVER
+
 from enum import StrEnum
 import pyinotify
 import threading
 import dbus
 import os
+import time
 
 log = logs.get()
 
@@ -18,6 +20,14 @@ UNKNOWN_PROFILE = "unknown"
 UPOWER_DBUS_NAME = "org.freedesktop.UPower"
 UPOWER_DBUS_PATH = "/org/freedesktop/UPower"
 UPOWER_DBUS_INTERFACE = "org.freedesktop.UPower"
+
+PLATFORM_PROFILE_PATH = "/sys/firmware/acpi/platform_profile"
+PLATFORM_PROFILE_MAPPING = {
+    "low-power": PPD_POWER_SAVER,
+    "balanced": PPD_BALANCED,
+    "performance": PPD_PERFORMANCE
+}
+
 
 class PerformanceDegraded(StrEnum):
     """
@@ -41,6 +51,51 @@ class PerformanceDegradedEventHandler(pyinotify.ProcessEvent):
         if event.pathname != self._path:
             return
         self._controller.check_performance_degraded()
+
+
+class PlatformProfileEventHandler(pyinotify.ProcessEvent):
+    """
+    Event handler for switching PPD profiles based on the
+    ACPI platform profile
+
+    This handler should only invoke a PPD profile change if the
+    change of the file at PLATFORM_PROFILE_PATH comes from within
+    the kernel (e.g., when the user presses Fn-L on a Thinkpad laptop).
+    This is currently detected as the file being modified without
+    being opened before.
+    """
+    CLOSE_MODIFY_BUFFER = 0.1
+
+    def __init__(self, controller):
+        super(PlatformProfileEventHandler, self).__init__()
+        self._controller = controller
+        self._file_open = False
+        self._last_close = 0
+
+    def process_IN_OPEN(self, event):
+        if event.pathname != PLATFORM_PROFILE_PATH:
+            return
+        self._file_open = True
+        self._last_close = 0
+
+    def process_IN_CLOSE_WRITE(self, event):
+        if event.pathname != PLATFORM_PROFILE_PATH:
+            return
+        self._file_open = False
+        self._last_close = time.time()
+
+    def process_IN_CLOSE_NOWRITE(self, event):
+        if event.pathname != PLATFORM_PROFILE_PATH:
+            return
+        self._file_open = False
+
+    def process_IN_MODIFY(self, event):
+        if event.pathname != PLATFORM_PROFILE_PATH or self._file_open or self._last_close + self.CLOSE_MODIFY_BUFFER > time.time():
+            # Do not invoke a profile change if a modify event comes:
+            # 1. when the file is open,
+            # 2. directly after the file is closed (the events may sometimes come in the wrong order).
+            return
+        self._controller.check_platform_profile()
 
 
 class ProfileHold(object):
@@ -168,6 +223,7 @@ class Controller(exports.interfaces.ExportableInterface):
         self._watch_manager = pyinotify.WatchManager()
         self._notifier = pyinotify.ThreadedNotifier(self._watch_manager)
         self._inotify_watches = {}
+        self._platform_profile_supported = os.path.isfile(PLATFORM_PROFILE_PATH)
         self._no_turbo_supported = os.path.isfile(NO_TURBO_PATH)
         self._lap_mode_supported = os.path.isfile(LAP_MODE_PATH)
         self._tuned_interface.connect_to_signal("profile_changed", self._tuned_profile_changed)
@@ -233,6 +289,10 @@ class Controller(exports.interfaces.ExportableInterface):
             self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(LAP_MODE_PATH),
                                                                    mask=pyinotify.IN_MODIFY,
                                                                    proc_fun=PerformanceDegradedEventHandler(LAP_MODE_PATH, self))
+        if self._platform_profile_supported and self._config.thinkpad_function_keys:
+           self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(PLATFORM_PROFILE_PATH),
+                                                                  mask=pyinotify.IN_OPEN | pyinotify.IN_MODIFY | pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CLOSE_NOWRITE,
+                                                                  proc_fun=PlatformProfileEventHandler(self))
 
     def check_performance_degraded(self):
         """
@@ -247,6 +307,20 @@ class Controller(exports.interfaces.ExportableInterface):
             log.info("Performance degraded: %s" % performance_degraded)
             self._performance_degraded = performance_degraded
             exports.property_changed("PerformanceDegraded", performance_degraded)
+
+    def check_platform_profile(self):
+        """
+        Sets the active PPD profile based on the content of the ACPI platform profile.
+        """
+        platform_profile = self._cmd.read_file(PLATFORM_PROFILE_PATH).strip()
+        if platform_profile not in PLATFORM_PROFILE_MAPPING:
+            return
+        log.debug("Platform profile changed: %s" % platform_profile)
+        new_profile = PLATFORM_PROFILE_MAPPING[platform_profile]
+        self._profile_holds.clear()
+        self.switch_profile(new_profile)
+        self._base_profile = new_profile
+        self._save_base_profile(new_profile)
 
     def _load_base_profile(self):
         """
