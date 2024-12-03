@@ -84,6 +84,7 @@ BuildRequires: %{_py}-mock
 BuildRequires: %{_py}-pyudev
 Requires: %{_py}-pyudev
 Requires: %{_py}-linux-procfs, %{_py}-perf
+Requires: %{_py}-inotify
 %if %{without python3}
 Requires: %{_py}-schedutils
 %endif
@@ -504,6 +505,7 @@ fi
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/active_profile
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/profile_mode
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/post_loaded_profile
+%config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/ppd_base_profile
 %config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/bootcmdline
 %verify(not size mtime md5) %{_sysconfdir}/modprobe.d/tuned.conf
