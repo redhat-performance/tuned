@@ -68,6 +68,7 @@ class PluginBaseTestCase(unittest.TestCase):
 		instance = self._plugin.create_instance(\
 			'first_instance',0,'right_device*',None,'test','test',\
 			{'default_option1':'default_value2'})
+		instance.plugin.init_devices()
 
 		self.assertEqual(self._plugin._get_matching_devices(\
 			instance,['bad_device','right_device1','right_device2']),\
@@ -77,6 +78,7 @@ class PluginBaseTestCase(unittest.TestCase):
 		instance = self._plugin.create_instance(\
 			'second_instance',0,'right_device*','device[1-2]','test','test',\
 			{'default_option1':'default_value2'})
+		instance.plugin.init_devices()
 
 		device1 = DummyDevice('device1',{'name':'device1'})
 		device2 = DummyDevice('device2',{'name':'device2'})
@@ -176,6 +178,10 @@ class DummyPlugin(Plugin):
 
 	def _instance_cleanup(self, instance):
 		self.cleaned_instances.append(instance)
+
+	def _init_devices(self):
+		super(DummyPlugin,self)._init_devices()
+		self._devices_supported = True
 
 	def _get_device_objects(self, devices):
 		objects = []
