@@ -661,6 +661,9 @@ class SchedulerPlugin(base.Plugin):
 					log.warning("Affinity of task with PID %d cannot be changed, the task's affinity mask is fixed."
 							% pid)
 				return True
+			log.info("Task %d cmdline: %s" % (pid, self._get_cmdline(process)))
+			log.info("Task %d cgroup: %s" % (pid, self._get_stat_cgroup(process)))
+			log.info("Task %d affinity: %s" % (pid, list(self._scheduler_utils.get_affinity(pid))))
 		except (OSError, IOError) as e:
 			if e.errno == errno.ENOENT or e.errno == errno.ESRCH:
 				log.debug("Failed to get task info for PID %d, the task vanished."
