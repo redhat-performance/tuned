@@ -90,7 +90,7 @@ printk value. This should make the serial console more responsive.
 This profile is intended to be used as an overlay on other
 profiles. For example:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # tuned-adm profile throughput-performance optimize-serial-console
 ----
@@ -104,7 +104,7 @@ A profile optimized for PostgreSQL databases loads based on `throughput-performa
 `intel-sst`::
 A profile optimized for systems with user-defined Intel Speed Select Technology configurations. This profile is intended to be used as an overlay on other profiles. For example:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # tuned-adm profile cpu-partitioning intel-sst
 ----

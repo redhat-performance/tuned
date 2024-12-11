@@ -33,7 +33,7 @@ This procedure installs and enables the *TuneD* application, installs *TuneD* pr
 
 . Verify that a *TuneD* profile is active and applied:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 $ tuned-adm active
 

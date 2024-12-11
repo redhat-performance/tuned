@@ -36,7 +36,7 @@ class NetTuningPlugin(hotplug.Plugin):
 	The [option]`coalesce` option allows changing coalescing settings
 	for the specified network devices. The syntax is:
 	+
-	[subs="+quotes,+macros"]
+	[subs="quotes"]
 	----
 	coalesce=__param1__ __value1__ __param2__ __value2__ ... __paramN__ __valueN__
 	----

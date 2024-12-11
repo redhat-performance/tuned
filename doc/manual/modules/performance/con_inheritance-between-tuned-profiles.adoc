@@ -7,7 +7,7 @@
 
 The `[main]` section of *TuneD* profiles recognizes the [option]`include` option:
 
-[subs=+quotes]
+[subs="quotes"]
 ----
 [main]
 include=[replaceable]_parent_

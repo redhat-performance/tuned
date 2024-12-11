@@ -19,7 +19,7 @@ endif::[]
 
 . In the [filename]`/etc/tuned/profiles/` directory, create a new directory named the same as the profile that you want to create:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # mkdir /etc/tuned/profiles/[replaceable]_my-profile_
 ----
@@ -48,14 +48,14 @@ alpm=medium_power
 
 . To activate the profile, use:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # tuned-adm profile [replaceable]_my-profile_
 ----
 
 . Verify that the *TuneD* profile is active and the system settings are applied:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 $ tuned-adm active
 

@@ -12,7 +12,7 @@ You can:
 
 To call a function, use the following syntax:
 
-[subs=+quotes]
+[subs="quotes"]
 ----
 ${f:[replaceable]__function_name__:[replaceable]__argument_1__:[replaceable]__argument_2__}
 ----

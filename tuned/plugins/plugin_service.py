@@ -174,7 +174,7 @@ class ServicePlugin(base.Plugin):
 
 	The syntax is as follows:
 
-	[subs="+quotes,+macros"]
+	[subs="quotes"]
 	----
 	[service]
 	service.__service_name__=__commands__[,file:__file__]

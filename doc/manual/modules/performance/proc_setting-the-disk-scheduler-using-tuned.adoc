@@ -21,9 +21,6 @@ endif::[]
 ifdef::pantheonenv[]
 :installing-tuned-link: pass:macros[xref:modules/performance/proc_installing-and-enabling-tuned.adoc[Installing and enabling Tuned]]
 endif::[]
-ifdef::upstream[]
-:installing-tuned-link: pass:macros[xref:installing-and-enabling-tuned_getting-started-with-tuned[]]
-endif::[]
 
 // Use a link elsewhere.
 ifndef::performance-title[]
@@ -43,9 +40,6 @@ endif::[]
 ifdef::pantheonenv[]
 :tuned-profiles-link: pass:macros[xref:modules/performance/ref_tuned-profiles-distributed-with-rhel.adoc[Tuned profiles distributed with RHEL]]
 endif::[]
-ifdef::upstream[]
-:tuned-profiles-link: pass:macros[xref:tuned-profiles-distributed-with-rhel_getting-started-with-tuned[]]
-endif::[]
 
 // Use a link elsewhere.
 ifndef::performance-title[]
@@ -62,14 +56,14 @@ $ tuned-adm active
 
 . Create a new directory to hold your *TuneD* profile:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # mkdir /etc/tuned/profiles/[replaceable]__my-profile__
 ----
 
 . Find the system unique identifier of the selected block device:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 $ udevadm info --query=property --name=/dev/_device_ | grep -E '(WWN|SERIAL)'
 
@@ -87,7 +81,7 @@ The command in the this example will return all values identified as a World Wid
 
 .. Optional: Include an existing profile:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 [main]
 include=_existing-profile_
@@ -95,7 +89,7 @@ include=_existing-profile_
 
 .. Set the selected disk scheduler for the device that matches the WWN identifier:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 [disk]
 devices_udev_regex=_IDNAME_=_device system unique id_
@@ -109,14 +103,14 @@ Here:
 +
 To match multiple devices in the `devices_udev_regex` option, enclose the identifiers in parentheses and separate them with vertical bars:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 devices_udev_regex=(ID_WWN=_0x5002538d00000000_)|(ID_WWN=_0x1234567800000000_)
 ----
 
 . Enable your profile:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # tuned-adm profile [replaceable]__my-profile__
 ----
@@ -125,7 +119,7 @@ devices_udev_regex=(ID_WWN=_0x5002538d00000000_)|(ID_WWN=_0x1234567800000000_)
 
 . Verify that the TuneD profile is active and applied:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 $ tuned-adm active
 
@@ -150,9 +144,6 @@ endif::[]
 endif::[]
 ifdef::pantheonenv[]
 :customizing-tuned-link: pass:macros[xref:assemblies/assembly_customizing-tuned-profiles.adoc[Customizing Tuned Profiles]]
-endif::[]
-ifdef::upstream[]
-:customizing-tuned-link: pass:macros[xref:customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance[Customizing Tuned profiles]]
 endif::[]
 // Use a link elsewhere.
 ifndef::performance-title[]
