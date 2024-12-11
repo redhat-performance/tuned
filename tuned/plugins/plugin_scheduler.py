@@ -215,7 +215,7 @@ class SchedulerPlugin(base.Plugin):
 	To adjust scheduling policy, priority and affinity for a group of
 	processes/threads, use the following syntax.
 
-	[subs="+quotes,+macros"]
+	[subs="quotes"]
 	----
 	group.__groupname__=__rule_prio__:__sched__:__prio__:__affinity__:__regex__
 	----
@@ -227,7 +227,7 @@ class SchedulerPlugin(base.Plugin):
 	defined. However, this is Python interpreter dependant. To disable
 	an inherited rule for `__groupname__` use:
 
-	[subs="+quotes,+macros"]
+	[subs="quotes"]
 	----
 	group.__groupname__=
 	----
@@ -245,7 +245,7 @@ class SchedulerPlugin(base.Plugin):
 
 	`__regex__` is Python regular expression. It is matched against the output of:
 
-	[subs="+quotes,+macros"]
+	[subs="quotes"]
 	----
 	ps -eo cmd
 	----

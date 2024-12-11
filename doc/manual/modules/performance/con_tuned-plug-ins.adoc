@@ -20,7 +20,7 @@ Each tuning plug-in tunes an individual subsystem and takes several parameters t
 
 Sections describing plug-in instances are formatted in the following way:
 
-[subs=quotes]
+[subs="quotes"]
 ----
 [_NAME_]
 type=_TYPE_
@@ -69,7 +69,7 @@ If the plug-in supports more options, they can be also specified in the plug-in 
 
 If you do not need custom names for the plug-in instance and there is only one definition of the instance in your configuration file, *TuneD* supports the following short syntax:
 
-[subs=quotes]
+[subs="quotes"]
 ----
 [_TYPE_]
 devices=_DEVICES_

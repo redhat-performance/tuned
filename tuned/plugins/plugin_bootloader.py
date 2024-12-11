@@ -36,14 +36,14 @@ class BootloaderPlugin(base.Plugin):
 
 	The kernel options can be specified by the following syntax:
 
-	[subs="+quotes,+macros"]
+	[subs="quotes"]
 	----
 	cmdline__suffix__=__arg1__ __arg2__ ... __argN__
 	----
 
 	Or with an alternative, but equivalent syntax:
 
-	[subs="+quotes,+macros"]
+	[subs="quotes"]
 	----
 	cmdline__suffix__=+__arg1__ __arg2__ ... __argN__
 	----
@@ -60,7 +60,7 @@ class BootloaderPlugin(base.Plugin):
 
 	It is also possible to remove kernel options by the following syntax:
 
-	[subs="+quotes,+macros"]
+	[subs="quotes"]
 	----
 	cmdline__suffix__=-__arg1__ __arg2__ ... __argN__
 	----

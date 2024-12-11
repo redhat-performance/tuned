@@ -9,7 +9,7 @@ Using *TuneD* variables reduces the amount of necessary typing in *TuneD* profil
 
 There are no predefined variables in *TuneD* profiles. You can define your own variables by creating the `[variables]` section in a profile and using the following syntax:
 
-[subs=+quotes]
+[subs="quotes"]
 ----
 [variables]
 
@@ -18,7 +18,7 @@ There are no predefined variables in *TuneD* profiles. You can define your own v
 
 To expand the value of a variable in a profile, use the following syntax:
 
-[subs=+quotes]
+[subs="quotes"]
 ----
 ${[replaceable]__variable_name__}
 ----
@@ -37,7 +37,7 @@ cmdline=isolcpus=${isolated_cores}
 
 The variables can be specified in a separate file. For example, you can add the following lines to [filename]`tuned.conf`:
 
-[subs=+quotes]
+[subs="quotes"]
 ----
 [variables]
 include=/etc/tuned/[replaceable]_my-variables.conf_

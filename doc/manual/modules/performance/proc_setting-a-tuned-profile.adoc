@@ -19,7 +19,7 @@ endif::[]
 
 . Optionally, you can let *TuneD* recommend the most suitable profile for your system:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # tuned-adm recommend
 
@@ -28,14 +28,14 @@ endif::[]
 
 . Activate a profile:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # tuned-adm profile [replaceable]_selected-profile_
 ----
 +
 Alternatively, you can activate a combination of multiple profiles:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # tuned-adm profile [replaceable]_profile1_ [replaceable]_profile2_
 ----
@@ -51,7 +51,7 @@ The following example optimizes the system to run in a virtual machine with the 
 
 . View the current active *TuneD* profile on your system:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 # tuned-adm active
 
