@@ -630,6 +630,9 @@ fi
 %{_datadir}/dbus-1/system-services/net.hadess.PowerProfiles.service
 %{_datadir}/dbus-1/system.d/net.hadess.PowerProfiles.conf
 %{_datadir}/polkit-1/actions/net.hadess.PowerProfiles.policy
+%{_datadir}/dbus-1/system-services/org.freedesktop.UPower.PowerProfiles.service
+%{_datadir}/dbus-1/system.d/org.freedesktop.UPower.PowerProfiles.conf
+%{_datadir}/polkit-1/actions/org.freedesktop.UPower.PowerProfiles.policy
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog

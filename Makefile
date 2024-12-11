@@ -53,6 +53,7 @@ TUNED_USER_PROFILES_DIR = $(TUNED_CFG_DIR)/profiles
 TUNED_RECOMMEND_DIR = $(TUNED_SYSTEM_DIR)/recommend.d
 TUNED_USER_RECOMMEND_DIR = $(TUNED_CFG_DIR)/recommend.d
 BASH_COMPLETIONS = $(DATADIR)/bash-completion/completions
+PPD_BUS_NAMES = org.freedesktop.UPower.PowerProfiles net.hadess.PowerProfiles
 
 copy_executable = install -Dm 0755 $(1) $(2)
 rewrite_shebang = sed -i -r -e $(SHEBANG_REWRITE_REGEX) $(1)
@@ -244,10 +245,14 @@ install: install-dirs
 install-ppd:
 	$(call install_python_script,tuned-ppd.py,$(DESTDIR)/usr/sbin/tuned-ppd)
 	install -Dpm 0644 tuned/ppd/tuned-ppd.service $(DESTDIR)$(UNITDIR)/tuned-ppd.service
-	install -Dpm 0644 tuned/ppd/tuned-ppd.dbus.service $(DESTDIR)$(DATADIR)/dbus-1/system-services/net.hadess.PowerProfiles.service
-	install -Dpm 0644 tuned/ppd/dbus.conf $(DESTDIR)$(DATADIR)/dbus-1/system.d/net.hadess.PowerProfiles.conf
-	install -Dpm 0644 tuned/ppd/tuned-ppd.policy $(DESTDIR)$(DATADIR)/polkit-1/actions/net.hadess.PowerProfiles.policy
 	install -Dpm 0644 tuned/ppd/ppd.conf $(DESTDIR)$(SYSCONFDIR)/tuned/ppd.conf
+	$(foreach bus, $(PPD_BUS_NAMES), \
+		install -Dpm 0644 tuned/ppd/tuned-ppd.dbus.service $(DESTDIR)$(DATADIR)/dbus-1/system-services/$(bus).service; \
+		sed -i 's/?name?/$(bus)/g' $(DESTDIR)$(DATADIR)/dbus-1/system-services/$(bus).service; \
+		install -Dpm 0644 tuned/ppd/dbus.conf $(DESTDIR)$(DATADIR)/dbus-1/system.d/$(bus).conf; \
+		sed -i 's/?name?/$(bus)/g' $(DESTDIR)$(DATADIR)/dbus-1/system.d/$(bus).conf; \
+		install -Dpm 0644 tuned/ppd/tuned-ppd.policy $(DESTDIR)$(DATADIR)/polkit-1/actions/$(bus).policy; \
+		sed -i 's/?name?/$(bus)/g' $(DESTDIR)$(DATADIR)/polkit-1/actions/$(bus).policy;)
 
 clean: clean-html
 	find -name "*.pyc" | xargs rm -f
