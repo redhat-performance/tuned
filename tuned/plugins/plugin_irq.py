@@ -18,37 +18,37 @@ class IrqInfo(object):
 
 class IrqPlugin(hotplug.Plugin):
 	r"""
-	`irq`::
-
 	Allows tuning of IRQ affinities, and thus re-implements functionality
 	already present in the `scheduler` plugin. However, this plugin offers
 	more flexibility, as it allows tuning of individual interrupts with
 	different affinities. When using the `irq` plugin, make sure to disable
 	IRQ processing in the `scheduler` plugin by setting its option
 	[option]`irq_process=false`.
-	The plugin handles individual IRQs as `devices`, and multiple plugin
+
+	The plugin handles individual IRQs as devices and multiple plugin
 	instances can be defined, each addressing different devices/irqs.
-	The `device` names used by the plugin are `irq<n>`, where `<n>` is the
-	IRQ number. The special `device` `DEFAULT` controls values written to
+	The device names used by the plugin are `irq<n>`, where `<n>` is the
+	IRQ number. The special device `DEFAULT` controls values written to
 	`/proc/irq/default_smp_affinity`, which applies to all non-active IRQs.
-	===
+
 	The option [option]`affinity` controls the IRQ affinity to be set. It is
-	a string in "cpulist" format (such as 1,3-4). If the configured affinity
+	a string in "cpulist" format (such as `1,3-4`). If the configured affinity
 	is empty, then the affinity of the respective IRQs is not touched.
-	===
+
 	The option [option]`mode` is a string which can either be `set` (default)
 	or `intersect`. In `set` mode the [option]`affinity` is always written
 	as configured, whereas in `intersect` mode, the new affinity will be
 	calculated as the intersection of the current and the configured affinity.
 	If that intersection is empty, the configured affinity will be used.
-	--
-	.Example moving all IRQs to CPU0, except irq16, which is directed to CPU2
+
+	.Moving all IRQs to CPU0, except irq16, which is directed to CPU2
 	====
 	----
 	[irq_special]
 	type=irq
 	devices=irq16
 	affinity=2
+
 	[irq]
 	affinity=0
 	----

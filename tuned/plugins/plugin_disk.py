@@ -11,29 +11,26 @@ log = tuned.logs.get()
 
 class DiskPlugin(hotplug.Plugin):
 	"""
-	`disk`::
-	
 	Plug-in for tuning various block device options. This plug-in can also
 	dynamically change the advanced power management and spindown timeout
 	setting for a drive according to the current drive utilization. The
 	dynamic tuning is controlled by the [option]`dynamic` and the global
 	[option]`dynamic_tuning` option in `tuned-main.conf`.
-	+
+
 	The disk plug-in operates on all supported block devices unless a
 	comma separated list of [option]`devices` is passed to it.
-	+
-	.Operate only on the sda block device
+
+	.Operate only on the `sda` block device
 	====
 	----
 	[disk]
-	# Comma separated list of devices, all devices if commented out.
 	devices=sda
 	----
 	====
-	+
+
 	The [option]`elevator` option sets the Linux I/O scheduler.
-	+
-	.Use the bfq I/O scheduler on xvda block device
+
+	.Use the bfq I/O scheduler on the `xvda` block device
 	====
 	----
 	[disk]
@@ -41,21 +38,21 @@ class DiskPlugin(hotplug.Plugin):
 	elevator=bfq
 	----
 	====
-	+
+
 	The [option]`scheduler_quantum` option only applies to the CFQ I/O
 	scheduler. It defines the number of I/O requests that CFQ sends to
 	one device at one time, essentially limiting queue depth. The default
 	value is 8 requests. The device being used may support greater queue
 	depth, but increasing the value of quantum will also increase latency,
 	especially for large sequential write work loads.
-	+
+
 	The [option]`apm` option sets the Advanced Power Management feature
 	on drives that support it. It corresponds to using the `-B` option of
 	the `hdparm` utility. The [option]`spindown` option puts the drive
 	into idle (low-power) mode, and also sets the standby (spindown)
 	timeout for the drive. It corresponds to using `-S` option of the
 	`hdparm` utility.
-	+
+
 	.Use a medium-agressive power management with spindown
 	====
 	----
@@ -64,7 +61,7 @@ class DiskPlugin(hotplug.Plugin):
 	spindown=6
 	----
 	====
-	+
+
 	The [option]`readahead` option controls how much extra data the
 	operating system reads from disk when performing sequential
 	I/O operations. Increasing the `readahead` value might improve
@@ -73,7 +70,7 @@ class DiskPlugin(hotplug.Plugin):
 	can be adjusted to sectors by specifying the suffix 's'. If the
 	suffix is specified, there must be at least one space between the
 	number and suffix (for example, `readahead=8192 s`).
-	+
+
 	.Set the `readahead` to 4MB unless already set to a higher value
 	====
 	----

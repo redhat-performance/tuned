@@ -10,18 +10,15 @@ log = tuned.logs.get()
 
 class ACPIPlugin(base.Plugin):
 	"""
-	`acpi`::
-
 	Configures the ACPI driver.
-	+
+
 	The only currently supported option is
 	[option]`platform_profile`, which sets the ACPI
 	platform profile sysfs attribute,
 	a generic power/performance preference API for other drivers.
 	Multiple profiles can be specified, separated by `|`.
 	The first available profile is selected.
-	+
-	--
+
 	.Selecting a platform profile
 	====
 	----
@@ -31,7 +28,6 @@ class ACPIPlugin(base.Plugin):
 	Using this option, *TuneD* will try to set the platform profile
 	to `balanced`. If that fails, it will try to set it to `low-power`.
 	====
-	--
 	"""
 	def __init__(self, *args, **kwargs):
 		super(ACPIPlugin, self).__init__(*args, **kwargs)

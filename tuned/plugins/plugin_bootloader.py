@@ -14,42 +14,40 @@ log = tuned.logs.get()
 
 class BootloaderPlugin(base.Plugin):
 	"""
-	`bootloader`::
-	
 	Adds options to the kernel command line. This plug-in supports the
 	GRUB 2 boot loader and the Boot Loader Specification (BLS).
-	+
+
 	NOTE: *TuneD* will not remove or replace kernel command line
 	parameters added via other methods like *grubby*. *TuneD* will manage
 	the kernel command line parameters added via *TuneD*. Please refer
 	to your platform bootloader documentation about how to identify and
 	manage kernel command line parameters set outside of *TuneD*.
-	+
+
 	Customized non-standard location of the GRUB 2 configuration file
 	can be specified by the [option]`grub2_cfg_file` option.
-	+
+
 	The kernel options are added to the current GRUB configuration and
 	its templates. Reboot the system for the kernel option to take effect.
-	+
+
 	Switching to another profile or manually stopping the `tuned`
 	service removes the additional options. If you shut down or reboot
 	the system, the kernel options persist in the [filename]`grub.cfg`
 	file and grub environment files.
-	+
+
 	The kernel options can be specified by the following syntax:
-	+
+
 	[subs="+quotes,+macros"]
 	----
 	cmdline__suffix__=__arg1__ __arg2__ ... __argN__
 	----
-	+
+
 	Or with an alternative, but equivalent syntax:
-	+
+
 	[subs="+quotes,+macros"]
 	----
 	cmdline__suffix__=+__arg1__ __arg2__ ... __argN__
 	----
-	+
+
 	Where __suffix__ can be arbitrary (even empty) alphanumeric
 	string which should be unique across all loaded profiles. It is
 	recommended to use the profile name as the __suffix__
@@ -59,59 +57,51 @@ class BootloaderPlugin(base.Plugin):
 	is the same behavior as any other plug-in options. The final kernel
 	command line is constructed by concatenating all the resulting
 	[option]`cmdline` options.
-	+
+
 	It is also possible to remove kernel options by the following syntax:
-	+
+
 	[subs="+quotes,+macros"]
 	----
 	cmdline__suffix__=-__arg1__ __arg2__ ... __argN__
 	----
-	+
+
 	Such kernel options will not be concatenated and thus removed during
 	the final kernel command line construction.
-	+
+
 	.Modifying the kernel command line
 	====
 	For example, to add the [option]`quiet` kernel option to a *TuneD*
 	profile, include the following lines in the [filename]`tuned.conf`
 	file:
-	
 	----
 	[bootloader]
 	cmdline_my_profile=+quiet
 	----
-	
 	An example of a custom profile `my_profile` that adds the
 	[option]`isolcpus=2` option to the kernel command line:
-	
 	----
 	[bootloader]
 	cmdline_my_profile=isolcpus=2
 	----
-	
 	An example of a custom profile `my_profile` that removes the
 	[option]`rhgb quiet` options from the kernel command line (if
 	previously added by *TuneD*):
-	
 	----
 	[bootloader]
 	cmdline_my_profile=-rhgb quiet
 	----
 	====
-	+
+
 	.Modifying the kernel command line, example with inheritance
 	====
 	For example, to add the [option]`rhgb quiet` kernel options to a
 	*TuneD* profile `profile_1`:
-	
 	----
 	[bootloader]
 	cmdline_profile_1=+rhgb quiet
 	----
-	
 	In the child profile `profile_2` drop the [option]`quiet` option
 	from the kernel command line:
-	
 	----
 	[main]
 	include=profile_1
@@ -119,10 +109,8 @@ class BootloaderPlugin(base.Plugin):
 	[bootloader]
 	cmdline_profile_2=-quiet
 	----
-	
 	The final kernel command line will be [option]`rhgb`. In case the same
 	[option]`cmdline` suffix as in the `profile_1` is used:
-	
 	----
 	[main]
 	include=profile_1
@@ -130,35 +118,34 @@ class BootloaderPlugin(base.Plugin):
 	[bootloader]
 	cmdline_profile_1=-quiet
 	----
-	
 	It will result in the empty kernel command line because the merge
 	executes and the [option]`cmdline_profile_1` gets redefined to just
 	[option]`-quiet`. Thus there is nothing to remove in the final kernel
 	command line processing.
 	====
-	+
+
 	The [option]`initrd_add_img=IMAGE` adds an initrd overlay file
 	`IMAGE`. If the `IMAGE` file name begins with '/', the absolute path is
 	used. Otherwise, the current profile directory is used as the base
 	directory for the `IMAGE`.
-	+
+
 	The [option]`initrd_add_dir=DIR` creates an initrd image from the
 	directory `DIR` and adds the resulting image as an overlay.
 	If the `DIR` directory name begins with '/', the absolute path
 	is used. Otherwise, the current profile directory is used as the
 	base directory for the `DIR`.
-	+
+
 	The [option]`initrd_dst_img=PATHNAME` sets the name and location of
 	the resulting initrd image. Typically, it is not necessary to use this
 	option. By default, the location of initrd images is `/boot` and the
 	name of the image is taken as the basename of `IMAGE` or `DIR`. This can
 	be overridden by setting [option]`initrd_dst_img`.
-	+
+
 	The [option]`initrd_remove_dir=VALUE` removes the source directory
 	from which the initrd image was built if `VALUE` is true. Only 'y',
 	'yes', 't', 'true' and '1' (case insensitive) are accepted as true
 	values for this option. Other values are interpreted as false.
-	+
+
 	.Adding an overlay initrd image
 	====
 	----
@@ -166,17 +153,16 @@ class BootloaderPlugin(base.Plugin):
 	initrd_remove_dir=True
 	initrd_add_dir=/tmp/tuned-initrd.img
 	----
-	
 	This creates an initrd image from the `/tmp/tuned-initrd.img` directory
 	and and then removes the `tuned-initrd.img` directory from `/tmp`.
 	====
-	+
+
 	The [option]`skip_grub_config=VALUE` does not change grub
 	configuration if `VALUE` is true. However, [option]`cmdline`
 	options are still processed, and the result is used to verify the current
 	cmdline. Only 'y', 'yes', 't', 'true' and '1' (case insensitive) are accepted
 	as true values for this option. Other values are interpreted as false.
-	+
+
 	.Do not change grub configuration
 	====
 	----

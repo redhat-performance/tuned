@@ -13,12 +13,10 @@ cmd = commands()
 
 class VMPlugin(base.Plugin):
 	"""
-	`vm`::
-	
 	Enables or disables transparent huge pages depending on value of the
 	[option]`transparent_hugepages` option. The option can have one of three
 	possible values `always`, `madvise` and `never`.
-	+
+
 	.Disable transparent hugepages
 	====
 	----
@@ -26,7 +24,7 @@ class VMPlugin(base.Plugin):
 	transparent_hugepages=never
 	----
 	====
-	+
+
 	The [option]`transparent_hugepage.defrag` option specifies the
 	defragmentation policy. Possible values for this option are `always`,
 	`defer`, `defer+madvise`, `madvise` and `never`. For a detailed
