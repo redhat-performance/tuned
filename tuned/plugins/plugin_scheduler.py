@@ -1098,10 +1098,13 @@ class SchedulerPlugin(base.Plugin):
 						event = instance._evlist.read_on_cpu(cpu)
 						if event:
 							read_events = True
-							if event.type == perf.RECORD_COMM or \
-								(self._perf_process_fork_value and event.type == perf.RECORD_FORK):
+							if isinstance(event, perf.comm_event) or (
+								self._perf_process_fork_value
+								and isinstance(event, perf.task_event)
+								and event.type == perf.RECORD_FORK
+							):
 								self._add_pid(instance, int(event.tid), r)
-							elif event.type == perf.RECORD_EXIT:
+							elif isinstance(event, perf.task_event) and event.type == perf.RECORD_EXIT:
 								self._remove_pid(instance, int(event.tid))
 
 	@command_custom("cgroup_ps_blacklist", per_device = False)
