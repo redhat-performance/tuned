@@ -401,7 +401,7 @@ class SchedulerPlugin(base.Plugin):
 	with hierarchy-ID 8 and controller-list blkio.
 	====
 
-	Recent kernels moved some `sched_` and `numa_balancing_` kernel run-time
+	Kernels 5.13 and newer moved some `sched_` and `numa_balancing_` kernel run-time
 	parameters from `/proc/sys/kernel`, managed by the `sysctl` utility, to
 	`debugfs`, typically mounted under `/sys/kernel/debug`.  TuneD provides an
 	abstraction mechanism for the following parameters via the scheduler plug-in:
@@ -412,8 +412,12 @@ class SchedulerPlugin(base.Plugin):
 	[option]`numa_balancing_scan_period_min_ms`,
 	[option]`numa_balancing_scan_period_max_ms` and
 	[option]`numa_balancing_scan_size_mb`.
-	Based on the kernel used, TuneD will write the specified value to the correct
-	location.
+	Moreover in kernel 6.6 and newer support for the `sched_wakeup_granularity_ns` and
+	`sched_latency_ns` were removed. The `sched_min_granularity_ns` was renamed to
+	`sched_base_slice_ns`. Based on the kernel used, TuneD will write the specified
+	value to the correct location or ignore it. For the compatibility the alias
+	[option]`sched_base_slice_ns` was added, but the [option]`sched_min_granularity_ns`
+	can be still used instead.
 
 	.Set tasks' "cache hot" value for migration decisions.
 	====
@@ -431,6 +435,12 @@ class SchedulerPlugin(base.Plugin):
 	`/sys/kernel/debug/sched/migration_cost_ns`.
 	====
 	"""
+
+	_dict_sched_knob_map = {
+		"wakeup_granularity_ns": "",
+		"min_granularity_ns": "base_slice_ns",
+		"latency_ns": "",
+	}
 
 	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
 		super(SchedulerPlugin, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
@@ -557,6 +567,7 @@ class SchedulerPlugin(base.Plugin):
 			"perf_mmap_pages": None,
 			"perf_process_fork": "false",
 			"sched_min_granularity_ns": None,
+			"sched_base_slice_ns": None,
 			"sched_latency_ns": None,
 			"sched_wakeup_granularity_ns": None,
 			"sched_tunable_scaling": None,
@@ -1400,37 +1411,62 @@ class SchedulerPlugin(base.Plugin):
 			if self._irq_process:
 				self._restore_all_irq_affinity()
 
+	def _sched_assembly_path(self, prefix, namespace, knob):
+		if prefix == "":
+			path = "%s/%s" % (namespace, knob)
+		else:
+			path = "%s/%s/%s" % (prefix, namespace, knob)
+		return "/sys/kernel/debug/%s" % path
+
+	# map to kernel 6.6 paths, "" means that knob was dropped
+	def _sched_assembly_path2(self, path, prefix, namespace, knob):
+		lpath = path
+		if namespace == "sched":
+			lknob = self._dict_sched_knob_map.get(knob)
+			if lknob is not None:
+				if lknob:
+					lpath = self._sched_assembly_path(prefix, namespace, lknob)
+				else:
+					lpath = ""
+		return lpath
+
 	def _get_sched_knob_path(self, prefix, namespace, knob):
 		key = "%s_%s_%s" % (prefix, namespace, knob)
 		path = self._sched_knob_paths_cache.get(key)
-		if path:
+		if path or path == "":
 			return path
 		path = "/proc/sys/kernel/%s_%s" % (namespace, knob)
 		if not os.path.exists(path):
-			if prefix == "":
-				path = "%s/%s" % (namespace, knob)
-			else:
-				path = "%s/%s/%s" % (prefix, namespace, knob)
-			path = "/sys/kernel/debug/%s" % path
-			if self._secure_boot_hint is None:
+			path = self._sched_assembly_path(prefix, namespace, knob)
+			# kernel 6.6 drops and renames some knobs
+			if not os.path.exists(path):
+				path = self._sched_assembly_path2(path, prefix, namespace, knob)
+			if path != "" and self._secure_boot_hint is None:
 				self._secure_boot_hint = True
 		self._sched_knob_paths_cache[key] = path
 		return path
 
 	def _get_sched_knob(self, prefix, namespace, knob):
-		data = self._cmd.read_file(self._get_sched_knob_path(prefix, namespace, knob), err_ret = None)
-		if data is None:
-			log.error("Error reading '%s'" % knob)
-			if self._secure_boot_hint:
-				log.error("This may not work with Secure Boot or kernel_lockdown (this hint is logged only once)")
-				self._secure_boot_hint = False
+		data = None
+		path = self._get_sched_knob_path(prefix, namespace, knob)
+		if path != "":
+			data = self._cmd.read_file(path, err_ret = None)
+			if data is None:
+				log.error("Error reading '%s'" % knob)
+				if self._secure_boot_hint:
+					log.error("This may not work with Secure Boot or kernel_lockdown (this hint is logged only once)")
+					self._secure_boot_hint = False
 		return data
 
 	def _set_sched_knob(self, prefix, namespace, knob, value, sim, remove = False):
 		if value is None:
 			return None
+		path = self._get_sched_knob_path(prefix, namespace, knob)
+		if not path:
+			log.debug("knob '%s' ignored, unsupported by kernel" % knob)
+			return None
 		if not sim:
-			if not self._cmd.write_to_file(self._get_sched_knob_path(prefix, namespace, knob), value, \
+			if not self._cmd.write_to_file(path, value, \
 				no_error = [errno.ENOENT] if remove else False):
 					log.error("Error writing value '%s' to '%s'" % (value, knob))
 		return value
@@ -1442,6 +1478,14 @@ class SchedulerPlugin(base.Plugin):
 	@command_set("sched_min_granularity_ns")
 	def _set_sched_min_granularity_ns(self, value, sim, remove):
 		return self._set_sched_knob("", "sched", "min_granularity_ns", value, sim, remove)
+
+	@command_get("sched_base_slice_ns")
+	def _get_sched_base_slice_ns(self):
+		return self._get_sched_min_granularity_ns()
+
+	@command_set("sched_base_slice_ns")
+	def _set_sched_base_slice_ns(self, value, sim, remove):
+		return self._set_sched_min_granularity_ns(value, sim, remove)
 
 	@command_get("sched_latency_ns")
 	def _get_sched_latency_ns(self):
