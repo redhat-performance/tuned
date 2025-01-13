@@ -6,7 +6,7 @@
   <vendor>TuneD</vendor>
   <vendor_url>https://tuned-project.org/</vendor_url>
 
-  <action id="net.hadess.PowerProfiles.HoldProfile">
+  <action id="?name?.HoldProfile">
     <description>Hold power profile</description>
     <message>Authentication is required to hold power profiles.</message>
     <defaults>
@@ -16,7 +16,7 @@
     </defaults>
   </action>
   
-  <action id="net.hadess.PowerProfiles.ReleaseProfile">
+  <action id="?name?.ReleaseProfile">
     <description>Release power profile</description>
     <message>Authentication is required to release power profiles.</message>
     <defaults>

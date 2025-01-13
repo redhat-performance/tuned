@@ -97,13 +97,25 @@ PREFIX_PROFILE_FACTORY = "System"
 PREFIX_PROFILE_USER = "User"
 
 # PPD-to-tuned API translation daemon configuration
-PPD_NAMESPACE = "net.hadess.PowerProfiles"
-PPD_DBUS_BUS = PPD_NAMESPACE
-PPD_DBUS_OBJECT = "/net/hadess/PowerProfiles"
-PPD_DBUS_INTERFACE = PPD_DBUS_BUS
 PPD_CONFIG_FILE = "/etc/tuned/ppd.conf"
 PPD_BASE_PROFILE_FILE = "/etc/tuned/ppd_base_profile"
 PPD_API_COMPATIBILITY = "0.23"
+PPD_DBUS_BUS = "org.freedesktop.UPower.PowerProfiles"
+PPD_DBUS_BUS_LEGACY = "net.hadess.PowerProfiles"
+PPD_DBUS_NAMES = [
+    {
+        "bus": PPD_DBUS_BUS,
+        "namespace": PPD_DBUS_BUS,
+        "interface": PPD_DBUS_BUS,
+        "object": "/org/freedesktop/UPower/PowerProfiles"
+	},
+    {
+        "bus": PPD_DBUS_BUS_LEGACY,
+        "namespace": PPD_DBUS_BUS_LEGACY,
+        "interface": PPD_DBUS_BUS_LEGACY,
+        "object": "/net/hadess/PowerProfiles"
+	}
+]
 
 # After adding new option to tuned-main.conf add here its name with CFG_ prefix
 # and eventually default value with CFG_DEF_ prefix (default is None)
