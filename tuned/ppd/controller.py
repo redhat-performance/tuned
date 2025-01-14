@@ -243,7 +243,6 @@ class Controller(exports.interfaces.ExportableInterface):
         """
         if not result:
             return
-        self._profile_holds.clear()
         if tuned_profile != self._tuned_interface.active_profile():
             log.debug("Received a profile change signal from TuneD, but it is not relevant anymore.")
             return
@@ -254,6 +253,7 @@ class Controller(exports.interfaces.ExportableInterface):
             log.warning("TuneD profile changed to an unknown profile '%s'" % tuned_profile)
         if self._active_profile != ppd_profile:
             log.info("Profile changed to '%s'" % ppd_profile)
+            self._profile_holds.clear()
             self._active_profile = ppd_profile
             exports.property_changed("ActiveProfile", self._active_profile)
             if ppd_profile != UNKNOWN_PROFILE:
