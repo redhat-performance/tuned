@@ -244,6 +244,9 @@ class Controller(exports.interfaces.ExportableInterface):
         if not result:
             return
         self._profile_holds.clear()
+        if tuned_profile != self._tuned_interface.active_profile():
+            log.debug("Received a profile change signal from TuneD, but it is not relevant anymore.")
+            return
         try:
             ppd_profile = self._config.tuned_to_ppd.get(tuned_profile, self._on_battery)
         except KeyError:
