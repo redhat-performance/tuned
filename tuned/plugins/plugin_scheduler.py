@@ -644,13 +644,22 @@ class SchedulerPlugin(base.Plugin):
 	def _is_kthread(self, process):
 		return process["stat"]["flags"] & procfs.pidstat.PF_KTHREAD != 0
 
+	def _process_in_blacklisted_cgroup(self, process):
+		if self._cgroup_ps_blacklist_re == "":
+			return False
+		return re.search(self._cgroup_ps_blacklist_re, self._get_stat_cgroup(process)) is not None
+
 	# Returns True if we can ignore a failed affinity change of
 	# a process with the given PID and therefore not report it as an error.
-	def _ignore_set_affinity_error(self, pid):
+	def _ignore_set_affinity_error(self, process):
+		pid = process.pid
 		try:
-			process = procfs.process(pid)
 			if process["stat"]["state"] == "Z":
 				log.debug("Affinity of zombie task with PID %d could not be changed."
+						% pid)
+				return True
+			if self._process_in_blacklisted_cgroup(process):
+				log.debug("Affinity of task with PID %d could not be changed, the task was moved into a blacklisted cgroup."
 						% pid)
 				return True
 			if process["stat"].is_bound_to_cpu():
@@ -1168,13 +1177,17 @@ class SchedulerPlugin(base.Plugin):
 		return res
 
 	def _set_affinity(self, pid, affinity):
+		process = procfs.process(pid)
+		if self._process_in_blacklisted_cgroup(process):
+			log.debug("Not setting CPU affinity of PID %d, the task belongs to a blacklisted cgroup." % pid)
+			return
 		log.debug("Setting CPU affinity of PID %d to '%s'." % (pid, affinity))
 		try:
 			self._scheduler_utils.set_affinity(pid, affinity)
 		# Workaround for old python-schedutils (pre-0.4) which
 		# incorrectly raised SystemError instead of OSError
 		except (SystemError, OSError) as e:
-			if not self._ignore_set_affinity_error(pid):
+			if not self._ignore_set_affinity_error(process):
 				log.error("Failed to set affinity of PID %d to '%s': %s"
 						% (pid, affinity, e))
 
@@ -1191,9 +1204,6 @@ class SchedulerPlugin(base.Plugin):
 		if self._ps_blacklist != "":
 			psl = [v for v in psl if re.search(self._ps_blacklist,
 					self._get_stat_comm(v)) is None]
-		if self._cgroup_ps_blacklist_re != "":
-			psl = [v for v in psl if re.search(self._cgroup_ps_blacklist_re,
-					self._get_stat_cgroup(v)) is None]
 		psd = dict([(v.pid, v) for v in psl])
 		for pid in psd:
 			try:
