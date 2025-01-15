@@ -77,7 +77,7 @@ class VMPlugin(base.Plugin):
 		return path
 
 	@command_set("transparent_hugepages")
-	def _set_transparent_hugepages(self, value, sim, remove):
+	def _set_transparent_hugepages(self, value, instance, sim, remove):
 		if value not in ["always", "never", "madvise"]:
 			if not sim:
 				log.warning("Incorrect 'transparent_hugepages' value '%s'." % str(value))
@@ -102,11 +102,11 @@ class VMPlugin(base.Plugin):
 
         # just an alias to transparent_hugepages
 	@command_set("transparent_hugepage")
-	def _set_transparent_hugepage(self, value, sim, remove):
+	def _set_transparent_hugepage(self, value, instance, sim, remove):
 		self._set_transparent_hugepages(value, sim, remove)
 
 	@command_get("transparent_hugepages")
-	def _get_transparent_hugepages(self):
+	def _get_transparent_hugepages(self, instance):
 		sys_file = os.path.join(self._thp_path(), "enabled")
 		if os.path.exists(sys_file):
 			return cmd.get_active_option(cmd.read_file(sys_file))
@@ -115,11 +115,11 @@ class VMPlugin(base.Plugin):
 
         # just an alias to transparent_hugepages
 	@command_get("transparent_hugepage")
-	def _get_transparent_hugepage(self):
+	def _get_transparent_hugepage(self, instance):
 		return self._get_transparent_hugepages()
 
 	@command_set("transparent_hugepage.defrag")
-	def _set_transparent_hugepage_defrag(self, value, sim, remove):
+	def _set_transparent_hugepage_defrag(self, value, instance, sim, remove):
 		sys_file = os.path.join(self._thp_path(), "defrag")
 		if os.path.exists(sys_file):
 			if not sim:
@@ -132,7 +132,7 @@ class VMPlugin(base.Plugin):
 			return None
 
 	@command_get("transparent_hugepage.defrag")
-	def _get_transparent_hugepage_defrag(self):
+	def _get_transparent_hugepage_defrag(self, instance):
 		sys_file = os.path.join(self._thp_path(), "defrag")
 		if os.path.exists(sys_file):
 			return cmd.get_active_option(cmd.read_file(sys_file))
@@ -159,19 +159,19 @@ class VMPlugin(base.Plugin):
 		return True
 
 	@command_custom("dirty_bytes")
-	def _dirty_bytes(self, enabling, value, verify, ignore_missing):
+	def _dirty_bytes(self, enabling, value, verify, ignore_missing, instance):
 		return self._dirty_option("dirty_bytes", "dirty_ratio", self._check_twice_pagesize, enabling, value, verify)
 
 	@command_custom("dirty_ratio")
-	def _dirty_ratio(self, enabling, value, verify, ignore_missing):
+	def _dirty_ratio(self, enabling, value, verify, ignore_missing, instance):
 		return self._dirty_option("dirty_ratio", "dirty_bytes", self._check_ratio, enabling, value, verify)
 
 	@command_custom("dirty_background_bytes")
-	def _dirty_background_bytes(self, enabling, value, verify, ignore_missing):
+	def _dirty_background_bytes(self, enabling, value, verify, ignore_missing, instance):
 		return self._dirty_option("dirty_background_bytes", "dirty_background_ratio", self._check_positive, enabling, value, verify)
 
 	@command_custom("dirty_background_ratio")
-	def _dirty_background_ratio(self, enabling, value, verify, ignore_missing):
+	def _dirty_background_ratio(self, enabling, value, verify, ignore_missing, instance):
 		return self._dirty_option("dirty_background_ratio", "dirty_background_bytes", self._check_ratio, enabling, value, verify)
 
 	def _dirty_option(self, option, counterpart, check_fun, enabling, value, verify):

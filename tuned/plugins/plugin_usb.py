@@ -56,7 +56,7 @@ class USBPlugin(base.Plugin):
 		return "/sys/bus/usb/devices/%s/power/autosuspend" % device
 
 	@command_set("autosuspend", per_device=True)
-	def _set_autosuspend(self, value, device, sim, remove):
+	def _set_autosuspend(self, value, device, instance, sim, remove):
 		enable = self._option_bool(value)
 		if enable is None:
 			return None
@@ -69,6 +69,6 @@ class USBPlugin(base.Plugin):
 		return val
 
 	@command_get("autosuspend")
-	def _get_autosuspend(self, device, ignore_missing=False):
+	def _get_autosuspend(self, device, instance, ignore_missing=False):
 		sys_file = self._autosuspend_sysfile(device)
 		return self._cmd.read_file(sys_file, no_error=ignore_missing).strip()

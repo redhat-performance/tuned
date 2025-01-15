@@ -166,7 +166,7 @@ class UncorePlugin(hotplug.Plugin):
 		return self._validate_khz_value(device, min_or_max, khz)
 
 	@command_set("max_freq_khz", per_device = True)
-	def _set_max_freq_khz(self, value, device, sim, remove):
+	def _set_max_freq_khz(self, value, device, instance, sim, remove):
 		max_freq_khz = self._validate_value(device, IS_MAX, value)
 		if max_freq_khz is None:
 			return None
@@ -178,7 +178,7 @@ class UncorePlugin(hotplug.Plugin):
 		return self._set(device, "max_freq_khz", max_freq_khz)
 
 	@command_get("max_freq_khz")
-	def _get_max_freq_khz(self, device, ignore_missing=False):
+	def _get_max_freq_khz(self, device, instance, ignore_missing=False):
 		if ignore_missing and not os.path.isdir(SYSFS_DIR):
 			return None
 
@@ -192,7 +192,7 @@ class UncorePlugin(hotplug.Plugin):
 		return max_freq_khz
 
 	@command_set("min_freq_khz", per_device = True)
-	def _set_min_freq_khz(self, value, device, sim, remove):
+	def _set_min_freq_khz(self, value, device, instance, sim, remove):
 		min_freq_khz = self._validate_value(device, IS_MIN, value)
 		if min_freq_khz is None:
 			return None
@@ -204,7 +204,7 @@ class UncorePlugin(hotplug.Plugin):
 		return self._set(device, "min_freq_khz", min_freq_khz)
 
 	@command_get("min_freq_khz")
-	def _get_min_freq_khz(self, device, ignore_missing=False):
+	def _get_min_freq_khz(self, device, instance, ignore_missing=False):
 		if ignore_missing and not os.path.isdir(SYSFS_DIR):
 			return None
 

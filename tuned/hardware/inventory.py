@@ -41,10 +41,17 @@ class Inventory(object):
 	def get_device(self, subsystem, sys_name):
 		"""Get a pyudev.Device object for the sys_name (e.g. 'sda')."""
 		try:
-			return pyudev.Devices.from_name(self._udev_context, subsystem, sys_name)
+			try:
+				d = pyudev.Devices.from_name(self._udev_context, subsystem, sys_name)
+			except pyudev.DeviceNotFoundByNameError:
+				d = None
 		# workaround for pyudev < 0.18
 		except AttributeError:
-			return pyudev.Device.from_name(self._udev_context, subsystem, sys_name)
+			try:
+				d = pyudev.Device.from_name(self._udev_context, subsystem, sys_name)
+			except pyudev.DeviceNotFoundByNameError:
+				d = None
+		return d
 
 	def get_devices(self, subsystem):
 		"""Get list of devices on a given subsystem."""

@@ -1110,7 +1110,7 @@ class SchedulerPlugin(base.Plugin):
 								self._remove_pid(instance, int(event.tid))
 
 	@command_custom("cgroup_ps_blacklist", per_device = False)
-	def _cgroup_ps_blacklist(self, enabling, value, verify, ignore_missing):
+	def _cgroup_ps_blacklist(self, enabling, value, verify, ignore_missing, instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1118,7 +1118,7 @@ class SchedulerPlugin(base.Plugin):
 			self._cgroup_ps_blacklist_re = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
 	@command_custom("ps_whitelist", per_device = False)
-	def _ps_whitelist(self, enabling, value, verify, ignore_missing):
+	def _ps_whitelist(self, enabling, value, verify, ignore_missing, instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1126,7 +1126,7 @@ class SchedulerPlugin(base.Plugin):
 			self._ps_whitelist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
 	@command_custom("ps_blacklist", per_device = False)
-	def _ps_blacklist(self, enabling, value, verify, ignore_missing):
+	def _ps_blacklist(self, enabling, value, verify, ignore_missing, instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1134,7 +1134,7 @@ class SchedulerPlugin(base.Plugin):
 			self._ps_blacklist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
 	@command_custom("irq_process", per_device = False)
-	def _irq_process(self, enabling, value, verify, ignore_missing):
+	def _irq_process(self, enabling, value, verify, ignore_missing, instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1142,7 +1142,7 @@ class SchedulerPlugin(base.Plugin):
 			self._irq_process = self._cmd.get_bool(value) == "1"
 
 	@command_custom("default_irq_smp_affinity", per_device = False)
-	def _default_irq_smp_affinity(self, enabling, value, verify, ignore_missing):
+	def _default_irq_smp_affinity(self, enabling, value, verify, ignore_missing, instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1153,7 +1153,7 @@ class SchedulerPlugin(base.Plugin):
 				self._default_irq_smp_affinity_value = self._cmd.cpulist_unpack(value)
 
 	@command_custom("perf_process_fork", per_device = False)
-	def _perf_process_fork(self, enabling, value, verify, ignore_missing):
+	def _perf_process_fork(self, enabling, value, verify, ignore_missing, instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1365,7 +1365,7 @@ class SchedulerPlugin(base.Plugin):
 		return res
 
 	@command_custom("isolated_cores", per_device = False, priority = 10)
-	def _isolated_cores(self, enabling, value, verify, ignore_missing):
+	def _isolated_cores(self, enabling, value, verify, ignore_missing, instance):
 		affinity = None
 		self._affinity = None
 		if value is not None:
@@ -1399,6 +1399,7 @@ class SchedulerPlugin(base.Plugin):
 			# _instance_unapply_static()
 			if self._irq_process:
 				self._restore_all_irq_affinity()
+		return True
 
 	def _get_sched_knob_path(self, prefix, namespace, knob):
 		key = "%s_%s_%s" % (prefix, namespace, knob)
@@ -1436,81 +1437,81 @@ class SchedulerPlugin(base.Plugin):
 		return value
 
 	@command_get("sched_min_granularity_ns")
-	def _get_sched_min_granularity_ns(self):
+	def _get_sched_min_granularity_ns(self, instance):
 		return self._get_sched_knob("", "sched", "min_granularity_ns")
 
 	@command_set("sched_min_granularity_ns")
-	def _set_sched_min_granularity_ns(self, value, sim, remove):
+	def _set_sched_min_granularity_ns(self, value, instance, sim, remove):
 		return self._set_sched_knob("", "sched", "min_granularity_ns", value, sim, remove)
 
 	@command_get("sched_latency_ns")
-	def _get_sched_latency_ns(self):
+	def _get_sched_latency_ns(self, instance):
 		return self._get_sched_knob("", "sched", "latency_ns")
 
 	@command_set("sched_latency_ns")
-	def _set_sched_latency_ns(self, value, sim, remove):
+	def _set_sched_latency_ns(self, value, instance, sim, remove):
 		return self._set_sched_knob("", "sched", "latency_ns", value, sim, remove)
 
 	@command_get("sched_wakeup_granularity_ns")
-	def _get_sched_wakeup_granularity_ns(self):
+	def _get_sched_wakeup_granularity_ns(self, instance):
 		return self._get_sched_knob("", "sched", "wakeup_granularity_ns")
 
 	@command_set("sched_wakeup_granularity_ns")
-	def _set_sched_wakeup_granularity_ns(self, value, sim, remove):
+	def _set_sched_wakeup_granularity_ns(self, value, instance, sim, remove):
 		return self._set_sched_knob("", "sched", "wakeup_granularity_ns", value, sim, remove)
 
 	@command_get("sched_tunable_scaling")
-	def _get_sched_tunable_scaling(self):
+	def _get_sched_tunable_scaling(self, instance):
 		return self._get_sched_knob("", "sched", "tunable_scaling")
 
 	@command_set("sched_tunable_scaling")
-	def _set_sched_tunable_scaling(self, value, sim, remove):
+	def _set_sched_tunable_scaling(self, value, instance, sim, remove):
 		return self._set_sched_knob("", "sched", "tunable_scaling", value, sim, remove)
 
 	@command_get("sched_migration_cost_ns")
-	def _get_sched_migration_cost_ns(self):
+	def _get_sched_migration_cost_ns(self, instance):
 		return self._get_sched_knob("", "sched", "migration_cost_ns")
 
 	@command_set("sched_migration_cost_ns")
-	def _set_sched_migration_cost_ns(self, value, sim, remove):
+	def _set_sched_migration_cost_ns(self, value, instance, sim, remove):
 		return self._set_sched_knob("", "sched", "migration_cost_ns", value, sim, remove)
 
 	@command_get("sched_nr_migrate")
-	def _get_sched_nr_migrate(self):
+	def _get_sched_nr_migrate(self, instance):
 		return self._get_sched_knob("", "sched", "nr_migrate")
 
 	@command_set("sched_nr_migrate")
-	def _set_sched_nr_migrate(self, value, sim, remove):
+	def _set_sched_nr_migrate(self, value, instance, sim, remove):
 		return self._set_sched_knob("", "sched", "nr_migrate", value, sim, remove)
 
 	@command_get("numa_balancing_scan_delay_ms")
-	def _get_numa_balancing_scan_delay_ms(self):
+	def _get_numa_balancing_scan_delay_ms(self, instance):
 		return self._get_sched_knob("sched", "numa_balancing", "scan_delay_ms")
 
 	@command_set("numa_balancing_scan_delay_ms")
-	def _set_numa_balancing_scan_delay_ms(self, value, sim, remove):
+	def _set_numa_balancing_scan_delay_ms(self, value, instance, sim, remove):
 		return self._set_sched_knob("sched", "numa_balancing", "scan_delay_ms", value, sim, remove)
 
 	@command_get("numa_balancing_scan_period_min_ms")
-	def _get_numa_balancing_scan_period_min_ms(self):
+	def _get_numa_balancing_scan_period_min_ms(self, instance):
 		return self._get_sched_knob("sched", "numa_balancing", "scan_period_min_ms")
 
 	@command_set("numa_balancing_scan_period_min_ms")
-	def _set_numa_balancing_scan_period_min_ms(self, value, sim, remove):
+	def _set_numa_balancing_scan_period_min_ms(self, value, instance, sim, remove):
 		return self._set_sched_knob("sched", "numa_balancing", "scan_period_min_ms", value, sim, remove)
 
 	@command_get("numa_balancing_scan_period_max_ms")
-	def _get_numa_balancing_scan_period_max_ms(self):
+	def _get_numa_balancing_scan_period_max_ms(self, instance):
 		return self._get_sched_knob("sched", "numa_balancing", "scan_period_max_ms")
 
 	@command_set("numa_balancing_scan_period_max_ms")
-	def _set_numa_balancing_scan_period_max_ms(self, value, sim, remove):
+	def _set_numa_balancing_scan_period_max_ms(self, value, instance, sim, remove):
 		return self._set_sched_knob("sched", "numa_balancing", "scan_period_max_ms", value, sim, remove)
 
 	@command_get("numa_balancing_scan_size_mb")
-	def _get_numa_balancing_scan_size_mb(self):
+	def _get_numa_balancing_scan_size_mb(self, instance):
 		return self._get_sched_knob("sched", "numa_balancing", "scan_size_mb")
 
 	@command_set("numa_balancing_scan_size_mb")
-	def _set_numa_balancing_scan_size_mb(self, value, sim, remove):
+	def _set_numa_balancing_scan_size_mb(self, value, instance, sim, remove):
 		return self._set_sched_knob("sched", "numa_balancing", "scan_size_mb", value, sim, remove)

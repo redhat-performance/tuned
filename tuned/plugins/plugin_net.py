@@ -6,6 +6,7 @@ from tuned.utils.nettool import ethcard
 from tuned.utils.commands import commands
 import os
 import re
+import pyudev
 
 log = tuned.logs.get()
 
@@ -167,15 +168,21 @@ class NetTuningPlugin(hotplug.Plugin):
 		self._cmd = commands()
 		self._re_ip_link_show = {}
 		self._use_ip = True
+		self.re_not_virtual = re.compile('(?!.*/virtual/.*)')
+		# pyudev >= 0.21 check
+		if hasattr(pyudev.Device, "properties"):
+			self._get_device_property = self._get_device_property_1
+		else:
+			self._get_device_property = self._get_device_property_2
 
 	def _init_devices(self):
+		super(NetTuningPlugin, self)._init_devices()
 		self._devices_supported = True
 		self._free_devices = set()
 		self._assigned_devices = set()
 
-		re_not_virtual = re.compile('(?!.*/virtual/.*)')
 		for device in self._hardware_inventory.get_devices("net"):
-			if re_not_virtual.match(device.device_path):
+			if self._device_is_supported(device):
 				self._free_devices.add(device.sys_name)
 
 		log.debug("devices: %s" % str(self._free_devices));
@@ -183,12 +190,82 @@ class NetTuningPlugin(hotplug.Plugin):
 	def _get_device_objects(self, devices):
 		return [self._hardware_inventory.get_device("net", x) for x in devices]
 
+	def _device_is_supported(self, device):
+		return self.re_not_virtual.match(device.device_path)
+
+	def _hardware_events_init(self):
+		self._hardware_inventory.subscribe(self, "net", self._hardware_events_callback)
+
+	def _hardware_events_cleanup(self):
+		self._hardware_inventory.unsubscribe(self)
+
+	def _hardware_events_callback(self, event, device):
+		if self._device_is_supported(device):
+			super(NetTuningPlugin, self)._hardware_events_callback(event, device)
+
+	def _added_device_apply_tuning(self, instance, device_name):
+		if instance._load_monitor is not None:
+			instance._load_monitor.add_device(device_name)
+		super(NetTuningPlugin, self)._added_device_apply_tuning(instance, device_name)
+
+	def _removed_device_unapply_tuning(self, instance, device_name):
+		if instance._load_monitor is not None:
+			instance._load_monitor.remove_device(device_name)
+		super(NetTuningPlugin, self)._removed_device_unapply_tuning(instance, device_name)
+
+	# pyudev >= 0.21
+	def _get_device_property_1(self, pyudev_dev, prop):
+		return pyudev_dev.properties.get(prop)
+
+	# pyudev < 0.21
+	def _get_device_property_2(self, pyudev_dev, prop):
+		try:
+			p = pyudev_dev.__getitem__(prop)
+		except KeyError:
+			p = None
+		return p
+
+	# handle device rename
+	def _move_device(self, device_name):
+		d = self._hardware_inventory.get_device("net", device_name)
+		if d:
+			i = self._get_device_property(d, "IFINDEX")
+			if i:
+				for instance_name, instance in list(self._instances.items()):
+					device_name_old = instance._ifmap_orig.get(i)
+					if device_name_old:
+						log.debug("Rename device, ifindex: '%s', original name '%s', new name '%s'" % \
+							(i, device_name_old, device_name))
+						instance._ifnamemap[device_name_old] = device_name
+						break
+
+	def _get_curr_device_wrapper(self, instance):
+		# get new device name after rename
+		def _get_curr_device(device):
+			d = instance._ifnamemap.get(device)
+			return d if d else device
+
+		return _get_curr_device
+
 	def _instance_init(self, instance):
 		instance._has_static_tuning = True
 		instance._load_monitor = None
 		instance._idle = None
 		instance._stats = None
+		instance._ifnamemap = {}
+		instance._get_curr_device = self._get_curr_device_wrapper(instance)
 		instance._has_dynamic_tuning = self._option_bool(instance.options["dynamic"])
+
+	def assign_free_devices(self, instance):
+		super(NetTuningPlugin, self).assign_free_devices(instance)
+		instance._ifmap_orig = {}
+		devices = instance.assigned_devices
+		for device in devices:
+			d = self._hardware_inventory.get_device("net", device)
+			if d:
+				i = self._get_device_property(d, "IFINDEX")
+				if i:
+					instance._ifmap_orig[i] = device
 
 	def _instance_cleanup(self, instance):
 		if instance._load_monitor is not None:
@@ -200,6 +277,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		instance._idle = {}
 		instance._stats = {}
 		instance._load_monitor = self._monitors_repository.create("net", instance.assigned_devices)
+		instance._load_monitor._set_dev_map(instance._get_curr_device)
 
 	def _instance_apply_dynamic(self, instance, device):
 		self._instance_update_dynamic(instance, device)
@@ -292,7 +370,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		}
 
 	def _init_stats_and_idle(self, instance, device):
-		max_speed = self._calc_speed(ethcard(device).get_max_speed())
+		max_speed = self._calc_speed(ethcard(instance._get_curr_device(device)).get_max_speed())
 		instance._stats[device] = { "new": 4 * [0], "max": 2 * [max_speed, 1] }
 		instance._idle[device] = { "level": 0, "read": 0, "write": 0 }
 
@@ -326,7 +404,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		if device in instance._idle and instance._idle[device]["level"] > 0:
 			instance._idle[device]["level"] = 0
 			log.info("%s: setting max speed" % device)
-			ethcard(device).set_max_speed()
+			ethcard(instance._get_curr_device(device)).set_max_speed()
 
 	def _calc_speed(self, speed):
 		# 0.6 is just a magical constant (empirical value): Typical workload on netcard won't exceed
@@ -389,7 +467,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return "/sys/module/nf_conntrack/parameters/hashsize"
 
 	@command_set("wake_on_lan", per_device=True)
-	def _set_wake_on_lan(self, value, device, sim, remove):
+	def _set_wake_on_lan(self, value, device, instance, sim, remove):
 		if value is None:
 			return None
 
@@ -400,14 +478,15 @@ class NetTuningPlugin(hotplug.Plugin):
 			return None
 
 		if not sim:
-			self._cmd.execute(["ethtool", "-s", device, "wol", value])
+			self._cmd.execute(["ethtool", "-s", instance._get_curr_device(device), "wol", value])
 		return value
 
 	@command_get("wake_on_lan")
-	def _get_wake_on_lan(self, device, ignore_missing=False):
+	def _get_wake_on_lan(self, device, instance, ignore_missing=False):
 		value = None
 		try:
-			m = re.match(r".*Wake-on:\s*([" + WOL_VALUES + "]+).*", self._cmd.execute(["ethtool", device])[1], re.S)
+			m = re.match(r".*Wake-on:\s*([" + WOL_VALUES + "]+).*",
+				self._cmd.execute(["ethtool", instance._get_curr_device(device)])[1], re.S)
 			if m:
 				value = m.group(1)
 		except IOError:
@@ -415,7 +494,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return value
 
 	@command_set("nf_conntrack_hashsize")
-	def _set_nf_conntrack_hashsize(self, value, sim, remove):
+	def _set_nf_conntrack_hashsize(self, value, instance, sim, remove):
 		if value is None:
 			return None
 
@@ -429,7 +508,7 @@ class NetTuningPlugin(hotplug.Plugin):
 			return None
 
 	@command_get("nf_conntrack_hashsize")
-	def _get_nf_conntrack_hashsize(self):
+	def _get_nf_conntrack_hashsize(self, instance):
 		value = self._cmd.read_file(self._nf_conntrack_hashsize_path())
 		if len(value) > 0:
 			return int(value)
@@ -457,7 +536,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return self._call_ip_link(args)
 
 	@command_set("txqueuelen", per_device=True)
-	def _set_txqueuelen(self, value, device, sim, remove):
+	def _set_txqueuelen(self, value, device, instance, sim, remove):
 		if value is None:
 			return None
 		try:
@@ -467,9 +546,9 @@ class NetTuningPlugin(hotplug.Plugin):
 			return None
 		if not sim:
 			# there is inconsistency in "ip", where "txqueuelen" is set as it, but is shown as "qlen"
-			res = self._call_ip_link(["set", "dev", device, "txqueuelen", value])
+			res = self._call_ip_link(["set", "dev", instance._get_curr_device(device), "txqueuelen", value])
 			if res is None:
-				log.warning("Cannot set txqueuelen for device '%s'" % device)
+				log.warning("Cannot set txqueuelen for device '%s'" % instance._get_curr_device(device))
 				return None
 		return value
 
@@ -482,22 +561,24 @@ class NetTuningPlugin(hotplug.Plugin):
 		return self._re_ip_link_show[arg]
 
 	@command_get("txqueuelen")
-	def _get_txqueuelen(self, device, ignore_missing=False):
-		out = self._ip_link_show(device)
+	def _get_txqueuelen(self, device, instance, ignore_missing=False):
+		out = self._ip_link_show(instance._get_curr_device(device))
 		if out is None:
 			if not ignore_missing:
-				log.info("Cannot get 'ip link show' result for txqueuelen value for device '%s'" % device)
+				log.info("Cannot get 'ip link show' result for txqueuelen value for device '%s'" % \
+					instance._get_curr_device(device))
 			return None
 		res = self._get_re_ip_link_show("qlen").search(out)
 		if res is None:
 			# We can theoretically get device without qlen (http://linux-ip.net/gl/ip-cref/ip-cref-node17.html)
 			if not ignore_missing:
-				log.info("Cannot get txqueuelen value from 'ip link show' result for device '%s'" % device)
+				log.info("Cannot get txqueuelen value from 'ip link show' result for device '%s'" % \
+					instance._get_curr_device(device))
 			return None
 		return res.group(1)
 
 	@command_set("mtu", per_device=True)
-	def _set_mtu(self, value, device, sim, remove):
+	def _set_mtu(self, value, device, instance, sim, remove):
 		if value is None:
 			return None
 		try:
@@ -506,24 +587,26 @@ class NetTuningPlugin(hotplug.Plugin):
 			log.warning("mtu value '%s' is not integer" % value)
 			return None
 		if not sim:
-			res = self._call_ip_link(["set", "dev", device, "mtu", value])
+			res = self._call_ip_link(["set", "dev", instance._get_curr_device(device), "mtu", value])
 			if res is None:
-				log.warning("Cannot set mtu for device '%s'" % device)
+				log.warning("Cannot set mtu for device '%s'" % instance._get_curr_device(device))
 				return None
 		return value
 
 	@command_get("mtu")
-	def _get_mtu(self, device, ignore_missing=False):
-		out = self._ip_link_show(device)
+	def _get_mtu(self, device, instance, ignore_missing=False):
+		out = self._ip_link_show(instance._get_curr_device(device))
 		if out is None:
 			if not ignore_missing:
-				log.info("Cannot get 'ip link show' result for mtu value for device '%s'" % device)
+				log.info("Cannot get 'ip link show' result for mtu value for device '%s'" % \
+					instance._get_curr_device(device))
 			return None
 		res = self._get_re_ip_link_show("mtu").search(out)
 		if res is None:
 			# mtu value should be always present, but it's better to have a test
 			if not ignore_missing:
-				log.info("Cannot get mtu value from 'ip link show' result for device '%s'" % device)
+				log.info("Cannot get mtu value from 'ip link show' result for device '%s'" % \
+					instance._get_curr_device(device))
 			return None
 		return res.group(1)
 
@@ -589,10 +672,11 @@ class NetTuningPlugin(hotplug.Plugin):
 			mod_params_list.extend(["combined", cnt])
 		return dict(list(zip(mod_params_list[::2], mod_params_list[1::2])))
 
-	def _check_device_support(self, context, parameters, device, dev_params):
+	def _check_device_support(self, instance, context, parameters, device, dev_params):
 		"""Filter unsupported parameters and log warnings about it
 
 		Positional parameters:
+		instance -- instance calling it
 		context -- context of change
 		parameters -- parameters to change
 		device -- name of device on which should be parameters set
@@ -608,15 +692,15 @@ class NetTuningPlugin(hotplug.Plugin):
 			log.warning("%s parameter %s is not supported by device %s" % (
 				context,
 				param,
-				device,
+				instance._get_curr_device(device),
 			))
 			parameters.pop(param, None)
 
-	def _get_device_parameters(self, context, device):
+	def _get_device_parameters(self, instance, context, device):
 		context2opt = { "coalesce": "-c", "features": "-k", "pause": "-a", "ring": "-g", \
 				"channels": "-l"}
 		opt = context2opt[context]
-		ret, value = self._cmd.execute(["ethtool", opt, device])
+		ret, value = self._cmd.execute(["ethtool", opt, instance._get_curr_device(device)])
 		if ret != 0 or len(value) == 0:
 			return None
 		context2parser = { "coalesce": self._parse_device_parameters, \
@@ -630,7 +714,7 @@ class NetTuningPlugin(hotplug.Plugin):
 			return None
 		return d
 
-	def _set_device_parameters(self, context, value, device, sim,
+	def _set_device_parameters(self, instance, context, value, device, sim,
 				dev_params = None):
 		if value is None or len(value) == 0:
 			return None
@@ -639,7 +723,7 @@ class NetTuningPlugin(hotplug.Plugin):
 			return {}
 		# check if device supports parameters and filter out unsupported ones
 		if dev_params:
-			self._check_device_support(context, d, device, dev_params)
+			self._check_device_support(instance, context, d, device, dev_params)
 			# replace the channel parameters based on the device support
 			if context == "channels" and str(dev_params[next(iter(d))]) in ["n/a", "0"]:
 				d = self._replace_channels_parameters(context, self._cmd.dict2list(d), dev_params)
@@ -650,19 +734,19 @@ class NetTuningPlugin(hotplug.Plugin):
                                 "channels": "-L"}
 			opt = context2opt[context]
 			# ignore ethtool return code 80, it means parameter is already set
-			self._cmd.execute(["ethtool", opt, device] + self._cmd.dict2list(d), no_errors = [80])
+			self._cmd.execute(["ethtool", opt, instance._get_curr_device(device)] + \
+				self._cmd.dict2list(d), no_errors = [80])
 		return d
 
-	def _custom_parameters(self, context, start, value, device, verify):
+	def _custom_parameters(self, context, start, value, device, verify, instance):
 		storage_key = self._storage_key(
 				command_name = context,
 				device_name = device)
 		if start:
-			params_current = self._get_device_parameters(context,
-					device)
+			params_current = self._get_device_parameters(instance, context, device)
 			if params_current is None or len(params_current) == 0:
 				return False
-			params_set = self._set_device_parameters(context,
+			params_set = self._set_device_parameters(instance, context,
 					value, device, verify,
 					dev_params = params_current)
 			# if none of parameters passed checks then the command completely
@@ -679,7 +763,7 @@ class NetTuningPlugin(hotplug.Plugin):
 				self._log_verification_result(context, res,
 						params_set,
 						relevant_params_current,
-						device = device)
+						device = instance._get_curr_device(device))
 				return res
 			# saved are only those parameters which passed checks
 			self._storage.set(storage_key, " ".join(
@@ -688,25 +772,25 @@ class NetTuningPlugin(hotplug.Plugin):
 			original_value = self._storage.get(storage_key)
 			# in storage are only those parameters which were already tested
 			# so skip check for supported parameters
-			self._set_device_parameters(context, original_value, device, False)
+			self._set_device_parameters(instance, context, original_value, device, False)
 		return None
 
 	@command_custom("features", per_device = True)
-	def _features(self, start, value, device, verify, ignore_missing):
-		return self._custom_parameters("features", start, value, device, verify)
+	def _features(self, start, value, device, verify, ignore_missing, instance):
+		return self._custom_parameters("features", start, value, device, verify, instance)
 
 	@command_custom("coalesce", per_device = True)
-	def _coalesce(self, start, value, device, verify, ignore_missing):
-		return self._custom_parameters("coalesce", start, value, device, verify)
+	def _coalesce(self, start, value, device, verify, ignore_missing, instance):
+		return self._custom_parameters("coalesce", start, value, device, verify, instance)
 
 	@command_custom("pause", per_device = True)
-	def _pause(self, start, value, device, verify, ignore_missing):
-		return self._custom_parameters("pause", start, value, device, verify)
+	def _pause(self, start, value, device, verify, ignore_missing, instance):
+		return self._custom_parameters("pause", start, value, device, verify, instance)
 
 	@command_custom("ring", per_device = True)
-	def _ring(self, start, value, device, verify, ignore_missing):
-		return self._custom_parameters("ring", start, value, device, verify)
+	def _ring(self, start, value, device, verify, ignore_missing, instance):
+		return self._custom_parameters("ring", start, value, device, verify, instance)
 
 	@command_custom("channels", per_device = True)
-	def _channels(self, start, value, device, verify, ignore_missing):
-		return self._custom_parameters("channels", start, value, device, verify)
+	def _channels(self, start, value, device, verify, ignore_missing, instance):
+		return self._custom_parameters("channels", start, value, device, verify, instance)

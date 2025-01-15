@@ -248,7 +248,7 @@ class IrqPlugin(hotplug.Plugin):
 	# command definitions: entry to device-specific tuning
 	#
 	@command_custom("mode", per_device=False, priority=-10)
-	def _mode(self, enabling, value, verify, ignore_missing):
+	def _mode(self, enabling, value, verify, ignore_missing, instance):
 		if (enabling or verify) and value is not None:
 			# Store the operating mode of the current instance in the plugin
 			# object, from where it is read by the "affinity" command.
@@ -256,7 +256,7 @@ class IrqPlugin(hotplug.Plugin):
 			self._mode_val = value
 
 	@command_custom("affinity", per_device=True)
-	def _affinity(self, enabling, value, device, verify, ignore_missing):
+	def _affinity(self, enabling, value, device, verify, ignore_missing, instance):
 		irq = "DEFAULT" if device == "DEFAULT" else device[len("irq"):]
 		if irq not in self._irqs:
 			log.error("Unknown device: %s" % device)

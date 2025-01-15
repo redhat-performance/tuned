@@ -30,10 +30,20 @@ class NetMonitor(tuned.monitors.Monitor):
 		return (int) (0.6 * 1024 * 1024 * speed / 8)
 
 	@classmethod
+	def _set_dev_map(cls, map_fce):
+		cls.map_fce = map_fce
+
+	@classmethod
+	def _dev_map(cls, dev):
+		try:
+			return cls.map_fce(dev)
+		except AttributeError:
+			return dev
+	@classmethod
 	def _updateStat(cls, dev):
 		files = ["rx_bytes", "rx_packets", "tx_bytes", "tx_packets"]
 		for i,f in enumerate(files):
-			cls._load[dev][i] = cmd.read_file("/sys/class/net/" + dev + "/statistics/" + f, err_ret = "0").strip()
+			cls._load[dev][i] = cmd.read_file("/sys/class/net/" + cls._dev_map(dev) + "/statistics/" + f, err_ret = "0").strip()
 
 	@classmethod
 	def update(cls):

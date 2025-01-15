@@ -526,7 +526,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._cmd.read_file("/sys/devices/system/cpu/%s/cpufreq/scaling_available_governors" % device).strip().split()
 
 	@command_set("governor", per_device=True)
-	def _set_governor(self, governors, device, sim, remove):
+	def _set_governor(self, governors, device, instance, sim, remove):
 		if not self._check_cpu_can_change_governor(device):
 			return None
 		governors = str(governors)
@@ -555,7 +555,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return governor
 
 	@command_get("governor")
-	def _get_governor(self, device, ignore_missing=False):
+	def _get_governor(self, device, instance, ignore_missing=False):
 		governor = None
 		if not self._check_cpu_can_change_governor(device):
 			return None
@@ -572,7 +572,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return "/sys/devices/system/cpu/cpufreq/%s/sampling_down_factor" % governor
 
 	@command_set("sampling_down_factor", per_device = True, priority = 10)
-	def _set_sampling_down_factor(self, sampling_down_factor, device, sim, remove):
+	def _set_sampling_down_factor(self, sampling_down_factor, device, instance, sim, remove):
 		val = None
 
 		# hack to clear governors map when the profile starts unloading
@@ -599,7 +599,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return val
 
 	@command_get("sampling_down_factor")
-	def _get_sampling_down_factor(self, device, ignore_missing=False):
+	def _get_sampling_down_factor(self, device, instance, ignore_missing=False):
 		governor = self._get_governor(device, ignore_missing=ignore_missing)
 		if governor is None:
 			return None
@@ -627,7 +627,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return "/sys/devices/system/cpu/cpu%s/power/energy_perf_bias" % cpu_id
 
 	@command_set("energy_perf_bias", per_device=True)
-	def _set_energy_perf_bias(self, energy_perf_bias, device, sim, remove):
+	def _set_energy_perf_bias(self, energy_perf_bias, device, instance, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -706,7 +706,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 				}.get(self._try_parse_num(s), s)
 
 	@command_get("energy_perf_bias")
-	def _get_energy_perf_bias(self, device, ignore_missing=False):
+	def _get_energy_perf_bias(self, device, instance, ignore_missing=False):
 		energy_perf_bias = None
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
@@ -741,7 +741,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._has_pm_qos_resume_latency_us
 
 	@command_set("pm_qos_resume_latency_us", per_device=True)
-	def _set_pm_qos_resume_latency_us(self, pm_qos_resume_latency_us, device, sim, remove):
+	def _set_pm_qos_resume_latency_us(self, pm_qos_resume_latency_us, device, instance, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -757,7 +757,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return latency
 
 	@command_get("pm_qos_resume_latency_us")
-	def _get_pm_qos_resume_latency_us(self, device, ignore_missing=False):
+	def _get_pm_qos_resume_latency_us(self, device, instance, ignore_missing=False):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -766,7 +766,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._cmd.read_file(self._pm_qos_resume_latency_us_path(device), no_error=ignore_missing).strip()
 
 	@command_set("boost", per_device=True)
-	def _set_boost(self, boost, device, sim, remove):
+	def _set_boost(self, boost, device, instance, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -785,7 +785,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return None
 
 	@command_get("boost")
-	def _get_boost(self, device, ignore_missing=False):
+	def _get_boost(self, device, instance, ignore_missing=False):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -797,7 +797,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return None
 
 	@command_set("energy_performance_preference", per_device=True)
-	def _set_energy_performance_preference(self, energy_performance_preference, device, sim, remove):
+	def _set_energy_performance_preference(self, energy_performance_preference, device, instance, sim, remove):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -823,7 +823,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return None
 
 	@command_get("energy_performance_preference")
-	def _get_energy_performance_preference(self, device, ignore_missing=False):
+	def _get_energy_performance_preference(self, device, instance, ignore_missing=False):
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None

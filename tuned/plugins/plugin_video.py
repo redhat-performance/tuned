@@ -107,7 +107,7 @@ class VideoPlugin(base.Plugin):
 		return None
 
 	@command_set("radeon_powersave", per_device=True)
-	def _set_radeon_powersave(self, value, device, sim, remove):
+	def _set_radeon_powersave(self, value, device, instance, sim, remove):
 		sys_files = self._files(device)
 		va = str(re.sub(r"(\s*:\s*)|(\s+)|(\s*;\s*)|(\s*,\s*)", " ", value)).split()
 		if not os.path.exists(sys_files["method"]):
@@ -143,7 +143,7 @@ class VideoPlugin(base.Plugin):
 		return None
 
 	@command_get("radeon_powersave")
-	def _get_radeon_powersave(self, device, ignore_missing = False):
+	def _get_radeon_powersave(self, device, instance, ignore_missing = False):
 		sys_files = self._files(device)
 		if not os.path.exists(sys_files["method"]):
 			log.debug("radeon_powersave is not supported on '%s'" % device)
@@ -159,7 +159,7 @@ class VideoPlugin(base.Plugin):
 			return None
 
 	@command_set("panel_power_savings", per_device=True)
-	def _set_panel_power_savings(self, value, device, sim, remove):
+	def _set_panel_power_savings(self, value, device, instance, sim, remove):
 		"""Set the panel_power_savings value"""
 		try:
 			value = int(value, 10)
@@ -173,7 +173,7 @@ class VideoPlugin(base.Plugin):
 		return None
 
 	@command_get("panel_power_savings")
-	def _get_panel_power_savings(self, device, ignore_missing=False):
+	def _get_panel_power_savings(self, device, instance, ignore_missing=False):
 		"""Get the current panel_power_savings value"""
 		if not os.path.exists(self._files(device)["panel_power_savings"]):
 			log.debug("panel_power_savings is not supported on '%s'" % device)
