@@ -408,7 +408,7 @@ class Controller(exports.interfaces.ExportableInterface):
             self._active_profile = profile
         return True
 
-    @exports.export("sss", "u")
+    @exports.export("sss", "u", "hold-profile")
     def HoldProfile(self, profile, reason, app_id, caller):
         """
         Initiates a profile hold and returns a cookie for referring to it.
@@ -419,7 +419,7 @@ class Controller(exports.interfaces.ExportableInterface):
             )
         return self._profile_holds.add(profile, reason, app_id, caller)
 
-    @exports.export("u", "")
+    @exports.export("u", "", "release-profile")
     def ReleaseProfile(self, cookie, caller):
         """
         Releases a held profile with the given cookie.
@@ -435,8 +435,8 @@ class Controller(exports.interfaces.ExportableInterface):
         """
         pass
 
-    @exports.property_setter("ActiveProfile")
-    def set_active_profile(self, profile):
+    @exports.property_setter("ActiveProfile", "switch-profile")
+    def set_active_profile(self, profile, caller):
         """
         Sets the base profile to the given one and also makes it active.
         If there are any active profile holds, these are cancelled.
@@ -451,14 +451,14 @@ class Controller(exports.interfaces.ExportableInterface):
         self._save_base_profile(profile)
 
     @exports.property_getter("ActiveProfile")
-    def get_active_profile(self):
+    def get_active_profile(self, caller):
         """
         Returns the currently active PPD profile.
         """
         return self._active_profile
 
     @exports.property_getter("Profiles")
-    def get_profiles(self):
+    def get_profiles(self, caller):
         """
         Returns a DBus array of all available PPD profiles.
         """
@@ -468,26 +468,26 @@ class Controller(exports.interfaces.ExportableInterface):
         )
 
     @exports.property_getter("Actions")
-    def get_actions(self):
+    def get_actions(self, caller):
         """
         Returns a DBus array of all available actions (currently there are none).
         """
         return dbus.Array([], signature="s")
 
     @exports.property_getter("PerformanceDegraded")
-    def get_performance_degraded(self):
+    def get_performance_degraded(self, caller):
         """
         Returns the current performance degradation status.
         """
         return self._performance_degraded
 
     @exports.property_getter("ActiveProfileHolds")
-    def get_active_profile_holds(self):
+    def get_active_profile_holds(self, caller):
         """
         Returns a DBus array of active profile holds.
         """
         return self._profile_holds.as_dbus_array()
 
     @exports.property_getter("Version")
-    def version(self):
+    def version(self, caller):
         return PPD_API_COMPATIBILITY
