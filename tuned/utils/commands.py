@@ -552,3 +552,6 @@ class commands:
 	# Checks if name contains only valid characters and has valid length or is empty string or None
 	def is_valid_name(self, name):
 		return not name or (all(c in consts.NAMES_ALLOWED_CHARS for c in name) and len(name) <= consts.NAMES_MAX_LENGTH)
+
+	def getconf(self, variable):
+		return check_output(["getconf", variable]).decode().strip()
