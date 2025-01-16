@@ -32,21 +32,24 @@ TMPFILESDIR_DETECT = $(shell $(PKG_CONFIG) systemd --variable tmpfilesdir || rpm
 TMPFILESDIR = $(TMPFILESDIR_DETECT:%{_tmpfilesdir}=$(TMPFILESDIR_FALLBACK))
 VERSIONED_NAME = $(NAME)-$(VERSION)$(PRERELEASE)$(GIT_PSUFFIX)
 
+export PREFIX = /usr
+export BINDIR = $(PREFIX)/bin
+export SBINDIR = $(PREFIX)/sbin
 export SYSCONFDIR = /etc
-export DATADIR = /usr/share
+export DATADIR = $(PREFIX)/share
 export DOCDIR = $(DATADIR)/doc/$(NAME)
-PYTHON = /usr/bin/python3
+PYTHON = $(BINDIR)/python3
 PYLINT = pylint-3
 ifeq ($(PYTHON),python2)
 PYLINT = pylint-2
 endif
-SHEBANG_REWRITE_REGEX= '1s|^\#!/usr/bin/\<python3\>|\#!$(PYTHON)|'
+SHEBANG_REWRITE_REGEX= '1s|^\#!$(BINDIR)/\<python3\>|\#!$(PYTHON)|'
 PYTHON_SITELIB = $(shell $(PYTHON) -c 'from sysconfig import get_path; print(get_path("purelib"));')
 ifeq ($(PYTHON_SITELIB),)
 $(error Failed to determine python library directory)
 endif
-KERNELINSTALLHOOKDIR = /usr/lib/kernel/install.d
-TUNED_SYSTEM_DIR = /usr/lib/tuned
+KERNELINSTALLHOOKDIR = $(PREFIX)/lib/kernel/install.d
+TUNED_SYSTEM_DIR = $(PREFIX)/lib/tuned
 TUNED_SYSTEM_PROFILES_DIR = $(TUNED_SYSTEM_DIR)/profiles
 TUNED_CFG_DIR = $(SYSCONFDIR)/tuned
 TUNED_USER_PROFILES_DIR = $(TUNED_CFG_DIR)/profiles
@@ -147,21 +150,21 @@ install: install-dirs
 	cp -a tuned $(DESTDIR)$(PYTHON_SITELIB)
 
 	# binaries
-	$(call install_python_script,tuned.py,$(DESTDIR)/usr/sbin/tuned)
-	$(call install_python_script,tuned-adm.py,$(DESTDIR)/usr/sbin/tuned-adm)
-	$(call install_python_script,tuned-gui.py,$(DESTDIR)/usr/sbin/tuned-gui)
+	$(call install_python_script,tuned.py,$(DESTDIR)$(SBINDIR)/tuned)
+	$(call install_python_script,tuned-adm.py,$(DESTDIR)$(SBINDIR)/tuned-adm)
+	$(call install_python_script,tuned-gui.py,$(DESTDIR)$(SBINDIR)/tuned-gui)
 
 	$(foreach file, diskdevstat netdevstat scomes, \
-		install -Dpm 0755 systemtap/$(file) $(DESTDIR)/usr/sbin/$(notdir $(file));)
+		install -Dpm 0755 systemtap/$(file) $(DESTDIR)$(SBINDIR)/$(notdir $(file));)
 	$(call install_python_script, \
-		systemtap/varnetload, $(DESTDIR)/usr/sbin/varnetload)
+		systemtap/varnetload, $(DESTDIR)$(SBINDIR)/varnetload)
 
 	# glade
 	install -Dpm 0644 tuned-gui.glade $(DESTDIR)$(DATADIR)/tuned/ui/tuned-gui.glade
 
 	# tools
 	$(call install_python_script, \
-		 experiments/powertop2tuned.py, $(DESTDIR)/usr/bin/powertop2tuned)
+		 experiments/powertop2tuned.py, $(DESTDIR)$(BINDIR)/powertop2tuned)
 
 	# configuration files
 	# Update default profiles location, in the configuration and in the code
@@ -233,7 +236,7 @@ install: install-dirs
 	# libexec scripts
 	$(foreach file, $(wildcard libexec/*), \
 		$(call install_python_script, \
-			$(file), $(DESTDIR)/usr/libexec/tuned/$(notdir $(file))))
+			$(file), $(DESTDIR)$(PREFIX)/libexec/tuned/$(notdir $(file))))
 
 	# icon
 	install -Dpm 0644 icons/tuned.svg $(DESTDIR)$(DATADIR)/icons/hicolor/scalable/apps/tuned.svg
@@ -243,7 +246,7 @@ install: install-dirs
 	desktop-file-install --dir=$(DESTDIR)$(DATADIR)/applications tuned-gui.desktop
 
 install-ppd:
-	$(call install_python_script,tuned-ppd.py,$(DESTDIR)/usr/sbin/tuned-ppd)
+	$(call install_python_script,tuned-ppd.py,$(DESTDIR)$(SBINDIR)/tuned-ppd)
 	install -Dpm 0644 tuned/ppd/tuned-ppd.service $(DESTDIR)$(UNITDIR)/tuned-ppd.service
 	install -Dpm 0644 tuned/ppd/ppd.conf $(DESTDIR)$(SYSCONFDIR)/tuned/ppd.conf
 	$(foreach bus, $(PPD_BUS_NAMES), \
