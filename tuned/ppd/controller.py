@@ -3,7 +3,7 @@ from tuned.utils.commands import commands
 from tuned.consts import PPD_CONFIG_FILE, PPD_BASE_PROFILE_FILE, PPD_API_COMPATIBILITY
 from tuned.ppd.config import PPDConfig, PPD_PERFORMANCE, PPD_BALANCED, PPD_POWER_SAVER
 
-from enum import StrEnum
+from enum import Enum
 from random import Random
 import pyinotify
 import threading
@@ -30,7 +30,7 @@ PLATFORM_PROFILE_MAPPING = {
 }
 
 
-class PerformanceDegraded(StrEnum):
+class PerformanceDegraded(Enum):
     """
     Possible reasons for performance degradation.
     """
@@ -310,9 +310,9 @@ class Controller(exports.interfaces.ExportableInterface):
         if os.path.exists(LAP_MODE_PATH) and self._cmd.read_file(LAP_MODE_PATH).strip() == "1":
             performance_degraded = PerformanceDegraded.LAP_DETECTED
         if performance_degraded != self._performance_degraded:
-            log.info("Performance degraded: %s" % performance_degraded)
+            log.info("Performance degraded: %s" % performance_degraded.value)
             self._performance_degraded = performance_degraded
-            exports.property_changed("PerformanceDegraded", performance_degraded)
+            exports.property_changed("PerformanceDegraded", performance_degraded.value)
 
     def check_platform_profile(self):
         """
@@ -487,7 +487,7 @@ class Controller(exports.interfaces.ExportableInterface):
         """
         Returns the current performance degradation status.
         """
-        return self._performance_degraded
+        return self._performance_degraded.value
 
     @exports.property_getter("ActiveProfileHolds")
     def get_active_profile_holds(self, caller):
