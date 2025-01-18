@@ -1509,11 +1509,11 @@ class SchedulerPlugin(base.Plugin):
 		return self._set_sched_knob("", "sched", "min_granularity_ns", value, sim, remove)
 
 	@command_get("sched_base_slice_ns")
-	def _get_sched_base_slice_ns(self):
+	def _get_sched_base_slice_ns(self, instance):
 		return self._get_sched_min_granularity_ns()
 
 	@command_set("sched_base_slice_ns")
-	def _set_sched_base_slice_ns(self, value, sim, remove):
+	def _set_sched_base_slice_ns(self, value, instance, sim, remove):
 		return self._set_sched_min_granularity_ns(value, sim, remove)
 
 	@command_get("sched_latency_ns")
