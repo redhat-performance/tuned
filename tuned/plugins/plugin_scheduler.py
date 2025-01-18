@@ -11,7 +11,7 @@ import threading
 # perf is optional
 try:
 	import perf
-except ModuleNotFoundError:
+except ImportError:
 # if perf is unavailable, it will be disabled later
 	pass
 import select

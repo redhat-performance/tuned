@@ -31,6 +31,6 @@ with open(args.out, "w") as out_file:
 		plugin_file = inspect.getfile(plugin)
 		plugin_name = os.path.basename(plugin_file)[7:-3]
 		out_file.write("\n")
-		out_file.write(f"== **{plugin_name}**\n")
+		out_file.write("== **%s**\n" % plugin_name)
 		out_file.write(inspect.cleandoc(plugin.__doc__))
 		out_file.write("\n")

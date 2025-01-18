@@ -38,7 +38,7 @@ export SBINDIR = $(PREFIX)/sbin
 export SYSCONFDIR = /etc
 export DATADIR = $(PREFIX)/share
 export DOCDIR = $(DATADIR)/doc/$(NAME)
-PYTHON = $(BINDIR)/python3
+export PYTHON = $(BINDIR)/python3
 PYLINT = pylint-3
 ifeq ($(PYTHON),python2)
 PYLINT = pylint-2
