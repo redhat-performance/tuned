@@ -16,7 +16,7 @@ This procedure lists all *TuneD* profiles that are currently available on your s
 
 * To list all available *TuneD* profiles on your system, use:
 +
-[subs="+quotes",options="+nowrap",role=white-space-pre]
+[subs="quotes"]
 ----
 $ *tuned-adm list*
 
@@ -35,7 +35,7 @@ Current active profile: [replaceable]_balanced_
 
 * To display only the currently active profile, use:
 +
-[subs=+quotes]
+[subs="quotes"]
 ----
 $ *tuned-adm active*
 

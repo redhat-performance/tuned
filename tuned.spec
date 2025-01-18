@@ -296,11 +296,7 @@ to TuneD from power-profiles-daemon (PPD).
 %autosetup -p1 -n %{name}-%{version}%{?prerel2}
 
 %build
-# Docs cannot be generated on RHEL now due to missing asciidoctor dependency
-# asciidoc doesn't seem to be compatible
-%if ! 0%{?rhel}
 make html %{make_python_arg}
-%endif
 
 %install
 make install DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg} \
