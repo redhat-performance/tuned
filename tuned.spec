@@ -299,10 +299,12 @@ to TuneD from power-profiles-daemon (PPD).
 make html %{make_python_arg}
 
 %install
-make install DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg} \
-  TUNED_USER_PROFILES_DIR=%{user_profiles_dir} \
-  TUNED_SYSTEM_PROFILES_DIR=%{system_profiles_dir}
-make install-ppd DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
+make install DESTDIR="%{buildroot}" BINDIR="%{_bindir}" SBINDIR="%{_sbindir}" \
+  DOCDIR="%{docdir}" %{make_python_arg} \
+  TUNED_USER_PROFILES_DIR="%{user_profiles_dir}" \
+  TUNED_SYSTEM_PROFILES_DIR="%{system_profiles_dir}"
+make install-ppd DESTDIR="%{buildroot}" BINDIR="%{_bindir}" \
+  SBINDIR="%{_sbindir}" DOCDIR="%{docdir}" %{make_python_arg}
 
 %if ! 0%{?rhel}
 # manual
