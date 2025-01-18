@@ -27,11 +27,14 @@ class Plugin(base.Plugin):
 
 	def _hardware_events_callback(self, event, device):
 		if event == "add":
-			log.info("device '%s' added" % device.sys_name)
+			log.info("device '%s', add event" % device.sys_name)
 			self._add_device(device.sys_name)
 		elif event == "remove":
-			log.info("device '%s' removed" % device.sys_name)
+			log.info("device '%s', remove event" % device.sys_name)
 			self._remove_device(device.sys_name)
+		elif event == "move":
+			log.info("device: '%s', rename event, reported new name" % device.sys_name)
+			self._move_device(device.sys_name)
 
 	def _add_device_process(self, instance, device_name):
 		log.info("instance %s: adding new device %s" % (instance.name, device_name))
@@ -77,6 +80,19 @@ class Plugin(base.Plugin):
 			self._assigned_devices.remove(device_name)
 			return True
 		return False
+
+	def _move_device(self, device_name):
+		"""Rename device in the instance, this probably applies only
+		to network interfaces. The udev device environment is
+		mostly unchanged (except the name) and the old device name
+		isn't announced, thus the rename functionality is plugin
+		dependant and has to be implemented in the child plugin class.
+
+		Parameters:
+		device_name -- new name of the device
+
+		"""
+		pass
 
 	def _remove_device(self, device_name):
 		"""Remove device from the instance

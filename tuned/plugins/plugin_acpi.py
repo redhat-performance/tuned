@@ -52,7 +52,7 @@ class ACPIPlugin(base.Plugin):
 		return os.path.join(ACPI_DIR, "platform_profile")
 
 	@command_set("platform_profile")
-	def _set_platform_profile(self, profiles, sim, remove):
+	def _set_platform_profile(self, profiles, instance, sim, remove):
 		if not os.path.isfile(self._platform_profile_path()):
 			log.debug("ACPI platform_profile is not supported on this system")
 			return None
@@ -70,7 +70,7 @@ class ACPIPlugin(base.Plugin):
 		return None
 
 	@command_get("platform_profile")
-	def _get_platform_profile(self, ignore_missing=False):
+	def _get_platform_profile(self, instance, ignore_missing=False):
 		if not os.path.isfile(self._platform_profile_path()):
 			log.debug("ACPI platform_profile is not supported on this system")
 			return None

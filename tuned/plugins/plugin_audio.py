@@ -72,7 +72,7 @@ class AudioPlugin(hotplug.Plugin):
 		return "/sys/module/%s/parameters/power_save_controller" % device
 
 	@command_set("timeout", per_device = True)
-	def _set_timeout(self, value, device, sim, remove):
+	def _set_timeout(self, value, device, instance, sim, remove):
 		try:
 			timeout = int(value)
 		except ValueError:
@@ -88,7 +88,7 @@ class AudioPlugin(hotplug.Plugin):
 			return None
 
 	@command_get("timeout")
-	def _get_timeout(self, device, ignore_missing=False):
+	def _get_timeout(self, device, instance, ignore_missing=False):
 		sys_file = self._timeout_path(device)
 		value = cmd.read_file(sys_file, no_error=ignore_missing)
 		if len(value) > 0:
@@ -96,7 +96,7 @@ class AudioPlugin(hotplug.Plugin):
 		return None
 
 	@command_set("reset_controller", per_device = True)
-	def _set_reset_controller(self, value, device, sim, remove):
+	def _set_reset_controller(self, value, device, instance, sim, remove):
 		v = cmd.get_bool(value)
 		sys_file = self._reset_controller_path(device)
 		if os.path.exists(sys_file):
@@ -107,7 +107,7 @@ class AudioPlugin(hotplug.Plugin):
 		return None
 
 	@command_get("reset_controller")
-	def _get_reset_controller(self, device, ignore_missing=False):
+	def _get_reset_controller(self, device, instance, ignore_missing=False):
 		sys_file = self._reset_controller_path(device)
 		if os.path.exists(sys_file):
 			value = cmd.read_file(sys_file)

@@ -139,7 +139,7 @@ class PluginBaseTestCase(unittest.TestCase):
 		command = [com for com in self._commands_plugin._commands.values()\
 			if com['name'] == 'size'][0]
 
-		self.assertEqual(self._commands_plugin._get_current_value(command),'S')
+		self.assertEqual(self._commands_plugin._get_current_value(instance, command),'S')
 
 	def test_norm_value(self):
 		self.assertEqual(self._plugin._norm_value('"000000021"'),'21')
@@ -211,25 +211,25 @@ class CommandsPlugin(Plugin):
 		return {'size':'S','device_setting':'101'}
 
 	@decorators.command_set('size')
-	def _set_size(self, new_size, sim, remove):
+	def _set_size(self, new_size, instance, sim, remove):
 		self._size = new_size
 		return new_size
 
 	@decorators.command_get('size')
-	def _get_size(self):
+	def _get_size(self, instance):
 		return self._size
 
-	@decorators.command_set('device_setting',per_device = True)
-	def _set_device_setting(self,value,device,sim,remove):
+	@decorators.command_set('device_setting', per_device = True)
+	def _set_device_setting(self, value, device, instance, sim, remove):
 		device.setting = value
 		return device.setting
 
 	@decorators.command_get('device_setting')
-	def _get_device_setting(self,device,ignore_missing = False):
+	def _get_device_setting(self, device, instance, ignore_missing = False):
 		return device.setting
 
 	@decorators.command_custom('custom_name')
-	def the_most_custom_command(self):
+	def the_most_custom_command(self, instance):
 		return True
 
 class BadCommandsPlugin(Plugin):

@@ -335,7 +335,7 @@ class DiskPlugin(hotplug.Plugin):
 		return self._sysfs_path(device, "queue/scheduler")
 
 	@command_set("elevator", per_device=True)
-	def _set_elevator(self, value, device, sim, remove):
+	def _set_elevator(self, value, device, instance, sim, remove):
 		sys_file = self._elevator_file(device)
 		if not sim:
 			self._cmd.write_to_file(sys_file, value, \
@@ -343,14 +343,14 @@ class DiskPlugin(hotplug.Plugin):
 		return value
 
 	@command_get("elevator")
-	def _get_elevator(self, device, ignore_missing=False):
+	def _get_elevator(self, device, instance, ignore_missing=False):
 		sys_file = self._elevator_file(device)
 		# example of scheduler file content:
 		# noop deadline [cfq]
 		return self._cmd.get_active_option(self._cmd.read_file(sys_file, no_error=ignore_missing))
 
 	@command_set("apm", per_device=True)
-	def _set_apm(self, value, device, sim, remove):
+	def _set_apm(self, value, device, instance, sim, remove):
 		if not self._is_hdparm_apm_supported(device):
 			if not sim:
 				log.info("apm option is not supported for device '%s'" % device)
@@ -366,7 +366,7 @@ class DiskPlugin(hotplug.Plugin):
 			return None
 
 	@command_get("apm")
-	def _get_apm(self, device, ignore_missing=False):
+	def _get_apm(self, device, instance, ignore_missing=False):
 		if not self._is_hdparm_apm_supported(device):
 			if not ignore_missing:
 				log.info("apm option is not supported for device '%s'" % device)
@@ -390,7 +390,7 @@ class DiskPlugin(hotplug.Plugin):
 		return value
 
 	@command_set("spindown", per_device=True)
-	def _set_spindown(self, value, device, sim, remove):
+	def _set_spindown(self, value, device, instance, sim, remove):
 		if not self._is_hdparm_apm_supported(device):
 			if not sim:
 				log.info("spindown option is not supported for device '%s'" % device)
@@ -406,7 +406,7 @@ class DiskPlugin(hotplug.Plugin):
 			return None
 
 	@command_get("spindown")
-	def _get_spindown(self, device, ignore_missing=False):
+	def _get_spindown(self, device, instance, ignore_missing=False):
 		if not self._is_hdparm_apm_supported(device):
 			if not ignore_missing:
 				log.info("spindown option is not supported for device '%s'" % device)
@@ -429,7 +429,7 @@ class DiskPlugin(hotplug.Plugin):
 		return v
 
 	@command_set("readahead", per_device=True)
-	def _set_readahead(self, value, device, sim, remove):
+	def _set_readahead(self, value, device, instance, sim, remove):
 		sys_file = self._readahead_file(device)
 		val = self._parse_ra(value)
 		if val is None:
@@ -441,7 +441,7 @@ class DiskPlugin(hotplug.Plugin):
 		return val
 
 	@command_get("readahead")
-	def _get_readahead(self, device, ignore_missing=False):
+	def _get_readahead(self, device, instance, ignore_missing=False):
 		sys_file = self._readahead_file(device)
 		value = self._cmd.read_file(sys_file, no_error=ignore_missing).strip()
 		if len(value) == 0:
@@ -449,7 +449,7 @@ class DiskPlugin(hotplug.Plugin):
 		return int(value)
 
 	@command_custom("readahead_multiply", per_device=True)
-	def _multiply_readahead(self, enabling, multiplier, device, verify, ignore_missing):
+	def _multiply_readahead(self, enabling, multiplier, device, verify, ignore_missing, instance):
 		if verify:
 			return None
 		storage_key = self._storage_key(
@@ -473,7 +473,7 @@ class DiskPlugin(hotplug.Plugin):
 		return self._sysfs_path(device, "queue/iosched/quantum")
 
 	@command_set("scheduler_quantum", per_device=True)
-	def _set_scheduler_quantum(self, value, device, sim, remove):
+	def _set_scheduler_quantum(self, value, device, instance, sim, remove):
 		sys_file = self._scheduler_quantum_file(device)
 		if not sim:
 			self._cmd.write_to_file(sys_file, "%d" % int(value), \
@@ -481,7 +481,7 @@ class DiskPlugin(hotplug.Plugin):
 		return value
 
 	@command_get("scheduler_quantum")
-	def _get_scheduler_quantum(self, device, ignore_missing=False):
+	def _get_scheduler_quantum(self, device, instance, ignore_missing=False):
 		sys_file = self._scheduler_quantum_file(device)
 		value = self._cmd.read_file(sys_file, no_error=ignore_missing).strip()
 		if len(value) == 0:

@@ -122,7 +122,7 @@ class SystemdPlugin(base.Plugin):
 		return " ".join(str(v) for v in self._cmd.cpulist_unpack(re.sub(r"\s+", r",", re.sub(r",\s+", r",", cpulist))))
 
 	@command_custom("cpu_affinity", per_device = False)
-	def _cmdline(self, enabling, value, verify, ignore_missing):
+	def _cmdline(self, enabling, value, verify, ignore_missing, instance):
 		conf_affinity = None
 		conf_affinity_unpacked = None
 		v = self._cmd.unescape(self._variables.expand(self._cmd.unquote(value)))
@@ -141,3 +141,6 @@ class SystemdPlugin(base.Plugin):
 
 			log.info("setting '%s' to '%s' in the '%s'" % (consts.SYSTEMD_CPUAFFINITY_VAR, v_unpacked, consts.SYSTEMD_SYSTEM_CONF_FILE))
 			self._write_systemd_system_conf(self._add_keyval(conf, consts.SYSTEMD_CPUAFFINITY_VAR, v_unpacked))
+			return True
+		return None
+

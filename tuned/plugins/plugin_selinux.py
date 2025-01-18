@@ -62,7 +62,7 @@ class SelinuxPlugin(base.Plugin):
 		pass
 
 	@command_set("avc_cache_threshold")
-	def _set_avc_cache_threshold(self, value, sim, remove):
+	def _set_avc_cache_threshold(self, value, instance, sim, remove):
 		if value is None:
 			return None
 		threshold = int(value)
@@ -75,7 +75,7 @@ class SelinuxPlugin(base.Plugin):
 			return None
 
 	@command_get("avc_cache_threshold")
-	def _get_avc_cache_threshold(self):
+	def _get_avc_cache_threshold(self, instance):
 		value = self._cmd.read_file(self._cache_threshold_path)
 		if len(value) > 0:
 			return int(value)

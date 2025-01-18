@@ -562,7 +562,7 @@ class BootloaderPlugin(base.Plugin):
 		return True
 
 	@command_custom("grub2_cfg_file")
-	def _grub2_cfg_file(self, enabling, value, verify, ignore_missing):
+	def _grub2_cfg_file(self, enabling, value, verify, ignore_missing, instance):
 		# nothing to verify
 		if verify:
 			return None
@@ -570,7 +570,7 @@ class BootloaderPlugin(base.Plugin):
 			self._grub2_cfg_file_names = [str(value)]
 
 	@command_custom("initrd_dst_img")
-	def _initrd_dst_img(self, enabling, value, verify, ignore_missing):
+	def _initrd_dst_img(self, enabling, value, verify, ignore_missing, instance):
 		# nothing to verify
 		if verify:
 			return None
@@ -578,19 +578,24 @@ class BootloaderPlugin(base.Plugin):
 			self._initrd_dst_img_val = str(value)
 			if self._initrd_dst_img_val == "":
 				return False
-			if self._initrd_dst_img_val[0] != "/":
-				self._initrd_dst_img_val = os.path.join(consts.BOOT_DIR, self._initrd_dst_img_val)
+			if self._initrd_dst_img_val[0] == "/":
+				return False
+			self._initrd_dst_img_val = os.path.join(consts.BOOT_DIR, self._initrd_dst_img_val)
+			return True
+		return None
 
 	@command_custom("initrd_remove_dir")
-	def _initrd_remove_dir(self, enabling, value, verify, ignore_missing):
+	def _initrd_remove_dir(self, enabling, value, verify, ignore_missing, instance):
 		# nothing to verify
 		if verify:
 			return None
 		if enabling and value is not None:
 			self._initrd_remove_dir = self._cmd.get_bool(value) == "1"
+			return True
+		return None
 
 	@command_custom("initrd_add_img", per_device = False, priority = 10)
-	def _initrd_add_img(self, enabling, value, verify, ignore_missing):
+	def _initrd_add_img(self, enabling, value, verify, ignore_missing, instance):
 		# nothing to verify
 		if verify:
 			return None
@@ -601,9 +606,11 @@ class BootloaderPlugin(base.Plugin):
 				return False
 			if not self._install_initrd(src_img):
 				return False
+			return True
+		return None
 
 	@command_custom("initrd_add_dir", per_device = False, priority = 10)
-	def _initrd_add_dir(self, enabling, value, verify, ignore_missing):
+	def _initrd_add_dir(self, enabling, value, verify, ignore_missing, instance):
 		# nothing to verify
 		if verify:
 			return None
@@ -631,9 +638,11 @@ class BootloaderPlugin(base.Plugin):
 			if self._initrd_remove_dir:
 				log.info("removing directory '%s'" % src_dir)
 				self._cmd.rmtree(src_dir)
+			return True
+		return None
 
 	@command_custom("cmdline", per_device = False, priority = 10)
-	def _cmdline(self, enabling, value, verify, ignore_missing):
+	def _cmdline(self, enabling, value, verify, ignore_missing, instance):
 		v = self._variables.expand(self._cmd.unquote(value))
 		if verify:
 			if self._rpm_ostree:
@@ -664,15 +673,19 @@ class BootloaderPlugin(base.Plugin):
 			log.info("installing additional boot command line parameters to grub2")
 			self.update_grub2_cfg = True
 			self._cmdline_val = v
+			return True
+		return None
 
 	@command_custom("skip_grub_config", per_device = False, priority = 10)
-	def _skip_grub_config(self, enabling, value, verify, ignore_missing):
+	def _skip_grub_config(self, enabling, value, verify, ignore_missing, instance):
 		if verify:
 			return None
 		if enabling and value is not None:
 			if self._cmd.get_bool(value) == "1":
 				log.info("skipping any modification of grub config")
 				self._skip_grub_config_val = True
+				return True
+		return None
 
 	def _instance_post_static(self, instance, enabling):
 		if enabling and self._skip_grub_config_val:
