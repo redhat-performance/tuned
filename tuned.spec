@@ -51,16 +51,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.24.1
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.25.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -638,6 +638,31 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Sun Jan 19 2025 Jaroslav Škarvada <jskarvad@redhat.com> - 2.25.0-0.1.rc1
+- new release
+  - tuned-ppd: removed the use of StrEnum
+    resolves: RHEL-68208
+  - tuned-ppd: multiple fixes and updates
+  - docs: plugins docs are now automatically generated from the docstrings
+  - plugin_cpu: fixed no_turbo boolean option parsing
+    resolves: RHEL-51760
+  - plugin_cpu: allowed raw energy_performance_preference values
+  - plugin_vm: added support for dirty_(bytes|ratio) sysctl parameters
+    resolves: RHEL-58820
+  - plugin_bootloader: added variables to BLS entries only if grub is used
+  - plugin_scheduler: do not assume that perf events have type attribute
+    resolves: RHEL-60898
+  - plugin_scheduler: updated sched knobs for kernels 6.6+
+  - plugin_scheduler: log process info when its affinity cannot be changed
+    resolves: RHEL-69933
+  - plugin_scheduler: postpone cgroup blacklist check, double-check after fail
+    resolves: RHEL-72981
+  - plugin_scheduler: made perf support optional
+  - plugin_net: added support for hotplug and rename
+    resolves: RHEL-60906
+  - makefile: added support for installation to custom $BINDIR/$SBINDIR
+  - functions: dropped cpuspeed support
+
 * Tue Nov 26 2024 Jaroslav Škarvada <jskarvad@redhat.com> - 2.24.1-1
 - new release
   - fixed privileged execution of arbitrary scripts by active local user
