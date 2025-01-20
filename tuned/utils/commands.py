@@ -280,7 +280,7 @@ class commands:
 	def is_cpu_online(self, cpu):
 		scpu = str(cpu)
 		# CPU0 is always online
-		return cpu == "0" or self.read_file("/sys/devices/system/cpu/cpu%s/online" % scpu, no_error = True).strip() == "1"
+		return cpu == "0" or self.read_file("/sys/devices/system/cpu/cpu%s/online" % scpu, err_ret = "1", no_error = True).strip() == "1"
 
 	# Converts hexadecimal CPU mask to CPU list
 	def hex2cpulist(self, mask):
