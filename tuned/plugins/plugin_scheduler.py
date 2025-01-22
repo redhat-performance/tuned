@@ -32,13 +32,14 @@ log = tuned.logs.get()
 
 class SchedulerParams(object):
 	def __init__(self, cmd, cmdline = None, scheduler = None,
-			priority = None, affinity = None, cgroup = None):
+			priority = None, affinity = None, cgroup = None, parent_pid = None):
 		self._cmd = cmd
 		self.cmdline = cmdline
 		self.scheduler = scheduler
 		self.priority = priority
 		self.affinity = affinity
 		self.cgroup = cgroup
+		self.parent_pid = parent_pid
 
 	@property
 	def affinity(self):
@@ -483,6 +484,7 @@ class SchedulerPlugin(base.Plugin):
 			self._scheduler_utils = SchedulerUtils()
 		except AttributeError:
 			self._scheduler_utils = SchedulerUtilsSchedutils()
+		self._cgroup_threads_file = consts.DEF_CGROUP_THREADS_FILE
 
 	def _calc_mmap_pages(self, mmap_pages):
 		if mmap_pages is None:
@@ -508,14 +510,15 @@ class SchedulerPlugin(base.Plugin):
 		# FIXME: do we want to do this here?
 		# recover original values in case of crash
 		self._scheduler_original = self._storage.get(
-				self._scheduler_storage_key, {})
+				self._scheduler_storage_key, collections.OrderedDict())
 		if len(self._scheduler_original) > 0:
 			log.info("recovering scheduling settings from previous run")
 			self._restore_ps_affinity()
-			self._scheduler_original = {}
+			self._scheduler_original = collections.OrderedDict()
 			self._storage.unset(self._scheduler_storage_key)
 
 		self._cgroups_original_affinity = dict()
+		self._cgroups2_original_controllers = dict()
 
 		# calculated by isolated_cores setter
 		self._affinity = None
@@ -570,11 +573,12 @@ class SchedulerPlugin(base.Plugin):
 	def _get_config_options(cls):
 		return {
 			"isolated_cores": None,
-			"cgroup_mount_point": consts.DEF_CGROUP_MOUNT_POINT,
+			"cgroup_mount_point": None,
 			"cgroup_mount_point_init": False,
 			"cgroup_groups_init": True,
 			"cgroup_for_isolated_cores": None,
 			"cgroup_ps_blacklist": None,
+			"cgroup_version": None,
 			"ps_whitelist": None,
 			"ps_blacklist": None,
 			"irq_process": True,
@@ -611,7 +615,8 @@ class SchedulerPlugin(base.Plugin):
 	def get_processes(self):
 		ps = procfs.pidstats()
 		ps.reload_threads()
-		processes = {}
+		# we use OrderedDict so we'll process parent proc first, important in cgroups2
+		processes = collections.OrderedDict()
 		for proc in ps.values():
 			try:
 				cmd = self._get_cmdline(proc)
@@ -748,37 +753,134 @@ class SchedulerPlugin(base.Plugin):
 	def _is_cgroup_affinity(self, affinity):
 		return str(affinity)[:7] == "cgroup."
 
-	def _store_orig_process_affinity(self, pid, affinity, is_cgroup = False):
+	def _store_orig_process_affinity(self, pid, affinity, is_cgroup = False, parent_pid = None):
 		try:
 			params = self._scheduler_original[pid]
 		except KeyError:
-			params = SchedulerParams(self._cmd)
+			params = SchedulerParams(self._cmd, parent_pid = parent_pid)
 			self._scheduler_original[pid] = params
 		if params.affinity is None and params.cgroup is None:
 			if is_cgroup:
 				params.cgroup = affinity
 			else:
 				params.affinity = affinity
+		
+	def _get_cgroup_version_and_mount_point(self, cgroup_version, cgroup_mount_point):
+		# For backward compatibility, if cgroup_mount_point is set and cgroup_version isn't, than we use cgroup v1
+		if cgroup_version is None and cgroup_mount_point is not None:
+			cgroup_version = "cgroup"
+		# check supported cgroup versions
+		supported_cg = sorted([x for x in self._cmd.read_file(consts.DEF_SUPPORTED_FS_FILE).split() if x in ["cgroup", "cgroup2"]],
+			reverse=True)
+		if cgroup_version and cgroup_version not in supported_cg:
+			log.warn("Set cgroup version '%s' not in supported versions %s" % (cgroup_version, supported_cg))
+			
+		# if we have both version and mounting point, we return it
+		if cgroup_version is not None and cgroup_mount_point is not None:
+			return cgroup_version, cgroup_mount_point
+			
+		# check connected cgroups
+		mounted_cg = sorted([x for x in self._cmd.read_file(consts.DEF_MOUNTED_FS_FILE).splitlines() if x.startswith("cgroup")],
+			reverse=True)
 
+		# cgroup_version is not set to "cgroup" and there is connected cgroup2 fs
+		if cgroup_version in [None, "cgroup2"] and "cgroup2" in supported_cg and mounted_cg[0].startswith("cgroup2 "):
+			# we try if there's available cgroup2 cpuset controller
+			cg2_mp = mounted_cg[0].split()[1]
+			avail_controllers = self._cmd.read_file(os.path.join(cg2_mp, consts.DEF_CGROUP2_AVAILABLE_CONTROLLERS_FILE)).split()
+			if "cpuset" in avail_controllers:
+				return "cgroup2", cg2_mp
+
+		# we'll check if there's connected cgroup v1 with cpuset option
+		for mcg in mounted_cg:
+			# mtab format is "device mount_point fs_type mount_options ...", controller type of cgroup v1 is in options
+			options = mcg.split()[3]
+			if "cpuset" in options.split(','):
+				return "cgroup", mcg.split()[1]
+		
+		# no mounted cgroup with for cpu set, we'll return newest version with mounting point according to convention
+		if supported_cg[0] == "cgroup":
+			return "cgroup", consts.DEF_CGROUP_MOUNT_POINT
+		if len(mounted_cg) > 1:
+			return "cgroup2", consts.DEF_CGROUP2_MOUNT_POINT_UNIFIED
+		return "cgroup2", consts.DEF_CGROUP2_MOUNT_POINT
+	
+	def _cgroup2_write_controllers(self, cgroup, controllers):
+		return self._cmd.write_to_file(self._cgroup_get_file_path(cgroup, consts.DEF_CGROUP2_ENABLED_CONTROLLERS_FILE), " ".join(controllers))
+	
+	def _cgroup2_enable_controller(self, cgroup, controller="cpuset"):
+		enabled = True
+		if controller not in self._cgroup2_get_available_controllers(cgroup):
+			if cgroup:
+				enabled = self._cgroup2_enable_controller(os.path.split(cgroup)[0])
+			else:
+				# Controller cannot be enabled on given fs, something is terribly wrong
+				return False
+		if enabled:
+			enabled_controllers = self._cgroup2_get_enabled_controllers(cgroup)
+			if controller not in enabled_controllers:
+				self._cgroups2_original_controllers[cgroup] = enabled_controllers
+				enabled = self._cgroup2_write_controllers(self._cgroup2_get_enabled_controllers(cgroup) + [controller])
+		return enabled
+
+	def _cgroup_get_file_path(self, cgroup, file=""):
+		cgroup = self._sanitize_cgroup_path(cgroup)
+		if cgroup != "/":
+			return os.path.join(self._cgroup_mount_point, cgroup, file)
+		return os.path.join(self._cgroup_mount_point, file)
+				
+	def _cgroup2_get_cgroup_type(self, cgroup):
+		return self._cmd.read_file(self._cgroup_get_file_path(cgroup, consts.DEF_CGROUP2_TYPE_FILE))
+	
+	def _cgroup2_set_threaded_type(self, cgroup):
+		success = True
+		type = self._cgroup2_get_cgroup_type(cgroup)
+		if type == "domain invalid":
+			success = self._cgroup2_set_threaded_type(os.path.split(cgroup)[0])
+			if success:
+				success = self._cmd.write_to_file(self._cgroup_get_file_path(cgroup, consts.DEF_CGROUP2_TYPE_FILE), "threaded")
+		return success
+	
+	def _cgroup2_get_available_controllers(self, cgroup):
+		return self._cmd.read_file(self._cgroup_get_file_path(cgroup, consts.DEF_CGROUP2_AVAILABLE_CONTROLLERS_FILE)).split()
+	
+	def _cgroup2_get_enabled_controllers(self, cgroup):
+		return self._cmd.read_file(self._cgroup_get_file_path(cgroup, consts.DEF_CGROUP2_ENABLED_CONTROLLERS_FILE)).split()
+		
 	def _get_cgroup_affinity(self, pid):
 		# we cannot use procfs, because it uses comma ',' delimiter which
 		# can be ambiguous
+		cgroup = "/"
 		for l in self._cmd.read_file("%s/%s/%s" % (consts.PROCFS_MOUNT_POINT, str(pid), "cgroup"), no_error = True).split("\n"):
+			# cgroup2 hierarchy is "0::/cgroup..."
+			if l.startswith("0::"):
+				cgroup = l[4:]
+				continue
 			try:
 				cgroup = l.split(":cpuset:")[1][1:]
 				return cgroup if cgroup != "" else "/"
 			except IndexError:
 				pass
-		return "/"
+		return cgroup
 
 	# it can be arbitrary cgroup even cgroup we didn't set, but it needs to be
 	# under "cgroup_mount_point"
-	def _set_cgroup(self, pid, cgroup):
+	def _set_cgroup(self, pid, cgroup, parent_pid = None):
 		cgroup = self._sanitize_cgroup_path(cgroup)
 		path = self._cgroup_mount_point
 		if cgroup != "/":
 			path = "%s/%s" % (path, cgroup)
-		self._cmd.write_to_file("%s/tasks" % path, str(pid), no_error = True)
+		write_file = self._cgroup_threads_file
+		if self._cgroup_version == "cgroup2":
+			# we are writing original proccess, it is needed to write to procs file
+			if not parent_pid:
+				write_file = consts.DEF_CGROUP2_PROCS_FILE
+			else:
+				# we write a thread, but cgroup is in invalid state
+				cgroup_type = self._cgroup2_get_cgroup_type(cgroup)
+				if cgroup_type == "domain invalid":
+					self._cgroup2_set_threaded_type(cgroup)
+		self._cmd.write_to_file(self._cgroup_get_file_path(cgroup, write_file), str(pid), no_error = True)
 
 	def _parse_cgroup_affinity(self, cgroup):
 		# "cgroup.CGROUP"
@@ -787,7 +889,7 @@ class SchedulerPlugin(base.Plugin):
 		is_cgroup = not isinstance(cgroup, list) and len(cgroup) > 0
 		return is_cgroup, cgroup
 
-	def _tune_process_affinity(self, pid, affinity, intersect = False):
+	def _tune_process_affinity(self, pid, affinity, intersect = False, parent_pid = None):
 		cont = True
 		if affinity is None:
 			return cont
@@ -795,7 +897,7 @@ class SchedulerPlugin(base.Plugin):
 			(is_cgroup, cgroup) = self._parse_cgroup_affinity(affinity)
 			if is_cgroup:
 				prev_affinity = self._get_cgroup_affinity(pid)
-				self._set_cgroup(pid, cgroup)
+				self._set_cgroup(pid, cgroup, parent_pid=parent_pid)
 			else:
 				prev_affinity = self._get_affinity(pid)
 				if intersect:
@@ -804,7 +906,7 @@ class SchedulerPlugin(base.Plugin):
 							affinity)
 				self._set_affinity(pid, affinity)
 			self._store_orig_process_affinity(pid,
-					prev_affinity, is_cgroup)
+					prev_affinity, is_cgroup, parent_pid)
 		except (SystemError, OSError) as e:
 			if hasattr(e, "errno") and e.errno == errno.ESRCH:
 				log.debug("Failed to read affinity of PID %d, the task vanished."
@@ -818,11 +920,11 @@ class SchedulerPlugin(base.Plugin):
 		return cont
 
 	#tune process and store previous values
-	def _tune_process(self, pid, cmd, sched, prio, affinity):
+	def _tune_process(self, pid, cmd, sched, prio, affinity, parent_pid = None):
 		cont = self._tune_process_rt(pid, sched, prio)
 		if not cont:
 			return
-		cont = self._tune_process_affinity(pid, affinity)
+		cont = self._tune_process_affinity(pid, affinity, parent_pid)
 		if not cont or pid not in self._scheduler_original:
 			return
 		self._scheduler_original[pid].cmdline = cmd
@@ -871,7 +973,7 @@ class SchedulerPlugin(base.Plugin):
 		if (not self._cmd.write_to_file("%s/%s" % (path, "cpuset.mems"),
 				self._cmd.read_file("%s/%s" % (self._cgroup_mount_point, "cpuset.mems"), no_error = True),
 				no_error = True)):
-					log.error("Unable to initialize 'cpuset.mems ' for cgroup '%s'" % path)
+					log.error("Unable to initialize 'cpuset.mems' for cgroup '%s'" % path)
 
 	def _cgroup_initialize_groups(self):
 		if self._cgroup is not None and not self._cgroup in self._cgroups:
@@ -885,7 +987,10 @@ class SchedulerPlugin(base.Plugin):
 			os.makedirs(self._cgroup_mount_point, consts.DEF_CGROUP_MODE)
 		except OSError as e:
 			log.error("Unable to create cgroup mount point: %s" % e)
-		(ret, out) = self._cmd.execute(["mount", "-t", "cgroup", "-o", "cpuset", "cpuset", self._cgroup_mount_point])
+		if self._cgroup_version == "cgroup":
+			(ret, out) = self._cmd.execute(["mount", "-t", "cgroup", "-o", "cpuset", "cpuset", self._cgroup_mount_point])
+		else:
+			(ret, out) = self._cmd.execute(["mount", "-t", "cgroup2", "none", self._cgroup_mount_point])
 		if ret != 0:
 			log.error("Unable to mount '%s'" % self._cgroup_mount_point)
 
@@ -918,7 +1023,9 @@ class SchedulerPlugin(base.Plugin):
 		else:
 			log.debug("Skipping cgroup '%s', empty affinity requested" % cgroup)
 			return
-		path = "%s/%s/%s" % (self._cgroup_mount_point, cgroup, "cpuset.cpus")
+		path = self._cgroup_get_file_path(cgroup, "cpuset.cpus")
+		if self._cgroup_version == "cgroup2":
+			self._cgroup2_enable_controller(cgroup)
 		if backup:
 			orig_affinity = self._cmd.read_file(path, err_ret = "ERR", no_error = True).strip()
 			if orig_affinity != "ERR":
@@ -943,11 +1050,19 @@ class SchedulerPlugin(base.Plugin):
 		log.debug("Restoring cgroups affinities")
 		for cg in self._cgroups_original_affinity.items():
 			self._cgroup_set_affinity_one(cg[0], cg[1])
+		for cg in self._cgroups2_original_controllers.items():
+			self._cgroup2_write_controllers(cg[0], cg[1])
 
 	def _instance_apply_static(self, instance):
-		# need to get "cgroup_mount_point_init", "cgroup_mount_point", "cgroup_groups_init",
+		# need to get "cgroup_version", "cgroup_mount_point_init", "cgroup_mount_point", "cgroup_groups_init",
 		# "cgroup", and initialize mount point and cgroups before super class implementation call
-		self._cgroup_mount_point = self._variables.expand(instance.options["cgroup_mount_point"])
+		self._cgroup_version, self._cgroup_mount_point = self._get_cgroup_version_and_mount_point(
+			self._variables.expand(instance.options["cgroup_version"]),
+			self._variables.expand(instance.options["cgroup_mount_point"]))
+		if self._cgroup_version == "cgroup":
+			self._cgroup_threads_file = consts.DEF_CGROUP_THREADS_FILE
+		else:
+			self._cgroup_threads_file = consts.DEF_CGROUP2_THREADS_FILE
 		self._cgroup_mount_point_init = self._cmd.get_bool(self._variables.expand(
 			instance.options["cgroup_mount_point_init"])) == "1"
 		self._cgroup_groups_init = self._cmd.get_bool(self._variables.expand(
@@ -1020,21 +1135,21 @@ class SchedulerPlugin(base.Plugin):
 				self._set_rt(pid, orig_params.scheduler,
 						orig_params.priority)
 			if orig_params.cgroup is not None:
-				self._set_cgroup(pid, orig_params.cgroup)
+				self._set_cgroup(pid, orig_params.cgroup, orig_params.parent_pid)
 			elif orig_params.affinity is not None:
 				self._set_affinity(pid, orig_params.affinity)
-		self._scheduler_original = {}
+		self._scheduler_original = collections.OrderedDict()
 		self._storage.unset(self._scheduler_storage_key)
 
 	def _cgroup_cleanup_tasks_one(self, cgroup):
 		cnt = int(consts.CGROUP_CLEANUP_TASKS_RETRY)
 		data = " "
 		while data != "" and cnt > 0:
-			data = self._cmd.read_file("%s/%s/%s" % (self._cgroup_mount_point, cgroup, "tasks"),
+			data = self._cmd.read_file("%s/%s/%s" % (self._cgroup_mount_point, cgroup, self._cgroup_threads_file),
 				err_ret = " ", no_error = True)
 			if data not in ["", " "]:
 				for l in data.split("\n"):
-					self._cmd.write_to_file("%s/%s" % (self._cgroup_mount_point, "tasks"), l, no_error = True)
+					self._cmd.write_to_file("%s/%s" % (self._cgroup_mount_point, self._cgroup_threads_file), l, no_error = True)
 			cnt -= 1
 		if cnt == 0:
 			log.warning("Unable to cleanup tasks from cgroup '%s'" % cgroup)
@@ -1088,7 +1203,7 @@ class SchedulerPlugin(base.Plugin):
 
 	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret1 = super(SchedulerPlugin, self)._instance_verify_static(instance, ignore_missing, devices)
-		ret2 = self._cgroup_verify_affinity()
+		ret2 = self._cgroup_verify_affinit
 		return ret1 and ret2
 
 	def _add_pid(self, instance, pid, r):
@@ -1229,7 +1344,7 @@ class SchedulerPlugin(base.Plugin):
 			return list(aff)
 		return affinity3
 
-	def _set_all_obj_affinity(self, objs, affinity, threads = False):
+	def _set_all_obj_affinity(self, objs, affinity, parent_pid = None):
 		psl = [v for v in objs if re.search(self._ps_whitelist,
 				self._get_stat_comm(v)) is not None]
 		if self._ps_blacklist != "":
@@ -1249,16 +1364,16 @@ class SchedulerPlugin(base.Plugin):
 							% (pid, e))
 				continue
 			cont = self._tune_process_affinity(pid, affinity,
-					intersect = True)
+					intersect = True, parent_pid=parent_pid)
 			if not cont:
 				continue
 			if pid in self._scheduler_original:
 				self._scheduler_original[pid].cmdline = cmd
 			# process threads
-			if not threads and "threads" in psd[pid]:
+			if not parent_pid and "threads" in psd[pid]:
 				self._set_all_obj_affinity(
 						psd[pid]["threads"].values(),
-						affinity, True)
+						affinity, pid)
 
 	def _get_stat_cgroup(self, o):
 		try:
