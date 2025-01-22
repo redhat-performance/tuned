@@ -312,6 +312,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		return {
 			"adaptive-rx": None,
 			"adaptive-tx": None,
+			"cqe-mode-rx": None,
 			"rx-usecs": None,
 			"rx-frames": None,
 			"rx-usecs-irq": None,
@@ -437,6 +438,7 @@ class NetTuningPlugin(hotplug.Plugin):
 		value = self._cmd.multiple_re_replace({
 			"Adaptive RX:": "adaptive-rx:",
 			"\\s+TX:": "\nadaptive-tx:",
+			"CQE mode RX:": "cqe-mode-rx:",
 			"rx-frame-low:": "rx-frames-low:",
 			"rx-frame-high:": "rx-frames-high:",
 			"tx-frame-low:": "tx-frames-low:",
