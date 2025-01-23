@@ -1,12 +1,11 @@
-from tuned.utils.plugin_loader import PluginLoader
-from . import base
+from tuned.utils.class_loader import ClassLoader
+from tuned.profiles.functions.base import Function
 import tuned.logs
 import tuned.consts as consts
-from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
-class Repository(PluginLoader):
+class Repository(ClassLoader):
 
 	def __init__(self):
 		super(Repository, self).__init__()
@@ -19,11 +18,11 @@ class Repository(PluginLoader):
 	def _set_loader_parameters(self):
 		self._namespace = "tuned.profiles.functions"
 		self._prefix = consts.FUNCTION_PREFIX
-		self._interface = tuned.profiles.functions.base.Function
+		self._interface = Function
 
 	def create(self, function_name):
 		log.debug("creating function %s" % function_name)
-		function_cls = self.load_plugin(function_name)
+		function_cls = self.load_class(function_name)
 		function_instance = function_cls()
 		self._functions[function_name] = function_instance
 		return function_instance

@@ -2,13 +2,13 @@
 import argparse
 import os
 import inspect
-from tuned.utils.plugin_loader import PluginLoader
+from tuned.utils.class_loader import ClassLoader
 from tuned.plugins.base import Plugin
 
 
-class DocLoader(PluginLoader):
+class PluginDocLoader(ClassLoader):
 	def __init__(self):
-		super(DocLoader, self).__init__()
+		super(PluginDocLoader, self).__init__()
 
 	def _set_loader_parameters(self):
 		self._namespace = "tuned.plugins"
@@ -23,7 +23,7 @@ args = parser.parse_args()
 with open(args.intro, "r") as intro_file:
 	intro = intro_file.read()
 
-all_plugins = sorted(DocLoader().load_all_plugins(), key=lambda x: x.__module__)
+all_plugins = sorted(PluginDocLoader().load_all_classes(), key=lambda x: x.__module__)
 
 with open(args.out, "w") as out_file:
 	out_file.write(intro)
