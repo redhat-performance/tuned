@@ -1,4 +1,5 @@
 from tuned.utils.class_loader import ClassLoader
+from tuned.profiles.functions.parser import Parser
 from tuned.profiles.functions.base import Function
 import tuned.logs
 import tuned.consts as consts
@@ -6,6 +7,10 @@ import tuned.consts as consts
 log = tuned.logs.get()
 
 class Repository(ClassLoader):
+	"""
+	Repository of functions used within TuneD profiles.
+	The functions are loaded lazily (when first used).
+	"""
 
 	def __init__(self):
 		super(Repository, self).__init__()
@@ -27,7 +32,7 @@ class Repository(ClassLoader):
 		self._functions[function_name] = function_instance
 		return function_instance
 
-	# loads function from plugin file and return it
+	# load a function from its file and return it
 	# if it is already loaded, just return it, it is not loaded again
 	def load_func(self, function_name):
 		if not function_name in self._functions:
@@ -40,3 +45,6 @@ class Repository(ClassLoader):
 		for k, v in list(self._functions.items()):
 			if v == function:
 				del self._functions[k]
+
+	def expand(self, s):
+		return Parser(self).expand(s)
