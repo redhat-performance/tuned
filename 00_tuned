@@ -26,4 +26,6 @@ tuned_bootcmdline_file=$tunedcfgdir/bootcmdline
 . $tuned_bootcmdline_file
 
 echo "set tuned_params=\"$TUNED_BOOT_CMDLINE\""
+echo "export tuned_params"
 echo "set tuned_initrd=\"$TUNED_BOOT_INITRD_ADD\""
+echo "export tuned_initrd"
