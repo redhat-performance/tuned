@@ -209,24 +209,6 @@ class BootloaderPlugin(base.Plugin):
 			"skip_grub_config": None,
 		}
 
-	@staticmethod
-	def _options_to_dict(options, omit=""):
-		"""
-		Returns dict created from options
-		e.g.: _options_to_dict("A=A A=B A B=A C=A", "A=B B=A B=B") returns {'A': ['A', None], 'C': ['A']}
-		"""
-		d = {}
-		omit = omit.split()
-		for o in options.split():
-			if o not in omit:
-				arr = o.split('=', 1)
-				d.setdefault(arr[0], []).append(arr[1] if len(arr) > 1 else None)
-		return d
-
-	@staticmethod
-	def _dict_to_options(d):
-		return " ".join([k + "=" + v1 if v1 is not None else k for k, v in d.items() for v1 in v])
-
 	def _rpm_ostree_status(self):
 		"""
 		Returns status of rpm-ostree transactions or None if not run on rpm-ostree system
@@ -241,68 +223,45 @@ class BootloaderPlugin(base.Plugin):
 			return None
 		return splited[1]
 
-	def _wait_till_idle(self):
+	def _wait_till_rpm_ostree_idle(self):
+		"""Check that rpm-ostree is idle, allowing some waiting time."""
 		sleep_cycles = 10
 		sleep_secs = 1.0
-		for i in range(sleep_cycles):
+		for _ in range(sleep_cycles):
 			if self._rpm_ostree_status() == "idle":
 				return True
 			sleep(sleep_secs)
-		if self._rpm_ostree_status() == "idle":
-			return True
-		return False
+		return self._rpm_ostree_status() == "idle"
 
-	def _rpm_ostree_kargs(self, append={}, delete={}):
-		"""
-		Method for appending or deleting rpm-ostree karg
-		returns None if rpm-ostree not present or is run on not ostree system
-		or tuple with new kargs, appended kargs and deleted kargs
-		"""
-		(rc, out, err) = self._cmd.execute(['rpm-ostree', 'kargs'], return_err=True)
-		log.debug("rpm-ostree output stdout:\n%s\nstderr:\n%s" % (out, err))
+	def _get_rpm_ostree_kargs(self):
+		"""Retrieve the output of rpm-ostree kargs, i.e., current default kernel arguments."""
+		if not self._wait_till_rpm_ostree_idle():
+			log.error("Error getting rpm-ostree kargs: rpm-ostree is busy")
+			return None
+		(rc, out, err) = self._cmd.execute(["rpm-ostree", "kargs"], return_err=True)
+		if out:
+			log.debug("rpm-ostree kargs: %s" % out)
 		if rc != 0:
-			return None, None, None
-		kargs = self._options_to_dict(out)
+			log.error("Error getting rpm-ostree kargs: %s" % err)
+			return None
+		return out
 
-		if not self._wait_till_idle():
-			log.error("Cannot wait for transaction end")
-			return None, None, None
-
-		deleted = {}
-		delete_params = self._dict_to_options(delete).split()
-		# Deleting kargs, e.g. deleting added kargs by profile
-		for k, val in delete.items():
-			for v in val:
-				kargs[k].remove(v)
-			deleted[k] = val
-
-		appended = {}
-		append_params = self._dict_to_options(append).split()
-		# Appending kargs, e.g. new kargs by profile or restoring kargs replaced by profile
-		for k, val in append.items():
-			if kargs.get(k):
-				# If there is karg that we add with new value we want to delete it
-				# and store old value for restoring after profile unload
-				log.debug("adding rpm-ostree kargs %s: %s for delete" % (k, kargs[k]))
-				deleted.setdefault(k, []).extend(kargs[k])
-				delete_params.extend([k + "=" + v if v is not None else k for v in kargs[k]])
-				kargs[k] = []
-			kargs.setdefault(k, []).extend(val)
-			appended[k] = val
-
-		if append_params == delete_params:
-			log.info("skipping rpm-ostree kargs - append == deleting (%s)" % append_params)
-			return kargs, appended, deleted
-
-		log.info("rpm-ostree kargs - appending: '%s'; deleting: '%s'" % (append_params, delete_params))
-		(rc, _, err) = self._cmd.execute(['rpm-ostree', 'kargs'] +
-										 ['--append=%s' % v for v in append_params] +
-										 ['--delete=%s' % v for v in delete_params], return_err=True)
+	def _modify_rpm_ostree_kargs(self, delete_kargs=[], append_kargs=[]):
+		"""
+		Modify (delete and append) kernel arguments in a rpm-ostree system.
+		Return a boolean indicating whether the operation was successful.
+		"""
+		if not self._wait_till_rpm_ostree_idle():
+			log.error("Error modifying rpm-ostree kargs: rpm-ostree is busy")
+			return False
+		(rc, _, err) = self._cmd.execute(
+			["rpm-ostree", "kargs"] +
+			["--delete=%s" % karg for karg in delete_kargs] +
+			["--append=%s" % karg for karg in append_kargs], return_err=True)
 		if rc != 0:
-			log.error("Something went wrong with rpm-ostree kargs\n%s" % (err))
-			return self._options_to_dict(out), None, None
-		else:
-			return kargs, appended, deleted
+			log.error("Error modifying rpm-ostree kargs: %s" % err)
+			return False
+		return True
 
 	def _get_effective_options(self, options):
 		"""Merge provided options with plugin default options and merge all cmdline.* options."""
@@ -368,18 +327,16 @@ class BootloaderPlugin(base.Plugin):
 			log.info("removing initrd image '%s'" % self._initrd_dst_img_val)
 			self._cmd.unlink(self._initrd_dst_img_val)
 
-	def _get_rpm_ostree_changes(self):
+	def _get_appended_rpm_ostree_kargs(self):
+		"""Return the list of kernel arguments that were appended by this profile (in a rpm-ostree system)."""
 		f = self._cmd.read_file(consts.BOOT_CMDLINE_FILE)
 		appended = re.search(consts.BOOT_CMDLINE_TUNED_VAR + r"=\"(.*)\"", f, flags=re.MULTILINE)
-		appended = appended[1] if appended else ""
-		deleted = re.search(consts.BOOT_CMDLINE_KARGS_DELETED_VAR + r"=\"(.*)\"", f, flags=re.MULTILINE)
-		deleted = deleted[1] if deleted else ""
-		return appended, deleted
+		return appended[1].split() if appended else []
 
 	def _remove_rpm_ostree_tuning(self):
-		appended, deleted = self._get_rpm_ostree_changes()
-		self._rpm_ostree_kargs(append=self._options_to_dict(deleted), delete=self._options_to_dict(appended))
-		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: "", consts.BOOT_CMDLINE_KARGS_DELETED_VAR: ""})
+		"""Remove kernel parameter tuning in a rpm-ostree system."""
+		self._modify_rpm_ostree_kargs(delete_kargs=self._get_appended_rpm_ostree_kargs())
+		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: ""})
 
 	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):
 		if rollback == consts.ROLLBACK_FULL and not self._skip_grub_config_val:
@@ -489,14 +446,22 @@ class BootloaderPlugin(base.Plugin):
 		return True
 
 	def _rpm_ostree_update(self):
-		appended, _ = self._get_rpm_ostree_changes()
-		_cmdline_dict = self._options_to_dict(self._cmdline_val, appended)
-		if not _cmdline_dict:
-			return None
-		(_, _, d) = self._rpm_ostree_kargs(append=_cmdline_dict)
-		if d is None:
+		"""Apply kernel parameter tuning in a rpm-ostree system."""
+		if self._get_appended_rpm_ostree_kargs():
+			# The kargs are already set in /etc/tuned/bootcmldine,
+			# we are likely post-reboot and done.
 			return
-		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : self._cmdline_val, consts.BOOT_CMDLINE_KARGS_DELETED_VAR : self._dict_to_options(d)})
+		profile_kargs = self._cmdline_val.split()
+		active_kargs = self._get_rpm_ostree_kargs()
+		if active_kargs is None:
+			log.error("Not updating kernel arguments, could not read the current ones.")
+			return
+		# Only append key=value pairs that do not yet appear in kernel parameters,
+		# otherwise we would not be able to restore the cmdline to the previous state
+		# via rpm-ostree kargs --delete.
+		kargs_to_append = [karg for karg in profile_kargs if karg not in active_kargs.split()]
+		if self._modify_rpm_ostree_kargs(append_kargs=kargs_to_append):
+			self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : " ".join(kargs_to_append)})
 
 	def _grub2_update(self):
 		self._grub2_cfg_patch({consts.GRUB2_TUNED_VAR : self._cmdline_val, consts.GRUB2_TUNED_INITRD_VAR : self._initrd_val})
@@ -646,11 +611,10 @@ class BootloaderPlugin(base.Plugin):
 		v = self._variables.expand(self._cmd.unquote(value))
 		if verify:
 			if self._rpm_ostree:
-				rpm_ostree_kargs = self._rpm_ostree_kargs()[0]
-				cmdline = self._dict_to_options(rpm_ostree_kargs)
+				cmdline = self._get_rpm_ostree_kargs()
 			else:
 				cmdline = self._cmd.read_file("/proc/cmdline")
-			if len(cmdline) == 0:
+			if cmdline is None or len(cmdline) == 0:
 				return None
 			cmdline_set = set(cmdline.split())
 			value_set = set(v.split())
