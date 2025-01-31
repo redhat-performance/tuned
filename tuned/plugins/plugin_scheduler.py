@@ -463,6 +463,7 @@ class SchedulerPlugin(base.Plugin):
 		# default is to whitelist all and blacklist none
 		self._ps_whitelist = ".*"
 		self._ps_blacklist = ""
+		self._kthread_process = True
 		self._cgroup_ps_blacklist_re = ""
 		# perf is optional, if unavailable, it will be disabled later
 		try:
@@ -577,6 +578,7 @@ class SchedulerPlugin(base.Plugin):
 			"cgroup_ps_blacklist": None,
 			"ps_whitelist": None,
 			"ps_blacklist": None,
+			"kthread_process": True,
 			"irq_process": True,
 			"default_irq_smp_affinity": "calc",
 			"perf_mmap_pages": None,
@@ -614,6 +616,8 @@ class SchedulerPlugin(base.Plugin):
 		processes = {}
 		for proc in ps.values():
 			try:
+				if not self._kthread_process and self._is_kthread(proc):
+					continue
 				cmd = self._get_cmdline(proc)
 				pid = proc["pid"]
 				processes[pid] = cmd
@@ -1093,6 +1097,9 @@ class SchedulerPlugin(base.Plugin):
 
 	def _add_pid(self, instance, pid, r):
 		try:
+			proc = procfs.process(pid)
+			if not self._kthread_process and self._is_kthread(proc):
+				return
 			cmd = self._get_cmdline(pid)
 		except (OSError, IOError) as e:
 			if e.errno == errno.ENOENT \
@@ -1171,6 +1178,14 @@ class SchedulerPlugin(base.Plugin):
 		if enabling and value is not None:
 			self._ps_blacklist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
+	@command_custom("kthread_process", per_device = False)
+	def _kthread_process(self, enabling, value, verify, ignore_missing, instance):
+		# currently unsupported
+		if verify:
+			return None
+		if enabling and value is not None:
+			self._kthread_process = self._cmd.get_bool(value) == "1"
+
 	@command_custom("irq_process", per_device = False)
 	def _irq_process(self, enabling, value, verify, ignore_missing, instance):
 		# currently unsupported
@@ -1230,7 +1245,10 @@ class SchedulerPlugin(base.Plugin):
 		return affinity3
 
 	def _set_all_obj_affinity(self, objs, affinity, threads = False):
-		psl = [v for v in objs if re.search(self._ps_whitelist,
+		psl = objs
+		if not self._kthread_process:
+			psl = [v for v in psl if not self._is_kthread(v)]
+		psl = [v for v in psl if re.search(self._ps_whitelist,
 				self._get_stat_comm(v)) is not None]
 		if self._ps_blacklist != "":
 			psl = [v for v in psl if re.search(self._ps_blacklist,
