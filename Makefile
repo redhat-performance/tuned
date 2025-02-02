@@ -36,6 +36,7 @@ export PREFIX = /usr
 export BINDIR = $(PREFIX)/bin
 export SBINDIR = $(PREFIX)/sbin
 export SYSCONFDIR = /etc
+export LIBEXECDIR = $(PREFIX)/libexec
 export DATADIR = $(PREFIX)/share
 export DOCDIR = $(DATADIR)/doc/$(NAME)
 export PYTHON = $(BINDIR)/python3
@@ -236,7 +237,7 @@ install: install-dirs
 	# libexec scripts
 	$(foreach file, $(wildcard libexec/*), \
 		$(call install_python_script, \
-			$(file), $(DESTDIR)$(PREFIX)/libexec/tuned/$(notdir $(file))))
+			$(file), $(DESTDIR)$(LIBEXECDIR)/tuned/$(notdir $(file))))
 
 	# icon
 	install -Dpm 0644 icons/tuned.svg $(DESTDIR)$(DATADIR)/icons/hicolor/scalable/apps/tuned.svg
