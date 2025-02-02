@@ -1,12 +1,16 @@
-from tuned.utils.plugin_loader import PluginLoader
-from . import base
+from tuned.utils.class_loader import ClassLoader
+from tuned.profiles.functions.parser import Parser
+from tuned.profiles.functions.base import Function
 import tuned.logs
 import tuned.consts as consts
-from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
-class Repository(PluginLoader):
+class Repository(ClassLoader):
+	"""
+	Repository of functions used within TuneD profiles.
+	The functions are loaded lazily (when first used).
+	"""
 
 	def __init__(self):
 		super(Repository, self).__init__()
@@ -19,16 +23,16 @@ class Repository(PluginLoader):
 	def _set_loader_parameters(self):
 		self._namespace = "tuned.profiles.functions"
 		self._prefix = consts.FUNCTION_PREFIX
-		self._interface = tuned.profiles.functions.base.Function
+		self._interface = Function
 
 	def create(self, function_name):
 		log.debug("creating function %s" % function_name)
-		function_cls = self.load_plugin(function_name)
+		function_cls = self.load_class(function_name)
 		function_instance = function_cls()
 		self._functions[function_name] = function_instance
 		return function_instance
 
-	# loads function from plugin file and return it
+	# load a function from its file and return it
 	# if it is already loaded, just return it, it is not loaded again
 	def load_func(self, function_name):
 		if not function_name in self._functions:
@@ -41,3 +45,6 @@ class Repository(PluginLoader):
 		for k, v in list(self._functions.items()):
 			if v == function:
 				del self._functions[k]
+
+	def expand(self, s):
+		return Parser(self).expand(s)

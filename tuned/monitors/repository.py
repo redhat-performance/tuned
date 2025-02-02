@@ -1,12 +1,12 @@
 import tuned.logs
 import tuned.monitors
-from tuned.utils.plugin_loader import PluginLoader
+from tuned.utils.class_loader import ClassLoader
 
 log = tuned.logs.get()
 
 __all__ = ["Repository"]
 
-class Repository(PluginLoader):
+class Repository(ClassLoader):
 
 	def __init__(self):
 		super(Repository, self).__init__()
@@ -23,7 +23,7 @@ class Repository(PluginLoader):
 
 	def create(self, plugin_name, devices):
 		log.debug("creating monitor %s" % plugin_name)
-		monitor_cls = self.load_plugin(plugin_name)
+		monitor_cls = self.load_class(plugin_name)
 		monitor_instance = monitor_cls(devices)
 		self._monitors.add(monitor_instance)
 		return monitor_instance

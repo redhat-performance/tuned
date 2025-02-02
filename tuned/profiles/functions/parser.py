@@ -1,23 +1,18 @@
-import os
 import re
-import glob
-from . import repository
 import tuned.logs
-import tuned.consts as consts
 from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
 cmd = commands()
 
-class Functions():
+class Parser():
 	"""
-	Built-in functions
+	Parser used for expanding strings containing functions.
 	"""
 
-	def __init__(self):
-		self._repository = repository.Repository()
-		self._parse_init()
+	def __init__(self, repository):
+		self._repository = repository
 
 	def _parse_init(self, s = ""):
 		self._cnt = 0

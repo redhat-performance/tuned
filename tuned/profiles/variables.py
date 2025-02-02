@@ -1,8 +1,8 @@
 import os
 import re
 import tuned.logs
-from .functions import functions as functions
 import tuned.consts as consts
+from tuned.profiles import functions
 from tuned.utils.commands import commands
 from tuned.utils.config_parser import ConfigParser, Error
 
@@ -17,7 +17,7 @@ class Variables():
 		self._cmd = commands()
 		self._lookup_re = {}
 		self._lookup_env = {}
-		self._functions = functions.Functions()
+		self._functions = functions.Repository()
 
 	def _add_env_prefix(self, s, prefix):
 		if s.find(prefix) == 0:

@@ -1,11 +1,11 @@
 import tuned.logs
 import os
 
-__all__ = ["PluginLoader"]
+__all__ = ["ClassLoader"]
 
 log = tuned.logs.get()
 
-class PluginLoader(object):
+class ClassLoader(object):
 	__slots__ = ["_namespace", "_prefix", "_interface"]
 
 	def _set_loader_parameters(self):
@@ -16,7 +16,7 @@ class PluginLoader(object):
 		raise NotImplementedError()
 
 	def __init__(self):
-		super(PluginLoader, self).__init__()
+		super(ClassLoader, self).__init__()
 
 		self._namespace = None
 		self._prefix = None
@@ -26,9 +26,9 @@ class PluginLoader(object):
 		assert type(self._prefix) is str
 		assert type(self._interface) is type and issubclass(self._interface, object)
 
-	def load_plugin(self, plugin_name):
-		assert type(plugin_name) is str
-		module_name = "%s.%s%s" % (self._namespace, self._prefix, plugin_name)
+	def load_class(self, class_name):
+		assert type(class_name) is str
+		module_name = "%s.%s%s" % (self._namespace, self._prefix, class_name)
 		return self._get_class(module_name)
 
 	def _get_class(self, module_name):
@@ -45,22 +45,23 @@ class PluginLoader(object):
 			if type(cls) is type and issubclass(cls, self._interface):
 				return cls
 
-		raise ImportError("Cannot find the plugin class.")
+		raise ImportError("Cannot find the class %s." % module_name)
 
-	def load_all_plugins(self):
-		plugins_package = __import__(self._namespace)
-		plugin_clss = []
-		for module_name in os.listdir(plugins_package.plugins.__path__[0]):
+	def load_all_classes(self):
+		package = __import__(self._namespace)
+		basename = self._namespace.split(".")[-1]
+		classes = []
+		for module_name in os.listdir(getattr(package, basename).__path__[0]):
 			try:
 				module_name = os.path.splitext(module_name)[0]
-				if not module_name.startswith("plugin_"):
+				if not module_name.startswith(self._prefix):
 					continue
-				plugin_class = self._get_class(
+				next_class = self._get_class(
 					"%s.%s" % (self._namespace, module_name)
 					)
-				if plugin_class not in plugin_clss:
-					plugin_clss.append(plugin_class)
+				if next_class not in classes:
+					classes.append(next_class)
 			except ImportError:
 				pass
-		return plugin_clss
+		return classes
 

@@ -1,4 +1,4 @@
-from tuned.utils.plugin_loader import PluginLoader
+from tuned.utils.class_loader import ClassLoader
 import tuned.plugins.base
 import tuned.logs
 
@@ -6,7 +6,7 @@ log = tuned.logs.get()
 
 __all__ = ["Repository"]
 
-class Repository(PluginLoader):
+class Repository(ClassLoader):
 
 	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
 		super(Repository, self).__init__()
@@ -31,7 +31,7 @@ class Repository(PluginLoader):
 
 	def create(self, plugin_name):
 		log.debug("creating plugin %s" % plugin_name)
-		plugin_cls = self.load_plugin(plugin_name)
+		plugin_cls = self.load_class(plugin_name)
 		plugin_instance = plugin_cls(self._monitor_repository, self._storage_factory, self._hardware_inventory, self._device_matcher,\
 			self._device_matcher_udev, self._plugin_instance_factory, self._global_cfg, self._variables)
 		self._plugins.add(plugin_instance)

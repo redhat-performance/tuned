@@ -291,12 +291,12 @@ class Daemon(object):
 
 	def get_all_plugins(self):
 		"""Return all accessible plugin classes"""
-		return self._unit_manager.plugins_repository.load_all_plugins()
+		return self._unit_manager.plugins_repository.load_all_classes()
 
 	def get_plugin_documentation(self, plugin_name):
 		"""Return plugin class docstring"""
 		try:
-			plugin_class = self._unit_manager.plugins_repository.load_plugin(
+			plugin_class = self._unit_manager.plugins_repository.load_class(
 				plugin_name
 			)
 		except ImportError:
@@ -313,7 +313,7 @@ class Daemon(object):
 		dictionary -- {parameter_name: hint}
 		"""
 		try:
-			plugin_class = self._unit_manager.plugins_repository.load_plugin(
+			plugin_class = self._unit_manager.plugins_repository.load_class(
 				plugin_name
 			)
 		except ImportError:
