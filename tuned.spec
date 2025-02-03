@@ -59,7 +59,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.25.0
+Version: 2.25.1
 Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
@@ -638,6 +638,15 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Mon Feb  3 2025 Jaroslav Škarvada <jskarvad@redhat.com> - 2.25.1-1
+- new release
+  - plugins: added missing instance parameters
+  - disk: added missing remove parameter
+  - plugin_scheduler: added switch to disable processing of kthreads
+  - Makefile: added support for installation to custom LIBEXECDIR
+  - functions: create a new parser object for each string expansion
+    resolves: RHEL-75773
+
 * Fri Jan 31 2025 Jaroslav Škarvada <jskarvad@redhat.com> - 2.25.0-1
 - new release
   - sap-hana: Set transparent_hugepages to madvise
