@@ -103,7 +103,7 @@ class VMPlugin(base.Plugin):
         # just an alias to transparent_hugepages
 	@command_set("transparent_hugepage")
 	def _set_transparent_hugepage(self, value, instance, sim, remove):
-		self._set_transparent_hugepages(value, sim, remove)
+		self._set_transparent_hugepages(value, instance, sim, remove)
 
 	@command_get("transparent_hugepages")
 	def _get_transparent_hugepages(self, instance):
@@ -116,7 +116,7 @@ class VMPlugin(base.Plugin):
         # just an alias to transparent_hugepages
 	@command_get("transparent_hugepage")
 	def _get_transparent_hugepage(self, instance):
-		return self._get_transparent_hugepages()
+		return self._get_transparent_hugepages(instance)
 
 	@command_set("transparent_hugepage.defrag")
 	def _set_transparent_hugepage_defrag(self, value, instance, sim, remove):

@@ -456,17 +456,17 @@ class DiskPlugin(hotplug.Plugin):
 				command_name = "readahead_multiply",
 				device_name = device)
 		if enabling:
-			old_readahead = self._get_readahead(device)
+			old_readahead = self._get_readahead(device, instance)
 			if old_readahead is None:
 				return
 			new_readahead = int(float(multiplier) * old_readahead)
 			self._storage.set(storage_key, old_readahead)
-			self._set_readahead(new_readahead, device, False)
+			self._set_readahead(new_readahead, device, instance, False)
 		else:
 			old_readahead = self._storage.get(storage_key)
 			if old_readahead is None:
 				return
-			self._set_readahead(old_readahead, device, False)
+			self._set_readahead(old_readahead, device, instance, False)
 			self._storage.unset(storage_key)
 
 	def _scheduler_quantum_file(self, device):
