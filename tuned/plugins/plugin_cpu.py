@@ -582,7 +582,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			self._governors_map.clear()
 
 		self._governors_map[device] = None
-		governor = self._get_governor(device)
+		governor = self._get_governor(device, instance)
 		if governor is None:
 			log.debug("ignoring sampling_down_factor setting for CPU '%s', cannot match governor" % device)
 			return None
@@ -600,7 +600,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 	@command_get("sampling_down_factor")
 	def _get_sampling_down_factor(self, device, instance, ignore_missing=False):
-		governor = self._get_governor(device, ignore_missing=ignore_missing)
+		governor = self._get_governor(device, instance, ignore_missing=ignore_missing)
 		if governor is None:
 			return None
 		path = self._sampling_down_factor_path(governor)

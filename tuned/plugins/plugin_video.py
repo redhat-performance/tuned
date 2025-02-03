@@ -85,7 +85,7 @@ class VideoPlugin(base.Plugin):
 			"panel_power_savings": "/sys/class/drm/%s/amdgpu/panel_power_savings" % device,
 		}
 
-	def apply_panel_power_saving_target(self, device, target, sim=False):
+	def apply_panel_power_saving_target(self, device, target, instance, sim=False):
 		"""Apply the target value to the panel_power_savings file if it doesn't already have it"""
 
 		# if we don't have the file, we might be radeon not amdgpu
@@ -93,7 +93,7 @@ class VideoPlugin(base.Plugin):
 			return None
 
 		# make sure the value is different (avoids unnecessary kernel modeset)
-		current = int(self._get_panel_power_savings(device))
+		current = int(self._get_panel_power_savings(device, instance))
 		if current == target:
 			log.info(
 				"panel_power_savings for %s already %s" % (device, target)
@@ -167,7 +167,7 @@ class VideoPlugin(base.Plugin):
 			log.warning("Invalid value %s for panel_power_savings" % value)
 			return None
 		if value in range(0, 5):
-			return self.apply_panel_power_saving_target(device, value, sim)
+			return self.apply_panel_power_saving_target(device, value, instance, sim)
 		else:
 			log.warning("Invalid value %s for panel_power_savings" % value)
 		return None
