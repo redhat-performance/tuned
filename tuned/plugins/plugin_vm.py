@@ -159,19 +159,19 @@ class VMPlugin(base.Plugin):
 		return True
 
 	@command_custom("dirty_bytes")
-	def _dirty_bytes(self, enabling, value, verify, ignore_missing, instance):
+	def _dirty_bytes(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		return self._dirty_option("dirty_bytes", "dirty_ratio", self._check_twice_pagesize, enabling, value, verify)
 
 	@command_custom("dirty_ratio")
-	def _dirty_ratio(self, enabling, value, verify, ignore_missing, instance):
+	def _dirty_ratio(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		return self._dirty_option("dirty_ratio", "dirty_bytes", self._check_ratio, enabling, value, verify)
 
 	@command_custom("dirty_background_bytes")
-	def _dirty_background_bytes(self, enabling, value, verify, ignore_missing, instance):
+	def _dirty_background_bytes(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		return self._dirty_option("dirty_background_bytes", "dirty_background_ratio", self._check_positive, enabling, value, verify)
 
 	@command_custom("dirty_background_ratio")
-	def _dirty_background_ratio(self, enabling, value, verify, ignore_missing, instance):
+	def _dirty_background_ratio(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		return self._dirty_option("dirty_background_ratio", "dirty_background_bytes", self._check_ratio, enabling, value, verify)
 
 	def _dirty_option(self, option, counterpart, check_fun, enabling, value, verify):
