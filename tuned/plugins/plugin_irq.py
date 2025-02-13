@@ -182,18 +182,21 @@ class IrqPlugin(hotplug.Plugin):
 	#
 	# "high-level" methods: apply tuning while saving original affinities
 	#
-	def _apply_irq_affinity(self, irqinfo, affinity, mode):
+	def _apply_irq_affinity(self, irqinfo, affinity, mode, transfer):
 		"""Apply IRQ affinity tuning
 
 		Args:
 			irqinfo (IrqInfo): IRQ that should be tuned
 			affinity (set): desired affinity
 		"""
-		original = self._get_irq_affinity(irqinfo.irq)
+		if transfer:
+			original = irqinfo.original_affinity
+		else:
+			original = self._get_irq_affinity(irqinfo.irq)
 		if mode == "intersect":
 			# intersection of affinity and original, if that is empty fall back to configured affinity
 			affinity = affinity & original or affinity
-		if irqinfo.unchangeable or affinity == original:
+		if irqinfo.unchangeable or (not transfer and affinity == original):
 			return
 		res = self._set_irq_affinity(irqinfo.irq, affinity, False)
 		if res == 0:
@@ -202,13 +205,13 @@ class IrqPlugin(hotplug.Plugin):
 		elif res == -2:
 			irqinfo.unchangeable = True
 
-	def _restore_irq_affinity(self, irqinfo):
+	def _restore_irq_affinity(self, irqinfo, transfer):
 		"""Restore IRQ affinity
 
 		Args:
 			irqinfo (IrqInfo): IRQ that should be restored
 		"""
-		if irqinfo.unchangeable or irqinfo.original_affinity is None:
+		if transfer or irqinfo.unchangeable or irqinfo.original_affinity is None:
 			return
 		self._set_irq_affinity(irqinfo.irq, irqinfo.original_affinity, True)
 		irqinfo.original_affinity = None
@@ -257,6 +260,7 @@ class IrqPlugin(hotplug.Plugin):
 
 	@command_custom("affinity", per_device=True)
 	def _affinity(self, enabling, value, device, verify, ignore_missing, instance, transfer_instance):
+		transfer = transfer_instance is not None
 		irq = "DEFAULT" if device == "DEFAULT" else device[len("irq"):]
 		if irq not in self._irqs:
 			log.error("Unknown device: %s" % device)
@@ -267,6 +271,6 @@ class IrqPlugin(hotplug.Plugin):
 			return self._verify_irq_affinity(irqinfo, affinity, self._mode_val)
 		if enabling:
 			affinity = set(self._cmd.cpulist_unpack(value))
-			return self._apply_irq_affinity(irqinfo, affinity, self._mode_val)
+			return self._apply_irq_affinity(irqinfo, affinity, self._mode_val, transfer)
 		else:
-			return self._restore_irq_affinity(irqinfo)
+			return self._restore_irq_affinity(irqinfo, transfer)
