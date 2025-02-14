@@ -203,15 +203,15 @@ class NetTuningPlugin(hotplug.Plugin):
 		if self._device_is_supported(device):
 			super(NetTuningPlugin, self)._hardware_events_callback(event, device)
 
-	def _added_device_apply_tuning(self, instance, device_name):
+	def _added_device_apply_tuning(self, instance, device_name, transfer_from_instance):
 		if instance._load_monitor is not None:
 			instance._load_monitor.add_device(device_name)
-		super(NetTuningPlugin, self)._added_device_apply_tuning(instance, device_name)
+		super(NetTuningPlugin, self)._added_device_apply_tuning(instance, device_name, transfer_from_instance)
 
-	def _removed_device_unapply_tuning(self, instance, device_name):
+	def _removed_device_unapply_tuning(self, instance, device_name, transfer_to_instance):
 		if instance._load_monitor is not None:
 			instance._load_monitor.remove_device(device_name)
-		super(NetTuningPlugin, self)._removed_device_unapply_tuning(instance, device_name)
+		super(NetTuningPlugin, self)._removed_device_unapply_tuning(instance, device_name, transfer_to_instance)
 
 	# pyudev >= 0.21
 	def _get_device_property_1(self, pyudev_dev, prop):
@@ -778,21 +778,21 @@ class NetTuningPlugin(hotplug.Plugin):
 		return None
 
 	@command_custom("features", per_device = True)
-	def _features(self, start, value, device, verify, ignore_missing, instance):
+	def _features(self, start, value, device, verify, ignore_missing, instance, transfer_instance):
 		return self._custom_parameters("features", start, value, device, verify, instance)
 
 	@command_custom("coalesce", per_device = True)
-	def _coalesce(self, start, value, device, verify, ignore_missing, instance):
+	def _coalesce(self, start, value, device, verify, ignore_missing, instance, transfer_instance):
 		return self._custom_parameters("coalesce", start, value, device, verify, instance)
 
 	@command_custom("pause", per_device = True)
-	def _pause(self, start, value, device, verify, ignore_missing, instance):
+	def _pause(self, start, value, device, verify, ignore_missing, instance, transfer_instance):
 		return self._custom_parameters("pause", start, value, device, verify, instance)
 
 	@command_custom("ring", per_device = True)
-	def _ring(self, start, value, device, verify, ignore_missing, instance):
+	def _ring(self, start, value, device, verify, ignore_missing, instance, transfer_instance):
 		return self._custom_parameters("ring", start, value, device, verify, instance)
 
 	@command_custom("channels", per_device = True)
-	def _channels(self, start, value, device, verify, ignore_missing, instance):
+	def _channels(self, start, value, device, verify, ignore_missing, instance, transfer_instance):
 		return self._custom_parameters("channels", start, value, device, verify, instance)
