@@ -141,4 +141,4 @@ class PPDConfig:
         self._ppd_to_tuned = ProfileMap(profile_dict_ac, profile_dict_dc)
         self._tuned_to_ppd = ProfileMap({v: k for k, v in profile_dict_ac.items()}, {v: k for k, v in profile_dict_dc.items()})
 
-        self._sysfs_acpi_monitor = cfg.getboolean(MAIN_SECTION, SYSFS_ACPI_MONITOR_OPTION, fallback=False)
+        self._sysfs_acpi_monitor = cfg.getboolean(MAIN_SECTION, SYSFS_ACPI_MONITOR_OPTION, fallback=True)
