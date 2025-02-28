@@ -179,6 +179,10 @@ class DummyPlugin(Plugin):
 	def _instance_cleanup(self, instance):
 		self.cleaned_instances.append(instance)
 
+	def _init_devices(self):
+		super(DummyPlugin,self)._init_devices()
+		self._devices_supported = True
+
 	def _get_device_objects(self, devices):
 		objects = []
 		for device in devices:
