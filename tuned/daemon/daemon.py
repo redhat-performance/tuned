@@ -333,8 +333,6 @@ class Daemon(object):
 		if self._profile is None:
 			return False
 
-		log.debug(f"BUG: variables={self._application._daemon._profile._variables._lookup_re.keys()}")
-
 		log.info("starting tuning")
 		self._not_used.set()
 		self._thread = threading.Thread(target=self._thread_code)
