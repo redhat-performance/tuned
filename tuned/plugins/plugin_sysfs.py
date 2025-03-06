@@ -51,7 +51,7 @@ class SysfsPlugin(base.Plugin):
 
 	def _instance_apply_static(self, instance):
 		for key, value in list(instance._sysfs.items()):
-			v = self._variables.expand(value)
+			v = instance.variables.expand(value)
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
 					instance._sysfs_original[f] = self._read_sysfs(f)
@@ -62,7 +62,7 @@ class SysfsPlugin(base.Plugin):
 	def _instance_verify_static(self, instance, ignore_missing, devices):
 		ret = True
 		for key, value in list(instance._sysfs.items()):
-			v = self._variables.expand(value)
+			v = instance.variables.expand(value)
 			for f in glob.iglob(key):
 				if self._check_sysfs(f):
 					curr_val = self._read_sysfs(f)
