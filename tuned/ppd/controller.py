@@ -299,9 +299,9 @@ class Controller(exports.interfaces.ExportableInterface):
                                                                    mask=pyinotify.IN_MODIFY,
                                                                    proc_fun=PerformanceDegradedEventHandler(self, LAP_MODE_PATH))
         if self._platform_profile_supported and self._config.thinkpad_function_keys:
-           self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(PLATFORM_PROFILE_PATH),
-                                                                  mask=pyinotify.IN_OPEN | pyinotify.IN_MODIFY | pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CLOSE_NOWRITE,
-                                                                  proc_fun=PlatformProfileEventHandler(self))
+            self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(PLATFORM_PROFILE_PATH),
+                                                                   mask=pyinotify.IN_OPEN | pyinotify.IN_MODIFY | pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CLOSE_NOWRITE,
+                                                                   proc_fun=PlatformProfileEventHandler(self))
 
     def check_performance_degraded(self):
         """
