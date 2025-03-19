@@ -6,7 +6,7 @@ class Unit(object):
 	Unit description.
 	"""
 
-	__slots__ = [ "_name", "_priority", "_type", "_enabled", "_replace", "_drop", "_devices", "_devices_udev_regex", \
+	__slots__ = [ "_name", "_priority", "_type", "_enabled", "_replace", "_prepend", "_drop", "_devices", "_devices_udev_regex", \
 		"_cpuinfo_regex", "_uname_regex", "_script_pre", "_script_post", "_options" ]
 
 	def __init__(self, name, config):
@@ -15,6 +15,7 @@ class Unit(object):
 		self._type = config.pop("type", self._name)
 		self._enabled = config.pop("enabled", True) in [True, "True", "true", 1, "1"]
 		self._replace = config.pop("replace", False) in [True, "True", "true", 1, "1"]
+		self._prepend = config.pop("prepend", False) in [True, "True", "true", 1, "1"]
 		self._drop = config.pop("drop", None)
 		if self._drop is not None:
 			self._drop = re.split(r"\b\s*[,;]\s*", str(self._drop))
@@ -57,6 +58,10 @@ class Unit(object):
 	@property
 	def replace(self):
 		return self._replace
+
+	@property
+	def prepend(self):
+		return self._prepend
 
 	@property
 	def drop(self):
