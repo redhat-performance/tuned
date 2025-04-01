@@ -21,7 +21,7 @@ class CalcIsolatedCores(base.Function):
 	"""
 	def __init__(self):
 		# max 1 argument
-		super(CalcIsolatedCores, self).__init__("calc_isolated_cores", 1)
+		super(CalcIsolatedCores, self).__init__(1)
 
 	def execute(self, args):
 		if not super(CalcIsolatedCores, self).execute(args):

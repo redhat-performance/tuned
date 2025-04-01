@@ -17,7 +17,7 @@ class LSCPUCheck(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 2 arguments
-		super(LSCPUCheck, self).__init__("lscpu_check", 0, 2)
+		super(LSCPUCheck, self).__init__(0, 2)
 
 	def execute(self, args):
 		if not super(LSCPUCheck, self).execute(args):

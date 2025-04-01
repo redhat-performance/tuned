@@ -23,7 +23,7 @@ class IntelRecommendedPState(base.Function):
     generation, Intel has fixed these issues.
     """
     def __init__(self):
-        super(IntelRecommendedPState, self).__init__("intel_recommended_pstate", 0)
+        super(IntelRecommendedPState, self).__init__(0)
 
     def execute(self, args):
         if not super(IntelRecommendedPState, self).execute(args):

@@ -7,7 +7,7 @@ class CPUListPresent(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(CPUListPresent, self).__init__("cpulist_present", 0)
+		super(CPUListPresent, self).__init__(0)
 
 	def execute(self, args):
 		if not super(CPUListPresent, self).execute(args):

@@ -6,7 +6,7 @@ class S2KB(base.Function):
 	"""
 	def __init__(self):
 		# 1 argument
-		super(S2KB, self).__init__("s2kb", 1, 1)
+		super(S2KB, self).__init__(1, 1)
 
 	def execute(self, args):
 		if not super(S2KB, self).execute(args):

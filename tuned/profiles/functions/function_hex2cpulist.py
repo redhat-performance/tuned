@@ -13,7 +13,7 @@ class Hex2CPUList(base.Function):
 	"""
 	def __init__(self):
 		# 1 argument
-		super(Hex2CPUList, self).__init__("hex2cpulist", 1, 1)
+		super(Hex2CPUList, self).__init__(1, 1)
 
 	def execute(self, args):
 		if not super(Hex2CPUList, self).execute(args):

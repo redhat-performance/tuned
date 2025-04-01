@@ -20,7 +20,7 @@ class Assertion(base.Function):
 	"""
 	def __init__(self):
 		# 3 arguments
-		super(Assertion, self).__init__("assertion", 3, 3)
+		super(Assertion, self).__init__(3, 3)
 
 	def execute(self, args):
 		if not super(Assertion, self).execute(args):
