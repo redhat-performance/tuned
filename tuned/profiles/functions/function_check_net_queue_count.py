@@ -10,7 +10,7 @@ class CheckNetQueueCount(base.Function):
 	"""
 	def __init__(self):
 		# 1 argument
-		super(CheckNetQueueCount, self).__init__("check_net_queue_count", 1, 1)
+		super(CheckNetQueueCount, self).__init__(1, 1)
 
 	def execute(self, args):
 		if not super(CheckNetQueueCount, self).execute(args):

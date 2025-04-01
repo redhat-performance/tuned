@@ -25,7 +25,7 @@ class Package2Uncores(base.Function):
 	"""
 
 	def __init__(self):
-		super(Package2Uncores, self).__init__("package2uncores", 0)
+		super(Package2Uncores, self).__init__(0)
 
 	def execute(self, args):
 		if not super(Package2Uncores, self).execute(args):
