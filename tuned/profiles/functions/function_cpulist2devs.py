@@ -1,7 +1,4 @@
-import tuned.logs
 from . import base
-
-log = tuned.logs.get()
 
 class CPUList2Devs(base.Function):
 	"""
