@@ -5,7 +5,14 @@ log = tuned.logs.get()
 
 class cpulist2devs(base.Function):
 	"""
-	Conversion function: converts CPU list to device strings
+	Converts a CPU list into a comma-separated list of device names.
+
+	====
+	The following will return `cpu1,cpu2,cpu3,cpu5`:
+	----
+	${f:cpulist2devs:1-3,5}
+	----
+	====
 	"""
 	def __init__(self):
 		# arbitrary number of arguments

@@ -5,7 +5,7 @@ from tuned.utils.commands import commands
 
 class s2kb(base.Function):
 	"""
-	Conversion function: sectors to kbytes
+	Converts disk sectors to kilobytes.
 	"""
 	def __init__(self):
 		# 1 argument

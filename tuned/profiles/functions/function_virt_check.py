@@ -5,9 +5,17 @@ from tuned.utils.commands import commands
 
 class virt_check(base.Function):
 	"""
-	Checks whether running inside virtual machine (VM) or on bare metal.
-	If running inside VM expands to argument 1, otherwise expands to
-	argument 2 (even on error).
+	Checks whether *TuneD* is running inside a virtual machine (VM) or on bare metal.
+
+	Inside a VM, it returns the first argument.
+	Otherwise returns the second argument (even on error).
+
+	====
+	The following returns `VM` when running in a virtual machine:
+	----
+	${f:virt_check:VM:Bare}
+	----
+	====
 	"""
 	def __init__(self):
 		# 2 arguments

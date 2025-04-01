@@ -7,8 +7,8 @@ log = tuned.logs.get()
 
 class cpulist_present(base.Function):
 	"""
-	Checks whether CPUs from list are present, returns list containing
-	only present CPUs
+	Checks whether the CPUs from a given CPU list are present on the system.
+	Returns a CPU list containing only the present CPUs from the given list.
 	"""
 	def __init__(self):
 		# arbitrary number of arguments

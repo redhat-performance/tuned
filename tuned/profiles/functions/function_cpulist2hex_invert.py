@@ -7,7 +7,15 @@ log = tuned.logs.get()
 
 class cpulist2hex_invert(base.Function):
 	"""
-	Converts CPU list to hexadecimal CPU mask and inverts it
+	Converts a CPU list into a hexadecimal CPU mask and inverts it.
+
+	====
+	On a system with 4 CPUs numbered from 0 to 3, the following will
+	return `00000002`, because only CPU1 is in the complement.
+	----
+	${f:cpulist2hex_invert:0,2,3}
+	----
+	====
 	"""
 	def __init__(self):
 		# arbitrary number of arguments

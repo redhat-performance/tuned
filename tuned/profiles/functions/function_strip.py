@@ -5,7 +5,16 @@ from tuned.utils.commands import commands
 
 class strip(base.Function):
 	"""
-	Makes string from all arguments and strip it
+	Creates a string by concatenating all arguments,
+	stripping any leading or trailing whitespace from
+	the result.
+
+	====
+	The following returns `foo bar`:
+	----
+	${f:strip:  foo :bar  }
+	----
+	====
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument
