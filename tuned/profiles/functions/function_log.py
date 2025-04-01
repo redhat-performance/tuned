@@ -3,7 +3,7 @@ from . import base
 
 log = tuned.logs.get()
 
-class execute(base.Function):
+class Log(base.Function):
 	"""
 	Returns the concatenation of its arguments and also logs the return value,
 	which is useful for debugging.
@@ -20,10 +20,10 @@ class execute(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument (the value to log)
-		super(execute, self).__init__("log", 0, 1)
+		super(Log, self).__init__("log", 0, 1)
 
 	def execute(self, args):
-		if not super(execute, self).execute(args):
+		if not super(Log, self).execute(args):
 			return None
 		s = "".join(args)
 		log.info(s)

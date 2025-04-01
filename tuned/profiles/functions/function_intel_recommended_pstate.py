@@ -10,7 +10,7 @@ PMU_PATH = "/sys/devices/cpu/caps/pmu_name"
 ACTIVE = "active"
 DISABLE = "disable"
 
-class intel_recommended_pstate(base.Function):
+class IntelRecommendedPState(base.Function):
     """
     Returns the recommended intel_pstate CPUFreq driver mode
     based on the CPU generation.
@@ -23,10 +23,10 @@ class intel_recommended_pstate(base.Function):
     generation, Intel has fixed these issues.
     """
     def __init__(self):
-        super(intel_recommended_pstate, self).__init__("intel_recommended_pstate", 0)
+        super(IntelRecommendedPState, self).__init__("intel_recommended_pstate", 0)
 
     def execute(self, args):
-        if not super(intel_recommended_pstate, self).execute(args):
+        if not super(IntelRecommendedPState, self).execute(args):
             return None
 
         current_processor_name = self._cmd.read_file(PMU_PATH).strip()

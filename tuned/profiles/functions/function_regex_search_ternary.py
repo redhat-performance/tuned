@@ -1,7 +1,7 @@
 import re
 from . import base
 
-class regex_search_ternary(base.Function):
+class RegexSearchTernary(base.Function):
 	"""
 	Ternary regex operator.
 
@@ -12,10 +12,10 @@ class regex_search_ternary(base.Function):
 	"""
 	def __init__(self):
 		# 4 arguments
-		super(regex_search_ternary, self).__init__("regex_search_ternary", 4, 4)
+		super(RegexSearchTernary, self).__init__("regex_search_ternary", 4, 4)
 
 	def execute(self, args):
-		if not super(regex_search_ternary, self).execute(args):
+		if not super(RegexSearchTernary, self).execute(args):
 			return None
 		if re.search(args[1], args[0]):
 			return args[2]
