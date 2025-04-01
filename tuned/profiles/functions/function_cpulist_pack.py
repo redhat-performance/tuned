@@ -7,9 +7,14 @@ log = tuned.logs.get()
 
 class cpulist_pack(base.Function):
 	"""
-	Conversion function: packs CPU list in form 1,2,3,5 to 1-3,5.
-	The cpulist_unpack is used as a preprocessor, so it always returns
-	optimal results. For details about input syntax see cpulist_unpack.
+	Packs a CPU list into the most succint form.
+
+	====
+	The following returns `1-3,5`:
+	----
+	${f:cpulist_pack:1,2,3,5}
+	----
+	====
 	"""
 	def __init__(self):
 		# arbitrary number of arguments

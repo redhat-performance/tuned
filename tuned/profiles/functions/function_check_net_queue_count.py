@@ -5,8 +5,8 @@ log = tuned.logs.get()
 
 class check_net_queue_count(base.Function):
 	"""
-	Checks whether the user has specified a queue count for net devices. If
-        not, return the number of housekeeping CPUs.
+	Checks whether the first argument is a valid queue count for net devices.
+	If yes, returns it, otherwise returns the number of housekeeping CPUs.
 	"""
 	def __init__(self):
 		# 1 argument

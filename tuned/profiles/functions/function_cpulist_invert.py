@@ -7,10 +7,15 @@ log = tuned.logs.get()
 
 class cpulist_invert(base.Function):
 	"""
-	Inverts list of CPUs (makes its complement). For the complement it
-	gets number of online CPUs from the /sys/devices/system/cpu/online,
-	e.g. system with 4 CPUs (0-3), the inversion of list "0,2,3" will be
-	"1"
+	Inverts a CPU list, i.e., returns its complement. The complement is
+	computed from the list of online CPUs in `/sys/devices/system/cpu/online`.
+
+	====
+	On a system with 4 CPUs numbered from 0 to 3, the following will return `1`.
+	----
+	${f:cpulist_invert:0,2,3}
+	----
+	====
 	"""
 	def __init__(self):
 		# arbitrary number of arguments

@@ -8,9 +8,16 @@ log = tuned.logs.get()
 
 class assertion_non_equal(base.Function):
 	"""
-	Assertion non equal: compares argument 2 with argument 3. If they match
-	it logs text from argument 1 and  throws InvalidProfileException. This
-	exception will abort profile loading.
+	Compares the second argument and the third argument.
+	If they _match_, the function logs the text from
+	the first argument as an error and aborts profile loading.
+
+	====
+	The following will pass without errors:
+	----
+	${f:assertion_non_equal:fatal error:3:5}
+	----
+	====
 	"""
 	def __init__(self):
 		# 3 arguments

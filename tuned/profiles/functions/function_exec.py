@@ -5,7 +5,14 @@ from tuned.utils.commands import commands
 
 class execute(base.Function):
 	"""
-	Executes process and substitutes its output.
+	Executes a process and returns its output.
+
+	====
+	The following executes `cat /etc/tuned/active_profile`:
+	----
+	${f:exec:cat:/etc/tuned/active_profile}
+	----
+	====
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument (the name of executable)

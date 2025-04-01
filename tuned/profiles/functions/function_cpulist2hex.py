@@ -7,7 +7,14 @@ log = tuned.logs.get()
 
 class cpulist2hex(base.Function):
 	"""
-	Conversion function: converts CPU list to hexadecimal CPU mask
+	Converts a CPU list into a hexadecimal CPU mask.
+
+	====
+	The following will return `00000007`.
+	----
+	${f:cpulist2hex:0-3}
+	----
+	====
 	"""
 	def __init__(self):
 		# arbitrary number of arguments

@@ -12,7 +12,16 @@ SYSFS_DIR = "/sys/devices/system/cpu/"
 
 class package2cpus(base.Function):
 	"""
-	Provides cpu device list for a package (socket)
+	Returns a comma-separated list of CPU devices for a package (socket).
+	Multiple socket numbers can be specified in separate arguments.
+
+	====
+	On a system with two CPU sockets, both with 4 cores, the
+	following will return `cpu0,cpu1,cpu2,cpu3,cpu4,cpu5,cpu6,cpu7`:
+	----
+	${f:package2cpus:0:1}
+	----
+	====
 	"""
 
 	def __init__(self):
