@@ -6,13 +6,17 @@ log = tuned.logs.get()
 
 class cpuinfo_check(base.Function):
 	"""
-	Checks regexes against /proc/cpuinfo. Accepts arguments in the
-	following form: REGEX1, STR1, REGEX2, STR2, ...[, STR_FALLBACK]
-	If REGEX1 matches something in /proc/cpuinfo it expands to STR1,
-	if REGEX2 matches it expands to STR2. It stops on the first match,
-	i.e. if REGEX1 matches, no more regexes are processed. If none
-	regex matches it expands to STR_FALLBACK. If there is no fallback,
-	it expands to empty string.
+	Checks regexes against the content of `/proc/cpuinfo`.
+
+	Accepts arguments in the form `REGEX1, STR1, REGEX2, STR2, ...[, STR_FALLBACK]`.
+
+	If `REGEX1` has a match in `/proc/cpuinfo`, it returns `STR1`.
+
+	If `REGEX2` has a match, it returns `STR2`.
+
+	The function stops on the first match, i.e., if `REGEX1` has a match,
+	no more regexes are processed. If no regex has a match, `STR_FALLBACK`
+	is returned. If there is no fallback value, it returns an empty string.
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 2 arguments

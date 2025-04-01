@@ -7,7 +7,14 @@ log = tuned.logs.get()
 
 class cpulist_unpack(base.Function):
 	"""
-	Conversion function: unpacks CPU list in form 1-3,4 to 1,2,3,4
+	Unpacks a CPU list into a form with no ranges.
+
+	====
+	The following returns `1,2,3,5`:
+	----
+	${f:cpulist_unpack:1-3,5}
+	----
+	====
 	"""
 	def __init__(self):
 		# arbitrary number of arguments

@@ -8,9 +8,16 @@ log = tuned.logs.get()
 
 class calc_isolated_cores(base.Function):
 	"""
-	Calculates and returns isolated cores. The argument specifies how many
-	cores per socket reserve for housekeeping. If not specified, 1 core
-	per socket is reserved for housekeeping and the rest is isolated.
+	Calculates and returns a list of isolated cores. The argument
+	specifies how many cores per socket should be reserved for housekeeping.
+	If not specified, a single core is reserved per socket and the rest is isolated.
+
+	====
+	Reserve two cores per socket for housekeeping and return the list of remaining cores:
+	----
+	${f:calc_isolated_cores:2}
+	----
+	====
 	"""
 	def __init__(self):
 		# max 1 argument

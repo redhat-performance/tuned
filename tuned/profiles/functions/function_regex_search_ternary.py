@@ -3,10 +3,12 @@ from . import base
 
 class regex_search_ternary(base.Function):
 	"""
-	Ternary regex operator, it takes arguments in the following form
-	STR1, REGEX, STR2, STR3
-	If REGEX matches STR1 (re.search is used), STR2 is returned,
-	otherwise STR3 is returned
+	Ternary regex operator.
+
+	It takes arguments in the following form:
+	`STR1, REGEX, STR2, STR3`
+
+	If `REGEX` is matched within `STR1`, returns `STR2`, otherwise returns `STR3`.
 	"""
 	def __init__(self):
 		# 4 arguments

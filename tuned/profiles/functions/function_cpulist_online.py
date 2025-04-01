@@ -7,8 +7,15 @@ log = tuned.logs.get()
 
 class cpulist_online(base.Function):
 	"""
-	Checks whether CPUs from list are online, returns list containing
-	only online CPUs
+	Returns a CPU list containing the online CPUs from the given CPU list.
+
+	====
+	On a system with 8 CPUs where the first 4 CPUs (0 to 3) are offline,
+	the following returns `4-6`:
+	----
+	${f:cpulist_online:0-6}
+	----
+	====
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
