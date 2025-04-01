@@ -20,7 +20,7 @@ class Log(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument (the value to log)
-		super(Log, self).__init__("log", 0, 1)
+		super(Log, self).__init__(0, 1)
 
 	def execute(self, args):
 		if not super(Log, self).execute(args):

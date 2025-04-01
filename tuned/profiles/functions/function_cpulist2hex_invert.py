@@ -14,7 +14,7 @@ class CPUList2HexInvert(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(CPUList2HexInvert, self).__init__("cpulist2hex_invert", 0)
+		super(CPUList2HexInvert, self).__init__(0)
 
 	def execute(self, args):
 		if not super(CPUList2HexInvert, self).execute(args):

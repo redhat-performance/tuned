@@ -12,7 +12,7 @@ class RegexSearchTernary(base.Function):
 	"""
 	def __init__(self):
 		# 4 arguments
-		super(RegexSearchTernary, self).__init__("regex_search_ternary", 4, 4)
+		super(RegexSearchTernary, self).__init__(4, 4)
 
 	def execute(self, args):
 		if not super(RegexSearchTernary, self).execute(args):

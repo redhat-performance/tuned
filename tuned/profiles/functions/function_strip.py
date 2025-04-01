@@ -15,7 +15,7 @@ class Strip(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument
-		super(Strip, self).__init__("strip", 0, 1)
+		super(Strip, self).__init__(0, 1)
 
 	def execute(self, args):
 		if not super(Strip, self).execute(args):

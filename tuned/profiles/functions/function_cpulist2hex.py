@@ -13,7 +13,7 @@ class CPUList2Hex(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(CPUList2Hex, self).__init__("cpulist2hex", 0)
+		super(CPUList2Hex, self).__init__(0)
 
 	def execute(self, args):
 		if not super(CPUList2Hex, self).execute(args):

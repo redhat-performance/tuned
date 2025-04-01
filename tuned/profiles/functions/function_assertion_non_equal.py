@@ -19,7 +19,7 @@ class AssertionNonEqual(base.Function):
 	"""
 	def __init__(self):
 		# 3 arguments
-		super(AssertionNonEqual, self).__init__("assertion_non_equal", 3, 3)
+		super(AssertionNonEqual, self).__init__(3, 3)
 
 	def execute(self, args):
 		if not super(AssertionNonEqual, self).execute(args):

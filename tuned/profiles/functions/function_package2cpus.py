@@ -25,7 +25,7 @@ class Package2CPUs(base.Function):
 	"""
 
 	def __init__(self):
-		super(Package2CPUs, self).__init__("package2cpus", 0)
+		super(Package2CPUs, self).__init__(0)
 
 	def execute(self, args):
 		if not super(Package2CPUs, self).execute(args):

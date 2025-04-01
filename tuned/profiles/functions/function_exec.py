@@ -13,7 +13,7 @@ class Exec(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 1 argument (the name of executable)
-		super(Exec, self).__init__("exec", 0, 1)
+		super(Exec, self).__init__(0, 1)
 
 	def execute(self, args):
 		if not super(Exec, self).execute(args):

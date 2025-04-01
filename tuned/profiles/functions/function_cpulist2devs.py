@@ -13,7 +13,7 @@ class CPUList2Devs(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(CPUList2Devs, self).__init__("cpulist2devs", 0)
+		super(CPUList2Devs, self).__init__(0)
 
 	def execute(self, args):
 		if not super(CPUList2Devs, self).execute(args):

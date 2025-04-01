@@ -14,7 +14,7 @@ class CPUListInvert(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(CPUListInvert, self).__init__("cpulist_invert", 0)
+		super(CPUListInvert, self).__init__(0)
 
 	def execute(self, args):
 		if not super(CPUListInvert, self).execute(args):

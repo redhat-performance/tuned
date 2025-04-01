@@ -17,7 +17,7 @@ class CPUInfoCheck(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 2 arguments
-		super(CPUInfoCheck, self).__init__("cpuinfo_check", 0, 2)
+		super(CPUInfoCheck, self).__init__(0, 2)
 
 	def execute(self, args):
 		if not super(CPUInfoCheck, self).execute(args):

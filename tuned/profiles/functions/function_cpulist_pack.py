@@ -13,7 +13,7 @@ class CPUListPack(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(CPUListPack, self).__init__("cpulist_pack", 0)
+		super(CPUListPack, self).__init__(0)
 
 	def execute(self, args):
 		if not super(CPUListPack, self).execute(args):

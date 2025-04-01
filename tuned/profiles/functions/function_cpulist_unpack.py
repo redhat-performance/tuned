@@ -13,7 +13,7 @@ class CPUListUnpack(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(CPUListUnpack, self).__init__("cpulist_unpack", 0)
+		super(CPUListUnpack, self).__init__(0)
 
 	def execute(self, args):
 		if not super(CPUListUnpack, self).execute(args):
