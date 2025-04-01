@@ -5,7 +5,7 @@ from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
-class cpulist_unpack(base.Function):
+class CPUListUnpack(base.Function):
 	"""
 	Unpacks a CPU list into a form with no ranges.
 
@@ -18,9 +18,9 @@ class cpulist_unpack(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(cpulist_unpack, self).__init__("cpulist_unpack", 0)
+		super(CPUListUnpack, self).__init__("cpulist_unpack", 0)
 
 	def execute(self, args):
-		if not super(cpulist_unpack, self).execute(args):
+		if not super(CPUListUnpack, self).execute(args):
 			return None
 		return ",".join(str(v) for v in self._cmd.cpulist_unpack(",,".join(args)))

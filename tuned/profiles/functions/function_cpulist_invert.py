@@ -5,7 +5,7 @@ from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
-class cpulist_invert(base.Function):
+class CPUListInvert(base.Function):
 	"""
 	Inverts a CPU list, i.e., returns its complement. The complement is
 	computed from the list of online CPUs in `/sys/devices/system/cpu/online`.
@@ -19,9 +19,9 @@ class cpulist_invert(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(cpulist_invert, self).__init__("cpulist_invert", 0)
+		super(CPUListInvert, self).__init__("cpulist_invert", 0)
 
 	def execute(self, args):
-		if not super(cpulist_invert, self).execute(args):
+		if not super(CPUListInvert, self).execute(args):
 			return None
 		return ",".join(str(v) for v in self._cmd.cpulist_invert(",,".join(args)))

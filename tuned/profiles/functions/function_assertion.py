@@ -6,7 +6,7 @@ from tuned.profiles.exceptions import InvalidProfileException
 
 log = tuned.logs.get()
 
-class assertion(base.Function):
+class Assertion(base.Function):
 	"""
 	Compares the second argument and the third argument.
 	If they _do not match_, the function logs the text from
@@ -22,10 +22,10 @@ class assertion(base.Function):
 	"""
 	def __init__(self):
 		# 3 arguments
-		super(assertion, self).__init__("assertion", 3, 3)
+		super(Assertion, self).__init__("assertion", 3, 3)
 
 	def execute(self, args):
-		if not super(assertion, self).execute(args):
+		if not super(Assertion, self).execute(args):
 			return None
 		if args[1] != args[2]:
 			log.error("assertion '%s' failed: '%s' != '%s'" % (args[0], args[1], args[2]))

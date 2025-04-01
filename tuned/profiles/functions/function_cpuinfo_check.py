@@ -4,7 +4,7 @@ from . import base
 
 log = tuned.logs.get()
 
-class cpuinfo_check(base.Function):
+class CPUInfoCheck(base.Function):
 	"""
 	Checks regexes against the content of `/proc/cpuinfo`.
 
@@ -20,10 +20,10 @@ class cpuinfo_check(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 2 arguments
-		super(cpuinfo_check, self).__init__("cpuinfo_check", 0, 2)
+		super(CPUInfoCheck, self).__init__("cpuinfo_check", 0, 2)
 
 	def execute(self, args):
-		if not super(cpuinfo_check, self).execute(args):
+		if not super(CPUInfoCheck, self).execute(args):
 			return None
 		cpuinfo = self._cmd.read_file("/proc/cpuinfo")
 		for i in range(0, len(args), 2):

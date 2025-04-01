@@ -5,7 +5,7 @@ from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
-class cpulist_pack(base.Function):
+class CPUListPack(base.Function):
 	"""
 	Packs a CPU list into the most succint form.
 
@@ -18,9 +18,9 @@ class cpulist_pack(base.Function):
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(cpulist_pack, self).__init__("cpulist_pack", 0)
+		super(CPUListPack, self).__init__("cpulist_pack", 0)
 
 	def execute(self, args):
-		if not super(cpulist_pack, self).execute(args):
+		if not super(CPUListPack, self).execute(args):
 			return None
 		return ",".join(str(v) for v in self._cmd.cpulist_pack(",,".join(args)))

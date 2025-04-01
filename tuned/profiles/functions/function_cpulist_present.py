@@ -5,17 +5,17 @@ from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
-class cpulist_present(base.Function):
+class CPUListPresent(base.Function):
 	"""
 	Checks whether the CPUs from a given CPU list are present on the system.
 	Returns a CPU list containing only the present CPUs from the given list.
 	"""
 	def __init__(self):
 		# arbitrary number of arguments
-		super(cpulist_present, self).__init__("cpulist_present", 0)
+		super(CPUListPresent, self).__init__("cpulist_present", 0)
 
 	def execute(self, args):
-		if not super(cpulist_present, self).execute(args):
+		if not super(CPUListPresent, self).execute(args):
 			return None
 		cpus = self._cmd.cpulist_unpack(",,".join(args))
 		present = self._cmd.cpulist_unpack(self._cmd.read_file("/sys/devices/system/cpu/present"))

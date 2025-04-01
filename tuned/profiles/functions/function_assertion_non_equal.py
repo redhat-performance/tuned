@@ -6,7 +6,7 @@ from tuned.profiles.exceptions import InvalidProfileException
 
 log = tuned.logs.get()
 
-class assertion_non_equal(base.Function):
+class AssertionNonEqual(base.Function):
 	"""
 	Compares the second argument and the third argument.
 	If they _match_, the function logs the text from
@@ -21,10 +21,10 @@ class assertion_non_equal(base.Function):
 	"""
 	def __init__(self):
 		# 3 arguments
-		super(assertion_non_equal, self).__init__("assertion_non_equal", 3, 3)
+		super(AssertionNonEqual, self).__init__("assertion_non_equal", 3, 3)
 
 	def execute(self, args):
-		if not super(assertion_non_equal, self).execute(args):
+		if not super(AssertionNonEqual, self).execute(args):
 			return None
 		if args[1] == args[2]:
 			log.error("assertion '%s' failed: '%s' == '%s'" % (args[0], args[1], args[2]))
