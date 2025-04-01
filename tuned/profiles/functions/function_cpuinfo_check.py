@@ -1,8 +1,5 @@
 import re
-import tuned.logs
 from . import base
-
-log = tuned.logs.get()
 
 class CPUInfoCheck(base.Function):
 	"""
