@@ -6,7 +6,7 @@ import tuned.consts as consts
 
 log = tuned.logs.get()
 
-class calc_isolated_cores(base.Function):
+class CalcIsolatedCores(base.Function):
 	"""
 	Calculates and returns a list of isolated cores. The argument
 	specifies how many cores per socket should be reserved for housekeeping.
@@ -21,10 +21,10 @@ class calc_isolated_cores(base.Function):
 	"""
 	def __init__(self):
 		# max 1 argument
-		super(calc_isolated_cores, self).__init__("calc_isolated_cores", 1)
+		super(CalcIsolatedCores, self).__init__("calc_isolated_cores", 1)
 
 	def execute(self, args):
-		if not super(calc_isolated_cores, self).execute(args):
+		if not super(CalcIsolatedCores, self).execute(args):
 			return None
 		cpus_reserve = 1
 		if len(args) > 0:

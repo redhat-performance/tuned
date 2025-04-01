@@ -5,7 +5,7 @@ from tuned.utils.commands import commands
 
 log = tuned.logs.get()
 
-class hex2cpulist(base.Function):
+class Hex2CPUList(base.Function):
 	"""
 	Converts a hexadecimal CPU mask into a CPU list.
 
@@ -18,9 +18,9 @@ class hex2cpulist(base.Function):
 	"""
 	def __init__(self):
 		# 1 argument
-		super(hex2cpulist, self).__init__("hex2cpulist", 1, 1)
+		super(Hex2CPUList, self).__init__("hex2cpulist", 1, 1)
 
 	def execute(self, args):
-		if not super(hex2cpulist, self).execute(args):
+		if not super(Hex2CPUList, self).execute(args):
 			return None
 		return ",".join(str(v) for v in self._cmd.hex2cpulist(args[0]))

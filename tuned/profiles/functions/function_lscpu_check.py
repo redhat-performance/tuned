@@ -4,7 +4,7 @@ from . import base
 
 log = tuned.logs.get()
 
-class lscpu_check(base.Function):
+class LSCPUCheck(base.Function):
 	"""
 	Checks regexes against the output of `lscpu`.
 
@@ -20,10 +20,10 @@ class lscpu_check(base.Function):
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 2 arguments
-		super(lscpu_check, self).__init__("lscpu_check", 0, 2)
+		super(LSCPUCheck, self).__init__("lscpu_check", 0, 2)
 
 	def execute(self, args):
-		if not super(lscpu_check, self).execute(args):
+		if not super(LSCPUCheck, self).execute(args):
 			return None
 		# Stdout is the 2nd result from the execute call
 		_, lscpu = self._cmd.execute("lscpu")
