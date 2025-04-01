@@ -1,9 +1,4 @@
-import os
-import tuned.logs
 from . import base
-from tuned.utils.commands import commands
-
-log = tuned.logs.get()
 
 class CPUListInvert(base.Function):
 	"""
