@@ -4,3 +4,4 @@ tuned-*.tar.bz2
 *~
 *.html
 doc/manual/modules/performance/ref_available-tuned-plug-ins.adoc
+doc/manual/modules/performance/ref_built-in-functions-available-in-tuned-profiles.adoc
