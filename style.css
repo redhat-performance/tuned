@@ -95,3 +95,7 @@ ul {
     /* Indent list elements both from the left and the right */
     padding: 0 50px;
 }
+
+#rh-logo {
+    width: 200px;
+}
