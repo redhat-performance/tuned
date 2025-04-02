@@ -1,6 +1,6 @@
 [Unit]
 Description=Dynamic System Tuning Daemon
-After=systemd-sysctl.service network.target dbus.service polkit.service
+After=systemd-sysctl.service network.target dbus.service polkit.service systemd-udev-settle.service
 Requires=dbus.service
 Conflicts=cpupower.service auto-cpufreq.service tlp.service power-profiles-daemon.service
 Documentation=man:tuned(8) man:tuned.conf(5) man:tuned-adm(8)
