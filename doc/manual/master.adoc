@@ -1,5 +1,5 @@
-:revnumber: 2.24.1
-:revdate: 2024-10-09
+:revnumber: 2.25.1
+:revdate: 2025-05-30
 :keywords: documentation, tuned, performance, power, linux
 :toc:
 
