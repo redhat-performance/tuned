@@ -19,17 +19,11 @@ ifdef::pantheonenv[]
 endif::[]
 
 
-include::modules/performance/con_tuned-profiles.adoc[leveloffset=+1]
-
-include::modules/performance/con_the-default-tuned-profile.adoc[leveloffset=+1]
-
-include::modules/performance/con_merged-tuned-profiles.adoc[leveloffset=+1]
-
 include::modules/performance/con_the-location-of-tuned-profiles.adoc[leveloffset=+1]
 
-include::modules/performance/con_inheritance-between-tuned-profiles.adoc[leveloffset=+1]
+include::modules/performance/con_syntax-of-profile-configuration.adoc[leveloffset=+1]
 
-include::modules/performance/con_static-and-dynamic-tuning-in-tuned.adoc[leveloffset=+1]
+include::modules/performance/con_inheritance-between-tuned-profiles.adoc[leveloffset=+1]
 
 include::modules/performance/con_tuned-plug-ins.adoc[leveloffset=+1]
 

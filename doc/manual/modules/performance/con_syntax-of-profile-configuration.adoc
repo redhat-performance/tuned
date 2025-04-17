@@ -1,0 +1,12 @@
+:_module-type: CONCEPT
+[id="syntax-of-profile-configuration_{context}"]
+= Syntax of profile configuration
+
+[role="_abstract"]
+The `tuned.conf` file uses INI syntax. It can contain one `[main]` section and other sections for configuring plug-in instances. However, all sections are optional.
+
+Lines starting with the hash sign (`#`) are comments.
+
+[role="_additional-resources"]
+.Additional resources
+* `tuned.conf(5)` man page.

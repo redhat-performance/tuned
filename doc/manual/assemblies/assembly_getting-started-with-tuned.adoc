@@ -21,13 +21,11 @@ include::modules/performance/con_tuned-profiles.adoc[leveloffset=+1]
 
 include::modules/performance/con_the-default-tuned-profile.adoc[leveloffset=+1]
 
-include::modules/performance/con_merged-tuned-profiles.adoc[leveloffset=+1]
-
-include::modules/performance/con_the-location-of-tuned-profiles.adoc[leveloffset=+1]
-
 include::modules/performance/ref_tuned-profiles-distributed-with-rhel.adoc[leveloffset=+1]
 
 include::modules/performance/ref_real-time-tuned-profiles-distributed-with-rhel.adoc[leveloffset=+1]
+
+include::modules/performance/con_merged-tuned-profiles.adoc[leveloffset=+1]
 
 include::modules/performance/con_static-and-dynamic-tuning-in-tuned.adoc[leveloffset=+1]
 
