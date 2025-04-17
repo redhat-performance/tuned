@@ -5,7 +5,7 @@
 [role="_abstract"]
 As an experimental feature, it is possible to select more profiles at once. *TuneD* will try to merge them during the load.
 
-If there are conflicts, the settings from the last specified profile takes precedence.
+If there are conflicts, the settings from the last specified profile take precedence.
 
 .Low power consumption in a virtual guest
 ====
