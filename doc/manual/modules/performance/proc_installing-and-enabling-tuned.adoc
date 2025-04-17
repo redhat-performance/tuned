@@ -16,7 +16,7 @@ This procedure installs and enables the *TuneD* application, installs *TuneD* pr
 . Install the [package]`tuned` package:
 +
 ----
-# yum install tuned
+# dnf install tuned
 ----
 
 . Enable and start the `tuned` service:
@@ -28,7 +28,7 @@ This procedure installs and enables the *TuneD* application, installs *TuneD* pr
 . Optionally, install *TuneD* profiles for real-time systems:
 +
 ----
-# yum install tuned-profiles-realtime tuned-profiles-nfv
+# dnf install tuned-profiles-realtime tuned-profiles-nfv
 ----
 
 . Verify that a *TuneD* profile is active and applied:
