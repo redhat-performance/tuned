@@ -13,8 +13,8 @@ class Plugin(base.Plugin):
 		super(Plugin, self).__init__(*args, **kwargs)
 
 	def cleanup(self):
-		super(Plugin, self).cleanup()
 		self._hardware_events_cleanup()
+		super(Plugin, self).cleanup()
 
 	def _hardware_events_init(self):
 		pass
@@ -46,6 +46,7 @@ class Plugin(base.Plugin):
 
 	def _add_device(self, device_name):
 		if device_name in (self._assigned_devices | self._free_devices):
+			log.debug("device: '%s' already exists, ignoring" % device_name)
 			return
 
 		for instance_name, instance in list(self._instances.items()):
@@ -102,13 +103,17 @@ class Plugin(base.Plugin):
 
 		"""
 		if device_name not in (self._assigned_devices | self._free_devices):
+			log.debug("device: '%s' doesn't exist, ignoring" % device_name)
 			return
 
 		for instance in list(self._instances.values()):
 			if self._remove_device_process(instance, device_name):
 				break
 		else:
-			self._free_devices.remove(device_name)
+			try:
+				self._free_devices.remove(device_name)
+			except KeyError:
+				log.debug("device: '%s' isn't initialized, not removing it" % device_name)
 
 	def _remove_devices_nocheck(self, instance, device_names):
 		"""
