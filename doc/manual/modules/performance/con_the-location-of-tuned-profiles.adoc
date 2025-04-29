@@ -5,19 +5,20 @@
 [role="_abstract"]
 *TuneD* stores profiles in the following directories:
 
-[filename]`/usr/lib/tuned/profiles/`::
-Distribution-specific profiles are stored in the [filename]`/usr/lib/tuned/profiles/` directory. Each profile has its own directory. The profile consists of the main configuration file called `tuned.conf`, and optionally other files, for example helper scripts.
+[filename]`{system-profile-dir}`::
+Distribution-specific profiles are stored in the [filename]`{system-profile-dir}` directory. Each profile has its own directory. The profile consists of the main configuration file called `tuned.conf`, and optionally other files, for example helper scripts.
 
-[filename]`/etc/tuned/profiles/`::
-If you need to customize a profile, copy the profile directory into the [filename]`/etc/tuned/profiles/` directory, which is used for custom profiles, and then adjust it. If there is a system profile and a custom profile of the same name, the custom profile located in [filename]`/etc/tuned/profiles` is used.
+[filename]`{user-profile-dir}`::
+If you need to customize a profile, copy the profile directory into the [filename]`{user-profile-dir}` directory, which is used for custom profiles, and then adjust it. If there is a system profile and a custom profile of the same name, the custom profile located in [filename]`{user-profile-dir}` is used.
 
 .User-defined profile directories
 ====
-If you want to make TuneD load profiles from a directory other than [filename]`/usr/lib/tuned/profiles/` and [filename]`/etc/tuned/profiles/`, you can list it in [filename]`/etc/tuned/tuned-main.conf` as follows:
+If you want to make TuneD load profiles from a directory other than [filename]`{system-profile-dir}` and [filename]`{user-profile-dir}`, you can list it in [filename]`/etc/tuned/tuned-main.conf` as follows:
+[subs="attributes"]
 ----
-profile_dirs=/usr/lib/tuned/profiles,/etc/tuned/profiles,/my/custom/profiles
+profile_dirs={system-profile-dir},{user-profile-dir},/my/custom/profiles
 ----
-In this example, profiles are loaded also from [filename]`/my/custom/profiles/`. If two directories contain profiles with the same names, the one that is listed later takes precedence.
+In this example, profiles are loaded also from [filename]`/my/custom/profiles`. If two directories contain profiles with the same names, the one that is listed later takes precedence.
 ====
 
 [role="_additional-resources"]

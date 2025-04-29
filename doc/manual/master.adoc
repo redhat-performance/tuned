@@ -11,6 +11,8 @@
 // Load externally defined attributes
 include::meta/attributes.adoc[]
 
+include::meta/variables.adoc[]
+
 // Set context for all included assemblies
 :context: tuned-documentation
 
