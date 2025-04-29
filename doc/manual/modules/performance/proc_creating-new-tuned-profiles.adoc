@@ -17,11 +17,11 @@ endif::[]
 
 .Procedure
 
-. In the [filename]`/etc/tuned/profiles/` directory, create a new directory named the same as the profile that you want to create:
+. In the [filename]`{user-profile-dir}` directory, create a new directory named the same as the profile that you want to create:
 +
-[subs="quotes"]
+[subs="attributes, quotes"]
 ----
-# mkdir /etc/tuned/profiles/[replaceable]_my-profile_
+# mkdir {user-profile-dir}/[replaceable]_my-profile_
 ----
 
 . In the new directory, create a file named [filename]`tuned.conf`. Add a `[main]` section and plug-in definitions in it, according to your requirements.
