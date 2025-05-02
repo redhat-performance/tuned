@@ -83,9 +83,26 @@ class SCSIHostPlugin(hotplug.Plugin):
 	def _get_alpm_policy_file(self, device):
 		return os.path.join("/sys/class/scsi_host/", str(device), "link_power_management_policy")
 
+	def _get_ahci_port_cmd_file(self, device):
+		return os.path.join("/sys/class/scsi_host/", str(device), "ahci_port_cmd")
+
+	def _is_external_sata_port(self, device):
+		port_cmd_file = self._get_ahci_port_cmd_file(device)
+		if not os.path.isfile(port_cmd_file):
+			return False
+		port_cmd = int(self._cmd.read_file(port_cmd_file), 16)
+		# Bit 18 is HPCP (Hot Plug Capable Port)
+		# Bit 21 is ESP (External SATA Port)
+		return port_cmd & (1 << 18 | 1 << 21) != 0
+
 	@command_set("alpm", per_device = True)
 	def _set_alpm(self, policy, device, instance, sim, remove):
 		if policy is None:
+			return None
+		if self._is_external_sata_port(device):
+			# According to the SATA AHCI specification, external (or hot-plug capable)
+			# SATA ports must have power management disabled to reliably detect hot plug removal.
+			log.info("Device '%s' is an external SATA controller, skipping ALPM setting to support hot plug" % str(device))
 			return None
 		policy_file = self._get_alpm_policy_file(device)
 		if not sim:
