@@ -106,17 +106,17 @@ PPD_API_COMPATIBILITY = "0.23"
 PPD_DBUS_BUS = "org.freedesktop.UPower.PowerProfiles"
 PPD_DBUS_BUS_LEGACY = "net.hadess.PowerProfiles"
 PPD_DBUS_NAMES = [
-    {
-        "bus": PPD_DBUS_BUS,
-        "namespace": PPD_DBUS_BUS,
-        "interface": PPD_DBUS_BUS,
-        "object": "/org/freedesktop/UPower/PowerProfiles"
+	{
+		"bus": PPD_DBUS_BUS,
+		"namespace": PPD_DBUS_BUS,
+		"interface": PPD_DBUS_BUS,
+		"object": "/org/freedesktop/UPower/PowerProfiles"
 	},
-    {
-        "bus": PPD_DBUS_BUS_LEGACY,
-        "namespace": PPD_DBUS_BUS_LEGACY,
-        "interface": PPD_DBUS_BUS_LEGACY,
-        "object": "/net/hadess/PowerProfiles"
+	{
+		"bus": PPD_DBUS_BUS_LEGACY,
+		"namespace": PPD_DBUS_BUS_LEGACY,
+		"interface": PPD_DBUS_BUS_LEGACY,
+		"object": "/net/hadess/PowerProfiles"
 	}
 ]
 
