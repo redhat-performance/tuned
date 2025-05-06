@@ -51,6 +51,8 @@ class Daemon(object):
 			self._init_profile(profile_names)
 		except TunedException as e:
 			log.error("Cannot set initial profile. No tunings will be enabled: %s" % e)
+			if not self._daemon:
+				raise TunedException("Applying TuneD profile failed, check TuneD logs for details.")
 
 	def _init_threads(self):
 		self._thread = None
