@@ -6,6 +6,8 @@ import threading
 import tuned.consts as consts
 from tuned.utils.commands import commands
 from tuned.plugins import hotplug
+import pyudev
+import time
 
 __all__ = ["Controller"]
 
@@ -54,13 +56,29 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		Controller main loop. The call is blocking.
 		"""
 		log.info("starting controller")
+		self._terminate.clear()
+		wait_settle = self._global_config.get_int(consts.CFG_STARTUP_UDEV_SETTLE_WAIT, \
+			consts.CFG_DEF_STARTUP_UDEV_SETTLE_WAIT)
+		if wait_settle > 0:
+			log.info("waiting for udev to settle")
+			monitor = pyudev.Monitor.from_netlink(pyudev.Context())
+			p = True
+			t = time.time()
+			while time.time() < (t + wait_settle) and not self._terminate.is_set() and p:
+				p = monitor.poll(timeout = 1)
+			if not self._terminate.is_set():
+				if p:
+					log.info("udev settle timed out")
+				else:
+					log.info("udev settled")
+			del monitor
+
 		res = self.start()
 		daemon = self._global_config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON)
 		if not res and daemon:
 			exports.start()
 
 		if daemon:
-			self._terminate.clear()
 			# we have to pass some timeout, otherwise signals will not work
 			while not self._cmd.wait(self._terminate, 1):
 				exports.period_check()

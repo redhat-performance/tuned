@@ -146,6 +146,7 @@ CFG_UNIX_SOCKET_CONNECTIONS_BACKLOG = "connections_backlog"
 CFG_CPU_EPP_FLAG = "hwp_epp"
 CFG_ROLLBACK = "rollback"
 CFG_PROFILE_DIRS = "profile_dirs"
+CFG_STARTUP_UDEV_SETTLE_WAIT = "startup_udev_settle_wait"
 
 # no_daemon mode
 CFG_DEF_DAEMON = True
@@ -197,6 +198,8 @@ CFG_FUNC_UNIX_SOCKET_CONNECTIONS_BACKLOG = "getint"
 CFG_DEF_ROLLBACK = "auto"
 # default profile directories
 CFG_DEF_PROFILE_DIRS = [SYSTEM_PROFILES_DIR, USER_PROFILES_DIR]
+# default startup udev settle wait
+CFG_DEF_STARTUP_UDEV_SETTLE_WAIT = 0
 
 PATH_CPU_DMA_LATENCY = "/dev/cpu_dma_latency"
 
