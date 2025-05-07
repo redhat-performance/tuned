@@ -75,7 +75,10 @@ class GlobalConfig():
 			if isinstance(i, int):
 				return i
 			else:
-				return int(i, 0)
+				try:
+					return int(i, 0)
+				except ValueError:
+					log.error("Error parsing integer '%s', using '%d'." %(str(i), default))
 		return default
 
 	def get_list(self, key, default = []):
