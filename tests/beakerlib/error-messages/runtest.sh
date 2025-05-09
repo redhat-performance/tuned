@@ -24,7 +24,7 @@ rlJournalStart
         rlAssertRpm $PACKAGE
         rlImport "tuned/basic"
 
-        PROFILE_DIR=$(tunedGetSystemProfilesBaseDir)
+        PROFILE_DIR=$(tunedGetProfilesBaseDir)
 
         rlFileBackup "/var/log/tuned/tuned.log"
         tunedDisableSystemdRateLimitingStart
