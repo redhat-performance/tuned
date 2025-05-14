@@ -7,10 +7,11 @@ class Profile(object):
 	Representation of a tuning profile.
 	"""
 
-	__slots__ = ["_name", "_options", "_units"]
+	__slots__ = ["_name", "_options", "_variables", "_units"]
 
-	def __init__(self, name, config):
+	def __init__(self, name=None, config={}):
 		self._name = name
+		self._variables = collections.OrderedDict()
 		self._init_options(config)
 		self._init_units(config)
 
@@ -39,6 +40,10 @@ class Profile(object):
 	@name.setter
 	def name(self, value):
 		self._name = value
+
+	@property
+	def variables(self):
+		return self._variables
 
 	@property
 	def units(self):

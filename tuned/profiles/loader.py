@@ -51,15 +51,9 @@ class Loader(object):
 		processed_files = []
 		self._load_profile(profile_names, profiles, processed_files)
 
-		if len(profiles) > 1:
-			final_profile = self._profile_merger.merge(profiles)
-		else:
-			final_profile = profiles[0]
-
+		final_profile = self._profile_merger.merge(profiles)
 		final_profile.name = " ".join(profile_names)
-		if "variables" in final_profile.units:
-			self._variables.add_from_cfg(final_profile.units["variables"].options)
-			del(final_profile.units["variables"])
+		self._variables.add_from_cfg(final_profile.variables)
 		# FIXME hack, do all variable expansions in one place
 		self._expand_vars_in_devices(final_profile)
 		self._expand_vars_in_regexes(final_profile)
