@@ -24,16 +24,18 @@ rlJournalStart
         rlAssertRpm $PACKAGE
         rlImport "tuned/basic"
 
-        PROFILE_DIR=$(tunedGetSystemProfilesBaseDir)
-
-        rlFileBackup "/var/log/tuned/tuned.log"
-        tunedDisableSystemdRateLimitingStart
         rlServiceStart "tuned"
         tunedProfileBackup
+
+        rlFileBackup "/var/log/tuned/tuned.log"
+
+        tunedDisableSystemdRateLimitingStart
+
+        USRPROFILEDIR="$(tunedGetUsrProfilesBaseDir)"
     rlPhaseEnd
 
     rlPhaseStartTest "Test of profile balanced"
-        rlRun "cat $PROFILE_DIR/balanced/tuned.conf | grep alpm="
+        rlRun "cat ${USRPROFILEDIR}/balanced/tuned.conf | grep alpm="
         echo > /var/log/tuned/tuned.log
         rlRun "tuned-adm profile balanced"
         rlRun "tuned-adm active | grep balanced"
@@ -42,7 +44,7 @@ rlJournalStart
     rlPhaseEnd
 
     rlPhaseStartTest "Test of profile powersave"
-        rlRun "cat $PROFILE_DIR/powersave/tuned.conf | grep alpm="
+        rlRun "cat ${USRPROFILEDIR}/powersave/tuned.conf | grep alpm="
         echo > /var/log/tuned/tuned.log
         rlRun "tuned-adm profile powersave"
         rlRun "tuned-adm active | grep powersave"
