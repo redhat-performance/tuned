@@ -105,7 +105,7 @@ class BootloaderPlugin(base.Plugin):
 	----
 	[main]
 	include=profile_1
-	
+
 	[bootloader]
 	cmdline_profile_2=-quiet
 	----
@@ -114,7 +114,7 @@ class BootloaderPlugin(base.Plugin):
 	----
 	[main]
 	include=profile_1
-	
+
 	[bootloader]
 	cmdline_profile_1=-quiet
 	----
@@ -447,20 +447,28 @@ class BootloaderPlugin(base.Plugin):
 
 	def _rpm_ostree_update(self):
 		"""Apply kernel parameter tuning in a rpm-ostree system."""
-		if self._get_appended_rpm_ostree_kargs():
-			# The kargs are already set in /etc/tuned/bootcmldine,
-			# we are likely post-reboot and done.
-			return
+		appended_kargs = self._get_appended_rpm_ostree_kargs()
 		profile_kargs = self._cmdline_val.split()
 		active_kargs = self._get_rpm_ostree_kargs()
 		if active_kargs is None:
 			log.error("Not updating kernel arguments, could not read the current ones.")
 			return
+		# Ignore kargs previously appended by TuneD, these will be removed later.
+		non_tuned_kargs = active_kargs.split()
+		for karg in appended_kargs:
+			non_tuned_kargs.remove(karg)
 		# Only append key=value pairs that do not yet appear in kernel parameters,
 		# otherwise we would not be able to restore the cmdline to the previous state
 		# via rpm-ostree kargs --delete.
-		kargs_to_append = [karg for karg in profile_kargs if karg not in active_kargs.split()]
-		if self._modify_rpm_ostree_kargs(append_kargs=kargs_to_append):
+		kargs_to_append = [karg for karg in profile_kargs if karg not in non_tuned_kargs]
+		if appended_kargs == kargs_to_append:
+			# The correct kargs are already set in /etc/tuned/bootcmldine,
+			# we are likely post-reboot and done.
+			log.info("Kernel arguments already set, not updating.")
+			return
+		# If there are kargs in /etc/bootcmdline and they do not match
+		# the requested ones, there was no rollback, so remove them now.
+		if self._modify_rpm_ostree_kargs(delete_kargs=appended_kargs, append_kargs=kargs_to_append):
 			self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : " ".join(kargs_to_append)})
 
 	def _grub2_update(self):
