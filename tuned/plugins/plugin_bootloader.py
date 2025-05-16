@@ -105,7 +105,7 @@ class BootloaderPlugin(base.Plugin):
 	----
 	[main]
 	include=profile_1
-	
+
 	[bootloader]
 	cmdline_profile_2=-quiet
 	----
@@ -114,7 +114,7 @@ class BootloaderPlugin(base.Plugin):
 	----
 	[main]
 	include=profile_1
-	
+
 	[bootloader]
 	cmdline_profile_1=-quiet
 	----
@@ -447,10 +447,7 @@ class BootloaderPlugin(base.Plugin):
 
 	def _rpm_ostree_update(self):
 		"""Apply kernel parameter tuning in a rpm-ostree system."""
-		if self._get_appended_rpm_ostree_kargs():
-			# The kargs are already set in /etc/tuned/bootcmldine,
-			# we are likely post-reboot and done.
-			return
+		appended_kargs = self._get_appended_rpm_ostree_kargs()
 		profile_kargs = self._cmdline_val.split()
 		active_kargs = self._get_rpm_ostree_kargs()
 		if active_kargs is None:
@@ -460,6 +457,14 @@ class BootloaderPlugin(base.Plugin):
 		# otherwise we would not be able to restore the cmdline to the previous state
 		# via rpm-ostree kargs --delete.
 		kargs_to_append = [karg for karg in profile_kargs if karg not in active_kargs.split()]
+		if appended_kargs == kargs_to_append:
+			# The correct kargs are already set in /etc/tuned/bootcmldine,
+			# we are likely post-reboot and done.
+			return
+		if appended_kargs:
+			# If there are kargs in /etc/bootcmdline and they do not match
+			# the requested ones, there was no rollback, so remove them now.
+			self._remove_rpm_ostree_tuning()
 		if self._modify_rpm_ostree_kargs(append_kargs=kargs_to_append):
 			self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : " ".join(kargs_to_append)})
 
