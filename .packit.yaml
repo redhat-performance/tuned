@@ -8,6 +8,7 @@ jobs:
   - epel-7-x86_64
   - epel-8-x86_64
   - centos-stream-9-x86_64
+  - centos-stream-10-x86_64
 - job: tests
   trigger: pull_request
   targets:
@@ -15,6 +16,7 @@ jobs:
   - epel-7-x86_64
   - epel-8-x86_64
   - centos-stream-9-x86_64
+  - centos-stream-10-x86_64
 
 files_to_sync:
 - tuned.spec
