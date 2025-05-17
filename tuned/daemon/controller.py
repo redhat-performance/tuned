@@ -485,10 +485,6 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			log.error(rets)
 			return (False, rets)
 		plugin = plugins[plugin_name]
-		if not isinstance(plugin, hotplug.Plugin):
-			rets = "Plugin '%s' does not support hotplugging or dynamic instances." % plugin.name
-			log.error(rets)
-			return (False, rets)
 		devices = options.pop("devices", None)
 		devices_udev_regex = options.pop("devices_udev_regex", None)
 		script_pre = options.pop("script_pre", None)
@@ -543,10 +539,6 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			log.error(rets)
 			return (False, rets)
 		plugin = instance.plugin
-		if not isinstance(plugin, hotplug.Plugin):
-			rets = "Plugin '%s' does not support hotplugging or dynamic instances." % plugin.name
-			log.error(rets)
-			return (False, rets)
 		devices = instance.processed_devices.copy()
 		try:
 			plugin._remove_devices_nocheck(instance, devices)
