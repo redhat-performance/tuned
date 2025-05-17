@@ -98,17 +98,24 @@ class Manager(object):
 				continue
 
 		instances = []
+		instance_restore_devices = {}
 		for instance_info in instance_info_list:
 			plugin = plugins_by_name[instance_info.type]
 			if plugin is None:
 				continue
 			log.debug("creating '%s' (%s)" % (instance_info.name, instance_info.type))
+			restore = instance_info.options.pop("__devices__", None)
+			if restore:
+				instance_restore_devices[instance_info.name] = restore.split()
 			new_instance = plugin.create_instance(instance_info.name, instance_info.priority, \
 				instance_info.devices, instance_info.devices_udev_regex, \
 				instance_info.script_pre, instance_info.script_post, instance_info.options)
 			instances.append(new_instance)
 		for instance in instances:
 			instance.plugin.init_devices()
+			if instance.name in instance_restore_devices:
+				instance.plugin.restore_devices(instance, instance_restore_devices[instance.name])
+		for instance in instances:
 			instance.plugin.assign_free_devices(instance)
 			instance.plugin.initialize_instance(instance)
 		# At this point we should be able to start the HW events

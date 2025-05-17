@@ -164,16 +164,25 @@ class Plugin(object):
 			udev_devices = self._device_matcher_udev.match_list(instance.devices_udev_regex, udev_devices)
 			return set([x.sys_name for x in udev_devices])
 
+	def restore_devices(self, instance, devices):
+		if not self._devices_supported:
+			return
+
+		log.debug("Restoring devices of instance %s: %s" % (instance.name, " ".join(devices)))
+		for device in devices:
+			if device not in self._free_devices:
+				continue
+			self._free_devices.remove(device)
+			instance.assigned_devices.add(device)
+			self._assigned_devices.add(device)
+
 	def assign_free_devices(self, instance):
 		if not self._devices_supported:
 			return
 
 		log.debug("assigning devices to instance %s" % instance.name)
 		to_assign = self._get_matching_devices(instance, self._free_devices)
-		instance.active = len(to_assign) > 0
-		if not instance.active:
-			log.warning("instance %s: no matching devices available" % instance.name)
-		else:
+		if len(to_assign) > 0:
 			name = instance.name
 			if instance.name != self.name:
 				name += " (%s)" % self.name
@@ -181,6 +190,9 @@ class Plugin(object):
 			instance.assigned_devices.update(to_assign) # cannot use |=
 			self._assigned_devices |= to_assign
 			self._free_devices -= to_assign
+		instance.active = len(instance.assigned_devices) > 0
+		if not instance.active:
+			log.warning("instance %s: no matching devices available" % instance.name)
 
 	def release_devices(self, instance):
 		if not self._devices_supported:
