@@ -196,7 +196,7 @@ class Daemon(object):
 		if self._profile is None:
 			raise TunedException("Cannot start the daemon without setting a profile.")
 
-		self._unit_manager.create(self._profile.units)
+		self._unit_manager.create(self._profile.units, self._profile.variables)
 		self._save_active_profile(" ".join(self._active_profiles),
 					  self._manual)
 		self._save_post_loaded_profile(self._post_loaded_profile)

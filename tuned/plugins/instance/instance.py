@@ -4,7 +4,7 @@ class Instance(object):
 	"""
 	"""
 
-	def __init__(self, plugin, name, priority, devices_expression, devices_udev_regex, script_pre, script_post, options):
+	def __init__(self, plugin, name, priority, devices_expression, devices_udev_regex, script_pre, script_post, options, variables):
 		self._plugin = plugin
 		self._name = name
 		self._devices_expression = devices_expression
@@ -12,6 +12,7 @@ class Instance(object):
 		self._script_pre = script_pre
 		self._script_post = script_post
 		self._options = options
+		self._variables = variables
 
 		self._active = True
 		self._priority = priority
@@ -70,6 +71,10 @@ class Instance(object):
 	@property
 	def options(self):
 		return self._options
+
+	@property
+	def variables(self):
+		return self._variables
 
 	@property
 	def has_static_tuning(self):

@@ -7,12 +7,13 @@ class Profile(object):
 	Representation of a tuning profile.
 	"""
 
-	__slots__ = ["_name", "_options", "_units"]
+	__slots__ = ["_name", "_options", "_units", "_variables"]
 
-	def __init__(self, name, config):
+	def __init__(self, name, config, variables):
 		self._name = name
 		self._init_options(config)
 		self._init_units(config)
+		self._variables = variables
 
 	def _init_options(self, config):
 		self._options = {}
@@ -53,3 +54,10 @@ class Profile(object):
 		Profile global options.
 		"""
 		return self._options
+
+	@property
+	def variables(self):
+		"""
+		Profile variables.
+		"""
+		return self._variables

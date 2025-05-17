@@ -19,7 +19,7 @@ class Plugin(object):
 	Intentionally a lot of logic is included in the plugin to increase plugin flexibility.
 	"""
 
-	def __init__(self, monitors_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, instance_factory, global_cfg, variables):
+	def __init__(self, monitors_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, instance_factory, global_cfg):
 		"""Plugin constructor."""
 
 		self._storage = storage_factory.create(self.__class__.__name__)
@@ -33,7 +33,6 @@ class Plugin(object):
 		self._init_commands()
 
 		self._global_cfg = global_cfg
-		self._variables = variables
 		self._has_dynamic_options = False
 		self._devices_inited = False
 
@@ -93,14 +92,14 @@ class Plugin(object):
 	# Interface for manipulation with instances of the plugin.
 	#
 
-	def create_instance(self, name, priority, devices_expression, devices_udev_regex, script_pre, script_post, options):
+	def create_instance(self, name, priority, devices_expression, devices_udev_regex, script_pre, script_post, options, variables):
 		"""Create new instance of the plugin and seize the devices."""
 		if name in self._instances:
 			raise Exception("Plugin instance with name '%s' already exists." % name)
 
 		effective_options = self._get_effective_options(options)
 		instance = self._instance_factory.create(self, name, priority, devices_expression, devices_udev_regex, \
-			script_pre, script_post, effective_options)
+			script_pre, script_post, effective_options, variables)
 		self._instances[name] = instance
 		self._instances = collections.OrderedDict(sorted(self._instances.items(), key=lambda x: x[1].priority))
 
@@ -239,7 +238,7 @@ class Plugin(object):
 		ret = True
 		for dev in devices:
 			environ = os.environ
-			environ.update(self._variables.get_env())
+			environ.update(instance._variables.get_env())
 			arguments = [op]
 			if rollback == consts.ROLLBACK_FULL:
 				arguments.append("full_rollback")
@@ -448,13 +447,13 @@ class Plugin(object):
 
 	def _execute_all_non_device_commands(self, instance):
 		for command in [command for command in list(self._commands.values()) if not command["per_device"]]:
-			new_value = self._variables.expand(instance.options.get(command["name"], None))
+			new_value = instance._variables.expand(instance.options.get(command["name"], None))
 			if new_value is not None:
 				self._execute_non_device_command(instance, command, new_value)
 
 	def _execute_all_device_commands(self, instance, devices):
 		for command in [command for command in list(self._commands.values()) if command["per_device"]]:
-			new_value = self._variables.expand(instance.options.get(command["name"], None))
+			new_value = instance._variables.expand(instance.options.get(command["name"], None))
 			if new_value is None:
 				continue
 			for device in devices:
@@ -463,7 +462,7 @@ class Plugin(object):
 	def _verify_all_non_device_commands(self, instance, ignore_missing):
 		ret = True
 		for command in [command for command in list(self._commands.values()) if not command["per_device"]]:
-			new_value = self._variables.expand(instance.options.get(command["name"], None))
+			new_value = instance._variables.expand(instance.options.get(command["name"], None))
 			if new_value is not None:
 				if self._verify_non_device_command(instance, command, new_value, ignore_missing) == False:
 					ret = False
@@ -472,7 +471,7 @@ class Plugin(object):
 	def _verify_all_device_commands(self, instance, devices, ignore_missing):
 		ret = True
 		for command in [command for command in list(self._commands.values()) if command["per_device"]]:
-			new_value = self._variables.expand(instance.options.get(command["name"], None))
+			new_value = instance._variables.expand(instance.options.get(command["name"], None))
 			if new_value is None:
 				continue
 			for device in devices:
