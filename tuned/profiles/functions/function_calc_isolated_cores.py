@@ -3,8 +3,10 @@ import glob
 import tuned.logs
 from . import base
 import tuned.consts as consts
+from tuned.utils.commands import commands
 
 log = tuned.logs.get()
+cmd = commands()
 
 class calc_isolated_cores(base.Function):
 	"""
@@ -46,4 +48,4 @@ class calc_isolated_cores(base.Function):
 			cpus.sort(key = int)
 			isol_cpus = isol_cpus + cpus[cpus_reserve:]
 		isol_cpus.sort(key = int)
-		return ",".join(isol_cpus)
+		return ",".join(cmd.cpulist_pack(",".join(isol_cpus)))
