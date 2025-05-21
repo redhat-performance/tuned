@@ -57,6 +57,16 @@ class CPULatencyPlugin(hotplug.Plugin):
 	----
 	====
 	
+	`scaling_max_freq`:::
+	The maximum frequency the CPU can scale up to in kHz. 
+	This setting limits the CPU's maximum operating frequency.
+	====
+	----
+	[cpu]
+	scaling_max_freq = 3200000
+	----
+	====
+
 	`energy_perf_bias`:::
 	[option]`energy_perf_bias` supports managing energy
 	vs. performance policy via x86 Model Specific Registers using the
@@ -244,6 +254,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 			"force_latency"        : None,
 			"governor"             : None,
 			"sampling_down_factor" : None,
+			"scaling_max_freq"	   : None,
 			"energy_perf_bias"     : None,
 			"min_perf_pct"         : None,
 			"max_perf_pct"         : None,
@@ -604,6 +615,27 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if governor is None:
 			return None
 		path = self._sampling_down_factor_path(governor)
+		if not os.path.exists(path):
+			return None
+		return self._cmd.read_file(path).strip()
+
+	@command_set("scaling_max_freq", per_device = True)
+	def _set_scaling_max_freq(self, scaling_max_freq, device, instance, sim, remove):
+		val = None
+		path = "/sys/devices/system/cpu/%s/cpufreq/scaling_max_freq" % device
+
+		if not os.path.exists(path):
+			log.debug("ignoring scaling_max_freq setting for CPU '%s' doesn't support it" % device)
+			return None
+		val = str(scaling_max_freq)
+		if not sim:
+			log.info("setting scaling_max_freq to '%s'" % val)
+			self._cmd.write_to_file(path, val, no_error = [errno.ENOENT] if remove else False)
+		return val
+
+	@command_get("scaling_max_freq")
+	def _get_scaling_max_freq(self, device, instance, ignore_missing=False):
+		path = "/sys/devices/system/cpu/%s/cpufreq/scaling_max_freq" % device
 		if not os.path.exists(path):
 			return None
 		return self._cmd.read_file(path).strip()
