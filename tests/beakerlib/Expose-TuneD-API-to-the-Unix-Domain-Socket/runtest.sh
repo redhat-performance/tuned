@@ -24,7 +24,7 @@ send() {
   local socket=/run/tuned/tuned.sock
 #  local send_only=--send-only
   
-  printf "$data" | nc $send_only -U /run/tuned/tuned.sock
+  printf "$data" | ncat $send_only -U /run/tuned/tuned.sock
 }
 
 rlJournalStart
