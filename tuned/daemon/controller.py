@@ -62,15 +62,25 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		if wait_settle > 0:
 			log.info("waiting for udev to settle")
 			monitor = pyudev.Monitor.from_netlink(pyudev.Context())
+			udev_buffer_size = self._global_config.get_size("udev_buffer_size", consts.CFG_DEF_UDEV_BUFFER_SIZE)
+			try:
+				monitor.set_receive_buffer_size(udev_buffer_size)
+			except EnvironmentError:
+				log.warning("cannot set udev monitor receive buffer size, we are probably running inside " +
+					 "container or with limited capabilites, TuneD functionality may be limited")
 			p = True
 			t = time.time()
-			while time.time() < (t + wait_settle) and not self._terminate.is_set() and p:
-				p = monitor.poll(timeout = 1)
-			if not self._terminate.is_set():
-				if p:
-					log.info("udev settle timed out")
-				else:
-					log.info("udev settled")
+			try:
+				while time.time() < (t + wait_settle) and not self._terminate.is_set() and p:
+					p = monitor.poll(timeout = 1)
+				if not self._terminate.is_set():
+					if p:
+						log.info("udev settle timed out")
+					else:
+						log.info("udev settled")
+			# https://github.com/pyudev/pyudev/issues/194
+			except (OSError, IOError) as e:
+				log.warning("udev settle failed, '%s'" % e)
 			del monitor
 
 		res = self.start()
