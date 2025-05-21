@@ -14,8 +14,8 @@ class SCSIHostPlugin(hotplug.Plugin):
 	Tunes options for SCSI hosts.
 
 	The plug-in sets Aggressive Link Power Management (ALPM) to the value specified
-	by the [option]`alpm` option. The option takes one of three values:
-	`min_power`, `medium_power` and `max_performance`.
+	by the [option]`alpm` option. The option takes one of four values:
+	`min_power`, `med_power_with_dipm`, `medium_power` and `max_performance`.
 
 	NOTE: ALPM is only available on SATA controllers that use the Advanced
 	Host Controller Interface (AHCI).
@@ -24,7 +24,7 @@ class SCSIHostPlugin(hotplug.Plugin):
 	====
 	----
 	[scsi_host]
-	alpm=min_power
+	alpm=med_power_with_dipm
 	----
 	====
 	"""
