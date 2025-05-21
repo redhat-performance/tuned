@@ -1,25 +1,26 @@
 import re
-import tuned.logs
 from . import base
 
-log = tuned.logs.get()
-
-class lscpu_check(base.Function):
+class LSCPUCheck(base.Function):
 	"""
-	Checks regexes against the output of lscpu. Accepts arguments in the
-	following form: REGEX1, STR1, REGEX2, STR2, ...[, STR_FALLBACK]
-	If REGEX1 matches something in the output it expands to STR1,
-	if REGEX2 matches it expands to STR2. It stops on the first match,
-	i.e. if REGEX1 matches, no more regexes are processed. If none
-	regex matches it expands to STR_FALLBACK. If there is no fallback,
-	it expands to empty string.
+	Checks regexes against the output of `lscpu`.
+
+	Accepts arguments in the form `REGEX1, STR1, REGEX2, STR2, ...[, STR_FALLBACK]`.
+
+	If `REGEX1` has a match in the output of `lscpu`, it returns `STR1`.
+	
+	If `REGEX2` has a match, it returns `STR2`.
+
+	The function stops on the first match, i.e., if `REGEX1` has a match,
+	no more regexes are processed. If no regex has a match, `STR_FALLBACK`
+	is returned. If there is no fallback value, returns an empty string.
 	"""
 	def __init__(self):
 		# unlimited number of arguments, min 2 arguments
-		super(lscpu_check, self).__init__("lscpu_check", 0, 2)
+		super(LSCPUCheck, self).__init__(0, 2)
 
 	def execute(self, args):
-		if not super(lscpu_check, self).execute(args):
+		if not super(LSCPUCheck, self).execute(args):
 			return None
 		# Stdout is the 2nd result from the execute call
 		_, lscpu = self._cmd.execute("lscpu")
