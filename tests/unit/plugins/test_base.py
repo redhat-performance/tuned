@@ -30,12 +30,11 @@ class PluginBaseTestCase(unittest.TestCase):
 	def setUp(self):
 		self._plugin = DummyPlugin(monitors_repository,storage_factory,\
 			hardware_inventory,device_matcher,device_matcher_udev,\
-			plugin_instance_factory,None,None)
+			plugin_instance_factory,None)
 
 		self._commands_plugin = CommandsPlugin(monitors_repository,\
 			storage_factory,hardware_inventory,device_matcher,\
-			device_matcher_udev,plugin_instance_factory,None,\
-			profiles.variables.Variables())
+			device_matcher_udev,plugin_instance_factory,None)
 
 	def test_get_effective_options(self):
 		self.assertEqual(self._plugin._get_effective_options(\
@@ -51,13 +50,13 @@ class PluginBaseTestCase(unittest.TestCase):
 	def test_create_instance(self):
 		instance = self._plugin.create_instance(\
 			'first_instance',0,'test','test','test','test',\
-			{'default_option1':'default_value2'})
+			{'default_option1':'default_value2'},None)
 		self.assertIsNotNone(instance)
 
 	def test_destroy_instance(self):
 		instance = self._plugin.create_instance(\
 			'first_instance',0,'test','test','test','test',\
-			{'default_option1':'default_value2'})
+			{'default_option1':'default_value2'},None)
 		instance.plugin.init_devices()
 
 		self._plugin.destroy_instance(instance)
@@ -67,7 +66,7 @@ class PluginBaseTestCase(unittest.TestCase):
 		""" without udev regex """
 		instance = self._plugin.create_instance(\
 			'first_instance',0,'right_device*',None,'test','test',\
-			{'default_option1':'default_value2'})
+			{'default_option1':'default_value2'},None)
 
 		self.assertEqual(self._plugin._get_matching_devices(\
 			instance,['bad_device','right_device1','right_device2']),\
@@ -76,7 +75,7 @@ class PluginBaseTestCase(unittest.TestCase):
 		""" with udev regex """
 		instance = self._plugin.create_instance(\
 			'second_instance',0,'right_device*','device[1-2]','test','test',\
-			{'default_option1':'default_value2'})
+			{'default_option1':'default_value2'},None)
 
 		device1 = DummyDevice('device1',{'name':'device1'})
 		device2 = DummyDevice('device2',{'name':'device2'})
@@ -105,7 +104,7 @@ class PluginBaseTestCase(unittest.TestCase):
 
 	def test_execute_all_non_device_commands(self):
 		instance = self._commands_plugin.create_instance('test_instance',0,'',\
-			'','','',{'size':'XXL'})
+			'','','',{'size':'XXL'},profiles.variables.Variables())
 
 		self._commands_plugin._execute_all_non_device_commands(instance)
 
@@ -113,7 +112,7 @@ class PluginBaseTestCase(unittest.TestCase):
 
 	def test_execute_all_device_commands(self):
 		instance = self._commands_plugin.create_instance('test_instance',0,'',\
-			'','','',{'device_setting':'010'})
+			'','','',{'device_setting':'010'},profiles.variables.Variables())
 
 		device1 = DummyDevice('device1',{})
 		device2 = DummyDevice('device2',{})
@@ -134,7 +133,7 @@ class PluginBaseTestCase(unittest.TestCase):
 
 	def test_get_current_value(self):
 		instance = self._commands_plugin.create_instance('test_instance',0,'',\
-			'','','',{})
+			'','','',{},None)
 
 		command = [com for com in self._commands_plugin._commands.values()\
 			if com['name'] == 'size'][0]
