@@ -562,7 +562,7 @@ class BootloaderPlugin(base.Plugin):
 		return True
 
 	@command_custom("grub2_cfg_file")
-	def _grub2_cfg_file(self, enabling, value, verify, ignore_missing, instance):
+	def _grub2_cfg_file(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# nothing to verify
 		if verify:
 			return None
@@ -570,7 +570,7 @@ class BootloaderPlugin(base.Plugin):
 			self._grub2_cfg_file_names = [str(value)]
 
 	@command_custom("initrd_dst_img")
-	def _initrd_dst_img(self, enabling, value, verify, ignore_missing, instance):
+	def _initrd_dst_img(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# nothing to verify
 		if verify:
 			return None
@@ -585,7 +585,7 @@ class BootloaderPlugin(base.Plugin):
 		return None
 
 	@command_custom("initrd_remove_dir")
-	def _initrd_remove_dir(self, enabling, value, verify, ignore_missing, instance):
+	def _initrd_remove_dir(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# nothing to verify
 		if verify:
 			return None
@@ -595,7 +595,7 @@ class BootloaderPlugin(base.Plugin):
 		return None
 
 	@command_custom("initrd_add_img", per_device = False, priority = 10)
-	def _initrd_add_img(self, enabling, value, verify, ignore_missing, instance):
+	def _initrd_add_img(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# nothing to verify
 		if verify:
 			return None
@@ -610,7 +610,7 @@ class BootloaderPlugin(base.Plugin):
 		return None
 
 	@command_custom("initrd_add_dir", per_device = False, priority = 10)
-	def _initrd_add_dir(self, enabling, value, verify, ignore_missing, instance):
+	def _initrd_add_dir(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# nothing to verify
 		if verify:
 			return None
@@ -642,7 +642,7 @@ class BootloaderPlugin(base.Plugin):
 		return None
 
 	@command_custom("cmdline", per_device = False, priority = 10)
-	def _cmdline(self, enabling, value, verify, ignore_missing, instance):
+	def _cmdline(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		v = self._variables.expand(self._cmd.unquote(value))
 		if verify:
 			if self._rpm_ostree:
@@ -677,7 +677,7 @@ class BootloaderPlugin(base.Plugin):
 		return None
 
 	@command_custom("skip_grub_config", per_device = False, priority = 10)
-	def _skip_grub_config(self, enabling, value, verify, ignore_missing, instance):
+	def _skip_grub_config(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		if verify:
 			return None
 		if enabling and value is not None:
