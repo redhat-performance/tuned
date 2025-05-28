@@ -134,7 +134,8 @@ class DiskPlugin(hotplug.Plugin):
 		return  device.device_type == "disk" and \
 			device.attributes.get("removable", None) == b"0" and \
 			(device.parent is None or \
-					device.parent.subsystem in ["scsi", "virtio", "xen", "nvme"])
+					device.parent.subsystem in ["scsi", "virtio", "xen", "nvme",
+												"mmc"])
 
 	def _hardware_events_init(self):
 		self._hardware_inventory.subscribe(self, "block", self._hardware_events_callback)
