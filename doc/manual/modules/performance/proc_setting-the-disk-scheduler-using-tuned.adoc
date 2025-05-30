@@ -12,41 +12,21 @@ In the following commands and configuration, replace:
 
 .Prerequisites
 
-// Use an xref if we're inside the performance title or the upstream Tuned manual. Wrap performance title inside pantheonenv[] ifndef. Use pantheonenv[] ifdef to use correct xref syntax for PV2.
 ifndef::pantheonenv[]
-ifdef::performance-title[]
-:installing-tuned-link: pass:macros[xref:installing-and-enabling-tuned_getting-started-with-tuned[Installing and enabling Tuned]]
-endif::[]
+* The `tuned` service is installed and enabled. For details, see xref:installing-and-enabling-tuned_getting-started-with-tuned[Installing and enabling Tuned]
 endif::[]
 ifdef::pantheonenv[]
-:installing-tuned-link: pass:macros[xref:modules/performance/proc_installing-and-enabling-tuned.adoc[Installing and enabling Tuned]]
+* The `tuned` service is installed and enabled. For details, see xref:modules/performance/proc_installing-and-enabling-tuned.adoc[Installing and enabling Tuned]
 endif::[]
-
-// Use a link elsewhere.
-ifndef::performance-title[]
-:installing-tuned-link: pass:macros[https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/monitoring_and_managing_system_status_and_performance/getting-started-with-tuned_monitoring-and-managing-system-status-and-performance#installing-and-enabling-tuned_getting-started-with-tuned]
-endif::[]
-
-* The `tuned` service is installed and enabled. For details, see {installing-tuned-link}.
 
 .Procedure
 
-// Use an xref if we're inside the performance title or the upstream Tuned manual. Wrap performance title inside pantheonenv[] ifndef. Use pantheonenv[] ifdef to use correct xref syntax for PV2.
 ifndef::pantheonenv[]
-ifdef::performance-title[]
-:tuned-profiles-link: pass:macros[xref:tuned-profiles-distributed-with-rhel_getting-started-with-tuned[Tuned profiles distributed with RHEL]]
-endif::[]
+. Optional: Select an existing *TuneD* profile on which your profile will be based. For a list of available profiles, see xref:tuned-profiles-distributed-with-rhel_getting-started-with-tuned[Tuned profiles distributed with RHEL].
 endif::[]
 ifdef::pantheonenv[]
-:tuned-profiles-link: pass:macros[xref:modules/performance/ref_tuned-profiles-distributed-with-rhel.adoc[Tuned profiles distributed with RHEL]]
+. Optional: Select an existing *TuneD* profile on which your profile will be based. For a list of available profiles, see xref:modules/performance/ref_tuned-profiles-distributed-with-rhel.adoc[Tuned profiles distributed with RHEL].
 endif::[]
-
-// Use a link elsewhere.
-ifndef::performance-title[]
-:tuned-profiles-link: pass:macros[https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/monitoring_and_managing_system_status_and_performance/getting-started-with-tuned_monitoring-and-managing-system-status-and-performance#tuned-profiles-distributed-with-rhel_getting-started-with-tuned]
-endif::[]
-
-. Optional: Select an existing *TuneD* profile on which your profile will be based. For a list of available profiles, see {tuned-profiles-link}.
 +
 To see which profile is currently active, use:
 +
@@ -136,18 +116,9 @@ See TuneD log file ('/var/log/tuned/tuned.log') for details.
 
 [role="_additional-resources"]
 .Additional resources
-// Use an xref if we're inside the performance title or the upstream Tuned manual. Wrap performance title inside pantheonenv[] ifndef. Use pantheonenv[] ifdef to use correct xref syntax for PV2.
 ifndef::pantheonenv[]
-ifdef::performance-title[]
-:customizing-tuned-link: pass:macros[xref:customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance[Customizing Tuned profiles]]
-endif::[]
+* xref:customizing-tuned-profiles_tuned-documentation[Customizing Tuned profiles]
 endif::[]
 ifdef::pantheonenv[]
-:customizing-tuned-link: pass:macros[xref:assemblies/assembly_customizing-tuned-profiles.adoc[Customizing Tuned Profiles]]
+* xref:assemblies/assembly_customizing-tuned-profiles.adoc[Customizing Tuned Profiles]
 endif::[]
-// Use a link elsewhere.
-ifndef::performance-title[]
-:customizing-tuned-link: pass:macros[https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/monitoring_and_managing_system_status_and_performance/customizing-tuned-profiles_monitoring-and-managing-system-status-and-performance]
-endif::[]
-//* For more information on creating a *TuneD* profile, see
-* {customizing-tuned-link}.
