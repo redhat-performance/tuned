@@ -1,5 +1,6 @@
-import collections
+import tuned.consts as consts
 from functools import reduce
+from tuned.profiles.profile import Profile
 
 class Merger(object):
 	"""
@@ -14,7 +15,7 @@ class Merger(object):
 		Merge multiple configurations into one. If there are multiple units of the same type, option 'devices'
 		is set for each unit with respect to eliminating any duplicate devices.
 		"""
-		merged_config = reduce(self._merge_two, configs)
+		merged_config = reduce(self._merge_two, configs, Profile())
 		return merged_config
 
 	def _merge_two(self, profile_a, profile_b):
@@ -23,11 +24,22 @@ class Merger(object):
 		from the newer profile. If the 'replace' options of the newer unit is 'True', all options from the
 		older unit are dropped.
 		"""
+		if profile_a.name is None:
+			profile_a.name = profile_b.name
 
 		profile_a.options.update(profile_b.options)
 
 		for unit_name, unit in list(profile_b.units.items()):
-			if unit.replace or unit_name not in profile_a.units:
+			if unit.type == consts.PLUGIN_VARIABLES_UNIT_NAME:
+				if unit.replace:
+					profile_a.variables.clear()
+				overwritten_variables = set(profile_a.variables.keys()) & set(unit.options.keys())
+				profile_a.variables.update(unit.options)
+				if unit.prepend:
+					for variable in reversed(unit.options):
+						if variable not in overwritten_variables:
+							profile_a.variables.move_to_end(variable, last=False)
+			elif unit.replace or unit_name not in profile_a.units:
 				profile_a.units[unit_name] = unit
 			else:
 				profile_a.units[unit_name].type = unit.type

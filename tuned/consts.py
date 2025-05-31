@@ -21,6 +21,7 @@ USER_PROFILES_DIR = "/etc/tuned/profiles"
 SYSTEM_PROFILES_DIR = "/usr/lib/tuned/profiles"
 PERSISTENT_STORAGE_DIR = "/var/lib/tuned"
 PLUGIN_MAIN_UNIT_NAME = "main"
+PLUGIN_VARIABLES_UNIT_NAME = "variables"
 # Magic section header because ConfigParser does not support "headerless" config
 MAGIC_HEADER_NAME = "this_is_some_magic_section_header_because_of_compatibility"
 RECOMMEND_DIRECTORIES = ["/usr/lib/tuned/recommend.d", "/etc/tuned/recommend.d"]
