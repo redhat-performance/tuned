@@ -45,6 +45,8 @@ class Merger(object):
 				profile_a.units[unit_name].type = unit.type
 				profile_a.units[unit_name].enabled = unit.enabled
 				profile_a.units[unit_name].devices = unit.devices
+				if unit.priority is not None:
+					profile_a.units[unit_name].priority = unit.priority
 				if unit.devices_udev_regex is not None:
 					profile_a.units[unit_name].devices_udev_regex = unit.devices_udev_regex
 				if unit.cpuinfo_regex is not None:
