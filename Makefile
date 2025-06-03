@@ -3,6 +3,8 @@ NAME = tuned
 BUILD = release
 # which config to use in mock-build target
 MOCK_CONFIG = rhel-7-x86_64
+# Allow users to build tuned without gui
+INSTALL_GUI ?= 1
 # scratch-build for triggering Jenkins
 SCRATCH_BUILD_TARGET = rhel-7.5-candidate
 VERSION = $(shell awk '/^Version:/ {print $$2}' tuned.spec)
@@ -74,8 +76,10 @@ release-cp: release-dir
 	cp -a tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
 		tuned-adm.bash dbus.conf recommend.conf tuned-main.conf 00_tuned \
 		92-tuned.install bootcmdline modules.conf com.redhat.tuned.policy \
-		tuned-gui.py tuned-gui.glade tuned-ppd.py \
-		tuned-gui.desktop functions compile_plugin_docs.py $(VERSIONED_NAME)
+		tuned-ppd.py functions compile_plugin_docs.py $(VERSIONED_NAME)
+	ifeq ($(INSTALL_GUI),1)
+		cp -a tuned-gui.py tuned-gui.glade tuned-gui.desktop $(VERSIONED_NAME)
+	endif
 	cp -a doc experiments libexec man profiles systemtap tuned contrib icons \
 		tests $(VERSIONED_NAME)
 
@@ -153,15 +157,19 @@ install: install-dirs
 	# binaries
 	$(call install_python_script,tuned.py,$(DESTDIR)$(SBINDIR)/tuned)
 	$(call install_python_script,tuned-adm.py,$(DESTDIR)$(SBINDIR)/tuned-adm)
+	ifeq ($(INSTALL_GUI),1)
 	$(call install_python_script,tuned-gui.py,$(DESTDIR)$(SBINDIR)/tuned-gui)
+	endif
 
 	$(foreach file, diskdevstat netdevstat scomes, \
 		install -Dpm 0755 systemtap/$(file) $(DESTDIR)$(SBINDIR)/$(notdir $(file));)
 	$(call install_python_script, \
 		systemtap/varnetload, $(DESTDIR)$(SBINDIR)/varnetload)
 
+	ifeq ($(INSTALL_GUI),1)
 	# glade
 	install -Dpm 0644 tuned-gui.glade $(DESTDIR)$(DATADIR)/tuned/ui/tuned-gui.glade
+	endif
 
 	# tools
 	$(call install_python_script, \
@@ -239,12 +247,14 @@ install: install-dirs
 		$(call install_python_script, \
 			$(file), $(DESTDIR)$(LIBEXECDIR)/tuned/$(notdir $(file))))
 
+	ifeq ($(INSTALL_GUI),1)
 	# icon
 	install -Dpm 0644 icons/tuned.svg $(DESTDIR)$(DATADIR)/icons/hicolor/scalable/apps/tuned.svg
 
 	# desktop file
 	install -dD $(DESTDIR)$(DATADIR)/applications
 	desktop-file-install --dir=$(DESTDIR)$(DATADIR)/applications tuned-gui.desktop
+	endif
 
 install-ppd:
 	$(call install_python_script,tuned-ppd.py,$(DESTDIR)$(SBINDIR)/tuned-ppd)

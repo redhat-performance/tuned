@@ -1,4 +1,5 @@
 %bcond_with snapshot
+%bcond gui 1
 
 %if 0%{?rhel} && 0%{?rhel} < 10
 %global user_profiles_dir %{_sysconfdir}/tuned
@@ -139,6 +140,7 @@ network and ATA harddisk devices are implemented.
 %global docdir %{_docdir}/%{name}
 %endif
 
+%if %{with gui}
 %package gtk
 Summary: GTK GUI for tuned
 Requires: %{name} = %{version}-%{release}
@@ -152,6 +154,7 @@ Requires: pygobject3-base
 
 %description gtk
 GTK GUI that can control tuned and provides simple profile editor.
+%endif
 
 %package utils
 Requires: %{name} = %{version}-%{release}
@@ -299,7 +302,7 @@ to TuneD from power-profiles-daemon (PPD).
 make html %{make_python_arg}
 
 %install
-make install DESTDIR="%{buildroot}" BINDIR="%{_bindir}" SBINDIR="%{_sbindir}" \
+make install INSTALL_GUI="%{?gui}" DESTDIR="%{buildroot}" BINDIR="%{_bindir}" SBINDIR="%{_sbindir}" \
   DOCDIR="%{docdir}" %{make_python_arg} \
   TUNED_USER_PROFILES_DIR="%{user_profiles_dir}" \
   TUNED_SYSTEM_PROFILES_DIR="%{system_profiles_dir}"
@@ -324,8 +327,10 @@ mkdir -p %{buildroot}%{_var}/lib/tuned
 mkdir -p %{buildroot}%{_sysconfdir}/modprobe.d
 touch %{buildroot}%{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 
+%if %{with gui}
 # validate desktop file
 desktop-file-validate %{buildroot}%{_datadir}/applications/tuned-gui.desktop
+%endif
 
 # On RHEL-7 EPEL is needed, because there is no python-mock package and
 # python-2.7 doesn't have mock built-in
@@ -526,6 +531,7 @@ fi
 %ghost %{_sysconfdir}/modprobe.d/kvm.rt.tuned.conf
 %{_prefix}/lib/kernel/install.d/92-tuned.install
 
+%if %{with gui}
 %files gtk
 %{_sbindir}/tuned-gui
 %if %{with python3}
@@ -536,6 +542,7 @@ fi
 %{_datadir}/tuned/ui
 %{_datadir}/icons/hicolor/scalable/apps/tuned.svg
 %{_datadir}/applications/tuned-gui.desktop
+%endif
 
 %files utils
 %doc COPYING
