@@ -26,6 +26,46 @@ class Unit(object):
 		self._script_post = config.pop("script_post", None)
 		self._options = collections.OrderedDict(config)
 
+	def as_ordered_dict(self):
+		"""generate serializable (with json.dumps()) representation for hashing"""
+		ret = collections.OrderedDict()
+		ret["name"] = self.name
+		ret["priority"] = self.priority
+		ret["type"] = self.type
+		ret["enabled"] = self.enabled
+		ret["replace"] = self.replace
+		ret["drop"] = self.drop
+		ret["devices"] = self.devices
+		ret["devices_udev_regex"] = self.devices_udev_regex
+		ret["cpuinfo_regex"] = self.cpuinfo_regex
+		ret["uname_regex"] = self.uname_regex
+		ret["script_pre"] = self.script_pre
+		ret["script_post"] = self.script_post
+		for k, v in self.options.items():
+			ret[k] = v
+		return ret
+
+	def snapshot(self):
+		"""generate config representation that will re-create the data when read as a profile"""
+		snapshot = "[%s]\n" % self.name
+		snapshot += "priority=%s\n" % self.priority
+		snapshot += "type=%s\n" % self.type
+		snapshot += "enabled=%s\n" % self.enabled
+		snapshot += "devices=%s\n" % self.devices
+		if self.devices_udev_regex is not None:
+			snapshot += "devices_udev_regex=%s\n" % self.devices_udev_regex
+		if self.cpuinfo_regex is not None:
+			snapshot += "cpuinfo_regex=%s\n" % self.cpuinfo_regex
+		if self.uname_regex is not None:
+			snapshot += "uname_regex=%s\n" % self.uname_regex
+		if self.script_pre is not None:
+			snapshot += "script_pre=%s\n" % self.script_pre
+		if self.script_post is not None:
+			snapshot += "script_post=%s\n" % self.script_post
+		for k, v in self.options.items():
+			snapshot += "%s=%s\n" % (k, v)
+		return snapshot
+
 	@property
 	def name(self):
 		return self._name

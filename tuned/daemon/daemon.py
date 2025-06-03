@@ -121,6 +121,11 @@ class Daemon(object):
 			self._notify_profile_changed(profile_names, False, errstr)
 			raise TunedException(errstr)
 
+		# restore profile snapshot (if there is one)
+		snapshot = self._profile_loader.restore_snapshot(self._profile)
+		if snapshot is not None:
+			self._profile = snapshot
+
 	def set_profile(self, profile_names, manual):
 		if self.is_running():
 			errstr = "Cannot set profile while the daemon is running."
@@ -153,6 +158,40 @@ class Daemon(object):
 		if save_instantly:
 			self._save_active_profile(active_profiles, manual)
 			self._save_post_loaded_profile(post_loaded_profile)
+
+	def sync_instances(self):
+		# NOTE: currently, Controller creates the new instances, and here in Daemon
+		#       we discover what happened, and update the profile accordingly.
+		#       a potentially better approach would be to move some of the logic
+		#       from Controller to Daemon, and create/destroy the instances here,
+		#       and at the same time update the profile.
+
+		# remove all units that don't have an instance
+		instance_names = [i.name for i in self._unit_manager.instances]
+		for unit in list(self._profile.units.keys()):
+			if unit in instance_names:
+				continue
+			log.debug("snapshot sync: removing unit '%s'" % unit)
+			del self._profile.units[unit]
+		# create units for new instances
+		for instance in self._unit_manager.instances:
+			if instance.name in self._profile.units:
+				continue
+			log.debug("snapshot sync: creating unit '%s'" % instance.name)
+			config = {
+				"priority": instance.priority,
+				"type": instance._plugin.name,
+				"enabled": instance.active,
+				"devices": instance.devices_expression,
+				"devices_udev_regex": instance.devices_udev_regex,
+				"script_pre": instance.script_pre,
+				"script_post": instance.script_post,
+			}
+			for k, v in instance.options.items():
+				config[k] = v
+			self._profile.units[instance.name] = self._profile._create_unit(instance.name, config)
+		# create profile snapshot
+		self._profile_loader.create_snapshot(self._profile, self._unit_manager.instances)
 
 	@property
 	def profile(self):
@@ -200,6 +239,8 @@ class Daemon(object):
 		self._save_active_profile(" ".join(self._active_profiles),
 					  self._manual)
 		self._save_post_loaded_profile(self._post_loaded_profile)
+		# trigger a profile snapshot
+		self.sync_instances()
 		self._unit_manager.start_tuning()
 		self._profile_applied.set()
 		log.info("static tuning from profile '%s' applied" % self._profile.name)
@@ -368,6 +409,7 @@ class Daemon(object):
 			return False
 		log.info("stopping tuning")
 		if profile_switch:
+			self._profile_loader.remove_snapshot()
 			self._terminate_profile_switch.set()
 		self._terminate.set()
 		self._thread.join()

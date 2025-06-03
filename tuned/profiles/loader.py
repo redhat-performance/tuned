@@ -24,9 +24,6 @@ class Loader(object):
 		self._global_config = global_config
 		self._variables = variables
 
-	def _create_profile(self, profile_name, config):
-		return tuned.profiles.profile.Profile(profile_name, config)
-
 	@classmethod
 	def safe_name(cls, profile_name):
 		return re.match(r'^[a-zA-Z0-9_.-]+$', profile_name)
@@ -57,22 +54,43 @@ class Loader(object):
 			final_profile = profiles[0]
 
 		final_profile.name = " ".join(profile_names)
-		if "variables" in final_profile.units:
-			self._variables.add_from_cfg(final_profile.units["variables"].options)
-			del(final_profile.units["variables"])
-		# FIXME hack, do all variable expansions in one place
-		self._expand_vars_in_devices(final_profile)
-		self._expand_vars_in_regexes(final_profile)
+		final_profile.process_variables()
+		final_profile.calculate_hash()
 		return final_profile
 
-	def _expand_vars_in_devices(self, profile):
-		for unit in profile.units:
-			profile.units[unit].devices = self._variables.expand(profile.units[unit].devices)
+	def create_snapshot(self, profile, instances):
+		snapshot = profile.snapshot(instances)
+		log.debug("Storing profile snapshot in %s:\n%s" % (consts.PROFILE_SNAPSHOT_FILE, snapshot))
+		with open(consts.PROFILE_SNAPSHOT_FILE, "w") as f:
+			f.write(snapshot)
 
-	def _expand_vars_in_regexes(self, profile):
-		for unit in profile.units:
-			profile.units[unit].cpuinfo_regex = self._variables.expand(profile.units[unit].cpuinfo_regex)
-			profile.units[unit].uname_regex = self._variables.expand(profile.units[unit].uname_regex)
+	def restore_snapshot(self, profile):
+		if profile is None:
+			# When tuning is stopped, we are called with profile==None -> skip
+			return None
+		snapshot = None
+		if os.path.isfile(consts.PROFILE_SNAPSHOT_FILE):
+			log.debug("Found profile snapshot '%s'" % consts.PROFILE_SNAPSHOT_FILE)
+			try:
+				config = self._load_config_data(consts.PROFILE_SNAPSHOT_FILE)
+				snapshot_hash = config.get("main", {}).get("profile_base_hash", None)
+				if snapshot_hash == profile._base_hash:
+					snapshot = self._profile_factory.create("restore", config, self._variables)
+					snapshot.name = profile.name
+					snapshot.process_variables()
+					log.info("Restored profile snapshot: %s" % snapshot.name)
+				else:
+					log.debug("Snapshot hash '%s' does not match current base hash '%s'. Not restoring." % (snapshot_hash, profile._base_hash))
+					os.remove(consts.PROFILE_SNAPSHOT_FILE)
+			except InvalidProfileException as e:
+				log.error("Could not process profile snapshot: %s" % e)
+		return snapshot
+
+	def remove_snapshot(self):
+		try:
+			os.remove(consts.PROFILE_SNAPSHOT_FILE)
+		except FileNotFoundError:
+			pass
 
 	def _load_profile(self, profile_names, profiles, processed_files):
 		for name in profile_names:
@@ -84,9 +102,9 @@ class Loader(object):
 			processed_files.append(filename)
 
 			config = self._load_config_data(filename)
-			profile = self._profile_factory.create(name, config)
+			profile = self._profile_factory.create(name, config, self._variables)
 			if "include" in profile.options:
-				include_names = re.split(r"\s*[,;]\s*", self._variables.expand(profile.options.pop("include")))
+				include_names = re.split(r"\s*[,;]\s*", profile._variables.expand(profile.options.pop("include")))
 				self._load_profile(include_names, profiles, processed_files)
 
 			profiles.append(profile)
