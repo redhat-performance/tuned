@@ -1,3 +1,4 @@
+import collections
 import os
 import re
 import tuned.logs
@@ -15,6 +16,7 @@ class Variables():
 
 	def __init__(self):
 		self._cmd = commands()
+		self._raw = collections.OrderedDict()
 		self._lookup_re = {}
 		self._lookup_env = {}
 		self._functions = functions.Repository()
@@ -34,6 +36,7 @@ class Variables():
 		if not self._check_var(variable):
 			log.error("variable definition '%s' contains unallowed characters" % variable)
 			return
+		self._raw[s] = value
 		v = self.expand(value)
 		# variables referenced by ${VAR}, $ can be escaped by two $,
 		# i.e. the following will not expand: $${VAR}
@@ -77,3 +80,14 @@ class Variables():
 
 	def get_env(self):
 		return self._lookup_env
+
+	def as_ordered_dict(self):
+		"""generate serializable (with json.dumps()) representation for hashing"""
+		return self._raw
+
+	def snapshot(self):
+		"""generate config representation that will re-create the data when read as a profile"""
+		snapshot = "[variables]\n"
+		for k, v in self._raw.items():
+			snapshot += "%s=%s\n" % (k, v)
+		return snapshot

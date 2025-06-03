@@ -407,6 +407,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			rets = "Ignoring devices not handled by any instance '%s'." % str(devs)
 			log.info(rets)
 			return (False, rets)
+		self._daemon.sync_instances()
 		return (True, "OK")
 
 	@exports.export("s", "(bsa(ss))")
@@ -472,6 +473,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		"""
 		if caller == "":
 			return (False, "Unauthorized")
+		plugin_name = str(plugin_name)
+		instance_name = str(instance_name)
 		if not self._cmd.is_valid_name(plugin_name):
 			return (False, "Invalid plugin_name")
 		if not self._cmd.is_valid_name(instance_name):
@@ -519,6 +522,7 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 					other_instance.name, instance.name))
 				plugin._remove_devices_nocheck(other_instance, devs_moving)
 				plugin._add_devices_nocheck(instance, devs_moving)
+		self._daemon.sync_instances()
 		return (True, "OK")
 
 	@exports.export("s", "(bs)")
@@ -561,4 +565,5 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		for device in devices:
 			# _add_device() will find a suitable plugin instance
 			plugin._add_device(device)
+		self._daemon.sync_instances()
 		return (True, "OK")

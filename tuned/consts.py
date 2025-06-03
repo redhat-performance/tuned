@@ -19,6 +19,7 @@ DEFAULT_PROFILE = "balanced"
 DEFAULT_STORAGE_FILE = "/run/tuned/save.pickle"
 USER_PROFILES_DIR = "/etc/tuned/profiles"
 SYSTEM_PROFILES_DIR = "/usr/lib/tuned/profiles"
+PROFILE_SNAPSHOT_FILE = "/run/tuned/profile-snapshot.conf"
 PERSISTENT_STORAGE_DIR = "/var/lib/tuned"
 PLUGIN_MAIN_UNIT_NAME = "main"
 # Magic section header because ConfigParser does not support "headerless" config
