@@ -1,5 +1,5 @@
 %bcond_with snapshot
-%bcond gui 1
+%bcond_without gui
 
 %if 0%{?rhel} && 0%{?rhel} < 10
 %global user_profiles_dir %{_sysconfdir}/tuned
