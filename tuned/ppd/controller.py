@@ -229,6 +229,7 @@ class Controller(exports.interfaces.ExportableInterface):
         self._watch_manager = pyinotify.WatchManager()
         self._notifier = pyinotify.ThreadedNotifier(self._watch_manager)
         self._inotify_watches = {}
+        self._pinned_virtual_files = []
         self._platform_profile_supported = os.path.isfile(PLATFORM_PROFILE_PATH)
         self._no_turbo_supported = os.path.isfile(NO_TURBO_PATH)
         self._lap_mode_supported = os.path.isfile(LAP_MODE_PATH)
@@ -289,16 +290,22 @@ class Controller(exports.interfaces.ExportableInterface):
         """
         Sets up inotify file watches.
         """
+        for f in self._pinned_virtual_files:
+            f.close()
+        self._pinned_virtual_files.clear()
         self._watch_manager.rm_watch(list(self._inotify_watches.values()))
         if self._no_turbo_supported:
+            self._pinned_virtual_files.append(open(NO_TURBO_PATH, "r"))
             self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(NO_TURBO_PATH),
                                                                    mask=pyinotify.IN_MODIFY,
                                                                    proc_fun=PerformanceDegradedEventHandler(self, NO_TURBO_PATH))
         if self._lap_mode_supported:
+            self._pinned_virtual_files.append(open(LAP_MODE_PATH, "r"))
             self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(LAP_MODE_PATH),
                                                                    mask=pyinotify.IN_MODIFY,
                                                                    proc_fun=PerformanceDegradedEventHandler(self, LAP_MODE_PATH))
         if self._platform_profile_supported and self._config.thinkpad_function_keys:
+            self._pinned_virtual_files.append(open(PLATFORM_PROFILE_PATH, "r"))
             self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(PLATFORM_PROFILE_PATH),
                                                                    mask=pyinotify.IN_OPEN | pyinotify.IN_MODIFY | pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CLOSE_NOWRITE,
                                                                    proc_fun=PlatformProfileEventHandler(self))
@@ -379,6 +386,9 @@ class Controller(exports.interfaces.ExportableInterface):
         self._notifier.start()
         while not self._cmd.wait(self._terminate, 1):
             pass
+        for f in self._pinned_virtual_files:
+            f.close()
+        self._pinned_virtual_files.clear()
         self._watch_manager.rm_watch(list(self._inotify_watches.values()))
         self._notifier.stop()
         exports.stop()
