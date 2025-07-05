@@ -293,11 +293,11 @@ class Controller(exports.interfaces.ExportableInterface):
         if self._no_turbo_supported:
             self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(NO_TURBO_PATH),
                                                                    mask=pyinotify.IN_MODIFY,
-                                                                   proc_fun=PerformanceDegradedEventHandler(NO_TURBO_PATH, self))
+                                                                   proc_fun=PerformanceDegradedEventHandler(self, NO_TURBO_PATH))
         if self._lap_mode_supported:
             self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(LAP_MODE_PATH),
                                                                    mask=pyinotify.IN_MODIFY,
-                                                                   proc_fun=PerformanceDegradedEventHandler(LAP_MODE_PATH, self))
+                                                                   proc_fun=PerformanceDegradedEventHandler(self, LAP_MODE_PATH))
         if self._platform_profile_supported and self._config.thinkpad_function_keys:
            self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(PLATFORM_PROFILE_PATH),
                                                                   mask=pyinotify.IN_OPEN | pyinotify.IN_MODIFY | pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CLOSE_NOWRITE,
