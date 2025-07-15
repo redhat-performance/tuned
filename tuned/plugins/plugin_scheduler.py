@@ -447,6 +447,11 @@ class SchedulerPlugin(base.Plugin):
 		"latency_ns": "",
 	}
 
+	def _disable_perf(self):
+		log.warning("python-perf unavailable, disabling perf support and " \
+			"runtime tuning, you can try to (re)install python(3)-perf package")
+		self._perf_available = False
+
 	def __init__(self, monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables):
 		super(SchedulerPlugin, self).__init__(monitor_repository, storage_factory, hardware_inventory, device_matcher, device_matcher_udev, plugin_instance_factory, global_cfg, variables)
 		self._has_dynamic_options = True
@@ -465,14 +470,15 @@ class SchedulerPlugin(base.Plugin):
 		self._ps_blacklist = ""
 		self._kthread_process = True
 		self._cgroup_ps_blacklist_re = ""
-		# perf is optional, if unavailable, it will be disabled later
+		self._perf_available = True
+
 		try:
 			self._cpus = perf.cpu_map()
 		except (NameError, AttributeError):
-			cpus = self._cmd.read_file(consts.SYSFS_CPUS_PRESENT_PATH)
+			self._disable_perf()
 			# it's different type than perf.cpu_map(), but without perf we use it as iterable
-			# which should be compatible, fallback to single core CPU if sysfs is unavailable
-			self._cpus = self._cmd.cpulist_unpack(cpus) if cpus else [ 0 ]
+			# which should be compatible
+			self._cpus = self._cmd.get_cpus()
 
 		self._scheduler_storage_key = self._storage_key(
 				command_name = "scheduler")
@@ -541,7 +547,7 @@ class SchedulerPlugin(base.Plugin):
 		if self._cmd.get_bool(instance._scheduler.get("runtime", 1)) == "0":
 			instance._runtime_tuning = False
 		instance._terminate = threading.Event()
-		if self._daemon and instance._runtime_tuning:
+		if self._daemon and instance._runtime_tuning and self._perf_available:
 			try:
 				instance._threads = perf.thread_map()
 				evsel = perf.evsel(type = perf.TYPE_SOFTWARE,
@@ -558,9 +564,9 @@ class SchedulerPlugin(base.Plugin):
 					instance._evlist.mmap(pages = perf_mmap_pages)
 			# no perf
 			except:
-				log.warning("python-perf unavailable, disabling perf support and " \
-					"runtime tuning, you can try to (re)install python(3)-perf package")
-				instance._runtime_tuning = False
+				self._disable_perf()
+		if not self._perf_available:
+			instance._runtime_tuning = False
 
 	def _instance_cleanup(self, instance):
 		if instance._evlist:

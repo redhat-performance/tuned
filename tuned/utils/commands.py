@@ -555,3 +555,9 @@ class commands:
 
 	def getconf(self, variable):
 		return check_output(["getconf", variable]).decode().strip()
+
+	# Gets list of available CPUs
+	def get_cpus(self):
+		cpus = self.read_file(consts.SYSFS_CPUS_PRESENT_PATH)
+		# fallback to single core CPU if sysfs is unavailable
+		return self.cpulist_unpack(cpus) if cpus else [ 0 ]
