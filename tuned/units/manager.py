@@ -89,8 +89,8 @@ class Manager(object):
 				plugin = self._plugins_repository.create(plugin_name)
 				plugins_by_name[plugin_name] = plugin
 				self._plugins.append(plugin)
-			except tuned.plugins.exceptions.NotSupportedPluginException:
-				log.info("skipping plugin '%s', not supported on your system" % plugin_name)
+			except tuned.plugins.exceptions.NotSupportedPluginException as e:
+				log.info("skipping plugin '%s', not supported on your system: %s" % (plugin_name, e))
 				continue
 			except Exception as e:
 				log.error("failed to initialize plugin %s" % plugin_name)
