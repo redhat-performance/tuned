@@ -43,7 +43,7 @@ timeout=10
 radeon_powersave=dpm-balanced, auto
 
 [scsi_host]
-alpm=medium_power
+alpm=med_power_with_dipm
 ----
 
 . To activate the profile, use:

@@ -22,14 +22,14 @@ If the [replaceable]_parent_ profile is updated, such as after a *TuneD* upgrade
 
 .A power-saving profile based on balanced
 ====
-The following is an example of a custom profile that extends the `balanced` profile and sets Aggressive Link Power Management (ALPM) for all devices to the maximum powersaving.
+The following is an example of a custom profile that extends the `balanced` profile and disables the capability of the CPU to boost above nominal frequencies for brief periods.
 
 ----
 [main]
 include=balanced
 
-[scsi_host]
-alpm=min_power
+[cpu]
+boost=0
 ----
 ====
 
