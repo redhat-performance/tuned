@@ -11,7 +11,7 @@ PROFILES_SECTION = "profiles"
 BATTERY_SECTION = "battery"
 DEFAULT_PROFILE_OPTION = "default"
 BATTERY_DETECTION_OPTION = "battery_detection"
-THINKPAD_FUNCTION_KEYS_OPTION = "thinkpad_function_keys"
+SYSFS_ACPI_MONITOR_OPTION = "sysfs_acpi_monitor"
 
 
 class ProfileMap:
@@ -75,13 +75,13 @@ class PPDConfig:
         return self._tuned_to_ppd
 
     @property
-    def thinkpad_function_keys(self):
+    def sysfs_acpi_monitor(self):
         """
         Whether to react to changes of ACPI platform profile
         done via function keys (e.g., Fn-L) on newer Thinkpad
         machines. Experimental feature.
         """
-        return self._thinkpad_function_keys
+        return self._sysfs_acpi_monitor
 
     def load_from_file(self, config_file):
         """
@@ -141,4 +141,4 @@ class PPDConfig:
         self._ppd_to_tuned = ProfileMap(profile_dict_ac, profile_dict_dc)
         self._tuned_to_ppd = ProfileMap({v: k for k, v in profile_dict_ac.items()}, {v: k for k, v in profile_dict_dc.items()})
 
-        self._thinkpad_function_keys = cfg.getboolean(MAIN_SECTION, THINKPAD_FUNCTION_KEYS_OPTION, fallback=False)
+        self._sysfs_acpi_monitor = cfg.getboolean(MAIN_SECTION, SYSFS_ACPI_MONITOR_OPTION, fallback=True)

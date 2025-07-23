@@ -304,7 +304,7 @@ class Controller(exports.interfaces.ExportableInterface):
             self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(LAP_MODE_PATH),
                                                                    mask=pyinotify.IN_MODIFY,
                                                                    proc_fun=PerformanceDegradedEventHandler(self, LAP_MODE_PATH))
-        if self._platform_profile_supported and self._config.thinkpad_function_keys:
+        if self._platform_profile_supported and self._config.sysfs_acpi_monitor:
             self._pinned_virtual_files.append(open(PLATFORM_PROFILE_PATH, "r"))
             self._inotify_watches |= self._watch_manager.add_watch(path=os.path.dirname(PLATFORM_PROFILE_PATH),
                                                                    mask=pyinotify.IN_OPEN | pyinotify.IN_MODIFY | pyinotify.IN_CLOSE_WRITE | pyinotify.IN_CLOSE_NOWRITE,
