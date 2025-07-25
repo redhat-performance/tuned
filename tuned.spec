@@ -65,7 +65,8 @@ License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
 BuildArch: noarch
-BuildRequires: systemd, desktop-file-utils
+BuildRequires: systemd
+BuildRequires: desktop-file-utils
 %if 0%{?rhel}
 BuildRequires: asciidoc
 %else
@@ -75,7 +76,8 @@ Requires(post): systemd, virt-what
 Requires(preun): systemd
 Requires(postun): systemd
 BuildRequires: make
-BuildRequires: %{_py}, %{_py}-devel
+BuildRequires: %{_py}
+BuildRequires: %{_py}-devel
 # BuildRequires for 'make test'
 # python-mock is needed for python-2.7, but it's not available on RHEL-7, only in the EPEL
 %if %{without python3} && ( ! 0%{?rhel} || 0%{?rhel} >= 8 || 0%{?epel})
@@ -91,15 +93,23 @@ Requires: %{_py}-schedutils
 # requires for packages with inconsistent python2/3 names
 %if %{with python3}
 # BuildRequires for 'make test'
-BuildRequires: python3-dbus, python3-gobject-base
-Requires: python3-dbus, python3-gobject-base
+BuildRequires: python3-dbus
+BuildRequires: python3-gobject-base
+Requires: python3-dbus
+Requires: python3-gobject-base
 %else
 # BuildRequires for 'make test'
-BuildRequires: dbus-python, pygobject3-base
-Requires: dbus-python, pygobject3-base
+BuildRequires: dbus-python
+BuildRequires: pygobject3-base
+Requires: dbus-python
+Requires: pygobject3-base
 %endif
-Requires: virt-what, ethtool, gawk
-Requires: util-linux, dbus, polkit
+Requires: virt-what
+Requires: ethtool
+Requires: gawk
+Requires: util-linux
+Requires: dbus
+Requires: polkit
 %if 0%{?fedora} > 22 || 0%{?rhel} > 7
 Recommends: dmidecode
 # https://src.fedoraproject.org/rpms/tuned/pull-request/8
@@ -306,10 +316,8 @@ make install DESTDIR="%{buildroot}" BINDIR="%{_bindir}" SBINDIR="%{_sbindir}" \
 make install-ppd DESTDIR="%{buildroot}" BINDIR="%{_bindir}" \
   SBINDIR="%{_sbindir}" DOCDIR="%{docdir}" %{make_python_arg}
 
-%if ! 0%{?rhel}
 # manual
 make install-html DESTDIR=%{buildroot} DOCDIR=%{docdir}
-%endif
 
 # conditional support for grub2, grub2 is not available on all architectures
 # and tuned is noarch package, thus the following hack is needed
