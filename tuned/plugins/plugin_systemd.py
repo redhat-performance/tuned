@@ -32,8 +32,9 @@ class SystemdPlugin(base.Plugin):
 	"""
 
 	def __init__(self, *args, **kwargs):
-		if not os.path.isfile(consts.SYSTEMD_SYSTEM_CONF_FILE):
-			raise exceptions.NotSupportedPluginException("Required systemd '%s' configuration file not found, disabling plugin." % consts.SYSTEMD_SYSTEM_CONF_FILE)
+		if not os.path.isfile(consts.SYSTEMD_USER_SYSTEM_CONF_FILE) and not os.path.isfile(consts.SYSTEMD_SYSTEM_CONF_FILE):
+			raise exceptions.NotSupportedPluginException("Systemd '%s' or '%s' configuration file not found, disabling plugin." % \
+				(consts.SYSTEMD_USER_SYSTEM_CONF_FILE, consts.SYSTEMD_SYSTEM_CONF_FILE))
 		super(SystemdPlugin, self).__init__(*args, **kwargs)
 		self._cmd = commands()
 
@@ -74,22 +75,22 @@ class SystemdPlugin(base.Plugin):
 		return re.sub(r"^\s*" + key + r"\s*=.*\n", "", conf, flags = re.MULTILINE)
 
 	def _read_systemd_system_conf(self):
-		systemd_system_conf = self._cmd.read_file(consts.SYSTEMD_SYSTEM_CONF_FILE, err_ret = None)
+		systemd_system_conf = self._cmd.read_file(consts.SYSTEMD_USER_SYSTEM_CONF_FILE, err_ret = None)
 		if systemd_system_conf is None:
 			log.error("error reading systemd configuration file")
 			return None
 		return systemd_system_conf
 
 	def _write_systemd_system_conf(self, conf):
-		tmpfile = consts.SYSTEMD_SYSTEM_CONF_FILE + consts.TMP_FILE_SUFFIX
+		tmpfile = consts.SYSTEMD_USER_SYSTEM_CONF_FILE + consts.TMP_FILE_SUFFIX
 		if not self._cmd.write_to_file(tmpfile, conf):
 			log.error("error writing systemd configuration file")
 			self._cmd.unlink(tmpfile, no_error = True)
 			return False
 		# Atomic replace, this doesn't work on Windows (AFAIK there is no way on Windows how to do this
 		# atomically), but it's unlikely this code will run there
-		if not self._cmd.rename(tmpfile, consts.SYSTEMD_SYSTEM_CONF_FILE):
-			log.error("error replacing systemd configuration file '%s'" % consts.SYSTEMD_SYSTEM_CONF_FILE)
+		if not self._cmd.rename(tmpfile, consts.SYSTEMD_USER_SYSTEM_CONF_FILE):
+			log.error("error replacing systemd configuration file '%s'" % consts.SYSTEMD_USER_SYSTEM_CONF_FILE)
 			self._cmd.unlink(tmpfile, no_error = True)
 			return False
 		return True
@@ -127,7 +128,10 @@ class SystemdPlugin(base.Plugin):
 		conf_affinity_unpacked = None
 		v = self._cmd.unescape(self._variables.expand(self._cmd.unquote(value)))
 		v_unpacked = " ".join(str(v) for v in self._cmd.cpulist_unpack(v))
-		conf = self._read_systemd_system_conf()
+		if os.path.isfile(consts.SYSTEMD_USER_SYSTEM_CONF_FILE):
+			conf = self._read_systemd_system_conf()
+		else:
+			conf = ""
 		if conf is not None:
 			conf_affinity = self._get_keyval(conf, consts.SYSTEMD_CPUAFFINITY_VAR)
 			conf_affinity_unpacked = self._cpulist_convert_unpack(conf_affinity)
@@ -139,7 +143,7 @@ class SystemdPlugin(base.Plugin):
 			if conf_affinity is not None and cpu_affinity_saved is None and v_unpacked != conf_affinity_unpacked:
 				self._cmd.write_to_file(fname, conf_affinity, makedir = True)
 
-			log.info("setting '%s' to '%s' in the '%s'" % (consts.SYSTEMD_CPUAFFINITY_VAR, v_unpacked, consts.SYSTEMD_SYSTEM_CONF_FILE))
+			log.info("setting '%s' to '%s' in the '%s'" % (consts.SYSTEMD_CPUAFFINITY_VAR, v_unpacked, consts.SYSTEMD_USER_SYSTEM_CONF_FILE))
 			self._write_systemd_system_conf(self._add_keyval(conf, consts.SYSTEMD_CPUAFFINITY_VAR, v_unpacked))
 			return True
 		return None

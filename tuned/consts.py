@@ -65,7 +65,8 @@ DEF_SERVICE_CFG_DIR_MODE = 0o755
 MODULES_FILE = "/etc/modprobe.d/tuned.conf"
 
 # systemd plugin configuration
-SYSTEMD_SYSTEM_CONF_FILE = "/etc/systemd/system.conf"
+SYSTEMD_USER_SYSTEM_CONF_FILE = "/etc/systemd/system.conf"
+SYSTEMD_SYSTEM_CONF_FILE = "/usr/lib/systemd/system.conf"
 SYSTEMD_CPUAFFINITY_VAR = "CPUAffinity"
 
 # irqbalance plugin configuration
