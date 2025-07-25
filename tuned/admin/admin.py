@@ -303,7 +303,7 @@ class Admin(object):
 		print("Trying to (re)start tuned...")
 		(ret, msg) = self._cmd.execute(["service", "tuned", "restart"])
 		if ret != 0:
-			raise TunedException("TuneD (re)start failed, you need to (re)start TuneD by hand.")
+			raise TunedException("TuneD (re)start failed, check TuneD logs for details.")
 		print("TuneD (re)started.")
 
 	def _set_profile(self, profile_name, manual):
