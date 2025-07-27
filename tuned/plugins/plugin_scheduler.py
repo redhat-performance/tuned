@@ -1161,7 +1161,7 @@ class SchedulerPlugin(base.Plugin):
 								self._remove_pid(instance, int(event.tid))
 
 	@command_custom("cgroup_ps_blacklist", per_device = False)
-	def _cgroup_ps_blacklist(self, enabling, value, verify, ignore_missing, instance):
+	def _cgroup_ps_blacklist(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1169,7 +1169,7 @@ class SchedulerPlugin(base.Plugin):
 			self._cgroup_ps_blacklist_re = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
 	@command_custom("ps_whitelist", per_device = False)
-	def _ps_whitelist(self, enabling, value, verify, ignore_missing, instance):
+	def _ps_whitelist(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1177,7 +1177,7 @@ class SchedulerPlugin(base.Plugin):
 			self._ps_whitelist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
 	@command_custom("ps_blacklist", per_device = False)
-	def _ps_blacklist(self, enabling, value, verify, ignore_missing, instance):
+	def _ps_blacklist(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1185,7 +1185,7 @@ class SchedulerPlugin(base.Plugin):
 			self._ps_blacklist = "|".join(["(%s)" % v for v in re.split(r"(?<!\\);", str(value))])
 
 	@command_custom("kthread_process", per_device = False)
-	def _kthread_process(self, enabling, value, verify, ignore_missing, instance):
+	def _kthread_process(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1193,7 +1193,7 @@ class SchedulerPlugin(base.Plugin):
 			self._kthread_process = self._cmd.get_bool(value) == "1"
 
 	@command_custom("irq_process", per_device = False)
-	def _irq_process(self, enabling, value, verify, ignore_missing, instance):
+	def _irq_process(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1201,7 +1201,7 @@ class SchedulerPlugin(base.Plugin):
 			self._irq_process = self._cmd.get_bool(value) == "1"
 
 	@command_custom("default_irq_smp_affinity", per_device = False)
-	def _default_irq_smp_affinity(self, enabling, value, verify, ignore_missing, instance):
+	def _default_irq_smp_affinity(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1212,7 +1212,7 @@ class SchedulerPlugin(base.Plugin):
 				self._default_irq_smp_affinity_value = self._cmd.cpulist_unpack(value)
 
 	@command_custom("perf_process_fork", per_device = False)
-	def _perf_process_fork(self, enabling, value, verify, ignore_missing, instance):
+	def _perf_process_fork(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		# currently unsupported
 		if verify:
 			return None
@@ -1428,7 +1428,7 @@ class SchedulerPlugin(base.Plugin):
 		return res
 
 	@command_custom("isolated_cores", per_device = False, priority = 10)
-	def _isolated_cores(self, enabling, value, verify, ignore_missing, instance):
+	def _isolated_cores(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		affinity = None
 		self._affinity = None
 		if value is not None:
