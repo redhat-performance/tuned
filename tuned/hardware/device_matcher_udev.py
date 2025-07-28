@@ -16,7 +16,10 @@ class DeviceMatcherUdev(device_matcher.DeviceMatcher):
 		try:
 			items = device.properties.items()
 		except AttributeError:
-			items = device.items()
+			try:
+				items = device.items()
+			except AttributeError:
+				return False
 
 		for key, val in sorted(list(items)):
 			properties += key + '=' + val + '\n'
