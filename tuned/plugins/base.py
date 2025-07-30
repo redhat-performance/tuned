@@ -154,6 +154,9 @@ class Plugin(object):
 		return None
 
 	def _get_matching_devices(self, instance, devices):
+		if not self._devices_supported:
+			return set()
+
 		if instance.devices_udev_regex is None:
 			return set(self._device_matcher.match_list(instance.devices_expression, devices))
 		else:
@@ -163,6 +166,18 @@ class Plugin(object):
 				return set()
 			udev_devices = self._device_matcher_udev.match_list(instance.devices_udev_regex, udev_devices)
 			return set([x.sys_name for x in udev_devices])
+
+	def _add_device(self, device_name):
+		pass
+
+	def _add_devices_nocheck(self, instance, device_names):
+		pass
+
+	def _remove_device(self, device_name):
+		pass
+
+	def _remove_devices_nocheck(self, instance, device_names):
+		pass
 
 	def assign_free_devices(self, instance):
 		if not self._devices_supported:
