@@ -190,7 +190,9 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 	`boost`:::
 	The [option]`boost` option allows the CPU to boost above nominal
-	frequencies for shorts periods of time.
+	frequencies for shorts periods of time. On Intel systems with the
+	intel_pstate driver, setting boost=0 will automatically set no_turbo=1
+	to ensure boost is properly disabled.
 	+
 	.Allowing CPU boost
 	====
@@ -771,17 +773,38 @@ class CPULatencyPlugin(hotplug.Plugin):
 			log.debug("%s is not online, skipping" % device)
 			return None
 		cpu_id = device.lstrip("cpu")
+		boost_set = False
+
 		if os.path.exists(self._pstate_boost_path(cpu_id)):
 			if not sim:
 				if boost == "0" or boost == "1":
 					self._cmd.write_to_file(self._pstate_boost_path(cpu_id), boost, \
 						no_error = [errno.ENOENT] if remove else False, ignore_same=True)
 					log.info("Setting boost value '%s' for cpu '%s'" % (boost, device))
+					boost_set = True
 				else:
 					log.error("Failed to set boost on cpu '%s'. Is the value in the profile correct?" % device)
-			return str(boost)
 		else:
 			log.debug("boost file missing, which can happen on pre 6.11 kernels.")
+
+		# For Intel systems with intel_pstate driver, handle no_turbo
+		# This ensures boost=0 works properly on Intel CPUs
+		if self._has_intel_pstate and boost in ["0", "1"]:
+			no_turbo_val = "1" if boost == "0" else "0"
+
+			if not sim:
+				try:
+					self._set_intel_pstate_attr("no_turbo", no_turbo_val)
+					log.info("Setting no_turbo to '%s' for intel_pstate driver (boost=%s)" % (no_turbo_val, boost))
+					boost_set = True
+				except Exception as e:
+					log.warning("Failed to set no_turbo for intel_pstate: %s" % str(e))
+
+		if boost_set or sim:
+			return str(boost)
+		elif boost in ["0", "1"]:
+			log.warning("Unable to set boost on cpu '%s'. Neither per-policy boost nor intel_pstate no_turbo is available." % device)
+
 		return None
 
 	@command_get("boost")
