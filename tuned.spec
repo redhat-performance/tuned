@@ -51,16 +51,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.25.1
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.26.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -646,6 +646,39 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Sun Aug 17 2025 Jaroslav Škarvada  <jskarvad@redhat.com> - 2.26.0-0.1.rc1
+- new release
+  - tuned-ppd: renamed thinkpad_function_keys as sysfs_acpi_monitor
+  - tuned-ppd: enabled sysfs_acpi_monitor by default
+  - tuned-ppd: fixed inotify watch for performance degradation
+  - tuned-ppd: pinned virtual files in memory for inotify
+  - fixed instance priority inheritance
+    resolves: RHEL-94842
+  - hotplug: added fixes for device remove race condition
+  - tuned-main.conf: added startup_udev_settle_wait option
+    resolves: RHEL-88238
+  - functions: silenced errors if module kvm_intel does not exist
+    resolves: RHEL-79943
+  - functions: make calc_isolated_cores return CPU ranges
+    resolves: RHEL-75751
+  - scsi: used 'med_power_with_dipm' for SATA ALPM
+  - scsi: do not set ALPM on external SATA ports
+    resolves: RHEL-79913
+  - network_latency: Set non-zero rcutree.nohz_full_patience_delay
+    resolves: RHEL-61801
+  - realtime: Disable appropriate P-State drivers
+    resolves: RHEL-85637
+  - plugin_disk: added support for MMC (MultiMediaCard) devices
+  - udev: fix possible traceback in device matcher
+    resolves: RHEL-97087
+  - udev-settle: obey udev buffer size and handle possible tracebacks
+    resolves: RHEL-92637
+  - daemon: re-raise daemon init exception in no-daemon mode
+    resolves: RHEL-71304
+  - vm: deprecate dirty_ratio in favour of dirty_bytes with percents
+    resolves: RHEL-101578
+  - gui: fix the profile deleter script
+
 * Mon Feb  3 2025 Jaroslav Škarvada <jskarvad@redhat.com> - 2.25.1-1
 - new release
   - plugins: added missing instance parameters
