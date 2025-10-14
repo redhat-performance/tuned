@@ -595,6 +595,12 @@ class BootloaderPlugin(base.Plugin):
 			if not os.path.isdir(src_dir):
 				log.error("error: cannot create initrd image, source directory '%s' doesn't exist" % src_dir)
 				return False
+			try:
+				os.chmod(src_dir, 0o755)
+				log.debug("setting permissions of directory '%s'" % src_dir)
+			except Exception as e:
+				log.error("error: failed to change permissions of directory '%s': %s" % (src_dir, e))
+				return False
 
 			log.info("generating initrd image from directory '%s'" % src_dir)
 			(fd, tmpfile) = tempfile.mkstemp(prefix = "tuned-bootloader-", suffix = ".tmp")
