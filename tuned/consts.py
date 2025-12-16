@@ -130,6 +130,7 @@ CFG_SLEEP_INTERVAL = "sleep_interval"
 CFG_UPDATE_INTERVAL = "update_interval"
 CFG_RECOMMEND_COMMAND = "recommend_command"
 CFG_REAPPLY_SYSCTL = "reapply_sysctl"
+CFG_REAPPLY_SYSCTL_EXCLUDE = "reapply_sysctl_exclude"
 CFG_DEFAULT_INSTANCE_PRIORITY = "default_instance_priority"
 CFG_UDEV_BUFFER_SIZE = "udev_buffer_size"
 CFG_LOG_FILE_COUNT = "log_file_count"
@@ -166,6 +167,8 @@ CFG_FUNC_RECOMMEND_COMMAND = "getboolean"
 # reapply system sysctl
 CFG_DEF_REAPPLY_SYSCTL = True
 CFG_FUNC_REAPPLY_SYSCTL = "getboolean"
+# sysctl parameters to exclude from reapplication
+CFG_DEF_REAPPLY_SYSCTL_EXCLUDE = []
 # default instance priority
 CFG_DEF_DEFAULT_INSTANCE_PRIORITY = 0
 CFG_FUNC_DEFAULT_INSTANCE_PRIORITY = "getint"

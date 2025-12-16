@@ -71,6 +71,21 @@ will not override user-provided system sysctl settings. If set to \fBFalse\fR or
 it's set to \fBTrue\fR.
 
 .TP
+.BI reapply_sysctl_exclude= LIST
+A comma or semicolon separated list of sysctl parameter patterns to exclude
+from reapplication when \fBreapply_sysctl\fR is enabled. This is useful for
+protecting runtime sysctl changes made by Kubernetes CNI plugins or other
+services that set sysctls dynamically. Supports shell-style wildcards
+(\fB*\fR, \fB?\fR, \fB[seq]\fR). By default the list is empty.
+.PP
+.RS
+.B Example:
+.nf
+  reapply_sysctl_exclude = net.ipv4.ip_forward, net.ipv6.conf.*.forwarding
+.fi
+.RE
+
+.TP
 .BI default_instance_priority= INT
 Default instance (unit) priority. By default it's \fB0\fR. Each unit has a
 priority which is by default preset to the \fIINT\fR. It can be overridden
@@ -86,6 +101,7 @@ processed as the first.
   update_interval = 10
   recommend_command = 0
   reapply_sysctl = 1
+  reapply_sysctl_exclude = net.ipv4.ip_forward, net.bridge.bridge-nf-call-iptables
   default_instance_priority = 0
 .fi
 

@@ -1,3 +1,4 @@
+import fnmatch
 import re
 from . import base
 from .decorators import *
@@ -100,6 +101,17 @@ class SysctlPlugin(base.Plugin):
 		for option, value in list(instance._sysctl_original.items()):
 			self._write_sysctl(option, value)
 
+	def _is_sysctl_excluded(self, option):
+		"""Check if a sysctl option matches any exclusion pattern."""
+		exclude_list = self._global_cfg.get_list(
+			consts.CFG_REAPPLY_SYSCTL_EXCLUDE,
+			consts.CFG_DEF_REAPPLY_SYSCTL_EXCLUDE
+		)
+		for pattern in exclude_list:
+			if fnmatch.fnmatch(option, pattern):
+				return True
+		return False
+
 	def _apply_system_sysctl(self, instance_sysctl):
 		files = {}
 		for d in SYSCTL_CONFIG_DIRS:
@@ -148,6 +160,11 @@ class SysctlPlugin(base.Plugin):
 					% (path, lineno))
 			return
 		value = value.strip()
+		# Check if this sysctl is excluded from reapplication
+		if self._is_sysctl_excluded(option):
+			log.debug("Skipping excluded sysctl parameter '%s' from '%s'"
+					% (option, path))
+			return
 		if option in instance_sysctl:
 			instance_value = self._variables.expand(instance_sysctl[option])
 			if instance_value != value:
