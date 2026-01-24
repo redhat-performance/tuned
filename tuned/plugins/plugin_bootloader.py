@@ -250,14 +250,16 @@ class BootloaderPlugin(base.Plugin):
 		"""
 		Modify (delete and append) kernel arguments in a rpm-ostree system.
 		Return a boolean indicating whether the operation was successful.
+		Uses --delete-if-present and --append-if-missing for idempotent operations,
+		which is important for systems with transient /etc where state may be lost.
 		"""
 		if not self._wait_till_rpm_ostree_idle():
 			log.error("Error modifying rpm-ostree kargs: rpm-ostree is busy")
 			return False
 		(rc, _, err) = self._cmd.execute(
 			["rpm-ostree", "kargs"] +
-			["--delete=%s" % karg for karg in delete_kargs] +
-			["--append=%s" % karg for karg in append_kargs], return_err=True)
+			["--delete-if-present=%s" % karg for karg in delete_kargs] +
+			["--append-if-missing=%s" % karg for karg in append_kargs], return_err=True)
 		if rc != 0:
 			log.error("Error modifying rpm-ostree kargs: %s" % err)
 			return False
@@ -447,29 +449,36 @@ class BootloaderPlugin(base.Plugin):
 
 	def _rpm_ostree_update(self):
 		"""Apply kernel parameter tuning in a rpm-ostree system."""
-		appended_kargs = self._get_appended_rpm_ostree_kargs()
+		stored_kargs = self._get_appended_rpm_ostree_kargs()
 		profile_kargs = self._cmdline_val.split()
 		active_kargs = self._get_rpm_ostree_kargs()
 		if active_kargs is None:
 			log.error("Not updating kernel arguments, could not read the current ones.")
 			return
-		# Ignore kargs previously appended by TuneD, these will be removed later.
-		non_tuned_kargs = active_kargs.split()
-		for karg in appended_kargs:
-			non_tuned_kargs.remove(karg)
-		# Only append key=value pairs that do not yet appear in kernel parameters,
-		# otherwise we would not be able to restore the cmdline to the previous state
-		# via rpm-ostree kargs --delete.
-		kargs_to_append = [karg for karg in profile_kargs if karg not in non_tuned_kargs]
-		if appended_kargs == kargs_to_append:
-			# The correct kargs are already set in /etc/tuned/bootcmldine,
-			# we are likely post-reboot and done.
-			log.info("Kernel arguments already set, not updating.")
+
+		active_kargs_list = active_kargs.split()
+
+		# Check if all profile kargs are already present in rpm-ostree
+		profile_kargs_in_rpm_ostree = all(karg in active_kargs_list for karg in profile_kargs)
+
+		if profile_kargs_in_rpm_ostree:
+			# Kargs already in rpm-ostree; state file may be missing (transient /etc)
+			if set(stored_kargs) != set(profile_kargs):
+				log.info("Kernel arguments already in rpm-ostree, restoring state file.")
+				self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: " ".join(profile_kargs)})
+			else:
+				log.info("Kernel arguments already set, not updating.")
 			return
-		# If there are kargs in /etc/bootcmdline and they do not match
-		# the requested ones, there was no rollback, so remove them now.
-		if self._modify_rpm_ostree_kargs(delete_kargs=appended_kargs, append_kargs=kargs_to_append):
-			self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : " ".join(kargs_to_append)})
+
+		# Determine what to delete (old stored kargs not in new profile)
+		kargs_to_delete = [k for k in stored_kargs if k not in profile_kargs]
+
+		# Determine what to append (profile kargs not yet in rpm-ostree)
+		kargs_to_append = [k for k in profile_kargs if k not in active_kargs_list]
+
+		# Use idempotent --delete-if-present and --append-if-missing
+		if self._modify_rpm_ostree_kargs(delete_kargs=kargs_to_delete, append_kargs=kargs_to_append):
+			self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: " ".join(profile_kargs)})
 
 	def _grub2_update(self):
 		self._grub2_cfg_patch({consts.GRUB2_TUNED_VAR : self._cmdline_val, consts.GRUB2_TUNED_INITRD_VAR : self._initrd_val})
