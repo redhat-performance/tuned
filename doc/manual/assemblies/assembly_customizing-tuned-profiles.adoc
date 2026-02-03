@@ -33,8 +33,6 @@ include::modules/performance/con_static-and-dynamic-tuning-in-tuned.adoc[levelof
 
 include::modules/performance/con_tuned-plug-ins.adoc[leveloffset=+1]
 
-include::modules/performance/ref_available-tuned-plug-ins.adoc[leveloffset=+1]
-
 include::modules/performance/con_variables-in-tuned-profiles.adoc[leveloffset=+1]
 
 include::modules/performance/con_built-in-functions-in-tuned-profiles.adoc[leveloffset=+1]
