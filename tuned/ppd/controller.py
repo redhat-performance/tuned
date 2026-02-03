@@ -344,6 +344,18 @@ class Controller(exports.interfaces.ExportableInterface):
         """
         return self._cmd.read_file(PPD_BASE_PROFILE_FILE, no_error=True).strip() or None
 
+    def _get_recommend_profile(self):
+        """
+        Get TuneD recommended profile.
+        """
+        tuned_profile = self._tuned_interface.recommend_profile()
+        try:
+            ppd_profile = self._config.tuned_to_ppd.get(tuned_profile, self._on_battery)
+        except KeyError:
+            log.warning("TuneD recommends profile unknown to PPD: %s", tuned_profile)
+            return None
+        return ppd_profile
+
     def _save_base_profile(self, profile):
         """
         Saves the given PPD profile into the base profile file.
@@ -373,7 +385,8 @@ class Controller(exports.interfaces.ExportableInterface):
         self.check_performance_degraded()
         self._config = PPDConfig(PPD_CONFIG_FILE, self._tuned_interface)
         self._setup_battery_signaling()
-        self._base_profile = self._load_base_profile() or self._config.default_profile
+        self._base_profile =  self._load_base_profile() or self._get_recommend_profile() or \
+                self._config.default_profile
         self.switch_profile(self._base_profile)
         self._save_base_profile(self._base_profile)
         self._setup_inotify()
