@@ -241,6 +241,17 @@ CAPTURE_LOG_LEVELS = {
 		"console": LOG_LEVEL_CONSOLE,
 		"none": None,
 		}
+def syslog_priority(levelno):
+	"""
+	Convert sparse numeric python logging level to syslog priority.
+	"""
+	if	levelno <= logging.DEBUG:	return 7	# debug
+	elif	levelno <= logging.INFO:	return 6	# info
+	elif	levelno == LOG_LEVEL_CONSOLE:	return 5	# notice
+	elif	levelno <= logging.WARNING:	return 4	# warning
+	elif	levelno <= logging.ERROR:	return 3	# err
+	elif	levelno <= logging.CRITICAL:	return 2	# crit
+	else:	return 1	# alert
 
 # number of retries when waiting for device initialization
 HOTPLUG_WAIT_FOR_DEV_INIT_RETRIES = 100
