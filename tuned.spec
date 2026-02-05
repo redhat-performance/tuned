@@ -317,7 +317,7 @@ make install-ppd DESTDIR="%{buildroot}" BINDIR="%{_bindir}" \
   SBINDIR="%{_sbindir}" DOCDIR="%{docdir}" %{make_python_arg}
 
 # manual
-make install-html DESTDIR=%{buildroot} DOCDIR=%{docdir}
+make install-html DESTDIR=%{buildroot} DOCDIR=%{docdir} %{make_python_arg}
 
 # conditional support for grub2, grub2 is not available on all architectures
 # and tuned is noarch package, thus the following hack is needed
