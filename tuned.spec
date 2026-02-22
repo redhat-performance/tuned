@@ -51,8 +51,8 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-%global prerelease rc
-%global prereleasenum 1
+#%%global prerelease rc
+#%%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
@@ -60,7 +60,7 @@
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
 Version: 2.27.0
-Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -646,6 +646,9 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Sun Feb 22 2026 Jaroslav Škarvada <jskarvad@redhat.com> - 2.27.0-1
+- new release
+
 * Tue Feb 10 2026 Jaroslav Škarvada <jskarvad@redhat.com> - 2.27.0-0.1.rc1
 - new release
   - cpu-partitioning: autodetect dracut hook directory, systemd workaround
