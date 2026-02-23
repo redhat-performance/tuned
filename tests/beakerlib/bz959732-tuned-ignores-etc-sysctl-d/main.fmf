@@ -1,0 +1,24 @@
+summary: Test for BZ#959732 (tuned ignores /etc/sysctl.d)
+description: |
+    Bug summary: tuned ignores /etc/sysctl.d
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=959732
+contact: rhack@redhat.com
+component: []
+framework: beakerlib
+recommend:
+  - tuned
+duration: 5m
+enabled: true
+tag:
+  - TIPpass
+  - Tier1
+  - TipWaived6
+tier: '1'
+link:
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=959732
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=1103691
+adjust:
+  - enabled: false
+    when: arch == s390x
+    continue: false
+id: 38c4c3b1-d68d-451f-bdf9-5de27e4ea822
