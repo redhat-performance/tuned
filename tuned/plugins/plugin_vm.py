@@ -159,24 +159,24 @@ class VMPlugin(base.Plugin):
 		return True
 
 	@command_custom("dirty_bytes")
-	def _dirty_bytes(self, enabling, value, verify, ignore_missing, instance):
+	def _dirty_bytes(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		if value is not None and value.strip().endswith("%"):
 			return self._dirty_option("dirty_ratio", "dirty_bytes", self._check_ratio, enabling, value.strip().rstrip("%"), verify)
 		return self._dirty_option("dirty_bytes", "dirty_ratio", self._check_twice_pagesize, enabling, value, verify)
 
 	@command_custom("dirty_ratio")
-	def _dirty_ratio(self, enabling, value, verify, ignore_missing, instance):
+	def _dirty_ratio(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		log.warning("The 'dirty_ratio' option is deprecated and does not support inheritance, use 'dirty_bytes' with '%' instead.")
 		return self._dirty_option("dirty_ratio", "dirty_bytes", self._check_ratio, enabling, value, verify)
 
 	@command_custom("dirty_background_bytes")
-	def _dirty_background_bytes(self, enabling, value, verify, ignore_missing, instance):
+	def _dirty_background_bytes(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		if value is not None and value.strip().endswith("%"):
 			return self._dirty_option("dirty_background_ratio", "dirty_background_bytes", self._check_ratio, enabling, value.strip().rstrip("%"), verify)
 		return self._dirty_option("dirty_background_bytes", "dirty_background_ratio", self._check_positive, enabling, value, verify)
 
 	@command_custom("dirty_background_ratio")
-	def _dirty_background_ratio(self, enabling, value, verify, ignore_missing, instance):
+	def _dirty_background_ratio(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		log.warning("The 'dirty_background_ratio' option is deprecated and does not support inheritance, use 'dirty_background_bytes' with '%' instead.")
 		return self._dirty_option("dirty_background_ratio", "dirty_background_bytes", self._check_ratio, enabling, value, verify)
 
