@@ -15,7 +15,7 @@ include=[replaceable]_parent_
 
 All settings from the [replaceable]_parent_ profile are loaded in this _child_ profile. In the following sections, the _child_ profile can override certain settings inherited from the [replaceable]_parent_ profile or add new settings not present in the [replaceable]_parent_ profile.
 
-You can create your own _child_ profile in the [filename]`/etc/tuned/profiles/` directory based on a pre-installed profile in [filename]`/usr/lib/tuned/profiles/` with only some parameters adjusted.
+You can create your own _child_ profile in the [filename]`{user-profile-dir}` directory based on a pre-installed profile in [filename]`{system-profile-dir}` with only some parameters adjusted.
 
 If the [replaceable]_parent_ profile is updated, such as after a *TuneD* upgrade, the changes are reflected in the _child_ profile.
 

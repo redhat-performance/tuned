@@ -8,11 +8,14 @@ class Function(object):
 	"""
 	Built-in function
 	"""
-	def __init__(self, name, nargs_max, nargs_min = None):
-		self._name = name
+	def __init__(self, nargs_max, nargs_min = None):
 		self._nargs_max = nargs_max
 		self._nargs_min = nargs_min
 		self._cmd = commands()
+
+	@property
+	def name(self):
+		return self.__class__.__module__.split(".")[-1].split("_", 1)[1]
 
 	# checks arguments
 	# nargs_max - maximal number of arguments, there mustn't be more arguments,
@@ -30,5 +33,5 @@ class Function(object):
 		if self._check_args(args, self._nargs_max, self._nargs_min):
 			return True
 		else:
-			log.error("invalid number of arguments for builtin function '%s'" % self._name)
+			log.error("invalid number of arguments for builtin function '%s'" % self.name)
 		return False

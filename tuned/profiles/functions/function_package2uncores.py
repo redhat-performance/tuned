@@ -10,16 +10,25 @@ cmd = commands()
 
 SYSFS_DIR = "/sys/devices/system/cpu/intel_uncore_frequency/"
 
-class package2uncores(base.Function):
+class Package2Uncores(base.Function):
 	"""
-	Provides uncore device list for a package (socket)
+	Returns a comma-separated list of uncore devices for a package (socket).
+	Multiple socket numbers can be specified in separate arguments.
+
+	====
+	On a system with a single socket and a single die,
+	the following will return `package_00_die_00`:
+	----
+	${f:package2uncores:0}
+	----
+	====
 	"""
 
 	def __init__(self):
-		super(package2uncores, self).__init__("package2uncores", 0)
+		super(Package2Uncores, self).__init__(0)
 
 	def execute(self, args):
-		if not super(package2uncores, self).execute(args):
+		if not super(Package2Uncores, self).execute(args):
 			return None
 
 		if len(args) <= 0:

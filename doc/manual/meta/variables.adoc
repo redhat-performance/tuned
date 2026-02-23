@@ -1,0 +1,2 @@
+:system-profile-dir: /usr/lib/tuned/profiles
+:user-profile-dir: /etc/tuned/profiles

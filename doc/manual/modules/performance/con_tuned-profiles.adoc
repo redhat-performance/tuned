@@ -17,13 +17,6 @@ The performance-boosting profiles include profiles that focus on the following a
 * Virtual machine performance
 * Virtualization host performance
 
-[discrete]
-== Syntax of profile configuration
-
-The `tuned.conf` file can contain one `[main]` section and other sections for configuring plug-in instances. However, all sections are optional.
-
-Lines starting with the hash sign (`#`) are comments.
-
 [role="_additional-resources"]
 .Additional resources
 * `tuned.conf(5)` man page.

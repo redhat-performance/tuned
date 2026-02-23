@@ -10,26 +10,23 @@ PMU_PATH = "/sys/devices/cpu/caps/pmu_name"
 ACTIVE = "active"
 DISABLE = "disable"
 
-class intel_recommended_pstate(base.Function):
+class IntelRecommendedPState(base.Function):
     """
-    Checks the processor code name and return the recommended
-    intel_pstate CPUFreq driver mode. Active is returned for the
-    newer generation of processors not in the PROCESSOR_NAME list.
+    Returns the recommended intel_pstate CPUFreq driver mode
+    based on the CPU generation.
 
-    Intel recommends to use the intel_pstate CPUFreq driver
-    in active mode with HWP enabled on Ice Lake and later 
-    generations processors. This function allows dynamically 
-    setting intel_pstate based on the processor's model.
-    For pre-IceLake processors setting pstate to active
-    can introduce jitters which were historically seen around
-    and tested with RHEL-7.4. From IceLake generation, intel 
-    has fixed these issues. 
+    NOTE: Intel recommends to use the P-State driver
+    in active mode with HWP enabled starting from the Ice Lake
+    CPU generations. In older CPU generations, setting
+    P-State to `active` can introduce jitters which were historically
+    seen around and tested with RHEL-7.4. Beginning with the Ice Lake
+    generation, Intel has fixed these issues.
     """
     def __init__(self):
-        super(intel_recommended_pstate, self).__init__("intel_recommended_pstate", 0)
+        super(IntelRecommendedPState, self).__init__(0)
 
     def execute(self, args):
-        if not super(intel_recommended_pstate, self).execute(args):
+        if not super(IntelRecommendedPState, self).execute(args):
             return None
 
         current_processor_name = self._cmd.read_file(PMU_PATH).strip()
