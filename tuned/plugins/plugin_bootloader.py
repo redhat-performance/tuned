@@ -193,6 +193,7 @@ class BootloaderPlugin(base.Plugin):
 		self._bls = self._bls_enabled()
 
 		self._rpm_ostree = self._rpm_ostree_status() is not None
+		self._rpm_ostree_has_source = self._rpm_ostree and self._rpm_ostree_has_source_flag()
 
 	def _instance_cleanup(self, instance):
 		pass
@@ -222,6 +223,12 @@ class BootloaderPlugin(base.Plugin):
 			log.warning("Exceptional format of rpm-ostree status result:\n%s" % out)
 			return None
 		return splited[1]
+
+	def _rpm_ostree_has_source_flag(self):
+		"""Check if the installed rpm-ostree supports --source for kargs."""
+		(rc, out, err) = self._cmd.execute(
+			['rpm-ostree', 'kargs', '--help'], return_err=True)
+		return '--source=' in (out + err)
 
 	def _wait_till_rpm_ostree_idle(self):
 		"""Check that rpm-ostree is idle, allowing some waiting time."""
@@ -262,6 +269,45 @@ class BootloaderPlugin(base.Plugin):
 			log.error("Error modifying rpm-ostree kargs: %s" % err)
 			return False
 		return True
+
+	def _rpm_ostree_source_update(self):
+		"""Apply kernel parameter tuning using rpm-ostree --source tracking.
+
+		With --source=tuned, rpm-ostree automatically removes all previous
+		kargs from the 'tuned' source and replaces them with the new set.
+		This eliminates the need to track state in /etc/tuned/bootcmdline,
+		which is critical for bootc systems with transient /etc.
+		"""
+		if not self._wait_till_rpm_ostree_idle():
+			log.error("Error modifying rpm-ostree kargs: rpm-ostree is busy")
+			return
+		cmd = ["rpm-ostree", "kargs", "--source=tuned"]
+		for karg in self._cmdline_val.split():
+			cmd.append("--append=%s" % karg)
+		(rc, _, err) = self._cmd.execute(cmd, return_err=True)
+		if rc != 0:
+			log.error("Error applying rpm-ostree kargs with --source: %s" % err)
+			return
+		# Best-effort state file write for diagnostics and backward compat
+		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: self._cmdline_val})
+
+	def _remove_rpm_ostree_source_tuning(self):
+		"""Remove kernel parameter tuning using rpm-ostree --source tracking.
+
+		Calling --source=tuned with no --append flags clears all kargs
+		owned by the 'tuned' source.
+		"""
+		if not self._wait_till_rpm_ostree_idle():
+			log.error("Error removing rpm-ostree kargs: rpm-ostree is busy")
+			return
+		(rc, _, err) = self._cmd.execute(
+			["rpm-ostree", "kargs", "--source=tuned"], return_err=True)
+		if rc != 0:
+			log.error("Error clearing rpm-ostree kargs source: %s" % err)
+		# Clear the state file even on rpm-ostree failure to prevent stale
+		# state from causing incorrect diffs on the next legacy-path apply.
+		# This matches the behavior of the legacy _remove_rpm_ostree_tuning().
+		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: ""})
 
 	def _get_effective_options(self, options):
 		"""Merge provided options with plugin default options and merge all cmdline.* options."""
@@ -335,6 +381,9 @@ class BootloaderPlugin(base.Plugin):
 
 	def _remove_rpm_ostree_tuning(self):
 		"""Remove kernel parameter tuning in a rpm-ostree system."""
+		if self._rpm_ostree_has_source:
+			self._remove_rpm_ostree_source_tuning()
+			return
 		self._modify_rpm_ostree_kargs(delete_kargs=self._get_appended_rpm_ostree_kargs())
 		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: ""})
 
@@ -447,6 +496,9 @@ class BootloaderPlugin(base.Plugin):
 
 	def _rpm_ostree_update(self):
 		"""Apply kernel parameter tuning in a rpm-ostree system."""
+		if self._rpm_ostree_has_source:
+			self._rpm_ostree_source_update()
+			return
 		appended_kargs = self._get_appended_rpm_ostree_kargs()
 		profile_kargs = self._cmdline_val.split()
 		active_kargs = self._get_rpm_ostree_kargs()
