@@ -133,7 +133,8 @@ class BootloaderPlugin(base.Plugin):
 	directory `DIR` and adds the resulting image as an overlay.
 	If the `DIR` directory name begins with '/', the absolute path
 	is used. Otherwise, the current profile directory is used as the
-	base directory for the `DIR`.
+	base directory for the `DIR`. For safety reasons, `DIR` has to be
+	a subdirectory within the defined profile directories.
 
 	The [option]`initrd_dst_img=PATHNAME` sets the name and location of
 	the resulting initrd image. Typically, it is not necessary to use this
