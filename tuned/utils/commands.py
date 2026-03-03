@@ -108,9 +108,15 @@ class commands:
 			d = os.path.dirname(f)
 			if os.path.isdir(d):
 				makedir = False
+		if makedir:
+			try:
+				os.makedirs(d, mode=0o755)
+			except (OSError, IOError) as e:
+				if isinstance(no_error, bool) and not no_error or \
+					isinstance(no_error, list) and e.errno not in no_error:
+						self._error("Unable to create directory '%s', error: '%s'" % (d, e))
+				return False
 		try:
-			if makedir:
-				os.makedirs(d)
 			if ignore_same and self.read_file(f, no_error=True).strip() == str(data):
 				self._debug("Skipping the write to file '%s', the content would not change" % f)
 				return True
