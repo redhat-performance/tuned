@@ -15,10 +15,10 @@ class SystemdPlugin(base.Plugin):
 	Plug-in for tuning systemd options.
 
 	The [option]`cpu_affinity` option allows setting CPUAffinity in
-	`/etc/systemd/system.conf`. This configures the CPU affinity for the
-	service manager as well as the default CPU affinity for all forked
-	off processes. The option takes a comma-separated list of CPUs with
-	optional CPU ranges specified by the minus sign (`-`).
+	`/etc/systemd/system.conf.d/00-tuned.conf`. This configures the CPU
+	affinity for the service manager as well as the default CPU affinity
+	for all forked off processes. The option takes a comma-separated
+	list of CPUs with optional CPU ranges specified by the minus sign (`-`).
 
 	.Set the CPUAffinity for `systemd` to `0 1 2 3`
 	====
@@ -32,10 +32,15 @@ class SystemdPlugin(base.Plugin):
 	"""
 
 	def __init__(self, *args, **kwargs):
-		if not os.path.isfile(consts.SYSTEMD_SYSTEM_CONF_FILE):
-			raise exceptions.NotSupportedPluginException("Required systemd '%s' configuration file not found, disabling plugin." % consts.SYSTEMD_SYSTEM_CONF_FILE)
-		super(SystemdPlugin, self).__init__(*args, **kwargs)
 		self._cmd = commands()
+		if not os.path.isfile(consts.SYSTEMD_SYSTEM_CONF_FILE):
+			if os.path.isdir(consts.SYSTEMD_CFG_PATH):
+				log.info("Systemd configuration file '%s' not found, attempting to create it." % consts.SYSTEMD_SYSTEM_CONF_FILE)
+				if not self._cmd.write_to_file(consts.SYSTEMD_SYSTEM_CONF_FILE, consts.SYSTEMD_SYSTEM_CONF_HEADER + "\n", makedir=True):
+					raise exceptions.NotSupportedPluginException("Error creating systemd configuration file '%s', disabling plugin." % consts.SYSTEMD_SYSTEM_CONF_FILE)
+			else:
+				raise exceptions.NotSupportedPluginException("Systemd directory '%s' not found, systemd is not probably used, disabling plugin." % consts.SYSTEMD_CFG_PATH)
+		super(SystemdPlugin, self).__init__(*args, **kwargs)
 
 	def _instance_init(self, instance):
 		instance._has_dynamic_tuning = False
@@ -143,4 +148,3 @@ class SystemdPlugin(base.Plugin):
 			self._write_systemd_system_conf(self._add_keyval(conf, consts.SYSTEMD_CPUAFFINITY_VAR, v_unpacked))
 			return True
 		return None
-

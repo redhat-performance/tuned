@@ -519,6 +519,9 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/tuned-main.conf
 %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/tuned/bootcmdline
 %verify(not size mtime md5) %{_sysconfdir}/modprobe.d/tuned.conf
+# https://bugzilla.redhat.com/show_bug.cgi?id=2444143
+%dir %{_sysconfdir}/systemd/system.conf.d
+%verify(not size mtime md5) %{_sysconfdir}/systemd/system.conf.d/00-tuned.conf
 %{_tmpfilesdir}/tuned.conf
 %{_unitdir}/tuned.service
 %dir %{_localstatedir}/log/tuned
