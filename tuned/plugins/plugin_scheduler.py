@@ -1317,12 +1317,13 @@ class SchedulerPlugin(base.Plugin):
 				f.write(affinity_hex)
 			return 0
 		except (OSError, IOError) as e:
-			# EIO is returned by
+			# EPERM is returned by
 			# kernel/irq/proc.c:write_irq_affinity() if changing
 			# the affinity is not supported
-			# (at least on kernels 3.10 and 4.18)
-			if hasattr(e, "errno") and e.errno == errno.EIO \
-					and not restoring:
+			# Before kernel v6.12, write_irq_affinity() returned EIO
+			# instead of EPERM, hence the check for both error codes.
+			if hasattr(e, "errno") and (e.errno == errno.EIO \
+					or e.errno == errno.EPERM) and not restoring:
 				log.debug("Setting SMP affinity of IRQ %s is not supported"
 						% irq)
 				return -2
