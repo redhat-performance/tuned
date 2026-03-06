@@ -57,15 +57,19 @@ PROCFS_MOUNT_POINT = "/proc"
 DEF_CGROUP_MOUNT_POINT = "/sys/fs/cgroup/cpuset"
 DEF_CGROUP_MODE = 0o770
 
+# systemd paths used by multiple plugins
+SYSTEMD_CFG_PATH = "/etc/systemd"
+
 # service plugin configuration
-SERVICE_SYSTEMD_CFG_PATH = "/etc/systemd/system/%s.service.d"
+SERVICE_SYSTEMD_CFG_PATH = SYSTEMD_CFG_PATH + "/system/%s.service.d"
 DEF_SERVICE_CFG_DIR_MODE = 0o755
 
 # modules plugin configuration
 MODULES_FILE = "/etc/modprobe.d/tuned.conf"
 
 # systemd plugin configuration
-SYSTEMD_SYSTEM_CONF_FILE = "/etc/systemd/system.conf"
+SYSTEMD_SYSTEM_CONF_FILE = SYSTEMD_CFG_PATH + "/system.conf.d/00-tuned.conf"
+SYSTEMD_SYSTEM_CONF_HEADER = "[Manager]"
 SYSTEMD_CPUAFFINITY_VAR = "CPUAffinity"
 
 # irqbalance plugin configuration

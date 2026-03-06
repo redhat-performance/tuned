@@ -1,6 +1,7 @@
 NAME = tuned
 # set to devel for nightly GIT snapshot
 BUILD = release
+SYSTEMD_SUPPORT = 1
 # which config to use in mock-build target
 MOCK_CONFIG = rhel-7-x86_64
 # scratch-build for triggering Jenkins
@@ -72,9 +73,9 @@ release-cp: release-dir
 	cp -a AUTHORS COPYING INSTALL README.md $(VERSIONED_NAME)
 
 	cp -a tuned.py tuned.spec tuned.service tuned.tmpfiles Makefile tuned-adm.py \
-		tuned-adm.bash dbus.conf recommend.conf tuned-main.conf 00_tuned \
-		92-tuned.install bootcmdline modules.conf com.redhat.tuned.policy \
-		tuned-gui.py tuned-gui.glade tuned-ppd.py \
+		tuned-adm.bash dbus.conf recommend.conf tuned-main.conf 00_tuned.grub \
+		00-tuned.conf.systemd 92-tuned.install bootcmdline modules.conf \
+		com.redhat.tuned.policy tuned-gui.py tuned-gui.glade tuned-ppd.py \
 		tuned-gui.desktop functions compile_plugin_docs.py $(VERSIONED_NAME)
 	cp -a doc experiments libexec man profiles systemtap tuned contrib icons \
 		tests $(VERSIONED_NAME)
@@ -210,14 +211,21 @@ install: install-dirs
 	# runtime directory
 	install -Dpm 0644 tuned.tmpfiles $(DESTDIR)$(TMPFILESDIR)/tuned.conf
 
+ifeq ($(SYSTEMD_SUPPORT), 1)
 	# systemd units
 	install -Dpm 0644 tuned.service $(DESTDIR)$(UNITDIR)/tuned.service
+endif
 
 	# dbus configuration
 	install -Dpm 0644 dbus.conf $(DESTDIR)$(DATADIR)/dbus-1/system.d/com.redhat.tuned.conf
 
 	# grub template
-	install -Dpm 0755 00_tuned $(DESTDIR)$(SYSCONFDIR)/grub.d/00_tuned
+	install -Dpm 0755 00_tuned.grub $(DESTDIR)$(SYSCONFDIR)/grub.d/00_tuned
+
+ifeq ($(SYSTEMD_SUPPORT), 1)
+	# systemd template
+	install -Dpm 0644 00-tuned.conf.systemd $(DESTDIR)$(SYSCONFDIR)/systemd/system.conf.d/00-tuned.conf
+endif
 
 	# kernel install hook
 	install -Dpm 0755 92-tuned.install $(DESTDIR)$(KERNELINSTALLHOOKDIR)/92-tuned.install

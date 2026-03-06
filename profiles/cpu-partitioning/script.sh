@@ -12,9 +12,9 @@ start() {
     else
       DRACUT_HOOK_DIR="/usr/lib/dracut/hooks/pre-udev"
     fi
-    mkdir -p "${TUNED_tmpdir}/etc/systemd"
+    mkdir -p "${TUNED_tmpdir}/etc/systemd/system.conf.d"
     mkdir -p "${TUNED_tmpdir}${DRACUT_HOOK_DIR}"
-    cp /etc/systemd/system.conf "${TUNED_tmpdir}/etc/systemd/"
+    cp /etc/systemd/system.conf.d/00-tuned.conf "${TUNED_tmpdir}/etc/systemd/system.conf.d/00-tuned.conf"
     cp 00-tuned-pre-udev.sh "${TUNED_tmpdir}${DRACUT_HOOK_DIR}"
     setup_kvm_mod_low_latency
     disable_ksm
