@@ -17,11 +17,11 @@ endif::[]
 
 .Procedure
 
-. In the [filename]`/etc/tuned/profiles/` directory, create a new directory named the same as the profile that you want to create:
+. In the [filename]`{user-profile-dir}` directory, create a new directory named the same as the profile that you want to create:
 +
-[subs="quotes"]
+[subs="attributes, quotes"]
 ----
-# mkdir /etc/tuned/profiles/[replaceable]_modified-profile_
+# mkdir {user-profile-dir}/[replaceable]_modified-profile_
 ----
 
 . In the new directory, create a file named [filename]`tuned.conf`, and set the `[main]` section as follows:
@@ -75,13 +75,14 @@ See TuneD log file ('/var/log/tuned/tuned.log') for details.
 ----
 
 // .An alternative approach
-// . Alternatively, copy the directory with a system profile from /usr/lib/tuned/profiles/ to /etc/tuned/profiles/. For example:
+// . Alternatively, copy the directory with a system profile from `{system-profile-dir}` to `{user-profile-dir}`. For example:
 // +
+// [subs="attributes"]
 // ----
-// # cp -r /usr/lib/tuned/profiles/throughput-performance /etc/tuned/profiles
+// # cp -r {system-profile-dir}/throughput-performance {user-profile-dir}/
 // ----
 //
-// . Then, edit the profile in /etc/tuned/profiles/ according to your needs. Note that if there are two profiles of the same name, the profile located in /etc/tuned/profiles/ is loaded. The disadvantage of this approach is that if a system profile is updated after a TuneD upgrade, the changes will not be reflected in the now-outdated modified version.
+// . Then, edit the profile in `{user-profile-dir}` according to your needs. Note that if there are two profiles of the same name, the profile located in `{user-profile-dir}` is loaded. The disadvantage of this approach is that if a system profile is updated after a TuneD upgrade, the changes will not be reflected in the now-outdated modified version.
 
 [role="_additional-resources"]
 .Additional resources

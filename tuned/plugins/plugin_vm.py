@@ -14,12 +14,28 @@ cmd = commands()
 class VMPlugin(base.Plugin):
 	"""
 	Tunes selected sysctl options in `/proc/sys/vm`, currently
-	[option]`dirty_ratio`, [option]`dirty_background_ratio`,
 	[option]`dirty_bytes`, and [option]`dirty_background_bytes`.
 	See https://docs.kernel.org/admin-guide/sysctl/vm.html for detailed
 	documentation of these options.
 
-	Additionaly enables or disables transparent huge pages depending on
+	.Set dirty bytes to 64 MiB
+	====
+	----
+	[vm]
+	dirty_bytes=67108864
+	----
+	====
+
+	.Set dirty bytes to 10% of total available memory
+	====
+	Note that this updates the `/proc/sys/vm/dirty_ratio` sysctl option.
+	----
+	[vm]
+	dirty_bytes=10%
+	----
+	====
+
+	Additionally enables or disables transparent huge pages depending on
 	the value of the [option]`transparent_hugepages` option. The option
 	can have one of three possible values: `always`, `madvise` and `never`.
 

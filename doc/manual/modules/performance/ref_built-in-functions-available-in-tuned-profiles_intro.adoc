@@ -1,0 +1,6 @@
+:_module-type: REFERENCE
+[id="built-in-functions-available-in-tuned-profiles_{context}"]
+= Built-in functions available in TuneD profiles
+
+[role="_abstract"]
+The following built-in functions are available in all *TuneD* profiles:
