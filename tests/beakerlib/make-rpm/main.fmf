@@ -1,0 +1,23 @@
+summary: sanity check for 'make rpm'
+description: ''
+contact: rhack@redhat.com
+component:
+  - tuned
+test: ./runtest.sh
+framework: beakerlib
+recommend:
+  - tuned
+  - make
+  - rpm-build
+  - dnf
+  - yum-utils
+duration: 10m
+enabled: true
+tag:
+  - FedoraReady
+  - NoRHEL4
+  - NoRHEL5
+  - TIPfail_infra
+  - TIPpass
+  - Tier1
+tier: '1'
