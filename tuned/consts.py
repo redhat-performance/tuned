@@ -69,7 +69,7 @@ MODULES_FILE = "/etc/modprobe.d/tuned.conf"
 
 # systemd plugin configuration
 SYSTEMD_SYSTEM_CONF_FILE = SYSTEMD_CFG_PATH + "/system.conf.d/00-tuned.conf"
-SYSTEMD_SYSTEM_CONF_HEADER = "[Manager]"
+SYSTEMD_SYSTEM_CONF_HEADER = "# Please avoid changing this file, as it will\n# be overwritten by TuneD!\n[Manager]"
 SYSTEMD_CPUAFFINITY_VAR = "CPUAffinity"
 
 # irqbalance plugin configuration
