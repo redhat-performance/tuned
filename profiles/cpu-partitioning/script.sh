@@ -3,7 +3,7 @@
 . /usr/lib/tuned/functions
 
 start() {
-    DRACUT_VER=`dracut --version | sed 's/^.* \([0-9]\+\).*/\1/'`
+    DRACUT_VER=`dracut --version 2>/dev/null | sed 's/^.* \([0-9]\+\).*/\1/'`
     echo "$DRACUT_VER" | grep -q '^[[:digit:]]\+$' || DRACUT_VER="0"
     # https://issues.redhat.com/browse/RHEL-119889
     if [ "$DRACUT_VER" -gt "102" ]
