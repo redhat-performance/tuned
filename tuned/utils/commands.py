@@ -48,7 +48,7 @@ class commands:
 
 	# convert dictionary 'd' to flat list and return it
 	# it uses sort on the dictionary items to return consistent results
-	# for directories with different inserte/delete history
+	# for directories with different insert/delete history
 	def dict2list(self, d):
 		l = []
 		if d is not None:
