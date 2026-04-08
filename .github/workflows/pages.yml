@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt install -y make asciidoctor
       - name: Build the manual
-        run: make -C doc/manual
+        run: make html
       - name: Prepare the website contents
         run: |
           git fetch origin gh-pages:gh-pages
