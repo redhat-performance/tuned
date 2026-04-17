@@ -194,6 +194,7 @@ class BootloaderPlugin(base.Plugin):
 		self._bls = self._bls_enabled()
 
 		self._rpm_ostree = self._rpm_ostree_status() is not None
+		self._bootc_has_source = self._bootc_has_set_options_for_source()
 
 	def _instance_cleanup(self, instance):
 		pass
@@ -223,6 +224,48 @@ class BootloaderPlugin(base.Plugin):
 			log.warning("Exceptional format of rpm-ostree status result:\n%s" % out)
 			return None
 		return splited[1]
+
+	def _bootc_has_set_options_for_source(self):
+		"""Check if bootc loader-entries set-options-for-source is available."""
+		(rc, out, err) = self._cmd.execute(
+			['bootc', 'loader-entries', 'set-options-for-source', '--help'],
+			return_err=True)
+		return rc == 0
+
+	def _bootc_source_update(self):
+		"""Apply kernel parameter tuning using bootc source tracking.
+
+		With bootc loader-entries set-options-for-source, bootc automatically
+		removes all previous kargs from the 'tuned' source and replaces them
+		with the new set. This eliminates the need to track state in
+		/etc/tuned/bootcmdline, which is critical for bootc systems with
+		transient /etc.
+		"""
+		cmd = ["bootc", "loader-entries", "set-options-for-source",
+			"--source", "tuned"]
+		if self._cmdline_val:
+			cmd.extend(["--options", self._cmdline_val])
+		(rc, _, err) = self._cmd.execute(cmd, return_err=True)
+		if rc != 0:
+			log.error("Error applying bootc kargs with set-options-for-source: %s" % err)
+			# Do not update state file - the kargs were not applied
+			return
+		# Best-effort state file write for diagnostics and backward compat
+		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: self._cmdline_val})
+
+	def _remove_bootc_source_tuning(self):
+		"""Remove kernel parameter tuning using bootc source tracking.
+
+		Calling set-options-for-source with --source tuned and no --options
+		clears all kargs owned by the 'tuned' source.
+		"""
+		(rc, _, err) = self._cmd.execute(
+			["bootc", "loader-entries", "set-options-for-source",
+			 "--source", "tuned"], return_err=True)
+		if rc != 0:
+			log.error("Error clearing bootc kargs source: %s" % err)
+		# Clear the state file even on failure to prevent stale state
+		self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR: ""})
 
 	def _wait_till_rpm_ostree_idle(self):
 		"""Check that rpm-ostree is idle, allowing some waiting time."""
@@ -341,7 +384,10 @@ class BootloaderPlugin(base.Plugin):
 
 	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):
 		if rollback == consts.ROLLBACK_FULL and not self._skip_grub_config_val:
-			if self._rpm_ostree:
+			if self._bootc_has_source:
+				log.info("removing bootc tuning previously added by Tuned")
+				self._remove_bootc_source_tuning()
+			elif self._rpm_ostree:
 				log.info("removing rpm-ostree tuning previously added by Tuned")
 				self._remove_rpm_ostree_tuning()
 			else:
@@ -518,6 +564,9 @@ class BootloaderPlugin(base.Plugin):
 		if self._rpm_ostree:
 			log.warning("Detected rpm-ostree which doesn't support initrd overlays.")
 			return False
+		if self._bootc_has_source:
+			log.warning("Detected bootc which doesn't support initrd overlays.")
+			return False
 		if self._check_petitboot():
 			log.warning("Detected Petitboot which doesn't support initrd overlays. The initrd overlay will be ignored by bootloader.")
 		log.info("installing initrd image as '%s'" % self._initrd_dst_img_val)
@@ -678,9 +727,16 @@ class BootloaderPlugin(base.Plugin):
 			# ensure that the desired cmdline is always written to BOOT_CMDLINE_FILE (/etc/tuned/bootcmdline)
 			self._patch_bootcmdline({consts.BOOT_CMDLINE_TUNED_VAR : self._cmdline_val, consts.BOOT_CMDLINE_INITRD_ADD_VAR : self._initrd_val})
 		elif enabling and self.update_grub2_cfg:
-			if self._rpm_ostree:
+			if self._bootc_has_source:
+				self._bootc_source_update()
+			elif self._rpm_ostree:
 				self._rpm_ostree_update()
 			else:
 				self._grub2_update()
 				self._bls_update()
 			self.update_grub2_cfg = False
+		elif enabling and self._bootc_has_source and not self.update_grub2_cfg:
+			# Profile has no [bootloader] cmdline= but bootc source
+			# tracking is available.  Declare the empty kargs state so
+			# that any stale kargs from a previous profile are cleared.
+			self._bootc_source_update()

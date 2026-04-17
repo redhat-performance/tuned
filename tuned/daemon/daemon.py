@@ -1,3 +1,4 @@
+import collections
 import os
 import errno
 import threading
@@ -194,10 +195,33 @@ class Daemon(object):
 		retcode, out = self._cmd.execute(["systemctl", "list-jobs"], no_errors = [0])
 		return re.search(r"\b(shutdown|reboot|halt|poweroff)\.target.*start", out) is None and not retcode
 
+	def _ensure_bootloader_unit(self):
+		"""Ensure the bootloader plugin is loaded on bootc systems.
+
+		On systems where bootc loader-entries set-options-for-source is
+		available, the bootloader plugin must always be loaded - even
+		for profiles without a [bootloader] section.  Without it, stale
+		kargs from a previous profile cannot be cleared during a
+		profile switch because the plugin (and its unapply logic) would
+		never be instantiated.
+		"""
+		if "bootloader" in self._profile.units:
+			return
+		(retcode, out, err) = self._cmd.execute(
+			["bootc", "loader-entries", "set-options-for-source",
+			 "--help"], return_err=True)
+		if retcode != 0:
+			return
+		from tuned.profiles.unit import Unit
+		log.debug("injecting synthetic bootloader unit for bootc source tracking")
+		self._profile.units["bootloader"] = Unit(
+			"bootloader", collections.OrderedDict())
+
 	def _thread_code(self):
 		if self._profile is None:
 			raise TunedException("Cannot start the daemon without setting a profile.")
 
+		self._ensure_bootloader_unit()
 		self._unit_manager.create(self._profile.units)
 		self._save_active_profile(" ".join(self._active_profiles),
 					  self._manual)
