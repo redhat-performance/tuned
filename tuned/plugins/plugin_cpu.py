@@ -775,12 +775,18 @@ class CPULatencyPlugin(hotplug.Plugin):
 		cpu_id = device.lstrip("cpu")
 		boost_set = False
 
+		boost = self._cmd.get_bool(boost)
 		if os.path.exists(self._pstate_boost_path(cpu_id)):
 			if not sim:
 				if boost == "0" or boost == "1":
-					self._cmd.write_to_file(self._pstate_boost_path(cpu_id), boost, \
-						no_error = [errno.ENOENT] if remove else False, ignore_same=True)
 					log.info("Setting boost value '%s' for cpu '%s'" % (boost, device))
+					# EINVAL if boost isn't supported
+					_no_error = [errno.EINVAL]
+					if remove:
+						_no_error = _no_error + [errno.ENOENT]
+					if not self._cmd.write_to_file(self._pstate_boost_path(cpu_id), boost, \
+						no_error = _no_error, ignore_same=True):
+							log.info("Cannot set boost on cpu '%s', maybe it isn't supported on this platform." % device)
 					boost_set = True
 				else:
 					log.error("Failed to set boost on cpu '%s'. Is the value in the profile correct?" % device)
@@ -814,7 +820,10 @@ class CPULatencyPlugin(hotplug.Plugin):
 			return None
 		cpu_id = device.lstrip("cpu")
 		if os.path.exists(self._pstate_boost_path(cpu_id)):
-			return self._cmd.read_file(self._pstate_boost_path(cpu_id)).strip()
+			val = self._cmd.read_file(self._pstate_boost_path(cpu_id)).strip();
+			# write returns EINVAL if boost isn't supported
+			return val if self._cmd.write_to_file(self._pstate_boost_path(cpu_id), val, \
+				no_error = True) else None
 		else:
 			log.debug("boost file missing, which can happen on pre 6.11 kernels.")
 		return None
