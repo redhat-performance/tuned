@@ -26,6 +26,7 @@ PLUGIN_VARIABLES_UNIT_NAME = "variables"
 MAGIC_HEADER_NAME = "this_is_some_magic_section_header_because_of_compatibility"
 RECOMMEND_DIRECTORIES = ["/usr/lib/tuned/recommend.d", "/etc/tuned/recommend.d"]
 
+TMP_DIR = "/tmp"
 TMP_FILE_SUFFIX = ".tmp"
 # max. number of consecutive errors to give up
 ERROR_THRESHOLD = 3

@@ -134,7 +134,12 @@ class BootloaderPlugin(base.Plugin):
 	If the `DIR` directory name begins with '/', the absolute path
 	is used. Otherwise, the current profile directory is used as the
 	base directory for the `DIR`. For safety reasons, `DIR` has to be
-	a subdirectory within the defined profile directories.
+	a subdirectory within the defined profile directories or within the
+	`TMP` directory (`TMP` directory is configured in the consts.py)
+	and owned by the same user who is running the TuneD process.
+	If `TMP` directory is used be careful about possible security concerns,
+	because `TMP` is usually writeable by any user. See e.g. the
+	`cpu-partitioning` profile for inspiration how to handle it securely.
 
 	The [option]`initrd_dst_img=PATHNAME` sets the name and location of
 	the resulting initrd image. Typically, it is not necessary to use this
@@ -594,16 +599,26 @@ class BootloaderPlugin(base.Plugin):
 			if src_dir == "":
 				return False
 			if not os.path.isdir(src_dir):
-				log.error("error: cannot create initrd image, source directory '%s' doesn't exist" % src_dir)
+				log.error("cannot create initrd image, source directory '%s' doesn't exist" % src_dir)
 				return False
-			if not self._safe_script_path(src_dir):
-				log.error("error: paths outside of the profile directories cannot be used: '%s'" % src_dir)
+			if not self._safe_script_path(src_dir, tmp_allowed = True):
+				log.error("paths outside of the profile directories or '%s' cannot be used, path: '%s'"
+					% (consts.TMP_DIR, src_dir))
 				return False
+			try:
+				euid = os.geteuid()
+				fuid = os.stat(src_dir).st_uid
+				if euid != fuid:
+					log.error("directory '%s' to be included in the initrd is owned by UID '%d' which is different "
+						"from the TuneD process EUID '%d', it is suspicious, initrd will not be created" % (src_dir, fuid, euid))
+					return False
+			except (FileNotFoundError, PermissionError) as e:
+				log.error("unable to stat directory '%s': '%s'" % (src_dir, e))
 			try:
 				os.chmod(src_dir, 0o755)
 				log.debug("setting permissions of directory '%s'" % src_dir)
 			except Exception as e:
-				log.error("error: failed to change permissions of directory '%s': %s" % (src_dir, e))
+				log.error("failed to change permissions of directory '%s': %s" % (src_dir, e))
 				return False
 
 			log.info("generating initrd image from directory '%s'" % src_dir)
