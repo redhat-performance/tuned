@@ -332,7 +332,10 @@ class NetTuningPlugin(hotplug.Plugin):
 			"rx-frames-high": None,
 			"tx-usecs-high": None,
 			"tx-frames-high": None,
-			"sample-interval": None
+			"sample-interval": None,
+			"tx-aggr-max-bytes": None,
+			"tx-aggr-max-frames": None,
+			"tx-aggr-time-usecs": None
 			}
 
 	@classmethod
@@ -615,7 +618,7 @@ class NetTuningPlugin(hotplug.Plugin):
 	# d is dict: {parameter: value}
 	def _check_parameters(self, context, d):
 		if context == "features":
-			return True
+			return d
 		params = set(d.keys())
 		supported_getter = { "coalesce": self._get_config_options_coalesce, \
 				"pause": self._get_config_options_pause, \
@@ -623,9 +626,8 @@ class NetTuningPlugin(hotplug.Plugin):
 				"channels": self._get_config_options_channels }
 		supported = set(supported_getter[context]().keys())
 		if not params.issubset(supported):
-			log.error("unknown %s parameter(s): %s" % (context, str(params - supported)))
-			return False
-		return True
+			log.warning("ignoring unknown %s parameter(s): %s" % (context, str(params - supported)))
+		return {k: v for k, v in d.items() if k in supported}
 
 	# parse output of ethtool -a
 	def _parse_pause_parameters(self, s):
@@ -712,17 +714,13 @@ class NetTuningPlugin(hotplug.Plugin):
 				"channels": self._parse_channels_parameters }
 		parser = context2parser[context]
 		d = parser(value)
-		if context == "coalesce" and not self._check_parameters(context, d):
-			return None
-		return d
+		return self._check_parameters(context, d)
 
 	def _set_device_parameters(self, instance, context, value, device, sim,
 				dev_params = None):
 		if value is None or len(value) == 0:
 			return None
-		d = self._parse_config_parameters(value, context)
-		if d is None or not self._check_parameters(context, d):
-			return {}
+		d = self._check_parameters(context, self._parse_config_parameters(value, context))
 		# check if device supports parameters and filter out unsupported ones
 		if dev_params:
 			self._check_device_support(instance, context, d, device, dev_params)
