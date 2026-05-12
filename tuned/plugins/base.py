@@ -213,11 +213,22 @@ class Plugin(object):
 	def _instance_post_static(self, instance, enabling):
 		pass
 
-	def _safe_script_path(self, path):
+	def _safe_script_path(self, path, tmp_allowed = False):
+		"""
+		Checks if the path is within profile directories or TMP directory.
+		TMP directory is configured in the consts.py.
+
+		:param path: the path to check
+		:param tmp_allowed: optional parameter, default False, True allows paths within TMP
+		:returns: True if the path is OK
+		"""
 		path = os.path.realpath(path)
+		# os.path.join() to add trailing slash
+		if tmp_allowed and path.startswith(os.path.join(consts.TMP_DIR, "")):
+			return True
 		profile_paths = self._global_cfg.get_list(consts.CFG_PROFILE_DIRS, consts.CFG_DEF_PROFILE_DIRS)
 		for p in profile_paths:
-			if path.startswith(p):
+			if path.startswith(os.path.join(p, "")):
 				return True
 		return False
 
