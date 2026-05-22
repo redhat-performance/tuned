@@ -382,6 +382,18 @@ class Admin(object):
 		print("Not supported in no_daemon mode.")
 		return False
 
+	def _action_dbus_dump(self):
+		(ret, msg) = self._controller.dump()
+		if ret:
+			print(msg)
+		else:
+			self._error("Unable to dump profile: '%s'" % msg)
+		return self._controller.exit(ret)
+
+	def _action_dump(self):
+		print("Not supported in no_daemon mode.")
+		return False
+
 	def _action_dbus_off(self):
 		# 25 seconds default DBus timeout + 5 secs safety margin
 		timeout = 25 + 5
