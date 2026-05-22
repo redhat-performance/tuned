@@ -1,0 +1,31 @@
+summary: Test for BZ#1759597 (Settings in /usr/lib/sysctl.d take precedence over)
+description: |
+    Bug summary: Settings in /usr/lib/sysctl.d take precedence over settings in tuned profiles in /etc/tuned.
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1759597
+contact: Robin Hack <rhack@redhat.com>
+component:
+  - tuned
+framework: beakerlib
+require:
+  - library(tuned/basic)
+recommend:
+  - tuned
+duration: 20m
+enabled: true
+tag:
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - NoRHEL7
+  - TIPpass_infra
+link:
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=1759597
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=1776149
+adjust:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7
+    continue: false
+  - enabled: false
+    when: distro ~< rhel-8.2
+    continue: false
+id: 1c91a928-72b9-407e-bf66-7a97025dc5cb
