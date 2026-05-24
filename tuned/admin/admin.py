@@ -267,6 +267,13 @@ class Admin(object):
 				return self._controller.exit(True)
 		return False
 
+	def _log_capture_start(self):
+		"""Start capturing log messages from Tuned daemon"""
+		# 25 seconds default DBus timeout + 5 secs safety margin
+		timeout = self._timeout + 25 + 5
+		self._log_token = self._controller.log_capture_start(
+			self._log_level, timeout)
+
 	def _log_capture_finish(self):
 		if self._log_token is None or self._log_token == "":
 			return
@@ -287,10 +294,7 @@ class Admin(object):
 			return self._controller.exit(False)
 		self._daemon_action_finished.clear()
 		if not self._async and self._log_level is not None:
-			# 25 seconds default DBus timeout + 5 secs safety margin
-			timeout = self._timeout + 25 + 5
-			self._log_token = self._controller.log_capture_start(
-					self._log_level, timeout)
+			self._log_capture_start()
 		(ret, msg) = self._controller.switch_profile(profile_name)
 		if self._async or not ret:
 			return self._controller.exit(self._profile_print_status(ret, msg))
@@ -337,10 +341,7 @@ class Admin(object):
 		profile_name = self._controller.recommend_profile()
 		self._daemon_action_finished.clear()
 		if not self._async and self._log_level is not None:
-			# 25 seconds default DBus timeout + 5 secs safety margin
-			timeout = self._timeout + 25 + 5
-			self._log_token = self._controller.log_capture_start(
-					self._log_level, timeout)
+			self._log_capture_start()
 		(ret, msg) = self._controller.auto_profile()
 		if self._async or not ret:
 			return self._controller.exit(self._profile_print_status(ret, msg))
@@ -363,9 +364,11 @@ class Admin(object):
 
 	def _action_dbus_verify_profile(self, ignore_missing):
 		if ignore_missing:
-			ret = self._controller.verify_profile_ignore_missing()
+			logs, ret = self._controller.verify_profile_ignore_missing(self._log_level)
 		else:
-			ret = self._controller.verify_profile()
+			logs, ret = self._controller.verify_profile(self._log_level)
+		print(logs, end = "", file = sys.stderr)
+		sys.stderr.flush()
 		if ret:
 			print("Verification succeeded, current system settings match the preset profile.")
 		else:
@@ -383,10 +386,8 @@ class Admin(object):
 		return False
 
 	def _action_dbus_off(self):
-		# 25 seconds default DBus timeout + 5 secs safety margin
-		timeout = 25 + 5
-		self._log_token = self._controller.log_capture_start(
-				self._log_level, timeout)
+		if self._log_level is not None:
+			self._log_capture_start()
 		ret = self._controller.off()
 		if not ret:
 			self._error("Cannot disable active profile.")
