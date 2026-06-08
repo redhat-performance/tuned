@@ -1,5 +1,5 @@
 import tuned.profiles.profile
-import tuned.profiles.variables
+from tuned.profiles.variables import Variables
 from tuned.utils.config_parser import ConfigParser, Error
 import tuned.consts as consts
 import os.path
@@ -15,17 +15,16 @@ class Loader(object):
 	Profiles loader.
 	"""
 
-	__slots__ = ["_profile_locator", "_profile_merger", "_profile_factory", "_global_config", "_variables"]
+	__slots__ = ["_profile_locator", "_profile_merger", "_profile_factory", "_global_config"]
 
-	def __init__(self, profile_locator, profile_factory, profile_merger, global_config, variables):
+	def __init__(self, profile_locator, profile_factory, profile_merger, global_config):
 		self._profile_locator = profile_locator
 		self._profile_factory = profile_factory
 		self._profile_merger = profile_merger
 		self._global_config = global_config
-		self._variables = variables
 
-	def _create_profile(self, profile_name, config):
-		return tuned.profiles.profile.Profile(profile_name, config)
+	def _create_profile(self, profile_name, config, variables):
+		return tuned.profiles.profile.Profile(profile_name, config, variables)
 
 	@classmethod
 	def safe_name(cls, profile_name):
@@ -49,11 +48,11 @@ class Loader(object):
 			log.info("loading profile: %s" % profile_names[0])
 		profiles = []
 		processed_files = []
-		self._load_profile(profile_names, profiles, processed_files)
+		self._load_profile(profile_names, profiles, processed_files, Variables())
 
 		final_profile = self._profile_merger.merge(profiles)
 		final_profile.name = " ".join(profile_names)
-		self._variables.add_from_cfg(final_profile.variables)
+		final_profile.variables.add_from_cfg(final_profile.variable_cfg)
 		# FIXME hack, do all variable expansions in one place
 		self._expand_vars_in_devices(final_profile)
 		self._expand_vars_in_regexes(final_profile)
@@ -61,14 +60,14 @@ class Loader(object):
 
 	def _expand_vars_in_devices(self, profile):
 		for unit in profile.units:
-			profile.units[unit].devices = self._variables.expand(profile.units[unit].devices)
+			profile.units[unit].devices = profile.variables.expand(profile.units[unit].devices)
 
 	def _expand_vars_in_regexes(self, profile):
 		for unit in profile.units:
-			profile.units[unit].cpuinfo_regex = self._variables.expand(profile.units[unit].cpuinfo_regex)
-			profile.units[unit].uname_regex = self._variables.expand(profile.units[unit].uname_regex)
+			profile.units[unit].cpuinfo_regex = profile.variables.expand(profile.units[unit].cpuinfo_regex)
+			profile.units[unit].uname_regex = profile.variables.expand(profile.units[unit].uname_regex)
 
-	def _load_profile(self, profile_names, profiles, processed_files):
+	def _load_profile(self, profile_names, profiles, processed_files, variables):
 		for name in profile_names:
 			filename = self._profile_locator.get_config(name, processed_files)
 			if filename == "":
@@ -78,10 +77,10 @@ class Loader(object):
 			processed_files.append(filename)
 
 			config = self._load_config_data(filename)
-			profile = self._profile_factory.create(name, config)
+			profile = self._profile_factory.create(name, config, variables)
 			if "include" in profile.options:
-				include_names = re.split(r"\s*[,;]\s*", self._variables.expand(profile.options.pop("include")))
-				self._load_profile(include_names, profiles, processed_files)
+				include_names = re.split(r"\s*[,;]\s*", profile.variables.expand(profile.options.pop("include")))
+				self._load_profile(include_names, profiles, processed_files, variables)
 
 			profiles.append(profile)
 

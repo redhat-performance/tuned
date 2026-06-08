@@ -39,10 +39,9 @@ class Application(object):
 		device_matcher = hardware.DeviceMatcher()
 		device_matcher_udev = hardware.DeviceMatcherUdev()
 		plugin_instance_factory = plugins.instance.Factory()
-		self.variables = profiles.variables.Variables()
 
 		plugins_repository = plugins.Repository(monitors_repository, storage_factory, hardware_inventory,\
-			device_matcher, device_matcher_udev, plugin_instance_factory, self.config, self.variables)
+			device_matcher, device_matcher_udev, plugin_instance_factory, self.config)
 		def_instance_priority = int(self.config.get(consts.CFG_DEFAULT_INSTANCE_PRIORITY, consts.CFG_DEF_DEFAULT_INSTANCE_PRIORITY))
 		unit_manager = units.Manager(
 				plugins_repository, monitors_repository,
@@ -51,7 +50,7 @@ class Application(object):
 		profile_factory = profiles.Factory()
 		profile_merger = profiles.Merger()
 		profile_locator = profiles.Locator(self.config.get_list(consts.CFG_PROFILE_DIRS, consts.CFG_DEF_PROFILE_DIRS))
-		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger, self.config, self.variables)
+		profile_loader = profiles.Loader(profile_locator, profile_factory, profile_merger, self.config)
 
 		self._daemon = daemon.Daemon(unit_manager, profile_loader, profile_name, self.config, self)
 		self._controller = controller.Controller(self._daemon, self.config)

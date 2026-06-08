@@ -53,8 +53,7 @@ class LoaderTestCase(unittest.TestCase):
 		locator = profiles.Locator([self._profiles_dir])
 		factory = profiles.Factory()
 		merger = profiles.Merger()
-		self._loader = profiles.Loader(locator,factory,merger,None,\
-			profiles.variables.Variables())
+		self._loader = profiles.Loader(locator,factory,merger,None)
 
 	def test_safe_name(self):
 		self.assertFalse(self._loader.safe_name('*'))
