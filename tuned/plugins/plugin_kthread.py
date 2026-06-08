@@ -449,9 +449,9 @@ class KthreadPlugin(base.Plugin):
 				except ThreadNoLongerExists:
 					self._kthread_internal_remove(pid)
 			self._instance_count -= 1
-		if self._instance_count == 0:
-			if have_perf:
-				self._perf_monitor_shutdown()
+			need_shutdown = (self._instance_count == 0)
+		if need_shutdown and have_perf:
+			self._perf_monitor_shutdown()
 
 	#
 	# internal bookkeeping (self._kthreads)
