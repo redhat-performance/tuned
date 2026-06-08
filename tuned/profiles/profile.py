@@ -7,11 +7,12 @@ class Profile(object):
 	Representation of a tuning profile.
 	"""
 
-	__slots__ = ["_name", "_options", "_variables", "_units"]
+	__slots__ = ["_name", "_options", "_units", "_variables", "_variable_cfg"]
 
-	def __init__(self, name=None, config={}):
+	def __init__(self, name, config, variables):
 		self._name = name
-		self._variables = collections.OrderedDict()
+		self._variables = variables
+		self._variable_cfg = collections.OrderedDict()
 		self._init_options(config)
 		self._init_units(config)
 
@@ -42,10 +43,6 @@ class Profile(object):
 		self._name = value
 
 	@property
-	def variables(self):
-		return self._variables
-
-	@property
 	def units(self):
 		"""
 		Units included in the profile.
@@ -58,3 +55,17 @@ class Profile(object):
 		Profile global options.
 		"""
 		return self._options
+
+	@property
+	def variables(self):
+		"""
+		Profile variables (Variables object).
+		"""
+		return self._variables
+
+	@property
+	def variable_cfg(self):
+		"""
+		Ordered variable configuration collected while merging profiles.
+		"""
+		return self._variable_cfg
