@@ -43,6 +43,10 @@ class Plugin(base.Plugin):
 		self._added_device_apply_tuning(instance, device_name)
 		self._call_device_script(instance, instance.script_post, "apply", [device_name])
 		instance.processed_devices.add(device_name)
+		# This can be a bit racy (we can overcount),
+		# but it shouldn't affect the boolean result
+		instance.active = len(instance.processed_devices) \
+				+ len(instance.assigned_devices) > 0
 
 	def _add_device(self, device_name):
 		if device_name in (self._assigned_devices | self._free_devices):
@@ -63,10 +67,6 @@ class Plugin(base.Plugin):
 		"""
 		for dev in device_names:
 			self._add_device_process(instance, dev)
-		# This can be a bit racy (we can overcount),
-		# but it shouldn't affect the boolean result
-		instance.active = len(instance.processed_devices) \
-				+ len(instance.assigned_devices) > 0
 
 	def _remove_device_process(self, instance, device_name):
 		if device_name in instance.processed_devices:
