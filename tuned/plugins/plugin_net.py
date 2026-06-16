@@ -503,7 +503,12 @@ class NetTuningPlugin(hotplug.Plugin):
 		if value is None:
 			return None
 
-		hashsize = int(value)
+		try:
+			hashsize = int(value)
+		except ValueError:
+			log.warning("nf_conntrack_hashsize value '%s' is not integer" % value)
+			return None
+
 		if hashsize >= 0:
 			if not sim:
 				self._cmd.write_to_file(self._nf_conntrack_hashsize_path(), hashsize, \
