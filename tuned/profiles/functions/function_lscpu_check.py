@@ -1,5 +1,8 @@
 import re
+import tuned.logs
 from . import base
+
+log = tuned.logs.get()
 
 class LSCPUCheck(base.Function):
 	"""
@@ -26,8 +29,11 @@ class LSCPUCheck(base.Function):
 		_, lscpu = self._cmd.execute("lscpu")
 		for i in range(0, len(args), 2):
 			if i + 1 < len(args):
-				if re.search(args[i], lscpu, re.MULTILINE):
-					return args[i + 1]
+				try:
+					if re.search(args[i], lscpu, re.MULTILINE):
+						return args[i + 1]
+				except re.error:
+					log.error("Invalid regular expression: '%s'" % args[i])
 		if len(args) % 2:
 			return args[-1]
 		else:
