@@ -299,26 +299,44 @@ restore_transparent_hugepages() {
 # WIFI tuning
 #
 
-# usage: _wifi_set_power_level level
+# usage: _wifi_set_power_level level [wireless_status_file]
 _wifi_set_power_level() {
 	# 0    auto, PM enabled
 	# 1-5  least savings and lowest latency - most savings and highest latency
 	# 6    disable power savings
 	level=$1
+	wireless_status_file=${2:-/proc/net/wireless}
 
 	# do not report errors on systems with no wireless
-	[ -e /proc/net/wireless ] || return 0
+	[ -e "$wireless_status_file" ] || return 0
 
-	# apply the settings using iwpriv
-	ifaces=$(cat /proc/net/wireless | grep -v '|' | sed 's@^ *\([^:]*\):.*@\1@')
+	case "$level" in
+	0|6)
+		power_save=off
+		;;
+	*)
+		power_save=on
+		;;
+	esac
+
+	ifaces=$(grep -v '|' "$wireless_status_file" | sed 's@^ *\([^:]*\):.*@\1@')
 	for iface in $ifaces; do
-		iwpriv $iface set_power $level
+		if command -v iw >/dev/null 2>&1; then
+			iw dev "$iface" set power_save "$power_save" && continue
+		fi
+
+		# Keep support for legacy drivers using Wireless Extensions.
+		if command -v iwpriv >/dev/null 2>&1; then
+			iwpriv "$iface" set_power "$level"
+		fi
 	done
 
 	# some adapters may rely on sysfs
 	for i in /sys/bus/pci/devices/*/power_level; do
-		(echo $level > $i) &> /dev/null
+		(echo "$level" > "$i") &> /dev/null
 	done
+
+	return 0
 }
 
 enable_wifi_powersave() {
