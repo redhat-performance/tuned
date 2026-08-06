@@ -8,6 +8,7 @@ from tuned.utils.commands import commands
 import tuned.consts as consts
 import errno
 import os
+import collections
 
 log = tuned.logs.get()
 
@@ -125,18 +126,22 @@ class SysctlPlugin(base.Plugin):
 				if fname not in files:
 					files[fname] = d
 
+		sysctl_settings = collections.OrderedDict()
 		for fname in sorted(files.keys()):
 			d = files[fname]
 			path = "%s/%s" % (d, fname)
-			self._apply_sysctl_config_file(path, instance_sysctl)
-		self._apply_sysctl_config_file("/etc/sysctl.conf", instance_sysctl)
+			self._apply_sysctl_config_file(path, instance_sysctl, sysctl_settings)
+		self._apply_sysctl_config_file("/etc/sysctl.conf", instance_sysctl, sysctl_settings)
 
-	def _apply_sysctl_config_file(self, path, instance_sysctl):
+		for option, value in sysctl_settings.items():
+			self._write_sysctl(option, value, ignore_missing=True)
+
+	def _apply_sysctl_config_file(self, path, instance_sysctl, sysctl_settings):
 		log.debug("Applying sysctl settings from file %s" % path)
 		try:
 			with open(path, "r") as f:
 				for lineno, line in enumerate(f, 1):
-					self._apply_sysctl_config_line(path, lineno, line, instance_sysctl)
+					self._apply_sysctl_config_line(path, lineno, line, instance_sysctl, sysctl_settings)
 			log.debug("Finished applying sysctl settings from file %s"
 					% path)
 		except (OSError, IOError) as e:
@@ -144,7 +149,7 @@ class SysctlPlugin(base.Plugin):
 				log.error("Error reading sysctl settings from file %s: %s"
 						% (path, str(e)))
 
-	def _apply_sysctl_config_line(self, path, lineno, line, instance_sysctl):
+	def _apply_sysctl_config_line(self, path, lineno, line, instance_sysctl, sysctl_settings):
 		line = line.strip()
 		if len(line) == 0 or line[0] == "#" or line[0] == ";":
 			return
@@ -170,7 +175,7 @@ class SysctlPlugin(base.Plugin):
 			if instance_value != value:
 				log.info("Overriding sysctl parameter '%s' from '%s' to '%s'"
 						% (option, instance_value, value))
-		self._write_sysctl(option, value, ignore_missing = True)
+		sysctl_settings[option] = value
 
 	def _get_sysctl_path(self, option):
 		# The sysctl name in sysctl tool and in /proc/sys differs.
