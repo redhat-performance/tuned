@@ -23,7 +23,7 @@ class VideoPlugin(base.Plugin):
 	* `dynpm`
 	* `dpm-battery`
 	* `dpm-balanced`
-	* `dpm-perfomance`
+	* `dpm-performance`
 
 	For additional detail, see
 	link:https://www.x.org/wiki/RadeonFeature/#kmspowermanagementoptions[KMS Power Management Options].

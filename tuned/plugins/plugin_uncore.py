@@ -127,7 +127,7 @@ class UncorePlugin(hotplug.Plugin):
 				return None
 
 			if freq_khz < initial_min_freq_khz:
-				log.info("%s: min_freq_khz %d value below initial_max_freq_khz - capped to %d" % (device, freq_khz, initial_min_freq_khz))
+				log.info("%s: min_freq_khz %d value below initial_min_freq_khz - capped to %d" % (device, freq_khz, initial_min_freq_khz))
 				freq_khz = initial_min_freq_khz
 
 		else:
