@@ -430,7 +430,13 @@ class CPULatencyPlugin(hotplug.Plugin):
 			return
 
 		load = instance._load_monitor.get_load()["system"]
-		if load < instance.options["load_threshold"]:
+		try:
+			load_threshold = float(instance.options["load_threshold"])
+		except (ValueError, TypeError):
+			log.error("invalid load_threshold value '%s', skipping dynamic latency update"
+					% instance.options["load_threshold"])
+			return
+		if load < load_threshold:
 			self._set_latency(instance.options["latency_high"])
 		else:
 			self._set_latency(instance.options["latency_low"])
