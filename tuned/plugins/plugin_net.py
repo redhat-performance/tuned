@@ -637,9 +637,9 @@ class NetTuningPlugin(hotplug.Plugin):
 	# parse output of ethtool -a
 	def _parse_pause_parameters(self, s):
 		s = self._cmd.multiple_re_replace(\
-				{"Autonegotiate": "autoneg",
-				"RX": "rx",
-				"TX": "tx"}, s)
+				{"Autonegotiate:": "autoneg:",
+				"RX:": "rx:",
+				"TX:": "tx:"}, s)
 		l = s.split("\n")[1:]
 		l = [x for x in l if x != '' and not re.search(r"\[fixed\]", x)]
 		return dict([x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2])
@@ -649,10 +649,10 @@ class NetTuningPlugin(hotplug.Plugin):
 		a = re.split(r"^Current hardware settings:$", s, flags=re.MULTILINE)
 		s = a[1]
 		s = self._cmd.multiple_re_replace(\
-				{"RX": "rx",
-				"RX Mini": "rx-mini",
-				"RX Jumbo": "rx-jumbo",
-				"TX": "tx"}, s)
+				{"RX:": "rx:",
+				"RX Mini:": "rx-mini:",
+				"RX Jumbo:": "rx-jumbo:",
+				"TX:": "tx:"}, s)
 		l = s.split("\n")
 		l = [x for x in l if x != '']
 		l = [x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2]
@@ -663,10 +663,10 @@ class NetTuningPlugin(hotplug.Plugin):
 		a = re.split(r"^Current hardware settings:$", s, flags=re.MULTILINE)
 		s = a[1]
 		s = self._cmd.multiple_re_replace(\
-				{"RX": "rx",
-				"TX": "tx",
-				"Other": "other",
-				"Combined": "combined"}, s)
+				{"RX:": "rx:",
+				"TX:": "tx:",
+				"Other:": "other:",
+				"Combined:": "combined:"}, s)
 		l = s.split("\n")
 		l = [x for x in l if x != '']
 		l = [x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2]
