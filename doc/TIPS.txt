@@ -19,8 +19,6 @@
 * Make sure writes to hd don't wake it up too quickly:
 ** Set flushing to once per 5 minutes
 ** echo "3000" > /proc/sys/vm/dirty_writeback_centisecs
-** Enable laptop mode
-** echo "5" > /proc/sys/vm/laptop_mode
 * Use relatime for your / partition
 ** mount -o remount,relatime / 
 * Enable USB autosuspend by adding the following to the kernel boot commandline:
