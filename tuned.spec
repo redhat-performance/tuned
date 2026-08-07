@@ -51,16 +51,16 @@
 %global git_suffix %{git_date}git%{git_short_commit}
 %endif
 
-#%%global prerelease rc
-#%%global prereleasenum 1
+%global prerelease rc
+%global prereleasenum 1
 
 %global prerel1 %{?prerelease:.%{prerelease}%{prereleasenum}}
 %global prerel2 %{?prerelease:-%{prerelease}.%{prereleasenum}}
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.27.0
-Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
+Version: 2.28.0
+Release: 0.1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
 URL: http://www.tuned-project.org/
@@ -650,6 +650,34 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Sat Aug 08 2026 Jaroslav Škarvada <jskarvad@redhat.com> - 2.28.0-0.1.rc1
+- new release
+  - scheduler: check for EPERM when setting IRQ affinity
+    resolves: RHEL-153655
+  - bootloader: set correct permission for tempdir
+    resolves: RHEL-121198
+  - commands: better error msgs when creating directory and hardened dir mode
+  - docs: build reference guide
+  - systemd: used drop-ins for configuration
+    resolves: RHEL-97580
+  - systemd: do not backup the drop-in configuration
+    resolves: RHEL-84365
+  - net: add more coalescing options, filter out unsupported ones
+    resolves: RHEL-152675
+  - cpu: do not log error if boost isn't supported
+    resolves: RHEL-169618
+  - bootloader: add bootc loader-entries set-options-for-source support
+    resolves: RHEL-170825
+  - cpu: fixed TypeError when load_threshold is set in a profil
+  - openshift: include network-throughput profile
+  - drop support for vm.laptop_mode which is deprecated in kernel 7.0
+  - net: fixed ring parser to work with rx-mini and rx-jumbo
+    resolves: RHEL-168025
+  - lscpu_check: do not traceback on invalid regex
+    resolves: RHEL-132575
+  - network-latency: increase AVC cache to 8192
+  - functions: use iw for Wi-Fi power saving
+
 * Sun Feb 22 2026 Jaroslav Škarvada <jskarvad@redhat.com> - 2.27.0-1
 - new release
 
