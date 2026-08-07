@@ -106,6 +106,7 @@ Requires: pygobject3-base
 %endif
 Requires: virt-what
 Requires: ethtool
+Requires: iw
 Requires: gawk
 Requires: util-linux
 Requires: dbus
