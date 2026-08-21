@@ -205,7 +205,7 @@ class VMPlugin(base.Plugin):
 			log.warning("Option '%s' is not supported on the current hardware." % option)
 		current_value = cmd.read_file(option_path).strip()
 		if verify:
-			return current_value == value
+			return self._verify_value(option, value, current_value, False)
 		if enabling:
 			try:
 				int_value = int(value)
