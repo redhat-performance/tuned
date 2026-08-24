@@ -36,8 +36,9 @@ rlJournalStart
         rlRun "dnf builddep -y tuned.spec || yum-builddep -y tuned.spec"
         rlRun "rpmbuild --nodeps -bp tuned.spec"
         rlRun "popd"
-        rlRun "cp -a rpmbuild/BUILD/tuned-$VER . || cp -a rpmbuild/BUILD/tuned-$VER-build/tuned-$VER ."
-        rlRun "pushd ./tuned-$VER"
+	rlRun "mkdir lala"
+	rlRun "rsync -a --exclude='*-SPECPARTS' rpmbuild/BUILD/tuned-*-build/tuned-* ./lala/ || rsync -a --exclude='*-SPECPARTS' rpmbuild/BUILD/tuned-* ./lala/"
+        rlRun "pushd ./lala/tuned-*"
     rlPhaseEnd
 
     rlPhaseStartTest
