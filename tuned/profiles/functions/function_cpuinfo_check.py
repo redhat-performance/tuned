@@ -1,5 +1,8 @@
 import re
+import tuned.logs
 from . import base
+
+log = tuned.logs.get()
 
 class CPUInfoCheck(base.Function):
 	"""
@@ -25,8 +28,11 @@ class CPUInfoCheck(base.Function):
 		cpuinfo = self._cmd.read_file("/proc/cpuinfo")
 		for i in range(0, len(args), 2):
 			if i + 1 < len(args):
-				if re.search(args[i], cpuinfo, re.MULTILINE):
-					return args[i + 1]
+				try:
+					if re.search(args[i], cpuinfo, re.MULTILINE):
+						return args[i + 1]
+				except re.error:
+					log.error("Invalid regular expression: '%s'" % args[i])
 		if len(args) % 2:
 			return args[-1]
 		else:
