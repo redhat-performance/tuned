@@ -62,6 +62,11 @@ class CommandsTestCase(unittest.TestCase):
 			,'gfhd1234')
 		self.assertEqual(self._commands.multiple_re_replace(\
 			dictionary,text,pattern),'gfhd1234')
+		self.assertEqual(self._commands.multiple_re_replace(\
+			{'^abc': '123'}, 'abc\nabc', flags = re.MULTILINE), '123\n123')
+		self.assertEqual(self._commands.multiple_re_replace(\
+			{'abc': '123'}, ' '.join(['abc'] * 10), flags = re.MULTILINE),\
+			' '.join(['123'] * 10))
 
 	def test_re_lookup(self):
 		dictionary = {'abc':'abc','mno':'mno'}

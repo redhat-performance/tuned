@@ -73,8 +73,8 @@ class commands:
 			if len(d) == 0 or s is None:
 				return s
 		if r is None:
-			r = self.re_lookup_compile(d)
-		return r.sub(lambda mo: list(d.values())[mo.lastindex - 1], s, flags)
+			r = re.compile("(%s)" % ")|(".join(list(d.keys())), flags)
+		return r.sub(lambda mo: list(d.values())[mo.lastindex - 1], s)
 
 	# Do regex lookup on 's' according to lookup table described by
 	# dictionary 'd' and return corresponding value from the dictionary,
