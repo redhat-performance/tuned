@@ -88,6 +88,7 @@ def get():
 class TunedLogger(logging.getLoggerClass()):
 	"""Custom TuneD daemon logger class."""
 	_formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(name)s: %(message)s")
+	_formatter_journal = logging.Formatter("<%(priority)d>%(name)s: %(message)s")
 	_console_handler = None
 	_file_handler = None
 
@@ -98,6 +99,11 @@ class TunedLogger(logging.getLoggerClass()):
 
 	def console(self, msg, *args, **kwargs):
 		self.log(consts.LOG_LEVEL_CONSOLE, msg, *args, **kwargs)
+
+	def makeRecord(self, name, level, fn, lno, msg, args, exc_info, func=None, extra=None, sinfo=None):
+		extra = extra or {}
+		extra["priority"] = consts.syslog_priority(level)
+		return super(TunedLogger, self).makeRecord(name, level, fn, lno, msg, args, exc_info, func, extra, sinfo)
 
 	def switch_to_console(self):
 		self._setup_console_handler()
@@ -117,12 +123,24 @@ class TunedLogger(logging.getLoggerClass()):
 			self.removeHandler(handler)
 
 	@classmethod
+	def _detect_systemd_journal_stream(cls):
+		"""
+		Returns True iff systemd tells us we are running with
+		stdout/stderr connected to the journal.
+		"""
+		return os.environ.get("JOURNAL_STREAM", "") != ""
+
+	@classmethod
 	def _setup_console_handler(cls):
 		if cls._console_handler is not None:
 			return
 
 		cls._console_handler = logging.StreamHandler()
-		cls._console_handler.setFormatter(cls._formatter)
+		if cls._detect_systemd_journal_stream():
+			fmt = cls._formatter_journal
+		else:
+			fmt = cls._formatter
+		cls._console_handler.setFormatter(fmt)
 
 	@classmethod
 	def _setup_file_handler(cls, filename, maxBytes, backupCount):
