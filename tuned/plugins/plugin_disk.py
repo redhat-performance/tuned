@@ -98,6 +98,7 @@ class DiskPlugin(hotplug.Plugin):
 		self._use_hdparm = True
 		self._free_devices = set()
 		self._hdparm_apm_device_support = dict()
+		self._hdparm_spindown_device_support = dict()
 		for device in self._hardware_inventory.get_devices("block"):
 			if self._device_is_supported(device):
 				self._free_devices.add(device.sys_name)
@@ -111,7 +112,7 @@ class DiskPlugin(hotplug.Plugin):
 			return False
 		if device in self._hdparm_apm_device_support:
 			return self._hdparm_apm_device_support[device]
-		(rc, out, err_msg) = self._cmd.execute(["hdparm", "-C", "/dev/%s" % device], \
+		(rc, out, err_msg) = self._cmd.execute(["hdparm", "-B", "/dev/%s" % device], \
 				no_errors = [errno.ENOENT], return_err=True)
 		if rc == -errno.ENOENT:
 			log.warning("hdparm command not found, ignoring for other devices")
@@ -122,12 +123,22 @@ class DiskPlugin(hotplug.Plugin):
 			log.debug("(rc: %s, msg: '%s')" % (rc, err_msg))
 			self._hdparm_apm_device_support[device] = False
 			return False
-		elif "unknown" in out:
+		elif "not supported" in out:
 			log.info("Driver for device '%s' does not support apm command" % device)
 			self._hdparm_apm_device_support[device] = False
 			return False
 		self._hdparm_apm_device_support[device] = True
 		return True
+
+	def _is_hdparm_spindown_supported(self, device):
+		if not self._use_hdparm:
+			return False
+		attempt = self._hdparm_spindown_device_support.get(device)
+		if attempt == None:
+			# We have no way of knowing if a spindown will work until we actually try it.
+			return True
+		else:
+			return attempt
 
 	@classmethod
 	def _device_is_supported(cls, device):
@@ -180,7 +191,6 @@ class DiskPlugin(hotplug.Plugin):
 		instance._has_static_tuning = True
 
 		self._apm_errcnt = 0
-		self._spindown_errcnt = 0
 
 		instance._load_monitor = None
 		instance._has_dynamic_tuning = self._option_bool(instance.options["dynamic"])
@@ -199,43 +209,49 @@ class DiskPlugin(hotplug.Plugin):
 		instance._load_monitor = self._monitors_repository.create(
 						"disk", instance.assigned_devices)
 
-	def _update_errcnt(self, rc, spindown):
-		if spindown:
-			s = "spindown"
-			cnt = self._spindown_errcnt
-		else:
-			s = "apm"
-			cnt = self._apm_errcnt
+	def _update_apm_errcnt(self, rc):
+		cnt = self._apm_errcnt
 		if cnt >= consts.ERROR_THRESHOLD:
 			return
 		if rc == 0:
 			cnt = 0
 		elif rc == -errno.ENOENT:
-			self._spindown_errcnt = self._apm_errcnt = consts.ERROR_THRESHOLD + 1
-			log.warning("hdparm command not found, ignoring future set_apm / set_spindown commands")
+			self._apm_errcnt = consts.ERROR_THRESHOLD + 1
+			log.warning("hdparm command not found, ignoring future set_apm commands")
 			return
 		else:
 			cnt += 1
 			if cnt == consts.ERROR_THRESHOLD:
-				log.info("disabling set_%s command: too many consecutive errors" % s)
-		if spindown:
-			self._spindown_errcnt = cnt
-		else:
-			self._apm_errcnt = cnt
+				log.info("disabling set_apm command: too many consecutive errors")
+		self._apm_errcnt = cnt
 
-	def _change_spindown(self, instance, device, new_spindown_level):
-		log.debug("changing spindown to %d" % new_spindown_level)
-		(rc, out) = self._cmd.execute(["hdparm", "-S%d" % new_spindown_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
-		self._update_errcnt(rc, True)
-		instance._spindown_change_delayed[device] = False
+	def _try_set_spindown(self, device, level):
+		if not self._use_hdparm:
+			return False
+		if self._hdparm_spindown_device_support.get(device) == False:
+			return False
+		(rc, out) = self._cmd.execute(["hdparm", "-S", str(level), "/dev/%s" % device], no_errors = [errno.ENOENT])
+		if rc == -errno.ENOENT:
+			log.warning("hdparm command not found, ignoring for other devices")
+			self._use_hdparm = False
+		success = not bool(rc)
+		if device not in self._hdparm_spindown_device_support:
+			if rc:
+				log.info("Driver for device '%s' does not support spindown command" % device)
+			self._hdparm_spindown_device_support[device] = success
+		return success
 
 	def _drive_spinning(self, device):
 		(rc, out) = self._cmd.execute(["hdparm", "-C", "/dev/%s" % device], no_errors = [errno.ENOENT])
 		return not "standby" in out and not "sleeping" in out
 
 	def _instance_update_dynamic(self, instance, device):
-		if not self._is_hdparm_apm_supported(device):
+		apm_avail = self._is_hdparm_apm_supported(device) and self._apm_errcnt < consts.ERROR_THRESHOLD
+		spindown_avail = self._is_hdparm_spindown_supported(device)
+		if not apm_avail and not spindown_avail:
+			log.info("There is no dynamic tuning available for device '%s' at time" % device)
 			return
+
 		load = instance._load_monitor.get_device_load(device)
 		if load is None:
 			return
@@ -266,19 +282,20 @@ class DiskPlugin(hotplug.Plugin):
 			new_spindown_level = self._spindown_levels[idle["level"]]
 
 			log.debug("tuning level changed to %d" % idle["level"])
-			if self._spindown_errcnt < consts.ERROR_THRESHOLD:
+			if spindown_avail:
 				if not self._drive_spinning(device) and level_change > 0:
 					log.debug("delaying spindown change to %d, drive has already spun down" % new_spindown_level)
 					instance._spindown_change_delayed[device] = True
-				else:
-					self._change_spindown(instance, device, new_spindown_level)
-			if self._apm_errcnt < consts.ERROR_THRESHOLD:
+				elif self._try_set_spindown(device, new_spindown_level):
+					instance._spindown_change_delayed[device] = False
+			if apm_avail:
 				log.debug("changing APM_level to %d" % new_power_level)
 				(rc, out) = self._cmd.execute(["hdparm", "-B%d" % new_power_level, "/dev/%s" % device], no_errors = [errno.ENOENT])
-				self._update_errcnt(rc, False)
-		elif instance._spindown_change_delayed[device] and self._drive_spinning(device):
+				self._update_apm_errcnt(rc)
+		elif spindown_avail and instance._spindown_change_delayed[device] and self._drive_spinning(device):
 			new_spindown_level = self._spindown_levels[idle["level"]]
-			self._change_spindown(instance, device, new_spindown_level)
+			if self._try_set_spindown(device, new_spindown_level):
+				instance._spindown_change_delayed[device] = False
 
 		log.debug("%s load: read %0.2f, write %0.2f" % (device, stats["read"], stats["write"]))
 		log.debug("%s idle: read %d, write %d, level %d" % (device, idle["read"], idle["write"], idle["level"]))
@@ -314,13 +331,7 @@ class DiskPlugin(hotplug.Plugin):
 				instance._idle[device][operation] = 0
 
 	def _instance_apply_dynamic(self, instance, device):
-		# At the moment we support dynamic tuning just for devices compatible with hdparm apm commands
-		# If in future will be added new functionality not connected to this command,
-		# it is needed to change it here
-		if not self._is_hdparm_apm_supported(device):
-			log.info("There is no dynamic tuning available for device '%s' at time" % device)
-		else:
-			super(DiskPlugin, self)._instance_apply_dynamic(instance, device)
+		self._instance_update_dynamic(instance, device)
 
 	def _instance_unapply_dynamic(self, instance, device):
 		pass
@@ -361,7 +372,7 @@ class DiskPlugin(hotplug.Plugin):
 		if self._apm_errcnt < consts.ERROR_THRESHOLD:
 			if not sim:
 				(rc, out) = self._cmd.execute(["hdparm", "-B", str(value), "/dev/" + device], no_errors = [errno.ENOENT])
-				self._update_errcnt(rc, False)
+				self._update_apm_errcnt(rc)
 			return str(value)
 		else:
 			return None
@@ -392,25 +403,17 @@ class DiskPlugin(hotplug.Plugin):
 
 	@command_set("spindown", per_device=True)
 	def _set_spindown(self, value, device, instance, sim, remove):
-		if not self._is_hdparm_apm_supported(device):
-			if not sim:
-				log.info("spindown option is not supported for device '%s'" % device)
-				return None
-			else:
-				return str(value)
-		if self._spindown_errcnt < consts.ERROR_THRESHOLD:
-			if not sim:
-				(rc, out) = self._cmd.execute(["hdparm", "-S", str(value), "/dev/" + device], no_errors = [errno.ENOENT])
-				self._update_errcnt(rc, True)
+		if sim:
 			return str(value)
+		elif self._is_hdparm_spindown_supported(device):
+			success = self._try_set_spindown(device, value)
+			return (str(value) if success else None)
 		else:
 			return None
 
 	@command_get("spindown")
 	def _get_spindown(self, device, instance, ignore_missing=False):
-		if not self._is_hdparm_apm_supported(device):
-			if not ignore_missing:
-				log.info("spindown option is not supported for device '%s'" % device)
+		if not self._is_hdparm_spindown_supported(device):
 			return None
 		# There's no way how to get current/old spindown value, hardcoding vendor specific 253
 		return 253
