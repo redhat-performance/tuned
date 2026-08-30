@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the master branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           sudo apt install -y make asciidoctor
@@ -37,7 +37,7 @@ jobs:
         id: pages
         uses: actions/configure-pages@v6
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
 
   deploy:
     if: ${{ github.repository == 'redhat-performance/tuned' }}
