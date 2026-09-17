@@ -37,9 +37,9 @@ rlJournalStart
 kernel.sem = 1250 256000 100 8192
 kernel.sem = 1250 256000 100 8192
 
-[selinux]
-avc_cache_threshold=8192 
-avc_cache_threshold=16384
+[vm]
+dirty_bytes = 10%
+dirty_bytes = 20%
 EOF
 
         rlRun "popd"
@@ -55,7 +55,7 @@ EOF
         rlAssertGrep "test-profile" "/etc/tuned/active_profile"
 
         # last value from config is used
-        rlAssertGrep "16384$"  /sys/fs/selinux/avc/cache_threshold
+        rlAssertGrep "20$" "/proc/sys/vm/dirty_ratio"
     rlPhaseEnd
 
     rlPhaseStartCleanup
