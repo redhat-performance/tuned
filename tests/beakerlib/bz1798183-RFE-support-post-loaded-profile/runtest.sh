@@ -26,7 +26,7 @@ SWAPPINESS=vm.swappiness
 DIRTY_RATIO=vm.dirty_ratio
 PID_FILE=/run/tuned/tuned.pid
 SERVICE_OVERRIDE_DIR=/etc/systemd/system/tuned.service.d
-PYTHON_CHECK="python3 /usr/libexec/platform-python python2 python"
+PYTHON_CHECK="python python2 python3 /usr/libexec/platform-python"
 PYTHON=python3
 
 function wait_for_tuned()
