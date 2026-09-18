@@ -3,6 +3,7 @@ from .decorators import *
 import tuned.logs
 from . import exceptions
 from tuned.utils.commands import commands
+from tuned.utils.bootc import has_set_options_for_source
 import tuned.consts as consts
 
 import os
@@ -231,11 +232,7 @@ class BootloaderPlugin(base.Plugin):
 		return splited[1]
 
 	def _bootc_has_set_options_for_source(self):
-		"""Check if bootc loader-entries set-options-for-source is available."""
-		(rc, out, err) = self._cmd.execute(
-			['bootc', 'loader-entries', 'set-options-for-source', '--help'],
-			return_err=True)
-		return rc == 0
+		return has_set_options_for_source(self._cmd)
 
 	def _bootc_source_update(self):
 		"""Apply kernel parameter tuning using bootc source tracking.

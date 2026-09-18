@@ -55,13 +55,12 @@ class BootloaderPluginBootcTestCase(unittest.TestCase):
 	# ------------------------------------------------------------------
 
 	def test_bootc_has_source_present(self):
-		"""bootc set-options-for-source is detected when --help succeeds."""
+		"""bootc needs both the command and a booted deployment."""
 		plugin = self._make_plugin_mock()
-		plugin._cmd.execute = Mock(return_value=(0, "Usage: bootc loader-entries...", ""))
+		plugin._cmd.execute = Mock(side_effect=[
+			(0, "Usage: bootc loader-entries...", ""),
+			(0, '{"status": {"booted": {"ostree": {"stateroot": "default"}}}}', "")])
 		self.assertTrue(plugin._bootc_has_set_options_for_source())
-		plugin._cmd.execute.assert_called_once_with(
-			['bootc', 'loader-entries', 'set-options-for-source', '--help'],
-			return_err=True)
 
 	def test_bootc_has_source_absent(self):
 		"""bootc set-options-for-source is not detected when --help fails."""
@@ -157,27 +156,54 @@ class BootloaderPluginBootcTestCase(unittest.TestCase):
 	# Init flag derivation logic
 	# ------------------------------------------------------------------
 
+	def test_package_host_with_bootc_uses_grub(self):
+		"""An installed bootc must not take over a package-mode host."""
+		from tuned.plugins.plugin_bootloader import BootloaderPlugin
+
+		plugin = self._make_plugin_mock()
+		plugin._rpm_ostree_status.return_value = None
+		def execute(args, **kwargs):
+			if args == ['bootc', 'status', '--json']:
+				return (0, '{"status": {"booted": null}}', '')
+			return (0, 'Usage: bootc loader-entries...', '')
+		plugin._cmd.execute.side_effect = execute
+		instance = Mock()
+		BootloaderPlugin._instance_init(plugin, instance)
+		plugin.update_grub2_cfg = True
+		plugin._cmdline_val = 'nohz=on'
+
+		BootloaderPlugin._instance_post_static(plugin, instance, enabling=True)
+		BootloaderPlugin._instance_unapply_static(plugin, instance, rollback=consts.ROLLBACK_FULL)
+
+		plugin._grub2_update.assert_called_once_with()
+		plugin._bls_update.assert_called_once_with()
+		plugin._remove_grub2_tuning.assert_called_once_with()
+		plugin._rpm_ostree_update.assert_not_called()
+		self.assertFalse(plugin._bootc_has_source)
+
 	def test_init_bootc_available(self):
 		"""When bootc is available, _bootc_has_source is True."""
-		plugin = Mock()
+		from tuned.plugins.plugin_bootloader import BootloaderPlugin
+		# spec= so the unbound-method call also works on Python 2
+		plugin = Mock(spec=BootloaderPlugin)
 		plugin._cmd = Mock()
 		plugin._bootc_has_set_options_for_source = Mock(return_value=True)
 		plugin._rpm_ostree_status = Mock(return_value="idle")
 
-		plugin._rpm_ostree = plugin._rpm_ostree_status() is not None
-		plugin._bootc_has_source = plugin._bootc_has_set_options_for_source()
+		BootloaderPlugin._instance_init(plugin, Mock())
 
 		self.assertTrue(plugin._bootc_has_source)
 
 	def test_init_no_bootc_no_rpm_ostree(self):
 		"""When neither bootc nor rpm-ostree is available, both flags are False."""
-		plugin = Mock()
+		from tuned.plugins.plugin_bootloader import BootloaderPlugin
+		# spec= so the unbound-method call also works on Python 2
+		plugin = Mock(spec=BootloaderPlugin)
 		plugin._cmd = Mock()
 		plugin._bootc_has_set_options_for_source = Mock(return_value=False)
 		plugin._rpm_ostree_status = Mock(return_value=None)
 
-		plugin._rpm_ostree = plugin._rpm_ostree_status() is not None
-		plugin._bootc_has_source = plugin._bootc_has_set_options_for_source()
+		BootloaderPlugin._instance_init(plugin, Mock())
 
 		self.assertFalse(plugin._bootc_has_source)
 		self.assertFalse(plugin._rpm_ostree)
@@ -319,22 +345,21 @@ class DaemonEnsureBootloaderUnitTestCase(unittest.TestCase):
 	"""Tests for the _ensure_bootloader_unit logic in Daemon.
 
 	The Daemon class cannot be imported directly in unit tests because
-	tuned.daemon.__init__ triggers a chain of imports (pyudev, dbus, etc.)
-	that are unavailable in the test environment.  Instead, we replicate
-	the _ensure_bootloader_unit logic inline - the method is simple
-	enough that this is reliable and avoids import gymnastics.
+	tuned.daemon.__init__ triggers a chain of imports (pyudev, dbus,
+	procfs, etc.) that are unavailable in the test environment.  Instead,
+	we replicate the _ensure_bootloader_unit logic inline - the method is
+	simple enough that this is reliable and avoids import gymnastics.  The
+	capability check is the real one shared with the bootloader plugin.
 	"""
 
 	@staticmethod
 	def _ensure_bootloader_unit(daemon_self):
 		"""Replica of Daemon._ensure_bootloader_unit for testing."""
 		import collections
+		from tuned.utils.bootc import has_set_options_for_source
 		if "bootloader" in daemon_self._profile.units:
 			return
-		(retcode, out, err) = daemon_self._cmd.execute(
-			["bootc", "loader-entries", "set-options-for-source",
-			 "--help"], return_err=True)
-		if retcode != 0:
+		if not has_set_options_for_source(daemon_self._cmd):
 			return
 		from tuned.profiles.unit import Unit
 		daemon_self._profile.units["bootloader"] = Unit(
@@ -362,6 +387,9 @@ class DaemonEnsureBootloaderUnitTestCase(unittest.TestCase):
 		"""Synthetic bootloader unit is injected when bootc is available
 		and the profile has no [bootloader] section."""
 		daemon = self._make_daemon_mock(has_bootloader_unit=False, bootc_available=True)
+		daemon._cmd.execute.side_effect = [
+			(0, 'Usage: ...', ''),
+			(0, '{"status": {"booted": {"ostree": {"stateroot": "default"}}}}', '')]
 
 		self._ensure_bootloader_unit(daemon)
 
@@ -376,6 +404,7 @@ class DaemonEnsureBootloaderUnitTestCase(unittest.TestCase):
 
 		# Should still be the original unit with options, not replaced
 		self.assertIn("cmdline", daemon._profile.units["bootloader"].options)
+		daemon._cmd.execute.assert_not_called()
 
 	def test_no_inject_when_bootc_unavailable(self):
 		"""No injection when bootc is not available."""
@@ -384,6 +413,16 @@ class DaemonEnsureBootloaderUnitTestCase(unittest.TestCase):
 		self._ensure_bootloader_unit(daemon)
 
 		self.assertNotIn("bootloader", daemon._profile.units)
+
+	def test_no_inject_on_package_host_with_bootc(self):
+		daemon = self._make_daemon_mock()
+		daemon._cmd.execute.side_effect = [
+			(0, 'Usage: ...', ''),
+			(0, '{"status": {"booted": null}}', '')]
+
+		self._ensure_bootloader_unit(daemon)
+
+		self.assertNotIn('bootloader', daemon._profile.units)
 
 
 if __name__ == '__main__':
