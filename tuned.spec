@@ -138,7 +138,7 @@ Requires: python3-syspurpose
 # plugin for kernel argument management when bootc's native
 # set-options-for-source is not yet available
 %if 0%{?fedora} || 0%{?rhel} >= 9
-Requires: (rpm-ostree if bootc)
+Requires: (rpm-ostree if bootc < 1.15.2)
 %endif
 
 %description
