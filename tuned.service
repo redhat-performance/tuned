@@ -9,7 +9,7 @@ Documentation=man:tuned(8) man:tuned.conf(5) man:tuned-adm(8)
 Type=dbus
 PIDFile=/run/tuned/tuned.pid
 BusName=com.redhat.tuned
-ExecStart=/usr/sbin/tuned -l -P
+ExecStart=/usr/sbin/tuned -P
 
 [Install]
 WantedBy=multi-user.target
