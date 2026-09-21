@@ -131,11 +131,11 @@ class DBusController(object):
 	def recommend_profile(self):
 		return self._call("recommend_profile")
 
-	def verify_profile(self):
-		return self._call("verify_profile")
+	def verify_profile(self, log_level):
+		return self._call("verify_profile", log_level)
 
-	def verify_profile_ignore_missing(self):
-		return self._call("verify_profile_ignore_missing")
+	def verify_profile_ignore_missing(self, log_level):
+		return self._call("verify_profile_ignore_missing", log_level)
 
 	def off(self):
 		return self._call("disable")
