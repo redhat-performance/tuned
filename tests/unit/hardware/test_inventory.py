@@ -58,6 +58,15 @@ class InventoryTestCase(unittest.TestCase):
 		self.assertFalse(self._dummier.CallbackWasCalled)
 		self.assertIsNone(self._inventory._monitor_observer)
 
+	def test_resubscribe(self):
+		# Every profile switch unsubscribes and subscribes the plugins again.
+		# The udev monitor filter must not grow with each subscription.
+		inventory = Inventory(set_receive_buffer_size=False)
+		dummy = DummyPlugin()
+		for i in range(500):
+			inventory.subscribe(dummy, "scsi", dummy.TestCallback)
+			inventory.unsubscribe(dummy)
+
 class DummyPlugin():
 	def __init__(self):
 		self.CallbackWasCalled = False

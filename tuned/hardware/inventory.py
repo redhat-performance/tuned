@@ -39,6 +39,8 @@ class Inventory(object):
 		self._monitor_observer = None
 
 		self._subscriptions = {}
+		# Subsystems already added to the udev monitor filter
+		self._filtered_subsystems = set()
 
 	def get_device(self, subsystem, sys_name):
 		"""Get a pyudev.Device object for the sys_name (e.g. 'sda')."""
@@ -86,7 +88,13 @@ class Inventory(object):
 			self._subscriptions[subsystem].append(callback_data)
 		else:
 			self._subscriptions[subsystem] = [callback_data, ]
-			self._udev_monitor.filter_by(subsystem)
+			# The filter stays on the monitor after unsubscribe(), and libudev
+			# adds a new entry on every call, even for the same subsystem. Adding
+			# it on every profile switch grows the BPF filter until
+			# udev_monitor_filter_update() fails with E2BIG.
+			if subsystem not in self._filtered_subsystems:
+				self._udev_monitor.filter_by(subsystem)
+				self._filtered_subsystems.add(subsystem)
 			# After start(), HW events begin to get queued up
 			self._udev_monitor.start()
 
