@@ -9,6 +9,7 @@ recommend:
   - tuned
   - make
   - rpm-build
+  - rsync
   - dnf
   - yum-utils
 duration: 10m
