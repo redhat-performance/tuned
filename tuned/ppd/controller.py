@@ -23,6 +23,9 @@ UPOWER_DBUS_PATH = "/org/freedesktop/UPower"
 UPOWER_DBUS_INTERFACE = "org.freedesktop.UPower"
 
 PLATFORM_PROFILE_PATH = "/sys/firmware/acpi/platform_profile"
+# Upper bound for ignoring platform profile changes while a TuneD profile
+# switch is running, in case the profile_changed signal never arrives
+TUNED_SWITCH_TIMEOUT = 5
 PLATFORM_PROFILE_MAPPING = {
     "low-power": PPD_POWER_SAVER,
     "quiet": PPD_POWER_SAVER,
@@ -64,7 +67,9 @@ class PlatformProfileEventHandler(pyinotify.ProcessEvent):
     change of the file at PLATFORM_PROFILE_PATH comes from within
     the kernel (e.g., when the user presses Fn-L on a Thinkpad laptop).
     This is currently detected as the file being modified without
-    being opened before.
+    being opened before. Changes made by TuneD itself while applying
+    a profile switch requested by tuned-ppd are ignored by the
+    controller (see Controller._tuned_switch_in_progress()).
     """
     CLOSE_MODIFY_BUFFER = 0.1
 
@@ -227,6 +232,9 @@ class Controller(exports.interfaces.ExportableInterface):
         self._terminate = threading.Event()
         self._battery_handler = None
         self._on_battery = False
+        self._tuned_switch_started = None
+        self._tuned_switch_finished = None
+        self._tuned_switch_profile = None
         self._watch_manager = pyinotify.WatchManager()
         self._notifier = pyinotify.ThreadedNotifier(self._watch_manager)
         self._inotify_watches = {}
@@ -249,6 +257,10 @@ class Controller(exports.interfaces.ExportableInterface):
         """
         The callback to invoke when TuneD signals a profile change.
         """
+        if tuned_profile == self._tuned_switch_profile:
+            # A late signal from an earlier switch must not end the window
+            # of the switch that is running now
+            self._tuned_switch_finished = time.monotonic()
         if not result:
             return
         if tuned_profile != self._tuned_interface.active_profile():
@@ -329,6 +341,12 @@ class Controller(exports.interfaces.ExportableInterface):
         """
         Sets the active PPD profile based on the content of the ACPI platform profile.
         """
+        if self._tuned_switch_in_progress():
+            # TuneD rolls back the old profile (writing its original
+            # platform_profile) before applying the new one; a change seen
+            # meanwhile is TuneD's own, not a user's hotkey
+            log.debug("Ignoring platform profile change during a TuneD profile switch")
+            return
         platform_profile = self._cmd.read_file(PLATFORM_PROFILE_PATH).strip()
         if platform_profile not in PLATFORM_PROFILE_MAPPING:
             return
@@ -363,6 +381,15 @@ class Controller(exports.interfaces.ExportableInterface):
         """
         self._cmd.write_to_file(PPD_BASE_PROFILE_FILE, profile + "\n")
 
+    def _tuned_switch_in_progress(self):
+        """
+        Returns whether a TuneD profile switch requested by tuned-ppd is still
+        being applied.
+        """
+        if self._tuned_switch_started is None or self._tuned_switch_finished is not None:
+            return False
+        return time.monotonic() < self._tuned_switch_started + TUNED_SWITCH_TIMEOUT
+
     def _set_tuned_profile(self, tuned_profile):
         """
         Sets the TuneD profile to the given one if not already set.
@@ -371,9 +398,15 @@ class Controller(exports.interfaces.ExportableInterface):
         if active_tuned_profile == tuned_profile:
             return True
         log.info("Setting TuneD profile to '%s'" % tuned_profile)
+        self._tuned_switch_profile = tuned_profile
+        self._tuned_switch_finished = None
+        self._tuned_switch_started = time.monotonic()
         ok, error_msg = self._tuned_interface.switch_profile(tuned_profile)
         if not ok:
             log.error(str(error_msg))
+            # TuneD has rolled back the old profile and applies it again,
+            # its profile_changed signal ends the window
+            self._tuned_switch_profile = active_tuned_profile
         return bool(ok)
 
     def initialize(self):
