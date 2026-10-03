@@ -36,11 +36,11 @@ class Plugin(base.Plugin):
 			log.info("device: '%s', rename event, reported new name" % device.sys_name)
 			self._move_device(device.sys_name)
 
-	def _add_device_process(self, instance, device_name):
+	def _add_device_process(self, instance, device_name, transfer_from_instance=None):
 		log.info("instance %s: adding new device %s" % (instance.name, device_name))
 		self._assigned_devices.add(device_name)
 		self._call_device_script(instance, instance.script_pre, "apply", [device_name])
-		self._added_device_apply_tuning(instance, device_name)
+		self._added_device_apply_tuning(instance, device_name, transfer_from_instance)
 		self._call_device_script(instance, instance.script_post, "apply", [device_name])
 		instance.processed_devices.add(device_name)
 
@@ -68,11 +68,14 @@ class Plugin(base.Plugin):
 		instance.active = len(instance.processed_devices) \
 				+ len(instance.assigned_devices) > 0
 
-	def _remove_device_process(self, instance, device_name):
+	def _remove_device_process(self, instance, device_name, transfer_to_instance=None):
 		if device_name in instance.processed_devices:
-			self._call_device_script(instance, instance.script_post, "unapply", [device_name])
-			self._removed_device_unapply_tuning(instance, device_name)
-			self._call_device_script(instance, instance.script_pre, "unapply", [device_name])
+			if transfer_to_instance is not None:
+				self._removed_device_unapply_tuning(instance, device_name, transfer_to_instance)
+			else:
+				self._call_device_script(instance, instance.script_post, "unapply", [device_name])
+				self._removed_device_unapply_tuning(instance, device_name, transfer_to_instance)
+				self._call_device_script(instance, instance.script_pre, "unapply", [device_name])
 			instance.processed_devices.remove(device_name)
 			# This can be a bit racy (we can overcount),
 			# but it shouldn't affect the boolean result
@@ -122,12 +125,26 @@ class Plugin(base.Plugin):
 		for dev in device_names:
 			self._remove_device_process(instance, dev)
 
-	def _added_device_apply_tuning(self, instance, device_name):
-		self._execute_all_device_commands(instance, [device_name])
+	def _transfer_device(self, from_instance, to_instance, device_name):
+		"""Transfer a device between instances
+
+		Apply the tuning of the target instance without the intermediate step
+		of rolling back to the original tuning.
+		"""
+		if device_name not in (self._assigned_devices | self._free_devices):
+			return
+
+		if not self._remove_device_process(from_instance, device_name, to_instance):
+			return
+
+		self._add_device_process(to_instance, device_name, transfer_from_instance=from_instance)
+
+	def _added_device_apply_tuning(self, instance, device_name, transfer_from_instance):
+		self._execute_all_device_commands(instance, [device_name], transfer_from_instance)
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._instance_apply_dynamic(instance, device_name)
 
-	def _removed_device_unapply_tuning(self, instance, device_name):
+	def _removed_device_unapply_tuning(self, instance, device_name, transfer_to_instance):
 		if instance.has_dynamic_tuning and self._global_cfg.get(consts.CFG_DYNAMIC_TUNING, consts.CFG_DEF_DYNAMIC_TUNING):
 			self._instance_unapply_dynamic(instance, device_name)
-		self._cleanup_all_device_commands(instance, [device_name], remove = True)
+		self._cleanup_all_device_commands(instance, [device_name], remove = True, transfer_to_instance=transfer_to_instance)

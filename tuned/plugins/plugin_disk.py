@@ -147,15 +147,15 @@ class DiskPlugin(hotplug.Plugin):
 		if self._device_is_supported(device) or event == "remove":
 			super(DiskPlugin, self)._hardware_events_callback(event, device)
 
-	def _added_device_apply_tuning(self, instance, device_name):
+	def _added_device_apply_tuning(self, instance, device_name, transfer_from_instance):
 		if instance._load_monitor is not None:
 			instance._load_monitor.add_device(device_name)
-		super(DiskPlugin, self)._added_device_apply_tuning(instance, device_name)
+		super(DiskPlugin, self)._added_device_apply_tuning(instance, device_name, transfer_from_instance)
 
-	def _removed_device_unapply_tuning(self, instance, device_name):
+	def _removed_device_unapply_tuning(self, instance, device_name, transfer_to_instance):
 		if instance._load_monitor is not None:
 			instance._load_monitor.remove_device(device_name)
-		super(DiskPlugin, self)._removed_device_unapply_tuning(instance, device_name)
+		super(DiskPlugin, self)._removed_device_unapply_tuning(instance, device_name, transfer_to_instance)
 
 	@classmethod
 	def _get_config_options(cls):
@@ -450,7 +450,7 @@ class DiskPlugin(hotplug.Plugin):
 		return int(value)
 
 	@command_custom("readahead_multiply", per_device=True)
-	def _multiply_readahead(self, enabling, multiplier, device, verify, ignore_missing, instance):
+	def _multiply_readahead(self, enabling, multiplier, device, verify, ignore_missing, instance, transfer_instance):
 		if verify:
 			return None
 		storage_key = self._storage_key(

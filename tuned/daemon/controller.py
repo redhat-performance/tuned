@@ -383,18 +383,18 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			return (False, "Invalid devices")
 		if not self._cmd.is_valid_name(instance_name):
 			return (False, "Invalid instance_name")
-		found = False
+		plugin = None
 		for instance_target in self._daemon._unit_manager.instances:
 			if instance_target.name == instance_name:
 				log.debug("Found instance '%s'." % instance_target.name)
-				found = True
+				plugin = instance_target.plugin
 				break
-		if not found:
+		if plugin is None:
 			rets = "Instance '%s' not found" % instance_name
 			log.error(rets)
 			return (False, rets)
-		if not isinstance(instance_target.plugin, hotplug.Plugin):
-			rets = "Plugin '%s' does not support hotplugging or dynamic instances." % instance_target.plugin.name
+		if not isinstance(plugin, hotplug.Plugin):
+			rets = "Plugin '%s' does not support hotplugging or dynamic instances." % plugin.name
 			log.error(rets)
 			return (False, rets)
 		devs = set(self._cmd.devstr2devs(devices))
@@ -405,14 +405,14 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 				devs -= devs_moving
 				log.info("Moving devices '%s' from instance '%s' to instance '%s'." % (str(devs_moving),
 					instance.name, instance_target.name))
-				if (instance.plugin.name != instance_target.plugin.name):
+				if (instance.plugin.name != plugin.name):
 					rets = "Target instance '%s' is of type '%s', but devices '%s' are currently handled by " \
 						"instance '%s' which is of type '%s'." % (instance_target.name,
-						instance_target.plugin.name, str(devs_moving), instance.name, instance.plugin.name)
+						plugin.name, str(devs_moving), instance.name, instance.plugin.name)
 					log.error(rets)
 					return (False, rets)
-				instance.plugin._remove_devices_nocheck(instance, devs_moving)
-				instance_target.plugin._add_devices_nocheck(instance_target, devs_moving)
+				for dev in devs_moving:
+					plugin._transfer_device(instance, instance_target, dev)
 		if (len(devs)):
 			rets = "Ignoring devices not handled by any instance '%s'." % str(devs)
 			log.info(rets)
@@ -518,17 +518,15 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 		plugin.instance_apply_tuning(instance)
 		# transfer matching devices from other instances, if the priority of the new
 		# instance is equal or higher (equal or lower priority value)
-		for other_instance in self._daemon._unit_manager.instances:
-			if (other_instance == instance or
-				other_instance.plugin != plugin or
-				instance.priority > other_instance.priority):
+		for other_instance in plugin._instances.values():
+			if (other_instance == instance or instance.priority > other_instance.priority):
 				continue
 			devs_moving = plugin._get_matching_devices(instance, other_instance.processed_devices)
 			if len(devs_moving):
 				log.info("Moving devices '%s' from instance '%s' to instance '%s'." % (str(devs_moving),
 					other_instance.name, instance.name))
-				plugin._remove_devices_nocheck(other_instance, devs_moving)
-				plugin._add_devices_nocheck(instance, devs_moving)
+				for dev in devs_moving:
+					plugin._transfer_device(other_instance, instance, dev)
 		return (True, "OK")
 
 	@exports.export("s", "(bs)")
@@ -557,6 +555,17 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			rets = "Plugin '%s' does not support hotplugging or dynamic instances." % plugin.name
 			log.error(rets)
 			return (False, rets)
+		# transfer devices to other instances that want them
+		for other_instance in plugin._instances.values():
+			if other_instance == instance:
+				continue
+			devs_moving = plugin._get_matching_devices(other_instance, instance.processed_devices)
+			if len(devs_moving):
+				log.info("Moving devices '%s' from instance '%s' to instance '%s'." % (str(devs_moving),
+					instance.name, other_instance.name))
+				for dev in devs_moving:
+					plugin._transfer_device(instance, other_instance, dev)
+		# any devices left?
 		devices = instance.processed_devices.copy()
 		try:
 			plugin._remove_devices_nocheck(instance, devices)
@@ -569,6 +578,6 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 			return (False, rets)
 		log.info("Deleted instance '%s'" % instance_name)
 		for device in devices:
-			# _add_device() will find a suitable plugin instance
+			# return the devices not claimed by instances to the plugins's free_devices
 			plugin._add_device(device)
 		return (True, "OK")
