@@ -1,0 +1,33 @@
+summary: built-in functions for various conversions. New functionality according to
+    BZ#1225135.
+description: ''
+contact: rhack@redhat.com
+component:
+  - tuned
+test: ./runtest.sh
+framework: beakerlib
+require:
+  - library(tuned/basic)
+recommend:
+  - tuned
+duration: 5m
+enabled: true
+tag:
+  - FedoraReady
+  - NoRHEL4
+  - NoRHEL5
+  - NoRHEL6
+  - TIPfail_infra
+  - TIPpass
+  - Tier1
+tier: '1'
+link:
+  - relates: https://bugzilla.redhat.com/show_bug.cgi?id=1225135
+adjust:
+  - enabled: false
+    when: distro == rhel-4, rhel-5, rhel-6, rhel-7, centos-7
+    continue: false
+extra-nitrate: TC#0496876
+extra-summary: /CoreOS/tuned/Sanity/built-in-functions
+extra-task: /CoreOS/tuned/Sanity/built-in-functions
+id: b04c6dd3-4412-4bd9-b4c7-a5cc44172574
