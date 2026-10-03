@@ -134,6 +134,9 @@ class DBusController(object):
 	def verify_profile(self):
 		return self._call("verify_profile")
 
+	def dump(self):
+		return self._call("dump_profile")
+
 	def verify_profile_ignore_missing(self):
 		return self._call("verify_profile_ignore_missing")
 
