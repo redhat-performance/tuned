@@ -23,6 +23,7 @@ class ProfileRecommender:
 		self._is_hardcoded = is_hardcoded
 		self._commands = commands()
 		self._chassis_type = None
+		self._virt_what = None
 
 	def recommend(self):
 		profile = consts.DEFAULT_PROFILE
@@ -74,8 +75,10 @@ class ProfileRecommender:
 						if not has_root:
 							match = False
 							break
+						if self._virt_what is None:
+							self._virt_what = self._commands.execute(["virt-what"])[1]
 						if not re.match(value,
-								self._commands.execute(["virt-what"])[1], re.S):
+								self._virt_what, re.S):
 							match = False
 					elif option == "system":
 						if not re.match(value,
