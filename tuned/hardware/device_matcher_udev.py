@@ -24,7 +24,15 @@ class DeviceMatcherUdev(device_matcher.DeviceMatcher):
 			except AttributeError:
 				return False
 
+		# The udev INTERFACE property is written to the udev database only
+		# after udev finishes processing an interface rename, so it can lag
+		# behind the live kernel name (e.g. report "eth0" while the interface
+		# is already "ens8f0np0"). Match the interface name against sys_name
+		# instead, which is the authoritative current name and updates in sync
+		# with the rename.
 		for key, val in sorted(list(items)):
+			if key == "INTERFACE":
+				val = device.sys_name
 			properties += key + '=' + val + '\n'
 
 		try:
