@@ -16,6 +16,14 @@ DEPRECATED_SYSCTL_OPTIONS = [ "base_reachable_time", "retrans_time" ]
 SYSCTL_CONFIG_DIRS = [ "/run/sysctl.d",
 		"/etc/sysctl.d" ]
 
+# Kernel: dirty_bytes and dirty_ratio are mutually exclusive. When the
+# ratio is active, dirty_bytes reads as 0. Writing 0 (or a value below
+# two pages) is rejected with EINVAL. Same for dirty_background_*.
+_DIRTY_BYTES_SYSCTLS = (
+		"vm.dirty_bytes",
+		"vm.dirty_background_bytes",
+)
+
 class SysctlPlugin(base.Plugin):
 	"""
 	Sets various kernel parameters at runtime.
@@ -98,8 +106,22 @@ class SysctlPlugin(base.Plugin):
 					ret = False
 		return ret
 
+	@staticmethod
+	def _is_zero_dirty_bytes(option, value):
+		if option not in _DIRTY_BYTES_SYSCTLS:
+			return False
+		try:
+			return int(str(value).strip()) == 0
+		except (TypeError, ValueError):
+			return False
+
 	def _instance_unapply_static(self, instance, rollback = consts.ROLLBACK_SOFT):
 		for option, value in list(instance._sysctl_original.items()):
+			if self._is_zero_dirty_bytes(option, value):
+				log.info("Not restoring '%s' to '%s', kernel rejects zero; "
+						"the counterpart ratio sysctl is the active setting."
+						% (option, value))
+				continue
 			self._write_sysctl(option, value)
 
 	def _is_sysctl_excluded(self, option):
