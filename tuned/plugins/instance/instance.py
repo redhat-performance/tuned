@@ -1,4 +1,7 @@
 import tuned.consts as consts
+import tuned.logs
+
+log = tuned.logs.get()
 
 class Instance(object):
 	"""
@@ -82,15 +85,19 @@ class Instance(object):
 	# methods
 
 	def apply_tuning(self):
+		log.debug("Applying tuning of instance '%s'." % self._name)
 		self._plugin.instance_apply_tuning(self)
 
 	def verify_tuning(self, ignore_missing):
+		log.debug("Verifying tuning of instance '%s'." % self._name)
 		return self._plugin.instance_verify_tuning(self, ignore_missing)
 
 	def update_tuning(self):
+		log.debug("Updating tuning of instance '%s'." % self._name)
 		self._plugin.instance_update_tuning(self)
 
 	def unapply_tuning(self, rollback = consts.ROLLBACK_SOFT):
+		log.debug("Unapplying tuning of instance '%s'." % self._name)
 		self._plugin.instance_unapply_tuning(self, rollback)
 
 	def destroy(self):

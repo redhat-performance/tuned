@@ -12,7 +12,16 @@ import collections
 
 log = tuned.logs.get()
 
-DEPRECATED_SYSCTL_OPTIONS = [ "base_reachable_time", "retrans_time" ]
+SYSCTL_OPTIONS_HANDLED_BY_VM_PLUGIN = [ \
+	"vm.transparent_hugepage",
+	"vm.transparent_hugepage.defrag",
+	"vm.dirty_bytes",
+	"vm.dirty_ratio",
+	"vm.dirty_background_bytes",
+	"vm.dirty_background_ratio" ]
+DEPRECATED_SYSCTL_OPTIONS = [ \
+	"base_reachable_time",
+	"retrans_time" ]
 SYSCTL_CONFIG_DIRS = [ "/run/sysctl.d",
 		"/etc/sysctl.d" ]
 
@@ -66,9 +75,13 @@ class SysctlPlugin(base.Plugin):
 
 	def _instance_apply_static(self, instance):
 		for option, value in list(instance._sysctl.items()):
+			if option in SYSCTL_OPTIONS_HANDLED_BY_VM_PLUGIN:
+				log.warn("Option " + \
+					"'%s' is now handled by the 'vm' TuneD plugin, please consider migration." \
+						% option)
 			original_value = self._read_sysctl(option)
 			if original_value is None:
-				log.error("sysctl option %s will not be set, failed to read the original value."
+				log.error("Option %s will not be set, failed to read the original value."
 						% option)
 			else:
 				new_value = self._variables.expand(

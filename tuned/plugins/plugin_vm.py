@@ -56,6 +56,8 @@ class VMPlugin(base.Plugin):
 
 	@classmethod
 	def _get_config_options(self):
+		# if new option is added, please update the
+		# SYSCTL_OPTIONS_HANDLED_BY_VM_PLUGIN list in the plugin_vm.py
 		return {
 			"transparent_hugepages" : None,
 			"transparent_hugepage" : None,
@@ -239,6 +241,4 @@ class VMPlugin(base.Plugin):
 		elif old_counterpart_value is not None:
 			log.info("Setting option '%s' to '%s'" % (counterpart, old_counterpart_value))
 			cmd.write_to_file(counterpart_path, old_counterpart_value)
-		else:
-			log.info("Not restoring '%s', previous value is the same or unknown." % option)
 		return None
