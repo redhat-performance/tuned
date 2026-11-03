@@ -117,9 +117,12 @@ class commands:
 						self._error("Unable to create directory '%s', error: '%s'" % (d, e))
 				return False
 		try:
-			if ignore_same and self.read_file(f, no_error=True).strip() == str(data):
-				self._debug("Skipping the write to file '%s', the content would not change" % f)
-				return True
+			if ignore_same:
+				self._debug("Read check because 'ignore_same' is requested.")
+				if self.read_file(f, no_error=True).strip() == str(data):
+					self._debug("Skipping the write to file '%s', the content would not change" % f)
+					return True
+				self._debug("Committing write.")
 			fd = open(f, "w")
 			fd.write(str(data))
 			fd.close()
@@ -140,7 +143,7 @@ class commands:
 		except (OSError,IOError) as e:
 			if not no_error:
 				self._error("Error when reading file '%s': '%s'" % (f, e))
-		self._debug("Read data from file: '%s' > '%s'" % (f, old_value))
+		self._debug("Reading from file: '%s' > '%s'" % (f, old_value))
 		return old_value
 
 	def rmtree(self, f, no_error = False):
