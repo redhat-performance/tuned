@@ -89,11 +89,24 @@ class NetTuningPlugin(hotplug.Plugin):
 	network device, use `ethtool -g device`. The syntax of the option
 	is the same as the [option]`coalesce` option.
 	+
+	It is possible to specify a percentage instead of an absolute value for
+	individual parameters. This will adjust the value based off the
+	maximums reported by `ethtool -g device`. The percentage has to be an integer.
+	+
 	.Change the number of ring entries for the Rx/Tx rings to 1024/512 respectively
 	=====
 	-----
 	[net]
 	ring=rx 1024 tx 512
+	-----
+	=====
+	+
+	.Change the number of ring entries for the Rx/Tx rings to 50% of their maximums
+	respectively
+	=====
+	-----
+	[net]
+	ring=rx 50% tx 50%
 	-----
 	=====
 
@@ -645,9 +658,11 @@ class NetTuningPlugin(hotplug.Plugin):
 		return dict([x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2])
 
 	# parse output of ethtool -g
-	def _parse_ring_parameters(self, s):
+	def _parse_ring_parameters_base(self, s, part):
+		# a[0] should contain maximums
+		# a[1] should contain current values
 		a = re.split(r"^Current hardware settings:$", s, flags=re.MULTILINE)
-		s = a[1]
+		s = a[part]
 		s = self._cmd.multiple_re_replace(\
 				{"RX:": "rx:",
 				"RX Mini:": "rx-mini:",
@@ -657,6 +672,12 @@ class NetTuningPlugin(hotplug.Plugin):
 		l = [x for x in l if x != '']
 		l = [x for x in [re.split(r":\s*", x) for x in l] if len(x) == 2]
 		return dict(l)
+
+	def _parse_ring_parameters(self, s):
+		return self._parse_ring_parameters_base(s, 1)
+
+	def _parse_ring_parameter_maximums(self, s):
+		return self._parse_ring_parameters_base(s, 0)
 
 	# parse output of ethtool -l
 	def _parse_channels_parameters(self, s):
@@ -721,6 +742,36 @@ class NetTuningPlugin(hotplug.Plugin):
 		d = parser(value)
 		return self._check_parameters(context, d)
 
+	def _get_device_ring_maximums(self, instance, device):
+		ret, value = self._cmd.execute(["ethtool", "-g", instance._get_curr_device(device)])
+		if ret != 0 or len(value) == 0:
+			return None
+		d = self._parse_ring_parameter_maximums(value)
+		return self._check_parameters("ring", d)
+
+	def _replace_ring_percentage(self, maximums, param, value):
+		if value[-1] != '%':
+			return value
+		if param not in maximums:
+			log.warning("device ring parameter '%s' does not have a specified maximum" % param)
+			return None
+		maximum_str = maximums[param]
+		try:
+			maximum = int(maximum_str)
+		except ValueError:
+			log.warning("device ring parameter '%s' maximum value '%s' is not integer" % (param, maximum_str))
+			return None
+		percentage_str = value[0:-1]
+		try:
+			percentage = int(percentage_str)
+		except ValueError:
+			log.warning("device ring parameter '%s' percentage value '%s' is not integer" % (param, percentage_str))
+			return None
+		if percentage < 0 or percentage > 100:
+			log.warning("device ring parameter '%s' percentage value '%d' is out of range" % (param, percentage))
+			percentage = max(0, min(percentage, 100))
+		return str((maximum * percentage) // 100)
+
 	def _set_device_parameters(self, instance, context, value, device, sim,
 				dev_params = None):
 		if value is None or len(value) == 0:
@@ -732,6 +783,11 @@ class NetTuningPlugin(hotplug.Plugin):
 			# replace the channel parameters based on the device support
 			if context == "channels" and str(dev_params[next(iter(d))]) in ["n/a", "0"]:
 				d = self._replace_channels_parameters(context, self._cmd.dict2list(d), dev_params)
+
+		if context == "ring" and len(d) != 0:
+			maximums = self._get_device_ring_maximums(instance, device) or {}
+			d = {k: self._replace_ring_percentage(maximums, k, v) for k, v in d.items()}
+			d = {k: v for k, v in d.items() if v is not None}
 
 		if not sim and len(d) != 0:
 			log.debug("setting %s: %s" % (context, str(d)))
