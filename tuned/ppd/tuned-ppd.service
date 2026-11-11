@@ -1,6 +1,7 @@
 [Unit]
 Description=PPD-to-TuneD API Translation Daemon
 Requires=tuned.service
+PartOf=tuned.service
 After=tuned.service
 Before=multi-user.target display-manager.target
 
