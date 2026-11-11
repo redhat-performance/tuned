@@ -4,12 +4,16 @@ After=systemd-sysctl.service network.target dbus.service polkit.service
 Requires=dbus.service
 Conflicts=cpupower.service auto-cpufreq.service tlp.service power-profiles-daemon.service
 Documentation=man:tuned(8) man:tuned.conf(5) man:tuned-adm(8)
+StartLimitIntervalSec=60s
+StartLimitBurst=3
 
 [Service]
 Type=dbus
 PIDFile=/run/tuned/tuned.pid
 BusName=com.redhat.tuned
 ExecStart=/usr/sbin/tuned -l -P
+Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target

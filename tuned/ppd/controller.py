@@ -480,10 +480,13 @@ class Controller(exports.interfaces.ExportableInterface):
             raise dbus.exceptions.DBusException("Invalid profile '%s'" % profile)
         log.debug("Setting base profile to %s" % profile)
         self._profile_holds.clear()
-        if not self.switch_profile(profile):
-            raise dbus.exceptions.DBusException("Error setting profile %s'" % profile)
+        # Save the validated user choice before asking TuneD to switch. If
+        # TuneD fails and systemd restarts both services during the request,
+        # initialize() must restore this choice, not the previous one.
         self._base_profile = profile
         self._save_base_profile(profile)
+        if not self.switch_profile(profile):
+            raise dbus.exceptions.DBusException("Error setting profile %s'" % profile)
 
     @exports.property_getter("ActiveProfile")
     def get_active_profile(self, caller):
