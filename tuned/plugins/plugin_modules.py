@@ -145,10 +145,12 @@ class ModulesPlugin(base.Plugin):
 		ll = len(l)
 		r = re.compile(r"^\s*#")
 		while i < ll:
-			if r.search(l[i]) is None:
+			if l[i].strip() and r.search(l[i]) is None:
 				j = i
-				i = ll
+				break
 			i += 1
+		else:
+			return
 		s = "\n".join(l[0:j])
 		if len(s) > 0:
 			s += "\n"
