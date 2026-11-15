@@ -27,6 +27,13 @@ class DeviceMatcherUdev(device_matcher.DeviceMatcher):
 		for key, val in sorted(list(items)):
 			properties += key + '=' + val + '\n'
 
+		# Expose the sysfs name as "M" for every device, mirroring the udev CLI
+		# tools (`udevadm info` reports it on the "M:" line).
+		try:
+			properties += 'M=' + device.sys_name + '\n'
+		except AttributeError:
+			pass
+
 		try:
 			return re.search(regex, properties, re.MULTILINE) is not None
 		except re.error:
