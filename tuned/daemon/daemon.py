@@ -57,6 +57,7 @@ class Daemon(object):
 
 	def _init_threads(self):
 		self._thread = None
+		self._thread_error = None
 		self._terminate = threading.Event()
 		# Flag which is set if terminating due to profile_switch
 		self._terminate_profile_switch = threading.Event()
@@ -218,14 +219,43 @@ class Daemon(object):
 			"bootloader", collections.OrderedDict())
 
 	def _thread_code(self):
+		try:
+			try:
+				self._thread_run()
+			finally:
+				self._thread_cleanup()
+		except Exception as e:
+			self._thread_error = "Tuning thread failed: %s" % e
+			log.exception(self._thread_error)
+			self._profile_applied.clear()
+			self._sighup_processing.clear()
+			try:
+				self._notify_profile_changed(" ".join(self._active_profiles),
+							     False, self._thread_error)
+			except Exception:
+				log.exception("Cannot report tuning thread failure to clients")
+			finally:
+				# Wake the controller even if the failure happened before the
+				# exporters started, or reporting the failure itself failed.
+				if self._application is not None:
+					self._application.controller.terminate()
+
+	@property
+	def thread_error(self):
+		"""Return the fatal worker error, if any, for the controller."""
+		return self._thread_error
+
+	def _thread_run(self):
 		if self._profile is None:
 			raise TunedException("Cannot start the daemon without setting a profile.")
 
-		self._ensure_bootloader_unit()
-		self._unit_manager.create(self._profile.units)
+		# Persist the validated selection before plugin initialization can
+		# fail, so a supervisor restart retries it rather than an old profile.
 		self._save_active_profile(" ".join(self._active_profiles),
 					  self._manual)
 		self._save_post_loaded_profile(self._post_loaded_profile)
+		self._ensure_bootloader_unit()
+		self._unit_manager.create(self._profile.units)
 		self._unit_manager.start_tuning()
 		self._profile_applied.set()
 		log.info("static tuning from profile '%s' applied" % self._profile.name)
@@ -252,6 +282,7 @@ class Daemon(object):
 						log.debug("performing tunings")
 						self._unit_manager.update_tuning()
 
+	def _thread_cleanup(self):
 		self._profile_applied.clear()
 
 		# wait for others to complete their tasks, use timeout 3 x sleep_interval to prevent
@@ -285,9 +316,11 @@ class Daemon(object):
 					rollback = consts.ROLLBACK_FULL
 				else:
 					log.info("terminating TuneD in one-shot mode")
-		if self._daemon:
-			self._unit_manager.stop_tuning(rollback)
-		self._unit_manager.destroy_all()
+		try:
+			if self._daemon:
+				self._unit_manager.stop_tuning(rollback)
+		finally:
+			self._unit_manager.destroy_all()
 
 	def _save_active_profile(self, profile_names, manual):
 		try:
@@ -353,6 +386,10 @@ class Daemon(object):
 		return self._thread is not None and self._thread.is_alive()
 
 	def start(self):
+		# Partially initialized plugins must not be reused after a fatal
+		# error. The controller will exit and let the supervisor handle it.
+		if self._thread_error is not None:
+			raise TunedException(self._thread_error)
 		if self.is_running():
 			return False
 

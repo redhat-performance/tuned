@@ -569,7 +569,13 @@ class SchedulerPlugin(base.Plugin):
 			instance._runtime_tuning = False
 
 	def _instance_cleanup(self, instance):
-		if instance._evlist:
+		# Thread shutdown is needed even when rollback=not_on_exit skips
+		# unapply, and before closing any perf descriptors it is using.
+		thread = getattr(instance, "_thread", None)
+		if thread is not None and thread.is_alive():
+			instance._terminate.set()
+			thread.join()
+		if getattr(instance, "_evlist", None):
 			for fd in instance._evlist.get_pollfd():
 				os.close(fd.name)
 

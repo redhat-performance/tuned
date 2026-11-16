@@ -95,6 +95,8 @@ class Controller(tuned.exports.interfaces.ExportableInterface):
 
 		log.info("terminating controller")
 		self.stop()
+		if self._daemon.thread_error is not None:
+			raise TunedException(self._daemon.thread_error)
 
 	def terminate(self):
 		self._terminate.set()

@@ -212,11 +212,12 @@ class Application(object):
 			self.config.set(consts.CFG_DAEMON, True)
 		if not self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
 			log.warning("Using one shot no daemon mode, most of the functionality will be not available, it can be changed in global config")
-		result = self._controller.run()
-		if self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
-			exports.stop()
-
-		if self._pid_file is not None:
-			self._delete_pid_file()
-
-		return result
+		try:
+			return self._controller.run()
+		finally:
+			try:
+				if self.config.get_bool(consts.CFG_DAEMON, consts.CFG_DEF_DAEMON):
+					exports.stop()
+			finally:
+				if self._pid_file is not None:
+					self._delete_pid_file()
