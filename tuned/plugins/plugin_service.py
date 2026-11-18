@@ -11,11 +11,12 @@ log = tuned.logs.get()
 cmd = commands()
 
 class Service():
-	def __init__(self, start = None, enable = None, cfg_file = None, runlevel = None):
+	def __init__(self, start = None, enable = None, cfg_file = None, runlevel = None, optional = None):
 		self.enable = enable
 		self.start = start
 		self.cfg_file = cfg_file
 		self.runlevel = runlevel
+		self.optional = optional
 
 class InitHandler():
 	def runlevel_get(self):
@@ -177,7 +178,7 @@ class ServicePlugin(base.Plugin):
 	[subs="quotes"]
 	----
 	[service]
-	service.__service_name__=__commands__[,file:__file__]
+	service.__service_name__=__commands__[,file:__file__][,optional]
 	----
 
 	Supported service-handling `_commands_` are `start`, `stop`, `enable`
@@ -185,6 +186,10 @@ class ServicePlugin(base.Plugin):
 	configuration file `__file__`. Multiple commands must be comma (`,`)
 	or semicolon (`;`) separated. If the directives conflict, the last
 	one is used.
+
+	The `optional` directive marks the service as optional, meaning that
+	verification does not fail if the service does not exist (it is
+	treated the same way as `--ignore-missing`).
 
 	The service plugin supports configuration overlays only for systemd.
 	In other init systems, this directive is ignored. The configuration
@@ -247,6 +252,8 @@ class ServicePlugin(base.Plugin):
 				service.start = False
 			elif i[:5] == "file:":
 				service.cfg_file = i[5:]
+			elif i == "optional":
+				service.optional = True
 			else:
 				log.error("service '%s': invalid service option: '%s'" % (name, i))
 		return service
@@ -305,9 +312,10 @@ class ServicePlugin(base.Plugin):
 				log.info(consts.STR_VERIFY_PROFILE_VALUE_MISSING % "service '%s' configuration '%s'" % (service[0], service[1].cfg_file))
 			is_enabled = self._init_handler.is_enabled(service[0], runlevel)
 			is_running = self._init_handler.is_running(service[0])
-			if self._verify_value("%s running" % service[0], service[1].start, is_running, ignore_missing) is False:
+			service_ignore_missing = ignore_missing or service[1].optional
+			if self._verify_value("%s running" % service[0], service[1].start, is_running, service_ignore_missing) is False:
 				ret = False
-			if self._verify_value("%s enabled" % service[0], service[1].enable, is_enabled, ignore_missing) is False:
+			if self._verify_value("%s enabled" % service[0], service[1].enable, is_enabled, service_ignore_missing) is False:
 				ret = False
 		return ret
 
