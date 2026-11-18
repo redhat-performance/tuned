@@ -7,6 +7,7 @@ from tuned.exceptions import TunedException
 from tuned.profiles.exceptions import InvalidProfileException
 import tuned.consts as consts
 from tuned.utils.commands import commands
+from tuned.utils.bootc import has_set_options_for_source
 from tuned import exports
 from tuned.utils.profile_recommender import ProfileRecommender
 import re
@@ -199,7 +200,7 @@ class Daemon(object):
 		"""Ensure the bootloader plugin is loaded on bootc systems.
 
 		On systems where bootc loader-entries set-options-for-source is
-		available, the bootloader plugin must always be loaded - even
+		usable, the bootloader plugin must always be loaded - even
 		for profiles without a [bootloader] section.  Without it, stale
 		kargs from a previous profile cannot be cleared during a
 		profile switch because the plugin (and its unapply logic) would
@@ -207,10 +208,7 @@ class Daemon(object):
 		"""
 		if "bootloader" in self._profile.units:
 			return
-		(retcode, out, err) = self._cmd.execute(
-			["bootc", "loader-entries", "set-options-for-source",
-			 "--help"], return_err=True)
-		if retcode != 0:
+		if not has_set_options_for_source(self._cmd):
 			return
 		from tuned.profiles.unit import Unit
 		log.debug("injecting synthetic bootloader unit for bootc source tracking")
