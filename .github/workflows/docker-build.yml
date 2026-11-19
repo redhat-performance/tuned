@@ -16,7 +16,7 @@ jobs:
           sudo apt update
           sudo apt install -y crun/testing podman/testing skopeo/testing
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build container
         run: sudo podman build -t localhost/tuned .
