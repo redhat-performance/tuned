@@ -1,6 +1,7 @@
 from . import base
 from .decorators import *
 import tuned.logs
+import tuned.consts as consts
 
 import os
 import errno
@@ -205,7 +206,12 @@ class VMPlugin(base.Plugin):
 			log.warning("Option '%s' is not supported on the current hardware." % option)
 		current_value = cmd.read_file(option_path).strip()
 		if verify:
-			return current_value == value
+			ret = current_value == value
+			self._log_verification_result(option, ret, value, current_value)
+			if not ret and current_value == "0":
+				counterpart_value = cmd.read_file(counterpart_path).strip()
+				log.info("verify: hint: counterpart option is active instead: '%s' = '%s'." % (counterpart, counterpart_value))
+			return ret
 		if enabling:
 			try:
 				int_value = int(value)
