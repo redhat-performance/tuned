@@ -46,7 +46,7 @@ class ProfileTestCase(unittest.TestCase):
 			"network" : { "type": "net", "devices": "*" },
 		})
 
-		self.assertIs(type(profile.options), dict)
+		self.assertIs(type(profile.options), collections.OrderedDict)
 		self.assertEqual(profile.options["anything"], 10)
 
 	def test_sets_options_empty(self):
