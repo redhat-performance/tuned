@@ -100,7 +100,7 @@ class IrqbalancePlugin(base.Plugin):
 			self._restart_irqbalance()
 
 	@command_custom("banned_cpus", per_device=False)
-	def _banned_cpus(self, enabling, value, verify, ignore_missing, instance):
+	def _banned_cpus(self, enabling, value, verify, ignore_missing, instance, transfer_instance):
 		banned_cpulist_string = None
 		if value is not None:
 			banned = set(self._cmd.cpulist_unpack(value))
