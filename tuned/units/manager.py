@@ -158,6 +158,13 @@ class Manager(object):
 				ret = False
 		return ret
 
+	def dump_tuning(self):
+		s = ""
+		for instance in self._instances:
+			s += self._try_call("dump_tuning", None,
+					instance.dump_tuning) + "\n"
+		return s[:-1]
+
 	def update_tuning(self):
 		for instance in self._instances:
 			self._try_call("update_tuning", None,
