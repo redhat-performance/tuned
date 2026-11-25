@@ -610,10 +610,11 @@ class SchedulerPlugin(base.Plugin):
 		if not isinstance(process, procfs.process):
 			pid = process
 			process = procfs.process(pid)
-		cmdline = procfs.process_cmdline(process)
+		cmd = procfs.process_cmdline(process)
+		comm = process['stat']['comm']
 		if self._is_kthread(process):
-			cmdline = "[" + cmdline + "]"
-		return cmdline
+			return "[" + cmd + "]", "[" + comm + "]"
+		return cmd, comm
 
 	# Raises OSError, IOError
 	def get_processes(self):
@@ -629,7 +630,7 @@ class SchedulerPlugin(base.Plugin):
 				processes[pid] = cmd
 				if "threads" in proc:
 					for pid in proc["threads"].keys():
-						cmd = self._get_cmdline(proc)
+						cmd = self._get_cmdline(pid)
 						processes[pid] = cmd
 			except (OSError, IOError) as e:
 				if e.errno == errno.ENOENT \
@@ -870,7 +871,16 @@ class SchedulerPlugin(base.Plugin):
 		(scheduler, priority) = self._convert_sched_params(
 				scheduler, priority)
 		affinity = self._convert_affinity(affinity)
-		return (rule_prio, scheduler, priority, affinity, regex)
+		# split regex into two, one to match the cmdline, and one the comm
+		# if there is only one regex for the cmdline, then the comm is matched by ".*"
+		# allow escaping of colons in regexes (-> '\:' is not a delimiter in the split)
+		regexes = re.split(r'(?<!\\):', regex, 1)
+		r1 = regexes[0].replace(r'\:', ':')
+		try:
+			r2 = regexes[1].replace(r'\:', ':')
+		except IndexError:
+			r2 = ".*"
+		return (rule_prio, scheduler, priority, affinity, r1, r2)
 
 	def _cgroup_create_group(self, cgroup):
 		path = "%s/%s" % (self._cgroup_mount_point, cgroup)
@@ -987,24 +997,34 @@ class SchedulerPlugin(base.Plugin):
 		sched_cfg = sorted(buf, key=lambda option_vals: option_vals[1][0])
 		sched_all = dict()
 		# for runtime tuning
+		# _sched_lookup is a dict mapping a cmdline regex to a list of scheduling
+		# parameters, each with a secondary regex to match the comm, sorted from lowest
+		# to highest priority
 		instance._sched_lookup = {}
-		for option, (rule_prio, scheduler, priority, affinity, regex) \
+		for option, (rule_prio, scheduler, priority, affinity, regex, regex2) \
 				in sched_cfg:
 			try:
-				r = re.compile(regex)
+				r1 = re.compile(regex)
 			except re.error as e:
 				log.error("error compiling regular expression: '%s'" % str(regex))
 				continue
-			processes = [(pid, cmd) for pid, cmd in ps.items() if re.search(r, cmd) is not None]
+			try:
+				r2 = re.compile(regex2)
+			except re.error as e:
+				log.error("error compiling regular expression: '%s'" % str(regex2))
+				continue
+			processes = [(pid, cmd) for pid, cmd in ps.items() if re.search(r1, cmd[0]) is not None and re.search(r2, cmd[1]) is not None]
 			#cmd - process name, option - group name
-			sched = dict([(pid, (cmd, option, scheduler, priority, affinity, regex))
+			sched = dict([(pid, (cmd, option, scheduler, priority, affinity))
 					for pid, cmd in processes])
 			sched_all.update(sched)
 			# make any contained regexes non-capturing: replace "(" with "(?:",
 			# unless the "(" is preceded by "\" or followed by "?"
 			regex = re.sub(r"(?<!\\)\((?!\?)", "(?:", str(regex))
-			instance._sched_lookup[regex] = [scheduler, priority, affinity]
-		for pid, (cmd, option, scheduler, priority, affinity, regex) \
+			if not regex in instance._sched_lookup:
+				instance._sched_lookup[regex] = []
+			instance._sched_lookup[regex].append([scheduler, priority, affinity, r2])
+		for pid, (cmd, option, scheduler, priority, affinity) \
 				in sched_all.items():
 			self._tune_process(pid, cmd, scheduler,
 					priority, affinity)
@@ -1116,14 +1136,23 @@ class SchedulerPlugin(base.Plugin):
 				log.error("Failed to get cmdline of PID %d: %s"
 						% (pid, e))
 			return
-		v = self._cmd.re_lookup(instance._sched_lookup, cmd, r)
-		if v is not None and not pid in self._scheduler_original:
-			log.debug("tuning new process '%s' with PID '%d' by '%s'" % (cmd, pid, str(v)))
-			(sched, prio, affinity) = v
-			self._tune_process(pid, cmd, sched, prio,
-					affinity)
-			self._storage.set(self._scheduler_storage_key,
-					self._scheduler_original)
+		# first match against cmdline, uses the optimized re_lookup
+		vs = self._cmd.re_lookup(instance._sched_lookup, cmd[0], r)
+		if vs is not None and not pid in self._scheduler_original:
+			tune_v = None
+			# second match against comm, reversed to start with the highest priority
+			for v in reversed(vs):
+				if re.search(v[3], cmd[1]) is not None:
+					tune_v = v[:3]
+					break
+
+			if tune_v is not None:
+				log.debug("tuning new process '%s' with PID '%d' by '%s'" % (cmd, pid, str(tune_v)))
+				(sched, prio, affinity) = tune_v
+				self._tune_process(pid, cmd, sched, prio,
+						affinity)
+				self._storage.set(self._scheduler_storage_key,
+						self._scheduler_original)
 
 	def _remove_pid(self, instance, pid):
 		if pid in self._scheduler_original:
