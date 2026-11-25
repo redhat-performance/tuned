@@ -192,7 +192,11 @@ class CPULatencyPlugin(hotplug.Plugin):
 	The [option]`boost` option allows the CPU to boost above nominal
 	frequencies for shorts periods of time. On Intel systems with the
 	intel_pstate driver, setting boost=0 will automatically set no_turbo=1
-	to ensure boost is properly disabled.
+	to ensure boost is properly disabled. On systems where per-CPU boost
+	control isn't available (e.g. some amd-pstate active/EPP setups,
+	where Core Performance Boost is a single package-wide bit rather
+	than per CPU, or some ARM/Snapdragon laptops), boost is set via the
+	global sysfs node instead.
 	+
 	.Allowing CPU boost
 	====
@@ -617,6 +621,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return self._cmd.read_file(path).strip()
 
 	def _try_set_energy_perf_bias(self, cpu_id, value):
+		"""Attempt to set energy_perf_bias for a CPU via the x86_energy_perf_policy tool."""
 		(retcode, out, err_msg) = self._cmd.execute(
 				["x86_energy_perf_policy",
 				"-c", cpu_id,
@@ -626,16 +631,30 @@ class CPULatencyPlugin(hotplug.Plugin):
 		return (retcode, err_msg)
 
 	def _pstate_boost_path(self, cpu_id):
+		"""Return the sysfs path for a CPU's per-policy boost toggle."""
 		return "/sys/devices/system/cpu/cpufreq/policy%s/boost" % cpu_id
 
+	def _global_boost_path(self):
+		"""Return the sysfs path for the package-wide boost toggle.
+
+		On some drivers/platforms this also gates per-policy boost
+		control: the per-policy node can reject writes with EINVAL
+		until this one is enabled first (e.g. amd-pstate in active/EPP
+		mode, or some ARM/Snapdragon laptops, see #810).
+		"""
+		return "/sys/devices/system/cpu/cpufreq/boost"
+
 	def _pstate_preference_path(self, cpu_id, available = False):
+		"""Return the sysfs path for a CPU's EPP preference, or its available choices."""
 		return "/sys/devices/system/cpu/cpufreq/policy%s/energy_performance_%s" % (cpu_id, "available_preferences" if available else "preference")
 
 	def _energy_perf_bias_path(self, cpu_id):
+		"""Return the sysfs path for a CPU's legacy energy_perf_bias setting."""
 		return "/sys/devices/system/cpu/cpu%s/power/energy_perf_bias" % cpu_id
 
 	@command_set("energy_perf_bias", per_device=True)
 	def _set_energy_perf_bias(self, energy_perf_bias, device, instance, sim, remove):
+		"""Set the legacy energy_perf_bias option for a CPU."""
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -766,6 +785,7 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 	@command_get("pm_qos_resume_latency_us")
 	def _get_pm_qos_resume_latency_us(self, device, instance, ignore_missing=False):
+		"""Get the current pm_qos_resume_latency_us option for a CPU."""
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -775,6 +795,15 @@ class CPULatencyPlugin(hotplug.Plugin):
 
 	@command_set("boost", per_device=True)
 	def _set_boost(self, boost, device, instance, sim, remove):
+		"""Set the boost option for a CPU.
+
+		Writes the package-wide global boost node first, then the
+		per-policy node, then intel_pstate's no_turbo, using whichever
+		mechanisms actually apply. The global node goes first because
+		on some drivers/platforms it gates the per-policy one: the
+		per-policy write fails with EINVAL until the global node is
+		enabled (see #810).
+		"""
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -782,6 +811,21 @@ class CPULatencyPlugin(hotplug.Plugin):
 		boost_set = False
 
 		boost = self._cmd.get_bool(boost)
+
+		# Some drivers/platforms gate per-policy boost control behind
+		# this package-wide node: the per-policy write below can fail
+		# with EINVAL until this is set first (e.g. amd-pstate in
+		# active/EPP mode, or some ARM/Snapdragon laptops, see #810).
+		# Written unconditionally (when it exists) so the per-policy
+		# attempt below has a chance to succeed too, not just as a
+		# fallback for when it doesn't.
+		if boost in ["0", "1"] and os.path.exists(self._global_boost_path()):
+			if not sim:
+				if self._cmd.write_to_file(self._global_boost_path(), boost, \
+					no_error = [errno.EINVAL], ignore_same=True):
+						log.info("Setting global boost value '%s' for cpu '%s'" % (boost, device))
+						boost_set = True
+
 		if os.path.exists(self._pstate_boost_path(cpu_id)):
 			if not sim:
 				if boost == "0" or boost == "1":
@@ -814,12 +858,18 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if boost_set or sim:
 			return str(boost)
 		elif boost in ["0", "1"]:
-			log.warning("Unable to set boost on cpu '%s'. Neither per-policy boost nor intel_pstate no_turbo is available." % device)
+			log.warning("Unable to set boost on cpu '%s'. Neither global boost, per-policy boost, nor intel_pstate no_turbo is available." % device)
 
 		return None
 
 	@command_get("boost")
 	def _get_boost(self, device, instance, ignore_missing=False):
+		"""Get the current boost option for a CPU.
+
+		Reads the per-policy sysfs node when it exists and its value
+		can be verified with a write-back; otherwise falls back to the
+		package-wide global boost node.
+		"""
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
@@ -827,14 +877,23 @@ class CPULatencyPlugin(hotplug.Plugin):
 		if os.path.exists(self._pstate_boost_path(cpu_id)):
 			val = self._cmd.read_file(self._pstate_boost_path(cpu_id)).strip()
 			# write returns EINVAL if boost isn't supported
-			return val if self._cmd.write_to_file(self._pstate_boost_path(cpu_id), val, \
-				no_error = True) else None
+			if self._cmd.write_to_file(self._pstate_boost_path(cpu_id), val, \
+				no_error = True):
+					return val
 		else:
 			log.debug("boost file missing, which can happen on pre 6.11 kernels.")
+
+		# Some drivers/platforms expose boost only via the global sysfs
+		# node, not per-policy (see #810); fall back to it here too, so
+		# verify doesn't report a false mismatch.
+		if os.path.exists(self._global_boost_path()):
+			return self._cmd.read_file(self._global_boost_path()).strip()
+
 		return None
 
 	@command_set("energy_performance_preference", per_device=True)
 	def _set_energy_performance_preference(self, energy_performance_preference, device, instance, sim, remove):
+		"""Set the EPP hint for a CPU, trying each '|'-separated value until one is accepted."""
 		if not self._is_cpu_online(device):
 			log.debug("%s is not online, skipping" % device)
 			return None
