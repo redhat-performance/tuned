@@ -35,8 +35,8 @@ rlJournalStart
         rlRun "mv /etc/tuned/tuned-main.conf.new /etc/tuned/tuned-main.conf"
         rlRun "ulimit -H -n 1048576"
         rlRun "ulimit -S -n 1048576"
-        rlRun "tuned --debug 2>&1 | tee TEST_OUT"
-        rlAssertNotGrep "tuned.plugins.plugin_sysctl: executing \['sysctl'," TEST_OUT
+	# According to bug, tuned should start within ~0.5 second
+        rlRun "timeout --kill-after=10 5 tuned --debug"
     rlPhaseEnd
 
     rlPhaseStartCleanup
