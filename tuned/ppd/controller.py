@@ -316,7 +316,8 @@ class Controller(exports.interfaces.ExportableInterface):
         Checks the current performance degradation status and sends a signal if it changed.
         """
         performance_degraded = PerformanceDegraded.NONE
-        if os.path.exists(NO_TURBO_PATH) and self._cmd.read_file(NO_TURBO_PATH).strip() == "1":
+        if (self._active_profile != PPD_POWER_SAVER and os.path.exists(NO_TURBO_PATH)
+                and self._cmd.read_file(NO_TURBO_PATH).strip() == "1"):
             performance_degraded = PerformanceDegraded.HIGH_OPERATING_TEMPERATURE
         if os.path.exists(LAP_MODE_PATH) and self._cmd.read_file(LAP_MODE_PATH).strip() == "1":
             performance_degraded = PerformanceDegraded.LAP_DETECTED
@@ -383,12 +384,12 @@ class Controller(exports.interfaces.ExportableInterface):
         self._active_profile = None
         self._profile_holds = ProfileHoldManager(self)
         self._performance_degraded = PerformanceDegraded.NONE
-        self.check_performance_degraded()
         self._config = PPDConfig(PPD_CONFIG_FILE, self._tuned_interface)
         self._setup_battery_signaling()
         self._base_profile =  self._load_base_profile() or self._get_recommend_profile() or \
                 self._config.default_profile
         self.switch_profile(self._base_profile)
+        self.check_performance_degraded()
         self._save_base_profile(self._base_profile)
         self._setup_inotify()
 
