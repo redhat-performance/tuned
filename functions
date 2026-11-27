@@ -175,21 +175,10 @@ remount_partitions() {
 	options=$1
 	shift
 
-	for partition in $@; do
-		mount -o remount,$options $partition >/dev/null 2>&1
+	for partition in "$@"; do
+		mount -i -o remount,"$options" -- "$partition" >/dev/null 2>&1
 	done
 }
-
-remount_all_no_rootboot_partitions() {
-	[ "$1" ] || return
-	# Find non-root and non-boot partitions, disable barriers on them
-	rootvol=$(df -h / | grep "^/dev" | awk '{print $1}')
-	bootvol=$(df -h /boot | grep "^/dev" | awk '{print $1}')
-	volumes=$(df -hl --exclude=tmpfs | grep "^/dev" | awk '{print $1}')
-	nobarriervols=$(echo "$volumes" | grep -v $rootvol | grep -v $bootvol)
-	remount_partitions "$1" $nobarriervols
-}
-
 
 DISK_QUANTUM_SAVE="${STORAGE}/disk_quantum${STORAGE_SUFFIX}"
 
