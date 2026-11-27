@@ -59,7 +59,7 @@
 
 Summary: A dynamic adaptive system tuning daemon
 Name: tuned
-Version: 2.28.0
+Version: 2.29.0
 Release: 1%{?prerel1}%{?with_snapshot:.%{git_suffix}}%{?dist}
 License: GPL-2.0-or-later AND CC-BY-SA-3.0
 Source0: https://github.com/redhat-performance/%{name}/archive/v%{version}%{?prerel2}/%{name}-%{version}%{?prerel2}.tar.gz
@@ -658,6 +658,20 @@ fi
 %config(noreplace) %{_sysconfdir}/tuned/ppd.conf
 
 %changelog
+* Fri Nov 27 2026 Jaroslav Škarvada <jskarvad@redhat.com> - 2.29.0-1
+- new release
+  - udev: fixed NameError and retry decrement in udev event handler
+  - socket: fixed error responses in the unix socket exporter
+  - shell: added zsh completion for 'tuned' and 'tuned-adm'
+  - ppd: map ACPI quiet platform profile to PPD power saver
+  - plugin: fixed initialize _devices_supported in Plugin.__init__
+  - hardware: do not traceback on invalid devices_udev_regex
+  - udev: expose sysfs name as "M" property in devices_udev_regex
+  - net: allow specifying percentages for ring buffer values
+    resolves: RHEL-233035
+  - spindown-disk: fixed parsing of the mount output
+    resolves: CVE-2026-137974
+
 * Sat Aug 22 2026 Jaroslav Škarvada <jskarvad@redhat.com> - 2.28.0-1
 - new release
   - spec: require rpm-ostree on image mode (bootc) systems
