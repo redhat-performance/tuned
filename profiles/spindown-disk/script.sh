@@ -2,7 +2,11 @@
 
 . /usr/lib/tuned/functions
 
-EXT_PARTITIONS=$(mount | grep -E "type ext(3|4)" | cut -d" " -f1)
+# handle special chars in mount names by escaping (-r) and unescaping (%b)
+mapfile -t EXT_MOUNTS < <(findmnt -rn -t ext3,ext4 -o TARGET)
+for i in "${!EXT_MOUNTS[@]}"; do
+    printf -v "EXT_MOUNTS[$i]" "%b" "${EXT_MOUNTS[$i]}"
+done
 
 start() {
 
@@ -11,7 +15,7 @@ start() {
     enable_wifi_powersave
     disable_logs_syncing
 
-    remount_partitions commit=600,noatime $EXT_PARTITIONS
+    remount_partitions commit=600,noatime "${EXT_MOUNTS[@]}"
     sync
 
     return 0
@@ -24,7 +28,7 @@ stop() {
     disable_wifi_powersave
     restore_logs_syncing
 
-    remount_partitions commit=5 $EXT_PARTITIONS
+    remount_partitions commit=5 "${EXT_MOUNTS[@]}"
 
     return 0
 }
